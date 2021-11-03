@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import type { AppDeepLink } from 'src/core/public';
-import { ML_PAGES } from '../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../common/constants/locator';
 
 const OVERVIEW_LINK_DEEP_LINK: AppDeepLink = {
   id: 'mlOverviewDeepLink',
@@ -38,7 +38,7 @@ const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink = {
       title: i18n.translate('xpack.ml.deepLink.trainedModels', {
         defaultMessage: 'Trained Models',
       }),
-      path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MODELS_MANAGE}`,
+      path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
     },
   ],
 };

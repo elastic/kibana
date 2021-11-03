@@ -8,15 +8,6 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import classNames from 'classnames';
-import React, { useState, useRef } from 'react';
-
-import { METRIC_TYPE } from '@kbn/analytics';
-import { FilterEditor } from './filter_editor';
-import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
-import { FilterOptions } from './filter_options';
-import { useKibana } from '../../../../kibana_react/public';
-import { IDataPluginServices, IIndexPattern } from '../..';
 import {
   buildEmptyFilter,
   Filter,
@@ -26,8 +17,18 @@ import {
   toggleFilterDisabled,
   toggleFilterNegated,
   unpinFilter,
-  UI_SETTINGS,
-} from '../../../common';
+} from '@kbn/es-query';
+import classNames from 'classnames';
+import React, { useState, useRef } from 'react';
+
+import { METRIC_TYPE } from '@kbn/analytics';
+import { FilterEditor } from './filter_editor';
+import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
+import { FilterOptions } from './filter_options';
+import { useKibana } from '../../../../kibana_react/public';
+import { IDataPluginServices, IIndexPattern } from '../..';
+
+import { UI_SETTINGS } from '../../../common';
 
 interface Props {
   filters: Filter[];
@@ -36,6 +37,7 @@ interface Props {
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
   appName: string;
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 function FilterBarUI(props: Props) {
@@ -53,6 +55,8 @@ function FilterBarUI(props: Props) {
     }
   }
 
+  const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
+
   function renderItems() {
     return props.filters.map((filter, i) => (
       <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
@@ -64,6 +68,7 @@ function FilterBarUI(props: Props) {
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
+          timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
         />
       </EuiFlexItem>
     ));
@@ -77,8 +82,8 @@ function FilterBarUI(props: Props) {
 
     const button = (
       <EuiButtonEmpty
-        size="xs"
-        onClick={() => setIsAddFilterPopoverOpen(true)}
+        size="s"
+        onClick={onAddFilterClick}
         data-test-subj="addFilter"
         className="globalFilterBar__addButton"
       >
@@ -111,6 +116,7 @@ function FilterBarUI(props: Props) {
                 onSubmit={onAdd}
                 onCancel={() => setIsAddFilterPopoverOpen(false)}
                 key={JSON.stringify(newFilter)}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               />
             </div>
           </EuiFlexItem>

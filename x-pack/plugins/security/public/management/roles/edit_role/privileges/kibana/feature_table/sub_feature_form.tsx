@@ -99,11 +99,12 @@ export const SubFeatureForm = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
-    const firstSelectedPrivilege = props.privilegeCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege(
-      props.featureId,
-      privilegeGroup,
-      props.privilegeIndex
-    );
+    const firstSelectedPrivilege =
+      props.privilegeCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege(
+        props.featureId,
+        privilegeGroup,
+        props.privilegeIndex
+      );
 
     const options = [
       ...privilegeGroup.privileges.map((privilege, privilegeIndex) => {

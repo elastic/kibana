@@ -16,13 +16,16 @@ import { SessionsClient } from 'src/plugins/data/public/search';
 import { SearchSessionStatus } from '../../../../../../../../src/plugins/data/common';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../../';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { LocaleWrapper, mockUrls } from '../../__mocks__';
+import { LocaleWrapper } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { managementPluginMock } from '../../../../../../../../src/plugins/management/public/mocks';
+import { SharePluginStart } from '../../../../../../../../src/plugins/share/public';
+import { sharePluginMock } from '../../../../../../../../src/plugins/share/public/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;
+let mockShareStart: jest.Mocked<SharePluginStart>;
 let mockPluginsSetup: IManagementSectionsPluginsSetup;
 let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
@@ -32,6 +35,7 @@ describe('Background Search Session Management Table', () => {
   beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockShareStart = sharePluginMock.createStartContract();
     mockPluginsSetup = {
       data: dataPluginMock.createSetupContract(),
       management: managementPluginMock.createSetupContract(),
@@ -48,7 +52,7 @@ describe('Background Search Session Management Table', () => {
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
     api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-      urls: mockUrls,
+      locators: mockShareStart.url.locators,
       notifications: mockCoreStart.notifications,
       application: mockCoreStart.application,
     });
@@ -70,6 +74,7 @@ describe('Background Search Session Management Table', () => {
               status: SearchSessionStatus.IN_PROGRESS,
               created: '2020-12-02T00:19:32Z',
               expires: '2020-12-07T00:19:32Z',
+              idMapping: {},
             },
           },
         ],
@@ -90,15 +95,18 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
       });
 
-      expect(table.find('thead th').map((node) => node.text())).toMatchInlineSnapshot(`
+      expect(table.find('thead th .euiTableCellContent__text').map((node) => node.text()))
+        .toMatchInlineSnapshot(`
         Array [
           "App",
           "Name",
+          "# Searches",
           "Status",
           "Created",
           "Expiration",
@@ -120,6 +128,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -130,6 +139,7 @@ describe('Background Search Session Management Table', () => {
         Array [
           "App",
           "Namevery background search ",
+          "# Searches0",
           "StatusExpired",
           "Created2 Dec, 2020, 00:19:32",
           "Expiration--",
@@ -162,6 +172,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -195,6 +206,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );

@@ -81,6 +81,13 @@ export async function migrateRawDocs(
   return processedDocs;
 }
 
+interface MigrateRawDocsSafelyDeps {
+  serializer: SavedObjectsSerializer;
+  knownTypes: ReadonlySet<string>;
+  migrateDoc: MigrateAndConvertFn;
+  rawDocs: SavedObjectsRawDoc[];
+}
+
 /**
  * Applies the specified migration function to every saved object document provided
  * and converts the saved object to a raw document.
@@ -88,11 +95,15 @@ export async function migrateRawDocs(
  * for which the transformation function failed.
  * @returns {TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>}
  */
-export function migrateRawDocsSafely(
-  serializer: SavedObjectsSerializer,
-  migrateDoc: MigrateAndConvertFn,
-  rawDocs: SavedObjectsRawDoc[]
-): TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> {
+export function migrateRawDocsSafely({
+  serializer,
+  knownTypes,
+  migrateDoc,
+  rawDocs,
+}: MigrateRawDocsSafelyDeps): TaskEither.TaskEither<
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess
+> {
   return async () => {
     const migrateDocNonBlocking = transformNonBlocking(migrateDoc);
     const processedDocs: SavedObjectsRawDoc[] = [];
@@ -100,7 +111,10 @@ export function migrateRawDocsSafely(
     const corruptSavedObjectIds: string[] = [];
     const options = { namespaceTreatment: 'lax' as const };
     for (const raw of rawDocs) {
-      if (serializer.isRawSavedObject(raw, options)) {
+      // Do not transform documents of unknown types
+      if (raw?._source?.type && !knownTypes.has(raw._source.type)) {
+        processedDocs.push(raw);
+      } else if (serializer.isRawSavedObject(raw, options)) {
         try {
           const savedObject = convertToRawAddMigrationVersion(raw, options, serializer);
           processedDocs.push(

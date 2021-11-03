@@ -11,12 +11,17 @@ import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
 import { BrowserFields } from '../../../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import {
+  ColumnHeaderOptions,
+  ControlColumnProps,
+  HeaderActionProps,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 import { OnSelectAll } from '../../events';
 import {
   EventsTh,
@@ -27,8 +32,6 @@ import {
 } from '../../styles';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
-import { ControlColumnProps } from '../control_columns';
-import { HeaderActionProps } from '../actions/header_actions';
 
 interface Props {
   actionsColumnWidth: number;

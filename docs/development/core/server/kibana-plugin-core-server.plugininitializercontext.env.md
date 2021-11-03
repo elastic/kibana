@@ -11,5 +11,6 @@ env: {
         mode: EnvironmentMode;
         packageInfo: Readonly<PackageInfo>;
         instanceUuid: string;
+        configs: readonly string[];
     };
 ```

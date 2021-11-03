@@ -43,4 +43,6 @@ export { attemptToURIDecode } from '../../../../src/plugins/es_ui_shared/public'
 
 export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
+export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+
 export const useKibana = () => _useKibana<AppServicesContext>();

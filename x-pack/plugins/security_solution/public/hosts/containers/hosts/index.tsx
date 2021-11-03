@@ -33,7 +33,7 @@ import { InspectResponse } from '../../../types';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'hostsAllQuery';
+export const ID = 'hostsAllQuery';
 
 type LoadPage = (newActivePage: number) => void;
 export interface HostsArgs {

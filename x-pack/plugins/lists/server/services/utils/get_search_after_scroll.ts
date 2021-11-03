@@ -46,7 +46,6 @@ export const getSearchAfterScroll = async <T>({
     const { body: response } = await esClient.search<TieBreaker<T>>({
       body: {
         _source: getSourceWithTieBreaker({ sortField }),
-        // @ts-expect-error Filter is not assignale to QueryDslQueryContainer
         query,
         search_after: newSearchAfter,
         sort: getSortWithTieBreaker({ sortField, sortOrder }),

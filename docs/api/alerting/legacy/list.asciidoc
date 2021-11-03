@@ -80,6 +80,7 @@ The API returns the following:
       },
       "producer":"stackAlerts",
       "minimumLicenseRequired":"basic",
+      "isExportable":true,
       "enabledInLicense":true,
       "authorizedConsumers":{
          "alerts":{
@@ -112,6 +113,9 @@ Each alert type contains the following properties:
 
 | `minimumLicenseRequired`
 | The license required to use the alert type.
+
+| `isExportable`
+| Whether the rule type is exportable through the Saved Objects Management UI.
 
 | `enabledInLicense`
 | Whether the alert type is enabled or disabled based on the license.

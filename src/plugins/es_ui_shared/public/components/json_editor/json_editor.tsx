@@ -7,9 +7,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 
+import { EuiCodeEditor } from '../code_editor';
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props<T extends object = { [key: string]: any }> {
@@ -31,7 +32,12 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   euiCodeEditorProps,
   error: propsError,
 }: Props<T>) {
-  const { content, setContent, error: internalError, isControlled } = useJson<T>({
+  const {
+    content,
+    setContent,
+    error: internalError,
+    isControlled,
+  } = useJson<T>({
     defaultValue,
     onUpdate,
     value,

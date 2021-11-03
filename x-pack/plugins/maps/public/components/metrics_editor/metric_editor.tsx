@@ -11,15 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { IndexPatternField } from 'src/plugins/data/public';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';
 import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
-import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { ValidatedNumberInput } from '../validated_number_input';
 
-function filterFieldsForAgg(fields: IFieldType[], aggType: AGG_TYPE) {
+function filterFieldsForAgg(fields: IndexPatternField[], aggType: AGG_TYPE) {
   if (!fields) {
     return [];
   }
@@ -40,7 +40,7 @@ function filterFieldsForAgg(fields: IFieldType[], aggType: AGG_TYPE) {
 
 interface Props {
   metric: AggDescriptor;
-  fields: IFieldType[];
+  fields: IndexPatternField[];
   onChange: (metric: AggDescriptor) => void;
   onRemove: () => void;
   metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;

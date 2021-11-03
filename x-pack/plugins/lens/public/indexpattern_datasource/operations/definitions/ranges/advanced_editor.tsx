@@ -23,7 +23,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { useDebounceWithOptions } from '../../../../shared_components';
-import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
+import { IFieldFormat } from '../../../../../../../../src/plugins/field_formats/common';
 import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {

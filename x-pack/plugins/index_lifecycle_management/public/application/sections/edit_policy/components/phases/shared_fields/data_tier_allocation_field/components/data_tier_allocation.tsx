@@ -161,13 +161,8 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
   ].filter(Boolean) as SelectOptions[];
 
 export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
-  const {
-    phase,
-    hasNodeAttributes,
-    isCloudEnabled,
-    isUsingDeprecatedDataRoleConfig,
-    isLoading,
-  } = props;
+  const { phase, hasNodeAttributes, isCloudEnabled, isUsingDeprecatedDataRoleConfig, isLoading } =
+    props;
 
   /**
    * On Cloud we want to disable the data tier allocation option when we detect that we are not

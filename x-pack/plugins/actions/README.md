@@ -19,7 +19,7 @@ Table of Contents
   - [Usage](#usage)
   - [Kibana Actions Configuration](#kibana-actions-configuration)
     - [Configuration Options](#configuration-options)
-      - [Adding Built-in Action Types to allowedHosts](#adding-built-in-action-types-to-allowedhosts)
+      - [**allowedHosts** configuration](#allowedhosts-configuration)
     - [Configuration Utilities](#configuration-utilities)
   - [Action types](#action-types)
     - [Methods](#methods)
@@ -33,27 +33,40 @@ Table of Contents
     - [actionsClient.execute(options)](#actionsclientexecuteoptions)
       - [Example](#example-2)
 - [Built-in Action Types](#built-in-action-types)
-  - [ServiceNow](#servicenow)
+  - [ServiceNow ITSM](#servicenow-itsm)
     - [`params`](#params)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
       - [`subActionParams (getFields)`](#subactionparams-getfields)
       - [`subActionParams (getIncident)`](#subactionparams-getincident)
       - [`subActionParams (getChoices)`](#subactionparams-getchoices)
-  - [Jira](#jira)
+  - [ServiceNow Sec Ops](#servicenow-sec-ops)
     - [`params`](#params-1)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
       - [`subActionParams (getIncident)`](#subactionparams-getincident-1)
+      - [`subActionParams (getChoices)`](#subactionparams-getchoices-1)
+  - [ServiceNow ITOM](#servicenow-itom)
+    - [`params`](#params-2)
+      - [`subActionParams (addEvent)`](#subactionparams-addevent)
+      - [`subActionParams (getChoices)`](#subactionparams-getchoices-2)
+  - [Jira](#jira)
+    - [`params`](#params-3)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
+      - [`subActionParams (getIncident)`](#subactionparams-getincident-2)
       - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
       - [`subActionParams (fieldsByIssueType)`](#subactionparams-fieldsbyissuetype)
       - [`subActionParams (issues)`](#subactionparams-issues)
       - [`subActionParams (issue)`](#subactionparams-issue)
-      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
-  - [IBM Resilient](#ibm-resilient)
-    - [`params`](#params-2)
-      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
       - [`subActionParams (getFields)`](#subactionparams-getfields-2)
+  - [IBM Resilient](#ibm-resilient)
+    - [`params`](#params-4)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-3)
       - [`subActionParams (incidentTypes)`](#subactionparams-incidenttypes)
       - [`subActionParams (severity)`](#subactionparams-severity)
+  - [Swimlane](#swimlane)
+    - [`params`](#params-5)
+  - [| severity    | The severity of the incident.    | string _(optional)_ |](#-severity-----the-severity-of-the-incident-----string-optional-)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
   - [licensing](#licensing)
@@ -102,8 +115,8 @@ This module provides utilities for interacting with the configuration.
 | ensureUriAllowed                        | _uri_: The URI you wish to validate is allowed               | Validates whether the URI is allowed. This checks the configuration and validates that the hostname of the URI is in the list of allowed Hosts and throws an error if it is not allowed. If the configuration says that all URI's are allowed (using an "\*") then it will never throw.     | No return value, throws if URI isn't allowed        |
 | ensureHostnameAllowed                   | _hostname_: The Hostname you wish to validate is allowed     | Validates whether the Hostname is allowed. This checks the configuration and validates that the hostname is in the list of allowed Hosts and throws an error if it is not allowed. If the configuration says that all Hostnames are allowed (using an "\*") then it will never throw        | No return value, throws if Hostname isn't allowed . |
 | ensureActionTypeEnabled                 | _actionType_: The actionType to check to see if it's enabled | Throws an error if the actionType is not enabled                                                                                                                                                                                                                                            | No return value, throws if actionType isn't enabled |
-| isRejectUnauthorizedCertificatesEnabled | _none_                                                       | Returns value of `rejectUnauthorized` from configuration. | Boolean |
-| getProxySettings                        | _none_                                                       | If `proxyUrl` is set in the configuration, returns the proxy settings `proxyUrl`, `proxyHeaders` and `proxyRejectUnauthorizedCertificates`. Otherwise returns _undefined_. | Undefined or ProxySettings |
+| isRejectUnauthorizedCertificatesEnabled | _none_                                                       | Returns value of `rejectUnauthorized` from configuration.                                                                                                                                                                                                                                   | Boolean                                             |
+| getProxySettings                        | _none_                                                       | If `proxyUrl` is set in the configuration, returns the proxy settings `proxyUrl`, `proxyHeaders` and `proxyRejectUnauthorizedCertificates`. Otherwise returns _undefined_.                                                                                                                  | Undefined or ProxySettings                          |
 
 ## Action types
 
@@ -113,17 +126,17 @@ This module provides utilities for interacting with the configuration.
 
 The following table describes the properties of the `options` object.
 
-| Property                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Type                         |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| id                       | Unique identifier for the action type. For convention, ids starting with `.` are reserved for built in action types. We recommend using a convention like `<plugin_id>.mySpecialAction` for your action types.                                                                                                                                                                                                                                                                                                                                                                               | string                       |
-| name                     | A user-friendly name for the action type. These will be displayed in dropdowns when chosing action types.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | string                       |
-| maxAttempts              | The maximum number of times this action will attempt to execute when scheduled. | number |
-| minimumLicenseRequired   | The license required to use the action type. | string |
+| Property                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Type                         |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| id                       | Unique identifier for the action type. For convention, ids starting with `.` are reserved for built in action types. We recommend using a convention like `<plugin_id>.mySpecialAction` for your action types.                                                                                                                                                                                                                                                                                                                                                                                       | string                       |
+| name                     | A user-friendly name for the action type. These will be displayed in dropdowns when chosing action types.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | string                       |
+| maxAttempts              | The maximum number of times this action will attempt to execute when scheduled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | number                       |
+| minimumLicenseRequired   | The license required to use the action type.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string                       |
 | validate.params          | When developing an action type, it needs to accept parameters to know what to do with the action. (Example `to`, `from`, `subject`, `body` of an email). See the current built-in email action type for an example of the state-of-the-art validation. <p>Technically, the value of this property should have a property named `validate()` which is a function that takes a params object to validate and returns a sanitized version of that object to pass to the execution function. Validation errors should be thrown from the `validate()` function and will be available as an error message | schema / validation function |
-| validate.config          | Similar to params, a config may be required when creating an action (for example `host` and `port` for an email server).                                                                                                                                                                                                                                                                                                                                                                                                                                                         | schema / validation function |
-| validate.secrets         | Similar to params, a secrets object may be required when creating an action (for example `user` and `password` for an email server).                                                                                                                                                                                                                                                                                                                                                                                                                                                         | schema / validation function |
-| executor                 | This is where the code of an action type lives. This is a function gets called for executing an action from either alerting or manually by using the exposed function (see firing actions). For full details, see executor section below.                                                                                                                                                                                                                                                                                                                                                    | Function                     |
-| renderParameterTemplates | Optionally define a function to provide custom rendering for this action type. | Function |
+| validate.config          | Similar to params, a config may be required when creating an action (for example `host` and `port` for an email server).                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | schema / validation function |
+| validate.secrets         | Similar to params, a secrets object may be required when creating an action (for example `user` and `password` for an email server).                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | schema / validation function |
+| executor                 | This is where the code of an action type lives. This is a function gets called for executing an action from either alerting or manually by using the exposed function (see firing actions). For full details, see executor section below.                                                                                                                                                                                                                                                                                                                                                            | Function                     |
+| renderParameterTemplates | Optionally define a function to provide custom rendering for this action type.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Function                     |
 
 **Important** - The config object is persisted in ElasticSearch and updated via the ElasticSearch update document API. This API allows "partial updates" - and this can cause issues with the encryption used on specified properties. So, a `validate()` function should return values for all configuration properties, so that partial updates do not occur. Setting property values to `null` rather than `undefined`, or not including a property in the config object, is all you need to do to ensure partial updates won't occur.
 
@@ -133,15 +146,15 @@ This is the primary function for an action type. Whenever the action needs to ex
 
 **executor(options)**
 
-| Property                                | Description                                                                                                                                                                                                                                                                                                                                     |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| actionId                                | The action saved object id that the action type is executing for.                                                                                                                                                                                                                                                                               |
-| config                                  | The action configuration. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.                                                              |
-| secrets                                 | The decrypted secrets object given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the secrets object before being passed to the executor, define `validate.secrets` within the action type.                                                              |
-| params                                  | Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.                                                                                                                                                                                  |
-| services.scopedClusterClient            | Use this to do Elasticsearch queries on the cluster Kibana connects to. Serves the same purpose as the normal IClusterClient, but exposes an additional `asCurrentUser` method that doesn't use credentials of the Kibana internal user (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead.|
-| services.savedObjectsClient             | This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user in context calling the execute API or the API key provided to the execute plugin function (only when security isenabled). |
-| services.log(tags, [data], [timestamp]) | Use this to create server logs. (This is the same function as server.log) 
+| Property                                | Description                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| actionId                                | The action saved object id that the action type is executing for.                                                                                                                                                                                                                                                                                                                           |
+| config                                  | The action configuration. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.                                                                                                                                                                                                                                    |
+| secrets                                 | The decrypted secrets object given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the secrets object before being passed to the executor, define `validate.secrets` within the action type.                                                                                                |
+| params                                  | Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.                                                                                                                                                                                                                              |
+| services.scopedClusterClient            | Use this to do Elasticsearch queries on the cluster Kibana connects to. Serves the same purpose as the normal IClusterClient, but exposes an additional `asCurrentUser` method that doesn't use credentials of the Kibana internal user (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead. |
+| services.savedObjectsClient             | This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user in context calling the execute API or the API key provided to the execute plugin function (only when security isenabled).                                             |
+| services.log(tags, [data], [timestamp]) | Use this to create server logs. (This is the same function as server.log)                                                                                                                                                                                                                                                                                                                   |
 
 ### Example
 
@@ -243,9 +256,9 @@ Kibana ships with a set of built-in action types. See [Actions and connector typ
 
 In addition to the documented configurations, several built in action type offer additional `params` configurations.
 
-## ServiceNow
+## ServiceNow ITSM
 
-The [ServiceNow user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+The [ServiceNow ITSM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
 ### `params`
 
 | Property        | Description                                                                                        | Type   |
@@ -262,16 +275,18 @@ The [ServiceNow user documentation `params`](https://www.elastic.co/guide/en/kib
 
 The following table describes the properties of the `incident` object.
 
-| Property          | Description                                                                                                               | Type                |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| short_description | The title of the incident.                                                                                                | string              |
-| description       | The description of the incident.                                                                                          | string _(optional)_ |
-| externalId        | The ID of the incident in ServiceNow. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_ |
-| severity          | The severity in ServiceNow.                                                                                   | string _(optional)_ |
-| urgency           | The urgency in ServiceNow.                                                                                    | string _(optional)_ |
-| impact            | The impact in ServiceNow.                                                                                     | string _(optional)_ |
-| category          | The category in ServiceNow.                                                                                   | string _(optional)_ |
-| subcategory       | The subcategory in ServiceNow.                                                                                | string _(optional)_ |
+| Property            | Description                                                                                                      | Type                |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------- |
+| short_description   | The title of the incident.                                                                                       | string              |
+| description         | The description of the incident.                                                                                 | string _(optional)_ |
+| externalId          | The ID of the incident in ServiceNow. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_ |
+| severity            | The severity in ServiceNow.                                                                                      | string _(optional)_ |
+| urgency             | The urgency in ServiceNow.                                                                                       | string _(optional)_ |
+| impact              | The impact in ServiceNow.                                                                                        | string _(optional)_ |
+| category            | The category in ServiceNow.                                                                                      | string _(optional)_ |
+| subcategory         | The subcategory in ServiceNow.                                                                                   | string _(optional)_ |
+| correlation_id      | The correlation id of the incident.                                                                              | string _(optional)_ |
+| correlation_display | The correlation display of the ServiceNow.                                                                       | string _(optional)_ |
 
 #### `subActionParams (getFields)`
 
@@ -286,12 +301,101 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 #### `subActionParams (getChoices)`
 
-| Property | Description                                                  | Type     |
-| -------- | ------------------------------------------------------------ | -------- |
-| fields   | An array of fields. Example: `[priority, category, impact]`. | string[] |
+| Property | Description                                        | Type     |
+| -------- | -------------------------------------------------- | -------- |
+| fields   | An array of fields. Example: `[category, impact]`. | string[] |
 
 ---
 
+## ServiceNow Sec Ops
+
+The [ServiceNow SecOps user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-sir-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+
+### `params`
+
+| Property        | Description                                                                                        | Type   |
+| --------------- | -------------------------------------------------------------------------------------------------- | ------ |
+| subAction       | The subaction to perform. It can be `pushToService`, `getFields`, `getIncident`, and `getChoices`. | string |
+| subActionParams | The parameters of the subaction.                                                                   | object |
+
+#### `subActionParams (pushToService)`
+
+| Property | Description                                                                                                   | Type                  |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| incident | The ServiceNow security incident.                                                                             | object                |
+| comments | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`. | object[] _(optional)_ |
+
+The following table describes the properties of the `incident` object.
+
+| Property            | Description                                                                                                                                 | Type                              |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| short_description   | The title of the security incident.                                                                                                         | string                            |
+| description         | The description of the security incident.                                                                                                   | string _(optional)_               |
+| externalId          | The ID of the security incident in ServiceNow. If present, the security incident is updated. Otherwise, a new security incident is created. | string _(optional)_               |
+| priority            | The priority in ServiceNow.                                                                                                                 | string _(optional)_               |
+| dest_ip             | A list of destination IPs related to the security incident. The IPs will be added as observables to the security incident.                  | (string \| string[]) _(optional)_ |
+| source_ip           | A list of source IPs related to the security incident. The IPs will be added as observables to the security incident.                       | (string \| string[]) _(optional)_ |
+| malware_hash        | A list of malware hashes related to the security incident. The hashes  will be added as observables to the security incident.               | (string \| string[]) _(optional)_ |
+| malware_url         | A list of malware URLs related to the security incident. The URLs will be added as observables to the security incident.                    | (string \| string[]) _(optional)_ |
+| category            | The category in ServiceNow.                                                                                                                 | string _(optional)_               |
+| subcategory         | The subcategory in ServiceNow.                                                                                                              | string _(optional)_               |
+| correlation_id      | The correlation id of the security incident.                                                                                                | string _(optional)_               |
+| correlation_display | The correlation display of the security incident.                                                                                           | string _(optional)_               |
+
+#### `subActionParams (getFields)`
+
+No parameters for the `getFields` subaction. Provide an empty object `{}`.
+
+#### `subActionParams (getIncident)`
+
+| Property   | Description                                    | Type   |
+| ---------- | ---------------------------------------------- | ------ |
+| externalId | The ID of the security incident in ServiceNow. | string |
+
+
+#### `subActionParams (getChoices)`
+
+| Property | Description                                          | Type     |
+| -------- | ---------------------------------------------------- | -------- |
+| fields   | An array of fields. Example: `[priority, category]`. | string[] |
+
+---
+## ServiceNow ITOM
+
+The [ServiceNow ITOM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-itom-action-type.html) lists configuration properties for the `addEvent` subaction. In addition, several other subaction types are available.
+### `params`
+
+| Property        | Description                                                       | Type   |
+| --------------- | ----------------------------------------------------------------- | ------ |
+| subAction       | The subaction to perform. It can be `addEvent`, and `getChoices`. | string |
+| subActionParams | The parameters of the subaction.                                  | object |
+
+#### `subActionParams (addEvent)`
+
+
+| Property        | Description                                                                                                                      | Type                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| source          | The name of the event source type.                                                                                               | string _(optional)_ |
+| event_class     | Specific instance of the source.                                                                                                 | string _(optional)_ |
+| resource        | The name of the resource.                                                                                                        | string _(optional)_ |
+| node            | The Host that the event was triggered for.                                                                                       | string _(optional)_ |
+| metric_name     | Name of the metric.                                                                                                              | string _(optional)_ |
+| type            | The type of event.                                                                                                               | string _(optional)_ |
+| severity        | The category in ServiceNow.                                                                                                      | string _(optional)_ |
+| description     | The subcategory in ServiceNow.                                                                                                   | string _(optional)_ |
+| additional_info | Any additional information about the event.                                                                                      | string _(optional)_ |
+| message_key     | This value is used for de-duplication of events. All actions sharing this key will be associated with the same ServiceNow alert. | string _(optional)_ |
+| time_of_event   | The time of the event.                                                                                                           | string _(optional)_ |
+
+Refer to [ServiceNow documentation](https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html) for more information about the properties.
+
+#### `subActionParams (getChoices)`
+
+| Property | Description                                | Type     |
+| -------- | ------------------------------------------ | -------- |
+| fields   | An array of fields. Example: `[severity]`. | string[] |
+
+---
 ## Jira
 
 The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/master/jira-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
@@ -311,20 +415,20 @@ The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/ma
 
 The following table describes the properties of the `incident` object.
 
-| Property    | Description                                                                                                      | Type                  |
-| ----------- | ---------------------------------------------------------------------------------------------------------------- | --------------------- |
-| summary     | The title of the issue.                                                                                          | string                |
-| description | The description of the issue.                                                                                   | string _(optional)_   |
+| Property    | Description                                                                                             | Type                  |
+| ----------- | ------------------------------------------------------------------------------------------------------- | --------------------- |
+| summary     | The title of the issue.                                                                                 | string                |
+| description | The description of the issue.                                                                           | string _(optional)_   |
 | externalId  | The ID of the issue in Jira. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_   |
-| issueType   | The ID of the issue type in Jira.                                                                                | string _(optional)_   |
-| priority    | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
-| labels      | An array of labels. Labels cannot contain spaces.                                                                | string[] _(optional)_ |
-| parent      | The ID or key of the parent issue. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
+| issueType   | The ID of the issue type in Jira.                                                                       | string _(optional)_   |
+| priority    | The name of the priority in Jira. Example: `Medium`.                                                    | string _(optional)_   |
+| labels      | An array of labels. Labels cannot contain spaces.                                                       | string[] _(optional)_ |
+| parent      | The ID or key of the parent issue. Only for `Sub-task` issue types.                                     | string _(optional)_   |
 
 #### `subActionParams (getIncident)`
 
-| Property   | Description                 | Type   |
-| ---------- | --------------------------- | ------ |
+| Property   | Description                  | Type   |
+| ---------- | ---------------------------- | ------ |
 | externalId | The ID of the issue in Jira. | string |
 
 #### `subActionParams (issueTypes)`
@@ -333,20 +437,20 @@ No parameters for the `issueTypes` subaction. Provide an empty object `{}`.
 
 #### `subActionParams (fieldsByIssueType)`
 
-| Property | Description                      | Type   |
-| -------- | -------------------------------- | ------ |
+| Property | Description                       | Type   |
+| -------- | --------------------------------- | ------ |
 | id       | The ID of the issue type in Jira. | string |
 
 #### `subActionParams (issues)`
 
-| Property | Description             | Type   |
-| -------- | ----------------------- | ------ |
+| Property | Description              | Type   |
+| -------- | ------------------------ | ------ |
 | title    | The title to search for. | string |
 
 #### `subActionParams (issue)`
 
-| Property | Description                 | Type   |
-| -------- | --------------------------- | ------ |
+| Property | Description                  | Type   |
+| -------- | ---------------------------- | ------ |
 | id       | The ID of the issue in Jira. | string |
 
 #### `subActionParams (getFields)`
@@ -354,16 +458,17 @@ No parameters for the `issueTypes` subaction. Provide an empty object `{}`.
 No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 ---
+
 ## IBM Resilient
 
 The [IBM Resilient user documentation `params`](https://www.elastic.co/guide/en/kibana/master/resilient-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
 
 ### `params`
 
-| Property        | Description                                                                                        | Type   |
-| --------------- | -------------------------------------------------------------------------------------------------- | ------ |
+| Property        | Description                                                                                       | Type   |
+| --------------- | ------------------------------------------------------------------------------------------------- | ------ |
 | subAction       | The subaction to perform. It can be `pushToService`, `getFields`, `incidentTypes`, and `severity. | string |
-| subActionParams | The parameters of the subaction.                                                                   | object |
+| subActionParams | The parameters of the subaction.                                                                  | object |
 
 #### `subActionParams (pushToService)`
 
@@ -374,13 +479,13 @@ The [IBM Resilient user documentation `params`](https://www.elastic.co/guide/en/
 
 The following table describes the properties of the `incident` object.
 
-| Property      | Description                                                                                                                  | Type                  |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| name          | The title of the incident.                                                                                                 | string _(optional)_   |
-| description   | The description of the incident.                                                                                             | string _(optional)_   |
+| Property      | Description                                                                                                         | Type                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| name          | The title of the incident.                                                                                          | string _(optional)_   |
+| description   | The description of the incident.                                                                                    | string _(optional)_   |
 | externalId    | The ID of the incident in IBM Resilient. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_   |
-| incidentTypes | An array with the IDs of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
-| severityCode  | IBM Resilient ID of the severity code.                                                                                       | number _(optional)_   |
+| incidentTypes | An array with the IDs of IBM Resilient incident types.                                                              | number[] _(optional)_ |
+| severityCode  | IBM Resilient ID of the severity code.                                                                              | number _(optional)_   |
 
 #### `subActionParams (getFields)`
 
@@ -394,6 +499,36 @@ No parameters for the `incidentTypes` subaction. Provide an empty object `{}`.
 
 No parameters for the `severity` subaction. Provide an empty object `{}`.
 
+---
+## Swimlane
+
+
+### `params`
+
+| Property        | Description                                          | Type   |
+| --------------- | ---------------------------------------------------- | ------ |
+| subAction       | The subaction to perform. It can be `pushToService`. | string |
+| subActionParams | The parameters of the subaction.                     | object |
+
+
+`subActionParams (pushToService)`
+
+| Property | Description                                                                                                   | Type                  |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| incident | The Swimlane incident.                                                                                        | object                |
+| comments | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`. | object[] _(optional)_ |
+
+
+The following table describes the properties of the `incident` object.
+
+| Property    | Description                      | Type                |
+| ----------- | -------------------------------- | ------------------- |
+| alertId     | The alert id.                    | string _(optional)_ |
+| caseId      | The case id of the incident.     | string _(optional)_ |
+| caseName    | The case name of the incident.   | string _(optional)_ |
+| description | The description of the incident. | string _(optional)_ |
+| ruleName    | The rule name.                   | string _(optional)_ |
+| severity    | The severity of the incident.    | string _(optional)_ |
 ---
 # Command Line Utility
 

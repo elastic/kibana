@@ -12,12 +12,14 @@ import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
 import { ServiceNowSIRFieldsRT } from './servicenow_sir';
+import { SwimlaneFieldsRT } from './swimlane';
 
 export * from './jira';
 export * from './servicenow_itsm';
 export * from './servicenow_sir';
 export * from './resilient';
 export * from './mappings';
+export * from './swimlane';
 
 export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ActionType;
@@ -32,10 +34,11 @@ export const ConnectorFieldsRt = rt.union([
 
 export enum ConnectorTypes {
   jira = '.jira',
+  none = '.none',
   resilient = '.resilient',
   serviceNowITSM = '.servicenow',
   serviceNowSIR = '.servicenow-sir',
-  none = '.none',
+  swimlane = '.swimlane',
 }
 
 export const connectorTypes = Object.values(ConnectorTypes);
@@ -45,7 +48,7 @@ const ConnectorJiraTypeFieldsRt = rt.type({
   fields: rt.union([JiraFieldsRT, rt.null]),
 });
 
-const ConnectorResillientTypeFieldsRt = rt.type({
+const ConnectorResilientTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.resilient),
   fields: rt.union([ResilientFieldsRT, rt.null]),
 });
@@ -53,6 +56,11 @@ const ConnectorResillientTypeFieldsRt = rt.type({
 const ConnectorServiceNowITSMTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.serviceNowITSM),
   fields: rt.union([ServiceNowITSMFieldsRT, rt.null]),
+});
+
+const ConnectorSwimlaneTypeFieldsRt = rt.type({
+  type: rt.literal(ConnectorTypes.swimlane),
+  fields: rt.union([SwimlaneFieldsRT, rt.null]),
 });
 
 const ConnectorServiceNowSIRTypeFieldsRt = rt.type({
@@ -65,26 +73,38 @@ const ConnectorNoneTypeFieldsRt = rt.type({
   fields: rt.null,
 });
 
+export const noneConnectorId: string = 'none';
+
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
-  ConnectorResillientTypeFieldsRt,
+  ConnectorNoneTypeFieldsRt,
+  ConnectorResilientTypeFieldsRt,
   ConnectorServiceNowITSMTypeFieldsRt,
   ConnectorServiceNowSIRTypeFieldsRt,
-  ConnectorNoneTypeFieldsRt,
+  ConnectorSwimlaneTypeFieldsRt,
+]);
+
+/**
+ * This type represents the connector's format when it is encoded within a user action.
+ */
+export const CaseUserActionConnectorRt = rt.intersection([
+  rt.type({ name: rt.string }),
+  ConnectorTypeFieldsRt,
 ]);
 
 export const CaseConnectorRt = rt.intersection([
   rt.type({
     id: rt.string,
-    name: rt.string,
   }),
-  ConnectorTypeFieldsRt,
+  CaseUserActionConnectorRt,
 ]);
 
+export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
 export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
-export type ConnectorResillientTypeFields = rt.TypeOf<typeof ConnectorResillientTypeFieldsRt>;
+export type ConnectorResilientTypeFields = rt.TypeOf<typeof ConnectorResilientTypeFieldsRt>;
+export type ConnectorSwimlaneTypeFields = rt.TypeOf<typeof ConnectorSwimlaneTypeFieldsRt>;
 export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
   typeof ConnectorServiceNowITSMTypeFieldsRt
 >;
@@ -92,16 +112,3 @@ export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorService
 
 // we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;
-
-export type ESConnectorFields = Array<{
-  key: string;
-  value: unknown;
-}>;
-
-export type ESCaseConnectorTypes = ConnectorTypes;
-export interface ESCaseConnector {
-  id: string;
-  name: string;
-  type: ESCaseConnectorTypes;
-  fields: ESConnectorFields | null;
-}

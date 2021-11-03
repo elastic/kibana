@@ -12,6 +12,7 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 import { useMessagesStorage } from '../../../../hooks/use_messages_storage';
 import { createCalloutId } from './helpers';
 import { CaseCallOut, CaseCallOutProps } from '.';
+import { observabilityAppId } from '../../../../../common';
 
 jest.mock('../../../../hooks/use_messages_storage');
 const useSecurityLocalStorageMock = useMessagesStorage as jest.Mock;
@@ -110,9 +111,9 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one']);
-    expect(securityLocalStorageMock.getMessages).toHaveBeenCalledWith('observability');
+    expect(securityLocalStorageMock.getMessages).toHaveBeenCalledWith(observabilityAppId);
     wrapper.find(`[data-test-subj="callout-dismiss-${id}"]`).last().simulate('click');
-    expect(securityLocalStorageMock.addMessage).toHaveBeenCalledWith('observability', id);
+    expect(securityLocalStorageMock.addMessage).toHaveBeenCalledWith(observabilityAppId, id);
   });
 
   it('do not show the callout if is in the localStorage', () => {

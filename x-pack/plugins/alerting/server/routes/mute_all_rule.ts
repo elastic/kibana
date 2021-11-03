@@ -28,10 +28,10 @@ export const muteAllRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
         try {
-          await alertsClient.muteAll({ id });
+          await rulesClient.muteAll({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {

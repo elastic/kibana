@@ -16,7 +16,7 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType } from '../rule_type_registry';
 import {
   AlertTypeParams,
   AlertTypeState,
@@ -29,6 +29,7 @@ jest.mock('./inject_action_params', () => ({
 }));
 
 const alertType: NormalizedAlertType<
+  AlertTypeParams,
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -44,6 +45,7 @@ const alertType: NormalizedAlertType<
   ],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',
@@ -58,6 +60,7 @@ const mockActionsPlugin = actionsMock.createStart();
 const mockEventLogger = eventLoggerMock.create();
 const createExecutionHandlerParams: jest.Mocked<
   CreateExecutionHandlerOptions<
+    AlertTypeParams,
     AlertTypeParams,
     AlertTypeState,
     AlertInstanceState,
@@ -95,6 +98,8 @@ const createExecutionHandlerParams: jest.Mocked<
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  supportsEphemeralTasks: false,
+  maxEphemeralActionsPerAlert: Promise.resolve(10),
 };
 
 beforeEach(() => {
@@ -135,6 +140,14 @@ test('enqueues execution per selected action', async () => {
           "foo": true,
           "stateVal": "My  goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",
@@ -162,7 +175,6 @@ test('enqueues execution per selected action', async () => {
           "kibana": Object {
             "alerting": Object {
               "action_group_id": "default",
-              "action_subgroup": undefined,
               "instance_id": "2",
             },
             "saved_objects": Array [
@@ -187,7 +199,6 @@ test('enqueues execution per selected action', async () => {
             "id": "1",
             "license": "basic",
             "name": "name-of-alert",
-            "namespace": "test1",
             "ruleset": "alerts",
           },
         },
@@ -247,6 +258,14 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
       id: '1',
       type: 'alert',
     }),
+    relatedSavedObjects: [
+      {
+        id: '1',
+        namespace: 'test1',
+        type: 'alert',
+        typeId: 'test',
+      },
+    ],
     spaceId: 'test1',
     apiKey: createExecutionHandlerParams.apiKey,
   });
@@ -327,6 +346,14 @@ test('context attribute gets parameterized', async () => {
           "foo": true,
           "stateVal": "My  goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",
@@ -360,6 +387,14 @@ test('state attribute gets parameterized', async () => {
           "foo": true,
           "stateVal": "My state-val goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",

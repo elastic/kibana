@@ -6,7 +6,7 @@
  */
 
 import { isNull, isObject, isUndefined } from 'lodash';
-import { FieldFormat } from 'src/plugins/data/common';
+import { FieldFormat } from 'src/plugins/field_formats/common';
 import { RawValue } from '../types';
 
 export function createFormatCsvValues(

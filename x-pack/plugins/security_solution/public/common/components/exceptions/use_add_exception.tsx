@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -17,9 +17,9 @@ import { HttpStart } from '../../../../../../../src/core/public';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
-  buildAlertStatusFilter,
   buildAlertsRuleIdFilter,
-  buildAlertStatusFilterRuleRegistry,
+  buildAlertStatusesFilter,
+  buildAlertStatusesFilterRuleRegistry,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -120,8 +120,8 @@ export const useAddOrUpdateException = ({
 
       try {
         setIsLoading(true);
-        let alertIdResponse: UpdateDocumentByQueryResponse | undefined;
-        let bulkResponse: UpdateDocumentByQueryResponse | undefined;
+        let alertIdResponse: estypes.UpdateByQueryResponse | undefined;
+        let bulkResponse: estypes.UpdateByQueryResponse | undefined;
         if (alertIdToClose != null) {
           alertIdResponse = await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
@@ -133,8 +133,8 @@ export const useAddOrUpdateException = ({
         if (bulkCloseIndex != null) {
           // TODO: Once we are past experimental phase this code should be removed
           const alertStatusFilter = ruleRegistryEnabled
-            ? buildAlertStatusFilterRuleRegistry('open')
-            : buildAlertStatusFilter('open');
+            ? buildAlertStatusesFilterRuleRegistry(['open', 'acknowledged', 'in-progress'])
+            : buildAlertStatusesFilter(['open', 'acknowledged', 'in-progress']);
 
           const filter = getQueryFilter(
             '',

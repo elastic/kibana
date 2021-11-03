@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { setupTestUsers } from './test_users';
+
+export default function ({ loadTestFile, getService }) {
   describe('Fleet Endpoints', function () {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
+
     // EPM
-    loadTestFile(require.resolve('./epm/index'));
+    loadTestFile(require.resolve('./epm'));
 
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup'));
@@ -30,6 +36,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./package_policy/update'));
     loadTestFile(require.resolve('./package_policy/get'));
     loadTestFile(require.resolve('./package_policy/delete'));
+    loadTestFile(require.resolve('./package_policy/upgrade'));
 
     // Agent policies
     loadTestFile(require.resolve('./agent_policy/index'));

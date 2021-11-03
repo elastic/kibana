@@ -7,21 +7,22 @@
 
 import expect from '@kbn/expect';
 import { countBy } from 'lodash';
-import { createApmApiSupertest } from '../../../common/apm_api_supertest';
 import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
-  const apmWriteUser = getService('supertestAsApmWriteUser');
-  const apmApiWriteUser = createApmApiSupertest(getService('supertestAsApmWriteUser'));
+  const apmApiClient = getService('apmApiClient');
+  const legacyWriteUserClient = getService('legacySupertestAsApmWriteUser');
 
   function getJobs() {
-    return apmApiWriteUser({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` });
+    return apmApiClient.writeUser({
+      endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
+    });
   }
 
   function createJobs(environments: string[]) {
-    return apmApiWriteUser({
-      endpoint: `POST /api/apm/settings/anomaly-detection/jobs`,
+    return apmApiClient.writeUser({
+      endpoint: `POST /internal/apm/settings/anomaly-detection/jobs`,
       params: {
         body: { environments },
       },
@@ -29,7 +30,10 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   function deleteJobs(jobIds: string[]) {
-    return apmWriteUser.post(`/api/ml/jobs/delete_jobs`).send({ jobIds }).set('kbn-xsrf', 'foo');
+    return legacyWriteUserClient
+      .post(`/api/ml/jobs/delete_jobs`)
+      .send({ jobIds })
+      .set('kbn-xsrf', 'foo');
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {

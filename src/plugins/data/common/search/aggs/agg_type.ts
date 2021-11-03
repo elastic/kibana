@@ -10,10 +10,11 @@ import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { ISearchSource } from 'src/plugins/data/public';
-import { DatatableColumnType, SerializedFieldFormat } from 'src/plugins/expressions/common';
+import { DatatableColumnType } from 'src/plugins/expressions/common';
 import type { RequestAdapter } from 'src/plugins/inspector/common';
+import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';

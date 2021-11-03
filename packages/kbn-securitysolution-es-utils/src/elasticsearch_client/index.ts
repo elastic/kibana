@@ -9,13 +9,7 @@
 // Copied from src/core/server/elasticsearch/client/types.ts
 // as these types aren't part of any package yet. Once they are, remove this completely
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import type {
-  ApiResponse,
-  TransportRequestOptions,
-  TransportRequestParams,
-  TransportRequestPromise,
-} from '@elastic/elasticsearch/lib/Transport';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 /**
  * Client used to query the elasticsearch cluster.
@@ -24,12 +18,5 @@ import type {
  */
 export type ElasticsearchClient = Omit<
   KibanaClient,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
-> & {
-  transport: {
-    request(
-      params: TransportRequestParams,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse>;
-  };
-};
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
+>;

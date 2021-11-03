@@ -42,7 +42,7 @@ export interface DepsStartMock {
  * Returns a mock of our app's depsStart (plugin start dependencies)
  */
 export const depsStartMock: () => DepsStartMock = () => {
-  const dataMock: DataMock = (dataPluginMock.createStartContract() as unknown) as DataMock;
+  const dataMock: DataMock = dataPluginMock.createStartContract() as unknown as DataMock;
   dataMock.indexPatterns.getFieldsForWildcard = jest.fn();
   dataMock.query.filterManager.setFilters = jest.fn();
   dataMock.query.filterManager.getUpdates$ = jest.fn(() => {

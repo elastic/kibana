@@ -16,7 +16,7 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
-const createMockConfig = (mockConfig: ConfigType = { maxSpaces: 1000, enabled: true }) => {
+const createMockConfig = (mockConfig: ConfigType = { maxSpaces: 1000 }) => {
   return ConfigSchema.validate(mockConfig);
 };
 
@@ -75,10 +75,7 @@ describe('#getAll', () => {
     mockCallWithRequestRepository.find.mockResolvedValue({
       saved_objects: savedObjects,
     } as any);
-    const mockConfig = createMockConfig({
-      maxSpaces: 1234,
-      enabled: true,
-    });
+    const mockConfig = createMockConfig({ maxSpaces: 1234 });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
     const actualSpaces = await client.getAll();
@@ -182,10 +179,7 @@ describe('#create', () => {
       total: maxSpaces - 1,
     } as any);
 
-    const mockConfig = createMockConfig({
-      maxSpaces,
-      enabled: true,
-    });
+    const mockConfig = createMockConfig({ maxSpaces });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
 
@@ -211,10 +205,7 @@ describe('#create', () => {
       total: maxSpaces,
     } as any);
 
-    const mockConfig = createMockConfig({
-      maxSpaces,
-      enabled: true,
-    });
+    const mockConfig = createMockConfig({ maxSpaces });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
 
@@ -340,5 +331,26 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
+  });
+
+  describe('#disableLegacyUrlAliases', () => {
+    test(`updates legacy URL aliases using callWithRequestRepository`, async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+
+      const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
+      const aliases = [
+        { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
+        { targetSpace: 'space2', targetType: 'bar', sourceId: '456' },
+      ];
+      await client.disableLegacyUrlAliases(aliases);
+
+      expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledWith([
+        { type: 'legacy-url-alias', id: 'space1:foo:123', attributes: { disabled: true } },
+        { type: 'legacy-url-alias', id: 'space2:bar:456', attributes: { disabled: true } },
+      ]);
+    });
   });
 });

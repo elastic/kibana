@@ -17,8 +17,6 @@
 }
 
 .lnsFormula__editor {
-  border-bottom: $euiBorderThin;
-
   .lnsIndexPatternDimensionEditor-isFullscreen & {
     border-bottom: none;
     display: flex;
@@ -32,7 +30,7 @@
 
 .lnsFormula__editorHeader,
 .lnsFormula__editorFooter {
-  padding: $euiSizeS;
+  padding: $euiSizeS $euiSize;
 }
 
 .lnsFormula__editorFooter {
@@ -47,8 +45,16 @@
 }
 
 .lnsFormula__editorContent {
+  min-height: 0;
   position: relative;
-  height: 201px;
+
+  .lnsIndexPatternDimensionEditor:not(.lnsIndexPatternDimensionEditor-isFullscreen) & {
+    height: 200px;
+  }
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    flex: 1;
+  }
 }
 
 .lnsFormula__editorPlaceholder {
@@ -60,11 +66,6 @@
   // Matches monaco editor
   font-family: Menlo, Monaco, 'Courier New', monospace;
   pointer-events: none;
-}
-
-.lnsIndexPatternDimensionEditor-isFullscreen .lnsFormula__editorContent {
-  flex: 1;
-  min-height: 201px;
 }
 
 .lnsFormula__warningText + .lnsFormula__warningText {
@@ -127,7 +128,7 @@
 }
 
 .lnsFormula__docsSearch {
-  padding: $euiSizeS;
+  padding: $euiSize;
 }
 
 .lnsFormula__docsNav {
@@ -135,7 +136,7 @@
 }
 
 .lnsFormula__docsNavGroup {
-  padding: $euiSizeS;
+  padding: $euiSize;
 
   & + & {
     border-top: $euiBorderThin;

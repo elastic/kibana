@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, debounce, first, mapValues } from 'lodash';
 
@@ -18,11 +18,10 @@ import {
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
-  EuiPageContent,
-  EuiPageContentHeader,
+  EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
   EuiStepsHorizontal,
-  EuiTitle,
 } from '@elastic/eui';
 
 import {
@@ -522,44 +521,46 @@ export class JobCreateUi extends Component {
       }
 
       saveErrorFeedback = (
-        <Fragment>
+        <>
+          <EuiSpacer />
+
           <EuiCallOut title={message} icon="cross" color="danger">
             {errorBody}
           </EuiCallOut>
 
           <EuiSpacer />
-        </Fragment>
+        </>
       );
     }
 
     return (
-      <Fragment>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="xpack.rollupJobs.createTitle"
-                  defaultMessage="Create rollup job"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageContentHeader>
+      <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.rollupJobs.createTitle"
+              defaultMessage="Create rollup job"
+            />
+          }
+        />
 
-          {saveErrorFeedback}
+        <EuiSpacer size="l" />
 
-          <EuiStepsHorizontal steps={this.getSteps()} />
+        <EuiStepsHorizontal steps={this.getSteps()} />
 
-          <EuiSpacer />
+        {saveErrorFeedback}
 
-          {this.renderCurrentStep()}
+        <EuiSpacer />
 
-          <EuiSpacer size="l" />
+        {this.renderCurrentStep()}
 
-          {this.renderNavigation()}
-        </EuiPageContent>
+        <EuiSpacer size="l" />
+
+        {this.renderNavigation()}
+
         {savingFeedback}
-      </Fragment>
+      </EuiPageContentBody>
     );
   }
 

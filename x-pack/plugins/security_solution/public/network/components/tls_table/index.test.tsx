@@ -24,6 +24,8 @@ import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -75,7 +77,7 @@ describe('Tls Table Component', () => {
           />
         </TestProviders>
       );
-      expect(store.getState().network.details.queries!.tls.sort).toEqual({
+      expect(store.getState().network.details.queries?.tls.sort).toEqual({
         direction: 'desc',
         field: '_id',
       });
@@ -84,7 +86,7 @@ describe('Tls Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.tls.sort).toEqual({
+      expect(store.getState().network.details.queries?.tls.sort).toEqual({
         direction: 'asc',
         field: '_id',
       });

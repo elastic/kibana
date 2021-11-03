@@ -24,6 +24,7 @@ A few notable services are called out below.
 * <<development-security>>
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
+* <<reporting-integration>>
 
 include::kibana-platform-plugin-api.asciidoc[leveloffset=+1]
 
@@ -52,3 +53,5 @@ include::security/index.asciidoc[leveloffset=+1]
 include::add-data-tutorials.asciidoc[leveloffset=+1]
 
 include::development-visualize-index.asciidoc[leveloffset=+1]
+
+include::development/index.asciidoc[leveloffset=+1]

@@ -10,5 +10,6 @@ export enum ActiveField {
   Filter = 'Filter',
   Sort = 'Sort',
   Url = 'Url',
+  Thumb = 'Thumb',
   None = '',
 }

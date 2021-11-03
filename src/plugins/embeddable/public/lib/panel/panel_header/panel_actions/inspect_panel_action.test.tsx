@@ -126,7 +126,7 @@ test('Execute throws an error when inspector adapters are not available', async 
   );
 
   expect(error).toBeInstanceOf(Error);
-  expect(error.message).toMatchInlineSnapshot(`"Action not compatible with context"`);
+  expect((error as Error).message).toMatchInlineSnapshot(`"Action not compatible with context"`);
 });
 
 test('Returns title', async () => {

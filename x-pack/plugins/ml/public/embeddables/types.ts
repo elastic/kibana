@@ -6,14 +6,10 @@
  */
 
 import type { CoreStart } from 'kibana/public';
+import type { Filter, Query } from '@kbn/es-query';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
-import type { Filter } from '../../../../../src/plugins/data/common/es_query/filters';
-import type {
-  Query,
-  RefreshInterval,
-  TimeRange,
-} from '../../../../../src/plugins/data/common/query';
+import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
 import type {
   EmbeddableInput,
   EmbeddableOutput,
@@ -31,7 +27,7 @@ import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
-import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import type { DataView } from '../../../../../src/plugins/data_views/common';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -114,7 +110,7 @@ export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, Anomal
 export interface AnomalyChartsCustomOutput {
   entityFields?: EntityField[];
   severity?: number;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
 }
 export type AnomalyChartsEmbeddableOutput = EmbeddableOutput & AnomalyChartsCustomOutput;
 export interface EditAnomalyChartsPanelContext {

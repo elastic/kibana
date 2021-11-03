@@ -78,6 +78,7 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 
+export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
@@ -108,10 +109,13 @@ export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
 export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
 export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 
+export const METRICSET_NAME = 'metricset.name';
+
 export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
 export const HOST_NAME = 'host.hostname';
+export const HOSTNAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';

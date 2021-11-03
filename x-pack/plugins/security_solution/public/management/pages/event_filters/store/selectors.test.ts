@@ -61,7 +61,7 @@ describe('event filters selectors', () => {
     previousStateWhileLoading = previousState;
 
     // will be fixed when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error TS2345
     initialState.listPage.data = createLoadingResourceState(previousState);
   };
 
@@ -204,8 +204,8 @@ describe('event filters selectors', () => {
       expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Loading
-      // ts-ignore will be fixed when AsyncResourceState is refactored (#830)
-      // @ts-ignore
+      // will be fixed when AsyncResourceState is refactored (#830)
+      // @ts-expect-error TS2345
       initialState.listPage.dataExist = createLoadingResourceState(initialState.listPage.dataExist);
       expect(getListPageDoesDataExist(initialState)).toBe(false);
 
@@ -248,11 +248,6 @@ describe('event filters selectors', () => {
 
     it('should should return true if any of the url params differ from last api call', () => {
       initialState.location.page_index = 10;
-      expect(listDataNeedsRefresh(initialState)).toBe(true);
-    });
-
-    it('should should return true if filter param differ from last api call', () => {
-      initialState.location.filter = 'query';
       expect(listDataNeedsRefresh(initialState)).toBe(true);
     });
   });

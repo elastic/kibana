@@ -35,13 +35,8 @@ import { Targets } from './types';
 export const App = () => {
   const { getLicenseStatus, notifications } = useAppContext();
 
-  const {
-    activeTab,
-    currentResponse,
-    highlightDetails,
-    pristine,
-    profiling,
-  } = useProfilerReadContext();
+  const { activeTab, currentResponse, highlightDetails, pristine, profiling } =
+    useProfilerReadContext();
 
   const dispatch = useProfilerActionContext();
 
@@ -58,9 +53,10 @@ export const App = () => {
     [dispatch]
   );
 
-  const onHighlight = useCallback((value) => dispatch({ type: 'setHighlightDetails', value }), [
-    dispatch,
-  ]);
+  const onHighlight = useCallback(
+    (value) => dispatch({ type: 'setHighlightDetails', value }),
+    [dispatch]
+  );
 
   const renderLicenseWarning = () => {
     return !getLicenseStatus().valid ? (

@@ -24,12 +24,12 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'nginxLogs',
     name: i18n.translate('home.tutorials.nginxLogs.nameTitle', {
-      defaultMessage: 'Nginx logs',
+      defaultMessage: 'Nginx Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.nginxLogs.shortDescription', {
-      defaultMessage: 'Collect and parse access and error logs created by the Nginx HTTP server.',
+      defaultMessage: 'Collect and parse logs from Nginx HTTP servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.nginxLogs.longDescription', {
       defaultMessage:
@@ -59,5 +59,6 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['web', 'security'],
   };
 }

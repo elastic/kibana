@@ -10,16 +10,16 @@ import React from 'react';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { validate } from './validation';
 import {
-  ALERT_MISSING_MONITORING_DATA,
-  ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_DETAILS,
+  RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import { Expression } from './expression';
 
 export function createMissingMonitoringDataAlertType(): AlertTypeModel {
   return {
-    id: ALERT_MISSING_MONITORING_DATA,
-    description: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].description,
+    id: RULE_MISSING_MONITORING_DATA,
+    description: RULE_DETAILS[RULE_MISSING_MONITORING_DATA].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaMissingData}`;
@@ -27,11 +27,11 @@ export function createMissingMonitoringDataAlertType(): AlertTypeModel {
     alertParamsExpression: (props: any) => (
       <Expression
         {...props}
-        paramDetails={ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].paramDetails}
+        paramDetails={RULE_DETAILS[RULE_MISSING_MONITORING_DATA].paramDetails}
       />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+    requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };
 }

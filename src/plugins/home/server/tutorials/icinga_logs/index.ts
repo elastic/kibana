@@ -24,12 +24,12 @@ export function icingaLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'icingaLogs',
     name: i18n.translate('home.tutorials.icingaLogs.nameTitle', {
-      defaultMessage: 'Icinga logs',
+      defaultMessage: 'Icinga Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.icingaLogs.shortDescription', {
-      defaultMessage: 'Collect Icinga main, debug, and startup logs.',
+      defaultMessage: 'Collect and parse main, debug, and startup logs from Icinga with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.icingaLogs.longDescription', {
       defaultMessage:
@@ -59,5 +59,6 @@ export function icingaLogsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['security'],
   };
 }

@@ -20,7 +20,24 @@ export interface CopySavedObjectsToSpaceResponse {
   [spaceId: string]: SavedObjectsImportResponse;
 }
 
-export interface SavedObjectTarget {
+/**
+ * Properties for the CopyToSpaceFlyout.
+ */
+export interface CopyToSpaceFlyoutProps {
+  /**
+   * The object to render the flyout for.
+   */
+  savedObjectTarget: CopyToSpaceSavedObjectTarget;
+  /**
+   * Optional callback when the flyout is closed.
+   */
+  onClose?: () => void;
+}
+
+/**
+ * Describes the target saved object during a copy operation.
+ */
+export interface CopyToSpaceSavedObjectTarget {
   /**
    * The object's type.
    */

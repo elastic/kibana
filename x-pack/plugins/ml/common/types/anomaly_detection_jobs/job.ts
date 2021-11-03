@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type JobId = string;
 export type BucketSpan = string;
 
+// temporary Job override, waiting for es client to have correct types
 export type Job = estypes.MlJob;
+
+export type MlJobBlocked = estypes.MlJobBlocked;
 
 export type AnalysisConfig = estypes.MlAnalysisConfig;
 

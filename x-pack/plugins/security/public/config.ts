@@ -7,4 +7,5 @@
 
 export interface ConfigType {
   loginAssistanceMessage: string;
+  showInsecureClusterWarning: boolean;
 }

@@ -8,7 +8,11 @@
 import React, { ComponentType } from 'react';
 import moment from 'moment';
 
-import { ActivityLog, Immutable } from '../../../../../../common/endpoint/types';
+import {
+  ActivityLog,
+  Immutable,
+  ActivityLogItemTypes,
+} from '../../../../../../common/endpoint/types';
 import { EndpointDetailsFlyoutTabs } from './components/endpoint_details_tabs';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsFlyout } from '.';
@@ -20,12 +24,13 @@ export const dummyEndpointActivityLog = (
 ): AsyncResourceState<Immutable<ActivityLog>> => ({
   type: 'LoadedResourceState',
   data: {
-    total: 20,
     page: 1,
     pageSize: 50,
+    startDate: moment().subtract(5, 'day').fromNow().toString(),
+    endDate: moment().toString(),
     data: [
       {
-        type: 'action',
+        type: ActivityLogItemTypes.FLEET_ACTION,
         item: {
           id: '',
           data: {
@@ -43,7 +48,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: ActivityLogItemTypes.FLEET_ACTION,
         item: {
           id: '',
           data: {
@@ -62,7 +67,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: ActivityLogItemTypes.FLEET_ACTION,
         item: {
           id: '',
           data: {
@@ -81,7 +86,7 @@ export const dummyEndpointActivityLog = (
         },
       },
       {
-        type: 'action',
+        type: ActivityLogItemTypes.FLEET_ACTION,
         item: {
           id: '',
           data: {
@@ -121,16 +126,21 @@ export default {
 export const Tabs = () => (
   <EndpointDetailsFlyoutTabs
     show="details"
+    hostname="endpoint-name-01"
     tabs={[
       {
         id: 'overview',
         name: 'Overview',
         content: <>{'Endpoint Details'}</>,
+        route:
+          '/administration/endpoints?page_index=0&page_size=10&selected_endpoint=endpoint-id-00001010&show=details',
       },
       {
         id: 'activity_log',
         name: 'Activity Log',
         content: ActivityLogMarkup(),
+        route:
+          '/administration/endpoints?page_index=0&page_size=10&selected_endpoint=endpoint-id-00001010&show=activity_log',
       },
     ]}
   />

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
 import { ary, assign, isPlainObject, isString, sortBy } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';

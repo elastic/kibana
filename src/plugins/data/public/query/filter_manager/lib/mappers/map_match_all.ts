@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, isMatchAllFilter, FILTERS } from '../../../../../common';
+import { Filter, isMatchAllFilter, FILTERS } from '@kbn/es-query';
 
 export const mapMatchAll = (filter: Filter) => {
   if (isMatchAllFilter(filter)) {

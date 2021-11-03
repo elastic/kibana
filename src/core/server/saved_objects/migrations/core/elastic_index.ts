@@ -12,7 +12,7 @@
  */
 
 import _ from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MigrationEsClient } from './migration_es_client';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
@@ -28,6 +28,27 @@ export interface FullIndexInfo {
   mappings: IndexMapping;
 }
 
+/**
+ * Types that are no longer registered and need to be removed
+ */
+export const REMOVED_TYPES: string[] = [
+  'apm-services-telemetry',
+  'background-session',
+  'cases-sub-case',
+  'file-upload-telemetry',
+  // https://github.com/elastic/kibana/issues/91869
+  'fleet-agent-events',
+  // Was removed in 7.12
+  'ml-telemetry',
+  'server',
+  // https://github.com/elastic/kibana/issues/95617
+  'tsvb-validation-telemetry',
+  // replaced by osquery-manager-usage-metric
+  'osquery-usage-metric',
+  // Was removed in 7.16
+  'timelion-sheet',
+].sort();
+
 // When migrating from the outdated index we use a read query which excludes
 // saved objects which are no longer used. These saved objects will still be
 // kept in the outdated index for backup purposes, but won't be available in
@@ -35,18 +56,11 @@ export interface FullIndexInfo {
 export const excludeUnusedTypesQuery: estypes.QueryDslQueryContainer = {
   bool: {
     must_not: [
-      // https://github.com/elastic/kibana/issues/91869
-      {
+      ...REMOVED_TYPES.map((typeName) => ({
         term: {
-          type: 'fleet-agent-events',
+          type: typeName,
         },
-      },
-      // https://github.com/elastic/kibana/issues/95617
-      {
-        term: {
-          type: 'tsvb-validation-telemetry',
-        },
-      },
+      })),
       // https://github.com/elastic/kibana/issues/96131
       {
         bool: {
@@ -292,7 +306,7 @@ export async function convertToAlias(
  * alias, meaning that it will only point to one index at a time, so we
  * remove any other indices from the alias.
  *
- * @param {CallCluster} client
+ * @param {MigrationEsClient} client
  * @param {string} index
  * @param {string} alias
  * @param {AliasAction[]} aliasActions - Optional actions to be added to the updateAliases call

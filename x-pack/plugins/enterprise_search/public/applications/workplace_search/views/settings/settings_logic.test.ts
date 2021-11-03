@@ -22,12 +22,7 @@ import { SettingsLogic } from './settings_logic';
 describe('SettingsLogic', () => {
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SettingsLogic);
   const ORG_NAME = 'myOrg';
   const defaultValues = {
@@ -35,8 +30,14 @@ describe('SettingsLogic', () => {
     connectors: [],
     orgNameInputValue: '',
     oauthApplication: null,
+    icon: null,
+    stagedIcon: null,
+    logo: null,
+    stagedLogo: null,
+    logoButtonLoading: false,
+    iconButtonLoading: false,
   };
-  const serverProps = { organizationName: ORG_NAME, oauthApplication };
+  const serverProps = { organizationName: ORG_NAME, oauthApplication, logo: null, icon: null };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -79,6 +80,34 @@ describe('SettingsLogic', () => {
       expect(SettingsLogic.values.oauthApplication).toEqual(oauthApplication);
     });
 
+    it('setIcon', () => {
+      SettingsLogic.actions.setStagedIcon('stagedIcon');
+      SettingsLogic.actions.setIcon('icon');
+
+      expect(SettingsLogic.values.icon).toEqual('icon');
+      expect(SettingsLogic.values.stagedIcon).toEqual(null);
+    });
+
+    it('setStagedIcon', () => {
+      SettingsLogic.actions.setStagedIcon('stagedIcon');
+
+      expect(SettingsLogic.values.stagedIcon).toEqual('stagedIcon');
+    });
+
+    it('setLogo', () => {
+      SettingsLogic.actions.setStagedLogo('stagedLogo');
+      SettingsLogic.actions.setLogo('logo');
+
+      expect(SettingsLogic.values.logo).toEqual('logo');
+      expect(SettingsLogic.values.stagedLogo).toEqual(null);
+    });
+
+    it('setStagedLogo', () => {
+      SettingsLogic.actions.setStagedLogo('stagedLogo');
+
+      expect(SettingsLogic.values.stagedLogo).toEqual('stagedLogo');
+    });
+
     it('setUpdatedOauthApplication', () => {
       SettingsLogic.actions.setUpdatedOauthApplication({ oauthApplication });
 
@@ -93,7 +122,7 @@ describe('SettingsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(configuredSources));
         SettingsLogic.actions.initializeSettings();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/settings');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/settings');
         await nextTick();
         expect(setServerPropsSpy).toHaveBeenCalledWith(configuredSources);
       });
@@ -116,7 +145,7 @@ describe('SettingsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(serverProps));
         SettingsLogic.actions.initializeConnectors();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/settings/connectors');
         await nextTick();
         expect(onInitializeConnectorsSpy).toHaveBeenCalledWith(serverProps);
       });
@@ -139,11 +168,11 @@ describe('SettingsLogic', () => {
 
         SettingsLogic.actions.updateOrgName();
 
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/org/settings/customize', {
+        expect(http.put).toHaveBeenCalledWith('/internal/workplace_search/org/settings/customize', {
           body: JSON.stringify({ name: NAME }),
         });
         await nextTick();
-        expect(setSuccessMessage).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
+        expect(flashSuccessToast).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
         expect(setUpdatedNameSpy).toHaveBeenCalledWith({ organizationName: NAME });
       });
 
@@ -154,6 +183,86 @@ describe('SettingsLogic', () => {
         await nextTick();
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
+    });
+
+    describe('updateOrgIcon', () => {
+      it('calls API and sets values', async () => {
+        const ICON = 'icon';
+        SettingsLogic.actions.setStagedIcon(ICON);
+        const setIconSpy = jest.spyOn(SettingsLogic.actions, 'setIcon');
+        http.put.mockReturnValue(Promise.resolve({ icon: ICON }));
+
+        SettingsLogic.actions.updateOrgIcon();
+
+        expect(http.put).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/settings/upload_images',
+          {
+            body: JSON.stringify({ icon: ICON }),
+          }
+        );
+        await nextTick();
+        expect(flashSuccessToast).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
+        expect(setIconSpy).toHaveBeenCalledWith(ICON);
+      });
+
+      it('handles error', async () => {
+        http.put.mockReturnValue(Promise.reject('this is an error'));
+        SettingsLogic.actions.updateOrgIcon();
+
+        await nextTick();
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+    });
+
+    describe('updateOrgLogo', () => {
+      it('calls API and sets values', async () => {
+        const LOGO = 'logo';
+        SettingsLogic.actions.setStagedLogo(LOGO);
+        const setLogoSpy = jest.spyOn(SettingsLogic.actions, 'setLogo');
+        http.put.mockReturnValue(Promise.resolve({ logo: LOGO }));
+
+        SettingsLogic.actions.updateOrgLogo();
+
+        expect(http.put).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/settings/upload_images',
+          {
+            body: JSON.stringify({ logo: LOGO }),
+          }
+        );
+        await nextTick();
+        expect(flashSuccessToast).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
+        expect(setLogoSpy).toHaveBeenCalledWith(LOGO);
+      });
+
+      it('handles error', async () => {
+        http.put.mockReturnValue(Promise.reject('this is an error'));
+        SettingsLogic.actions.updateOrgLogo();
+
+        await nextTick();
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+    });
+
+    it('resetOrgLogo', () => {
+      const updateOrgLogoSpy = jest.spyOn(SettingsLogic.actions, 'updateOrgLogo');
+      SettingsLogic.actions.setStagedLogo('stagedLogo');
+      SettingsLogic.actions.setLogo('logo');
+      SettingsLogic.actions.resetOrgLogo();
+
+      expect(SettingsLogic.values.logo).toEqual(null);
+      expect(SettingsLogic.values.stagedLogo).toEqual(null);
+      expect(updateOrgLogoSpy).toHaveBeenCalled();
+    });
+
+    it('resetOrgIcon', () => {
+      const updateOrgIconSpy = jest.spyOn(SettingsLogic.actions, 'updateOrgIcon');
+      SettingsLogic.actions.setStagedIcon('stagedIcon');
+      SettingsLogic.actions.setIcon('icon');
+      SettingsLogic.actions.resetOrgIcon();
+
+      expect(SettingsLogic.values.icon).toEqual(null);
+      expect(SettingsLogic.values.stagedIcon).toEqual(null);
+      expect(updateOrgIconSpy).toHaveBeenCalled();
     });
 
     describe('updateOauthApplication', () => {
@@ -170,7 +279,7 @@ describe('SettingsLogic', () => {
         expect(clearFlashMessages).toHaveBeenCalled();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/workplace_search/org/settings/oauth_application',
+          '/internal/workplace_search/org/settings/oauth_application',
           {
             body: JSON.stringify({
               oauth_application: { name, confidential, redirect_uri: redirectUri },
@@ -179,7 +288,7 @@ describe('SettingsLogic', () => {
         );
         await nextTick();
         expect(setUpdatedOauthApplicationSpy).toHaveBeenCalledWith({ oauthApplication });
-        expect(setSuccessMessage).toHaveBeenCalledWith(OAUTH_APP_UPDATED_MESSAGE);
+        expect(flashSuccessToast).toHaveBeenCalledWith(OAUTH_APP_UPDATED_MESSAGE);
       });
 
       it('handles error', async () => {
@@ -201,7 +310,7 @@ describe('SettingsLogic', () => {
 
         await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith('/settings/connectors');
-        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('handles error', async () => {

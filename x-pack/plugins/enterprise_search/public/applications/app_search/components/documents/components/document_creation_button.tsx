@@ -21,7 +21,7 @@ export const DocumentCreationButton: React.FC = () => {
     <>
       <EuiButton
         fill
-        color="primary"
+        iconType="plusInCircle"
         data-test-subj="IndexDocumentsButton"
         onClick={showCreationModes}
       >

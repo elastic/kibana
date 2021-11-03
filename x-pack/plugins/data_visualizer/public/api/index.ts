@@ -8,11 +8,12 @@
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../application';
 
-export async function getFileDataVisualizerComponent(): Promise<FileDataVisualizerSpec> {
+export async function getFileDataVisualizerComponent(): Promise<() => FileDataVisualizerSpec> {
   const modules = await lazyLoadModules();
-  return modules.FileDataVisualizer;
+  return () => modules.FileDataVisualizer;
 }
-export async function getIndexDataVisualizerComponent(): Promise<IndexDataVisualizerSpec> {
+
+export async function getIndexDataVisualizerComponent(): Promise<() => IndexDataVisualizerSpec> {
   const modules = await lazyLoadModules();
-  return modules.IndexDataVisualizer;
+  return () => modules.IndexDataVisualizer;
 }

@@ -7,6 +7,7 @@
  */
 
 export * from './clog';
+export * from './create_table';
 export * from './font';
 export * from './var_set';
 export * from './var';

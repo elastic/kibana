@@ -15,6 +15,7 @@ export {
   Get,
   Set,
   url,
+  mergeMigrationFunctionMaps,
 } from '../common';
 
 export { KbnServerError, reportServerError, getKbnServerError } from './report_server_error';

@@ -74,7 +74,7 @@ describe('Value Lists API', () => {
       await expect(
         deleteList({
           http: httpMock,
-          ...((payload as unknown) as ApiPayload<DeleteListParams>),
+          ...(payload as unknown as ApiPayload<DeleteListParams>),
           signal: abortCtrl.signal,
         })
       ).rejects.toEqual(new Error('Invalid value "23" supplied to "id"'));
@@ -201,7 +201,7 @@ describe('Value Lists API', () => {
       );
 
       // httpmock's fetch signature is inferred incorrectly
-      const [[, { body }]] = (httpMock.fetch.mock.calls as unknown) as Array<
+      const [[, { body }]] = httpMock.fetch.mock.calls as unknown as Array<
         [unknown, HttpFetchOptions]
       >;
       const actualFile = (body as FormData).get('file');
@@ -231,7 +231,7 @@ describe('Value Lists API', () => {
     it('rejects with an error if request body is invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
       const payload: ApiPayload<ImportListParams> = {
-        file: (undefined as unknown) as File,
+        file: undefined as unknown as File,
         listId: 'list-id',
         type: 'ip',
       };
@@ -326,7 +326,7 @@ describe('Value Lists API', () => {
     it('rejects with an error if request params are invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
       const payload: ApiPayload<ExportListParams> = {
-        listId: (23 as unknown) as string,
+        listId: 23 as unknown as string,
       };
 
       await expect(

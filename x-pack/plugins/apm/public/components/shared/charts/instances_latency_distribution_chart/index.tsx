@@ -36,7 +36,8 @@ import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { CustomTooltip } from './custom_tooltip';
 
-type ApiResponseMainStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type ApiResponseMainStats =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 
 export interface InstancesLatencyDistributionChartProps {
   height: number;
@@ -61,6 +62,7 @@ export function InstancesLatencyDistributionChart({
   const latencyFormatter = getDurationFormatter(maxLatency);
 
   const tooltip: TooltipProps = {
+    stickTo: 'center',
     type: TooltipType.Follow,
     snap: false,
     customTooltip: (props: TooltipInfo) => (

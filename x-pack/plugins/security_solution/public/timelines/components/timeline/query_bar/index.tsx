@@ -22,7 +22,6 @@ import {
   SavedQueryTimeFilter,
 } from '../../../../../../../../src/plugins/data/public';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
-import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
@@ -30,6 +29,7 @@ import { QueryBar } from '../../../../common/components/query_bar';
 import { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
 import { timelineActions } from '../../../store/timeline';
+import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];
@@ -244,27 +244,19 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                     (f) => f.meta.controlledBy === TIMELINE_FILTER_DROP_AREA
                   )
                 : -1;
-            savedQueryServices.saveQuery(
-              {
-                ...newSavedQuery.attributes,
-                filters:
-                  newSavedQuery.attributes.filters != null
-                    ? dataProviderFilterExists > -1
-                      ? [
-                          ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
-                          getDataProviderFilter(dataProvidersDsl),
-                          ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
-                        ]
-                      : [
-                          ...newSavedQuery.attributes.filters,
-                          getDataProviderFilter(dataProvidersDsl),
-                        ]
-                    : [],
-              },
-              {
-                overwrite: true,
-              }
-            );
+            savedQueryServices.updateQuery(newSavedQuery.id, {
+              ...newSavedQuery.attributes,
+              filters:
+                newSavedQuery.attributes.filters != null
+                  ? dataProviderFilterExists > -1
+                    ? [
+                        ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
+                        getDataProviderFilter(dataProvidersDsl),
+                        ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
+                      ]
+                    : [...newSavedQuery.attributes.filters, getDataProviderFilter(dataProvidersDsl)]
+                  : [],
+            });
           }
         } else {
           setSavedQueryId(null);

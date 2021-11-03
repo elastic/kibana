@@ -72,7 +72,9 @@ export function healthCheckTaskRunner(
       async run() {
         try {
           return await getAlertingHealthStatus(
-            (await coreStartServices)[0].savedObjects,
+            (
+              await coreStartServices
+            )[0].savedObjects,
             state.runs
           );
         } catch (errMsg) {

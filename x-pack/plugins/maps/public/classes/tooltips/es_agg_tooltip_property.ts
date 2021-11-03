@@ -18,13 +18,14 @@ export class ESAggTooltipProperty extends ESTooltipProperty {
     tooltipProperty: ITooltipProperty,
     indexPattern: IndexPattern,
     field: IField,
-    aggType: AGG_TYPE
+    aggType: AGG_TYPE,
+    applyGlobalQuery: boolean
   ) {
-    super(tooltipProperty, indexPattern, field);
+    super(tooltipProperty, indexPattern, field, applyGlobalQuery);
     this._aggType = aggType;
   }
 
   isFilterable(): boolean {
-    return this._aggType === AGG_TYPE.TERMS;
+    return this._aggType === AGG_TYPE.TERMS ? super.isFilterable() : false;
   }
 }

@@ -8,10 +8,10 @@
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useContext, FC } from 'react';
 import { UptimeThemeContext } from '../../contexts';
-import { Ping } from '../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../common/runtime_types/ping';
 
 interface Props {
-  event: Ping;
+  event: JourneyStep;
 }
 
 export const ConsoleEvent: FC<Props> = ({ event }) => {
@@ -28,7 +28,7 @@ export const ConsoleEvent: FC<Props> = ({ event }) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem grow={false}>{event.timestamp}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{event['@timestamp']}</EuiFlexItem>
       <EuiFlexItem grow={false} style={{ color: typeColor }}>
         {event.synthetics?.type}
       </EuiFlexItem>

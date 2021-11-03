@@ -25,10 +25,8 @@ import {
 } from './types';
 import { createGetterSetter } from '../../kibana_utils/public';
 
-const [
-  getSectionsServiceStartPrivate,
-  setSectionsServiceStartPrivate,
-] = createGetterSetter<ManagementSectionsStartPrivate>('SectionsServiceStartPrivate');
+const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] =
+  createGetterSetter<ManagementSectionsStartPrivate>('SectionsServiceStartPrivate');
 
 export { getSectionsServiceStartPrivate };
 
@@ -76,7 +74,11 @@ export class ManagementSectionsService {
       if (capabilities.management.hasOwnProperty(section.id)) {
         const sectionCapabilities = capabilities.management[section.id];
         section.apps.forEach((app) => {
-          if (sectionCapabilities.hasOwnProperty(app.id) && sectionCapabilities[app.id] !== true) {
+          const capabilitiesId = app.capabilitiesId || app.id;
+          if (
+            sectionCapabilities.hasOwnProperty(capabilitiesId) &&
+            sectionCapabilities[capabilitiesId] !== true
+          ) {
             app.disable();
           }
         });

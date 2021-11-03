@@ -9,13 +9,13 @@ import { dataPluginMock } from '../../../../../../data/public/mocks';
 
 import { getDimensions } from './get_dimensions';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
-import { SearchSource, calculateBounds } from '../../../../../../data/common';
+import { ISearchSource, calculateBounds } from '../../../../../../data/common';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 
 test('getDimensions', () => {
   const indexPattern = indexPatternWithTimefieldMock;
   const setField = jest.fn();
-  const searchSource = ({
+  const searchSource = {
     setField,
     removeField: jest.fn(),
     getField: (name: string) => {
@@ -23,7 +23,7 @@ test('getDimensions', () => {
         return indexPattern;
       }
     },
-  } as unknown) as SearchSource;
+  } as unknown as ISearchSource;
 
   const dataMock = dataPluginMock.createStartContract();
   dataMock.query.timefilter.timefilter.getTime = () => {

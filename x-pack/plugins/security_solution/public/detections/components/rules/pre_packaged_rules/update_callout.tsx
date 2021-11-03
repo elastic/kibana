@@ -56,10 +56,7 @@ const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCal
       <p>
         {prepackagedRulesOrTimelines?.callOutMessage}
         <br />
-        <EuiLink
-          href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${services.docLinks.DOC_LINK_VERSION}/prebuilt-rules-changelog.html`}
-          target="_blank"
-        >
+        <EuiLink href={`${services.docLinks.links.siem.ruleChangeLog}`} target="_blank">
           {i18n.RELEASE_NOTES_HELP}
         </EuiLink>
       </p>

@@ -25,6 +25,7 @@ import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 
 describe('NetworkTopNFlow Table Component', () => {

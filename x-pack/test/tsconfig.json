@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -35,7 +34,6 @@
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../src/plugins/legacy_export/tsconfig.json" },
     { "path": "../../src/plugins/management/tsconfig.json" },
     { "path": "../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../src/plugins/newsfeed/tsconfig.json" },
@@ -55,8 +53,6 @@
     { "path": "../plugins/banners/tsconfig.json" },
     { "path": "../plugins/cases/tsconfig.json" },
     { "path": "../plugins/cloud/tsconfig.json" },
-    { "path": "../plugins/console_extensions/tsconfig.json" },
-    { "path": "../plugins/dashboard_mode/tsconfig.json" },
     { "path": "../plugins/enterprise_search/tsconfig.json" },
     { "path": "../plugins/fleet/tsconfig.json" },
     { "path": "../plugins/global_search/tsconfig.json" },
@@ -106,7 +102,6 @@
     { "path": "../plugins/remote_clusters/tsconfig.json" },
     { "path": "../plugins/cross_cluster_replication/tsconfig.json" },
     { "path": "../plugins/index_lifecycle_management/tsconfig.json"},
-    { "path": "../plugins/uptime/tsconfig.json" },
-    { "path": "../plugins/xpack_legacy/tsconfig.json" }
+    { "path": "../plugins/uptime/tsconfig.json" }
   ]
 }

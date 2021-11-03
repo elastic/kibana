@@ -10,16 +10,16 @@ import * as constants from './constants';
 import noDataResponse from './mock_responses/no_data.json';
 import dataResponse from './mock_responses/data.json';
 import { APMConfig } from '../../..';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
-const mockIndices = {
-  /* eslint-disable @typescript-eslint/naming-convention */
-  'apm_oss.sourcemapIndices': 'myIndex',
-  'apm_oss.errorIndices': 'myIndex',
-  'apm_oss.onboardingIndices': 'myIndex',
-  'apm_oss.spanIndices': 'myIndex',
-  'apm_oss.transactionIndices': 'myIndex',
-  'apm_oss.metricsIndices': 'myIndex',
-  /* eslint-enable @typescript-eslint/naming-convention */
+const mockIndices: ApmIndicesConfig = {
+  sourcemap: 'myIndex',
+  error: 'myIndex',
+  onboarding: 'myIndex',
+  span: 'myIndex',
+  transaction: 'myIndex',
+  metric: 'myIndex',
   apmAgentConfigurationIndex: 'myIndex',
   apmCustomLinkIndex: 'myIndex',
 };
@@ -27,8 +27,6 @@ const mockIndices = {
 function getMockSetup(esResponse: any) {
   const clientSpy = jest.fn().mockReturnValueOnce(esResponse);
   return {
-    start: 0,
-    end: 500000,
     apmEventClient: { search: clientSpy } as any,
     internalClient: { search: clientSpy } as any,
     config: new Proxy(
@@ -39,7 +37,6 @@ function getMockSetup(esResponse: any) {
     ) as APMConfig,
     uiFilters: {},
     indices: mockIndices,
-    dynamicIndexPattern: null as any,
   };
 }
 
@@ -49,6 +46,10 @@ describe('getTransactionBreakdown', () => {
       serviceName: 'myServiceName',
       transactionType: 'request',
       setup: getMockSetup(noDataResponse),
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
+      start: 0,
+      end: 500000,
     });
 
     expect(Object.keys(response.timeseries).length).toBe(0);
@@ -59,6 +60,10 @@ describe('getTransactionBreakdown', () => {
       serviceName: 'myServiceName',
       transactionType: 'request',
       setup: getMockSetup(dataResponse),
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
+      start: 0,
+      end: 500000,
     });
 
     const { timeseries } = response;
@@ -87,6 +92,10 @@ describe('getTransactionBreakdown', () => {
       serviceName: 'myServiceName',
       transactionType: 'request',
       setup: getMockSetup(dataResponse),
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
+      start: 0,
+      end: 500000,
     });
 
     const { timeseries } = response;
@@ -99,6 +108,10 @@ describe('getTransactionBreakdown', () => {
       serviceName: 'myServiceName',
       transactionType: 'request',
       setup: getMockSetup(dataResponse),
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
+      start: 0,
+      end: 500000,
     });
 
     const { timeseries } = response;

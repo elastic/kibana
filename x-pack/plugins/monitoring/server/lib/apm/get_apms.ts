@@ -49,9 +49,11 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 
     //  add the beat
     const rateOptions = {
-      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp'],
+      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp'] ?? null,
       earliestHitTimestamp:
-        earliestStats?.timestamp ?? hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp'],
+        earliestStats?.timestamp ??
+        hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp'] ??
+        null,
       timeWindowMin: start,
       timeWindowMax: end,
     };
@@ -109,8 +111,8 @@ export async function getApms(req: LegacyRequest, apmIndexPattern: string, clust
   const params = {
     index: apmIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       // only filter path can filter for inner_hits
       'hits.hits._source.timestamp',
       'hits.hits._source.@timestamp',

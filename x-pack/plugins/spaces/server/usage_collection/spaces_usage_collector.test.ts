@@ -7,10 +7,7 @@
 
 import * as Rx from 'rxjs';
 
-import {
-  elasticsearchServiceMock,
-  pluginInitializerContextConfigMock,
-} from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { createCollectorFetchContextMock } from '../../../../../src/plugins/usage_collection/server/mocks';
 import type { KibanaFeature } from '../../../features/server';
@@ -40,7 +37,10 @@ const MOCK_USAGE_STATS: UsageStats = {
   'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no': 0,
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': 6,
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': 7,
+  'apiCalls.disableLegacyUrlAliases.total': 17,
 };
+
+const kibanaIndex = '.kibana-tests';
 
 function setup({
   license = { isAvailable: true },
@@ -52,6 +52,7 @@ function setup({
     constructor({ fetch }: any) {
       this.fetch = fetch;
     }
+
     // to make typescript happy
     public fakeFetchUsage() {
       return this.fetch;
@@ -62,9 +63,9 @@ function setup({
     license$: Rx.of(license),
   } as LicensingPluginSetup;
 
-  const featuresSetup = ({
+  const featuresSetup = {
     getKibanaFeatures: jest.fn().mockReturnValue(features),
-  } as unknown) as PluginsSetup['features'];
+  } as unknown as PluginsSetup['features'];
 
   const usageStatsClient = usageStatsClientMock.create();
   usageStatsClient.getUsageStats.mockResolvedValue(MOCK_USAGE_STATS);
@@ -120,7 +121,7 @@ describe('error handling', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -144,7 +145,7 @@ describe('with a basic license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -163,7 +164,7 @@ describe('with a basic license', () => {
         size: 0,
         track_total_hits: true,
       },
-      index: '.kibana-tests',
+      index: kibanaIndex,
     });
   });
 
@@ -203,7 +204,7 @@ describe('with no license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -244,7 +245,7 @@ describe('with platinum license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),

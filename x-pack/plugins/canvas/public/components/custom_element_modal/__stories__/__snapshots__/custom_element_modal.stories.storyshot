@@ -80,7 +80,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        aria-describedby="generated-id-help"
+                        aria-describedby="generated-id-help-0"
                         className="euiFieldText canvasCustomElementForm__name"
                         data-test-subj="canvasCustomElementForm-name"
                         id="generated-id"
@@ -95,7 +95,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                   </div>
                   <div
                     className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    id="generated-id-help-0"
                   >
                     40 characters remaining
                   </div>
@@ -119,7 +119,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                   className="euiFormRow__fieldWrapper"
                 >
                   <textarea
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
                     className="euiTextArea euiTextArea--resizeVertical"
                     data-test-subj="canvasCustomElementForm-description"
                     id="generated-id"
@@ -131,7 +131,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                   />
                   <div
                     className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    id="generated-id-help-0"
                   >
                     83 characters remaining
                   </div>
@@ -389,7 +389,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        aria-describedby="generated-id-help"
+                        aria-describedby="generated-id-help-0"
                         className="euiFieldText canvasCustomElementForm__name"
                         data-test-subj="canvasCustomElementForm-name"
                         id="generated-id"
@@ -404,7 +404,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                   </div>
                   <div
                     className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    id="generated-id-help-0"
                   >
                     40 characters remaining
                   </div>
@@ -428,7 +428,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                   className="euiFormRow__fieldWrapper"
                 >
                   <textarea
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
                     className="euiTextArea euiTextArea--resizeVertical"
                     data-test-subj="canvasCustomElementForm-description"
                     id="generated-id"
@@ -440,7 +440,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                   />
                   <div
                     className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    id="generated-id-help-0"
                   >
                     100 characters remaining
                   </div>
@@ -695,7 +695,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        aria-describedby="generated-id-help"
+                        aria-describedby="generated-id-help-0"
                         className="euiFieldText canvasCustomElementForm__name"
                         data-test-subj="canvasCustomElementForm-name"
                         id="generated-id"
@@ -710,7 +710,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                   </div>
                   <div
                     className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    id="generated-id-help-0"
                   >
                     32 characters remaining
                   </div>
@@ -734,7 +734,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                   className="euiFormRow__fieldWrapper"
                 >
                   <textarea
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
                     className="euiTextArea euiTextArea--resizeVertical"
                     data-test-subj="canvasCustomElementForm-description"
                     id="generated-id"
@@ -746,7 +746,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                   />
                   <div
                     className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    id="generated-id-help-0"
                   >
                     100 characters remaining
                   </div>
@@ -996,7 +996,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                       className="euiFormControlLayout__childrenWrapper"
                     >
                       <input
-                        aria-describedby="generated-id-help"
+                        aria-describedby="generated-id-help-0"
                         className="euiFieldText canvasCustomElementForm__name"
                         data-test-subj="canvasCustomElementForm-name"
                         id="generated-id"
@@ -1011,7 +1011,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                   </div>
                   <div
                     className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    id="generated-id-help-0"
                   >
                     40 characters remaining
                   </div>
@@ -1035,7 +1035,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                   className="euiFormRow__fieldWrapper"
                 >
                   <textarea
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
                     className="euiTextArea euiTextArea--resizeVertical"
                     data-test-subj="canvasCustomElementForm-description"
                     id="generated-id"
@@ -1047,7 +1047,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                   />
                   <div
                     className="euiFormHelpText euiFormRow__text"
-                    id="generated-id-help"
+                    id="generated-id-help-0"
                   >
                     100 characters remaining
                   </div>

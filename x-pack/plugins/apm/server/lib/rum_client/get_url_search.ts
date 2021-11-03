@@ -6,7 +6,7 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import {
   TRANSACTION_DURATION,
@@ -17,14 +17,20 @@ export async function getUrlSearch({
   setup,
   urlQuery,
   percentile,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
   percentile: number;
+  start: number;
+  end: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {

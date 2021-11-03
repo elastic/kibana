@@ -25,6 +25,7 @@ export {
   useFormData,
   ValidationError,
   ValidationFunc,
+  ValidationFuncArg,
   VALIDATION_TYPES,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
@@ -33,6 +34,7 @@ export {
   ComboBoxField,
   ToggleField,
   SelectField,
+  JsonEditorField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
 export { ERROR_CODE } from '../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';

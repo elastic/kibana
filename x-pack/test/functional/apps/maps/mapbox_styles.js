@@ -40,7 +40,6 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['!=', ['get', '__kbn_too_many_features__'], true],
           ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
@@ -121,8 +120,6 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['!=', ['get', '__kbn_too_many_features__'], true],
-          ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
         ],
@@ -198,8 +195,6 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['!=', ['get', '__kbn_too_many_features__'], true],
-          ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           [
             'any',
             ['==', ['geometry-type'], 'Polygon'],
@@ -211,22 +206,6 @@ export default function ({ getPageObjects, getService }) {
         ],
         layout: { visibility: 'visible' },
         paint: { 'line-color': '#41937c', 'line-opacity': 0.75, 'line-width': 1 },
-      });
-    });
-
-    it('should style incomplete data layer as expected', async () => {
-      const layer = mapboxStyle.layers.find((mbLayer) => {
-        return mbLayer.id === 'n1t6f_toomanyfeatures';
-      });
-      expect(layer).to.eql({
-        id: 'n1t6f_toomanyfeatures',
-        type: 'fill',
-        source: 'n1t6f',
-        minzoom: 0,
-        maxzoom: 24,
-        filter: ['==', ['get', '__kbn_too_many_features__'], true],
-        layout: { visibility: 'visible' },
-        paint: { 'fill-pattern': '__kbn_too_many_features_image_id__', 'fill-opacity': 0.75 },
       });
     });
   });

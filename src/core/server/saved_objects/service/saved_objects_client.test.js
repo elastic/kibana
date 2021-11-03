@@ -184,6 +184,21 @@ test(`#closePointInTime`, async () => {
   expect(result).toBe(returnValue);
 });
 
+test(`#bulkResolve`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    bulkResolve: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const objects = Symbol();
+  const options = Symbol();
+  const result = await client.bulkResolve(objects, options);
+
+  expect(mockRepository.bulkResolve).toHaveBeenCalledWith(objects, options);
+  expect(result).toBe(returnValue);
+});
+
 test(`#resolve`, async () => {
   const returnValue = Symbol();
   const mockRepository = {

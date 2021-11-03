@@ -46,12 +46,11 @@ export async function rollDailyData(
     let toCreate: Map<string, ApplicationUsageDailyWithVersion>;
     do {
       toCreate = new Map();
-      const {
-        saved_objects: rawApplicationUsageTransactional,
-      } = await savedObjectsClient.find<ApplicationUsageTransactional>({
-        type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-        perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
-      });
+      const { saved_objects: rawApplicationUsageTransactional } =
+        await savedObjectsClient.find<ApplicationUsageTransactional>({
+          type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
+          perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
+        });
 
       for (const doc of rawApplicationUsageTransactional) {
         const {

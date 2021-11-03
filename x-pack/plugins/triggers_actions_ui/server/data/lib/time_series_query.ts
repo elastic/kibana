@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger, ElasticsearchClient } from 'kibana/server';
 import { getEsErrorMessage } from '../../../../alerting/server';
 import { DEFAULT_GROUPS } from '../index';
@@ -24,15 +24,8 @@ export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
   const { logger, esClient, query: queryParams } = params;
-  const {
-    index,
-    timeWindowSize,
-    timeWindowUnit,
-    interval,
-    timeField,
-    dateStart,
-    dateEnd,
-  } = queryParams;
+  const { index, timeWindowSize, timeWindowUnit, interval, timeField, dateStart, dateEnd } =
+    queryParams;
 
   const window = `${timeWindowSize}${timeWindowUnit}`;
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });
@@ -165,7 +158,7 @@ export function getResultFromEs(
     delete aggregations.dateAgg;
   }
 
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+  // @ts-expect-error specify aggregations type explicitly
   const groupBuckets = aggregations.groupAgg?.buckets || [];
   const result: TimeSeriesResult = {
     results: [],

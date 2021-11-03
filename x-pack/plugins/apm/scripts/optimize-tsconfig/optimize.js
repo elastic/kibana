@@ -38,6 +38,7 @@ async function prepareBaseTsConfig() {
         compilerOptions: {
           ...config.compilerOptions,
           incremental: false,
+          composite: false,
         },
         include: [],
       },

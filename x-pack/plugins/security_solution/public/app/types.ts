@@ -12,12 +12,12 @@ import {
   Action,
   Store,
   Dispatch,
-  PreloadedState,
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
-
-import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
+import { RouteProps } from 'react-router-dom';
+import { AppMountParameters } from '../../../../../src/core/public';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { StartServices } from '../types';
 
 /**
@@ -26,43 +26,38 @@ import { StartServices } from '../types';
 export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
-  SubPluginRoutes: React.FC;
+  subPluginRoutes: RouteProps[];
+  usageCollection?: UsageCollectionSetup;
 }
 
 import { State, SubPluginsInitReducer } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 import { TimelineState } from '../timelines/store/timeline/types';
-import { SecurityPageName } from '../../common/constants';
+
 export { SecurityPageName } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
-  initialState: Record<K, T | undefined>;
+  initialState: Record<K, T>;
   reducer: Record<K, Reducer<T, AnyAction>>;
   middleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 }
 
+export type SecuritySubPluginRoutes = RouteProps[];
+
 export interface SecuritySubPlugin {
-  SubPluginRoutes: React.FC;
+  routes: SecuritySubPluginRoutes;
   storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 
 export type SecuritySubPluginKeyStore =
   | 'hosts'
   | 'network'
+  | 'ueba'
   | 'timeline'
   | 'hostList'
   | 'alertList'
   | 'management';
-
-export type SecuritySubPluginNames = keyof typeof SecurityPageName;
-
-interface SecurityDeepLink {
-  base: AppDeepLink[];
-  premium?: AppDeepLink[];
-}
-
-export type SecurityDeepLinks = { [key in SecuritySubPluginNames]: SecurityDeepLink };
 
 /**
  * Returned by the various 'SecuritySubPlugin' classes from the `start` method.
@@ -74,14 +69,12 @@ export interface SecuritySubPluginWithStore<K extends SecuritySubPluginKeyStore,
 
 export interface SecuritySubPlugins extends SecuritySubPlugin {
   store: {
-    initialState: PreloadedState<
-      CombinedState<
-        StateFromReducersMapObject<
-          /** SubPluginsInitReducer, being an interface, will not work in `StateFromReducersMapObject`.
-           * Picking its keys does the trick.
-           **/
-          Pick<SubPluginsInitReducer, keyof SubPluginsInitReducer>
-        >
+    initialState: CombinedState<
+      StateFromReducersMapObject<
+        /** SubPluginsInitReducer, being an interface, will not work in `StateFromReducersMapObject`.
+         * Picking its keys does the trick.
+         **/
+        Pick<SubPluginsInitReducer, keyof SubPluginsInitReducer>
       >
     >;
     reducer: SubPluginsInitReducer;

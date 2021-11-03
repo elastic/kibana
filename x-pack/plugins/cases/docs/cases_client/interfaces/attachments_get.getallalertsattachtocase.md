@@ -18,4 +18,4 @@
 
 The ID of the case to retrieve the alerts from
 
-Defined in: [attachments/get.ts:87](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/attachments/get.ts#L87)
+Defined in: [attachments/get.ts:87](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/attachments/get.ts#L87)

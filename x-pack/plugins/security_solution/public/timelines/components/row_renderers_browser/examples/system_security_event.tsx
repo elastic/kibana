@@ -21,6 +21,7 @@ const SystemSecurityEventExampleComponent: React.FC = () => {
       {systemSecurityEventRowRenderer.renderRow({
         browserFields: {},
         data: mockEndgameUserLogon,
+        isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

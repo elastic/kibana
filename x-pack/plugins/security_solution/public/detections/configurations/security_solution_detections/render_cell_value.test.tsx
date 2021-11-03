@@ -9,15 +9,17 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { ColumnHeaderOptions } from '../../../../common';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 
 import { RenderCellValue } from '.';
+
+jest.mock('../../../common/lib/kibana');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -39,6 +41,7 @@ describe('RenderCellValue', () => {
       eventId,
       header,
       isDetails: false,
+      isDraggable: false,
       isExpandable: false,
       isExpanded: false,
       linkValues,

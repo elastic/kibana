@@ -7,18 +7,21 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { Ping } from '../../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 import { PingTimestamp } from '../../monitor/ping_list/columns/ping_timestamp';
 
 interface Props {
-  step: Ping;
+  step: JourneyStep;
 }
 
 export const StepImage = ({ step }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <PingTimestamp ping={step} initialStepNo={step.synthetics?.step?.index} />
+        <PingTimestamp
+          checkGroup={step.monitor.check_group}
+          initialStepNo={step.synthetics?.step?.index}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText>{step.synthetics?.step?.name}</EuiText>

@@ -15,6 +15,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 type ArchiveName =
   | 'apm_8.0.0'
+  | 'apm_mappings_only_8.0.0'
   | '8.0.0'
   | 'metrics_8.0.0'
   | 'ml_8.0.0'
@@ -109,6 +110,9 @@ export const registry = {
     running = true;
     const esArchiver = context.getService('esArchiver');
     const logger = context.getService('log');
+
+    const supertest = context.getService('legacySupertestAsApmWriteUser');
+
     const logWithTimer = () => {
       const start = process.hrtime();
 
@@ -141,12 +145,16 @@ export const registry = {
             const log = logWithTimer();
             for (const archiveName of condition.archives) {
               log(`Loading ${archiveName}`);
+
               await esArchiver.load(
                 Path.join(
                   'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
                   archiveName
                 )
               );
+
+              // sync jobs from .ml-config to .kibana SOs
+              await supertest.get('/api/ml/saved_objects/sync').set('kbn-xsrf', 'foo');
             }
             if (condition.archives.length) {
               log('Loaded all archives');

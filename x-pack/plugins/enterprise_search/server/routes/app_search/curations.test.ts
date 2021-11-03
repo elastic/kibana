@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerCurationsRoutes } from './curations';
 
 describe('curations routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/curations', () => {
+  describe('GET /internal/app_search/engines/{engineName}/curations', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/curations',
+        path: '/internal/app_search/engines/{engineName}/curations',
       });
 
       registerCurationsRoutes({
@@ -50,14 +50,14 @@ describe('curations routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{engineName}/curations', () => {
+  describe('POST /internal/app_search/engines/{engineName}/curations', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/curations',
+        path: '/internal/app_search/engines/{engineName}/curations',
       });
 
       registerCurationsRoutes({
@@ -107,14 +107,14 @@ describe('curations routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{engineName}/curations/{curationId}', () => {
+  describe('DELETE /internal/app_search/engines/{engineName}/curations/{curationId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+        path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
       });
 
       registerCurationsRoutes({
@@ -130,14 +130,14 @@ describe('curations routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{engineName}/curations/{curationId}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/curations/{curationId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+        path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
       });
 
       registerCurationsRoutes({
@@ -153,14 +153,14 @@ describe('curations routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{engineName}/curations/{curationId}', () => {
+  describe('PUT /internal/app_search/engines/{engineName}/curations/{curationId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+        path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
       });
 
       registerCurationsRoutes({
@@ -195,14 +195,14 @@ describe('curations routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{engineName}/curations/find_or_create', () => {
+  describe('GET /internal/app_search/engines/{engineName}/curations/find_or_create', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/curations/find_or_create',
+        path: '/internal/app_search/engines/{engineName}/curations/find_or_create',
       });
 
       registerCurationsRoutes({

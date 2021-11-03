@@ -57,7 +57,7 @@ export const globalTimeRangeSelector = createSelector(selectGlobal, (global) => 
 
 export const globalPolicySelector = createSelector(selectGlobal, (global) => global.policy);
 
-export const globalQuery = createSelector(selectGlobal, (global) => global.queries);
+export const globalQuery = () => createSelector(selectGlobal, (global) => global.queries);
 
 export const globalQueryByIdSelector = () => createSelector(selectGlobalQuery, (query) => query);
 

@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -74,7 +67,6 @@ export const SyntheticsCallout = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiCallOut>
-      <EuiSpacer size="s" />
     </>
   );
 };

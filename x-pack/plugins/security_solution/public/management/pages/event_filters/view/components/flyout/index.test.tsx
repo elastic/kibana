@@ -69,9 +69,8 @@ describe('Event filter flyout', () => {
 
   it('should renders correctly', () => {
     const component = render();
-    expect(component.getAllByText('Add Endpoint Event Filter')).not.toBeNull();
+    expect(component.getAllByText('Add event filter')).not.toBeNull();
     expect(component.getByText('Cancel')).not.toBeNull();
-    expect(component.getByText('Endpoint Security')).not.toBeNull();
   });
 
   it('should dispatch action to init form store on mount', async () => {
@@ -81,7 +80,7 @@ describe('Event filter flyout', () => {
     });
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
-    expect(getFormEntryState(getState())!.entries[0].field).toBe('');
+    expect(getFormEntryState(getState())?.entries[0].field).toBe('');
   });
 
   it('should confirm form when button is disabled', () => {
@@ -99,7 +98,7 @@ describe('Event filter flyout', () => {
       type: 'eventFiltersChangeForm',
       payload: {
         entry: {
-          ...(getState().form!.entry as CreateExceptionListItemSchema),
+          ...(getState().form?.entry as CreateExceptionListItemSchema),
           name: 'test',
           os_types: ['windows'],
         },
@@ -126,7 +125,7 @@ describe('Event filter flyout', () => {
         type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: getState().form!.entry as ExceptionListItemSchema,
+          data: getState().form?.entry as ExceptionListItemSchema,
         },
       });
     });
@@ -183,9 +182,8 @@ describe('Event filter flyout', () => {
   it('should renders correctly when id and edit type', () => {
     const component = render({ id: 'fakeId', type: 'edit' });
 
-    expect(component.getAllByText('Update Endpoint Event Filter')).not.toBeNull();
+    expect(component.getAllByText('Update event filter')).not.toBeNull();
     expect(component.getByText('Cancel')).not.toBeNull();
-    expect(component.getByText('Endpoint Security')).not.toBeNull();
   });
 
   it('should dispatch action to init form store on mount with id', async () => {
@@ -195,6 +193,6 @@ describe('Event filter flyout', () => {
     });
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
-    expect(getFormEntryState(getState())!.item_id).toBe(createdEventFilterEntryMock().item_id);
+    expect(getFormEntryState(getState())?.item_id).toBe(createdEventFilterEntryMock().item_id);
   });
 });

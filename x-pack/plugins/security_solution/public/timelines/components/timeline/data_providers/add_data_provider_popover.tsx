@@ -44,13 +44,15 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
     pick(['dataProviders', 'timelineType'], getTimeline(state, timelineId))
   );
 
-  const handleOpenPopover = useCallback(() => setIsAddFilterPopoverOpen(true), [
-    setIsAddFilterPopoverOpen,
-  ]);
+  const handleOpenPopover = useCallback(
+    () => setIsAddFilterPopoverOpen(true),
+    [setIsAddFilterPopoverOpen]
+  );
 
-  const handleClosePopover = useCallback(() => setIsAddFilterPopoverOpen(false), [
-    setIsAddFilterPopoverOpen,
-  ]);
+  const handleClosePopover = useCallback(
+    () => setIsAddFilterPopoverOpen(false),
+    [setIsAddFilterPopoverOpen]
+  );
 
   const handleDataProviderEdited = useCallback(
     ({ andProviderId, excluded, field, id, operator, providerId, value, type }) => {
@@ -111,7 +113,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         width: 400,
         content: (
           <StatefulEditDataProvider
-            browserFields={browserFields!}
+            browserFields={browserFields}
             field=""
             isExcluded={false}
             onDataProviderEdited={handleDataProviderEdited}
@@ -129,7 +131,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         width: 400,
         content: (
           <StatefulEditDataProvider
-            browserFields={browserFields!}
+            browserFields={browserFields}
             field=""
             isExcluded={false}
             onDataProviderEdited={handleDataProviderEdited}
@@ -180,7 +182,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
 
     return (
       <StatefulEditDataProvider
-        browserFields={browserFields!}
+        browserFields={browserFields}
         field=""
         isExcluded={false}
         onDataProviderEdited={handleDataProviderEdited}

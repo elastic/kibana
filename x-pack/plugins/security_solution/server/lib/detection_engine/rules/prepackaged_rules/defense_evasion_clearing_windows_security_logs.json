@@ -7,12 +7,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-windows.*"
+    "logs-windows.*",
+    "logs-system.*"
   ],
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Windows Event Logs Cleared",
-  "query": "event.action:(\"audit-log-cleared\" or \"Log clear\")",
+  "query": "event.action:(\"audit-log-cleared\" or \"Log clear\")\n",
   "risk_score": 21,
   "rule_id": "45ac4800-840f-414c-b221-53dd36a5aaf7",
   "severity": "low",
@@ -35,12 +36,19 @@
         {
           "id": "T1070",
           "name": "Indicator Removal on Host",
-          "reference": "https://attack.mitre.org/techniques/T1070/"
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.001",
+              "name": "Clear Windows Event Logs",
+              "reference": "https://attack.mitre.org/techniques/T1070/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

@@ -26,3 +26,8 @@ test('FieldName renders a geo field', () => {
   const component = render(<FieldName fieldName={'test.test.test'} fieldType={'geo_point'} />);
   expect(component).toMatchSnapshot();
 });
+
+test('FieldName renders unknown field', () => {
+  const component = render(<FieldName fieldName={'test.test.test'} />);
+  expect(component).toMatchSnapshot();
+});

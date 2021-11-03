@@ -10,6 +10,8 @@ import { PluginOpaqueId } from '../../server';
 import { IContextContainer, ContextContainer } from './container';
 import { CoreContext } from '../core_context';
 
+type PrebootDeps = SetupDeps;
+
 interface SetupDeps {
   pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
 }
@@ -18,7 +20,17 @@ interface SetupDeps {
 export class ContextService {
   constructor(private readonly core: CoreContext) {}
 
+  public preboot({ pluginDependencies }: PrebootDeps): InternalContextPreboot {
+    return this.getContextContainerFactory(pluginDependencies);
+  }
+
   public setup({ pluginDependencies }: SetupDeps): ContextSetup {
+    return this.getContextContainerFactory(pluginDependencies);
+  }
+
+  private getContextContainerFactory(
+    pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>
+  ) {
     return {
       createContextContainer: () => {
         return new ContextContainer(pluginDependencies, this.core.coreId);
@@ -26,6 +38,9 @@ export class ContextService {
     };
   }
 }
+
+/** @internal */
+export type InternalContextPreboot = ContextSetup;
 
 /**
  * {@inheritdoc IContextContainer}

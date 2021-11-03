@@ -6,7 +6,7 @@
  */
 
 import { identity } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -14,7 +14,7 @@ import {
   createSearchAfterReturnType,
   createSearchResultReturnType,
   createSearchAfterReturnTypeFromResponse,
-  createTotalHitsFromSearchResult,
+  getTotalHitsValue,
   mergeReturns,
   mergeSearchResults,
   getSafeSortIds,
@@ -23,22 +23,25 @@ import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } fr
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
-  tuple,
-  ruleSO,
+  buildReasonMessage,
+  buildRuleMessage,
+  bulkCreate,
+  completeRule,
+  enrichment = identity,
+  eventsTelemetry,
   exceptionsList,
-  services,
+  filter,
+  inputIndexPattern,
   listClient,
   logger,
-  eventsTelemetry,
-  inputIndexPattern,
-  filter,
   pageSize,
-  buildRuleMessage,
-  enrichment = identity,
-  bulkCreate,
+  services,
+  sortOrder,
+  trackTotalHits,
+  tuple,
   wrapHits,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const ruleParams = ruleSO.attributes.params;
+  const ruleParams = completeRule.ruleParams;
   let toReturn = createSearchAfterReturnType();
 
   // sortId tells us where to start our next consecutive search_after query
@@ -75,6 +78,8 @@ export const searchAfterAndBulkCreate = async ({
           filter,
           pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
           timestampOverride: ruleParams.timestampOverride,
+          trackTotalHits,
+          sortOrder,
         });
         mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
         toReturn = mergeReturns([
@@ -101,7 +106,7 @@ export const searchAfterAndBulkCreate = async ({
       }
 
       // determine if there are any candidate signals to be processed
-      const totalHits = createTotalHitsFromSearchResult({ searchResult: mergedSearchResults });
+      const totalHits = getTotalHitsValue(mergedSearchResults.hits.total);
       logger.debug(buildRuleMessage(`totalHits: ${totalHits}`));
       logger.debug(
         buildRuleMessage(`searchResult.hit.hits.length: ${mergedSearchResults.hits.hits.length}`)
@@ -142,7 +147,7 @@ export const searchAfterAndBulkCreate = async ({
           );
         }
         const enrichedEvents = await enrichment(filteredEvents);
-        const wrappedDocs = wrapHits(enrichedEvents.hits.hits);
+        const wrappedDocs = wrapHits(enrichedEvents.hits.hits, buildReasonMessage);
 
         const {
           bulkCreateDuration: bulkDuration,
@@ -151,6 +156,7 @@ export const searchAfterAndBulkCreate = async ({
           success: bulkSuccess,
           errors: bulkErrors,
         } = await bulkCreate(wrappedDocs);
+
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnType({
@@ -176,7 +182,7 @@ export const searchAfterAndBulkCreate = async ({
         break;
       }
     } catch (exc: unknown) {
-      logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
+      logger.error(buildRuleMessage(`[-] search_after_bulk_create threw an error ${exc}`));
       return mergeReturns([
         toReturn,
         createSearchAfterReturnType({

@@ -13,7 +13,8 @@ import { asDuration } from '../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 
-export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+export type LatencyChartsResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 
 export interface LatencyChartData {
   currentPeriod?: APMChartSpec<Coordinate>;

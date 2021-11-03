@@ -29,7 +29,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -70,7 +69,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -178,9 +176,9 @@ describe('config validation', () => {
     );
   });
 
-  test('action with tls configuration', () => {
+  test('action with ssl configuration', () => {
     const config: Record<string, unknown> = {
-      tls: {
+      ssl: {
         verificationMode: 'none',
         proxyVerificationMode: 'none',
       },
@@ -196,7 +194,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -208,7 +205,7 @@ describe('config validation', () => {
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
-        "tls": Object {
+        "ssl": Object {
           "proxyVerificationMode": "none",
           "verificationMode": "none",
         },

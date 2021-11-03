@@ -15,7 +15,8 @@ declare global {
 }
 
 export class CorePluginDeprecationsPlugin
-  implements Plugin<CorePluginDeprecationsPluginSetup, CorePluginDeprecationsPluginStart> {
+  implements Plugin<CorePluginDeprecationsPluginSetup, CorePluginDeprecationsPluginStart>
+{
   constructor(pluginContext: PluginInitializerContext) {
     window.env = pluginContext.env;
   }

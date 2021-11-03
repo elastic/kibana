@@ -76,6 +76,11 @@ export const WaterfallChartFixedAxisContainer = euiStyled.div`
   height: ${FIXED_AXIS_HEIGHT}px;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
   height: 100%;
+  &&& {
+    .echAnnotation__icon {
+      top: 8px;
+    }
+  }
 `;
 
 interface WaterfallChartSidebarContainer {

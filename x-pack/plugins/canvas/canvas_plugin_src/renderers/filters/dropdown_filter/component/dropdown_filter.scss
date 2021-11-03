@@ -11,6 +11,7 @@
     border-radius: $euiBorderRadius;
     appearance: none;
     font-size: inherit;
+    color: $euiTextColor;
 
     &:after {
       display: none;

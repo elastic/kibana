@@ -26,6 +26,8 @@ export const justIdAndTimestamp: Ecs = {
   timestamp: '2018-11-12T19:03:25.936Z',
 };
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('../../../../../../common/components/link_to');
 
 describe('netflowRowRenderer', () => {
@@ -36,6 +38,7 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields,
       data: getMockNetflowData(),
+      isDraggable: true,
       timelineId: 'test',
     });
 
@@ -105,6 +108,7 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: getMockNetflowData(),
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(

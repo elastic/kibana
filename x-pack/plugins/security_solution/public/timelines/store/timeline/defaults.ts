@@ -10,16 +10,17 @@ import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/t
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 import { SubsetTimelineModel, TimelineModel } from './model';
-import { Direction } from '../../../../common/search_strategy';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const timelineDefaults: SubsetTimelineModel &
-  Pick<TimelineModel, 'filters' | 'eqlOptions'> = {
+  Pick<TimelineModel, 'filters' | 'eqlOptions' | 'resolveTimelineConfig'> = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
+  documentType: '',
+  defaultColumns: defaultHeaders,
   dataProviders: [],
   dateRange: { start, end },
   deletedEventIds: [],
@@ -51,6 +52,8 @@ export const timelineDefaults: SubsetTimelineModel &
     filterQuery: null,
   },
   loadingEventIds: [],
+  resolveTimelineConfig: undefined,
+  queryFields: [],
   title: '',
   timelineType: TimelineType.default,
   templateTimelineId: null,
@@ -59,6 +62,7 @@ export const timelineDefaults: SubsetTimelineModel &
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
@@ -66,7 +70,7 @@ export const timelineDefaults: SubsetTimelineModel &
     {
       columnId: '@timestamp',
       columnType: 'number',
-      sortDirection: Direction.desc,
+      sortDirection: 'desc',
     },
   ],
   status: TimelineStatus.draft,

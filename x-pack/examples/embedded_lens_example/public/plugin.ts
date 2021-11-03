@@ -21,7 +21,8 @@ export interface StartDependencies {
 }
 
 export class EmbeddedLensExamplePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'embedded_lens_example',
@@ -38,8 +39,7 @@ export class EmbeddedLensExamplePlugin
       links: [
         {
           label: 'README',
-          href:
-            'https://github.com/elastic/kibana/tree/master/x-pack/examples/embedded_lens_example',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/embedded_lens_example',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

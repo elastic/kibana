@@ -13,7 +13,7 @@ import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 
-const services = ({
+const services = {
   capabilities: {
     discover: {
       save: true,
@@ -22,9 +22,9 @@ const services = ({
       save: true,
     },
   },
-} as unknown) as DiscoverServices;
+} as unknown as DiscoverServices;
 
-const state = ({} as unknown) as GetStateReturn;
+const state = {} as unknown as GetStateReturn;
 
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
@@ -35,6 +35,7 @@ test('getTopNavLinks result', () => {
     services,
     state,
     searchSource: {} as ISearchSource,
+    onOpenSavedSearch: () => {},
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
@@ -51,13 +52,6 @@ test('getTopNavLinks result', () => {
         "label": "New",
         "run": [Function],
         "testId": "discoverNewButton",
-      },
-      Object {
-        "description": "Save Search",
-        "id": "save",
-        "label": "Save",
-        "run": [Function],
-        "testId": "discoverSaveButton",
       },
       Object {
         "description": "Open Saved Search",
@@ -79,6 +73,15 @@ test('getTopNavLinks result', () => {
         "label": "Inspect",
         "run": [Function],
         "testId": "openInspectorButton",
+      },
+      Object {
+        "description": "Save Search",
+        "emphasize": true,
+        "iconType": "save",
+        "id": "save",
+        "label": "Save",
+        "run": [Function],
+        "testId": "discoverSaveButton",
       },
     ]
   `);

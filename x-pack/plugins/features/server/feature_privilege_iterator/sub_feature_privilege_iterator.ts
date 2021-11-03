@@ -16,20 +16,21 @@ import type { LicenseType } from '../../../licensing/server';
  */
 export type SubFeaturePrivilegeIterator = (
   feature: KibanaFeature,
-  licenseType: LicenseType
+  licenseHasAtLeast: (licenseType: LicenseType) => boolean | undefined
 ) => IterableIterator<SubFeaturePrivilegeConfig>;
 
-const subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator = function* subFeaturePrivilegeIterator(
-  feature: KibanaFeature,
-  licenseType: LicenseType
-): IterableIterator<SubFeaturePrivilegeConfig> {
-  for (const subFeature of feature.subFeatures) {
-    for (const group of subFeature.privilegeGroups) {
-      yield* group.privileges.filter(
-        (privilege) => !privilege.minimumLicense || privilege.minimumLicense <= licenseType
-      );
+const subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator =
+  function* subFeaturePrivilegeIterator(
+    feature: KibanaFeature,
+    licenseHasAtLeast: (licenseType: LicenseType) => boolean | undefined
+  ): IterableIterator<SubFeaturePrivilegeConfig> {
+    for (const subFeature of feature.subFeatures) {
+      for (const group of subFeature.privilegeGroups) {
+        yield* group.privileges.filter(
+          (privilege) => !privilege.minimumLicense || licenseHasAtLeast(privilege.minimumLicense)
+        );
+      }
     }
-  }
-};
+  };
 
 export { subFeaturePrivilegeIterator };

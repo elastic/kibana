@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`context api createSearchSource when useFieldsApi is false 1`] = `
+Object {
+  "_source": Object {},
+  "fields": Array [],
+  "query": Object {
+    "bool": Object {
+      "filter": Array [],
+      "must": Array [],
+      "must_not": Array [],
+      "should": Array [],
+    },
+  },
+  "runtime_mappings": Object {},
+  "script_fields": Object {},
+  "stored_fields": Array [
+    "*",
+  ],
+  "track_total_hits": false,
+}
+`;
+
+exports[`context api createSearchSource when useFieldsApi is true 1`] = `
+Object {
+  "_source": false,
+  "fields": Array [
+    Object {
+      "field": "_source",
+    },
+    Object {
+      "field": "_index",
+    },
+    Object {
+      "field": "message",
+    },
+    Object {
+      "field": "extension",
+    },
+    Object {
+      "field": "bytes",
+    },
+    Object {
+      "field": "scripted",
+    },
+    Object {
+      "field": "object.value",
+    },
+  ],
+  "query": Object {
+    "bool": Object {
+      "filter": Array [],
+      "must": Array [],
+      "must_not": Array [],
+      "should": Array [],
+    },
+  },
+  "runtime_mappings": Object {},
+  "script_fields": Object {},
+  "stored_fields": Array [
+    "*",
+  ],
+  "track_total_hits": false,
+}
+`;

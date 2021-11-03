@@ -25,7 +25,7 @@ describe('<FlyoutFrame>', () => {
       expect(title?.textContent).toBe('foobar');
     });
 
-    test('title can be any react node', () => {
+    test('title can be a react node', () => {
       const div = document.createElement('div');
       render(
         <FlyoutFrame
@@ -52,7 +52,7 @@ describe('<FlyoutFrame>', () => {
       expect(footer).toBe(null);
     });
 
-    test('can render anything in footer', () => {
+    test('can render a React node in footer', () => {
       const div = document.createElement('div');
       render(
         <FlyoutFrame

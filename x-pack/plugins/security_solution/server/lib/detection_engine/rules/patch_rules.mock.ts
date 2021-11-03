@@ -6,16 +6,19 @@
  */
 
 import { PatchRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 
-export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
+export const getPatchRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
-  alertsClient: alertsClientMock.create(),
+  rulesClient: rulesClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
+  spaceId: 'default',
+  ruleStatusClient: ruleExecutionLogClientMock.create(),
   anomalyThreshold: undefined,
   description: 'some description',
   enabled: true,
@@ -49,6 +52,7 @@ export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   threatQuery: undefined,
   threatMapping: undefined,
   threatLanguage: undefined,
+  throttle: null,
   concurrentSearches: undefined,
   itemsPerSearch: undefined,
   timestampOverride: undefined,
@@ -59,14 +63,16 @@ export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getAlertMock(getQueryRuleParams()),
+  rule: getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
 });
 
-export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
+export const getPatchMlRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
-  alertsClient: alertsClientMock.create(),
+  rulesClient: rulesClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
+  spaceId: 'default',
+  ruleStatusClient: ruleExecutionLogClientMock.create(),
   anomalyThreshold: 55,
   description: 'some description',
   enabled: true,
@@ -100,6 +106,7 @@ export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   threatQuery: undefined,
   threatMapping: undefined,
   threatLanguage: undefined,
+  throttle: null,
   concurrentSearches: undefined,
   itemsPerSearch: undefined,
   timestampOverride: undefined,
@@ -110,5 +117,5 @@ export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getAlertMock(getMlRuleParams()),
+  rule: getAlertMock(isRuleRegistryEnabled, getMlRuleParams()),
 });

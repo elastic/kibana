@@ -24,12 +24,12 @@ export function gcpLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'gcpLogs',
     name: i18n.translate('home.tutorials.gcpLogs.nameTitle', {
-      defaultMessage: 'Google Cloud logs',
+      defaultMessage: 'Google Cloud Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.gcpLogs.shortDescription', {
-      defaultMessage: 'Collect Google Cloud audit, firewall, and VPC flow logs.',
+      defaultMessage: 'Collect and parse logs from Google Cloud Platform with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.gcpLogs.longDescription', {
       defaultMessage:
@@ -61,5 +61,6 @@ export function gcpLogsSpecProvider(context: TutorialContext): TutorialSchema {
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['google_cloud', 'cloud', 'network', 'security'],
   };
 }

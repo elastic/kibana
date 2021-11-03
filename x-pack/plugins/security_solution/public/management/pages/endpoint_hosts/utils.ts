@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
+import moment from 'moment';
 import { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
 
 export const isPolicyOutOfDate = (
@@ -22,4 +24,19 @@ export const isPolicyOutOfDate = (
     reported.version >= current.agent.configured.revision &&
     reported.endpoint_policy_version >= current.endpoint.revision
   );
+};
+
+export const getIsInvalidDateRange = ({
+  startDate,
+  endDate,
+}: {
+  startDate: string;
+  endDate: string;
+}) => {
+  const start = moment(dateMath.parse(startDate));
+  const end = moment(dateMath.parse(endDate));
+  if (start.isValid() && end.isValid()) {
+    return start.isAfter(end);
+  }
+  return false;
 };

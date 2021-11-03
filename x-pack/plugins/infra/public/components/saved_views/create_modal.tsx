@@ -39,7 +39,7 @@ export const SavedViewCreateModal = ({ close, save, isInvalid }: Props) => {
   }, [includeTime, save, viewName]);
 
   return (
-    <EuiModal onClose={close}>
+    <EuiModal onClose={close} data-test-subj="savedViews-createModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage

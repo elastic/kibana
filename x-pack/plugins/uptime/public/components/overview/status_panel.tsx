@@ -13,7 +13,7 @@ import { SnapshotComponent } from './snapshot';
 const STATUS_CHART_HEIGHT = '160px';
 
 export const StatusPanel = ({}) => (
-  <EuiPanel>
+  <EuiPanel hasBorder>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={2}>
         <SnapshotComponent height={STATUS_CHART_HEIGHT} />

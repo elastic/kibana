@@ -110,3 +110,67 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7c",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId" : ".email",
+        "name" : "test email connector with auth",
+        "isMissingSecrets" : false,
+        "config" : {
+          "hasAuth" : true,
+          "from" : "me@me.com",
+          "host" : "smtp.myhost.com",
+          "port" : 25,
+          "service" : "someservice",
+          "secure" : null
+        },
+        "secrets" : "V2EJEtTv3yTFi1kdglhNahnKYWCS+J7aWCJQU+eEqGPZEz6n7G1NsBWoh7IY0FteLTilTteQXyY/Eg3k/7bb0G8Mz+WBZ1mRvUggGTFqgoOptyUsvHoBhv0R/1bCTCabN3Pe88AfnC+VDXqwuMifpmgKEEsKF3H8VONv7TYO02FW"
+      },
+      "migrationVersion": {
+        "action": "7.14.0"
+      },
+      "coreMigrationVersion" : "7.15.0",
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2021-08-31T12:43:37.117Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:1e0824a0-0a59-11ec-9a7c-fd0c2b83ff7c",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId" : ".email",
+        "name" : "test email connector no auth",
+        "isMissingSecrets" : false,
+        "config" : {
+          "hasAuth" : false,
+          "from" : "you@you.com",
+          "host" : "smtp.you.com",
+          "port" : 485,
+          "secure" : true,
+          "service" : null
+        },
+        "secrets" : "iw/bRTXZQXOV0ODocb6FQnHR6AyeVyD91We03llNStyTNFwuHVWdFl6ZdiEEeDOadBMeJomvp/dAfQevGpbwWdclcu9F87x3CfeGqV9DtBy0dXRbx9PzKBwgJdK3ucHQDFAs8ZXQbefvCOFjCHGAsJDPhTKj5rTUyg=="
+      },
+      "migrationVersion": {
+        "action": "7.14.0"
+      },
+      "coreMigrationVersion" : "7.15.0",
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2021-08-31T12:44:01.396Z"
+    }
+  }
+}

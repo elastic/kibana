@@ -52,7 +52,7 @@ class MockLayer {
 }
 
 function createMockLayer(id: string, mbSourceId: string): ILayer {
-  return (new MockLayer(id, mbSourceId) as unknown) as ILayer;
+  return new MockLayer(id, mbSourceId) as unknown as ILayer;
 }
 
 function createMockMbDataEvent(mbSourceId: string, tileKey: string): unknown {
@@ -83,9 +83,9 @@ describe('TileStatusTracker', () => {
     const mockMbMap = new MockMbMap();
     const loadedMap: Map<string, boolean> = new Map<string, boolean>();
     new TileStatusTracker({
-      mbMap: (mockMbMap as unknown) as MbMap,
-      setAreTilesLoaded: (layerId, areTilesLoaded) => {
-        loadedMap.set(layerId, areTilesLoaded);
+      mbMap: mockMbMap as unknown as MbMap,
+      updateTileStatus: (layer, areTilesLoaded) => {
+        loadedMap.set(layer.getId(), areTilesLoaded);
       },
       getCurrentLayerList: () => {
         return [
@@ -126,8 +126,8 @@ describe('TileStatusTracker', () => {
   test('should cleanup listeners on destroy', async () => {
     const mockMbMap = new MockMbMap();
     const tileStatusTracker = new TileStatusTracker({
-      mbMap: (mockMbMap as unknown) as MbMap,
-      setAreTilesLoaded: () => {},
+      mbMap: mockMbMap as unknown as MbMap,
+      updateTileStatus: () => {},
       getCurrentLayerList: () => {
         return [];
       },

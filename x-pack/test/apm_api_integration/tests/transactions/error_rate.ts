@@ -14,10 +14,11 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
-type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
+type ErrorRate =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
 
@@ -29,29 +30,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('handles the empty state', async () => {
       const response = await supertest.get(
         format({
-          pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-          query: { start, end, transactionType },
+          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
+          query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
         })
       );
       expect(response.status).to.be(200);
 
       const body = response.body as ErrorRate;
       expect(body).to.be.eql({
-        currentPeriod: { noHits: true, transactionErrorRate: [], average: null },
-        previousPeriod: { noHits: true, transactionErrorRate: [], average: null },
+        currentPeriod: { timeseries: [], average: null },
+        previousPeriod: { timeseries: [], average: null },
       });
     });
 
     it('handles the empty state with comparison data', async () => {
       const response = await supertest.get(
         format({
-          pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
           query: {
             transactionType,
             start: moment(end).subtract(15, 'minutes').toISOString(),
             end,
             comparisonStart: start,
             comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+            environment: 'ENVIRONMENT_ALL',
+            kuery: '',
           },
         })
       );
@@ -59,8 +62,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const body = response.body as ErrorRate;
       expect(body).to.be.eql({
-        currentPeriod: { noHits: true, transactionErrorRate: [], average: null },
-        previousPeriod: { noHits: true, transactionErrorRate: [], average: null },
+        currentPeriod: { timeseries: [], average: null },
+        previousPeriod: { timeseries: [], average: null },
       });
     });
   });
@@ -75,8 +78,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             format({
-              pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-              query: { start, end, transactionType },
+              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
+              query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
             })
           );
           errorRateResponse = response.body;
@@ -86,10 +89,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(errorRateResponse.currentPeriod.average).to.be.greaterThan(0);
           expect(errorRateResponse.previousPeriod.average).to.be(null);
 
-          expect(errorRateResponse.currentPeriod.transactionErrorRate.length).to.be.greaterThan(0);
-          expect(errorRateResponse.previousPeriod.transactionErrorRate).to.empty();
+          expect(errorRateResponse.currentPeriod.timeseries.length).to.be.greaterThan(0);
+          expect(errorRateResponse.previousPeriod.timeseries).to.empty();
 
-          const nonNullDataPoints = errorRateResponse.currentPeriod.transactionErrorRate.filter(
+          const nonNullDataPoints = errorRateResponse.currentPeriod.timeseries.filter(
             ({ y }) => y !== null
           );
 
@@ -98,32 +101,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct start date', () => {
           expectSnapshot(
-            new Date(
-              first(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
-            ).toISOString()
-          ).toMatchInline(`"2020-12-08T13:57:30.000Z"`);
+            new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
         });
 
         it('has the correct end date', () => {
           expectSnapshot(
-            new Date(
-              last(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
-            ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:27:30.000Z"`);
+            new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.transactionErrorRate.length).toMatchInline(
-            `61`
-          );
+          expectSnapshot(errorRateResponse.currentPeriod.timeseries.length).toMatchInline(`61`);
         });
 
         it('has the correct calculation for average', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(`0.16`);
+          expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
+            `0.092511013215859`
+          );
         });
 
         it('has the correct error rate', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.transactionErrorRate).toMatch();
+          expectSnapshot(errorRateResponse.currentPeriod.timeseries).toMatch();
         });
       });
 
@@ -133,13 +132,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const response = await supertest.get(
             format({
-              pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
               query: {
                 transactionType,
                 start: moment(end).subtract(15, 'minutes').toISOString(),
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -150,16 +151,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(errorRateResponse.currentPeriod.average).to.be.greaterThan(0);
           expect(errorRateResponse.previousPeriod.average).to.be.greaterThan(0);
 
-          expect(errorRateResponse.currentPeriod.transactionErrorRate.length).to.be.greaterThan(0);
-          expect(errorRateResponse.previousPeriod.transactionErrorRate.length).to.be.greaterThan(0);
+          expect(errorRateResponse.currentPeriod.timeseries.length).to.be.greaterThan(0);
+          expect(errorRateResponse.previousPeriod.timeseries.length).to.be.greaterThan(0);
 
-          const currentPeriodNonNullDataPoints = errorRateResponse.currentPeriod.transactionErrorRate.filter(
+          const currentPeriodNonNullDataPoints = errorRateResponse.currentPeriod.timeseries.filter(
             ({ y }) => y !== null
           );
 
-          const previousPeriodNonNullDataPoints = errorRateResponse.previousPeriod.transactionErrorRate.filter(
-            ({ y }) => y !== null
-          );
+          const previousPeriodNonNullDataPoints =
+            errorRateResponse.previousPeriod.timeseries.filter(({ y }) => y !== null);
 
           expect(currentPeriodNonNullDataPoints.length).to.be.greaterThan(0);
           expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);
@@ -167,56 +167,44 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct start date', () => {
           expectSnapshot(
-            new Date(
-              first(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
-            ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:12:50.000Z"`);
+            new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
           expectSnapshot(
-            new Date(
-              first(errorRateResponse.previousPeriod.transactionErrorRate)?.x ?? NaN
-            ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:12:50.000Z"`);
+            new Date(first(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
         });
 
         it('has the correct end date', () => {
           expectSnapshot(
-            new Date(
-              last(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
-            ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:27:50.000Z"`);
+            new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
           expectSnapshot(
-            new Date(
-              last(errorRateResponse.previousPeriod.transactionErrorRate)?.x ?? NaN
-            ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:27:50.000Z"`);
+            new Date(last(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.transactionErrorRate.length).toMatchInline(
-            `91`
-          );
-          expectSnapshot(
-            errorRateResponse.previousPeriod.transactionErrorRate.length
-          ).toMatchInline(`91`);
+          expectSnapshot(errorRateResponse.currentPeriod.timeseries.length).toMatchInline(`91`);
+          expectSnapshot(errorRateResponse.previousPeriod.timeseries.length).toMatchInline(`91`);
         });
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.233333333333333`
+            `0.102040816326531`
           );
           expectSnapshot(errorRateResponse.previousPeriod.average).toMatchInline(
-            `0.111111111111111`
+            `0.0852713178294574`
           );
         });
 
         it('has the correct error rate', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.transactionErrorRate).toMatch();
-          expectSnapshot(errorRateResponse.previousPeriod.transactionErrorRate).toMatch();
+          expectSnapshot(errorRateResponse.currentPeriod.timeseries).toMatch();
+          expectSnapshot(errorRateResponse.previousPeriod.timeseries).toMatch();
         });
 
         it('matches x-axis on current period and previous period', () => {
-          expect(errorRateResponse.currentPeriod.transactionErrorRate.map(({ x }) => x)).to.be.eql(
-            errorRateResponse.previousPeriod.transactionErrorRate.map(({ x }) => x)
+          expect(errorRateResponse.currentPeriod.timeseries.map(({ x }) => x)).to.be.eql(
+            errorRateResponse.previousPeriod.timeseries.map(({ x }) => x)
           );
         });
       });

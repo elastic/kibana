@@ -46,6 +46,7 @@ export const PACKAGE_POLICY_API_ROUTES = {
   CREATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
   UPDATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
   DELETE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/delete`,
+  UPGRADE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade`,
 };
 
 // Agent policy API routes
@@ -88,7 +89,6 @@ export const AGENT_API_ROUTES = {
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${API_ROOT}/agents/{agentId}/actions`,
-  ENROLL_PATTERN: `${API_ROOT}/agents/enroll`,
   UNENROLL_PATTERN: `${API_ROOT}/agents/{agentId}/unenroll`,
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
@@ -117,5 +117,5 @@ export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
 
 // Policy preconfig API routes
 export const PRECONFIGURATION_API_ROUTES = {
-  PUT_PRECONFIG: `${API_ROOT}/setup/preconfiguration`,
+  UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
 };

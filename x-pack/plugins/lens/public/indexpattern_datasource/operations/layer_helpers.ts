@@ -7,8 +7,10 @@
 
 import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from 'kibana/public';
+import { Query } from 'src/plugins/data/common';
 import type {
-  FramePublicAPI,
+  DatasourceFixAction,
+  FrameDatasourceAPI,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -18,6 +20,8 @@ import {
   OperationType,
   IndexPatternColumn,
   RequiredReference,
+  OperationDefinition,
+  GenericOperationDefinition,
 } from './definitions';
 import type {
   IndexPattern,
@@ -29,6 +33,13 @@ import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
+import type { TimeScaleUnit } from '../../../common/expressions';
+
+interface ColumnAdvancedParams {
+  filter?: Query | undefined;
+  timeShift?: string | undefined;
+  timeScale?: TimeScaleUnit | undefined;
+}
 
 interface ColumnChange {
   op: OperationType;
@@ -39,6 +50,8 @@ interface ColumnChange {
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
   shouldResetLabel?: boolean;
+  incompleteParams?: ColumnAdvancedParams;
+  initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
 
 interface ColumnCopy {
@@ -141,6 +154,24 @@ export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
   return insertNewColumn(args);
 }
 
+function ensureCompatibleParamsAreMoved<T extends ColumnAdvancedParams>(
+  column: T,
+  referencedOperation: GenericOperationDefinition,
+  previousColumn: ColumnAdvancedParams
+) {
+  const newColumn = { ...column };
+  if (referencedOperation.filterable) {
+    newColumn.filter = (previousColumn as ReferenceBasedIndexPatternColumn).filter;
+  }
+  if (referencedOperation.shiftable) {
+    newColumn.timeShift = (previousColumn as ReferenceBasedIndexPatternColumn).timeShift;
+  }
+  if (referencedOperation.timeScalingMode !== 'disabled') {
+    newColumn.timeScale = (previousColumn as ReferenceBasedIndexPatternColumn).timeScale;
+  }
+  return newColumn;
+}
+
 // Insert a column into an empty ID. The field parameter is required when constructing
 // a field-based operation, but will cause the function to fail for any other type of operation.
 export function insertNewColumn({
@@ -152,6 +183,8 @@ export function insertNewColumn({
   visualizationGroups,
   targetGroup,
   shouldResetLabel,
+  incompleteParams,
+  initialParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -163,7 +196,10 @@ export function insertNewColumn({
     throw new Error(`Can't insert a column with an ID that is already in use`);
   }
 
-  const baseOptions = { indexPattern, previousColumn: layer.columns[columnId] };
+  const baseOptions = {
+    indexPattern,
+    previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
+  };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
     if (field) {
@@ -246,9 +282,7 @@ export function insertNewColumn({
 
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     if (!possibleOperation) {
-      throw new Error(
-        `Can't create operation ${op} because it's incompatible with the index pattern`
-      );
+      throw new Error(`Can't create operation ${op} because it's incompatible with the data view`);
     }
     const isBucketed = Boolean(possibleOperation.isBucketed);
 
@@ -361,9 +395,18 @@ export function replaceColumn({
 
     tempLayer = resetIncomplete(tempLayer, columnId);
 
-    if (previousDefinition.input === 'managedReference') {
+    if (
+      previousDefinition.input === 'managedReference' &&
+      operationDefinition.input !== previousDefinition.input
+    ) {
       // If the transition is incomplete, leave the managed state until it's finished.
-      tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+      tempLayer = removeOrphanedColumns(
+        previousDefinition,
+        previousColumn,
+        tempLayer,
+        indexPattern
+      );
+
       const hypotheticalLayer = insertNewColumn({
         layer: tempLayer,
         columnId,
@@ -372,6 +415,17 @@ export function replaceColumn({
         field,
         visualizationGroups,
       });
+
+      // if the formula label is not the default one, propagate it to the new operation
+      if (
+        !shouldResetLabel &&
+        previousColumn.customLabel &&
+        previousColumn.label !==
+          previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
+      ) {
+        hypotheticalLayer.columns[columnId].customLabel = true;
+        hypotheticalLayer.columns[columnId].label = previousColumn.label;
+      }
       if (hypotheticalLayer.incompleteColumns && hypotheticalLayer.incompleteColumns[columnId]) {
         return {
           ...layer,
@@ -414,15 +468,13 @@ export function replaceColumn({
             indexPattern,
           });
 
-          const column = copyCustomLabel({ ...referenceColumn }, previousColumn);
           // do not forget to move over also any filter/shift/anything (if compatible)
           // from the reference definition to the new operation.
-          if (referencedOperation.filterable) {
-            column.filter = (previousColumn as ReferenceBasedIndexPatternColumn).filter;
-          }
-          if (referencedOperation.shiftable) {
-            column.timeShift = (previousColumn as ReferenceBasedIndexPatternColumn).timeShift;
-          }
+          const column = ensureCompatibleParamsAreMoved(
+            copyCustomLabel({ ...referenceColumn }, previousColumn),
+            referencedOperation,
+            previousColumn as ReferenceBasedIndexPatternColumn
+          );
 
           tempLayer = {
             ...tempLayer,
@@ -457,13 +509,10 @@ export function replaceColumn({
     // TODO: Refactor all this to be more generic and know less about Formula
     // if managed it has to look at the full picture to have a seamless transition
     if (operationDefinition.input === 'managedReference') {
-      const newColumn = copyCustomLabel(
-        operationDefinition.buildColumn(
-          { ...baseOptions, layer: tempLayer },
-          previousColumn.params,
-          operationDefinitionMap
-        ),
-        previousColumn
+      const newColumn = operationDefinition.buildColumn(
+        { ...baseOptions, layer: tempLayer },
+        previousColumn.params,
+        operationDefinitionMap
       ) as FormulaIndexPatternColumn;
 
       // now remove the previous references
@@ -492,6 +541,17 @@ export function replaceColumn({
         newLayer = basicLayer;
       }
 
+      // when coming to Formula keep the custom label
+      const regeneratedColumn = newLayer.columns[columnId];
+      if (
+        !shouldResetLabel &&
+        regeneratedColumn.operationType !== previousColumn.operationType &&
+        previousColumn.customLabel
+      ) {
+        regeneratedColumn.customLabel = true;
+        regeneratedColumn.label = previousColumn.label;
+      }
+
       return updateDefaultLabels(
         {
           ...tempLayer,
@@ -502,20 +562,15 @@ export function replaceColumn({
       );
     }
 
-    // This logic comes after the transitions because they need to look at previous columns
-    if (previousDefinition.input === 'fullReference') {
-      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-        tempLayer = deleteColumn({
-          layer: tempLayer,
-          columnId: id,
-          indexPattern,
-        });
-      });
-    }
-
     if (operationDefinition.input === 'none') {
       let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
       newColumn = copyCustomLabel(newColumn, previousColumn);
+      tempLayer = removeOrphanedColumns(
+        previousDefinition,
+        previousColumn,
+        tempLayer,
+        indexPattern
+      );
 
       const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
       return updateDefaultLabels(
@@ -529,15 +584,29 @@ export function replaceColumn({
     }
 
     if (!field) {
+      let incompleteColumn: {
+        operationType: OperationType;
+      } & ColumnAdvancedParams = { operationType: op };
       // if no field is available perform a full clean of the column from the layer
       if (previousDefinition.input === 'fullReference') {
-        tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+        const previousReferenceId = (previousColumn as ReferenceBasedIndexPatternColumn)
+          .references[0];
+        const referenceColumn = layer.columns[previousReferenceId];
+        if (referenceColumn) {
+          const referencedOperation = operationDefinitionMap[referenceColumn.operationType];
+
+          incompleteColumn = ensureCompatibleParamsAreMoved(
+            incompleteColumn,
+            referencedOperation,
+            previousColumn
+          );
+        }
       }
       return {
         ...tempLayer,
         incompleteColumns: {
           ...(tempLayer.incompleteColumns ?? {}),
-          [columnId]: { operationType: op },
+          [columnId]: incompleteColumn,
         },
       };
     }
@@ -552,6 +621,8 @@ export function replaceColumn({
         },
       };
     }
+
+    tempLayer = removeOrphanedColumns(previousDefinition, previousColumn, tempLayer, indexPattern);
 
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
     if (!shouldResetLabel) {
@@ -590,6 +661,37 @@ export function replaceColumn({
   } else {
     throw new Error('nothing changed');
   }
+}
+
+function removeOrphanedColumns(
+  previousDefinition:
+    | OperationDefinition<IndexPatternColumn, 'field'>
+    | OperationDefinition<IndexPatternColumn, 'none'>
+    | OperationDefinition<IndexPatternColumn, 'fullReference'>
+    | OperationDefinition<IndexPatternColumn, 'managedReference'>,
+  previousColumn: IndexPatternColumn,
+  tempLayer: IndexPatternLayer,
+  indexPattern: IndexPattern
+) {
+  let newLayer: IndexPatternLayer = tempLayer;
+  if (previousDefinition.input === 'managedReference') {
+    const [columnId] =
+      Object.entries(tempLayer.columns).find(([_, currColumn]) => currColumn === previousColumn) ||
+      [];
+    if (columnId != null) {
+      newLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+    }
+  }
+  if (previousDefinition.input === 'fullReference') {
+    (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
+      newLayer = deleteColumn({
+        layer: tempLayer,
+        columnId: id,
+        indexPattern,
+      });
+    });
+  }
+  return newLayer;
 }
 
 export function canTransition({
@@ -1186,10 +1288,7 @@ export function getErrorMessages(
       | string
       | {
           message: string;
-          fixAction?: {
-            label: string;
-            newState: (frame: FramePublicAPI) => Promise<IndexPatternPrivateState>;
-          };
+          fixAction?: DatasourceFixAction<IndexPatternPrivateState>;
         }
     >
   | undefined {
@@ -1221,7 +1320,7 @@ export function getErrorMessages(
         fixAction: errorMessage.fixAction
           ? {
               ...errorMessage.fixAction,
-              newState: async (frame: FramePublicAPI) => ({
+              newState: async (frame: FrameDatasourceAPI) => ({
                 ...state,
                 layers: {
                   ...state.layers,
@@ -1237,10 +1336,7 @@ export function getErrorMessages(
     | string
     | {
         message: string;
-        fixAction?: {
-          label: string;
-          newState: (framePublicAPI: FramePublicAPI) => Promise<IndexPatternPrivateState>;
-        };
+        fixAction?: DatasourceFixAction<IndexPatternPrivateState>;
       }
   >;
 
@@ -1308,7 +1404,7 @@ export function isOperationAllowedAsReference({
 
 // Labels need to be updated when columns are added because reference-based column labels
 // are sometimes copied into the parents
-function updateDefaultLabels(
+export function updateDefaultLabels(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern
 ): IndexPatternLayer {

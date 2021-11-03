@@ -9,6 +9,7 @@ import { AgentEcs } from './agent';
 import { AuditdEcs } from './auditd';
 import { DestinationEcs } from './destination';
 import { DnsEcs } from './dns';
+import { DllEcs } from './dll';
 import { EndgameEcs } from './endgame';
 import { EventEcs } from './event';
 import { FileEcs } from './file';
@@ -17,7 +18,7 @@ import { HostEcs } from './host';
 import { NetworkEcs } from './network';
 import { RegistryEcs } from './registry';
 import { RuleEcs } from './rule';
-import { SignalEcs } from './signal';
+import { SignalEcs, SignalEcsAAD } from './signal';
 import { SourceEcs } from './source';
 import { SuricataEcs } from './suricata';
 import { TlsEcs } from './tls';
@@ -30,6 +31,8 @@ import { ProcessEcs } from './process';
 import { SystemEcs } from './system';
 import { ThreatEcs } from './threat';
 import { Ransomware } from './ransomware';
+import { MemoryProtection } from './memory_protection';
+import { Target } from './target_type';
 
 export interface Ecs {
   _id: string;
@@ -45,6 +48,9 @@ export interface Ecs {
   network?: NetworkEcs;
   registry?: RegistryEcs;
   rule?: RuleEcs;
+  kibana?: {
+    alert: SignalEcsAAD;
+  };
   signal?: SignalEcs;
   source?: SourceEcs;
   suricata?: SuricataEcs;
@@ -63,4 +69,9 @@ export interface Ecs {
   // This should be temporary
   eql?: { parentId: string; sequenceNumber: string };
   Ransomware?: Ransomware;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Memory_protection?: MemoryProtection;
+  Target?: Target;
+  dll?: DllEcs;
+  'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
 }

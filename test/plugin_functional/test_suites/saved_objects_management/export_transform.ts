@@ -242,9 +242,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           .expect(200)
           .then((resp) => {
             const objects = parseNdJson(resp.text);
-            const exportDetails = (objects[
+            const exportDetails = objects[
               objects.length - 1
-            ] as unknown) as SavedObjectsExportResultDetails;
+            ] as unknown as SavedObjectsExportResultDetails;
 
             expect(exportDetails.excludedObjectsCount).to.eql(2);
             expect(exportDetails.excludedObjects).to.eql([
@@ -287,9 +287,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             expect([objects[0]].map((obj) => `${obj.type}:${obj.id}`)).to.eql([
               'test-is-exportable:5',
             ]);
-            const exportDetails = (objects[
+            const exportDetails = objects[
               objects.length - 1
-            ] as unknown) as SavedObjectsExportResultDetails;
+            ] as unknown as SavedObjectsExportResultDetails;
             expect(exportDetails.excludedObjects).to.eql([
               {
                 type: 'test-is-exportable',

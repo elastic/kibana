@@ -11,9 +11,14 @@ import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_data_visualizer_view/index';
+import { ResultLink } from '../common/components/results_links';
+
+interface Props {
+  additionalLinks?: ResultLink[];
+}
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
-export const FileDataVisualizer: FC = () => {
+export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
   const services = {
@@ -33,6 +38,7 @@ export const FileDataVisualizer: FC = () => {
         savedObjectsClient={coreStart.savedObjects.client}
         http={coreStart.http}
         fileUpload={fileUpload}
+        resultsLinks={additionalLinks}
       />
     </KibanaContextProvider>
   );

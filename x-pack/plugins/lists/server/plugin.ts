@@ -27,8 +27,7 @@ import { getUser } from './get_user';
 import { initSavedObjects } from './saved_objects';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 
-export class ListPlugin
-  implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, {}, PluginsStart> {
+export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {}, PluginsStart> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
   private spaces: SpacesServiceStart | undefined | null;
@@ -39,7 +38,7 @@ export class ListPlugin
     this.config = this.initializerContext.config.get<ConfigType>();
   }
 
-  public async setup(core: CoreSetup): Promise<ListPluginSetup> {
+  public setup(core: CoreSetup): ListPluginSetup {
     const { config } = this;
 
     initSavedObjects(core.savedObjects);
@@ -69,7 +68,7 @@ export class ListPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): void {
+  public start(core: CoreStart, plugins: PluginsStart): ListsPluginStart {
     this.logger.debug('Starting plugin');
     this.security = plugins.security;
     this.spaces = plugins.spaces?.spacesService;

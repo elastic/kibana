@@ -31,14 +31,8 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
       updateGroupBy,
     } = actions;
 
-    const {
-      aggList,
-      aggOptions,
-      aggOptionsData,
-      groupByList,
-      groupByOptions,
-      groupByOptionsData,
-    } = state;
+    const { aggList, aggOptions, aggOptionsData, groupByList, groupByOptions, groupByOptionsData } =
+      state;
 
     return (
       <PivotConfigurationContext.Provider value={{ actions, state }}>

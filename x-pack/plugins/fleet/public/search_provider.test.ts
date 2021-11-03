@@ -10,7 +10,7 @@ import { NEVER } from 'rxjs';
 
 import { coreMock } from 'src/core/public/mocks';
 
-import { createPackageSearchProvider } from './search_provider';
+import { createPackageSearchProvider, toSearchResult } from './search_provider';
 import type { GetPackagesResponse } from './types';
 
 jest.mock('./hooks/use_request/epm', () => {
@@ -87,22 +87,22 @@ describe('Package search provider', () => {
         ).toBe('--(a|)', {
           a: [
             {
-              id: 'test-test',
+              id: 'test',
               score: 80,
               title: 'test',
-              type: 'package',
+              type: 'integration',
               url: {
-                path: 'undefined#/detail/test-test/overview',
+                path: 'undefined/detail/test/overview',
                 prependBasePath: false,
               },
             },
             {
-              id: 'test1-test1',
+              id: 'test1',
               score: 80,
               title: 'test1',
-              type: 'package',
+              type: 'integration',
               url: {
-                path: 'undefined#/detail/test1-test1/overview',
+                path: 'undefined/detail/test1/overview',
                 prependBasePath: false,
               },
             },
@@ -164,18 +164,18 @@ describe('Package search provider', () => {
         const packageSearchProvider = createPackageSearchProvider(setupMock);
         expectObservable(
           packageSearchProvider.find(
-            { term: 'test' },
+            { term: 'test1' },
             { aborted$: NEVER, maxResults: 1, preference: '' }
           )
         ).toBe('--(a|)', {
           a: [
             {
-              id: 'test-test',
+              id: 'test1',
               score: 80,
-              title: 'test',
-              type: 'package',
+              title: 'test1',
+              type: 'integration',
               url: {
-                path: 'undefined#/detail/test-test/overview',
+                path: 'undefined/detail/test1/overview',
                 prependBasePath: false,
               },
             },
@@ -184,6 +184,144 @@ describe('Package search provider', () => {
       });
 
       expect(sendGetPackages).toHaveBeenCalledTimes(1);
+    });
+
+    describe('tags', () => {
+      test('without packages tag, without search term', () => {
+        getTestScheduler().run(({ hot, expectObservable }) => {
+          mockSendGetPackages.mockReturnValue(
+            hot('--(a|)', { a: { data: { response: testResponse } } })
+          );
+          setupMock.getStartServices.mockReturnValue(
+            hot('--(a|)', { a: [coreMock.createStart()] }) as any
+          );
+          const packageSearchProvider = createPackageSearchProvider(setupMock);
+          expectObservable(
+            packageSearchProvider.find(
+              { types: ['test'] },
+              { aborted$: NEVER, maxResults: 100, preference: '' }
+            )
+          ).toBe('(a|)', {
+            a: [],
+          });
+        });
+
+        expect(sendGetPackages).toHaveBeenCalledTimes(0);
+      });
+
+      test('with integration tag, with no search term', () => {
+        getTestScheduler().run(({ hot, expectObservable }) => {
+          mockSendGetPackages.mockReturnValue(
+            hot('--(a|)', { a: { data: { response: testResponse } } })
+          );
+          setupMock.getStartServices.mockReturnValue(
+            hot('--(a|)', { a: [coreMock.createStart()] }) as any
+          );
+          const packageSearchProvider = createPackageSearchProvider(setupMock);
+          expectObservable(
+            packageSearchProvider.find(
+              { types: ['integration'] },
+              { aborted$: NEVER, maxResults: 100, preference: '' }
+            )
+          ).toBe('--(a|)', {
+            a: [
+              {
+                id: 'test',
+                score: 80,
+                title: 'test',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/test/overview',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'test1',
+                score: 80,
+                title: 'test1',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/test1/overview',
+                  prependBasePath: false,
+                },
+              },
+            ],
+          });
+        });
+
+        expect(sendGetPackages).toHaveBeenCalledTimes(1);
+      });
+
+      test('with integration tag, with search term', () => {
+        getTestScheduler().run(({ hot, expectObservable }) => {
+          mockSendGetPackages.mockReturnValue(
+            hot('--(a|)', { a: { data: { response: testResponse } } })
+          );
+          setupMock.getStartServices.mockReturnValue(
+            hot('--(a|)', { a: [coreMock.createStart()] }) as any
+          );
+          const packageSearchProvider = createPackageSearchProvider(setupMock);
+          expectObservable(
+            packageSearchProvider.find(
+              { term: 'test1', types: ['integration'] },
+              { aborted$: NEVER, maxResults: 100, preference: '' }
+            )
+          ).toBe('--(a|)', {
+            a: [
+              {
+                id: 'test1',
+                score: 80,
+                title: 'test1',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/test1/overview',
+                  prependBasePath: false,
+                },
+              },
+            ],
+          });
+        });
+
+        expect(sendGetPackages).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('toSearchResult', () => {
+    let startMock: ReturnType<typeof coreMock.createStart>;
+
+    beforeEach(() => {
+      startMock = coreMock.createStart();
+    });
+
+    it('uses svg icon if available', () => {
+      const pkg = {
+        ...testResponse[0],
+        icons: [{ type: 'image/svg+xml', src: '/img_nginx.svg', path: '' }],
+      };
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      expect(icon).toMatchInlineSnapshot(`"/api/fleet/epm/packages/test/test/img_nginx.svg"`);
+    });
+
+    it('prepends base path to svg URL', () => {
+      startMock = coreMock.createStart({ basePath: '/foo' });
+      const pkg = {
+        ...testResponse[0],
+        icons: [{ type: 'image/svg+xml', src: '/img_nginx.svg', path: '' }],
+      };
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      expect(icon).toMatchInlineSnapshot(`"/foo/api/fleet/epm/packages/test/test/img_nginx.svg"`);
+    });
+
+    // ICON_TYPES is empty in EUI: https://github.com/elastic/eui/issues/5138
+    it.skip('uses eui icon type as fallback', () => {
+      const pkg = {
+        ...testResponse[0],
+        name: 'elasticsearch',
+        icons: [{ type: 'image/jpg', src: '/img_nginx.svg', path: '' }],
+      };
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      expect(icon).toMatchInlineSnapshot(`"logoElasticsearch"`);
     });
   });
 });

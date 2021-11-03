@@ -7,14 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
   PartialAlertParams,
 } from '../../../common/alerting/logs/log_threshold/types';
+import { formatRuleData } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
-export function getAlertType(): AlertTypeModel<PartialAlertParams> {
+export function createLogThresholdAlertType(): ObservabilityRuleTypeModel<PartialAlertParams> {
   return {
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {
@@ -22,7 +23,7 @@ export function getAlertType(): AlertTypeModel<PartialAlertParams> {
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/logs-threshold-alert.html`;
+      return `${docLinks.links.observability.logsThreshold}`;
     },
     alertParamsExpression: React.lazy(() => import('./components/expression_editor/editor')),
     validate: validateExpression,
@@ -33,5 +34,6 @@ export function getAlertType(): AlertTypeModel<PartialAlertParams> {
       }
     ),
     requiresAppContext: false,
+    format: formatRuleData,
   };
 }

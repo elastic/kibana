@@ -21,6 +21,7 @@ describe('interpreter/functions#kql', () => {
     context = {
       getSearchContext: () => ({}),
       getSearchSessionId: () => undefined,
+      getExecutionContext: () => undefined,
       types: {},
       variables: {},
       abortSignal: {} as any,

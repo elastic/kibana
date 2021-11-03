@@ -13,13 +13,15 @@ import {
   getDeleteBulkRequestById,
   getDeleteAsPostBulkRequest,
   getDeleteAsPostBulkRequestById,
-  getFindResultStatusEmpty,
-  getFindResultStatus,
+  getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 
-describe('delete_rules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('delete_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -27,11 +29,11 @@ describe('delete_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.alertsClient.delete.mockResolvedValue({}); // successful deletion
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // rule status request
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
+    clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
 
-    deleteRulesBulkRoute(server.router);
+    deleteRulesBulkRoute(server.router, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -41,7 +43,6 @@ describe('delete_rules', () => {
     });
 
     test('resturns 200 when deleting a single rule and related rule status', async () => {
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(200);
     });
@@ -62,13 +63,13 @@ describe('delete_rules', () => {
     });
 
     test('returns 200 because the error is in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(200);
@@ -83,7 +84,7 @@ describe('delete_rules', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

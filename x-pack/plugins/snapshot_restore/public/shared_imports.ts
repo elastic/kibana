@@ -13,6 +13,7 @@ export {
   NotAuthorizedSection,
   SectionError,
   PageError,
+  PageLoading,
   sendRequest,
   SendRequestConfig,
   SendRequestResponse,
@@ -21,4 +22,9 @@ export {
   useRequest,
   UseRequestConfig,
   WithPrivileges,
+  EuiCodeEditor,
 } from '../../../../src/plugins/es_ui_shared/public';
+
+export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+
+export { reactRouterNavigate } from '../../../../src/plugins/kibana_react/public';

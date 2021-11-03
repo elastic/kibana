@@ -40,12 +40,12 @@ describe('selectedFiltersReducer', () => {
           null,
           setSelectedFilters({
             locations: [],
-            ports: [5601],
+            ports: ['5601'],
             schemes: [],
             tags: [],
           })
         )
-      ).toEqual({ locations: [], ports: [5601], schemes: [], tags: [] });
+      ).toEqual({ locations: [], ports: ['5601'], schemes: [], tags: [] });
     });
 
     it('merges state and action payload', () => {
@@ -59,12 +59,12 @@ describe('selectedFiltersReducer', () => {
           },
           setSelectedFilters({
             locations: [],
-            ports: [5601],
+            ports: ['5601'],
             schemes: [],
             tags: ['prod'],
           })
         )
-      ).toEqual({ locations: [], ports: [5601], schemes: [], tags: ['prod'] });
+      ).toEqual({ locations: [], ports: ['5601'], schemes: [], tags: ['prod'] });
     });
   });
 

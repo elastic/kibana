@@ -14,9 +14,8 @@ import { getRandomString } from './lib';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers(
-    getService
-  );
+  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
+    registerHelpers(getService);
 
   describe('search', () => {
     const URI = `${API_BASE_PATH}/search`;

@@ -10,7 +10,7 @@ import { registryMock, managerMock } from './plugin.test.mocks';
 import { SharePlugin } from './plugin';
 import { CoreStart } from 'kibana/public';
 import { coreMock } from '../../../core/public/mocks';
-import { mockSecurityOssPlugin } from '../../security_oss/public/mocks';
+import { anonymousAccessMock } from '../common/anonymous_access/index.mock';
 
 describe('SharePlugin', () => {
   beforeEach(() => {
@@ -22,20 +22,16 @@ describe('SharePlugin', () => {
   describe('setup', () => {
     test('wires up and returns registry', async () => {
       const coreSetup = coreMock.createSetup();
-      const plugins = {
-        securityOss: mockSecurityOssPlugin.createSetup(),
-      };
-      const setup = await new SharePlugin().setup(coreSetup, plugins);
+      const setup = await new SharePlugin(coreMock.createPluginInitializerContext()).setup(
+        coreSetup
+      );
       expect(registryMock.setup).toHaveBeenCalledWith();
       expect(setup.register).toBeDefined();
     });
 
     test('registers redirect app', async () => {
       const coreSetup = coreMock.createSetup();
-      const plugins = {
-        securityOss: mockSecurityOssPlugin.createSetup(),
-      };
-      await new SharePlugin().setup(coreSetup, plugins);
+      await new SharePlugin(coreMock.createPluginInitializerContext()).setup(coreSetup);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'short_url_redirect',
@@ -47,22 +43,34 @@ describe('SharePlugin', () => {
   describe('start', () => {
     test('wires up and returns show function, but not registry', async () => {
       const coreSetup = coreMock.createSetup();
-      const pluginsSetup = {
-        securityOss: mockSecurityOssPlugin.createSetup(),
-      };
-      const service = new SharePlugin();
-      await service.setup(coreSetup, pluginsSetup);
-      const pluginsStart = {
-        securityOss: mockSecurityOssPlugin.createStart(),
-      };
-      const start = await service.start({} as CoreStart, pluginsStart);
+      const service = new SharePlugin(coreMock.createPluginInitializerContext());
+      await service.setup(coreSetup);
+      const start = await service.start({} as CoreStart);
       expect(registryMock.start).toHaveBeenCalled();
       expect(managerMock.start).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           getShareMenuItems: expect.any(Function),
         }),
-        expect.anything()
+        undefined
+      );
+      expect(start.toggleShareContextMenu).toBeDefined();
+    });
+
+    test('passes anonymous access service provider to the share menu manager when it is available', async () => {
+      const coreSetup = coreMock.createSetup();
+      const service = new SharePlugin(coreMock.createPluginInitializerContext());
+      const setup = await service.setup(coreSetup);
+      const anonymousAccessServiceProvider = () => anonymousAccessMock.create();
+      setup.setAnonymousAccessServiceProvider(anonymousAccessServiceProvider);
+      const start = await service.start({} as CoreStart);
+      expect(registryMock.start).toHaveBeenCalled();
+      expect(managerMock.start).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          getShareMenuItems: expect.any(Function),
+        }),
+        anonymousAccessServiceProvider
       );
       expect(start.toggleShareContextMenu).toBeDefined();
     });

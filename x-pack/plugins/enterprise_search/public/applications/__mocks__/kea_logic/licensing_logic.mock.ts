@@ -11,8 +11,11 @@ export const mockLicensingValues = {
   license: licensingMock.createLicense(),
   hasPlatinumLicense: false,
   hasGoldLicense: false,
+  isTrial: false,
+  canManageLicense: true,
 };
 
 jest.mock('../../shared/licensing', () => ({
+  ...(jest.requireActual('../../shared/licensing') as object),
   LicensingLogic: { values: mockLicensingValues },
 }));

@@ -63,6 +63,14 @@ export const HistogramResponseRT = rt.type({
   histogram: rt.type({
     buckets: rt.array(HistogramBucketRT),
   }),
+  metricsets: rt.type({
+    buckets: rt.array(
+      rt.type({
+        key: rt.string,
+        doc_count: rt.number,
+      })
+    ),
+  }),
 });
 
 const GroupingBucketRT = rt.intersection([

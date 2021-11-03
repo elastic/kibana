@@ -11,11 +11,12 @@ import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/type
 export async function fetchClusterHealth(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string
+  index: string,
+  filterQuery?: string
 ): Promise<AlertClusterHealth[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_state.status',
       'hits.hits._source.cluster_uuid',
       'hits.hits._index',
@@ -58,6 +59,15 @@ export async function fetchClusterHealth(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const result = await esClient.search<ElasticsearchSource>(params);
   const response: ElasticsearchResponse = result.body as ElasticsearchResponse;

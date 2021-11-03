@@ -29,7 +29,7 @@ export type {
 } from './authentication';
 export type { CheckPrivilegesPayload } from './authorization';
 export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
-export { LegacyAuditLogger, AuditLogger, AuditEvent } from './audit';
+export { AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
 export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
@@ -40,6 +40,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   deprecations: securityConfigDeprecationProvider,
   exposeToBrowser: {
     loginAssistanceMessage: true,
+    showInsecureClusterWarning: true,
   },
 };
 export const plugin: PluginInitializer<

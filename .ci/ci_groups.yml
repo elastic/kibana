@@ -1,0 +1,28 @@
+root:
+  - ciGroup1
+  - ciGroup2
+  - ciGroup3
+  - ciGroup4
+  - ciGroup5
+  - ciGroup6
+  - ciGroup7
+  - ciGroup8
+  - ciGroup9
+  - ciGroup10
+  - ciGroup11
+
+xpack:
+  - ciGroup1
+  - ciGroup2
+  - ciGroup3
+  - ciGroup4
+  - ciGroup5
+  - ciGroup6
+  - ciGroup7
+  - ciGroup8
+  - ciGroup9
+  - ciGroup10
+  - ciGroup11
+  - ciGroup12
+  - ciGroup13
+  - ciGroupDocker

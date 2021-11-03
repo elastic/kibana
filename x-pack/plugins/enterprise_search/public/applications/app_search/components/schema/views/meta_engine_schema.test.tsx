@@ -7,14 +7,13 @@
 
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/shallow_useeffect.mock';
+import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
-
-import { Loading } from '../../../../shared/loading';
 
 import { MetaEnginesSchemaTable, MetaEnginesConflictsTable } from '../components';
 
@@ -44,13 +43,6 @@ describe('MetaEngineSchema', () => {
     shallow(<MetaEngineSchema />);
 
     expect(actions.loadSchema).toHaveBeenCalled();
-  });
-
-  it('renders a loading state', () => {
-    setMockValues({ ...values, dataLoading: true });
-    const wrapper = shallow(<MetaEngineSchema />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders an inactive fields callout & table when source engines have schema conflicts', () => {

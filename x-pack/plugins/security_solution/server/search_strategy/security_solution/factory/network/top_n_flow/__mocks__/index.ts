@@ -19,6 +19,7 @@ import {
 export const mockOptions: NetworkTopNFlowRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -809,9 +810,10 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -819,7 +821,7 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               top_n_flow_count: { cardinality: { field: 'source.ip' } },
@@ -876,9 +878,10 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -886,7 +889,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     aggregations: {
       top_n_flow_count: { cardinality: { field: 'source.ip' } },

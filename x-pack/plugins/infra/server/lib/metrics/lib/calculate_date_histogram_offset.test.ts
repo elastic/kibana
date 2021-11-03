@@ -17,6 +17,36 @@ describe('calculateDateHistogramOffset(timerange)', () => {
       field: '@timestamp',
     };
     const offset = calculateDateHistogramOffset(timerange);
-    expect(offset).toBe('-28s');
+    expect(offset).toBe('-28000ms');
+  });
+  it('should work with un-even timeranges (60s buckets)', () => {
+    const timerange = {
+      from: 1625057349373,
+      to: 1625057649373,
+      interval: '60s',
+      field: '@timestamp',
+    };
+    const offset = calculateDateHistogramOffset(timerange);
+    expect(offset).toBe('-51373ms');
+  });
+  it('should work with un-even timeranges (5m buckets)', () => {
+    const timerange = {
+      from: 1625516185059,
+      to: 1625602885059,
+      interval: '5m',
+      field: '@timestamp',
+    };
+    const offset = calculateDateHistogramOffset(timerange);
+    expect(offset).toBe('-215059ms');
+  });
+  it('should work with un-even timeranges (>=10s buckets)', () => {
+    const timerange = {
+      from: 1625516185059,
+      to: 1625602885059,
+      interval: '>=10s',
+      field: '@timestamp',
+    };
+    const offset = calculateDateHistogramOffset(timerange);
+    expect(offset).toBe('-215059ms');
   });
 });

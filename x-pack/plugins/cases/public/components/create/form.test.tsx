@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -17,11 +17,17 @@ import { schema, FormProps } from './schema';
 import { CreateCaseForm } from './form';
 import { OwnerProvider } from '../owner_context';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_configure');
+jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
+
 const useGetTagsMock = useGetTags as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
+const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -54,6 +60,7 @@ describe('CreateCaseForm', () => {
     jest.resetAllMocks();
     useGetTagsMock.mockReturnValue({ tags: ['test'] });
     useConnectorsMock.mockReturnValue({ loading: false, connectors: connectorsMock });
+    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
   it('it renders with steps', async () => {
@@ -111,5 +118,15 @@ describe('CreateCaseForm', () => {
         ).toBeTruthy();
       });
     });
+  });
+
+  it('hides the sync alerts toggle', () => {
+    const { queryByText } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm disableAlerts />
+      </MockHookWrapperComponent>
+    );
+
+    expect(queryByText('Sync alert')).not.toBeInTheDocument();
   });
 });

@@ -15,7 +15,8 @@ import type {
 } from './types';
 
 export class Collector<TFetchReturn, ExtraOptions extends object = {}>
-  implements ICollector<TFetchReturn, ExtraOptions> {
+  implements ICollector<TFetchReturn, ExtraOptions>
+{
   public readonly extendFetchContext: CollectorOptionsFetchExtendedContext<boolean>;
   public readonly type: CollectorOptions<TFetchReturn, boolean>['type'];
   public readonly fetch: CollectorFetchMethod<boolean, TFetchReturn, ExtraOptions>;

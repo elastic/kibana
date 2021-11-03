@@ -70,7 +70,7 @@ The API returns the following:
     "id": "sales",
     "name": "Sales",
     "initials": "MK",
-    "disabledFeatures": ["discover", "timelion"],
+    "disabledFeatures": ["discover"],
     "imageUrl": ""
   }
 ]
@@ -124,7 +124,7 @@ The API returns the following:
     "id": "sales",
     "name": "Sales",
     "initials": "MK",
-    "disabledFeatures": ["discover", "timelion"],
+    "disabledFeatures": ["discover"],
     "imageUrl": "",
     "authorizedPurposes": {
       "any": true,

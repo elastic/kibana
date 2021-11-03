@@ -1,0 +1,143 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "title": "foo"
+  },
+  "coreMigrationVersion": "7.16.0",
+  "id": "f8a1e9a0-2dc5-11eb-8af3-cb3aa84dbabd",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2020-11-23T19:56:26.810Z",
+  "version": "WzM4LDJd"
+}
+
+{
+  "attributes": {
+    "columns": [
+      "_source"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [],
+    "title": "search",
+    "version": 1
+  },
+  "coreMigrationVersion": "7.16.0",
+  "id": "0c0b1700-2dc6-11eb-8af3-cb3aa84dbabd",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "f8a1e9a0-2dc5-11eb-8af3-cb3aa84dbabd",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2020-11-23T19:56:59.376Z",
+  "version": "WzQ3LDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "c6af0915-fc1c-41b5-b195-7b05a51b0271": {
+              "columnOrder": [
+                "0ee222c6-215d-4adc-aac0-b45469d5f9c1"
+              ],
+              "columns": {
+                "0ee222c6-215d-4adc-aac0-b45469d5f9c1": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Average of field",
+                  "operationType": "average",
+                  "scale": "ratio",
+                  "sourceField": "field"
+                }
+              }
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "accessor": "0ee222c6-215d-4adc-aac0-b45469d5f9c1",
+        "layerId": "c6af0915-fc1c-41b5-b195-7b05a51b0271",
+        "layerType": "data"
+      }
+    },
+    "title": "visualization",
+    "visualizationType": "lnsMetric"
+  },
+  "coreMigrationVersion": "7.16.0",
+  "id": "2be82220-2dc6-11eb-8af3-cb3aa84dbabd",
+  "migrationVersion": {
+    "lens": "7.15.0"
+  },
+  "references": [
+    {
+      "id": "f8a1e9a0-2dc5-11eb-8af3-cb3aa84dbabd",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "f8a1e9a0-2dc5-11eb-8af3-cb3aa84dbabd",
+      "name": "indexpattern-datasource-layer-c6af0915-fc1c-41b5-b195-7b05a51b0271",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "updated_at": "2020-11-23T19:57:52.834Z",
+  "version": "WzUyLDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"version\":\"8.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"6ec4f48e-5704-47ef-8cde-9aa671a2c27a\"},\"panelIndex\":\"6ec4f48e-5704-47ef-8cde-9aa671a2c27a\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_0\"},{\"version\":\"8.0.0\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"a719fa94-58cc-4023-b95d-5aec25315045\"},\"panelIndex\":\"a719fa94-58cc-4023-b95d-5aec25315045\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"}]",
+    "timeRestore": false,
+    "title": "dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "7.16.0",
+  "id": "37b49c50-2dc6-11eb-8af3-cb3aa84dbabd",
+  "migrationVersion": {
+    "dashboard": "7.15.0"
+  },
+  "references": [
+    {
+      "id": "2be82220-2dc6-11eb-8af3-cb3aa84dbabd",
+      "name": "panel_0",
+      "type": "lens"
+    },
+    {
+      "id": "0c0b1700-2dc6-11eb-8af3-cb3aa84dbabd",
+      "name": "panel_1",
+      "type": "search"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2020-11-23T19:58:12.629Z",
+  "version": "WzUzLDJd"
+}

@@ -14,10 +14,10 @@ import {
   CaseResponse,
   CaseStatuses,
   ExternalServiceResponse,
-  ESCaseAttributes,
-  ESCasesConfigureAttributes,
   CaseType,
   ENABLE_CASE_CONNECTOR,
+  CasesConfigureAttributes,
+  CaseAttributes,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
@@ -33,8 +33,8 @@ import { casesConnectors } from '../../connectors';
  * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<ESCasesConfigureAttributes>,
-  caseInfo: SavedObject<ESCaseAttributes>
+  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
+  caseInfo: SavedObject<CaseAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&
@@ -110,20 +110,24 @@ export const push = async (
       alertsInfo,
     });
 
-    const connectorMappings = await casesClientInternal.configuration.getMappings({
+    const getMappingsResponse = await casesClientInternal.configuration.getMappings({
       connector: theCase.connector,
     });
 
-    if (connectorMappings.length === 0) {
-      throw new Error('Connector mapping has not been created');
-    }
+    const mappings =
+      getMappingsResponse.length === 0
+        ? await casesClientInternal.configuration.createMappings({
+            connector: theCase.connector,
+            owner: theCase.owner,
+          })
+        : getMappingsResponse[0].attributes.mappings;
 
     const externalServiceIncident = await createIncident({
       actionsClient,
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings: connectorMappings[0].attributes.mappings,
+      mappings,
       alerts,
       casesConnectors,
     });
@@ -182,6 +186,7 @@ export const push = async (
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
+        originalCase: myCase,
         unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {
@@ -236,7 +241,7 @@ export const push = async (
             actionBy: { username, full_name, email },
             caseId,
             fields: ['pushed'],
-            newValue: JSON.stringify(externalService),
+            newValue: externalService,
             owner: myCase.attributes.owner,
           }),
         ],

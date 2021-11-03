@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+export { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';

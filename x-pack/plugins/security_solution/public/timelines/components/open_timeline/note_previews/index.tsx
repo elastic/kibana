@@ -6,7 +6,13 @@
  */
 
 import { uniqBy } from 'lodash/fp';
-import { EuiAvatar, EuiButtonIcon, EuiCommentList, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButtonIcon,
+  EuiCommentList,
+  EuiScreenReaderOnly,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -15,12 +21,13 @@ import { useDispatch } from 'react-redux';
 import { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { sourcererSelectors } from '../../../../common/store';
+import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -78,10 +85,45 @@ interface NotePreviewsProps {
   eventIdToNoteIds?: Record<string, string[]>;
   notes?: TimelineResultNote[] | null;
   timelineId?: string;
+  showTimelineDescription?: boolean;
 }
 
 export const NotePreviews = React.memo<NotePreviewsProps>(
-  ({ eventIdToNoteIds, notes, timelineId }) => {
+  ({ eventIdToNoteIds, notes, timelineId, showTimelineDescription }) => {
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const timeline = useDeepEqualSelector((state) =>
+      timelineId ? getTimeline(state, timelineId) : null
+    );
+
+    const descriptionList = useMemo(
+      () =>
+        showTimelineDescription && timelineId && timeline?.description
+          ? [
+              {
+                username: defaultToEmptyTag(timeline.updatedBy),
+                event: i18n.ADDED_A_DESCRIPTION,
+                'data-test-subj': 'note-preview-description',
+                id: 'note-preview-description',
+                timestamp: timeline.updated ? (
+                  <FormattedRelative data-test-subj="updated" value={new Date(timeline.updated)} />
+                ) : (
+                  getEmptyValue()
+                ),
+                children: <EuiText size="s">{timeline.description}</EuiText>,
+                timelineIcon: (
+                  <EuiAvatar
+                    data-test-subj="avatar"
+                    name={timeline.updatedBy != null ? timeline.updatedBy : '?'}
+                    size="l"
+                  />
+                ),
+                actions: <SaveTimelineButton timelineId={timelineId} initialFocus="description" />,
+              },
+            ]
+          : [],
+      [timeline, timelineId, showTimelineDescription]
+    );
+
     const notesList = useMemo(
       () =>
         uniqBy('savedObjectId', notes).map((note) => {
@@ -125,11 +167,12 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
       [eventIdToNoteIds, notes, timelineId]
     );
 
-    if (notes == null || notes.length === 0) {
-      return null;
-    }
-
-    return <EuiCommentList comments={notesList} />;
+    return (
+      <EuiCommentList
+        data-test-subj="note-comment-list"
+        comments={[...descriptionList, ...notesList]}
+      />
+    );
   }
 );
 

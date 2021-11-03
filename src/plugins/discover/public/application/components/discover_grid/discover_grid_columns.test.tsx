@@ -117,9 +117,17 @@ describe('Discover grid columns ', function () {
             [Function],
             [Function],
           ],
-          "display": "Time (timestamp)",
+          "display": <React.Fragment>
+            timestamp
+             
+            <EuiIconTip
+              aria-label="Primary time field."
+              content="This field represents the time that events occurred."
+              type="clock"
+            />
+          </React.Fragment>,
           "id": "timestamp",
-          "initialWidth": 180,
+          "initialWidth": 190,
           "isSortable": true,
           "schema": "datetime",
         },

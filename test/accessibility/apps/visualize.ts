@@ -11,14 +11,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
 
   describe('Visualize', () => {
-    before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
-      await PageObjects.common.navigateToApp('visualize');
-    });
-
     it('visualize', async () => {
       await a11y.testAppSnapshot();
     });

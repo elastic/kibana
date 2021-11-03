@@ -15,11 +15,12 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 
 import { DnsRequestEventDetails } from './dns_request_event_details';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });

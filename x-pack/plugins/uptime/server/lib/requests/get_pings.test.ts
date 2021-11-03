@@ -393,6 +393,51 @@ describe('getAll', () => {
     `);
   });
 
+  it('adds excluded locations terms agg', async () => {
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
+    await getPings({
+      uptimeEsClient,
+      dateRange: { from: 'now-1h', to: 'now' },
+      excludedLocations: `["fairbanks"]`,
+    });
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    // @ts-expect-error the response is not typed, but should always result in this object, and in this order,
+    // unless the code that builds the query is modified.
+    expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter[1]).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must_not": Array [
+            Object {
+              "terms": Object {
+                "observer.geo.name": Array [
+                  "fairbanks",
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  it('throws error for invalid exclusions', async () => {
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
+    await expect(
+      getPings({
+        uptimeEsClient,
+        dateRange: { from: 'now-1h', to: 'now' },
+        excludedLocations: `["fairbanks", 2345]`,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Excluded locations can only be strings"`);
+  });
+
   it('adds a filter for monitor status', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 

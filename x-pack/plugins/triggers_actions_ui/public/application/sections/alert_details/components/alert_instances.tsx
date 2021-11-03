@@ -8,11 +8,26 @@
 import React, { useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiHealth,
+  EuiSpacer,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiStat,
+  EuiIconTip,
+} from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerting/common';
+import {
+  ActionGroup,
+  AlertExecutionStatusErrorReasons,
+  AlertInstanceStatusValues,
+} from '../../../../../../alerting/common';
 import {
   Alert,
   AlertInstanceSummary,
@@ -26,6 +41,17 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import './alert_instances.scss';
+import { RuleMutedSwitch } from './rule_muted_switch';
+import { getHealthColor } from '../../alerts_list/components/alert_status_filter';
+import {
+  alertsStatusesTranslationsMapping,
+  ALERT_STATUS_LICENSE_ERROR,
+} from '../../alerts_list/translations';
+import {
+  formatMillisForDisplay,
+  shouldShowDurationWarning,
+} from '../../../lib/execution_duration_utils';
+import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -112,17 +138,11 @@ export const alertInstancesTableColumns = (
     ),
     render: (alertInstance: AlertInstanceListItem) => {
       return (
-        <>
-          <EuiSwitch
-            label="mute"
-            showLabel={false}
-            compressed={true}
-            checked={alertInstance.isMuted}
-            disabled={readOnly}
-            data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
-            onChange={() => onMuteAction(alertInstance)}
-          />
-        </>
+        <RuleMutedSwitch
+          disabled={readOnly}
+          onMuteAction={async () => await onMuteAction(alertInstance)}
+          alertInstance={alertInstance}
+        />
       );
     },
     sortable: false,
@@ -166,8 +186,91 @@ export function AlertInstances({
     requestRefresh();
   };
 
+  const showDurationWarning = shouldShowDurationWarning(
+    alertType,
+    alertInstanceSummary.executionDuration.average
+  );
+
+  const healthColor = getHealthColor(alert.executionStatus.status);
+  const isLicenseError =
+    alert.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+  const statusMessage = isLicenseError
+    ? ALERT_STATUS_LICENSE_ERROR
+    : alertsStatusesTranslationsMapping[alert.executionStatus.status];
+
   return (
     <>
+      <EuiHorizontalRule />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiPanel color="subdued" hasBorder={false}>
+            <EuiStat
+              data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
+              titleSize="xs"
+              title={
+                <EuiHealth
+                  data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
+                  textSize="inherit"
+                  color={healthColor}
+                >
+                  {statusMessage}
+                </EuiHealth>
+              }
+              description={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.ruleLastExecutionDescription',
+                {
+                  defaultMessage: `Last response`,
+                }
+              )}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiPanel
+            data-test-subj="avgExecutionDurationPanel"
+            color={showDurationWarning ? 'warning' : 'subdued'}
+            hasBorder={false}
+          >
+            <EuiStat
+              data-test-subj="avgExecutionDurationStat"
+              titleSize="xs"
+              title={
+                <EuiFlexGroup gutterSize="xs">
+                  {showDurationWarning && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        data-test-subj="ruleDurationWarning"
+                        anchorClassName="ruleDurationWarningIcon"
+                        type="alert"
+                        color="warning"
+                        content={i18n.translate(
+                          'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.ruleTypeExcessDurationMessage',
+                          {
+                            defaultMessage: `Duration exceeds the rule's expected run time.`,
+                          }
+                        )}
+                        position="top"
+                      />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    {formatMillisForDisplay(alertInstanceSummary.executionDuration.average)}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              description={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.avgDurationDescription',
+                {
+                  defaultMessage: `Average duration`,
+                }
+              )}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={4}>
+          <ExecutionDurationChart executionDuration={alertInstanceSummary.executionDuration} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="xl" />
       <input
         type="hidden"

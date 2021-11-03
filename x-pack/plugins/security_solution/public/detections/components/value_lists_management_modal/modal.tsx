@@ -107,9 +107,11 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   useEffect(() => {
     if (!isEmpty(deleteError)) {
       const references: string[] =
-        // @ts-ignore-next-line deleteError response unknown message.error.references
+        // deleteError response unknown message.error.references
+        // @ts-expect-error TS2571
         deleteError?.body?.message?.error?.references?.map(
-          // @ts-ignore-next-line response not typed
+          // response not typed
+          // @ts-expect-error TS7006
           (ref) => ref?.exception_list.name
         ) ?? [];
       const uniqueExceptionListReferences = Array.from(new Set(references));
@@ -118,7 +120,8 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         contentText: i18n.referenceErrorMessage(uniqueExceptionListReferences.length),
         exceptionListReferences: uniqueExceptionListReferences,
         isLoading: false,
-        // @ts-ignore-next-line deleteError response unknown
+        // deleteError response unknown
+        // @ts-expect-error TS2571
         valueListId: deleteError?.body?.message?.error?.value_list_id,
       });
     }
@@ -216,7 +219,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         <EuiModalBody>
           <ValueListsForm onSuccess={handleUploadSuccess} onError={handleUploadError} />
           <EuiSpacer />
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiText size="s">
               <h2>{i18n.TABLE_TITLE}</h2>
             </EuiText>

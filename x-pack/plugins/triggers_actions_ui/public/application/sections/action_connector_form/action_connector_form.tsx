@@ -24,6 +24,7 @@ import {
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
   ActionTypeModel,
+  ActionConnectorFieldsSetCallbacks,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -56,12 +57,12 @@ export async function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
   actionTypeModel: ActionTypeModel
 ) {
   const connectorValidationResult = await actionTypeModel?.validateConnector(connector);
-  const configErrors = (connectorValidationResult.config
-    ? connectorValidationResult.config.errors
-    : {}) as IErrorObject;
-  const secretsErrors = (connectorValidationResult.secrets
-    ? connectorValidationResult.secrets.errors
-    : {}) as IErrorObject;
+  const configErrors = (
+    connectorValidationResult.config ? connectorValidationResult.config.errors : {}
+  ) as IErrorObject;
+  const secretsErrors = (
+    connectorValidationResult.secrets ? connectorValidationResult.secrets.errors : {}
+  ) as IErrorObject;
   const connectorBaseErrors = validateBaseProperties(connector).errors;
   const connectorErrors = {
     ...configErrors,
@@ -89,6 +90,8 @@ interface ActionConnectorProps<
   serverError?: {
     body: { message: string; error: string };
   };
+  setCallbacks: ActionConnectorFieldsSetCallbacks;
+  isEdit: boolean;
 }
 
 export const ActionConnectorForm = ({
@@ -99,6 +102,8 @@ export const ActionConnectorForm = ({
   errors,
   actionTypeRegistry,
   consumer,
+  setCallbacks,
+  isEdit,
 }: ActionConnectorProps) => {
   const {
     docLinks,
@@ -237,6 +242,8 @@ export const ActionConnectorForm = ({
                 editActionConfig={setActionConfigProperty}
                 editActionSecrets={setActionSecretsProperty}
                 consumer={consumer}
+                setCallbacks={setCallbacks}
+                isEdit={isEdit}
               />
             </Suspense>
           </EuiErrorBoundary>

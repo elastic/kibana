@@ -12,7 +12,8 @@ import dateMath from '@elastic/datemath';
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { getFieldFormats, getUiSettings } from './dependency_cache';
-import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/field_formats/common';
 
 const unitsDesc = dateMath.unitsDesc;
 

@@ -19,6 +19,7 @@ Ids should end with:
 - ErrorMessage (if it's an error message),
 - LinkText (if it's `<a>` tag),
 - ToggleSwitch and etc.
+- `.markdown` (if it's markdown)
 
 There is one more complex case, when we have to divide a single expression into different labels.
 
@@ -92,17 +93,6 @@ The long term plan is to rely on using `FormattedMessage` and `i18n.translate()`
 Currently, we support the following ReactJS `i18n` tools, but they will be removed in future releases:
 - Usage of `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
 
-#### In AngularJS
-
-The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
-
-- Call JS function `i18n.translate()` from the `@kbn/i18n` package.
-- Use `i18nId` directive in template.
-
-Currently, we support the following AngluarJS `i18n` tools, but they will be removed in future releases:
-- Usage of `i18n` service in controllers, directives, services by injecting it.
-- Usage of `i18n` filter in template for attribute translation. Note: Use one-time binding ("{{:: ... }}") in filters wherever it's possible to prevent unnecessary expression re-evaluation.
-
 #### In JavaScript
 
 - Use `i18n.translate()` in NodeJS or any other framework agnostic code, where `i18n` is the I18n engine from `@kbn/i18n` package.
@@ -110,7 +100,7 @@ Currently, we support the following AngluarJS `i18n` tools, but they will be rem
 ### Naming convention
 
 The message ids chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a message id, adding a progressive number to the existing key should always be used as a last resort.
-Here's a rule of id maning:
+Here's a rule of id naming:
 
 `{plugin}.{area}.[{sub-area}].{element}`
 
@@ -138,6 +128,7 @@ Here's a rule of id maning:
   'kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch'
   'kbn.management.editIndexPattern.wrongTypeErrorMessage'
   'kbn.management.editIndexPattern.scripted.table.nameDescription'
+  'xpack.lens.formulaDocumentation.filterRatioDescription.markdown'
   ```
 
 - For complex messages, which are divided into several parts, use the following approach:
@@ -192,6 +183,7 @@ Each message id should end with a type of the message.
 | tooltip | `kbn.management.editIndexPattern.removeTooltip` |
 | error message | `kbn.management.createIndexPattern.step.invalidCharactersErrorMessage` |
 | toggleSwitch | `kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch` |
+| markdown | `xpack.lens.formulaDocumentation.filterRatioDescription.markdown` |
 
 For example:
 
@@ -220,7 +212,6 @@ For example:
 - for button:
 
   ```js
-
   <EuiButton data-test-subj="addScriptedFieldLink" href={addScriptedFieldUrl}>
        <FormattedMessage id="kbn.management.editIndexPattern.scripted.addFieldButtonLabel" defaultMessage="Add scripted field"/>
   </EuiButton>
@@ -229,11 +220,11 @@ For example:
 - for dropDown:
 
   ```js
-  <select ng-model="indexedFieldTypeFilter" ng-options="o for o in indexedFieldTypes">
-      <option value=""
-          i18n-id="kbn.management.editIndexPattern.fields.allTypesDropDown"
-          i18n-default-message="All field types"></option>
-  </select>
+    <option value={
+      i18n.translate('kbn.management.editIndexPattern.fields.allTypesDropDown', {
+        defaultMessage: 'All field types',
+      })
+    }
   ```
 
 - for placeholder:
@@ -281,15 +272,30 @@ For example:
   />
   ```
 
+- for markdown
+  ```js
+  import { Markdown } from '@elastic/eui';
+  
+  <Markdown
+      markdown={
+        i18n.translate('xpack.lens.formulaDocumentation.filterRatioDescription.markdown', {
+        defaultMessage: `### Filter ratio:
+        
+          Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.
+          For example, to see how the error rate changes over time:
+          
+          \`\`\`
+          count(kql='response.status_code > 400') / count()
+          \`\`\`
+        `,
+        })
+      }
+  />
+  ```
+
 ### Variety of `values`
 
 - Variables
-
-  ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
-    i18n-default-message="Time Filter field name: {timeFieldName}"
-    i18n-values="{ timeFieldName: indexPattern.timeFieldName }"></span>
-  ```
 
   ```html
   <FormattedMessage
@@ -302,25 +308,6 @@ For example:
   ```
 
 - Labels and variables in tag
-
-  ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
-    i18n-default-message="This page lists every field in the {indexPatternTitle} index"
-    i18n-values="{ indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
-  ```
-
-  -----------------------------------------------------------
-  **BUT** we can not use tags that should be compiled:
-
-  ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
-    i18n-default-message="This page lists every field in the {indexPatternTitle} index"
-    i18n-values="{ indexPatternTitle: '<div my-directive>' + indexPattern.title + '</div>' }"></span>
-  ```
-
-  To void injections vulnerability, `i18nId` directive doesn't compile its values.
-
-  -----------------------------------------------------------
 
   ```html
   <FormattedMessage
@@ -364,14 +351,92 @@ The numeric input is mapped to a plural category, some subset of "zero", "one", 
 
 Here is an example of message translation depending on a plural category:
 
-```html
-<span i18n-id="kbn.management.editIndexPattern.mappingConflictLabel"
-      i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
-      i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
+```jsx
+  <FormattedMessage
+    id="kbn.management.editIndexPattern.mappingConflictLabel"
+    defaultMessage="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
+    values={{ conflictFieldsLength: conflictFields.length }}
+  />
 ```
 
 When `conflictFieldsLength` equals 1, the result string will be `"A field is defined as several types (string, integer, etc) across the indices that match this pattern."`. In cases when `conflictFieldsLength` has value of 2 or more, the result string - `"2 fields are defined as several types (string, integer, etc) across the indices that match this pattern."`.
 
+### Text with markdown
+
+There is some support for using markdown and you can use any of the following syntax:
+
+#### Headers
+
+```md
+# This is an <h1> tag
+## This is an <h2> tag
+###### This is an <h6> tag
+```
+
+#### Emphasis
+
+```md
+*This text will be italic*
+_This will also be italic_
+
+**This text will be bold**
+__This will also be bold__
+
+_You **can** combine them_
+```
+
+#### Lists
+  ##### Unordered
+
+```md
+* Item 1
+* Item 2
+  * Item 2a
+  * Item 2b
+```
+  ##### Ordered
+
+```md
+1. Item 1
+1. Item 2
+1. Item 3
+  1. Item 3a
+  1. Item 3b
+```
+#### Images
+
+```md
+![Github Logo](/images/logo.png)
+Format: ![Alt Text](url)
+```
+  
+#### Links
+
+```md
+http://github.com - automatic!
+[GitHub](http://github.com)
+```
+  
+#### Blockquotes
+
+```md
+As Kanye West said:
+
+> We're living the future so
+> the present is our past.
+```
+#### Code Blocks
+
+```md
+var a = 13;
+```
+
+#### Inline code
+
+```md
+I think you should use an
+`<addr>` element here instead
+```
 ### Splitting
 
 Splitting sentences into several keys often inadvertently presumes a grammar, a sentence structure, and such composite strings are often very difficult to translate.
@@ -384,6 +449,12 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
   `The following dialogue box indicates progress. You can close it and the process will continue to run in the background.`
 
   If this group of sentences is separated it’s possible that the context of the `'it'` in `'close it'` will be lost.
+
+### Large paragraphs
+
+Try to avoid using large paragraphs of text. They are difficult to maintain and often need small changes when the information becomes out of date.
+
+If you have no other choice, you can split paragraphs into a _few_ i18n chunks. Chunks should be split at logical points to ensure they contain enough context to be intelligible on their own.
 
 ### Unit tests
 

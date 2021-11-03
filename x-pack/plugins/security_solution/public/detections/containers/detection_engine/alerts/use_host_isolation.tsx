@@ -12,6 +12,7 @@ import { createHostIsolation } from './api';
 
 interface HostIsolationStatus {
   loading: boolean;
+  /** Boolean return will indicate if isolation action was created successful */
   isolateHost: () => Promise<boolean>;
 }
 

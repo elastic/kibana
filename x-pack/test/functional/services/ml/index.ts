@@ -23,6 +23,8 @@ import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_ana
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
 import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
 import { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
+import { MachineLearningDataVisualizerIndexPatternManagementProvider } from './data_visualizer_index_pattern_management';
+import { MachineLearningForecastProvider } from './forecast';
 import { MachineLearningJobManagementProvider } from './job_management';
 import { MachineLearningJobSelectionProvider } from './job_selection';
 import { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
@@ -41,6 +43,7 @@ import { MachineLearningSettingsProvider } from './settings';
 import { MachineLearningSettingsCalendarProvider } from './settings_calendar';
 import { MachineLearningSettingsFilterListProvider } from './settings_filter_list';
 import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
+import { MachineLearningStackManagementJobsProvider } from './stack_management_jobs';
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
@@ -49,6 +52,8 @@ import { SwimLaneProvider } from './swim_lane';
 import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
 import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
 import { TrainedModelsProvider } from './trained_models';
+import { TrainedModelsTableProvider } from './trained_models_table';
+import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -63,7 +68,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dashboardJobSelectionTable = MachineLearningDashboardJobSelectionTableProvider(context);
   const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(
     context,
-    commonUI,
     dashboardJobSelectionTable
   );
 
@@ -86,7 +90,11 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
+  const dataVisualizerIndexPatternManagement =
+    MachineLearningDataVisualizerIndexPatternManagementProvider(context, dataVisualizerTable);
 
+  const forecast = MachineLearningForecastProvider(context);
+  const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
@@ -105,11 +113,17 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
+  const stackManagementJobs = MachineLearningStackManagementJobsProvider(
+    context,
+    jobTable,
+    dataFrameAnalyticsTable
+  );
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
   const alerting = MachineLearningAlertingProvider(context, commonUI);
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, api, commonUI);
+  const trainedModelsTable = TrainedModelsTableProvider(context);
 
   return {
     anomaliesTable,
@@ -131,7 +145,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,
+    dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
+    forecast,
+    jobAnnotations,
     jobManagement,
     jobSelection,
     jobSourceSelection,
@@ -150,9 +167,11 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     settingsCalendar,
     settingsFilterList,
     singleMetricViewer,
+    stackManagementJobs,
     swimLane,
     testExecution,
     testResources,
     trainedModels,
+    trainedModelsTable,
   };
 }

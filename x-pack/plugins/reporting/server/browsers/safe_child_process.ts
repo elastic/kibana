@@ -10,7 +10,7 @@ import { take, share, mapTo, delay, tap } from 'rxjs/operators';
 import { LevelLogger } from '../lib';
 
 interface IChild {
-  kill: (signal: string) => Promise<any>;
+  kill: (signal: string) => Promise<void>;
 }
 
 // Our process can get sent various signals, and when these occur we wish to

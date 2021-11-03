@@ -15,7 +15,7 @@ const createActionsConfigMock = () => {
     ensureHostnameAllowed: jest.fn().mockReturnValue({}),
     ensureUriAllowed: jest.fn().mockReturnValue({}),
     ensureActionTypeEnabled: jest.fn().mockReturnValue({}),
-    getTLSSettings: jest.fn().mockReturnValue({
+    getSSLSettings: jest.fn().mockReturnValue({
       verificationMode: 'full',
     }),
     getProxySettings: jest.fn().mockReturnValue(undefined),
@@ -24,6 +24,7 @@ const createActionsConfigMock = () => {
       timeout: 360000,
     }),
     getCustomHostSettings: jest.fn().mockReturnValue(undefined),
+    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue(undefined),
   };
   return mocked;
 };

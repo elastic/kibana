@@ -25,6 +25,7 @@ import { networkModel } from '../../store';
 import { NetworkHttpTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 
 describe('NetworkHttp Table Component', () => {
@@ -79,7 +80,7 @@ describe('NetworkHttp Table Component', () => {
         </TestProviders>
       );
 
-      expect(store.getState().network.page.queries!.http.sort).toEqual({
+      expect(store.getState().network.page.queries?.http.sort).toEqual({
         direction: 'desc',
       });
 
@@ -87,7 +88,7 @@ describe('NetworkHttp Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.http.sort).toEqual({
+      expect(store.getState().network.page.queries?.http.sort).toEqual({
         direction: 'asc',
       });
       expect(wrapper.find('.euiTable thead tr th button').first().find('svg')).toBeTruthy();

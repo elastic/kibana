@@ -12,7 +12,6 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import extractZip from 'extract-zip';
 import archiver from 'archiver';
 
 const asyncPipeline = promisify(pipeline);
@@ -43,10 +42,4 @@ export async function zip(
 
   // await the promise from the pipeline and archive.finalize()
   await Promise.all([asyncPipeline(archive, createWriteStream(outputPath)), archive.finalize()]);
-}
-
-export async function unzip(path: string, outputDir: string) {
-  await extractZip(path, {
-    dir: outputDir,
-  });
 }

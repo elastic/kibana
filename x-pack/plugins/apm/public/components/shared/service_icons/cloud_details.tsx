@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
-type ServiceDetailsReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
+type ServiceDetailsReturnType =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/details'>;
 
 interface Props {
   cloud: ServiceDetailsReturnType['cloud'];

@@ -78,10 +78,8 @@ export const useUncommonProcesses = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    uncommonProcessesRequest,
-    setUncommonProcessesRequest,
-  ] = useState<HostsUncommonProcessesRequestOptions | null>(null);
+  const [uncommonProcessesRequest, setUncommonProcessesRequest] =
+    useState<HostsUncommonProcessesRequestOptions | null>(null);
   const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(

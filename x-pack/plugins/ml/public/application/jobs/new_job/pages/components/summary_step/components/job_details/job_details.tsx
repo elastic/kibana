@@ -111,10 +111,10 @@ export const JobDetails: FC = () => {
         defaultMessage: 'Population field',
       }),
       description:
-        isPopulationJobCreator(jobCreator) && jobCreator.splitField !== null ? (
-          jobCreator.splitField.name
+        isPopulationJobCreator(jobCreator) && jobCreator.populationField !== null ? (
+          jobCreator.populationField.name
         ) : (
-          <span style={{ fontStyle: jobCreator.splitField !== null ? 'inherit' : 'italic' }}>
+          <span style={{ fontStyle: jobCreator.populationField !== null ? 'inherit' : 'italic' }}>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.summaryStep.jobDetails.populationField.placeholder"
               defaultMessage="No population field selected"

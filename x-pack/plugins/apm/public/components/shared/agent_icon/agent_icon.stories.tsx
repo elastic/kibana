@@ -8,80 +8,62 @@
 import {
   EuiCard,
   EuiFlexGroup,
-  EuiImage,
   EuiFlexItem,
-  EuiSpacer,
+  EuiImage,
   EuiToolTip,
-  EuiCodeBlock,
 } from '@elastic/eui';
-import React, { ComponentType } from 'react';
-import { AgentIcon } from './index';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import type { Story } from '@storybook/react';
+import React from 'react';
 import { AGENT_NAMES } from '../../../../common/agent_name';
 import { getAgentIcon } from './get_agent_icon';
-import { useTheme } from '../../../hooks/use_theme';
+import { AgentIcon } from './index';
 
 export default {
-  title: 'shared/icons',
+  title: 'shared/AgentIcon',
   component: AgentIcon,
-  decorators: [
-    (Story: ComponentType) => (
-      <EuiThemeProvider>
-        <Story />
-      </EuiThemeProvider>
-    ),
-  ],
 };
 
-export function AgentIcons() {
-  const theme = useTheme();
+export const List: Story = (_args, { globals }) => {
+  const darkMode = globals.euiTheme.includes('dark');
 
   return (
-    <>
-      <EuiCodeBlock language="html" isCopyable paddingSize="m">
-        {'<AgentIcon agentName="dotnet" />'}
-      </EuiCodeBlock>
-
-      <EuiSpacer />
-
-      <EuiFlexGroup gutterSize="l" wrap={true}>
-        {AGENT_NAMES.map((agentName) => {
-          return (
-            <EuiFlexItem key={agentName} grow={false}>
-              <EuiCard
-                icon={
-                  <>
-                    <p>
-                      <EuiToolTip
-                        position="top"
-                        content="Icon rendered with `EuiImage`"
-                      >
-                        <EuiImage
-                          size="s"
-                          hasShadow
-                          alt={agentName}
-                          src={getAgentIcon(agentName, theme.darkMode)}
-                        />
-                      </EuiToolTip>
-                    </p>
-                  </>
-                }
-                title={agentName}
-                description={
-                  <div>
+    <EuiFlexGroup gutterSize="l" wrap={true}>
+      {AGENT_NAMES.map((agentName) => {
+        return (
+          <EuiFlexItem key={agentName} grow={false}>
+            <EuiCard
+              icon={
+                <>
+                  <p>
                     <EuiToolTip
-                      position="bottom"
-                      content="Icon rendered with `AgentIcon`"
+                      position="top"
+                      content="Icon rendered with `EuiImage`"
                     >
-                      <AgentIcon agentName={agentName} />
+                      <EuiImage
+                        size="s"
+                        hasShadow
+                        alt={agentName}
+                        src={getAgentIcon(agentName, darkMode)}
+                      />
                     </EuiToolTip>
-                  </div>
-                }
-              />
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
-    </>
+                  </p>
+                </>
+              }
+              title={agentName}
+              description={
+                <div>
+                  <EuiToolTip
+                    position="bottom"
+                    content="Icon rendered with `AgentIcon`"
+                  >
+                    <AgentIcon agentName={agentName} />
+                  </EuiToolTip>
+                </div>
+              }
+            />
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
-}
+};

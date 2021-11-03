@@ -9,7 +9,7 @@
 
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
-import { LayerDescriptor } from '../descriptor_types';
+import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
 interface IndexPatternReferenceDescriptor {
   indexPatternId?: string;
@@ -44,21 +44,24 @@ export function extractReferences({
       sourceDescriptor.indexPatternRefName = refName;
     }
 
-    // Extract index-pattern references from join
-    const joins = layer.joins ? layer.joins : [];
-    joins.forEach((join, joinIndex) => {
-      if ('indexPatternId' in join.right) {
-        const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
-        const refName = `layer_${layerIndex}_join_${joinIndex}_index_pattern`;
-        extractedReferences.push({
-          name: refName,
-          type: 'index-pattern',
-          id: sourceDescriptor.indexPatternId!,
-        });
-        delete sourceDescriptor.indexPatternId;
-        sourceDescriptor.indexPatternRefName = refName;
-      }
-    });
+    if ('joins' in layer) {
+      // Extract index-pattern references from join
+      const vectorLayer = layer as VectorLayerDescriptor;
+      const joins = vectorLayer.joins ? vectorLayer.joins : [];
+      joins.forEach((join, joinIndex) => {
+        if ('indexPatternId' in join.right) {
+          const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
+          const refName = `layer_${layerIndex}_join_${joinIndex}_index_pattern`;
+          extractedReferences.push({
+            name: refName,
+            type: 'index-pattern',
+            id: sourceDescriptor.indexPatternId!,
+          });
+          delete sourceDescriptor.indexPatternId;
+          sourceDescriptor.indexPatternRefName = refName;
+        }
+      });
+    }
   });
 
   return {
@@ -99,16 +102,19 @@ export function injectReferences({
       delete sourceDescriptor.indexPatternRefName;
     }
 
-    // Inject index-pattern references into join
-    const joins = layer.joins ? layer.joins : [];
-    joins.forEach((join) => {
-      if ('indexPatternRefName' in join.right) {
-        const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
-        const reference = findReference(sourceDescriptor.indexPatternRefName!, references);
-        sourceDescriptor.indexPatternId = reference.id;
-        delete sourceDescriptor.indexPatternRefName;
-      }
-    });
+    if ('joins' in layer) {
+      // Inject index-pattern references into join
+      const vectorLayer = layer as VectorLayerDescriptor;
+      const joins = vectorLayer.joins ? vectorLayer.joins : [];
+      joins.forEach((join) => {
+        if ('indexPatternRefName' in join.right) {
+          const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
+          const reference = findReference(sourceDescriptor.indexPatternRefName!, references);
+          sourceDescriptor.indexPatternId = reference.id;
+          delete sourceDescriptor.indexPatternRefName;
+        }
+      });
+    }
   });
 
   return {

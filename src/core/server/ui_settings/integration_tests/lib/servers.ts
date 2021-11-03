@@ -8,7 +8,7 @@
 
 import type supertest from 'supertest';
 import type { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 import {
   createTestServers,
@@ -55,7 +55,7 @@ export function getServices() {
     return services;
   }
 
-  const esClient = esServer.es.getClient();
+  const esClient = esServer.es.getKibanaEsClient();
 
   const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
     httpServerMock.createKibanaRequest()
@@ -75,8 +75,10 @@ export function getServices() {
 
 export async function stopServers() {
   services = null!;
-  if (servers) {
+  if (esServer) {
     await esServer.stop();
+  }
+  if (kbn) {
     await kbn.stop();
   }
 }

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
-import { WaterfallTooltipResponsiveMaxWidth } from './styles';
+import { WaterfallChartTooltip } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
@@ -116,7 +116,7 @@ export const MiddleTruncatedText = ({
       <EuiScreenReaderOnly>
         <span data-test-subj="middleTruncatedTextSROnly">{fullText}</span>
       </EuiScreenReaderOnly>
-      <WaterfallTooltipResponsiveMaxWidth
+      <WaterfallChartTooltip
         as={EuiToolTip}
         content={
           <WaterfallTooltipContent {...{ text: formatTooltipHeading(index, fullText), url }} />
@@ -164,7 +164,7 @@ export const MiddleTruncatedText = ({
             </InnerContainer>
           )}
         </>
-      </WaterfallTooltipResponsiveMaxWidth>
+      </WaterfallChartTooltip>
       <span>
         <EuiLink href={url} external target="_blank">
           <EuiScreenReaderOnly>

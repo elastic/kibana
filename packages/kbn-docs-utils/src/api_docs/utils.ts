@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 import path from 'path';
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import {
-  AnchorLink,
   ApiDeclaration,
   ScopeApi,
   TypeKind,
   Lifecycle,
   PluginApi,
   ApiScope,
+  PluginOrPackage,
 } from './types';
 
 function capitalize(str: string): string {
@@ -33,9 +33,15 @@ export const snakeToCamel = (str: string): string =>
  */
 export function getPluginForPath(
   filePath: string,
-  plugins: KibanaPlatformPlugin[]
-): KibanaPlatformPlugin | undefined {
-  return plugins.find((plugin) => filePath.startsWith(plugin.directory + path.sep));
+  plugins: PluginOrPackage[]
+): PluginOrPackage | undefined {
+  if (filePath.indexOf('@') >= 0) {
+    return plugins.find(
+      (plugin) => !plugin.isPlugin && filePath.indexOf(plugin.manifest.id + path.sep) >= 0
+    );
+  } else {
+    return plugins.find((plugin) => filePath.startsWith(plugin.directory + path.sep));
+  }
 }
 
 /**
@@ -94,7 +100,7 @@ export function getPluginApiDocId(
   }
 ) {
   let service = '';
-  const cleanName = id.replace('.', '_');
+  const cleanName = id.replace('@', '').replace(/[./\\]/gi, '_');
   if (serviceInfo) {
     const serviceName = getServiceForPath(serviceInfo.apiPath, serviceInfo.directory);
     const serviceFolder = serviceInfo.serviceFolders?.find((f) => f === serviceName);
@@ -107,11 +113,10 @@ export function getPluginApiDocId(
   return `kib${capitalize(snakeToCamel(cleanName)) + capitalize(service)}PluginApi`;
 }
 
-export function getApiSectionId(link: AnchorLink) {
+export function getApiSectionId({ id, scope }: { id: string; scope: ApiScope }) {
   // Clean up the name. Things like destructured function parameters can have really long names with brackets and commas.
-  const cleanName = link.apiName.replace(/[^A-Za-z_.$0-9]+/g, '');
-  const id = `def-${link.scope}.${cleanName}`;
-  return id;
+  const cleanName = id.replace(/[^A-Za-z_.$0-9]+/g, '');
+  return `def-${scope}.${cleanName}`;
 }
 
 export function countScopeApi(api: ScopeApi): number {
@@ -240,6 +245,16 @@ function apiItemExists(name: string, scope: ApiScope, pluginApi: PluginApi): boo
   return (
     pluginApi[scopeAccessor(scope)].findIndex((dec: ApiDeclaration) => dec.label === name) >= 0
   );
+}
+
+export function getFileName(name: string): string {
+  // Remove the initial `@` if one exists, then replace all dots, slashes and dashes with an `_`.
+  return camelToSnake(name.replace(/@/gi, '').replace(/[.\\/-]/gi, '_'));
+}
+
+export function getSlug(name: string): string {
+  // Remove the initial `@` if one exists, then replace all dots and slashes with a `-`.
+  return name.replace(/@/gi, '').replace(/[.\\/]/gi, '-');
 }
 
 function scopeAccessor(scope: ApiScope): 'server' | 'common' | 'client' {

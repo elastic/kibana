@@ -38,11 +38,11 @@ export function TopNavMenuItem(props: TopNavMenuData) {
   };
 
   const btn = props.emphasize ? (
-    <EuiButton size="s" {...commonButtonProps}>
+    <EuiButton size="s" {...commonButtonProps} fill>
       {upperFirst(props.label || props.id!)}
     </EuiButton>
   ) : (
-    <EuiHeaderLink size="xs" color="primary" {...commonButtonProps}>
+    <EuiHeaderLink size="s" color="primary" {...commonButtonProps}>
       {upperFirst(props.label || props.id!)}
     </EuiHeaderLink>
   );

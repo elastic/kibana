@@ -26,12 +26,8 @@ const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 export const LogAnalysisSetupFlyout: React.FC<{
   allowedModules?: ModuleId[];
 }> = ({ allowedModules = moduleIds }) => {
-  const {
-    closeFlyout,
-    flyoutView,
-    showModuleList,
-    showModuleSetup,
-  } = useLogAnalysisSetupFlyoutStateContext();
+  const { closeFlyout, flyoutView, showModuleList, showModuleSetup } =
+    useLogAnalysisSetupFlyoutStateContext();
 
   if (flyoutView.view === 'hidden') {
     return null;

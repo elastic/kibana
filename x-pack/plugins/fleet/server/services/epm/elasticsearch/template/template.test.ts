@@ -24,6 +24,8 @@ import {
   generateTemplateIndexPattern,
 } from './template';
 
+const FLEET_COMPONENT_TEMPLATE = '.fleet_component_template-1';
+
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
   print(val) {
@@ -67,7 +69,7 @@ describe('EPM template', () => {
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual(composedOfTemplates);
+    expect(template.composed_of).toStrictEqual([...composedOfTemplates, FLEET_COMPONENT_TEMPLATE]);
   });
 
   it('adds empty composed_of correctly', () => {
@@ -82,7 +84,7 @@ describe('EPM template', () => {
       composedOfTemplates,
       templatePriority: 200,
     });
-    expect(template.composed_of).toStrictEqual(composedOfTemplates);
+    expect(template.composed_of).toStrictEqual([FLEET_COMPONENT_TEMPLATE]);
   });
 
   it('adds hidden field correctly', () => {
@@ -170,6 +172,26 @@ describe('EPM template', () => {
     });
 
     expect(template).toMatchSnapshot(path.basename(ymlPath));
+  });
+
+  it('tests processing long field with index false', () => {
+    const longWithIndexFalseYml = `
+- name: longIndexFalse
+  type: long
+  index: false
+`;
+    const longWithIndexFalseMapping = {
+      properties: {
+        longIndexFalse: {
+          type: 'long',
+          index: false,
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(longWithIndexFalseYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(longWithIndexFalseMapping);
   });
 
   it('tests processing text field with multi fields', () => {
@@ -602,6 +624,26 @@ describe('EPM template', () => {
       properties: {
         constantKeyword: {
           type: 'constant_keyword',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+  });
+
+  it('tests constant_keyword field type with value', () => {
+    const constantKeywordLiteralYaml = `
+- name: constantKeyword
+  type: constant_keyword
+  value: always_the_same
+  `;
+    const constantKeywordMapping = {
+      properties: {
+        constantKeyword: {
+          type: 'constant_keyword',
+          value: 'always_the_same',
         },
       },
     };

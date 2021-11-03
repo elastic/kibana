@@ -12,7 +12,7 @@ import { mockBrowserFields } from '../../containers/source/mock';
 
 const aField = {
   ...mockDetailItemData[4],
-  ...mockBrowserFields.base.fields!['@timestamp'],
+  ...mockBrowserFields.base.fields?.['@timestamp'],
 };
 
 describe('helpers', () => {

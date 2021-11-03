@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement, FunctionComponent } from 'react';
-import { LayerDescriptor } from '../../../common/descriptor_types';
+import type { LayerDescriptor } from '../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../common/constants';
 
 export type RenderWizardArguments = {
@@ -33,10 +33,12 @@ export type LayerWizard = {
   description: string;
   disabledReason?: string;
   getIsDisabled?: () => Promise<boolean> | boolean;
+  isBeta?: boolean;
   icon: string | FunctionComponent<any>;
   prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
+  showFeatureEditTools?: boolean;
 };
 
 export type LayerWizardWithMeta = LayerWizard & {
@@ -54,6 +56,7 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
     getIsDisabled: async () => {
       return false;
     },
+    isBeta: false,
     ...layerWizard,
   });
 }

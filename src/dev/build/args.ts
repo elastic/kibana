@@ -15,8 +15,6 @@ export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
-      'oss',
-      'no-oss',
       'skip-archives',
       'skip-initialize',
       'skip-generic-folders',
@@ -28,11 +26,13 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-contexts',
       'skip-docker-ubi',
       'skip-docker-centos',
+      'docker-cloud',
       'release',
       'skip-node-download',
       'verbose',
       'debug',
       'all-platforms',
+      'example-plugins',
       'verbose',
       'quiet',
       'silent',
@@ -45,10 +45,10 @@ export function readCliArgs(argv: string[]) {
     },
     default: {
       debug: true,
+      'example-plugins': false,
       rpm: null,
       deb: null,
       'docker-images': null,
-      oss: null,
       'version-qualifier': '',
     },
     unknown: (flag) => {
@@ -94,17 +94,17 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
-    buildOssDist: flags.oss !== false,
-    buildDefaultDist: !flags.oss,
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
+    createExamplePlugins: Boolean(flags['example-plugins']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerCentOS:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-centos']),
+    createDockerCloud: isOsPackageDesired('docker-images') && Boolean(flags['docker-cloud']),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),

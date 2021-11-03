@@ -23,6 +23,6 @@ export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const usageMetricType: SavedObjectsType = {
   name: usageMetricSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'agnostic',
   mappings: usageMetricSavedObjectMappings,
 };

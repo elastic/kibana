@@ -204,7 +204,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                 >
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutText"
-                    defaultMessage="It is not possible to alter the indices being used by the datafeed here. If you wish to select a different index pattern or saved search, please start the job creation again, selecting a different index pattern."
+                    defaultMessage="You cannot alter the indices being used by the datafeed here. To select a different data view or saved search, go to step 1 of the wizard and select the Change data view option."
                   />
                 </EuiCallOut>
               </>
@@ -272,9 +272,10 @@ const Contents: FC<{
   heightOffset?: number;
 }> = ({ title, value, editJson, onChange, heightOffset = 0 }) => {
   // the ace editor requires a fixed height
-  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
-    heightOffset,
-  ]);
+  const editorHeight = useMemo(
+    () => `${window.innerHeight - 230 - heightOffset}px`,
+    [heightOffset]
+  );
   return (
     <EuiFlexItem>
       <EuiTitle size="s">

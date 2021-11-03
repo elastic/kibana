@@ -15,12 +15,13 @@ export async function fetchMemoryUsageNodeStats(
   index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertMemoryUsageNodeStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
   const params = {
     index,
-    filterPath: ['aggregations'],
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -92,9 +93,18 @@ export async function fetchMemoryUsageNodeStats(
     },
   };
 
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
+
   const { body: response } = await esClient.search(params);
   const stats: AlertMemoryUsageNodeStats[] = [];
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not define buckets
+  // @ts-expect-error declare type for aggregations explicitly
   const { buckets: clusterBuckets } = response.aggregations?.clusters;
 
   if (!clusterBuckets?.length) {

@@ -66,7 +66,7 @@ export function handleResponse(
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
-    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
+    bytesWritten: getDiffCalculation(Number(bytesWrittenLast), Number(bytesWrittenFirst)),
     config: {
       container: config.get('monitoring.ui.container.apm.enabled'),
     },
@@ -97,8 +97,8 @@ export async function getApmInfo(
   const params = {
     index: apmIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.beats_stats.beat.host',
       'hits.hits._source.beats_stats.beat.version',
       'hits.hits._source.beats_stats.beat.name',

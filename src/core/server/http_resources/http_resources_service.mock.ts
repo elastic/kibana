@@ -13,10 +13,14 @@ const createHttpResourcesMock = (): jest.Mocked<HttpResources> => ({
   register: jest.fn(),
 });
 
-function createInternalHttpResourcesSetup() {
+function createInternalHttpResourcesPreboot() {
   return {
     createRegistrar: jest.fn(() => createHttpResourcesMock()),
   };
+}
+
+function createInternalHttpResourcesSetup() {
+  return createInternalHttpResourcesPreboot();
 }
 
 function createHttpResourcesResponseFactory() {
@@ -35,6 +39,7 @@ function createHttpResourcesResponseFactory() {
 
 export const httpResourcesMock = {
   createRegistrar: createHttpResourcesMock,
+  createPrebootContract: createInternalHttpResourcesPreboot,
   createSetupContract: createInternalHttpResourcesSetup,
   createResponseFactory: createHttpResourcesResponseFactory,
 };

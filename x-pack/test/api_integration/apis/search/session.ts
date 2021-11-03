@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
             sessionId,
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(400);
       });
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: oldName,
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -165,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -217,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -337,7 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'My Session',
           appId: 'discover',
           expires: '123',
-          urlGeneratorId: 'discover',
+          locatorId: 'discover',
         })
         .expect(200);
 
@@ -403,7 +403,12 @@ export default function ({ getService }: FtrProviderContext) {
       const { id: id1 } = searchRes1.body;
 
       // it might take the session a moment to be created
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      await retry.waitFor('search session created', async () => {
+        const response = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo');
+        return response.body.statusCode === undefined;
+      });
 
       const getSessionFirstTime = await supertest
         .get(`/internal/session/${sessionId}`)
@@ -458,7 +463,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -479,7 +484,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -500,7 +505,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -521,7 +526,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 
@@ -545,7 +550,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(401);
       });
@@ -586,7 +591,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(403);
 
@@ -709,7 +714,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'My Session',
             appId: 'discover',
             expires: '123',
-            urlGeneratorId: 'discover',
+            locatorId: 'discover',
           })
           .expect(200);
 

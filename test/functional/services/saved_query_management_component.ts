@@ -138,7 +138,7 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async savedQueryExist(title: string) {
     await this.openSavedQueryManagementComponent();
-    const exists = this.testSubjects.exists(`~load-saved-query-${title}-button`);
+    const exists = await this.testSubjects.exists(`~load-saved-query-${title}-button`);
     await this.closeSavedQueryManagementComponent();
     return exists;
   }
@@ -166,8 +166,9 @@ export class SavedQueryManagementComponentService extends FtrService {
     const isOpenAlready = await this.testSubjects.exists('saved-query-management-popover');
     if (isOpenAlready) return;
 
+    await this.testSubjects.click('saved-query-management-popover-button');
+
     await this.retry.waitFor('saved query management popover to have any text', async () => {
-      await this.testSubjects.click('saved-query-management-popover-button');
       const queryText = await this.testSubjects.getVisibleText('saved-query-management-popover');
       return queryText.length > 0;
     });

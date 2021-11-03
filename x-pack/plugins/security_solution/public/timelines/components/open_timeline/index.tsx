@@ -115,9 +115,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
 
     const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
-    const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
-      dispatch,
-    ]);
+    const updateIsLoading = useCallback(
+      (payload) => dispatch(dispatchUpdateIsLoading(payload)),
+      [dispatch]
+    );
 
     const {
       customTemplateTimelineCount,
@@ -134,15 +135,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       defaultTimelineCount,
       templateTimelineCount,
     });
-    const {
-      timelineStatus,
-      templateTimelineFilter,
-      installPrepackagedTimelines,
-    } = useTimelineStatus({
-      timelineType,
-      customTemplateTimelineCount,
-      elasticTemplateTimelineCount,
-    });
+    const { timelineStatus, templateTimelineFilter, installPrepackagedTimelines } =
+      useTimelineStatus({
+        timelineType,
+        customTemplateTimelineCount,
+        elasticTemplateTimelineCount,
+      });
     const refetch = useCallback(() => {
       fetchAllTimeline({
         pageInfo: {

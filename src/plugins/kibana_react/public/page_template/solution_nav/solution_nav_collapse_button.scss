@@ -1,0 +1,47 @@
+.kbnPageTemplateSolutionNavCollapseButton {
+  position: absolute;
+  opacity: 0;
+  left: 248px - $euiSize;
+  top: $euiSizeL;
+  z-index: 2;
+
+  @include euiCanAnimate {
+    transition: opacity $euiAnimSpeedFast, left $euiAnimSpeedFast, background $euiAnimSpeedFast;
+  }
+
+  &:hover,
+  &:focus {
+    transition-delay: 0s !important;
+  }
+
+  .kbnPageTemplate__pageSideBar:hover &,
+  &:hover,
+  &:focus {
+    opacity: 1;
+    left: 248px - $euiSizeL;
+  }
+
+  .kbnPageTemplate__pageSideBar:hover & {
+    transition-delay: $euiAnimSpeedSlow * 2;
+  }
+
+  &:not(&-isCollapsed) {
+    background-color: $euiColorEmptyShade !important; // Override all states
+  }
+}
+
+// Make the button take up the entire area of the collapsed navigation
+.kbnPageTemplateSolutionNavCollapseButton-isCollapsed {
+  opacity: 1 !important;
+  transition-delay: 0s !important;
+  left: 0 !important;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: 0;
+  // Keep the icon at the top instead of it getting shifted to the center of the page
+  padding-top: $euiSizeL + $euiSizeS;
+  align-items: flex-start;
+}

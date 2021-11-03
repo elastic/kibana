@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 
 import React from 'react';
 
-export const DistinctValues = ({ cardinality }: { cardinality?: number }) => {
+interface Props {
+  cardinality?: number;
+  showIcon?: boolean;
+}
+
+export const DistinctValues = ({ cardinality, showIcon }: Props) => {
   if (cardinality === undefined) return null;
   return (
-    <EuiFlexGroup alignItems={'center'}>
-      <EuiFlexItem className={'dataVisualizerColumnHeaderIcon'}>
-        <EuiIcon type="database" size={'s'} />
-      </EuiFlexItem>
-      <EuiText size={'s'}>
-        <b>{cardinality}</b>
-      </EuiText>
-    </EuiFlexGroup>
+    <>
+      {showIcon ? <EuiIcon type="database" size={'m'} className={'columnHeader__icon'} /> : null}
+      <EuiText size={'xs'}>{cardinality}</EuiText>
+    </>
   );
 };

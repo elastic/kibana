@@ -9,8 +9,8 @@
   ],
   "from": "now-30m",
   "interval": "15m",
-  "license": "Elastic License",
-  "machine_learning_job_id": "rare-destination-country",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "rare_destination_country",
   "name": "Network Traffic to Rare Destination Country",
   "references": [
     "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
@@ -25,5 +25,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 1
+  "version": 2
 }

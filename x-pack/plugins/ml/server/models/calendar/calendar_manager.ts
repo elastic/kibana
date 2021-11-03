@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { difference } from 'lodash';
 import { EventManager } from './event_manager';
 import type { MlClient } from '../../lib/ml_client';

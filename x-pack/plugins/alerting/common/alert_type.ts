@@ -20,6 +20,10 @@ export interface AlertType<
   defaultActionGroupId: ActionGroupIds;
   producer: string;
   minimumLicenseRequired: LicenseType;
+  isExportable: boolean;
+  ruleTaskTimeout?: string;
+  defaultScheduleInterval?: string;
+  minimumScheduleInterval?: string;
 }
 
 export interface ActionGroup<ActionGroupIds extends string> {

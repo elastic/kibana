@@ -6,7 +6,7 @@
  */
 
 import { GeoJsonFileSource } from './geojson_file_source';
-import { BoundsFilters } from '../vector_source';
+import { BoundsRequestMeta } from '../vector_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 
 describe('GeoJsonFileSource', () => {
@@ -20,7 +20,7 @@ describe('GeoJsonFileSource', () => {
     it('should get null bounds', async () => {
       const geojsonFileSource = new GeoJsonFileSource({});
       expect(
-        await geojsonFileSource.getBoundsForFilters(({} as unknown) as BoundsFilters, () => {})
+        await geojsonFileSource.getBoundsForFilters({} as unknown as BoundsRequestMeta, () => {})
       ).toEqual(null);
     });
 
@@ -51,7 +51,7 @@ describe('GeoJsonFileSource', () => {
 
       expect(geojsonFileSource.isBoundsAware()).toBe(true);
       expect(
-        await geojsonFileSource.getBoundsForFilters(({} as unknown) as BoundsFilters, () => {})
+        await geojsonFileSource.getBoundsForFilters({} as unknown as BoundsRequestMeta, () => {})
       ).toEqual({
         maxLat: 3,
         maxLon: 2,

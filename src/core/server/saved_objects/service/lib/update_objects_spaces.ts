@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -22,6 +22,9 @@ import {
   getBulkOperationError,
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
+  Either,
+  isLeft,
+  isRight,
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
@@ -85,14 +88,6 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
   error?: SavedObjectError;
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Left = { tag: 'Left'; error: SavedObjectsUpdateObjectsSpacesResponseObject };
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Right = { tag: 'Right'; value: Record<string, any> };
-type Either = Left | Right;
-const isLeft = (either: Either): either is Left => either.tag === 'Left';
-const isRight = (either: Either): either is Right => either.tag === 'Right';
-
 /**
  * Parameters for the updateObjectsSpaces function.
  *
@@ -139,14 +134,16 @@ export async function updateObjectsSpaces({
   const { namespace } = options;
 
   let bulkGetRequestIndexCounter = 0;
-  const expectedBulkGetResults: Either[] = objects.map((object) => {
+  const expectedBulkGetResults: Array<
+    Either<SavedObjectsUpdateObjectsSpacesResponseObject, Record<string, any>>
+  > = objects.map((object) => {
     const { type, id, spaces, version } = object;
 
     if (!allowedTypes.includes(type)) {
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
       return {
-        tag: 'Left' as 'Left',
-        error: { id, type, spaces: [], error },
+        tag: 'Left',
+        value: { id, type, spaces: [], error },
       };
     }
     if (!registry.isShareable(type)) {
@@ -156,13 +153,13 @@ export async function updateObjectsSpaces({
         )
       );
       return {
-        tag: 'Left' as 'Left',
-        error: { id, type, spaces: [], error },
+        tag: 'Left',
+        value: { id, type, spaces: [], error },
       };
     }
 
     return {
-      tag: 'Right' as 'Right',
+      tag: 'Right',
       value: {
         type,
         id,
@@ -193,71 +190,70 @@ export async function updateObjectsSpaces({
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];
-  const expectedBulkOperationResults: Either[] = expectedBulkGetResults.map(
-    (expectedBulkGetResult) => {
-      if (isLeft(expectedBulkGetResult)) {
-        return expectedBulkGetResult;
-      }
+  const expectedBulkOperationResults: Array<
+    Either<SavedObjectsUpdateObjectsSpacesResponseObject, Record<string, any>>
+  > = expectedBulkGetResults.map((expectedBulkGetResult) => {
+    if (isLeft(expectedBulkGetResult)) {
+      return expectedBulkGetResult;
+    }
 
-      const { id, type, spaces, version, esRequestIndex } = expectedBulkGetResult.value;
+    const { id, type, spaces, version, esRequestIndex } = expectedBulkGetResult.value;
 
-      let currentSpaces: string[] = spaces;
-      let versionProperties;
-      if (esRequestIndex !== undefined) {
-        const doc = bulkGetResponse?.body.docs[esRequestIndex];
-        // @ts-expect-error MultiGetHit._source is optional
-        if (!doc?.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
-          const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
-          return {
-            tag: 'Left' as 'Left',
-            error: { id, type, spaces: [], error },
-          };
-        }
-        currentSpaces = doc._source?.namespaces ?? [];
-        // @ts-expect-error MultiGetHit._source is optional
-        versionProperties = getExpectedVersionProperties(version, doc);
-      } else if (spaces?.length === 0) {
-        // A SOC wrapper attempted to retrieve this object in a pre-flight request and it was not found.
+    let currentSpaces: string[] = spaces;
+    let versionProperties;
+    if (esRequestIndex !== undefined) {
+      const doc = bulkGetResponse?.body.docs[esRequestIndex];
+      // @ts-expect-error MultiGetHit._source is optional
+      if (!doc?.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
         const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
         return {
-          tag: 'Left' as 'Left',
-          error: { id, type, spaces: [], error },
+          tag: 'Left',
+          value: { id, type, spaces: [], error },
         };
-      } else {
-        versionProperties = getExpectedVersionProperties(version);
       }
-
-      const { newSpaces, isUpdateRequired } = getNewSpacesArray(
-        currentSpaces,
-        spacesToAdd,
-        spacesToRemove
-      );
-      const expectedResult = {
-        type,
-        id,
-        newSpaces,
-        ...(isUpdateRequired && { esRequestIndex: bulkOperationRequestIndexCounter++ }),
+      currentSpaces = doc._source?.namespaces ?? [];
+      // @ts-expect-error MultiGetHit._source is optional
+      versionProperties = getExpectedVersionProperties(version, doc);
+    } else if (spaces?.length === 0) {
+      // A SOC wrapper attempted to retrieve this object in a pre-flight request and it was not found.
+      const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
+      return {
+        tag: 'Left',
+        value: { id, type, spaces: [], error },
       };
-
-      if (isUpdateRequired) {
-        const documentMetadata = {
-          _id: serializer.generateRawId(undefined, type, id),
-          _index: getIndexForType(type),
-          ...versionProperties,
-        };
-        if (newSpaces.length) {
-          const documentToSave = { updated_at: time, namespaces: newSpaces };
-          // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
-          bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
-        } else {
-          // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
-          bulkOperationParams.push({ delete: documentMetadata });
-        }
-      }
-
-      return { tag: 'Right' as 'Right', value: expectedResult };
+    } else {
+      versionProperties = getExpectedVersionProperties(version);
     }
-  );
+
+    const { newSpaces, isUpdateRequired } = getNewSpacesArray(
+      currentSpaces,
+      spacesToAdd,
+      spacesToRemove
+    );
+    const expectedResult = {
+      type,
+      id,
+      newSpaces,
+      ...(isUpdateRequired && { esRequestIndex: bulkOperationRequestIndexCounter++ }),
+    };
+
+    if (isUpdateRequired) {
+      const documentMetadata = {
+        _id: serializer.generateRawId(undefined, type, id),
+        _index: getIndexForType(type),
+        ...versionProperties,
+      };
+      if (newSpaces.length) {
+        const documentToSave = { updated_at: time, namespaces: newSpaces };
+        // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
+        bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
+      } else {
+        bulkOperationParams.push({ delete: documentMetadata });
+      }
+    }
+
+    return { tag: 'Right', value: expectedResult };
+  });
 
   const { refresh = DEFAULT_REFRESH_SETTING } = options;
   const bulkOperationResponse = bulkOperationParams.length
@@ -268,7 +264,7 @@ export async function updateObjectsSpaces({
     objects: expectedBulkOperationResults.map<SavedObjectsUpdateObjectsSpacesResponseObject>(
       (expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error;
+          return expectedResult.value;
         }
 
         const { type, id, newSpaces, esRequestIndex } = expectedResult.value;

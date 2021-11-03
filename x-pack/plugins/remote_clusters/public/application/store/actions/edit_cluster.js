@@ -97,14 +97,16 @@ export const editCluster = (cluster) => async (dispatch) => {
   }
 };
 
-export const startEditingCluster = ({ clusterName }) => (dispatch) => {
-  dispatch(loadClusters());
+export const startEditingCluster =
+  ({ clusterName }) =>
+  (dispatch) => {
+    dispatch(loadClusters());
 
-  dispatch({
-    type: EDIT_CLUSTER_START,
-    payload: { clusterName },
-  });
-};
+    dispatch({
+      type: EDIT_CLUSTER_START,
+      payload: { clusterName },
+    });
+  };
 
 export const stopEditingCluster = () => (dispatch) => {
   // Load the clusters to refresh the one we just edited.

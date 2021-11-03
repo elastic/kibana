@@ -12,7 +12,7 @@ import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
-import { EsHitRecord } from '../../angular/context/api/context';
+import { EsHitRecord } from '../../types';
 /**
  * Button to expand a given row
  */

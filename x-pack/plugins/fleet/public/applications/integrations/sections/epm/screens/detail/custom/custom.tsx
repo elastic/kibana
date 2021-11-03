@@ -18,16 +18,16 @@ interface Props {
 }
 
 export const CustomViewPage: React.FC<Props> = memo(({ packageInfo }) => {
-  const CustomView = useUIExtension(packageInfo.name, 'package-detail-custom');
+  const customViewExtension = useUIExtension(packageInfo.name, 'package-detail-custom');
   const { getPath } = useLink();
   const pkgkey = useMemo(() => pkgKeyFromPackageInfo(packageInfo), [packageInfo]);
 
-  return CustomView ? (
+  return customViewExtension ? (
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1} />
       <EuiFlexItem grow={6}>
         <ExtensionWrapper>
-          <CustomView pkgkey={pkgkey} packageInfo={packageInfo} />
+          <customViewExtension.Component pkgkey={pkgkey} packageInfo={packageInfo} />
         </ExtensionWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>

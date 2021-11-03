@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 import { testTable } from './__fixtures__/test_tables';
-import { fontStyle, containerStyle } from './__fixtures__/test_styles';
+import { fontStyle, getContainerStyle } from './__fixtures__/test_styles';
 import { render } from './render';
 
 const renderTable = {
@@ -25,7 +25,12 @@ const renderTable = {
 describe('render', () => {
   const fn = functionWrapper(render);
 
-  it('returns a render', () => {
+  let containerStyle;
+  beforeEach(async () => {
+    containerStyle = await getContainerStyle();
+  });
+
+  it('returns a render', async () => {
     const result = fn(renderTable, {
       as: 'debug',
       css: '".canvasRenderEl { background-color: red; }"',

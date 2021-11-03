@@ -26,6 +26,7 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 
@@ -47,7 +48,7 @@ function getFilterEntity(entityName, entityValue, filter) {
   return <EntityCell entityName={entityName} entityValue={entityValue} filter={filter} />;
 }
 
-function getDetailsItems(anomaly, examples, filter) {
+function getDetailsItems(anomaly, filter) {
   const source = anomaly.source;
 
   // TODO - when multivariate analyses are more common,
@@ -184,10 +185,54 @@ function getDetailsItems(anomaly, examples, filter) {
   }
 
   items.push({
+    title: (
+      <EuiToolTip
+        position="left"
+        content={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip', {
+          defaultMessage:
+            'A normalized score between 0-100, which indicates the relative significance of the anomaly record result. This value might change as new data is analyzed.',
+        })}
+      >
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTitle', {
+            defaultMessage: 'Record score',
+          })}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </span>
+      </EuiToolTip>
+    ),
+    description: Math.floor(1000 * source.record_score) / 1000,
+  });
+
+  items.push({
+    title: (
+      <EuiToolTip
+        position="left"
+        content={i18n.translate(
+          'xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTooltip',
+          {
+            defaultMessage:
+              'A normalized score between 0-100, which indicates the relative significance of the anomaly record when the bucket was initially processed.',
+          }
+        )}
+      >
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTitle', {
+            defaultMessage: 'Initial record score',
+          })}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </span>
+      </EuiToolTip>
+    ),
+    description: Math.floor(1000 * source.initial_record_score) / 1000,
+  });
+
+  items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.probabilityTitle', {
       defaultMessage: 'Probability',
     }),
-    description: source.probability,
+    description:
+      source.probability !== undefined ? Number.parseFloat(source.probability).toPrecision(3) : '',
   });
 
   // If there was only one cause, the actual, typical and by_field
@@ -469,7 +514,7 @@ export class AnomalyDetails extends Component {
   }
 
   renderDetails() {
-    const detailItems = getDetailsItems(this.props.anomaly, this.props.examples, this.props.filter);
+    const detailItems = getDetailsItems(this.props.anomaly, this.props.filter);
     const isInterimResult = get(this.props.anomaly, 'source.is_interim', false);
     return (
       <React.Fragment>

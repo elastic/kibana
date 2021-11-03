@@ -24,12 +24,12 @@ export function netflowLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'netflowLogs',
     name: i18n.translate('home.tutorials.netflowLogs.nameTitle', {
-      defaultMessage: 'NetFlow / IPFIX Collector',
+      defaultMessage: 'NetFlow / IPFIX Records',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.netflowLogs.shortDescription', {
-      defaultMessage: 'Collect NetFlow and IPFIX flow records.',
+      defaultMessage: 'Collect records from NetFlow and IPFIX flow with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.netflowLogs.longDescription', {
       defaultMessage:
@@ -58,5 +58,6 @@ export function netflowLogsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

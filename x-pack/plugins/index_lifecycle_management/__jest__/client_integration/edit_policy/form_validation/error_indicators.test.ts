@@ -7,10 +7,10 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> error indicators', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: ValidationTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -26,7 +26,7 @@ describe('<EditPolicy /> error indicators', () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupValidationTestBed();
     });
 
     const { component } = testBed;

@@ -1,27 +1,24 @@
 @import '../../../mixins';
 
 .lnsWorkspacePanelWrapper {
-  @include euiScrollBar;
-  // Override panel size padding
-  padding: 0 !important; // sass-lint:disable-line no-important
   margin-bottom: $euiSize;
   display: flex;
   flex-direction: column;
   position: relative; // For positioning the dnd overlay
   min-height: $euiSizeXXL * 10;
   overflow: visible;
-  border: none;
   height: 100%;
-  @include kbnThemeStyle('v7') {
-    border: none !important; // sass-lint:disable-line no-important
-  }
 
   .lnsWorkspacePanelWrapper__pageContentBody {
+    @include euiBottomShadowMedium;
     @include euiScrollBar;
     flex-grow: 1;
     display: flex;
     align-items: stretch;
     justify-content: stretch;
+    border-radius: $euiBorderRadius;
+    background: $euiColorEmptyShade;
+    height: 100%;
 
     > * {
       flex: 1 1 100%;
@@ -38,10 +35,7 @@
 }
 
 .lnsWorkspacePanel__dragDrop {
-  width: 100%;
-  height: 100%;
-  border: $euiBorderThin;
-  border-radius: $euiBorderRadiusSmall;
+  border: $euiBorderWidthThin solid transparent;
 
   &.lnsDragDrop-isDropTarget {
     @include lnsDroppable;

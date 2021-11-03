@@ -46,7 +46,7 @@ export class CollapsiblePanel extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         {this.getTitle()}
         {this.getForm()}
       </EuiPanel>

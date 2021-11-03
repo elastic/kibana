@@ -30,23 +30,18 @@ import { StyleSettings } from './style_settings';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { LAYER_TYPE } from '../../../common/constants';
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
-import { IVectorLayer } from '../../classes/layers/vector_layer';
+import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
 import { ImmutableSourceProperty, OnSourceChangeArgs } from '../../classes/sources/source';
 import { IField } from '../../classes/fields/field';
 
 const localStorage = new Storage(window.localStorage);
 
 export interface Props {
+  clearJoins: (layer: ILayer) => void;
   selectedLayer?: ILayer;
-  updateSourceProp: (
-    layerId: string,
-    propName: string,
-    value: unknown,
-    newLayerType?: LAYER_TYPE
-  ) => void;
+  updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
 }
 
 interface State {
@@ -111,18 +106,20 @@ export class EditLayerPanel extends Component<Props, State> {
   };
 
   async _loadLeftJoinFields() {
-    if (
-      !this.props.selectedLayer ||
-      !this.props.selectedLayer.showJoinEditor() ||
-      (this.props.selectedLayer as IVectorLayer).getLeftJoinFields === undefined
-    ) {
+    if (!this.props.selectedLayer || !isVectorLayer(this.props.selectedLayer)) {
+      return;
+    }
+
+    const vectorLayer = this.props.selectedLayer as IVectorLayer;
+    if (!vectorLayer.showJoinEditor() || vectorLayer.getLeftJoinFields === undefined) {
       return;
     }
 
     let leftJoinFields: JoinField[] = [];
     try {
-      const leftFieldsInstances = await (this.props
-        .selectedLayer as IVectorLayer).getLeftJoinFields();
+      const leftFieldsInstances = await (
+        this.props.selectedLayer as IVectorLayer
+      ).getLeftJoinFields();
       const leftFieldPromises = leftFieldsInstances.map(async (field: IField) => {
         return {
           name: field.getName(),
@@ -139,9 +136,12 @@ export class EditLayerPanel extends Component<Props, State> {
   }
 
   _onSourceChange = (...args: OnSourceChangeArgs[]) => {
-    for (let i = 0; i < args.length; i++) {
-      const { propName, value, newLayerType } = args[i];
-      this.props.updateSourceProp(this.props.selectedLayer!.getId(), propName, value, newLayerType);
+    return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
+  };
+
+  _clearJoins = () => {
+    if (this.props.selectedLayer) {
+      this.props.clearJoins(this.props.selectedLayer);
     }
   };
 
@@ -181,7 +181,11 @@ export class EditLayerPanel extends Component<Props, State> {
   }
 
   _renderJoinSection() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.showJoinEditor()) {
+    if (!this.props.selectedLayer || !isVectorLayer(this.props.selectedLayer)) {
+      return;
+    }
+    const vectorLayer = this.props.selectedLayer as IVectorLayer;
+    if (!vectorLayer.showJoinEditor()) {
       return null;
     }
 
@@ -189,7 +193,7 @@ export class EditLayerPanel extends Component<Props, State> {
       <Fragment>
         <EuiPanel>
           <JoinEditor
-            layer={this.props.selectedLayer}
+            layer={vectorLayer}
             leftJoinFields={this.state.leftJoinFields}
             layerDisplayName={this.state.displayName}
           />
@@ -273,6 +277,11 @@ export class EditLayerPanel extends Component<Props, State> {
               />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
+                clearJoins: this._clearJoins,
+                currentLayerType: this.props.selectedLayer.getType(),
+                hasJoins: isVectorLayer(this.props.selectedLayer)
+                  ? (this.props.selectedLayer as IVectorLayer).hasJoins()
+                  : false,
                 onChange: this._onSourceChange,
               })}
 

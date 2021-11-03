@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ConfigService } from '@kbn/config';
+import { ConfigService, ConfigValidateParameters } from '@kbn/config';
 import { CriticalError } from '../errors';
 
 const ignoredPaths = ['dev.', 'elastic.apm.'];
@@ -14,9 +14,12 @@ const ignoredPaths = ['dev.', 'elastic.apm.'];
 const invalidConfigExitCode = 78;
 const legacyInvalidConfigExitCode = 64;
 
-export async function ensureValidConfiguration(configService: ConfigService) {
+export async function ensureValidConfiguration(
+  configService: ConfigService,
+  params?: ConfigValidateParameters
+) {
   try {
-    await configService.validate();
+    await configService.validate(params);
   } catch (e) {
     throw new CriticalError(e.message, 'InvalidConfig', invalidConfigExitCode, e);
   }

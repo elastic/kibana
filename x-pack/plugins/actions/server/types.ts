@@ -16,13 +16,15 @@ import {
   SavedObjectAttributes,
   ElasticsearchClient,
   RequestHandlerContext,
+  SavedObjectReference,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
+import { TaskInfo } from './lib/action_executor';
 export { ActionTypeExecutorResult } from '../common';
 export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
 export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
 export { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
-
+export { SwimlanePublicConfigurationType } from './builtin_action_types/swimlane/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
@@ -57,6 +59,8 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
+  isEphemeral?: boolean;
+  taskInfo?: TaskInfo;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
@@ -107,6 +111,7 @@ export interface ActionType<
     params?: ValidatorType<Params>;
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
   };
   renderParameterTemplates?(
     params: Params,
@@ -132,9 +137,24 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   apiKey?: string;
 }
 
-export interface ActionTaskExecutorParams {
+interface PersistedActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
+}
+interface EphemeralActionTaskExecutorParams {
+  spaceId: string;
+  taskParams: ActionTaskParams;
+  references?: SavedObjectReference[];
+}
+
+export type ActionTaskExecutorParams =
+  | PersistedActionTaskExecutorParams
+  | EphemeralActionTaskExecutorParams;
+
+export function isPersistedActionTask(
+  actionTask: ActionTaskExecutorParams
+): actionTask is PersistedActionTaskExecutorParams {
+  return typeof (actionTask as PersistedActionTaskExecutorParams).actionTaskParamsId === 'string';
 }
 
 export interface ProxySettings {
@@ -142,7 +162,7 @@ export interface ProxySettings {
   proxyBypassHosts: Set<string> | undefined;
   proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
-  proxyTLSSettings: TLSSettings;
+  proxySSLSettings: SSLSettings;
 }
 
 export interface ResponseSettings {
@@ -150,6 +170,6 @@ export interface ResponseSettings {
   timeout: number;
 }
 
-export interface TLSSettings {
+export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
 }

@@ -12,9 +12,9 @@ import type {
   EntryMatch,
   EntryMatchWildcard,
   EntryNested,
+  ExceptionListItemSchema,
   NestedEntriesArray,
   OsType,
-  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -29,9 +29,13 @@ import {
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
-  UpdateTrustedApp,
   TrustedAppEntryTypes,
+  UpdateTrustedApp,
 } from '../../../../common/endpoint/types';
+import {
+  POLICY_REFERENCE_PREFIX,
+  tagsToEffectScope,
+} from '../../../../common/endpoint/service/trusted_apps/mapping';
 
 type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
 type Mapping<T extends string, U> = { [K in T]: U };
@@ -48,7 +52,6 @@ const OPERATING_SYSTEM_TO_OS_TYPE: Mapping<OperatingSystem, OsType> = {
   [OperatingSystem.WINDOWS]: 'windows',
 };
 
-const POLICY_REFERENCE_PREFIX = 'policy:';
 const OPERATOR_VALUE = 'included';
 
 const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
@@ -61,21 +64,6 @@ export const createConditionEntry = <T extends ConditionEntryField>(
   value: string
 ): ConditionEntry<T> => {
   return { field, value, type, operator: OPERATOR_VALUE };
-};
-
-export const tagsToEffectScope = (tags: string[]): EffectScope => {
-  const policyReferenceTags = tags.filter((tag) => tag.startsWith(POLICY_REFERENCE_PREFIX));
-
-  if (policyReferenceTags.some((tag) => tag === `${POLICY_REFERENCE_PREFIX}all`)) {
-    return {
-      type: 'global',
-    };
-  } else {
-    return {
-      type: 'policy',
-      policies: policyReferenceTags.map((tag) => tag.substr(POLICY_REFERENCE_PREFIX.length)),
-    };
-  }
 };
 
 export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
@@ -134,7 +122,7 @@ export const exceptionListItemToTrustedApp = (
     const grouped = entriesToConditionEntriesMap(exceptionListItem.entries);
 
     return {
-      id: exceptionListItem.id,
+      id: exceptionListItem.item_id,
       version: exceptionListItem._version || '',
       name: exceptionListItem.name,
       description: exceptionListItem.description,

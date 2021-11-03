@@ -156,32 +156,36 @@ const Prompt = () => (
   </EuiFlexGroup>
 );
 
-export const renderEndzoneTooltip = (
-  xInterval?: number,
-  domainStart?: number,
-  domainEnd?: number,
-  formatter?: (v: any) => string,
-  renderValue = true
-) => (headerData: TooltipValue): JSX.Element | string => {
-  const headerDataValue = headerData.value;
-  const formattedValue = formatter ? formatter(headerDataValue) : headerDataValue;
+export const renderEndzoneTooltip =
+  (
+    xInterval?: number,
+    domainStart?: number,
+    domainEnd?: number,
+    formatter?: (v: any) => string,
+    renderValue = true
+  ) =>
+  (headerData: TooltipValue): JSX.Element | string => {
+    const headerDataValue = headerData.value;
+    const formattedValue = formatter ? formatter(headerDataValue) : headerDataValue;
 
-  if (
-    (domainStart !== undefined && domainStart > headerDataValue) ||
-    (domainEnd !== undefined && xInterval !== undefined && domainEnd - xInterval < headerDataValue)
-  ) {
-    return (
-      <>
-        <Prompt />
-        {renderValue && (
-          <>
-            <EuiSpacer size="xs" />
-            <p>{formattedValue}</p>
-          </>
-        )}
-      </>
-    );
-  }
+    if (
+      (domainStart !== undefined && domainStart > headerDataValue) ||
+      (domainEnd !== undefined &&
+        xInterval !== undefined &&
+        domainEnd - xInterval < headerDataValue)
+    ) {
+      return (
+        <>
+          <Prompt />
+          {renderValue && (
+            <>
+              <EuiSpacer size="xs" />
+              <p>{formattedValue}</p>
+            </>
+          )}
+        </>
+      );
+    }
 
-  return renderValue ? formattedValue : null;
-};
+    return renderValue ? formattedValue : null;
+  };

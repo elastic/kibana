@@ -6,7 +6,6 @@
  */
 
 import { ViewStrings } from '../../../i18n';
-
 const { RevealImage: strings } = ViewStrings;
 
 export const revealImage = () => ({

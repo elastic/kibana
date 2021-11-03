@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { SnapshotRestoreServerPlugin } from './plugin';
-import { configSchema, SnapshotRestoreConfig } from './config';
+
+export { config } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) => new SnapshotRestoreServerPlugin(ctx);
-
-export const config: PluginConfigDescriptor<SnapshotRestoreConfig> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    slm_ui: true,
-  },
-};

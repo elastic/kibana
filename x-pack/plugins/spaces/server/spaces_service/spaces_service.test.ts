@@ -22,7 +22,7 @@ const createService = (serverBasePath: string = '') => {
 
   const coreStart = coreMock.createStart();
 
-  const respositoryMock = ({
+  const respositoryMock = {
     get: jest.fn().mockImplementation((type, id) => {
       if (type === 'space' && id === 'foo') {
         return Promise.resolve({
@@ -45,7 +45,7 @@ const createService = (serverBasePath: string = '') => {
       }
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }),
-  } as unknown) as SavedObjectsRepository;
+  } as unknown as SavedObjectsRepository;
 
   coreStart.savedObjects.createInternalRepository.mockReturnValue(respositoryMock);
   coreStart.savedObjects.createScopedRepository.mockReturnValue(respositoryMock);

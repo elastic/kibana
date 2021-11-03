@@ -13,6 +13,7 @@
 // the event log
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 type DeepPartial<T> = {
@@ -91,7 +92,6 @@ export const EventSchema = schema.maybe(
         ruleset: ecsString(),
         uuid: ecsString(),
         version: ecsString(),
-        namespace: ecsString(),
       })
     ),
     user: schema.maybe(
@@ -102,12 +102,40 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
+        task: schema.maybe(
+          schema.object({
+            scheduled: ecsDate(),
+            schedule_delay: ecsNumber(),
+          })
+        ),
         alerting: schema.maybe(
           schema.object({
             instance_id: ecsString(),
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
             status: ecsString(),
+          })
+        ),
+        alert: schema.maybe(
+          schema.object({
+            rule: schema.maybe(
+              schema.object({
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                    status: ecsString(),
+                    status_order: ecsNumber(),
+                    metrics: schema.maybe(
+                      schema.object({
+                        total_indexing_duration_ms: ecsNumber(),
+                        total_search_duration_ms: ecsNumber(),
+                        execution_gap_duration_s: ecsNumber(),
+                      })
+                    ),
+                  })
+                ),
+              })
+            ),
           })
         ),
         saved_objects: schema.maybe(
@@ -121,6 +149,8 @@ export const EventSchema = schema.maybe(
             })
           )
         ),
+        space_ids: ecsStringMulti(),
+        version: ecsVersion(),
       })
     ),
   })
@@ -147,4 +177,13 @@ const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
+}
+
+function validateVersion(version: string) {
+  if (semver.valid(version)) return;
+  return 'string is not a valid version: ' + version;
 }

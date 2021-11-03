@@ -7,9 +7,14 @@
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '../../../../../lists/server/mocks';
+import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   ConditionEntryField,
+  MaybeImmutable,
   OperatingSystem,
   TrustedApp,
 } from '../../../../common/endpoint/types';
@@ -22,12 +27,22 @@ import {
   getTrustedAppsSummary,
   updateTrustedApp,
 } from './service';
-import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+import {
+  TrustedAppNotFoundError,
+  TrustedAppVersionConflictError,
+  TrustedAppPolicyNotExistsError,
+} from './errors';
 import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { updateExceptionListItemImplementationMock } from './test_utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { getPackagePoliciesResponse, getTrustedAppByPolicy } from './mocks';
+import { EndpointLicenseError } from '../../errors';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
+const packagePolicyClient =
+  createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
+const savedObjectClient =
+  savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClientContract>;
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   _version: 'abc123',
@@ -70,16 +85,19 @@ const TRUSTED_APP: TrustedApp = {
   ],
 };
 
-describe('service', () => {
+describe('TrustedApps service', () => {
   beforeEach(() => {
     exceptionsListClient.deleteExceptionListItem.mockReset();
+    exceptionsListClient.getExceptionListItem.mockReset();
     exceptionsListClient.createExceptionListItem.mockReset();
     exceptionsListClient.findExceptionListItem.mockReset();
     exceptionsListClient.createTrustedAppsList.mockReset();
+    packagePolicyClient.getByIDs.mockReset();
   });
 
   describe('deleteTrustedApp', () => {
     it('should delete existing trusted app', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
       exceptionsListClient.deleteExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
 
       expect(await deleteTrustedApp(exceptionsListClient, { id: '123' })).toBeUndefined();
@@ -91,6 +109,7 @@ describe('service', () => {
     });
 
     it('should throw for non existing trusted app', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
       exceptionsListClient.deleteExceptionListItem.mockResolvedValue(null);
 
       await expect(deleteTrustedApp(exceptionsListClient, { id: '123' })).rejects.toBeInstanceOf(
@@ -103,20 +122,26 @@ describe('service', () => {
     it('should create trusted app', async () => {
       exceptionsListClient.createExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
 
-      const result = await createTrustedApp(exceptionsListClient, {
-        name: 'linux trusted app 1',
-        description: 'Linux trusted app 1',
-        effectScope: { type: 'global' },
-        os: OperatingSystem.LINUX,
-        entries: [
-          createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
-          createConditionEntry(
-            ConditionEntryField.HASH,
-            'match',
-            '1234234659af249ddf3e40864e9fb241'
-          ),
-        ],
-      });
+      const result = await createTrustedApp(
+        exceptionsListClient,
+        savedObjectClient,
+        packagePolicyClient,
+        {
+          name: 'linux trusted app 1',
+          description: 'Linux trusted app 1',
+          effectScope: { type: 'global' },
+          os: OperatingSystem.LINUX,
+          entries: [
+            createConditionEntry(ConditionEntryField.PATH, 'match', '/bin/malware'),
+            createConditionEntry(
+              ConditionEntryField.HASH,
+              'match',
+              '1234234659af249ddf3e40864e9fb241'
+            ),
+          ],
+        },
+        true
+      );
 
       expect(result).toEqual({ data: TRUSTED_APP });
 
@@ -126,24 +151,96 @@ describe('service', () => {
     it('should create trusted app with correct wildcard type', async () => {
       exceptionsListClient.createExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
 
-      const result = await createTrustedApp(exceptionsListClient, {
-        name: 'linux trusted app 1',
-        description: 'Linux trusted app 1',
-        effectScope: { type: 'global' },
-        os: OperatingSystem.LINUX,
-        entries: [
-          createConditionEntry(ConditionEntryField.PATH, 'wildcard', '/bin/malware'),
-          createConditionEntry(
-            ConditionEntryField.HASH,
-            'wildcard',
-            '1234234659af249ddf3e40864e9fb241'
-          ),
-        ],
-      });
+      const result = await createTrustedApp(
+        exceptionsListClient,
+        savedObjectClient,
+        packagePolicyClient,
+        {
+          name: 'linux trusted app 1',
+          description: 'Linux trusted app 1',
+          effectScope: { type: 'global' },
+          os: OperatingSystem.LINUX,
+          entries: [
+            createConditionEntry(ConditionEntryField.PATH, 'wildcard', '/bin/malware'),
+            createConditionEntry(
+              ConditionEntryField.HASH,
+              'wildcard',
+              '1234234659af249ddf3e40864e9fb241'
+            ),
+          ],
+        },
+        true
+      );
 
       expect(result).toEqual({ data: TRUSTED_APP });
 
       expect(exceptionsListClient.createTrustedAppsList).toHaveBeenCalled();
+    });
+
+    it("should throw wrong policy error if some policy doesn't exists", async () => {
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+      await expect(
+        createTrustedApp(
+          exceptionsListClient,
+          savedObjectClient,
+          packagePolicyClient,
+          {
+            name: 'linux trusted app 1',
+            description: 'Linux trusted app 1',
+            effectScope: {
+              type: 'policy',
+              policies: [
+                'e5cbb9cf-98aa-4303-a04b-6a1165915079',
+                '9da95be9-9bee-4761-a8c4-28d6d9bd8c71',
+              ],
+            },
+            os: OperatingSystem.LINUX,
+            entries: [
+              createConditionEntry(ConditionEntryField.PATH, 'wildcard', '/bin/malware'),
+              createConditionEntry(
+                ConditionEntryField.HASH,
+                'wildcard',
+                '1234234659af249ddf3e40864e9fb241'
+              ),
+            ],
+          },
+          true
+        )
+      ).rejects.toBeInstanceOf(TrustedAppPolicyNotExistsError);
+    });
+
+    it('should throw when license under platinum and by policy', async () => {
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+      await expect(
+        createTrustedApp(
+          exceptionsListClient,
+          savedObjectClient,
+          packagePolicyClient,
+          {
+            name: 'linux trusted app 1',
+            description: 'Linux trusted app 1',
+            effectScope: {
+              type: 'policy',
+              policies: [
+                'e5cbb9cf-98aa-4303-a04b-6a1165915079',
+                '9da95be9-9bee-4761-a8c4-28d6d9bd8c71',
+              ],
+            },
+            os: OperatingSystem.LINUX,
+            entries: [
+              createConditionEntry(ConditionEntryField.PATH, 'wildcard', '/bin/malware'),
+              createConditionEntry(
+                ConditionEntryField.HASH,
+                'wildcard',
+                '1234234659af249ddf3e40864e9fb241'
+              ),
+            ],
+          },
+          false
+        )
+      ).rejects.toBeInstanceOf(EndpointLicenseError);
     });
   });
 
@@ -224,7 +321,20 @@ describe('service', () => {
     });
 
     it('should return summary of trusted app items', async () => {
-      expect(await getTrustedAppsSummary(exceptionsListClient)).toEqual({
+      expect(await getTrustedAppsSummary(exceptionsListClient, {})).toEqual({
+        linux: 45,
+        windows: 55,
+        macos: 30,
+        total: 130,
+      });
+    });
+
+    it('should return summary of trusted app items when filtering by policyId', async () => {
+      expect(
+        await getTrustedAppsSummary(exceptionsListClient, {
+          kuery: `exception-list-agnostic.attributes.tags:"policy:caf1a334-53f3-4be9-814d-a32245f43d34" OR exception-list-agnostic.attributes.tags:"policy:all"`,
+        })
+      ).toEqual({
         linux: 45,
         windows: 55,
         macos: 30,
@@ -251,7 +361,14 @@ describe('service', () => {
       trustedAppForUpdate.entries = [trustedAppForUpdate.entries[0]];
 
       await expect(
-        updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, trustedAppForUpdate)
+        updateTrustedApp(
+          exceptionsListClient,
+          savedObjectClient,
+          packagePolicyClient,
+          TRUSTED_APP.id,
+          trustedAppForUpdate,
+          true
+        )
       ).resolves.toEqual({
         data: {
           created_at: '11/11/2011T11:11:11.111',
@@ -279,9 +396,16 @@ describe('service', () => {
     });
 
     it('should throw a Not Found error if trusted app is not found prior to making update', async () => {
-      exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(null);
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
       await expect(
-        updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, toUpdateTrustedApp(TRUSTED_APP))
+        updateTrustedApp(
+          exceptionsListClient,
+          savedObjectClient,
+          packagePolicyClient,
+          TRUSTED_APP.id,
+          toUpdateTrustedApp(TRUSTED_APP),
+          true
+        )
       ).rejects.toBeInstanceOf(TrustedAppNotFoundError);
     });
 
@@ -292,7 +416,14 @@ describe('service', () => {
       );
 
       await expect(
-        updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, toUpdateTrustedApp(TRUSTED_APP))
+        updateTrustedApp(
+          exceptionsListClient,
+          savedObjectClient,
+          packagePolicyClient,
+          TRUSTED_APP.id,
+          toUpdateTrustedApp(TRUSTED_APP),
+          true
+        )
       ).rejects.toBeInstanceOf(TrustedAppVersionConflictError);
     });
 
@@ -305,8 +436,47 @@ describe('service', () => {
       exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(null);
 
       await expect(
-        updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, toUpdateTrustedApp(TRUSTED_APP))
+        updateTrustedApp(
+          exceptionsListClient,
+          savedObjectClient,
+          packagePolicyClient,
+          TRUSTED_APP.id,
+          toUpdateTrustedApp(TRUSTED_APP),
+          true
+        )
       ).rejects.toBeInstanceOf(TrustedAppNotFoundError);
+    });
+
+    it("should throw wrong policy error if some policy doesn't exists during update", async () => {
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+      const trustedAppByPolicy = getTrustedAppByPolicy();
+      await expect(
+        updateTrustedApp(
+          exceptionsListClient,
+          savedObjectClient,
+          packagePolicyClient,
+          trustedAppByPolicy.id,
+          toUpdateTrustedApp(trustedAppByPolicy as MaybeImmutable<TrustedApp>),
+          true
+        )
+      ).rejects.toBeInstanceOf(TrustedAppPolicyNotExistsError);
+    });
+
+    it('should throw when license under platinum and by policy', async () => {
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+      const trustedAppByPolicy = getTrustedAppByPolicy();
+      await expect(
+        updateTrustedApp(
+          exceptionsListClient,
+          savedObjectClient,
+          packagePolicyClient,
+          trustedAppByPolicy.id,
+          toUpdateTrustedApp(trustedAppByPolicy as MaybeImmutable<TrustedApp>),
+          false
+        )
+      ).rejects.toBeInstanceOf(EndpointLicenseError);
     });
   });
 
@@ -321,6 +491,23 @@ describe('service', () => {
       await expect(getTrustedApp(exceptionsListClient, '123')).rejects.toBeInstanceOf(
         TrustedAppNotFoundError
       );
+    });
+
+    it('should try to find trusted app by `itemId` and then by `id`', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
+      await getTrustedApp(exceptionsListClient, '123').catch(() => Promise.resolve());
+
+      expect(exceptionsListClient.getExceptionListItem).toHaveBeenCalledTimes(2);
+      expect(exceptionsListClient.getExceptionListItem).toHaveBeenNthCalledWith(1, {
+        itemId: '123',
+        id: undefined,
+        namespaceType: 'agnostic',
+      });
+      expect(exceptionsListClient.getExceptionListItem).toHaveBeenNthCalledWith(2, {
+        itemId: undefined,
+        id: '123',
+        namespaceType: 'agnostic',
+      });
     });
   });
 });

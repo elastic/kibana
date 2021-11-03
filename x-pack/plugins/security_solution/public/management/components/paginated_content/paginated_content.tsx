@@ -153,11 +153,14 @@ export const PaginatedContent = memo(
       [pagination?.pageSize, pagination?.totalItemCount]
     );
 
+    // If loading is done,
+    // then check to ensure the pagination numbers are correct based by ensuring that the
+    // `pageIndex` is not higher than the number of available pages.
     useEffect(() => {
-      if (pageCount > 0 && pageCount < (pagination?.pageIndex || 0) + 1) {
+      if (!loading && pageCount > 0 && pageCount < (pagination?.pageIndex || 0) + 1) {
         onChange({ pageIndex: pageCount - 1, pageSize: pagination?.pageSize || 0 });
       }
-    }, [pageCount, onChange, pagination]);
+    }, [pageCount, onChange, pagination, loading]);
 
     const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
       (pageSize) => {
@@ -197,9 +200,10 @@ export const PaginatedContent = memo(
           let key: Key;
 
           if (itemId) {
-            key = (item[itemId] as unknown) as Key;
+            key = item[itemId] as unknown as Key;
           } else {
             if (itemKeys.has(item)) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               key = itemKeys.get(item)!;
             } else {
               key = generateUUI();

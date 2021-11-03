@@ -8,9 +8,9 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { TimelineEventsType } from '../../../../common/types/timeline';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
@@ -271,13 +271,13 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
 const TIMELINE_EVENT_DETAILS_OFFSET = 40;
 
 interface WidthProp {
-  width?: number;
+  width: number;
 }
 
 export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
   role: 'dialog',
   style: {
-    width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
+    width: `${width - TIMELINE_EVENT_DETAILS_OFFSET}px`,
   },
 }))<WidthProp>``;
 

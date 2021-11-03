@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -59,8 +59,8 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
 
       try {
         const { http } = HttpLogic.values;
-        const response = await http.get(
-          `/api/app_search/engines/${engineName}/documents/${documentId}`
+        const response = await http.get<{ fields: FieldDetails[] }>(
+          `/internal/app_search/engines/${engineName}/documents/${documentId}`
         );
         actions.setFields(response.fields);
       } catch (e) {
@@ -81,17 +81,14 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
       );
       const DELETE_SUCCESS = i18n.translate(
         'xpack.enterpriseSearch.appSearch.documentDetail.deleteSuccess',
-        {
-          defaultMessage:
-            'Successfully marked document for deletion. It will be deleted momentarily.',
-        }
+        { defaultMessage: 'Your document was deleted' }
       );
 
       if (window.confirm(CONFIRM_DELETE)) {
         try {
           const { http } = HttpLogic.values;
-          await http.delete(`/api/app_search/engines/${engineName}/documents/${documentId}`);
-          setQueuedSuccessMessage(DELETE_SUCCESS);
+          await http.delete(`/internal/app_search/engines/${engineName}/documents/${documentId}`);
+          flashSuccessToast(DELETE_SUCCESS);
           navigateToUrl(generateEnginePath(ENGINE_DOCUMENTS_PATH));
         } catch (e) {
           flashAPIErrors(e);

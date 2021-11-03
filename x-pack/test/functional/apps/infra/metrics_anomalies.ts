@@ -15,7 +15,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
 
-  // Failing: See https://github.com/elastic/kibana/issues/100445
   describe('Metrics UI Anomaly Flyout', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');

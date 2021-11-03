@@ -8,7 +8,7 @@
 import { set } from '@elastic/safer-lodash-set';
 import { MissingRequiredError } from './error_missing_required';
 import { ElasticsearchMetric } from './metrics';
-import { createQuery } from './create_query.js';
+import { createQuery } from './create_query';
 
 let metric;
 

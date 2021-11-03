@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious commands being used with certutil.exe. CertUtil is a native Windows component which is part of Certificate Services. CertUtil is often abused by attackers to live off the land for stealthier command and control or data exfiltration.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious CertUtil Commands",
+  "query": "process where event.type == \"start\" and\n  (process.name : \"certutil.exe\" or process.pe.original_file_name == \"CertUtil.exe\") and \n  process.args : (\"?decode\", \"?encode\", \"?urlcache\", \"?verifyctl\", \"?encodehex\", \"?decodehex\")\n",
+  "references": [
+    "https://twitter.com/Moriarty_Meng/status/984380793383370752",
+    "https://twitter.com/egre55/status/1087685529016193025",
+    "https://www.sysadmins.lv/blog-en/certutil-tips-and-tricks-working-with-x509-file-format.aspx",
+    "https://docs.microsoft.com/en-us/archive/blogs/pki/basic-crl-checking-with-certutil"
+  ],
+  "risk_score": 47,
+  "rule_id": "fd70c98a-c410-42dc-a2e3-761c71848acf",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1140",
+          "name": "Deobfuscate/Decode Files or Information",
+          "reference": "https://attack.mitre.org/techniques/T1140/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 9
+}

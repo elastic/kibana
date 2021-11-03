@@ -21,6 +21,9 @@ export interface TemplateContext {
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   ubi?: boolean;
+  cloud?: boolean;
+  metricbeatTarball?: string;
+  filebeatTarball?: string;
   ironbank?: boolean;
   revision: string;
   architecture?: string;
