@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiCallOut } from '@elastic/eui';
+import { EuiLink, EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function AlertsDisclaimer() {
+  const dismissMessage = () => {};
+
   return (
     <EuiCallOut
       title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
@@ -32,6 +34,13 @@ export function AlertsDisclaimer() {
           ),
         }}
       />
+
+      <EuiSpacer size="l" />
+      <EuiButton fill color="warning" onClick={dismissMessage}>
+        {i18n.translate('xpack.observability.alertsDisclaimerDismissMessage', {
+          defaultMessage: 'Dismiss message',
+        })}
+      </EuiButton>
     </EuiCallOut>
   );
 }
