@@ -35,7 +35,7 @@ export function PercentileAnnotations({ percentiles }: Props) {
   const style: Partial<LineAnnotationStyle> = {
     line: {
       strokeWidth: 1,
-      stroke: euiLightVars.euiColorSecondary,
+      stroke: euiLightVars.euiColorSuccess,
       opacity: 1,
     },
   };

@@ -81,7 +81,7 @@ export function BreakdownChart({
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const annotationColor = theme.eui.euiColorSecondary;
+  const annotationColor = theme.eui.euiColorSuccess;
 
   const isEmpty = isTimeseriesEmpty(timeseries);
 
