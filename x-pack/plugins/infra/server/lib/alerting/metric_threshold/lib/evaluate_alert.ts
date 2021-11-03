@@ -74,6 +74,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
         esClient,
         criterion,
         config.metricAlias,
+        config.fields.timestamp,
         groupBy,
         filterQuery,
         timeframe,
@@ -146,6 +147,7 @@ const getMetric: (
   esClient: ElasticsearchClient,
   params: MetricExpressionParams,
   index: string,
+  timefield: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
   timeframe?: { start?: number; end: number },
@@ -154,6 +156,7 @@ const getMetric: (
   esClient,
   params,
   index,
+  timefield,
   groupBy,
   filterQuery,
   timeframe,
@@ -169,6 +172,7 @@ const getMetric: (
 
   const searchBody = getElasticsearchMetricQuery(
     params,
+    timefield,
     calculatedTimerange,
     hasGroupBy ? groupBy : undefined,
     filterQuery
