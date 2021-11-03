@@ -26,3 +26,9 @@ export function useCanvasFilters(groups?: string[]) {
 
   return filters;
 }
+
+export function useCanvasFiltersActions() {
+  return {
+    updateFilter: (val: any) => {},
+  };
+}

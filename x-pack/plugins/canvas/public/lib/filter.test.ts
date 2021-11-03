@@ -35,6 +35,7 @@ const formatterFactory = (value: unknown) => () => JSON.stringify(value);
 const fc: FC<any> = () => null;
 
 const simpleFilterValue: FilterType = {
+  id: 0,
   type: 'exactly',
   column: 'project',
   value: 'kibana',
@@ -42,6 +43,7 @@ const simpleFilterValue: FilterType = {
 };
 
 const filterWithNestedValue: FilterType = {
+  id: 1,
   type: 'exactlyNested' as any,
   column: 'project',
   value: { nestedField1: 'nestedField1', nestedField2: 'nestedField2' },
@@ -284,15 +286,17 @@ describe('formatFilter', () => {
 
 describe('groupFiltersBy', () => {
   const filters: FilterType[] = [
-    { type: 'exactly', column: 'project', value: 'kibana', filterGroup: 'someGroup' },
+    { id: 0, type: 'exactly', column: 'project', value: 'kibana', filterGroup: 'someGroup' },
     {
+      id: 1,
       type: 'time',
       column: '@timestamp',
       value: { from: 'some time', to: 'some time' },
       filterGroup: 'someGroup2',
     },
-    { type: 'exactly', column: 'country', value: 'US', filterGroup: 'someGroup2' },
+    { id: 3, type: 'exactly', column: 'country', value: 'US', filterGroup: 'someGroup2' },
     {
+      id: 4,
       type: 'time',
       column: 'time',
       value: { from: 'some time', to: 'some time' },

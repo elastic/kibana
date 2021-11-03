@@ -34,6 +34,7 @@ export type CanvasExactlyFilter = ExpressionValueFilter & {
 export type CanvasFilter = CanvasTimeFilter | CanvasExactlyFilter | CanvasLuceneFilter;
 
 export interface Filter {
+  id: string | number;
   type: keyof typeof FilterType;
   column: string | null;
   value: unknown;
@@ -57,7 +58,7 @@ export interface FormattedFilterViewField {
 }
 
 export type FilterViewInstance<FilterValue = unknown> = Record<
-  keyof Filter,
+  keyof Omit<Filter, 'id'>,
   SimpleFilterViewField | ComplexFilterViewField<FilterValue>
 >;
 
@@ -65,3 +66,10 @@ export type FlattenFilterViewInstance = Record<string, SimpleFilterViewField>;
 export type FormattedFilterViewInstance = Record<string, FormattedFilterViewField>;
 
 export type FilterField = keyof Filter;
+
+export interface FilterFieldProps {
+  value: string;
+  updateFilter: (filter: Filter) => void;
+  filter: Filter;
+  availableFilters: Filter[];
+}

@@ -7,12 +7,27 @@
 
 import React, { FC } from 'react';
 import { EuiDescriptionList, EuiPanel } from '@elastic/eui';
-import { FormattedFilterViewInstance } from '../../../types';
+import {
+  FormattedFilterViewInstance,
+  Filter as FilterType,
+  FilterFieldProps,
+} from '../../../types';
 
-interface Props {
-  filter: FormattedFilterViewInstance;
-  updateFilter?: (value: any) => void;
+interface InteractiveFilterProps {
+  filterView: FormattedFilterViewInstance;
+  filter: FilterType;
+  availableFilters: FilterType[];
+  updateFilter: (value: any) => void;
 }
+
+interface StaticFilterProps {
+  filterView: FormattedFilterViewInstance;
+  updateFilter?: (value: any) => void;
+  filter?: FilterType;
+  availableFilters?: FilterType[];
+}
+
+type Props = InteractiveFilterProps | StaticFilterProps;
 
 const titleStyle = {
   width: '40%',
@@ -22,22 +37,18 @@ const descriptionStyle = {
   width: '60%',
 };
 
-type CustomComponentProps = Omit<Props, 'filter'> & { value: string };
+const renderElement = (Component: FC<FilterFieldProps>, props: FilterFieldProps) => (
+  <Component {...props} />
+);
 
-const renderElement = (
-  Component: FC<
-    Omit<CustomComponentProps, 'updateFilter'> & { onChange?: CustomComponentProps['updateFilter'] }
-  >,
-  { updateFilter, ...props }: CustomComponentProps
-) => {
-  return <Component {...props} onChange={updateFilter} />;
-};
-
-export const Filter: FC<Props> = ({ filter, ...restProps }) => {
-  const filterView = Object.values(filter).map((filterValue) => ({
+export const Filter: FC<Props> = ({ filterView, ...restProps }) => {
+  const view = Object.values(filterView).map((filterValue) => ({
     title: filterValue.label,
     description: filterValue.component
-      ? renderElement(filterValue.component, { value: filterValue.formattedValue, ...restProps })
+      ? renderElement(filterValue.component, {
+          ...(restProps as InteractiveFilterProps),
+          value: filterValue.formattedValue,
+        })
       : filterValue.formattedValue,
   }));
 
@@ -45,7 +56,7 @@ export const Filter: FC<Props> = ({ filter, ...restProps }) => {
     <EuiPanel grow={false} hasShadow={false}>
       <EuiDescriptionList
         type="column"
-        listItems={filterView}
+        listItems={view}
         titleProps={{ style: titleStyle, className: 'eui-textBreakWord' }}
         descriptionProps={{ style: descriptionStyle, className: 'eui-textBreakWord' }}
       />

@@ -36,10 +36,11 @@ const collectArgs = (args: ExpressionFunctionAST['arguments']) => {
   );
 };
 
-export function adaptCanvasFilter(filter: ExpressionFunctionAST): Filter {
+export function adaptCanvasFilter(filter: ExpressionFunctionAST, id: string | number): Filter {
   const { function: type, arguments: args } = filter;
   const { column, filterGroup, value: valueArg, type: typeArg, ...rest } = args ?? {};
   return {
+    id,
     type: convertFunctionToFilterType(type),
     column: argToValue(column),
     filterGroup: argToValue(filterGroup),

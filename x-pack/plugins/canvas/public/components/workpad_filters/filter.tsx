@@ -6,13 +6,31 @@
  */
 
 import React, { FC } from 'react';
-import { FormattedFilterViewInstance } from '../../../types';
+import { FormattedFilterViewInstance, Filter as FilterType } from '../../../types';
+import { useCanvasFilters, useCanvasFiltersActions } from '../hooks/sidebar';
 import { Filter as Component } from './filter.component';
 
 interface Props {
-  filter: FormattedFilterViewInstance;
+  filterView: FormattedFilterViewInstance;
+  filter: FilterType;
 }
 
+const StaticFilter: FC<Props> = (props) => <Component {...props} />;
+
+const InteractiveFilter: FC<Props> = (props) => {
+  const filters = useCanvasFilters();
+  const { updateFilter } = useCanvasFiltersActions();
+
+  return <Component {...props} updateFilter={updateFilter} availableFilters={filters} />;
+};
+
 export const Filter: FC<Props> = (props) => {
-  return <Component {...props} />;
+  const { filterView } = props;
+
+  const isInteractive = Object.values(filterView).filter(({ component }) => component);
+  if (isInteractive) {
+    return <InteractiveFilter {...props} />;
+  }
+
+  return <StaticFilter {...props} />;
 };
