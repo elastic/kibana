@@ -30,13 +30,3 @@ if [ -z "${KIBANA_URL}" ]; then
   echo "Set KIBANA_URL in your environment"
   exit 1
 fi
-
-if [ -z "${TASK_MANAGER_INDEX}" ]; then
-  echo "Set TASK_MANAGER_INDEX in your environment"
-  exit 1
-fi
-
-if [ -z "${KIBANA_INDEX}" ]; then
-  echo "Set KIBANA_INDEX in your environment"
-  exit 1
-fi
