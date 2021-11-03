@@ -166,7 +166,7 @@ export interface AllocatedModel {
     inference_count: number;
     routing_state: {
       routing_state: string;
-      reason: string;
+      reason?: string;
     };
     last_access?: number;
   };
