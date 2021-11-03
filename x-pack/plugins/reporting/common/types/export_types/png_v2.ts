@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { LocatorParams } from '../../../common/types';
-import type { LayoutParams } from '../../lib/layouts';
-import type { BaseParams, BasePayload } from '../../types';
+import type { LocatorParams } from '../url';
+import type { LayoutParams } from '../layout';
+import type { BaseParams, BasePayload } from '../base';
 
 // Job params: structure of incoming user request data
 export interface JobParamsPNGV2 extends BaseParams {
