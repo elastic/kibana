@@ -1,0 +1,11 @@
+steps:
+  - command: .buildkite/scripts/steps/functional/uptime.sh
+    label: 'Uptime @elastic/synthetics Tests'
+    agents:
+      queue: ci-group-6
+    depends_on: build
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1

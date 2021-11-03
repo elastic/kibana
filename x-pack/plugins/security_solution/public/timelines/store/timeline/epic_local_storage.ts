@@ -19,6 +19,8 @@ import {
   applyDeltaToColumnWidth,
   setExcludedRowRendererIds,
   updateColumns,
+  updateColumnOrder,
+  updateColumnWidth,
   updateItemsPerPage,
   updateSort,
 } from './actions';
@@ -30,6 +32,8 @@ const timelineActionTypes = [
   upsertColumn.type,
   applyDeltaToColumnWidth.type,
   updateColumns.type,
+  updateColumnOrder.type,
+  updateColumnWidth.type,
   updateItemsPerPage.type,
   updateSort.type,
   setExcludedRowRendererIds.type,

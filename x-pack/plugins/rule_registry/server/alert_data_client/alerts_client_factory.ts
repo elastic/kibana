@@ -9,7 +9,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, KibanaRequest, Logger } from 'src/core/server';
 import { AlertingAuthorization } from '../../../alerting/server';
 import { SecurityPluginSetup } from '../../../security/server';
-import { RuleDataPluginService } from '../rule_data_plugin_service';
+import { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
 
 export interface AlertsClientFactoryProps {
@@ -17,7 +17,7 @@ export interface AlertsClientFactoryProps {
   esClient: ElasticsearchClient;
   getAlertingAuthorization: (request: KibanaRequest) => PublicMethodsOf<AlertingAuthorization>;
   securityPluginSetup: SecurityPluginSetup | undefined;
-  ruleDataService: RuleDataPluginService | null;
+  ruleDataService: IRuleDataService | null;
 }
 
 export class AlertsClientFactory {
@@ -28,7 +28,7 @@ export class AlertsClientFactory {
     request: KibanaRequest
   ) => PublicMethodsOf<AlertingAuthorization>;
   private securityPluginSetup!: SecurityPluginSetup | undefined;
-  private ruleDataService!: RuleDataPluginService | null;
+  private ruleDataService!: IRuleDataService | null;
 
   public initialize(options: AlertsClientFactoryProps) {
     /**

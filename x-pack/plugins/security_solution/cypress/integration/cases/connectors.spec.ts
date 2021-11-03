@@ -89,11 +89,11 @@ describe('Cases connectors', () => {
     addServiceNowConnector(snConnector);
 
     cy.wait('@createConnector').then(({ response }) => {
-      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('not.exist');
 
-      selectLastConnectorCreated(response!.body.id);
+      selectLastConnectorCreated(response?.body.id);
 
       cy.wait('@saveConnector', { timeout: 10000 }).its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');

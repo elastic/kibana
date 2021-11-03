@@ -16,10 +16,10 @@ import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
-  ES_GEO_FIELD_TYPE,
   RENDER_AS,
 } from '../../common/constants';
-import { getGridTile, getTile } from './get_tile';
+import { getEsTile } from './get_tile';
+import { getEsGridTile } from './get_grid_tile';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
 
@@ -43,8 +43,6 @@ export function initMVTRoutes({
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
-          geoFieldType: schema.string(),
-          searchSessionId: schema.maybe(schema.string()),
           token: schema.maybe(schema.string()),
         }),
       },
@@ -56,14 +54,15 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      // todo - replace with direct abortion of raw transport request
+      // const abortController = new AbortController();
+      // request.events.aborted$.subscribe(() => {
+      //   abortController.abort();
+      // });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getTile({
+      const tile = await getEsTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -72,9 +71,6 @@ export function initMVTRoutes({
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
         requestBody: requestBodyDSL as any,
-        geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
-        searchSessionId: query.searchSessionId,
-        abortSignal: abortController.signal,
       });
 
       return sendResponse(response, tile);
@@ -95,8 +91,6 @@ export function initMVTRoutes({
           requestBody: schema.string(),
           index: schema.string(),
           requestType: schema.string(),
-          geoFieldType: schema.string(),
-          searchSessionId: schema.maybe(schema.string()),
           token: schema.maybe(schema.string()),
         }),
       },
@@ -107,14 +101,16 @@ export function initMVTRoutes({
       response: KibanaResponseFactory
     ) => {
       const { query, params } = request;
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+
+      // todo - replace with direct abortion of raw transport request
+      // const abortController = new AbortController();
+      // request.events.aborted$.subscribe(() => {
+      //   abortController.abort();
+      // });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getGridTile({
+      const tile = await getEsGridTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -124,9 +120,6 @@ export function initMVTRoutes({
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
-        geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
-        searchSessionId: query.searchSessionId,
-        abortSignal: abortController.signal,
       });
 
       return sendResponse(response, tile);

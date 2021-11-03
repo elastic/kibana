@@ -79,14 +79,14 @@ describe('EventFiltersNotification', () => {
         type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: store.getState()!.management!.eventFilters!.form!.entry as ExceptionListItemSchema,
+          data: store.getState().management.eventFilters.form.entry as ExceptionListItemSchema,
         },
       });
     });
 
     expect(notifications.toasts.addSuccess).toBeCalledWith(
       getCreationSuccessMessage(
-        store.getState()!.management!.eventFilters!.form!.entry as CreateExceptionListItemSchema
+        store.getState().management.eventFilters.form.entry as CreateExceptionListItemSchema
       )
     );
     expect(notifications.toasts.addDanger).not.toBeCalled();
@@ -110,14 +110,14 @@ describe('EventFiltersNotification', () => {
         type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: store.getState()!.management!.eventFilters!.form!.entry as ExceptionListItemSchema,
+          data: store.getState().management.eventFilters.form.entry as ExceptionListItemSchema,
         },
       });
     });
 
     expect(notifications.toasts.addSuccess).toBeCalledWith(
       getUpdateSuccessMessage(
-        store.getState()!.management!.eventFilters!.form!.entry as CreateExceptionListItemSchema
+        store.getState().management.eventFilters.form.entry as CreateExceptionListItemSchema
       )
     );
     expect(notifications.toasts.addDanger).not.toBeCalled();
@@ -144,7 +144,7 @@ describe('EventFiltersNotification', () => {
           type: 'FailedResourceState',
           error: { message: 'error message', statusCode: 500, error: 'error' },
           lastLoadedState: getLastLoadedResourceState(
-            store.getState()!.management!.eventFilters!.form!.submissionResourceState
+            store.getState().management.eventFilters.form.submissionResourceState
           ),
         },
       });
@@ -154,7 +154,7 @@ describe('EventFiltersNotification', () => {
     expect(notifications.toasts.addDanger).toBeCalledWith(
       getCreationErrorMessage(
         (
-          store.getState()!.management!.eventFilters!.form!
+          store.getState().management.eventFilters.form
             .submissionResourceState as FailedResourceState
         ).error
       )
@@ -181,7 +181,7 @@ describe('EventFiltersNotification', () => {
           type: 'FailedResourceState',
           error: { message: 'error message', statusCode: 500, error: 'error' },
           lastLoadedState: getLastLoadedResourceState(
-            store.getState()!.management!.eventFilters!.form!.submissionResourceState
+            store.getState().management.eventFilters.form.submissionResourceState
           ),
         },
       });
@@ -191,7 +191,7 @@ describe('EventFiltersNotification', () => {
     expect(notifications.toasts.addDanger).toBeCalledWith(
       getUpdateErrorMessage(
         (
-          store.getState()!.management!.eventFilters!.form!
+          store.getState().management.eventFilters.form
             .submissionResourceState as FailedResourceState
         ).error
       )
@@ -211,7 +211,7 @@ describe('EventFiltersNotification', () => {
           type: 'FailedResourceState',
           error: { message: 'error message', statusCode: 500, error: 'error' },
           lastLoadedState: getLastLoadedResourceState(
-            store.getState()!.management!.eventFilters!.form!.submissionResourceState
+            store.getState().management.eventFilters.form.submissionResourceState
           ),
         },
       });
@@ -221,7 +221,7 @@ describe('EventFiltersNotification', () => {
     expect(notifications.toasts.addWarning).toBeCalledWith(
       getGetErrorMessage(
         (
-          store.getState()!.management!.eventFilters!.form!
+          store.getState().management.eventFilters.form
             .submissionResourceState as FailedResourceState
         ).error
       )

@@ -31,7 +31,7 @@ const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
 export type BackToExternalAppButtonProps = CommonProps & ListPageRouteState;
 export const BackToExternalAppButton = memo<BackToExternalAppButtonProps>(
   ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo, ...commonProps }) => {
-    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo!);
+    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo);
 
     return (
       <EuiButtonEmptyStyled
@@ -40,7 +40,7 @@ export const BackToExternalAppButton = memo<BackToExternalAppButtonProps>(
         flush="left"
         size="xs"
         iconType="arrowLeft"
-        href={backButtonUrl!}
+        href={backButtonUrl}
         onClick={handleBackOnClick}
         textProps={{ className: 'text' }}
       >

@@ -18,6 +18,7 @@ import type {
   InstallablePackage,
   InstallSource,
 } from '../../../../common';
+import { DEFAULT_PACKAGES } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
@@ -25,6 +26,7 @@ import {
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
+import { licenseService } from '../../';
 import type {
   Installation,
   AssetType,
@@ -264,6 +266,10 @@ async function installPackageFromRegistry({
     // get package info
     const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
+    if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
+      return { error: new Error(`Requires ${packageInfo.license} license`), installType };
+    }
+
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
@@ -464,6 +470,12 @@ export async function createInstallation(options: {
   const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
+  // For default packages, default the `keep_policies_up_to_date` setting to true. For all other
+  // package, default it to false.
+  const defaultKeepPoliciesUpToDate = DEFAULT_PACKAGES.some(
+    ({ name }) => name === packageInfo.name
+  );
+
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
@@ -479,7 +491,7 @@ export async function createInstallation(options: {
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
       install_source: installSource,
-      keep_policies_up_to_date: false,
+      keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     },
     { id: pkgName, overwrite: true }
   );
@@ -506,8 +518,19 @@ export const saveInstalledEsRefs = async (
 ) => {
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installedAssetsToSave = installedPkg?.attributes.installed_es.concat(installedAssets);
+
+  const deduplicatedAssets =
+    installedAssetsToSave?.reduce((acc, currentAsset) => {
+      const foundAsset = acc.find((asset: EsAssetReference) => asset.id === currentAsset.id);
+      if (!foundAsset) {
+        return acc.concat([currentAsset]);
+      } else {
+        return acc;
+      }
+    }, [] as EsAssetReference[]) || [];
+
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: installedAssetsToSave,
+    installed_es: deduplicatedAssets,
   });
   return installedAssets;
 };

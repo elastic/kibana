@@ -217,7 +217,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     entityType,
     excludeEcsData: true,
     fields,
-    filterQuery: combinedQueries!.filterQuery,
+    filterQuery: combinedQueries?.filterQuery,
     id: STANDALONE_ID,
     indexNames,
     limit: itemsPerPageStore,

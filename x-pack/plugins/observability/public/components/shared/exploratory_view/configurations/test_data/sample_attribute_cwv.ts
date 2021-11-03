@@ -77,7 +77,8 @@ export const sampleAttributeCoreWebVital = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'transaction.type: page-load and processor.event: transaction',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.marks.agent.largestContentfulPaint < 2500',
                 },
                 isBucketed: false,
                 label: 'Good',

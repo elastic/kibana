@@ -6,7 +6,12 @@
  */
 
 export { ExecutorError } from './executor_error';
-export { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+export {
+  validateParams,
+  validateConfig,
+  validateSecrets,
+  validateConnector,
+} from './validate_with_schema';
 export { TaskRunnerFactory } from './task_runner_factory';
 export { ActionExecutor, ActionExecutorContract } from './action_executor';
 export { ILicenseState, LicenseState } from './license_state';

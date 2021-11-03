@@ -73,8 +73,8 @@ function title(statuses: Statuses) {
     case statuses.indexPatternCreatedStatus:
       return (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.importErrors.creatingIndexPatternErrorMessage"
-          defaultMessage="Error creating index pattern"
+          id="xpack.dataVisualizer.file.importErrors.creatingDataViewErrorMessage"
+          defaultMessage="Error creating data view"
         />
       );
     case statuses.permissionCheckStatus:

@@ -21,7 +21,6 @@ export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServe
       filters: schema.maybe(schema.string()),
       bucketSize: schema.maybe(schema.string()),
       query: schema.maybe(schema.string()),
-      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {

@@ -13,7 +13,7 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ElasticsearchNodes } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
@@ -66,7 +66,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
     if (services.http?.fetch && clusterUuid) {
       setIsLoading(true);
-      const response = await services.http?.fetch(url, {
+      const response = await services.http?.fetch<{ totalNodeCount: number }>(url, {
         method: 'POST',
         body: JSON.stringify({
           ccs,

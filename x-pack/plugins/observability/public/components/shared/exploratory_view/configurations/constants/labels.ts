@@ -231,6 +231,20 @@ export const MONITORS_DURATION_LABEL = i18n.translate(
   }
 );
 
+export const STEP_DURATION_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.stepDurationLabel',
+  {
+    defaultMessage: 'Step duration',
+  }
+);
+
+export const STEP_NAME_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.stepNameLabel',
+  {
+    defaultMessage: 'Step name',
+  }
+);
+
 export const WEB_APPLICATION_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.webApplication',
   {

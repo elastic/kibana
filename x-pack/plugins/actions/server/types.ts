@@ -111,6 +111,7 @@ export interface ActionType<
     params?: ValidatorType<Params>;
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
   };
   renderParameterTemplates?(
     params: Params,

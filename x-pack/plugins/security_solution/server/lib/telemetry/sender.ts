@@ -8,10 +8,11 @@
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { URL } from 'url';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+
 import { Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -64,6 +65,10 @@ export class TelemetryEventsSender {
         }
       );
     }
+  }
+
+  public getClusterID(): string | undefined {
+    return this.receiver?.getClusterInfo()?.cluster_uuid;
   }
 
   public start(
@@ -148,9 +153,10 @@ export class TelemetryEventsSender {
         return;
       }
 
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      const clusterInfo = this.receiver?.getClusterInfo();
+
+      const [telemetryUrl, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl('alerts-endpoint'),
-        this.receiver?.fetchClusterInfo(),
         this.receiver?.fetchLicenseInfo(),
       ]);
 
@@ -197,10 +203,10 @@ export class TelemetryEventsSender {
    * @param toSend telemetry events
    */
   public async sendOnDemand(channel: string, toSend: unknown[]) {
+    const clusterInfo = this.receiver?.getClusterInfo();
     try {
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      const [telemetryUrl, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl(channel),
-        this.receiver?.fetchClusterInfo(),
         this.receiver?.fetchLicenseInfo(),
       ]);
 
@@ -254,6 +260,7 @@ export class TelemetryEventsSender {
     const ndjson = transformDataToNdjson(events);
 
     try {
+      this.logger.debug(`Sending ${events.length} telemetry events to ${channel}`);
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
@@ -274,9 +281,7 @@ export class TelemetryEventsSender {
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
-      this.logger.warn(
-        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
-      );
+      this.logger.debug(`Error sending events: ${err}`);
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',

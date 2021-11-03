@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '../../../../../../src/core/server';
 import { Incident, PartialIncident, ResponseError, ServiceNowError } from './types';
 import { FIELD_PREFIX } from './config';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
@@ -43,4 +44,28 @@ export const getPushedDate = (timestamp?: string) => {
   }
 
   return new Date().toISOString();
+};
+
+export const throwIfSubActionIsNotSupported = ({
+  api,
+  subAction,
+  supportedSubActions,
+  logger,
+}: {
+  api: Record<string, unknown>;
+  subAction: string;
+  supportedSubActions: string[];
+  logger: Logger;
+}) => {
+  if (!api[subAction]) {
+    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  if (!supportedSubActions.includes(subAction)) {
+    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
+  }
 };

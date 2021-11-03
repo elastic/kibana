@@ -16,9 +16,10 @@ import {
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
 import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
-import { umDynamicSettings } from './lib/saved_objects';
+import { savedObjectsAdapter, umDynamicSettings } from './lib/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
+import { UptimeConfig } from './config';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -32,6 +33,10 @@ export class Plugin implements PluginType {
   }
 
   public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
+    const config = this.initContext.config.get<UptimeConfig>();
+
+    savedObjectsAdapter.config = config;
+
     this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
 

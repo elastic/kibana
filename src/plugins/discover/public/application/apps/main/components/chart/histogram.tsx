@@ -35,6 +35,7 @@ import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search'
 import { FetchStatus } from '../../../../types';
 import { DiscoverServices } from '../../../../../build_services';
 import { useDataState } from '../../utils/use_data_state';
+import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../charts/common';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
@@ -179,6 +180,8 @@ export function DiscoverHistogram({
 
   const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
 
+  const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
+
   return (
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
@@ -190,12 +193,12 @@ export function DiscoverHistogram({
             tooltip={tooltipProps}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
-            allowBrushingLastHistogramBucket={true}
+            allowBrushingLastHistogramBin={true}
           />
           <Axis
             id="discover-histogram-left-axis"
             position={Position.Left}
-            ticks={5}
+            ticks={2}
             integersOnly
             tickFormat={(value) => xAxisFormatter.convert(value)}
           />
@@ -203,7 +206,8 @@ export function DiscoverHistogram({
             id="discover-histogram-bottom-axis"
             position={Position.Bottom}
             tickFormat={formatXValue}
-            ticks={10}
+            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
+            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
           <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
           <Endzones
@@ -222,6 +226,7 @@ export function DiscoverHistogram({
             xAccessor="x"
             yAccessors={['y']}
             data={data}
+            yNice
             timeZone={timeZone}
             name={chartData.yAxisLabel}
           />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 import { AggCardinality, Aggs, FieldData } from '../../types';
@@ -41,7 +41,7 @@ export const checkAggregatableFieldsExist = async (
   // filter aggregation with exists query.
   const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
 
-  // Combine runtime fields from the index pattern as well as the datafeed
+  // Combine runtime fields from the data view as well as the datafeed
   const combinedRuntimeMappings: estypes.MappingRuntimeFields = {
     ...(isPopulatedObject(runtimeMappings) ? runtimeMappings : {}),
     ...(isPopulatedObject(datafeedConfig) && isPopulatedObject(datafeedConfig.runtime_mappings)
