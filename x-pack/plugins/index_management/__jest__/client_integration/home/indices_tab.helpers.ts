@@ -28,6 +28,8 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
+    clickContextMenuOption: (subj: string) => void;
+    clickManageContextMenuButton: () => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;

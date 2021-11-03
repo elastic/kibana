@@ -23,7 +23,6 @@ import { createMemoryHistory } from 'history';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: IndicesTestBed;
   let server: ReturnType<typeof setupEnvironment>['server'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
