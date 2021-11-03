@@ -10,7 +10,7 @@ import React from 'react';
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimePickerRefreshInterval } from '../../DatePicker/typings';
 
 interface Props {
@@ -24,7 +24,7 @@ export function MLManageJobsLink({ children, external }: Props) {
     plugins: { ml },
   } = useApmPluginContext();
 
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const timePickerRefreshIntervalDefaults =
     core.uiSettings.get<TimePickerRefreshInterval>(

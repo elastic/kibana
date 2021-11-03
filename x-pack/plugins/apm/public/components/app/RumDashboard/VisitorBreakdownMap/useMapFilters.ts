@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { FieldFilter as Filter } from '@kbn/es-query';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   SERVICE_NAME,
@@ -92,7 +92,7 @@ const existFilter: Filter = {
 };
 
 export const useMapFilters = (): Filter[] => {
-  const { urlParams, uxUiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { serviceName, searchTerm } = urlParams;
 

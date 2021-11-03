@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getNodeName, NodeType } from '../../../../common/connections';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { DependenciesTable } from '../../shared/dependencies_table';
@@ -19,7 +19,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 export function BackendDetailDependenciesTable() {
   const {
     urlParams: { comparisonEnabled, comparisonType },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { backendName, rangeFrom, rangeTo, kuery, environment },

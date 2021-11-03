@@ -20,13 +20,13 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { getCoreVitalsComponent } from '../../../../../../observability/public';
 import { CsmSharedContext } from '../CsmSharedContext';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getPercentileLabel } from './translations';
 
 export function UXMetrics() {
   const {
     urlParams: { percentile },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const uxQuery = useUxQuery();
 

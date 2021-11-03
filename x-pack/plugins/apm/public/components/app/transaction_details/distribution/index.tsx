@@ -25,7 +25,7 @@ import { useUiTracker } from '../../../../../../observability/public';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/search_strategies/constants';
 
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
@@ -69,7 +69,7 @@ export function TransactionDistribution({
   traceSamples,
 }: TransactionDistributionProps) {
   const transactionColors = useTransactionColors();
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
   const markerCurrentTransaction =

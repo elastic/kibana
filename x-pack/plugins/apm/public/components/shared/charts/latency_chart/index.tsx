@@ -17,7 +17,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -52,7 +52,7 @@ export function LatencyChart({ height, kuery, environment }: Props) {
   const history = useHistory();
   const theme = useTheme();
   const comparisonChartTheme = getComparisonChartTheme(theme);
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
 

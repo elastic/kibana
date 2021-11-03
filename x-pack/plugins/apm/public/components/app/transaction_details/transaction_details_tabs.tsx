@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
@@ -34,7 +34,7 @@ const tabs = [
 export function TransactionDetailsTabs() {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const history = useHistory();
 
   const [currentTab, setCurrentTab] = useState(traceSamplesTab.key);

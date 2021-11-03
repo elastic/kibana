@@ -31,7 +31,7 @@ import {
   APM_SEARCH_STRATEGIES,
 } from '../../common/search_strategies/constants';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 
 import { ApmPluginStartDeps } from '../plugin';
 
@@ -103,7 +103,7 @@ export function useSearchStrategy<
     query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/transactions/view');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { transactionName } = urlParams;
 
   const [rawResponse, setRawResponse] = useReducer(

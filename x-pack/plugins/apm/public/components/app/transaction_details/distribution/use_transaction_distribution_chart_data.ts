@@ -16,7 +16,7 @@ import { EventOutcome } from '../../../../../common/event_outcome';
 
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -37,7 +37,7 @@ export const useTransactionDistributionChartData = () => {
     core: { notifications },
   } = useApmPluginContext();
 
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { transactionName } = urlParams;
 
   const {

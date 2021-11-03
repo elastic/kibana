@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FilterValueLabel } from '../../../../../../observability/public';
 import { FiltersUIHook } from '../hooks/useLocalUIFilters';
 import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
@@ -38,7 +38,7 @@ export function SelectedFilters({
   const {
     uxUiFilters,
     urlParams: { searchTerm },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
   const { transactionUrl } = uxUiFilters;
 
   const urlValues = transactionUrl ?? [];
