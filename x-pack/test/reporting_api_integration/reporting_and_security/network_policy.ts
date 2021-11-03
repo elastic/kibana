@@ -10,11 +10,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
   const retry = getService('retry');
   const supertest = getService('supertest');
-  const archive = 'x-pack/test/functional/es_archives/reporting/canvas_disallowed_url';
 
   /*
    * The Reporting API Functional Test config implements a network policy that
@@ -22,11 +20,11 @@ export default function ({ getService }: FtrProviderContext) {
    */
   describe('Network Policy', () => {
     before(async () => {
-      await esArchiver.load(archive); // includes a canvas worksheet with an offending image URL
+      await reportingAPI.initLogs(); // includes a canvas worksheet with an offending image URL
     });
 
     after(async () => {
-      await esArchiver.unload(archive);
+      await reportingAPI.teardownLogs();
     });
 
     it('should fail job when page voilates the network policy', async () => {
