@@ -339,7 +339,7 @@ export default ExpressionEditor;
 // components.
 export const ExpressionLike = ({ text }: { text: string }) => {
   return (
-    <div className="euiExpression euiExpression-isUppercase euiExpression--secondary">
+    <div className="euiExpression euiExpression-isUppercase euiExpression--success">
       <span className="euiExpression__description">{text}</span>
     </div>
   );

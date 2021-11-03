@@ -29,14 +29,14 @@ export const SingleMetricComparison: React.FunctionComponent<{
     return (
       <NoWrapSpan>
         <EuiIcon type="sortUp" color="success" />
-        <EuiTextColor color="secondary">{formatPercentage(changeFactor)}</EuiTextColor>
+        <EuiTextColor color="success">{formatPercentage(changeFactor)}</EuiTextColor>
       </NoWrapSpan>
     );
   } else if (changeFactor > 0 && !Number.isFinite(changeFactor)) {
     return (
       <NoWrapSpan>
         <EuiIcon type="sortUp" color="success" />
-        <EuiTextColor color="secondary">{newCategoryTrendLabel}</EuiTextColor>
+        <EuiTextColor color="success">{newCategoryTrendLabel}</EuiTextColor>
       </NoWrapSpan>
     );
   }
