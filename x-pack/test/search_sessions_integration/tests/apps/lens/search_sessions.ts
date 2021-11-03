@@ -13,14 +13,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const searchSession = getService('searchSessions');
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'timePicker', 'header']);
   const listingTable = getService('listingTable');
+  const kibanaServer = getService('kibanaServer');
 
   describe('lens search sessions', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     it("doesn't shows search sessions indicator UI", async () => {
