@@ -68,7 +68,7 @@ describe('ApmSystem', () => {
         apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
         await apmSystem.setup();
         expect(mockTransaction.mark).toHaveBeenCalledTimes(1);
-        expect(mockTransaction.mark).toHaveBeenCalledWith('apmSetup');
+        expect(mockTransaction.mark).toHaveBeenCalledWith('apm-setup');
         // @ts-expect-error 2345
         expect(mockTransaction.block).toHaveBeenCalledTimes(1);
       });
@@ -97,7 +97,7 @@ describe('ApmSystem', () => {
           } as any as InternalApplicationStart,
         });
 
-        expect(mark).toHaveBeenCalledWith('apmStart');
+        expect(mark).toHaveBeenCalledWith('apm-start');
       });
 
       it('closes the page load transaction once', async () => {

@@ -32,7 +32,7 @@ interface StartDeps {
 export class ApmSystem {
   private readonly enabled: boolean;
   private pageLoadTransaction?: Transaction;
-  private resourceCounter: CachedResourceObserver;
+  private resourceObserver: CachedResourceObserver;
   private apm?: ApmBase;
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
@@ -40,7 +40,7 @@ export class ApmSystem {
    */
   constructor(private readonly apmConfig?: ApmConfig, private readonly basePath = '') {
     this.enabled = apmConfig != null && !!apmConfig.active;
-    this.resourceCounter = new CachedResourceObserver();
+    this.resourceObserver = new CachedResourceObserver();
   }
 
   async setup() {
@@ -88,19 +88,19 @@ export class ApmSystem {
       this.pageLoadTransaction = transaction;
       // @ts-expect-error 2339  block is a private property of Transaction interface
       this.pageLoadTransaction.block(true);
-      this.pageLoadTransaction.mark('apmSetup');
+      this.pageLoadTransaction.mark('apm-setup');
     }
   }
 
   /* Close and clear the page load transaction */
   private closePageLoadTransaction() {
     if (this.pageLoadTransaction) {
-      const loadCounts = this.resourceCounter.getCounts();
+      const loadCounts = this.resourceObserver.getCounts();
       this.pageLoadTransaction.addLabels({
-        loadedResources: loadCounts.networkOrDisk,
-        cachedResources: loadCounts.memory,
+        'loaded-resources': loadCounts.networkOrDisk,
+        'cached-resources': loadCounts.memory,
       });
-      this.resourceCounter.destroy();
+      this.resourceObserver.destroy();
       this.pageLoadTransaction.end();
       this.pageLoadTransaction = undefined;
     }
@@ -108,7 +108,7 @@ export class ApmSystem {
 
   private markPageLoadStart() {
     if (this.pageLoadTransaction) {
-      this.pageLoadTransaction.mark('apmStart');
+      this.pageLoadTransaction.mark('apm-start');
     }
   }
 
