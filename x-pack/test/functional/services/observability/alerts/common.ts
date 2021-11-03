@@ -6,9 +6,14 @@
  */
 
 import { chunk } from 'lodash';
+import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
+async function filterAsync(array: WebElementWrapper[], callback: any) {
+  const filterMap = await mapAsync(array, callback);
+  return array.filter((value, index) => filterMap[index]);
+}
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
   rangeFrom: '2021-10-18T13:36:22.109Z',
@@ -60,6 +65,30 @@ export function ObservabilityAlertsCommonProvider({
     // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
     return await testSubjects.findAll('dataGridRowCell');
   };
+
+  const getSolutionAlertsByReason = async (reason: string) =>
+    await retry.try(async () => {
+      const allAlerts = await find.allByCssSelector('.euiDataGridRowCell--lastColumn');
+      return await filterAsync(allAlerts, async (cell: WebElementWrapper) =>
+        (await cell.getVisibleText()).trim().includes(reason)
+      );
+    });
+
+  const getApmErrorCountAlerts = async () =>
+    await retry.try(async () => {
+      const allAlerts = await find.allByCssSelector('.euiDataGridRowCell--lastColumn');
+      return await filterAsync(allAlerts, async (cell: WebElementWrapper) =>
+        (await cell.getVisibleText()).trim().includes('Error count')
+      );
+    });
+
+  const getLogsAlerts = async () =>
+    await retry.try(async () => {
+      const allAlerts = await find.allByCssSelector('.euiDataGridRowCell--lastColumn');
+      return await filterAsync(allAlerts, async (cell:WebElementWrapper) =>
+        (await cell.getVisibleText()).trim().includes('log entries')
+      );
+    });
 
   const getTableCellsInRows = async () => {
     const columnHeaders = await getTableColumnHeaders();
@@ -157,6 +186,11 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.find(FILTER_FOR_VALUE_BUTTON_SELECTOR);
   };
 
+  // const getCheckboxSelectorForRow = async (rowIndex: number) => {
+  //   const rows = await getTableCellsInRows();
+  //   return await testSubjects.findDescendant('select-event', rows[rowIndex][0]);
+  // };
+
   const openActionsMenuForRow = async (rowIndex: number) => {
     const rows = await getTableCellsInRows();
     const actionsOverflowButton = await testSubjects.findDescendant(
@@ -244,5 +278,8 @@ export function ObservabilityAlertsCommonProvider({
     openActionsMenuForRow,
     getTimeRange,
     getActionsButtonByIndex,
+    getApmErrorCountAlerts,
+    getLogsAlerts,
+    getSolutionAlertsByReason,
   };
 }
