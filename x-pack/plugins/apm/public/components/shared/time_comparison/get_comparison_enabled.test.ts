@@ -7,7 +7,7 @@
 import { CoreStart } from 'kibana/public';
 import { getComparisonEnabled } from './get_comparison_enabled';
 
-describe('use_is_comparison_enabled', () => {
+describe('getComparisonEnabled', () => {
   function mockValues({
     uiSettings,
     urlComparisonEnabled,
