@@ -58,8 +58,7 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.ACCESS_DENIED
   | typeof ML_PAGES.DATA_VISUALIZER
   | typeof ML_PAGES.DATA_VISUALIZER_FILE
-  | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT
-  | typeof ML_PAGES.TRAINED_MODELS_NODES,
+  | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
   MlGenericUrlPageState | undefined
 >;
 
