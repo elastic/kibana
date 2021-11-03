@@ -23,8 +23,7 @@ export async function getIsUsingTransactionEvents({
   start?: number;
   end?: number;
 }): Promise<boolean> {
-  const searchAggregatedTransactions =
-    config['xpack.apm.searchAggregatedTransactions'];
+  const searchAggregatedTransactions = config.searchAggregatedTransactions;
 
   if (
     searchAggregatedTransactions === SearchAggregatedTransactionSetting.never

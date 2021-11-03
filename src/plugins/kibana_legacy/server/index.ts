@@ -18,7 +18,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     // TODO: Remove deprecation once defaultAppId is deleted
-    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', { silent: true }),
+    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', {
+      silent: true,
+      level: 'critical',
+    }),
     (completeConfig, rootPath, addDeprecation) => {
       if (
         get(completeConfig, 'kibana.defaultAppId') === undefined &&
@@ -27,6 +30,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
         return;
       }
       addDeprecation({
+        configPath: 'kibana.defaultAppId',
         message: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
         correctiveActions: {
           manualSteps: [

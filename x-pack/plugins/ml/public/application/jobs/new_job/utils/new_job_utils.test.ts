@@ -6,7 +6,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { createSearchItems } from './new_job_utils';
 
@@ -14,7 +14,7 @@ describe('createSearchItems', () => {
   const kibanaConfig = {} as IUiSettingsClient;
   const indexPattern = {
     fields: [],
-  } as unknown as IIndexPattern;
+  } as unknown as DataView;
 
   let savedSearch = {} as unknown as SavedSearchSavedObject;
   beforeEach(() => {

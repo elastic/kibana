@@ -31,6 +31,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       const triggersActionsUi = get(settings, fromPath);
       if (triggersActionsUi?.enabled === false || triggersActionsUi?.enabled === true) {
         addDeprecation({
+          configPath: 'xpack.trigger_actions_ui.enabled',
           message: `"xpack.trigger_actions_ui.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.trigger_actions_ui.enabled" from your kibana configs.`],

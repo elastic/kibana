@@ -16,6 +16,7 @@ export const technicalRuleFieldMap = {
     Fields.EVENT_ACTION,
     Fields.TAGS
   ),
+  [Fields.ALERT_RULE_PARAMS]: { type: 'keyword', index: false },
   [Fields.ALERT_RULE_TYPE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_RULE_CONSUMER]: { type: 'keyword', required: true },
   [Fields.ALERT_RULE_PRODUCER]: { type: 'keyword', required: true },

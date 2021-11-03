@@ -77,6 +77,10 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
     action('workpadService.get')(id);
     return Promise.resolve({ ...getDefaultWorkpad(), id });
   },
+  resolve: (id: string) => {
+    action('workpadService.resolve')(id);
+    return Promise.resolve({ outcome: 'exactMatch', workpad: { ...getDefaultWorkpad(), id } });
+  },
   findTemplates: () => {
     action('workpadService.findTemplates')();
     return (hasTemplates ? findSomeTemplates() : findNoTemplates())();

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ENABLE_ITOM } from '../../actions/server/constants/connectors';
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
-import { metadataTransformPattern } from './endpoint/constants';
+import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
+export const CASES_FEATURE_ID = 'securitySolutionCases';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
 export const APP_ICON_SOLUTION = 'logoSecurity';
 export const APP_PATH = `/app/security`;
-export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security`;
+export const ADD_DATA_PATH = `/app/integrations/browse/security`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -234,6 +237,11 @@ export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
 
 /**
+ * Internal actions route
+ */
+export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/notifications';
+
+/**
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
@@ -246,6 +254,7 @@ export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
 
+export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve';
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINES_URL = '/api/timelines';
 export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite';
@@ -294,18 +303,25 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 */
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
-  '.slack',
-  '.pagerduty',
-  '.swimlane',
-  '.webhook',
-  '.servicenow',
+  '.index',
   '.jira',
+  '.pagerduty',
   '.resilient',
+  '.servicenow',
+  '.servicenow-sir',
+  '.slack',
+  '.swimlane',
   '.teams',
+  '.webhook',
 ];
 
 if (ENABLE_CASE_CONNECTOR) {
   NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
+}
+
+// TODO: Remove when ITOM is ready
+if (ENABLE_ITOM) {
+  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.servicenow-itom');
 }
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
@@ -330,6 +346,23 @@ export const showAllOthersBucket: string[] = [
  */
 export const ELASTIC_NAME = 'estc';
 
-export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;
+export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
 
-export const RISKY_HOSTS_INDEX = 'ml_host_risk_score_latest';
+export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_';
+
+export const TRANSFORM_STATES = {
+  ABORTING: 'aborting',
+  FAILED: 'failed',
+  INDEXING: 'indexing',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STOPPING: 'stopping',
+  WAITING: 'waiting',
+};
+
+export const WARNING_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATES.ABORTING,
+  TRANSFORM_STATES.FAILED,
+  TRANSFORM_STATES.STOPPED,
+  TRANSFORM_STATES.STOPPING,
+]);

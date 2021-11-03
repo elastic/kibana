@@ -18,7 +18,7 @@ function fetchOptionsWithDebug(
 ) {
   const debugEnabled =
     inspectableEsQueriesEnabled &&
-    startsWith(fetchOptions.pathname, '/api/apm');
+    startsWith(fetchOptions.pathname, '/internal/apm');
 
   const { body, ...rest } = fetchOptions;
 

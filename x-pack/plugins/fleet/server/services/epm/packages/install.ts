@@ -12,7 +12,13 @@ import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } fro
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
-import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
+import type {
+  BulkInstallPackageInfo,
+  EpmPackageInstallStatus,
+  InstallablePackage,
+  InstallSource,
+} from '../../../../common';
+import { DEFAULT_PACKAGES } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
@@ -157,6 +163,8 @@ export async function handleInstallPackageFailure({
       logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     }
+
+    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' });
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -432,6 +440,21 @@ export const updateVersion = async (
     version: pkgVersion,
   });
 };
+
+export const updateInstallStatus = async ({
+  savedObjectsClient,
+  pkgName,
+  status,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  status: EpmPackageInstallStatus;
+}) => {
+  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    install_status: status,
+  });
+};
+
 export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: InstallablePackage;
@@ -441,6 +464,12 @@ export async function createInstallation(options: {
   const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
   const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
+
+  // For default packages, default the `keep_policies_up_to_date` setting to true. For all other
+  // package, default it to false.
+  const defaultKeepPoliciesUpToDate = DEFAULT_PACKAGES.some(
+    ({ name }) => name === packageInfo.name
+  );
 
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
@@ -457,6 +486,7 @@ export async function createInstallation(options: {
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
       install_source: installSource,
+      keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     },
     { id: pkgName, overwrite: true }
   );

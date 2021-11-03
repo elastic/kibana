@@ -13,7 +13,7 @@ import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
 import {
   ConditionEntryField,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   NewTrustedApp,
   OperatingSystem,
   PostTrustedAppCreateResponse,
@@ -34,14 +34,25 @@ import { forceHTMLElementOffsetWidth } from './components/effected_policy_select
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
-
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
+import { licenseService } from '../../../../common/hooks/use_license';
 
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+
+jest.mock('../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
+
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
@@ -58,32 +69,13 @@ describe('When on the Trusted Apps Page', () => {
   const originalScrollTo = window.scrollTo;
   const act = reactTestingLibrary.act;
 
-  const getFakeTrustedApp = (): TrustedApp => ({
-    id: '1111-2222-3333-4444',
-    version: 'abc123',
-    name: 'one app',
-    os: OperatingSystem.WINDOWS,
-    created_at: '2021-01-04T13:55:00.561Z',
-    created_by: 'me',
-    updated_at: '2021-01-04T13:55:00.561Z',
-    updated_by: 'me',
-    description: 'a good one',
-    effectScope: { type: 'global' },
-    entries: [
-      {
-        field: ConditionEntryField.PATH,
-        value: 'one/two',
-        operator: 'included',
-        type: 'match',
-      },
-    ],
-  });
+  const getFakeTrustedApp = jest.fn();
 
   const createListApiResponse = (
     page: number = 1,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     per_page: number = 20
-  ): GetTrustedListAppsResponse => {
+  ): GetTrustedAppsListResponse => {
     return {
       data: [getFakeTrustedApp()],
       total: 50, // << Should be a value large enough to fulfill two pages
@@ -97,7 +89,7 @@ describe('When on the Trusted Apps Page', () => {
 
     http.get.mockImplementation(async (...args) => {
       const path = args[0] as unknown as string;
-      // @ts-ignore
+      // @ts-expect-error TS2352
       const httpOptions = args[1] as HttpFetchOptions;
 
       if (path === TRUSTED_APPS_LIST_API) {
@@ -137,9 +129,32 @@ describe('When on the Trusted Apps Page', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    getFakeTrustedApp.mockImplementation(
+      (): TrustedApp => ({
+        id: '1111-2222-3333-4444',
+        version: 'abc123',
+        name: 'one app',
+        os: OperatingSystem.WINDOWS,
+        created_at: '2021-01-04T13:55:00.561Z',
+        created_by: 'me',
+        updated_at: '2021-01-04T13:55:00.561Z',
+        updated_by: 'me',
+        description: 'a good one',
+        effectScope: { type: 'global' },
+        entries: [
+          {
+            field: ConditionEntryField.PATH,
+            value: 'one/two',
+            operator: 'included',
+            type: 'match',
+          },
+        ],
+      })
+    );
 
     history = mockedContext.history;
     coreStart = mockedContext.coreStart;
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     render = () => mockedContext.render(<TrustedAppsPage />);
     reactTestingLibrary.act(() => {
@@ -178,19 +193,94 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     describe('and the Grid view is being displayed', () => {
-      describe('and the edit trusted app button is clicked', () => {
-        let renderResult: ReturnType<AppContextTestRender['render']>;
+      let renderResult: ReturnType<AppContextTestRender['render']>;
 
+      const renderWithListDataAndClickOnEditCard = async () => {
+        renderResult = await renderWithListData();
+
+        await act(async () => {
+          (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[0].click();
+        });
+
+        act(() => {
+          fireEvent.click(renderResult.getByTestId('editTrustedAppAction'));
+        });
+      };
+
+      const renderWithListDataAndClickAddButton = async (): Promise<
+        ReturnType<AppContextTestRender['render']>
+      > => {
+        renderResult = await renderWithListData();
+
+        act(() => {
+          const addButton = renderResult.getByTestId('trustedAppsListAddButton');
+          fireEvent.click(addButton, { button: 1 });
+        });
+
+        // Wait for the policies to be loaded
+        await act(async () => {
+          await waitForAction('trustedAppsPoliciesStateChanged', {
+            validate: (action) => {
+              return isLoadedResourceState(action.payload);
+            },
+          });
+        });
+
+        return renderResult;
+      };
+
+      describe('the license is downgraded to gold or below and the user is editing a per policy TA', () => {
         beforeEach(async () => {
-          renderResult = await renderWithListData();
+          (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+          useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
-          await act(async () => {
-            (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[0].click();
+          const originalFakeTrustedAppProvider = getFakeTrustedApp.getMockImplementation();
+          getFakeTrustedApp.mockImplementation(() => {
+            return {
+              ...originalFakeTrustedAppProvider!(),
+              effectScope: {
+                type: 'policy',
+                policies: ['abc123'],
+              },
+            };
           });
+          await renderWithListDataAndClickOnEditCard();
+        });
 
-          act(() => {
-            fireEvent.click(renderResult.getByTestId('editTrustedAppAction'));
+        it('shows a message at the top of the flyout to inform the user their license is expired', () => {
+          expect(
+            renderResult.queryByTestId('addTrustedAppFlyout-expired-license-callout')
+          ).toBeTruthy();
+        });
+      });
+
+      describe('the license is downgraded to gold or below and the user is adding a new TA', () => {
+        beforeEach(async () => {
+          (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+          useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+          const originalFakeTrustedAppProvider = getFakeTrustedApp.getMockImplementation();
+          getFakeTrustedApp.mockImplementation(() => {
+            return {
+              ...originalFakeTrustedAppProvider!(),
+              effectScope: {
+                type: 'policy',
+                policies: ['abc123'],
+              },
+            };
           });
+          await renderWithListDataAndClickAddButton();
+        });
+        it('does not show the expired license message at the top of the flyout', async () => {
+          expect(
+            renderResult.queryByTestId('addTrustedAppFlyout-expired-license-callout')
+          ).toBeNull();
+        });
+      });
+
+      describe('and the edit trusted app button is clicked', () => {
+        beforeEach(async () => {
+          await renderWithListDataAndClickOnEditCard();
         });
 
         it('should persist edit params to url', () => {
@@ -281,7 +371,7 @@ describe('When on the Trusted Apps Page', () => {
             }
           );
 
-          const renderResult = await renderWithListData();
+          renderResult = await renderWithListData();
 
           await reactTestingLibrary.act(async () => {
             await apiResponseForEditTrustedApp;
@@ -314,7 +404,7 @@ describe('When on the Trusted Apps Page', () => {
         });
 
         it('should retrieve trusted app via API using url `id`', async () => {
-          const renderResult = await renderAndWaitForGetApi();
+          renderResult = await renderAndWaitForGetApi();
 
           expect(coreStart.http.get).toHaveBeenCalledWith(TRUSTED_APP_GET_URI);
 
@@ -501,7 +591,7 @@ describe('When on the Trusted Apps Page', () => {
           // we can control when the API call response is returned, which will allow us
           // to test the UI behaviours while the API call is in flight
           coreStart.http.post.mockImplementation(
-            // @ts-ignore
+            // @ts-expect-error TS2345
             async (_, options: HttpFetchOptions) => {
               return new Promise((resolve, reject) => {
                 httpPostBody = options.body as string;
@@ -683,7 +773,7 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedListAppsResponse>> =
+    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
       jest.fn(async () => {
         return {
           data: [],
@@ -692,7 +782,7 @@ describe('When on the Trusted Apps Page', () => {
           per_page: 1,
         };
       });
-    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedListAppsResponse>> =
+    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedAppsListResponse>> =
       jest.fn(async () => {
         return {
           data: [],
@@ -704,7 +794,7 @@ describe('When on the Trusted Apps Page', () => {
 
     beforeEach(() => {
       const priorMockImplementation = coreStart.http.get.getMockImplementation();
-      // @ts-ignore
+      // @ts-expect-error TS7006
       coreStart.http.get.mockImplementation((path, options) => {
         if (path === TRUSTED_APPS_LIST_API) {
           const { page, per_page: perPage } = options.query as { page: number; per_page: number };
@@ -868,7 +958,7 @@ describe('When on the Trusted Apps Page', () => {
     beforeEach(async () => {
       // Ensure implementation is defined before render to avoid undefined responses from hidden api calls
       const priorMockImplementation = coreStart.http.get.getMockImplementation();
-      // @ts-ignore
+      // @ts-expect-error TS7006
       coreStart.http.get.mockImplementation((path, options) => {
         if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
           const policy = generator.generatePolicyPackagePolicy();

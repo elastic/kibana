@@ -5,38 +5,52 @@
  * 2.0.
  */
 
-import { get, pick, isEmpty } from 'lodash';
-import { Section } from './sections';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { flattenObject, KeyValuePair } from '../../../utils/flattenObject';
+import { isEmpty, groupBy, partition } from 'lodash';
+import type { SectionDescriptor } from './types';
 
-export type SectionsWithRows = ReturnType<typeof getSectionsWithRows>;
+const EXCLUDED_FIELDS = ['error.exception.stacktrace', 'span.stacktrace'];
 
-export const getSectionsWithRows = (
-  sections: Section[],
-  apmDoc: Transaction | APMError | Span
-) => {
-  return sections
-    .map((section) => {
-      const sectionData: Record<string, unknown> = get(
-        apmDoc,
-        section.key
-      ) as Record<string, unknown>;
-      const filteredData: Record<string, unknown> | undefined =
-        section.properties
-          ? pick(sectionData, section.properties)
-          : sectionData;
+export const getSectionsFromFields = (fields: Record<string, any>) => {
+  const rows = Object.keys(fields)
+    .filter(
+      (field) => !EXCLUDED_FIELDS.some((excluded) => field.startsWith(excluded))
+    )
+    .sort()
+    .map((field) => {
+      return {
+        section: field.split('.')[0],
+        field,
+        value: fields[field],
+      };
+    });
 
-      const rows: KeyValuePair[] = flattenObject(filteredData, section.key);
-      return { ...section, rows };
-    })
-    .filter(({ required, rows }) => required || !isEmpty(rows));
+  const sections = Object.values(groupBy(rows, 'section')).map(
+    (rowsForSection) => {
+      const first = rowsForSection[0];
+
+      const section: SectionDescriptor = {
+        key: first.section,
+        label: first.section.toLowerCase(),
+        properties: rowsForSection.map((row) => ({
+          field: row.field,
+          value: row.value,
+        })),
+      };
+
+      return section;
+    }
+  );
+
+  const [labelSections, otherSections] = partition(
+    sections,
+    (section) => section.key === 'labels'
+  );
+
+  return [...labelSections, ...otherSections];
 };
 
 export const filterSectionsByTerm = (
-  sections: SectionsWithRows,
+  sections: SectionDescriptor[],
   searchTerm: string
 ) => {
   if (!searchTerm) {
@@ -44,15 +58,16 @@ export const filterSectionsByTerm = (
   }
   return sections
     .map((section) => {
-      const { rows = [] } = section;
-      const filteredRows = rows.filter(({ key, value }) => {
-        const valueAsString = String(value).toLowerCase();
+      const { properties = [] } = section;
+      const filteredProps = properties.filter(({ field, value }) => {
         return (
-          key.toLowerCase().includes(searchTerm) ||
-          valueAsString.includes(searchTerm)
+          field.toLowerCase().includes(searchTerm) ||
+          value.some((val: string | number) =>
+            String(val).toLowerCase().includes(searchTerm)
+          )
         );
       });
-      return { ...section, rows: filteredRows };
+      return { ...section, properties: filteredProps };
     })
-    .filter(({ rows }) => !isEmpty(rows));
+    .filter(({ properties }) => !isEmpty(properties));
 };

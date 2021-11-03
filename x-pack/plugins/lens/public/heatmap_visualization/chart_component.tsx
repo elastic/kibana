@@ -9,6 +9,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   Chart,
   ElementClickListener,
+  BrushEndListener,
   Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
@@ -270,7 +271,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const config: HeatmapSpec['config'] = {
-    onBrushEnd,
     grid: {
       stroke: {
         width:
@@ -338,6 +338,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
             labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
           },
         }}
+        onBrushEnd={onBrushEnd as BrushEndListener}
       />
       <Heatmap
         id={tableId}

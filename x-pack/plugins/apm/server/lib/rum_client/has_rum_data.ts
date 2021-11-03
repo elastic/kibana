@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { SetupUX } from '../../routes/rum_client';
 import {
   SERVICE_NAME,
@@ -16,8 +17,8 @@ import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({
   setup,
-  start,
-  end,
+  start = moment().subtract(24, 'h').valueOf(),
+  end = moment().valueOf(),
 }: {
   setup: SetupUX;
   start?: number;
@@ -55,7 +56,7 @@ export async function hasRumData({
 
     const response = await apmEventClient.search('has_rum_data', params);
     return {
-      indices: setup.indices['apm_oss.transactionIndices']!,
+      indices: setup.indices.transaction,
       hasData: response.hits.total.value > 0,
       serviceName:
         response.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
@@ -64,7 +65,7 @@ export async function hasRumData({
     return {
       hasData: false,
       serviceName: undefined,
-      indices: setup.indices['apm_oss.transactionIndices']!,
+      indices: setup.indices.transaction,
     };
   }
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
 import { mount } from 'enzyme';
 import React from 'react';
 

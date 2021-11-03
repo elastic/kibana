@@ -7,7 +7,12 @@
 
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
-import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import {
+  MAX_TIME_COMPLETE_INSTALL,
+  ASSETS_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../../common';
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
@@ -21,6 +26,8 @@ import { installTransform } from '../elasticsearch/transform/install';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
+
+import { packagePolicyService } from '../..';
 
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
 import { deleteKibanaSavedObjectsAssets } from './remove';
@@ -192,11 +199,27 @@ export async function _installPackage({
     // update to newly installed version when all assets are successfully installed
     if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
 
-    await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-      install_version: pkgVersion,
-      install_status: 'installed',
-      package_assets: packageAssetRefs,
-    });
+    const updatedPackage = await savedObjectsClient.update<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      {
+        install_version: pkgVersion,
+        install_status: 'installed',
+        package_assets: packageAssetRefs,
+      }
+    );
+
+    // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
+    // associated package policies after installation
+    if (updatedPackage.attributes.keep_policies_up_to_date) {
+      const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      });
+
+      await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
+    }
 
     return [
       ...installedKibanaAssetsRefs,

@@ -6,9 +6,10 @@
  */
 
 import React, { FunctionComponent } from 'react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { LevelInfoTip } from './level_info_tip';
 
 const i18nTexts = {
   getCriticalStatusLabel: (count: number) =>
@@ -39,14 +40,31 @@ export const DeprecationCount: FunctionComponent<Props> = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiHealth color="danger" data-test-subj="criticalDeprecationsCount">
-          {i18nTexts.getCriticalStatusLabel(totalCriticalDeprecations)}
-        </EuiHealth>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="danger" data-test-subj="criticalDeprecationsCount">
+              {i18nTexts.getCriticalStatusLabel(totalCriticalDeprecations)}
+            </EuiHealth>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <LevelInfoTip level="critical" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
-        <EuiHealth color="subdued" data-test-subj="warningDeprecationsCount">
-          {i18nTexts.getWarningStatusLabel(totalWarningDeprecations)}
-        </EuiHealth>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="subdued" data-test-subj="warningDeprecationsCount">
+              {i18nTexts.getWarningStatusLabel(totalWarningDeprecations)}
+            </EuiHealth>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <LevelInfoTip level="warning" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -8,9 +8,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
-import { IIndexPattern } from 'src/plugins/data/common';
-
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -48,8 +45,9 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { savedObjects } = useMlKibana().services;
-  const savedObjectsClient = savedObjects.client;
+  const {
+    data: { dataViews },
+  } = useMlKibana().services;
 
   const indexName = item?.config.dest.index ?? '';
 
@@ -57,17 +55,8 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const checkIndexPatternExists = async () => {
     try {
-      const response = await savedObjectsClient.find<IIndexPattern>({
-        type: 'index-pattern',
-        perPage: 10,
-        search: `"${indexName}"`,
-        searchFields: ['title'],
-        fields: ['title'],
-      });
-      const ip = response.savedObjects.find(
-        (obj) => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
-      );
-      if (ip !== undefined) {
+      const dv = (await dataViews.find(indexName)).find(({ title }) => title === indexName);
+      if (dv !== undefined) {
         setIndexPatternExists(true);
       } else {
         setIndexPatternExists(false);
@@ -89,9 +78,9 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       );
     }
   };
-  const checkUserIndexPermission = () => {
+  const checkUserIndexPermission = async () => {
     try {
-      const userCanDelete = canDeleteIndex(indexName, toastNotificationService);
+      const userCanDelete = await canDeleteIndex(indexName, toastNotificationService);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }

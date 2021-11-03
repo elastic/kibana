@@ -289,8 +289,8 @@ export class CliDevMode {
             await reporter.timings({
               timings: [
                 {
-                  group: 'yarn start',
-                  id: 'started',
+                  group: 'scripts/kibana',
+                  id: 'dev server started',
                   ms: Date.now() - this.startTime!,
                   meta: { success },
                 },
@@ -313,7 +313,7 @@ export class CliDevMode {
             await reporter.timings({
               timings: [
                 {
-                  group: 'yarn start',
+                  group: 'scripts/kibana',
                   id: 'dev server restart',
                   ms,
                   meta: {

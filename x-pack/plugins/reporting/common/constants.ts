@@ -57,6 +57,11 @@ export const LAYOUT_TYPES = {
   PRINT: 'print',
 };
 
+export const DEFAULT_VIEWPORT = {
+  width: 1950,
+  height: 1200,
+};
+
 // Export Type Definitions
 export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';

@@ -6,24 +6,15 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, IToasts } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
+import { Fields } from './types';
 import { getFieldsByIssueType } from './api';
 import * as i18n from './translations';
 
-interface Fields {
-  [key: string]: {
-    allowedValues: Array<{ name: string; id: string }> | [];
-    defaultValue: { name: string; id: string } | {};
-  };
-}
-
 interface Props {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   issueType: string | undefined;
   actionConnector?: ActionConnector;
 }
@@ -62,8 +53,8 @@ export const useGetFieldsByIssueType = ({
         });
 
         if (!didCancel) {
-          setIsLoading(false);
           setFields(res.data ?? {});
+          setIsLoading(false);
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
               title: i18n.FIELDS_API_ERROR,

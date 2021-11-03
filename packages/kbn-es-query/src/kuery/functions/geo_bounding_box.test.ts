@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
 import * as geoBoundingBox from './geo_bounding_box';
 import { JsonObject } from '@kbn/utility-types';
@@ -29,11 +29,12 @@ const params = {
 
 describe('kuery functions', () => {
   describe('geoBoundingBox', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 

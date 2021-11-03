@@ -58,8 +58,8 @@ import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
-import { WARNING_TRANSFORM_STATES } from '../types';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
+import { WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -301,7 +301,6 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Agent status',
         }),
-        // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
             <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
@@ -315,7 +314,6 @@ export const EndpointList = () => {
           defaultMessage: 'Policy',
         }),
         truncateText: true,
-        // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           return (
             <>
@@ -390,7 +388,6 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'OS',
         }),
-        // eslint-disable-next-line react/display-name
         render: (os: string) => {
           return (
             <EuiToolTip content={os} anchorClassName="eui-textTruncate">
@@ -407,7 +404,6 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
           defaultMessage: 'IP address',
         }),
-        // eslint-disable-next-line react/display-name
         render: (ip: string[]) => {
           return (
             <EuiToolTip
@@ -429,7 +425,6 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
-        // eslint-disable-next-line react/display-name
         render: (version: string) => {
           return (
             <EuiToolTip content={version} anchorClassName="eui-textTruncate">
@@ -462,7 +457,6 @@ export const EndpointList = () => {
         }),
         actions: [
           {
-            // eslint-disable-next-line react/display-name
             render: (item: HostInfo) => {
               return <TableRowActions endpointMetadata={item.metadata} />;
             },

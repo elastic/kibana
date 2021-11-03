@@ -48,6 +48,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
+  UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
 
 /**
@@ -369,15 +370,29 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   version: 1,
 });
 
+export const resolveSimpleRuleOutput = (
+  ruleId = 'rule-1',
+  enabled = false
+): Partial<RulesSchema> => ({ outcome: 'exactMatch', ...getSimpleRuleOutput(ruleId, enabled) });
+
 /**
  * This is the typical output of a simple rule that Kibana will output with all the defaults except
  * for all the server generated properties such as created_by. Useful for testing end to end tests.
  */
 export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { rule_id, ...ruleWithoutRuleId } = rule;
+  const { rule_id: rId, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
+};
+
+/**
+ * This is the typical output of a simple rule that Kibana will output with all the defaults except
+ * for all the server generated properties such as created_by. Useful for testing end to end tests.
+ */
+export const resolveSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
+  const rule = getSimpleRuleOutput(ruleId);
+  const { rule_id: rId, ...ruleWithoutRuleId } = rule;
+  return { outcome: 'exactMatch', ...ruleWithoutRuleId };
 };
 
 export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => {
@@ -495,6 +510,29 @@ export const createSignalsIndex = async (
   }, 'createSignalsIndex');
 };
 
+export const createLegacyRuleAction = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  alertId: string,
+  connectorId: string
+): Promise<unknown> =>
+  supertest
+    .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}`)
+    .set('kbn-xsrf', 'true')
+    .query({ alert_id: alertId })
+    .send({
+      name: 'Legacy notification with one action',
+      interval: '1m',
+      actions: [
+        {
+          id: connectorId,
+          group: 'default',
+          params: {
+            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionTypeId: '.slack',
+        },
+      ],
+    });
 /**
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
@@ -764,16 +802,18 @@ export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
-  maxTimeout: number = 20000,
-  timeoutWait: number = 10
+  maxTimeout: number = 800000,
+  timeoutWait: number = 250
 ): Promise<void> => {
   let found = false;
   let numberOfTries = 0;
-
-  while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+  const maxTries = Math.floor(maxTimeout / timeoutWait);
+  while (!found && numberOfTries < maxTries) {
     if (await functionToTest()) {
       found = true;
     } else {
+      // eslint-disable-next-line no-console
+      console.log(`Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`);
       numberOfTries++;
     }
 
@@ -876,8 +916,10 @@ export const countDownTest = async (
 };
 
 /**
- * Helper to cut down on the noise in some of the tests. This checks for
- * an expected 200 still and does not try to any retries.
+ * Helper to cut down on the noise in some of the tests. If this detects
+ * a conflict it will try to manually remove the rule before re-adding the rule one time and log
+ * and error about the race condition.
+ * rule a second attempt. It only re-tries adding the rule if it encounters a conflict once.
  * @param supertest The supertest deps
  * @param rule The rule to create
  */
@@ -885,11 +927,84 @@ export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   rule: CreateRulesSchema
 ): Promise<FullResponseSchema> => {
+  const response = await supertest
+    .post(DETECTION_ENGINE_RULES_URL)
+    .set('kbn-xsrf', 'true')
+    .send(rule);
+  if (response.status === 409) {
+    if (rule.rule_id != null) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Did not get an expected 200 "ok" when creating a rule (createRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+          response.body
+        )}, status: ${JSON.stringify(response.status)}`
+      );
+      await deleteRule(supertest, rule.rule_id);
+      const secondResponseTry = await supertest
+        .post(DETECTION_ENGINE_RULES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(rule);
+      if (secondResponseTry.status !== 200) {
+        throw new Error(
+          `Unexpected non 200 ok when attempting to create a rule (second try): ${JSON.stringify(
+            response.body
+          )}`
+        );
+      } else {
+        return secondResponseTry.body;
+      }
+    } else {
+      throw new Error('When creating a rule found an unexpected conflict (404)');
+    }
+  } else if (response.status !== 200) {
+    throw new Error(
+      `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(response.status)}`
+    );
+  } else {
+    return response.body;
+  }
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. Does a delete of a rule.
+ * It does not check for a 200 "ok" on this.
+ * @param supertest The supertest deps
+ * @param id The rule id to delete
+ */
+export const deleteRule = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  ruleId: string
+): Promise<FullResponseSchema> => {
+  const response = await supertest
+    .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+    .set('kbn-xsrf', 'true');
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when deleting the rule (deleteRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+
+  return response.body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const createRuleWithAuth = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  rule: CreateRulesSchema,
+  auth: { user: string; pass: string }
+): Promise<FullResponseSchema> => {
   const { body } = await supertest
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
-    .send(rule)
-    .expect(200);
+    .auth(auth.user, auth.pass)
+    .send(rule);
   return body;
 };
 
@@ -903,12 +1018,19 @@ export const updateRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   updatedRule: UpdateRulesSchema
 ): Promise<FullResponseSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .put(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
-    .send(updatedRule)
-    .expect(200);
-  return body;
+    .send(updatedRule);
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when updating a rule (updateRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**
@@ -917,12 +1039,19 @@ export const updateRule = async (
  * @param supertest The supertest deps
  */
 export const createNewAction = async (supertest: SuperTest.SuperTest<SuperTest.Test>) => {
-  const { body } = await supertest
+  const response = await supertest
     .post('/api/actions/action')
     .set('kbn-xsrf', 'true')
-    .send(getWebHookAction())
-    .expect(200);
-  return body;
+    .send(getWebHookAction());
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when creating a new action. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**
@@ -939,14 +1068,21 @@ export const findImmutableRuleById = async (
   total: number;
   data: FullResponseSchema[];
 }> => {
-  const { body } = await supertest
+  const response = await supertest
     .get(
       `${DETECTION_ENGINE_RULES_URL}/_find?filter=alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true" AND alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`
     )
     .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
-  return body;
+    .send();
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when finding an immutable rule by id (findImmutableRuleById). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**
@@ -957,12 +1093,20 @@ export const findImmutableRuleById = async (
 export const getPrePackagedRulesStatus = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<PrePackagedRulesAndTimelinesStatusSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
     .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
-  return body;
+    .send();
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when getting a pre-packaged rule status. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**
@@ -975,12 +1119,70 @@ export const createExceptionList = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   exceptionList: CreateExceptionListSchema
 ): Promise<ExceptionListSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .post(EXCEPTION_LIST_URL)
     .set('kbn-xsrf', 'true')
-    .send(exceptionList)
-    .expect(200);
-  return body;
+    .send(exceptionList);
+
+  if (response.status === 409) {
+    if (exceptionList.list_id != null) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `When creating an exception list found an unexpected conflict (409) creating an exception list (createExceptionList), will attempt a cleanup and one time re-try. This usually indicates a bad cleanup or race condition within the tests: ${JSON.stringify(
+          response.body
+        )}, status: ${JSON.stringify(response.status)}`
+      );
+      await deleteExceptionList(supertest, exceptionList.list_id);
+      const secondResponseTry = await supertest
+        .post(EXCEPTION_LIST_URL)
+        .set('kbn-xsrf', 'true')
+        .send(exceptionList);
+      if (secondResponseTry.status !== 200) {
+        throw new Error(
+          `Unexpected non 200 ok when attempting to create an exception list (second try): ${JSON.stringify(
+            response.body
+          )}`
+        );
+      } else {
+        return secondResponseTry.body;
+      }
+    } else {
+      throw new Error('When creating an exception list found an unexpected conflict (404)');
+    }
+  } else if (response.status !== 200) {
+    throw new Error(
+      `Unexpected non 200 ok when attempting to create an exception list: ${JSON.stringify(
+        response.status
+      )}`
+    );
+  } else {
+    return response.body;
+  }
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. Does a delete of an exception list.
+ * It does not check for a 200 "ok" on this.
+ * @param supertest The supertest deps
+ * @param id The rule id to delete
+ */
+export const deleteExceptionList = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  listId: string
+): Promise<FullResponseSchema> => {
+  const response = await supertest
+    .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}`)
+    .set('kbn-xsrf', 'true');
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when deleting an exception list (deleteExceptionList). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+
+  return response.body;
 };
 
 /**
@@ -993,12 +1195,20 @@ export const createExceptionListItem = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   exceptionListItem: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .post(EXCEPTION_LIST_ITEM_URL)
     .set('kbn-xsrf', 'true')
-    .send(exceptionListItem)
-    .expect(200);
-  return body;
+    .send(exceptionListItem);
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when creating an exception list item (createExceptionListItem). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**
@@ -1011,11 +1221,19 @@ export const getRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   ruleId: string
 ): Promise<RulesSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-    .set('kbn-xsrf', 'true')
-    .expect(200);
-  return body;
+    .set('kbn-xsrf', 'true');
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when getting a rule (getRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 export const waitForAlertToComplete = async (
@@ -1023,11 +1241,16 @@ export const waitForAlertToComplete = async (
   id: string
 ): Promise<void> => {
   await waitFor(async () => {
-    const { body: alertBody } = await supertest
-      .get(`/api/alerts/alert/${id}/state`)
-      .set('kbn-xsrf', 'true')
-      .expect(200);
-    return alertBody.previousStartedAt != null;
+    const response = await supertest.get(`/api/alerts/alert/${id}/state`).set('kbn-xsrf', 'true');
+    if (response.status !== 200) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Did not get an expected 200 "ok" when waiting for an alert to complete (waitForAlertToComplete). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+          response.body
+        )}, status: ${JSON.stringify(response.status)}`
+      );
+    }
+    return response.body.previousStartedAt != null;
   }, 'waitForAlertToComplete');
 };
 
@@ -1042,12 +1265,35 @@ export const waitForRuleSuccessOrStatus = async (
   status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
 ): Promise<void> => {
   await waitFor(async () => {
-    const { body } = await supertest
-      .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-      .set('kbn-xsrf', 'true')
-      .send({ ids: [id] })
-      .expect(200);
-    return body[id]?.current_status?.status === status;
+    try {
+      const response = await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [id] });
+      if (response.status !== 200) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `Did not get an expected 200 "ok" when waiting for a rule success or status (waitForRuleSuccessOrStatus). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+            response.body
+          )}, status: ${JSON.stringify(response.status)}`
+        );
+      }
+      if (response.body[id]?.current_status?.status !== status) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
+            response.body
+          )}, status: ${JSON.stringify(response.status)}`
+        );
+      }
+
+      return response.body[id]?.current_status?.status === status;
+    } catch (e) {
+      if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
+        return false;
+      }
+      throw e;
+    }
   }, 'waitForRuleSuccessOrStatus');
 };
 
@@ -1081,12 +1327,21 @@ export const getSignalsByRuleIds = async (
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsRuleId(ruleIds))
-      .expect(200);
+  const response = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsRuleId(ruleIds));
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when getting a signal by rule_id (getSignalsByRuleIds). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } = response;
   return signalsOpen;
 };
 
@@ -1106,12 +1361,20 @@ export const getSignalsByIds = async (
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsId(ids, size))
-      .expect(200);
+  const response = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsId(ids, size));
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when getting a signal by id. CI issues could happen (getSignalsByIds). Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } = response;
   return signalsOpen;
 };
 
@@ -1129,12 +1392,20 @@ export const getSignalsById = async (
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsId([id]))
-      .expect(200);
+  const response = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsId([id]));
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when getting signals by id (getSignalsById). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } = response;
   return signalsOpen;
 };
 
@@ -1142,10 +1413,19 @@ export const installPrePackagedRules = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   await countDownTest(async () => {
-    const { status } = await supertest
+    const { status, body } = await supertest
       .put(DETECTION_ENGINE_PREPACKAGED_URL)
       .set('kbn-xsrf', 'true')
       .send();
+    if (status !== 200) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
+          body
+        )}, status: ${JSON.stringify(status)}`
+      );
+    }
+
     return status === 200;
   }, 'installPrePackagedRules');
 };
@@ -1300,12 +1580,19 @@ export const createRuleWithExceptionEntries = async (
     exceptions_list: [...maybeExceptionList, ...maybeEndpointList],
   };
   const ruleResponse = await createRule(supertest, ruleWithException);
-  await supertest
+  const response = await supertest
     .patch(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
-    .send({ rule_id: ruleResponse.rule_id, enabled: true })
-    .expect(200);
+    .send({ rule_id: ruleResponse.rule_id, enabled: true });
 
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when patching a rule with exception entries (createRuleWithExceptionEntries). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
   return ruleResponse;
 };
 
@@ -1362,14 +1649,22 @@ export const startSignalsMigration = async ({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   indices: string[];
 }): Promise<CreateMigrationResponse[]> => {
-  const {
-    body: { indices: created },
-  }: { body: { indices: CreateMigrationResponse[] } } = await supertest
+  const response = await supertest
     .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
     .set('kbn-xsrf', 'true')
-    .send({ index: indices })
-    .expect(200);
+    .send({ index: indices });
 
+  const {
+    body: { indices: created },
+  }: { body: { indices: CreateMigrationResponse[] } } = response;
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when starting a signals migration (startSignalsMigration). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
   return created;
 };
 
@@ -1386,14 +1681,22 @@ export const finalizeSignalsMigration = async ({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   migrationIds: string[];
 }): Promise<FinalizeMigrationResponse[]> => {
-  const {
-    body: { migrations },
-  }: { body: { migrations: FinalizeMigrationResponse[] } } = await supertest
+  const response = await supertest
     .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
     .set('kbn-xsrf', 'true')
-    .send({ migration_ids: migrationIds })
-    .expect(200);
+    .send({ migration_ids: migrationIds });
 
+  const {
+    body: { migrations },
+  }: { body: { migrations: FinalizeMigrationResponse[] } } = response;
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when finalizing signals migration (finalizeSignalsMigration). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
   return migrations;
 };
 

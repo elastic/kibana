@@ -108,6 +108,8 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
+    outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
+    alias_target_id: t.string,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),

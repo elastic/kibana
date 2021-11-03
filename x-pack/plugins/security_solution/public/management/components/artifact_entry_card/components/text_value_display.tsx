@@ -5,18 +5,57 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
+import { CommonProps, EuiText, EuiToolTip } from '@elastic/eui';
+import classNames from 'classnames';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 
-export type TextValueDisplayProps = PropsWithChildren<{
-  bold?: boolean;
-}>;
+export type TextValueDisplayProps = Pick<CommonProps, 'data-test-subj'> &
+  PropsWithChildren<{
+    bold?: boolean;
+    truncate?: boolean;
+    size?: 'xs' | 's' | 'm' | 'relative';
+    withTooltip?: boolean;
+  }>;
 
 /**
  * Common component for displaying consistent text across the card. Changes here could impact all of
  * display of values on the card
  */
-export const TextValueDisplay = memo<TextValueDisplayProps>(({ bold, children }) => {
-  return <EuiText size="s">{bold ? <strong>{children}</strong> : children}</EuiText>;
-});
+export const TextValueDisplay = memo<TextValueDisplayProps>(
+  ({
+    bold,
+    truncate,
+    size = 's',
+    withTooltip = false,
+    'data-test-subj': dataTestSubj,
+    children,
+  }) => {
+    const cssClassNames = useMemo(() => {
+      return classNames({
+        'eui-textTruncate': truncate,
+        'eui-textBreakWord': true,
+      });
+    }, [truncate]);
+
+    const textContent = useMemo(() => {
+      return bold ? <strong>{children}</strong> : children;
+    }, [bold, children]);
+
+    return (
+      <EuiText size={size} className={cssClassNames} data-test-subj={dataTestSubj}>
+        {withTooltip &&
+        'string' === typeof children &&
+        children.length > 0 &&
+        children !== getEmptyValue() ? (
+          <EuiToolTip content={children} position="top">
+            <>{textContent}</>
+          </EuiToolTip>
+        ) : (
+          textContent
+        )}
+      </EuiText>
+    );
+  }
+);
 TextValueDisplay.displayName = 'TextValueDisplay';

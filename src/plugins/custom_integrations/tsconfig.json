@@ -6,8 +6,15 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "storybook/**/*"
+  ],
   "references": [
-    { "path": "../../core/tsconfig.json" }
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../presentation_util/tsconfig.json" }
   ]
 }

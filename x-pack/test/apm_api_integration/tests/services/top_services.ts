@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+          `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
         );
 
         expect(response.status).to.be(200);
@@ -49,14 +49,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: {
         status: number;
-        body: APIReturnType<'GET /api/apm/services'>;
+        body: APIReturnType<'GET /internal/apm/services'>;
       };
 
       let sortedItems: typeof response.body.items;
 
       before(async () => {
         response = await supertest.get(
-          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+          `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
         );
         sortedItems = sortBy(response.body.items, 'serviceName');
       });
@@ -91,37 +91,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {},
             Object {
-              "latency": 520294.126436782,
-              "throughput": 11.6,
-              "transactionErrorRate": 0.0316091954022989,
+              "latency": 496794.054441261,
+              "throughput": 11.6333333333333,
+              "transactionErrorRate": 0.0315186246418338,
             },
             Object {
-              "latency": 74805.1452830189,
-              "throughput": 17.6666666666667,
-              "transactionErrorRate": 0.00566037735849057,
+              "latency": 83395.638576779,
+              "throughput": 17.8,
+              "transactionErrorRate": 0.00936329588014981,
             },
             Object {
-              "latency": 411589.785714286,
-              "throughput": 7.46666666666667,
-              "transactionErrorRate": 0.0848214285714286,
+              "latency": 430318.696035242,
+              "throughput": 7.56666666666667,
+              "transactionErrorRate": 0.092511013215859,
             },
             Object {
-              "latency": 53906.6603773585,
-              "throughput": 7.06666666666667,
+              "latency": 53147.5747663551,
+              "throughput": 7.13333333333333,
               "transactionErrorRate": 0,
             },
             Object {
-              "latency": 420634.9,
+              "latency": 419826.24375,
               "throughput": 5.33333333333333,
               "transactionErrorRate": 0.025,
             },
             Object {
-              "latency": 40989.5802047782,
-              "throughput": 9.76666666666667,
-              "transactionErrorRate": 0.00341296928327645,
+              "latency": 21520.4776632302,
+              "throughput": 9.7,
+              "transactionErrorRate": 0.00343642611683849,
             },
             Object {
-              "latency": 1040880.77777778,
+              "latency": 1040388.88888889,
               "throughput": 2.4,
               "transactionErrorRate": null,
             },
@@ -192,15 +192,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('includes services that only report metric data', async () => {
         interface Response {
           status: number;
-          body: APIReturnType<'GET /api/apm/services'>;
+          body: APIReturnType<'GET /internal/apm/services'>;
         }
 
         const [unfilteredResponse, filteredResponse] = await Promise.all([
           supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+            `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
           ) as Promise<Response>,
           supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=${encodeURIComponent(
+            `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=${encodeURIComponent(
               'not (processor.event:transaction)'
             )}`
           ) as Promise<Response>,
@@ -231,12 +231,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('and fetching a list of services', () => {
           let response: {
             status: number;
-            body: APIReturnType<'GET /api/apm/services'>;
+            body: APIReturnType<'GET /internal/apm/services'>;
           };
 
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+              `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
             );
           });
 
@@ -282,7 +282,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+            `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
           );
         });
 
@@ -307,7 +307,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertest.get(
-            `/api/apm/services?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&kuery=${encodeURIComponent(
+            `/internal/apm/services?environment=ENVIRONMENT_ALL&start=${start}&end=${end}&kuery=${encodeURIComponent(
               'service.name:opbeans-java'
             )}`
           );

@@ -20,8 +20,7 @@ import type {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-// @ts-ignore
-import { MapView } from './inspector/views/map_view';
+import { MapInspectorView } from './inspector/map_inspector_view';
 import {
   setEMSSettings,
   setKibanaCommonConfig,
@@ -48,12 +47,12 @@ import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import {
   createLayerDescriptors,
-  registerLayerWizard,
-  registerSource,
   MapsSetupApi,
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
+import { registerLayerWizard } from './classes/layers/layer_wizard_registry';
+import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -74,7 +73,8 @@ import {
   MapsAppRegionMapLocatorDefinition,
   MapsAppTileMapLocatorDefinition,
 } from './locators';
-import { SecurityPluginStart } from '../../security/public';
+import type { SecurityPluginStart } from '../../security/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -102,7 +102,8 @@ export interface MapsPluginStartDependencies {
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  security: SecurityPluginStart;
+  security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -156,7 +157,7 @@ export class MapsPlugin
       })
     );
 
-    plugins.inspector.registerView(MapView);
+    plugins.inspector.registerView(MapInspectorView);
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }

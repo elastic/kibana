@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { fullContentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
+import { EuiConfirmModal, EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
 
 import { Overview } from './overview';
 
 describe('Overview', () => {
+  const initializeSourceSynchronization = jest.fn();
   const contentSource = fullContentSources[0];
   const dataLoading = false;
   const isOrganization = true;
@@ -31,6 +32,7 @@ describe('Overview', () => {
 
   beforeEach(() => {
     setMockValues({ ...mockValues });
+    setMockActions({ initializeSourceSynchronization });
   });
 
   it('renders', () => {
@@ -117,5 +119,15 @@ describe('Overview', () => {
     const wrapper = shallow(<Overview />);
 
     expect(wrapper.find('[data-test-subj="DocumentPermissionsDisabled"]')).toHaveLength(1);
+  });
+
+  it('handles confirmModal submission', () => {
+    const wrapper = shallow(<Overview />);
+    const button = wrapper.find('[data-test-subj="SyncButton"]');
+    button.prop('onClick')!({} as any);
+    const modal = wrapper.find(EuiConfirmModal);
+    modal.prop('onConfirm')!({} as any);
+
+    expect(initializeSourceSynchronization).toHaveBeenCalled();
   });
 });

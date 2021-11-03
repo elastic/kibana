@@ -137,6 +137,7 @@ export const config: ServiceConfigDescriptor<CspConfigType> = {
       const cspConfig = rawConfig[fromPath];
       if (cspConfig?.rules) {
         addDeprecation({
+          configPath: 'csp.rules',
           message:
             '`csp.rules` is deprecated in favor of directive specific configuration. Please use `csp.connect_src`, ' +
             '`csp.default_src`, `csp.font_src`, `csp.frame_ancestors`, `csp.frame_src`, `csp.img_src`, ' +

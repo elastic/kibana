@@ -10,9 +10,10 @@ import { updateSearchSource } from './update_search_source';
 import { IndexPattern } from '../../../../../../data/public';
 import { SavedSearch } from '../../../../saved_searches';
 import { AppState } from '../services/discover_state';
-import { SortOrder } from '../../../../saved_searches/types';
+import type { SortOrder } from '../../../../saved_searches';
 import { SavedObjectSaveOpts } from '../../../../../../saved_objects/public';
 import { DiscoverServices } from '../../../../build_services';
+import { saveSavedSearch } from '../../../../saved_searches';
 
 /**
  * Helper function to update and persist the given savedSearch
@@ -52,8 +53,10 @@ export async function persistSavedSearch(
   }
 
   try {
-    const id = await savedSearch.save(saveOptions);
-    onSuccess(id);
+    const id = await saveSavedSearch(savedSearch, saveOptions, services.core.savedObjects.client);
+    if (id) {
+      onSuccess(id);
+    }
     return { id };
   } catch (saveError) {
     onError(saveError, savedSearch);

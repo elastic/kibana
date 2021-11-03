@@ -8,7 +8,8 @@
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
-import { setupEnvironment, kibanaDeprecationsServiceHelpers } from '../../helpers';
+import { setupEnvironment } from '../../helpers';
+import { kibanaDeprecationsServiceHelpers } from '../../kibana_deprecations/service.mock';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { esCriticalAndWarningDeprecations, esNoDeprecations } from './mock_es_issues';
 

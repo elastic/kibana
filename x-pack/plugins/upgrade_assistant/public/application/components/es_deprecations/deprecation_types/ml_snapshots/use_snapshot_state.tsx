@@ -7,7 +7,8 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import { ApiService, ResponseError } from '../../../../lib/api';
+import { ResponseError } from '../../../../../../common/types';
+import { ApiService } from '../../../../lib/api';
 import { Status } from '../../../types';
 
 const POLL_INTERVAL_MS = 1000;

@@ -138,7 +138,7 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
         series: {
           date_histogram: {
             field: logParams.timestampField,
-            fixed_interval: params.bucketSize,
+            fixed_interval: params.intervalString,
           },
         },
       },

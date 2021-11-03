@@ -36,6 +36,20 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
 
+  const logTaskManagerHealth = async () => {
+    // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
+    const tmHealth = await supertest.get(`/api/task_manager/_health`);
+    const driftValues = tmHealth.body?.stats?.runtime?.value;
+
+    log.info(`Task Manager status: "${tmHealth.body?.status}"`);
+    log.info(`Task Manager overall drift rankings: "${JSON.stringify(driftValues?.drift)}"`);
+    log.info(
+      `Task Manager drift rankings for "report:execute": "${JSON.stringify(
+        driftValues?.drift_by_type?.['report:execute']
+      )}"`
+    );
+  };
+
   const initEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.load(ecommerceSOPath);
@@ -132,7 +146,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generateCsv = async (job: JobParamsCSV, username = 'elastic', password = 'changeme') => {
+  const generateCsv = async (
+    job: JobParamsCSV,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
     const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
@@ -201,6 +219,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   return {
+    logTaskManagerHealth,
     initEcommerce,
     teardownEcommerce,
     DATA_ANALYST_USERNAME,

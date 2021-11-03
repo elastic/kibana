@@ -57,7 +57,7 @@ export async function getServiceTransactionGroups({
   end: number;
 }) {
   const { apmEventClient, config } = setup;
-  const bucketSize = config['xpack.apm.ui.transactionGroupBucketSize'];
+  const bucketSize = config.ui.transactionGroupBucketSize;
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions

@@ -33,20 +33,20 @@ import type {
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
-import {
-  getCapabilities,
-  getTypes,
-  getUISettings,
-  getSavedVisualizationsLoader,
-} from '../services';
+import { getCapabilities, getTypes, getUISettings } from '../services';
 import { showNewVisModal } from '../wizard';
-import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import {
+  convertToSerializedVis,
+  getSavedVisualization,
+  saveVisualization,
+  getFullPath,
+} from '../utils/saved_visualize_utils';
 import {
   extractControlsReferences,
   extractTimeSeriesReferences,
   injectTimeSeriesReferences,
   injectControlsReferences,
-} from '../saved_visualizations/saved_visualization_references';
+} from '../utils/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { checkForDuplicateTitle } from '../../../saved_objects/public';
@@ -59,7 +59,15 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient'>
+    Pick<
+      VisualizationsStartDeps,
+      | 'inspector'
+      | 'embeddable'
+      | 'savedObjectsClient'
+      | 'data'
+      | 'savedObjectsTaggingOss'
+      | 'spaces'
+    >
   >;
 }
 
@@ -147,17 +155,36 @@ export class VisualizeEmbeddableFactory
     input: Partial<VisualizeInput> & { id: string },
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const savedVisualizations = getSavedVisualizationsLoader();
+    const startDeps = await this.deps.start();
 
     try {
-      const savedObject = await savedVisualizations.get(savedObjectId);
+      const savedObject = await getSavedVisualization(
+        {
+          savedObjectsClient: startDeps.core.savedObjects.client,
+          search: startDeps.plugins.data.search,
+          dataViews: startDeps.plugins.data.dataViews,
+          spaces: startDeps.plugins.spaces,
+          savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss?.getTaggingApi(),
+        },
+        savedObjectId
+      );
+
+      if (savedObject.sharingSavedObjectProps?.outcome === 'conflict') {
+        return new ErrorEmbeddable(
+          i18n.translate('visualizations.embeddable.legacyURLConflict.errorMessage', {
+            defaultMessage: `This visualization has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+            values: { json: savedObject.sharingSavedObjectProps?.errorJSON },
+          }),
+          input,
+          parent
+        );
+      }
       const visState = convertToSerializedVis(savedObject);
       const vis = await createVisAsync(savedObject.visState.type, visState);
 
       return createVisEmbeddableFromObject(this.deps)(
         vis,
         input,
-        savedVisualizations,
         await this.getAttributeService(),
         parent
       );
@@ -173,11 +200,9 @@ export class VisualizeEmbeddableFactory
     if (input.savedVis) {
       const visState = input.savedVis;
       const vis = await createVisAsync(visState.type, visState);
-      const savedVisualizations = getSavedVisualizationsLoader();
       return createVisEmbeddableFromObject(this.deps)(
         vis,
         input,
-        savedVisualizations,
         await this.getAttributeService(),
         parent
       );
@@ -201,9 +226,9 @@ export class VisualizeEmbeddableFactory
         confirmOverwrite: false,
         returnToOrigin: true,
         isTitleDuplicateConfirmed: true,
+        copyOnSave: false,
       };
       savedVis.title = title;
-      savedVis.copyOnSave = false;
       savedVis.description = '';
       savedVis.searchSourceFields = visObj?.data.searchSource?.getSerializedFields();
       const serializedVis = (visObj as unknown as Vis).serialize();
@@ -217,7 +242,12 @@ export class VisualizeEmbeddableFactory
       if (visObj) {
         savedVis.uiStateJSON = visObj?.uiState.toString();
       }
-      const id = await savedVis.save(saveOptions);
+      const { core, plugins } = await this.deps.start();
+      const id = await saveVisualization(savedVis, saveOptions, {
+        savedObjectsClient: core.savedObjects.client,
+        overlays: core.overlays,
+        savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+      });
       if (!id || id === '') {
         throw new Error(
           i18n.translate('visualizations.savingVisualizationFailed.errorMsg', {
@@ -225,6 +255,7 @@ export class VisualizeEmbeddableFactory
           })
         );
       }
+      core.chrome.recentlyAccessed.add(getFullPath(id), savedVis.title, String(id));
       return { id };
     } catch (error) {
       throw error;

@@ -56,9 +56,13 @@ export function NoData(props) {
     window.location.hash = getSafeForExternalLink('#/elasticsearch/nodes');
   }
 
+  const NoDataContainer = ({ children }) => {
+    return <EuiPage data-test-subj="noDataContainer">{children}</EuiPage>;
+  };
+
   if (isCloudEnabled) {
     return (
-      <EuiPage>
+      <NoDataContainer>
         <EuiScreenReaderOnly>
           <h1>
             <FormattedMessage
@@ -97,13 +101,21 @@ export function NoData(props) {
             <CloudDeployment />
           </EuiPageContent>
         </EuiPageBody>
-      </EuiPage>
+      </NoDataContainer>
     );
   }
 
   if (useInternalCollection) {
     return (
-      <EuiPage>
+      <NoDataContainer>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.no_data.internal_collection.heading"
+              defaultMessage="No monitoring data found."
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
           <EuiPageContent
             verticalPosition="center"
@@ -132,12 +144,20 @@ export function NoData(props) {
             ) : null}
           </EuiPageContent>
         </EuiPageBody>
-      </EuiPage>
+      </NoDataContainer>
     );
   }
 
   return (
-    <EuiPage>
+    <NoDataContainer>
+      <EuiScreenReaderOnly>
+        <h1>
+          <FormattedMessage
+            id="xpack.monitoring.no_data.heading"
+            defaultMessage="No monitoring data found."
+          />
+        </h1>
+      </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
         <EuiPageContent
           verticalPosition="center"
@@ -195,7 +215,7 @@ export function NoData(props) {
           </EuiButtonEmpty>
         </EuiPageContent>
       </EuiPageBody>
-    </EuiPage>
+    </NoDataContainer>
   );
 }
 

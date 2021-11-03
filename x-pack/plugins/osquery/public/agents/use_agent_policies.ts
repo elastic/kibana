@@ -22,8 +22,8 @@ export const useAgentPolicies = (policyIds: string[] = []) => {
       queryFn: () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
       enabled: policyIds.length > 0,
       onSuccess: () => setErrorToast(),
-      onError: (error) =>
-        setErrorToast(error as Error, {
+      onError: (error: Error) =>
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.action_policy_details.fetchError', {
             defaultMessage: 'Error while fetching policy details',
           }),

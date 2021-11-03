@@ -37,7 +37,7 @@ export type KnownTypeToString<T> =
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
 export type TypeString<T> = KnownTypeToString<
-  T extends ObservableLike<any> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
+  T extends ObservableLike<unknown> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
 >;
 
 /**
@@ -46,13 +46,3 @@ export type TypeString<T> = KnownTypeToString<
  * `date` is typed as a number or string, and represents a date
  */
 export type UnmappedTypeStrings = 'date' | 'filter';
-
-/**
- * JSON representation of a field formatter configuration.
- * Is used to carry information about how to format data in
- * a data table as part of the column definition.
- */
-export interface SerializedFieldFormat<TParams = Record<string, any>> {
-  id?: string;
-  params?: TParams;
-}

@@ -58,8 +58,8 @@ describe('SourceLogic', () => {
   });
 
   describe('actions', () => {
-    it('onInitializeSource', () => {
-      SourceLogic.actions.onInitializeSource(contentSource);
+    it('setContentSource', () => {
+      SourceLogic.actions.setContentSource(contentSource);
 
       expect(SourceLogic.values.contentSource).toEqual(contentSource);
       expect(SourceLogic.values.dataLoading).toEqual(false);
@@ -67,7 +67,7 @@ describe('SourceLogic', () => {
 
     it('onUpdateSourceName', () => {
       const NAME = 'foo';
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.onUpdateSourceName(NAME);
 
       expect(SourceLogic.values.contentSource).toEqual({
@@ -88,7 +88,7 @@ describe('SourceLogic', () => {
     it('setContentFilterValue', () => {
       const VALUE = 'bar';
       SourceLogic.actions.setSearchResults(searchServerResponse);
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.setContentFilterValue(VALUE);
 
       expect(SourceLogic.values.contentMeta).toEqual({
@@ -127,7 +127,7 @@ describe('SourceLogic', () => {
   describe('listeners', () => {
     describe('initializeSource', () => {
       it('calls API and sets values (org)', async () => {
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
@@ -140,7 +140,7 @@ describe('SourceLogic', () => {
       it('calls API and sets values (account)', async () => {
         AppLogic.values.isOrganization = false;
 
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
@@ -423,6 +423,34 @@ describe('SourceLogic', () => {
         const promise = Promise.reject(error);
         http.delete.mockReturnValue(promise);
         SourceLogic.actions.removeContentSource(contentSource.id);
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+      });
+    });
+
+    describe('initializeSourceSynchronization', () => {
+      it('calls API and fetches fresh source state', async () => {
+        const initializeSourceSpy = jest.spyOn(SourceLogic.actions, 'initializeSource');
+        const promise = Promise.resolve(contentSource);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
+
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123/sync');
+        await promise;
+        expect(initializeSourceSpy).toHaveBeenCalledWith(contentSource.id);
+      });
+
+      it('handles error', async () => {
+        const error = {
+          response: {
+            error: 'this is an error',
+            status: 400,
+          },
+        };
+        const promise = Promise.reject(error);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
         await expectedAsyncError(promise);
 
         expect(flashAPIErrors).toHaveBeenCalledWith(error);

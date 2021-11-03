@@ -71,14 +71,15 @@ describe('ExecutedStep', () => {
   });
 
   it('renders accordions for console output', () => {
-    const browserConsole =
-      "Refused to execute script from because its MIME type ('image/gif') is not executable";
+    const browserConsole = [
+      "Refused to execute script from because its MIME type ('image/gif') is not executable",
+    ];
 
     const { getByText } = render(
-      <ExecutedStep browserConsole={browserConsole} index={3} step={step} loading={false} />
+      <ExecutedStep browserConsoles={browserConsole} index={3} step={step} loading={false} />
     );
 
     expect(getByText('Console output'));
-    expect(getByText(browserConsole));
+    expect(getByText(browserConsole[0]));
   });
 });

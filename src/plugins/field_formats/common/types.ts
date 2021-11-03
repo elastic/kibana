@@ -17,10 +17,6 @@ export type FieldFormatsContentType = 'html' | 'text';
  */
 export interface HtmlContextTypeOptions {
   field?: { name: string };
-  // TODO: get rid of indexPattern dep completely
-  indexPattern?: {
-    formatHit: (hit: { highlight: Record<string, string[]> }) => Record<string, string>;
-  };
   hit?: { highlight: Record<string, string[]> };
 }
 

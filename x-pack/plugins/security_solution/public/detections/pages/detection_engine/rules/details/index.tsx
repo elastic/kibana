@@ -19,6 +19,8 @@ import {
   EuiToolTip,
   EuiWindowEvent,
 } from '@elastic/eui';
+import { i18n as i18nTranslate } from '@kbn/i18n';
+
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -261,6 +263,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         capabilities: { actions },
       },
       timelines: timelinesUi,
+      spaces: spacesApi,
     },
   } = useKibana();
   const hasActionsPrivileges = useMemo(() => {
@@ -276,6 +279,51 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRule(maybeRule);
     }
   }, [maybeRule]);
+
+  useEffect(() => {
+    if (rule) {
+      const outcome = rule.outcome;
+      if (spacesApi && outcome === 'aliasMatch') {
+        // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
+        const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
+        spacesApi.ui.redirectLegacyUrl(
+          path,
+          i18nTranslate.translate(
+            'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+            {
+              defaultMessage: 'rule',
+            }
+          )
+        );
+      }
+    }
+  }, [rule, spacesApi]);
+
+  const getLegacyUrlConflictCallout = useMemo(() => {
+    if (rule?.alias_target_id != null && spacesApi && rule.outcome === 'conflict') {
+      const aliasTargetId = rule.alias_target_id;
+      // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other rule.
+      const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;
+      return (
+        <>
+          <EuiSpacer />
+          {spacesApi.ui.components.getLegacyUrlConflict({
+            objectNoun: i18nTranslate.translate(
+              'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+              {
+                defaultMessage: 'rule',
+              }
+            ),
+            currentObjectId: rule.id,
+            otherObjectId: aliasTargetId,
+            otherObjectPath: otherRulePath,
+          })}
+        </>
+      );
+    }
+    return null;
+  }, [rule, spacesApi]);
 
   useEffect(() => {
     if (!hasIndexRead) {
@@ -352,9 +400,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
       const timelineId = TimelineId.detectionsRulesDetailsPage;
-      clearEventsLoading!({ id: timelineId });
-      clearEventsDeleted!({ id: timelineId });
-      clearSelected!({ id: timelineId });
+      clearEventsLoading({ id: timelineId });
+      clearEventsDeleted({ id: timelineId });
+      clearSelected({ id: timelineId });
       setFilterGroup(newFilterGroup);
     },
     [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
@@ -721,6 +769,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexGroup>
               </DetectionEngineHeaderPage>
               {ruleError}
+              {getLegacyUrlConflictCallout}
               <EuiSpacer />
               <EuiFlexGroup>
                 <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>

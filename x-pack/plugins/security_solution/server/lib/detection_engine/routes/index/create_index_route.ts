@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { chunk, get } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 import {
   transformError,
-  getIndexExists,
+  getBootstrapIndexExists,
   getPolicyExists,
   setPolicy,
   createBootstrapIndex,
 } from '@kbn/securitysolution-es-utils';
 import type {
-  AppClient,
+  SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
-  SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
@@ -26,21 +25,16 @@ import {
   getSignalsTemplate,
   SIGNALS_TEMPLATE_VERSION,
   createBackwardsCompatibilityMapping,
+  ALIAS_VERSION_FIELD,
+  SIGNALS_FIELD_ALIASES_VERSION,
 } from './get_signals_template';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
-import { ConfigType } from '../../../../config';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 
-export const createIndexRoute = (
-  router: SecuritySolutionPluginRouter,
-  ruleDataService: RuleDataPluginService,
-  config: ConfigType
-) => {
+export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -51,14 +45,13 @@ export const createIndexRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
       try {
         const siemClient = context.securitySolution?.getAppClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        await createDetectionIndex(context, siemClient!, ruleDataService, ruleRegistryEnabled);
+        await createDetectionIndex(context.securitySolution);
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         const error = transformError(err);
@@ -71,30 +64,21 @@ export const createIndexRoute = (
   );
 };
 
-class CreateIndexError extends Error {
-  public readonly statusCode: number;
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
-
 export const createDetectionIndex = async (
-  context: SecuritySolutionRequestHandlerContext,
-  siemClient: AppClient,
-  ruleDataService: RuleDataPluginService,
-  ruleRegistryEnabled: boolean
+  context: SecuritySolutionApiRequestHandlerContext
 ): Promise<void> => {
+  const config = context.getConfig();
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const spaceId = siemClient.getSpaceId();
-
-  if (!siemClient) {
-    throw new CreateIndexError('', 404);
-  }
-
+  const siemClient = context.getAppClient();
+  const spaceId = context.getSpaceId();
   const index = siemClient.getSignalsIndex();
 
-  const indexExists = await getIndexExists(esClient, index);
+  const indexExists = await getBootstrapIndexExists(
+    context.core.elasticsearch.client.asInternalUser,
+    index
+  );
+  const { ruleRegistryEnabled } = config.experimentalFeatures;
+
   // If using the rule registry implementation, we don't want to create new .siem-signals indices -
   // only create/update resources if there are existing indices
   if (ruleRegistryEnabled && !indexExists) {
@@ -106,7 +90,10 @@ export const createDetectionIndex = async (
   if (!policyExists) {
     await setPolicy(esClient, index, signalsPolicy);
   }
+
+  const ruleDataService = context.getRuleDataService();
   const aadIndexAliasName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
+
   if (await templateNeedsUpdate({ alias: index, esClient })) {
     await esClient.indices.putIndexTemplate({
       name: index,
@@ -142,6 +129,11 @@ export const createDetectionIndex = async (
   }
 };
 
+// This function can be expensive if there are lots of existing .siem-signals indices
+// because any new backwards compatibility mappings need to be applied to all of them
+// while also preserving the original 'version' of the mapping. To do it somewhat efficiently,
+// we first group the indices by version and exclude any that already have up-to-date
+// aliases. Then we start updating the mappings sequentially in chunks.
 const addFieldAliasesToIndices = async ({
   esClient,
   index,
@@ -150,14 +142,34 @@ const addFieldAliasesToIndices = async ({
   index: string;
 }) => {
   const { body: indexMappings } = await esClient.indices.get({ index });
+  const indicesByVersion: Record<number, string[]> = {};
+  const versions: Set<number> = new Set();
   for (const [indexName, mapping] of Object.entries(indexMappings)) {
-    const currentVersion: number | undefined = get(mapping.mappings?._meta, 'version');
-    const body = createBackwardsCompatibilityMapping(currentVersion ?? 0);
-    await esClient.indices.putMapping({
-      index: indexName,
-      body,
-      allow_no_indices: true,
-    } as estypes.IndicesPutMappingRequest);
+    const version: number = get(mapping.mappings?._meta, 'version') ?? 0;
+    const aliasesVersion: number = get(mapping.mappings?._meta, ALIAS_VERSION_FIELD) ?? 0;
+    // Only attempt to add backwards compatibility mappings to indices whose names start with the alias
+    // This limits us to legacy .siem-signals indices, since alerts as data indices use a different naming
+    // scheme (but have the same alias, so will also be returned by the "get" request)
+    if (
+      indexName.startsWith(`${index}-`) &&
+      isOutdated({ current: aliasesVersion, target: SIGNALS_FIELD_ALIASES_VERSION })
+    ) {
+      indicesByVersion[version] = indicesByVersion[version]
+        ? [...indicesByVersion[version], indexName]
+        : [indexName];
+      versions.add(version);
+    }
+  }
+  for (const version of versions) {
+    const body = createBackwardsCompatibilityMapping(version);
+    const indexNameChunks = chunk(indicesByVersion[version], 20);
+    for (const indexNameChunk of indexNameChunks) {
+      await esClient.indices.putMapping({
+        index: indexNameChunk,
+        body,
+        allow_no_indices: true,
+      } as estypes.IndicesPutMappingRequest);
+    }
   }
 };
 
@@ -170,7 +182,7 @@ const addFieldAliasesToIndices = async ({
 //   index: string;
 //   aadIndexAliasName: string;
 // }) => {
-//   const { body: indices } = await esClient.indices.getAlias({ name: index });
+//   const { body: indices } = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
 //   const aliasActions = {
 //     actions: Object.keys(indices).map((concreteIndexName) => {
 //       return {

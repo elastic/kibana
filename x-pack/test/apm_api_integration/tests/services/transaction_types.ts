@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_types?start=${start}&end=${end}`
+          `/internal/apm/services/opbeans-node/transaction_types?start=${start}&end=${end}`
         );
 
         expect(response.status).to.be(200);
@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_types?start=${start}&end=${end}`
+          `/internal/apm/services/opbeans-node/transaction_types?start=${start}&end=${end}`
         );
 
         expect(response.status).to.be(200);

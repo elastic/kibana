@@ -24,12 +24,12 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'corednsLogs',
     name: i18n.translate('home.tutorials.corednsLogs.nameTitle', {
-      defaultMessage: 'CoreDNS logs',
+      defaultMessage: 'CoreDNS Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.corednsLogs.shortDescription', {
-      defaultMessage: 'Collect CoreDNS logs.',
+      defaultMessage: 'Collect and parse logs from CoreDNS servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.corednsLogs.longDescription', {
       defaultMessage:
@@ -59,5 +59,6 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['security', 'network', 'web'],
   };
 }

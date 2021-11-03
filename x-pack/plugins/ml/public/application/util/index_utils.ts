@@ -6,33 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  IndexPattern,
-  IIndexPattern,
-  IndexPatternsContract,
-  Query,
-  IndexPatternAttributes,
-} from '../../../../../../src/plugins/data/public';
-import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
-import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
+import type { Query } from '../../../../../../src/plugins/data/public';
+import type { DataView, DataViewsContract } from '../../../../../../src/plugins/data_views/public';
+import type { SavedSearchSavedObject } from '../../../common/types/kibana';
+import { getToastNotifications, getSavedObjectsClient, getDataViews } from './dependency_cache';
 
-let indexPatternCache: IndexPatternSavedObject[] = [];
+let indexPatternCache: DataView[] = [];
 let savedSearchesCache: SavedSearchSavedObject[] = [];
-let indexPatternsContract: IndexPatternsContract | null = null;
+let indexPatternsContract: DataViewsContract | null = null;
 
-export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
+export async function loadIndexPatterns(indexPatterns: DataViewsContract) {
   indexPatternsContract = indexPatterns;
-  const savedObjectsClient = getSavedObjectsClient();
-  return savedObjectsClient
-    .find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      fields: ['id', 'title', 'type', 'fields'],
-      perPage: 10000,
-    })
-    .then((response) => {
-      indexPatternCache = response.savedObjects;
-      return indexPatternCache;
-    });
+  const dataViewsContract = getDataViews();
+  indexPatternCache = await dataViewsContract.find('*', 10000);
+  return indexPatternCache;
 }
 
 export function loadSavedSearches() {
@@ -63,20 +50,15 @@ export function getIndexPatternsContract() {
 }
 
 export function getIndexPatternNames() {
-  return indexPatternCache.map((i) => i.attributes && i.attributes.title);
+  return indexPatternCache.map((i) => i.title);
 }
 
 export function getIndexPatternIdFromName(name: string) {
-  for (let j = 0; j < indexPatternCache.length; j++) {
-    if (indexPatternCache[j].get('title') === name) {
-      return indexPatternCache[j].id;
-    }
-  }
-  return null;
+  return indexPatternCache.find((i) => i.title === name)?.id ?? null;
 }
 export interface IndexPatternAndSavedSearch {
   savedSearch: SavedSearchSavedObject | null;
-  indexPattern: IIndexPattern | null;
+  indexPattern: DataView | null;
 }
 export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
   const resp: IndexPatternAndSavedSearch = {
@@ -106,7 +88,7 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
   };
 }
 
-export function getIndexPatternById(id: string): Promise<IndexPattern> {
+export function getIndexPatternById(id: string): Promise<DataView> {
   if (indexPatternsContract !== null) {
     if (id) {
       return indexPatternsContract.get(id);
@@ -127,7 +109,7 @@ export function getSavedSearchById(id: string): SavedSearchSavedObject | undefin
  * an optional flag will trigger the display a notification at the top of the page
  * warning that the index is not time based
  */
-export function timeBasedIndexCheck(indexPattern: IndexPattern, showNotification = false) {
+export function timeBasedIndexCheck(indexPattern: DataView, showNotification = false) {
   if (!indexPattern.isTimeBased()) {
     if (showNotification) {
       const toastNotifications = getToastNotifications();

@@ -1,6 +1,6 @@
 ---
 id: kibStyleGuide
-slug: /kibana-dev-docs/styleguide
+slug: /kibana-dev-docs/contributing/styleguide
 title: Style Guide
 summary: JavaScript/TypeScript styleguide.
 date: 2021-05-06
@@ -210,7 +210,7 @@ less likely to introduce bugs in the future due to insufficient types.
 
 If you’re not having `any` in your plugin or are starting a new plugin, you should enable the
 [`@typescript-eslint/no-explicit-any`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md)
-linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/master/.eslintrc.js) config.
+linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/main/.eslintrc.js) config.
 
 ### Avoid non-null assertions
 
@@ -229,7 +229,7 @@ assertion would now wrongly disable proper type checking for us.
 
 If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
 [`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
-linting rule for you plugin in the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/master/.eslintrc.js) config.
+linting rule for you plugin in the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/main/.eslintrc.js) config.
 
 ### Return/throw early from functions
 

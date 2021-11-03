@@ -8,6 +8,7 @@
 
 import { IndexPatternField } from 'src/plugins/data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
+import { getFieldSubtypeMulti } from '../../../../../../../../data/common';
 
 interface GroupedFields {
   selected: IndexPatternField[];
@@ -54,7 +55,8 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
       continue;
     }
-    const isSubfield = useNewFieldsApi && field.spec?.subType?.multi?.parent;
+    const subTypeMulti = getFieldSubtypeMulti(field?.spec);
+    const isSubfield = useNewFieldsApi && subTypeMulti;
     if (columns.includes(field.name)) {
       result.selected.push(field);
     } else if (popular.includes(field.name) && field.type !== '_source') {

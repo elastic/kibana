@@ -44,6 +44,8 @@ export const config: PluginConfigDescriptor<BannersConfigType> = {
       const pluginConfig = get(rootConfig, fromPath);
       if (pluginConfig?.placement === 'header') {
         addDeprecation({
+          configPath: 'xpack.banners.placement',
+          level: 'critical',
           message: 'The `header` value for xpack.banners.placement has been replaced by `top`',
           correctiveActions: {
             manualSteps: [

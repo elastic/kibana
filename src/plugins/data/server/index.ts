@@ -30,7 +30,7 @@ export const exporters = {
  * Field Formats:
  */
 
-export { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../common';
+export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
 
 /*
  * Index patterns:

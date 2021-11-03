@@ -9,8 +9,8 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './data_views';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
@@ -43,7 +43,7 @@ export interface DataPluginStart {
    * @deprecated - use "fieldFormats" plugin directly instead
    */
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsServiceStart;
+  indexPatterns: DataViewsServerPluginStart;
 }
 
 export interface DataPluginSetupDependencies {
@@ -56,6 +56,7 @@ export interface DataPluginSetupDependencies {
 export interface DataPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
+  dataViews: DataViewsServerPluginStart;
 }
 
 export class DataServerPlugin
@@ -71,7 +72,6 @@ export class DataServerPlugin
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
   private readonly autocompleteService: AutocompleteService;
-  private readonly indexPatterns = new IndexPatternsServiceProvider();
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
 
@@ -91,11 +91,6 @@ export class DataServerPlugin
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
-    this.indexPatterns.setup(core, {
-      expressions,
-      logger: this.logger.get('indexPatterns'),
-      usageCollection,
-    });
 
     core.uiSettings.register(getUiSettings());
 
@@ -114,16 +109,11 @@ export class DataServerPlugin
     };
   }
 
-  public start(core: CoreStart, { fieldFormats }: DataPluginStartDependencies) {
-    const indexPatterns = this.indexPatterns.start(core, {
-      fieldFormats,
-      logger: this.logger.get('indexPatterns'),
-    });
-
+  public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
     return {
       fieldFormats,
-      indexPatterns,
-      search: this.searchService.start(core, { fieldFormats, indexPatterns }),
+      indexPatterns: dataViews,
+      search: this.searchService.start(core, { fieldFormats, indexPatterns: dataViews }),
     };
   }
 

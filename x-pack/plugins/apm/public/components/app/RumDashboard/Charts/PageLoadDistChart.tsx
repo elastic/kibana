@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import {
   Axis,
   BrushEndListener,
+  XYBrushEvent,
   Chart,
   CurveType,
   LineSeries,
@@ -64,7 +65,7 @@ export function PageLoadDistChart({
   percentileRange,
 }: Props) {
   const [breakdownLoading, setBreakdownLoading] = useState(false);
-  const onBrushEnd: BrushEndListener = ({ x }) => {
+  const onBrushEnd = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -72,7 +73,6 @@ export function PageLoadDistChart({
     onPercentileChange(minX, maxX);
   };
 
-  // eslint-disable-next-line react/function-component-definition
   const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
     return (
       <div>
@@ -100,7 +100,7 @@ export function PageLoadDistChart({
           <Settings
             baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
             theme={euiChartTheme.theme}
-            onBrushEnd={onBrushEnd}
+            onBrushEnd={onBrushEnd as BrushEndListener}
             tooltip={tooltipProps}
             showLegend
           />

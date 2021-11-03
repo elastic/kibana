@@ -126,14 +126,20 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async createIndices(indices: string) {
+    async createIndex(
+      indices: string,
+      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping
+    ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
         log.debug(`Indices '${indices}' already exist. Nothing to create.`);
         return;
       }
 
-      const { body } = await es.indices.create({ index: indices });
+      const { body } = await es.indices.create({
+        index: indices,
+        ...(mappings ? { body: { mappings } } : {}),
+      });
       expect(body)
         .to.have.property('acknowledged')
         .eql(true, 'Response for create request indices should be acknowledged.');
@@ -981,11 +987,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200)
         .then((res: any) => res.body);
 
-      log.debug('> Trained model crated');
+      log.debug('> Trained model created');
       return model;
     },
 
-    async createdTestTrainedModels(
+    async createTestTrainedModels(
       modelType: ModelType,
       count: number = 10,
       withIngestPipelines = false

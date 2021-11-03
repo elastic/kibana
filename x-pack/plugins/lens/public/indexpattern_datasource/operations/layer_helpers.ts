@@ -417,6 +417,17 @@ export function replaceColumn({
         field,
         visualizationGroups,
       });
+
+      // if the formula label is not the default one, propagate it to the new operation
+      if (
+        !shouldResetLabel &&
+        previousColumn.customLabel &&
+        previousColumn.label !==
+          previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
+      ) {
+        hypotheticalLayer.columns[columnId].customLabel = true;
+        hypotheticalLayer.columns[columnId].label = previousColumn.label;
+      }
       if (hypotheticalLayer.incompleteColumns && hypotheticalLayer.incompleteColumns[columnId]) {
         return {
           ...layer,
@@ -500,13 +511,10 @@ export function replaceColumn({
     // TODO: Refactor all this to be more generic and know less about Formula
     // if managed it has to look at the full picture to have a seamless transition
     if (operationDefinition.input === 'managedReference') {
-      const newColumn = copyCustomLabel(
-        operationDefinition.buildColumn(
-          { ...baseOptions, layer: tempLayer },
-          previousColumn.params,
-          operationDefinitionMap
-        ),
-        previousColumn
+      const newColumn = operationDefinition.buildColumn(
+        { ...baseOptions, layer: tempLayer },
+        previousColumn.params,
+        operationDefinitionMap
       ) as FormulaIndexPatternColumn;
 
       // now remove the previous references
@@ -533,6 +541,17 @@ export function replaceColumn({
           : basicLayer;
       } catch (e) {
         newLayer = basicLayer;
+      }
+
+      // when coming to Formula keep the custom label
+      const regeneratedColumn = newLayer.columns[columnId];
+      if (
+        !shouldResetLabel &&
+        regeneratedColumn.operationType !== previousColumn.operationType &&
+        previousColumn.customLabel
+      ) {
+        regeneratedColumn.customLabel = true;
+        regeneratedColumn.label = previousColumn.label;
       }
 
       return updateDefaultLabels(
@@ -1387,7 +1406,7 @@ export function isOperationAllowedAsReference({
 
 // Labels need to be updated when columns are added because reference-based column labels
 // are sometimes copied into the parents
-function updateDefaultLabels(
+export function updateDefaultLabels(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern
 ): IndexPatternLayer {

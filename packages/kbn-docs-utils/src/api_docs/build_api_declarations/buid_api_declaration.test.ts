@@ -8,9 +8,9 @@
 
 import Path from 'path';
 import { Project, Node } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
-import { TypeKind, ApiScope } from '../types';
+import { TypeKind, ApiScope, PluginOrPackage } from '../types';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
 import { getDeclarationNodesForPluginScope } from '../get_declaration_nodes_for_plugin';
 import { buildApiDeclarationTopNode } from './build_api_declaration';
@@ -22,7 +22,7 @@ const log = new ToolingLog({
 });
 
 let nodes: Node[];
-let plugins: KibanaPlatformPlugin[];
+let plugins: PluginOrPackage[];
 
 function getNodeName(node: Node): string {
   return isNamedNode(node) ? node.getName() : '';

@@ -24,7 +24,9 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    savedSearchLoader: {} as DiscoverStart['savedSearchLoader'],
+    __LEGACY: {
+      savedSearchLoader: {} as DiscoverStart['__LEGACY']['savedSearchLoader'],
+    },
     urlGenerator: {
       createUrl: jest.fn(),
     } as unknown as DiscoverStart['urlGenerator'],

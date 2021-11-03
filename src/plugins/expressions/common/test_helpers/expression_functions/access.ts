@@ -8,7 +8,7 @@
 
 import { ExpressionFunctionDefinition } from '../../expression_functions';
 
-export const access: ExpressionFunctionDefinition<'access', any, { key: string }, any> = {
+export const access: ExpressionFunctionDefinition<'access', unknown, { key: string }, unknown> = {
   name: 'access',
   help: 'Access key on input object or return the input, if it is not an object',
   args: {
@@ -19,6 +19,10 @@ export const access: ExpressionFunctionDefinition<'access', any, { key: string }
     },
   },
   fn: (input, { key }, context) => {
-    return !input ? input : typeof input === 'object' ? input[key] : input;
+    return !input
+      ? input
+      : typeof input === 'object'
+      ? (input as Record<string, unknown>)[key]
+      : input;
   },
 };

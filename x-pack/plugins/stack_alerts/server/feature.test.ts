@@ -32,10 +32,15 @@ describe('Stack Alerts Feature Privileges', () => {
       BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all ?? [];
     const typesInFeaturePrivilegeRead =
       BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read ?? [];
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(typesInFeaturePrivilege.length);
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(typesInFeaturePrivilegeAll.length);
+    // transform alerting rule is initialized during the transform plugin setup
     expect(alertingSetup.registerType.mock.calls.length).toEqual(
-      typesInFeaturePrivilegeRead.length
+      typesInFeaturePrivilege.length - 1
+    );
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(
+      typesInFeaturePrivilegeAll.length - 1
+    );
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(
+      typesInFeaturePrivilegeRead.length - 1
     );
 
     alertingSetup.registerType.mock.calls.forEach((call) => {

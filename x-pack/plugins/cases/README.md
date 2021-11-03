@@ -1,9 +1,9 @@
-Case management in Kibana
+# Case management in Kibana
 
 [![Issues][issues-shield]][issues-url]
-[![Pull Requests][pr-shield]][pr-url] 
+[![Pull Requests][pr-shield]][pr-url]
 
-# Cases Plugin Docs
+# Docs
 
 ![Cases Logo][cases-logo] 
 
@@ -167,7 +167,7 @@ UI component:
 
 _***Feature in development, disabled by default**_
 
-See [Kibana Actions](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions) for more information.
+See [Kibana Actions](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions) for more information.
 
 
 ID: `.case`
@@ -288,9 +288,9 @@ Connectors of type (`.none`) should have the `fields` attribute set to `null`.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[pr-shield]: https://img.shields.io/github/issues-pr/elangosundar/awesome-README-templates?style=for-the-badge
-[pr-url]: https://github.com/elastic/kibana/pulls?q=is%3Apr+label%3AFeature%3ACases+-is%3Adraft+is%3Aopen+
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
+[pr-shield]: https://img.shields.io/github/issues-pr/elastic/kibana/Team:Threat%20Hunting:Cases?label=pull%20requests&style=for-the-badge
+[pr-url]: https://github.com/elastic/kibana/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc+label%3A%22Team%3AThreat+Hunting%3ACases%22
+[issues-shield]: https://img.shields.io/github/issues-search?label=issue&query=repo%3Aelastic%2Fkibana%20is%3Aissue%20is%3Aopen%20label%3A%22Team%3AThreat%20Hunting%3ACases%22&style=for-the-badge
 [issues-url]: https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3AFeature%3ACases
 [cases-logo]: images/logo.png
 [configure-img]: images/configure.png

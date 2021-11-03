@@ -103,7 +103,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: { visualization: { activeId: null, state: {} }, datasourceStates: {} },
       }
     );
@@ -121,7 +120,7 @@ describe('workspace_panel', () => {
         }}
       />,
 
-      { data: defaultProps.plugins.data, preloadedState: { datasourceStates: {} } }
+      { preloadedState: { datasourceStates: {} } }
     );
     instance = mounted.instance;
 
@@ -138,7 +137,7 @@ describe('workspace_panel', () => {
         }}
       />,
 
-      { data: defaultProps.plugins.data, preloadedState: { datasourceStates: {} } }
+      { preloadedState: { datasourceStates: {} } }
     );
     instance = mounted.instance;
 
@@ -165,8 +164,7 @@ describe('workspace_panel', () => {
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         ExpressionRenderer={expressionRendererMock}
-      />,
-      { data: defaultProps.plugins.data }
+      />
     );
 
     instance = mounted.instance;
@@ -199,9 +197,7 @@ describe('workspace_panel', () => {
         }}
         ExpressionRenderer={expressionRendererMock}
         plugins={{ ...props.plugins, uiActions: uiActionsMock }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -233,9 +229,7 @@ describe('workspace_panel', () => {
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
         ExpressionRenderer={expressionRendererMock}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
 
     instance = mounted.instance;
@@ -279,7 +273,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -360,9 +353,7 @@ describe('workspace_panel', () => {
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-
-        { data: defaultProps.plugins.data }
+        />
       );
       instance = mounted.instance;
     });
@@ -408,9 +399,7 @@ describe('workspace_panel', () => {
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-
-        { data: defaultProps.plugins.data }
+        />
       );
       instance = mounted.instance;
     });
@@ -456,7 +445,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -499,7 +487,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -543,7 +530,6 @@ describe('workspace_panel', () => {
       />,
 
       {
-        data: defaultProps.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -582,9 +568,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -614,9 +598,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: mockVisualization,
         }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -648,9 +630,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: mockVisualization,
         }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -679,9 +659,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
-      />,
-
-      { data: defaultProps.plugins.data }
+      />
     );
     instance = mounted.instance;
 
@@ -709,9 +687,7 @@ describe('workspace_panel', () => {
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-
-        { data: defaultProps.plugins.data }
+        />
       );
       instance = mounted.instance;
     });
@@ -745,9 +721,7 @@ describe('workspace_panel', () => {
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
           ExpressionRenderer={expressionRendererMock}
-        />,
-
-        { data: defaultProps.plugins.data }
+        />
       );
       instance = mounted.instance;
       lensStore = mounted.lensStore;
@@ -832,10 +806,13 @@ describe('workspace_panel', () => {
       expect(lensStore.dispatch).toHaveBeenCalledWith({
         type: 'lens/switchVisualization',
         payload: {
-          newVisualizationId: 'testVis',
-          initialState: {},
-          datasourceState: {},
-          datasourceId: 'testDatasource',
+          suggestion: {
+            newVisualizationId: 'testVis',
+            visualizationState: {},
+            datasourceState: {},
+            datasourceId: 'testDatasource',
+          },
+          clearStagedPreview: true,
         },
       });
     });

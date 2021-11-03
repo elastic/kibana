@@ -17,6 +17,7 @@ import { environmentsRouteRepository } from './environments';
 import { errorsRouteRepository } from './errors';
 import { apmFleetRouteRepository } from './fleet';
 import { indexPatternRouteRepository } from './index_pattern';
+import { latencyDistributionRouteRepository } from './latency_distribution';
 import { metricsRouteRepository } from './metrics';
 import { observabilityOverviewRouteRepository } from './observability_overview';
 import { rumRouteRepository } from './rum_client';
@@ -33,6 +34,7 @@ import { traceRouteRepository } from './traces';
 import { transactionRouteRepository } from './transactions';
 import { APMRouteHandlerResources } from './typings';
 import { historicalDataRouteRepository } from './historical_data';
+import { eventMetadataRouteRepository } from './event_metadata';
 import { suggestionsRouteRepository } from './suggestions';
 
 const getTypedGlobalApmServerRouteRepository = () => {
@@ -40,6 +42,7 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(indexPatternRouteRepository)
     .merge(environmentsRouteRepository)
     .merge(errorsRouteRepository)
+    .merge(latencyDistributionRouteRepository)
     .merge(metricsRouteRepository)
     .merge(observabilityOverviewRouteRepository)
     .merge(rumRouteRepository)
@@ -58,7 +61,8 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(apmFleetRouteRepository)
     .merge(backendsRouteRepository)
     .merge(fallbackToTransactionsRouteRepository)
-    .merge(historicalDataRouteRepository);
+    .merge(historicalDataRouteRepository)
+    .merge(eventMetadataRouteRepository);
 
   return repository;
 };

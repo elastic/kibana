@@ -30,7 +30,10 @@ import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../../common';
 import { groupFields } from './lib/group_fields';
-import { IndexPatternField } from '../../../../../../../data/public';
+import {
+  IndexPatternField,
+  indexPatterns as indexPatternUtils,
+} from '../../../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
@@ -208,7 +211,8 @@ export function DiscoverSidebarComponent({
     }
     const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
     fields.forEach((field) => {
-      const parent = field.spec?.subType?.multi?.parent;
+      const subTypeMulti = indexPatternUtils.getFieldSubtypeMulti(field);
+      const parent = subTypeMulti?.multi.parent;
       if (!parent) {
         return;
       }

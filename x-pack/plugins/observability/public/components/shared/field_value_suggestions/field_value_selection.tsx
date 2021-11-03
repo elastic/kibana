@@ -70,8 +70,8 @@ export function FieldValueSelection({
   values = [],
   selectedValue,
   excludedValue,
-  compressed = true,
   allowExclusions = true,
+  compressed = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
@@ -174,8 +174,8 @@ export function FieldValueSelection({
           }}
           options={options}
           onChange={onChange}
-          isLoading={loading && !query && options.length === 0}
           allowExclusions={allowExclusions}
+          isLoading={loading && !query && options.length === 0}
         >
           {(list, search) => (
             <div style={{ width: 240 }}>

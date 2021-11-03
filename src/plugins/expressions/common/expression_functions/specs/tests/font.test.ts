@@ -7,11 +7,12 @@
  */
 
 import { openSans } from '../../../fonts';
-import { font } from '../font';
+import { FontWeight, TextAlignment } from '../../../types';
+import { font, FontArguments } from '../font';
 import { functionWrapper } from './utils';
 
 describe('font', () => {
-  const fn: any = functionWrapper(font);
+  const fn = functionWrapper(font);
 
   const args = {
     align: 'left',
@@ -22,7 +23,7 @@ describe('font', () => {
     size: 14,
     underline: false,
     weight: 'normal',
-  };
+  } as unknown as FontArguments;
 
   describe('default output', () => {
     const result = fn(null, args);
@@ -63,7 +64,7 @@ describe('font', () => {
 
     describe('family', () => {
       it('sets font family', () => {
-        const result = fn(null, { ...args, family: 'Optima, serif' });
+        const result = fn(null, { ...args, family: 'Optima, serif' } as unknown as FontArguments);
         expect(result.spec.fontFamily).toBe('Optima, serif');
         expect(result.css).toContain('font-family:Optima, serif');
       });
@@ -79,29 +80,29 @@ describe('font', () => {
 
     describe('weight', () => {
       it('sets font weight', () => {
-        let result = fn(null, { ...args, weight: 'normal' });
+        let result = fn(null, { ...args, weight: FontWeight.NORMAL });
         expect(result.spec.fontWeight).toBe('normal');
         expect(result.css).toContain('font-weight:normal');
 
-        result = fn(null, { ...args, weight: 'bold' });
+        result = fn(null, { ...args, weight: FontWeight.BOLD });
         expect(result.spec.fontWeight).toBe('bold');
         expect(result.css).toContain('font-weight:bold');
 
-        result = fn(null, { ...args, weight: 'bolder' });
+        result = fn(null, { ...args, weight: FontWeight.BOLDER });
         expect(result.spec.fontWeight).toBe('bolder');
         expect(result.css).toContain('font-weight:bolder');
 
-        result = fn(null, { ...args, weight: 'lighter' });
+        result = fn(null, { ...args, weight: FontWeight.LIGHTER });
         expect(result.spec.fontWeight).toBe('lighter');
         expect(result.css).toContain('font-weight:lighter');
 
-        result = fn(null, { ...args, weight: '400' });
+        result = fn(null, { ...args, weight: FontWeight.FOUR });
         expect(result.spec.fontWeight).toBe('400');
         expect(result.css).toContain('font-weight:400');
       });
 
       it('throws when provided an invalid weight', () => {
-        expect(() => fn(null, { ...args, weight: 'foo' })).toThrow();
+        expect(() => fn(null, { ...args, weight: 'foo' as FontWeight })).toThrow();
       });
     });
 
@@ -131,25 +132,25 @@ describe('font', () => {
 
     describe('align', () => {
       it('sets text alignment', () => {
-        let result = fn(null, { ...args, align: 'left' });
+        let result = fn(null, { ...args, align: TextAlignment.LEFT });
         expect(result.spec.textAlign).toBe('left');
         expect(result.css).toContain('text-align:left');
 
-        result = fn(null, { ...args, align: 'center' });
+        result = fn(null, { ...args, align: TextAlignment.CENTER });
         expect(result.spec.textAlign).toBe('center');
         expect(result.css).toContain('text-align:center');
 
-        result = fn(null, { ...args, align: 'right' });
+        result = fn(null, { ...args, align: TextAlignment.RIGHT });
         expect(result.spec.textAlign).toBe('right');
         expect(result.css).toContain('text-align:right');
 
-        result = fn(null, { ...args, align: 'justify' });
+        result = fn(null, { ...args, align: TextAlignment.JUSTIFY });
         expect(result.spec.textAlign).toBe('justify');
         expect(result.css).toContain('text-align:justify');
       });
 
       it('throws when provided an invalid alignment', () => {
-        expect(() => fn(null, { ...args, align: 'foo' })).toThrow();
+        expect(() => fn(null, { ...args, align: 'foo' as TextAlignment })).toThrow();
       });
     });
   });

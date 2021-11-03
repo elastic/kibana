@@ -33,6 +33,7 @@ export const config: PluginConfigDescriptor<IEventLogConfig> = {
         settings?.xpack?.eventLog?.enabled === true
       ) {
         addDeprecation({
+          configPath: 'xpack.eventLog.enabled',
           message: `"xpack.eventLog.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.eventLog.enabled" from your kibana configs.`],

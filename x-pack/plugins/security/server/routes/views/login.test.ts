@@ -172,6 +172,7 @@ describe('Login view routes', () => {
         allowSubFeaturePrivileges: true,
         allowAuditLogging: true,
         allowLegacyAuditLogging: true,
+        allowML: true,
         showLogin: true,
       });
 

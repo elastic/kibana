@@ -50,3 +50,10 @@ export interface AppDependencies {
     api: ApiService;
   };
 }
+
+export interface ClientConfigType {
+  readonly: boolean;
+  ui: {
+    enabled: boolean;
+  };
+}

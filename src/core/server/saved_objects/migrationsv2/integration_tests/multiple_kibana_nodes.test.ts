@@ -67,7 +67,6 @@ async function createRoot({ logFileName }: CreateRootConfig) {
     },
     migrations: {
       skip: false,
-      enableV2: true,
       batchSize: 100, // fixture contains 5000 docs
     },
     logging: {

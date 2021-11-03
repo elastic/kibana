@@ -1,0 +1,91 @@
+[role="xpack"]
+[[servicenow-sir-action-type]]
+=== ServiceNow connector and action
+++++
+<titleabbrev>ServiceNow SecOps</titleabbrev>
+++++
+
+The ServiceNow SecOps connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow security incidents.
+
+[float]
+[[servicenow-sir-connector-configuration]]
+==== Connector configuration
+
+ServiceNow SecOps connectors have the following configuration properties.
+
+Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
+URL::       ServiceNow instance URL.
+Username::  Username for HTTP Basic authentication.
+Password::  Password for HTTP Basic authentication.
+
+The ServiceNow user requires at minimum read, create, and update access to the Security Incident table and read access to the https://docs.servicenow.com/bundle/paris-platform-administration/page/administer/localization/reference/r_ChoicesTable.html[sys_choice]. If you don't provide access to sys_choice, then the choices will not render.
+
+[float]
+[[servicenow-sir-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[Preconfigured-servicenow-sir-configuration]]
+==== Preconfigured connector type
+
+[source,text]
+--
+ my-servicenow-sir:
+   name: preconfigured-servicenow-connector-type
+   actionTypeId: .servicenow-sir
+   config:
+     apiUrl: https://example.service-now.com/
+     usesTableApi: false
+   secrets:
+     username: testuser
+     password: passwordkeystorevalue
+--
+
+Config defines information for the connector type.
+
+`apiUrl`:: An address that corresponds to *URL*.
+`usesTableApi`:: A boolean that indicates if the connector uses the Table API or the Import Set API.
+
+Note: If `usesTableApi` is set to false the Elastic application should be installed in ServiceNow.
+
+Secrets defines sensitive information for the connector type.
+
+`username`:: A string that corresponds to *Username*.
+`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+[float]
+[[define-servicenow-sir-ui]]
+==== Define connector in Stack Management
+
+Define ServiceNow SecOps connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-sir-connector.png[ServiceNow SecOps connector]
+
+Test ServiceNow SecOps action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-sir-params-test.png[ServiceNow SecOps params test]
+
+[float]
+[[servicenow-sir-action-configuration]]
+==== Action configuration
+
+ServiceNow SecOps actions have the following configuration properties.
+
+Short description::    A short description for the incident, used for searching the contents of the knowledge base.
+Priority::             The priority of the incident.
+Category::             The category of the incident.
+Subcategory::          The subcategory of the incident.
+Correlation ID::       All actions sharing this ID will be associated with the same ServiceNow security incident. If an incident exists in ServiceNow with the same correlation ID the security incident will be updated. Default value: `<rule ID>:<alert instance ID>`.
+Correlation Display::  A descriptive label of the alert for correlation purposes in ServiceNow.
+Description::          The details about the incident.
+Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+
+[float]
+[[configuring-servicenow-sir]]
+==== Configure ServiceNow SecOps
+
+ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

@@ -9,8 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty } from 'lodash/fp';
-import { connect, ConnectedProps } from 'react-redux';
-import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
+import { TimelineEventsDetailsItem } from '../../../../common';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
@@ -24,8 +23,6 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
-import { inputsModel, inputsSelectors, State } from '../../../common/store';
-
 interface ActionsData {
   alertStatus: Status;
   eventId: string;
@@ -48,7 +45,7 @@ export interface TakeActionDropdownProps {
   timelineId: string;
 }
 
-export const TakeActionDropdownComponent = React.memo(
+export const TakeActionDropdown = React.memo(
   ({
     detailsData,
     ecsData,
@@ -61,9 +58,7 @@ export const TakeActionDropdownComponent = React.memo(
     onAddIsolationStatusClick,
     refetch,
     timelineId,
-    globalQuery,
-    timelineQuery,
-  }: TakeActionDropdownProps & PropsFromRedux) => {
+  }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -146,24 +141,12 @@ export const TakeActionDropdownComponent = React.memo(
       closePopoverHandler();
     }, [closePopoverHandler]);
 
-    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-    };
-
-    const refetchAll = useCallback(() => {
-      if (timelineId === TimelineId.active) {
-        refetchQuery([timelineQuery]);
-      } else {
-        refetchQuery(globalQuery);
-      }
-    }, [timelineId, globalQuery, timelineQuery]);
-
     const { actionItems: statusActionItems } = useAlertsActions({
       alertStatus: actionsData.alertStatus,
       closePopover: closePopoverAndFlyout,
       eventId: actionsData.eventId,
       indexName,
-      refetch: refetchAll,
+      refetch,
       timelineId,
     });
 
@@ -233,21 +216,3 @@ export const TakeActionDropdownComponent = React.memo(
     ) : null;
   }
 );
-
-const makeMapStateToProps = () => {
-  const getGlobalQueries = inputsSelectors.globalQuery();
-  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { timelineId }: TakeActionDropdownProps) => {
-    return {
-      globalQuery: getGlobalQueries(state),
-      timelineQuery: getTimelineQuery(state, timelineId),
-    };
-  };
-  return mapStateToProps;
-};
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const TakeActionDropdown = connector(React.memo(TakeActionDropdownComponent));

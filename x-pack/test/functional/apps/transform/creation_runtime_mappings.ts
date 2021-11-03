@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       script: "emit(doc['responsetime'].value * 2.0)",
     },
   };
+
   describe('creation with runtime mappings', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

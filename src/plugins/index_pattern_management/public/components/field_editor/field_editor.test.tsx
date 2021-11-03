@@ -10,8 +10,6 @@ import { IndexPattern, IndexPatternField, IndexPatternsService } from 'src/plugi
 import { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-jest.mock('brace/mode/groovy', () => ({}));
-
 import { FieldEditor, FieldEdiorProps } from './field_editor';
 
 import { mockManagementPlugin } from '../../mocks';
@@ -23,7 +21,6 @@ jest.mock('@elastic/eui', () => ({
   EuiButtonEmpty: 'eui-button-empty',
   EuiCallOut: 'eui-call-out',
   EuiCode: 'eui-code',
-  EuiCodeEditor: 'eui-code-editor',
   EuiConfirmModal: 'eui-confirm-modal',
   EuiFieldNumber: 'eui-field-number',
   EuiFieldText: 'eui-field-text',
@@ -41,6 +38,15 @@ jest.mock('@elastic/eui', () => ({
   htmlIdGenerator: () => 42,
   euiPaletteColorBlind: () => ['red'],
 }));
+
+jest.mock('../../../../kibana_react/public', () => {
+  const original = jest.requireActual('../../../../kibana_react/public');
+
+  return {
+    ...original,
+    CodeEditor: `code-editor`,
+  };
+});
 
 jest.mock('../../scripting_languages', () => ({
   getEnabledScriptingLanguages: () => ['painless', 'testlang'],

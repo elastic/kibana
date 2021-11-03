@@ -73,7 +73,7 @@ export const indexFleetAgentForHost = async (
     .index<FleetServerAgent>({
       index: agentDoc._index,
       id: agentDoc._id,
-      body: agentDoc._source!,
+      body: agentDoc._source,
       op_type: 'create',
     })
     .catch(wrapErrorAndRejectPromise);

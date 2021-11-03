@@ -43,7 +43,7 @@ export class JsonLayout implements Layout {
 
   public format(record: LogRecord): string {
     const log: Ecs = {
-      ecs: { version: '1.9.0' },
+      ecs: { version: '1.12.0' },
       '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       message: record.message,
       error: JsonLayout.errorToSerializableObject(record.error),

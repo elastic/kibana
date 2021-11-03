@@ -477,6 +477,13 @@ export function LayerPanel(
                                   );
                                   removeButtonRef(id);
                                 }}
+                                invalid={
+                                  !layerDatasource.isValidColumn(
+                                    layerDatasourceState,
+                                    layerId,
+                                    columnId
+                                  )
+                                }
                               >
                                 <NativeRenderer
                                   render={layerDatasource.renderDimensionTrigger}

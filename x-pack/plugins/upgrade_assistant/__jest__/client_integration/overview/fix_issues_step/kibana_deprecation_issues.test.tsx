@@ -9,7 +9,8 @@ import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 import type { DomainDeprecationDetails } from 'kibana/public';
 
-import { setupEnvironment, kibanaDeprecationsServiceHelpers } from '../../helpers';
+import { setupEnvironment } from '../../helpers';
+import { kibanaDeprecationsServiceHelpers } from '../../kibana_deprecations/service.mock';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { esNoDeprecations } from './mock_es_issues';
 
@@ -55,7 +56,7 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
 
         expect(exists('kibanaStatsPanel')).toBe(true);
         expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain(1);
-        expect(find('kibanaStatsPanel.warningDeprecations').text()).toContain(1);
+        expect(find('kibanaStatsPanel.warningDeprecations').text()).toContain(2);
       });
 
       test('panel links to Kibana deprecations page', () => {

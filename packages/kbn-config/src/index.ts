@@ -13,6 +13,7 @@ export type {
   ConfigDeprecationWithContext,
   ConfigDeprecation,
   ConfigDeprecationCommand,
+  ConfigDeprecationContext,
   ChangedDeprecatedPaths,
 } from './deprecation';
 

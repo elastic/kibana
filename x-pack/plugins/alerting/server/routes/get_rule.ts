@@ -48,8 +48,9 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
-    ...omit(executionStatus, 'lastExecutionDate'),
+    ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
     last_execution_date: executionStatus.lastExecutionDate,
+    last_duration: executionStatus.lastDuration,
   },
   actions: actions.map(({ group, id, actionTypeId, params }) => ({
     group,

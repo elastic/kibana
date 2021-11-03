@@ -57,7 +57,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
-      resolve(__dirname, './apps/reporting'),
 
       //This upgrade assistant file needs to be run after the rest of the jobs because of
       //it being destructive.

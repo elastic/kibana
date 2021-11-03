@@ -189,7 +189,12 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         ]
       }
       loading={false}
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       onChange={[Function]}
       pagination={
         Object {
@@ -405,7 +410,12 @@ exports[`Table should render normally 1`] = `
         ]
       }
       loading={false}
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       onChange={[Function]}
       pagination={
         Object {

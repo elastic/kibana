@@ -13,10 +13,6 @@ export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
   config: MapsConfigType
 ): void {
-  if (!usageCollection) {
-    return;
-  }
-
   const mapsUsageCollector = usageCollection.makeUsageCollector<MapsUsage>({
     type: 'maps',
     isReady: () => true,

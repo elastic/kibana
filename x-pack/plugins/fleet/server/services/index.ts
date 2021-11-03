@@ -15,7 +15,7 @@ import type { GetAgentStatusResponse } from '../../common';
 import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
-import type { getInstallation } from './epm/packages';
+import type { getInstallation, ensureInstalledPackage } from './epm/packages';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
@@ -37,6 +37,7 @@ export interface ESIndexPatternService {
 
 export interface PackageService {
   getInstallation: typeof getInstallation;
+  ensureInstalledPackage: typeof ensureInstalledPackage;
 }
 
 /**

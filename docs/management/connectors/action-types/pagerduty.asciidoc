@@ -68,7 +68,7 @@ PagerDuty actions have the following properties.
 
 Severity::      The perceived severity of on the affected system. This can be one of `Critical`, `Error`, `Warning` or `Info`(default).
 Event action::  One of `Trigger` (default), `Resolve`, or `Acknowledge`. See https://v2.developer.pagerduty.com/docs/events-api-v2#event-action[event action] for more details.
-Dedup Key::     All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution. This value is *optional*, and if not set, defaults to `<alert ID>:<alert instance ID>`. The maximum length is *255* characters. See https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication[alert deduplication] for details. 
+Dedup Key::     All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution. This value is *optional*, and if not set, defaults to `<rule ID>:<alert ID>`. The maximum length is *255* characters. See https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication[alert deduplication] for details. 
 Timestamp::     An *optional* https://v2.developer.pagerduty.com/v2/docs/types#datetime[ISO-8601 format date-time], indicating the time the event was detected or generated.
 Component::     An *optional* value indicating the component of the source machine that is responsible for the event, for example `mysql` or `eth0`.
 Group::         An *optional* value indicating the logical grouping of components of a service, for example `app-stack`.

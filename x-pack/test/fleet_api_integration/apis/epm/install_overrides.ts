@@ -126,9 +126,7 @@ export default function (providerContext: FtrProviderContext) {
                   limit: '10000',
                 },
               },
-              number_of_routing_shards: 30,
               number_of_shards: '3',
-              refresh_interval: '5s',
             },
           },
           mappings: {

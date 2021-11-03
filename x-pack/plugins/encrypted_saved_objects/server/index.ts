@@ -17,7 +17,7 @@ export type { IsMigrationNeededPredicate } from './create_migration';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0', { level: 'critical' })],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new EncryptedSavedObjectsPlugin(initializerContext);

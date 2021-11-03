@@ -210,7 +210,7 @@ describe('Authenticator', () => {
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
-          supportedSchemes: new Set(['apikey', 'basic']),
+          supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
         });
       });
 
@@ -238,7 +238,9 @@ describe('Authenticator', () => {
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
-        ).toHaveBeenCalledWith(expect.anything(), { supportedSchemes: new Set(['apikey']) });
+        ).toHaveBeenCalledWith(expect.anything(), {
+          supportedSchemes: new Set(['apikey', 'bearer']),
+        });
       });
 
       it('disabled if explicitly disabled', () => {

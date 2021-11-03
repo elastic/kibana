@@ -6,13 +6,14 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
+
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   CloudBackupStatus,
   ESUpgradeStatus,
   DeprecationLoggingStatus,
+  ResponseError,
 } from '../../../common/types';
-import { ResponseError } from '../../../public/application/lib/api';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
@@ -63,6 +64,16 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const body = error ? error : response;
 
     server.respondWith('GET', `${API_BASE_PATH}/deprecation_logging/count`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setDeleteLogsCacheResponse = (response?: string, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+    server.respondWith('DELETE', `${API_BASE_PATH}/deprecation_logging/cache`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -148,11 +159,33 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadSystemIndicesMigrationStatus = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/system_indices_migration`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setLoadMlUpgradeModeResponse = (response?: object, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
     server.respondWith('GET', `${API_BASE_PATH}/ml_upgrade_mode`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setSystemIndicesMigrationResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('POST', `${API_BASE_PATH}/system_indices_migration`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -169,6 +202,9 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setDeleteMlSnapshotResponse,
     setUpgradeMlSnapshotStatusResponse,
     setLoadDeprecationLogsCountResponse,
+    setLoadSystemIndicesMigrationStatus,
+    setSystemIndicesMigrationResponse,
+    setDeleteLogsCacheResponse,
     setStartReindexingResponse,
     setReindexStatusResponse,
     setLoadMlUpgradeModeResponse,

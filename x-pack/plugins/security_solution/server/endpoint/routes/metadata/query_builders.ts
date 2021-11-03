@@ -53,8 +53,8 @@ export async function kibanaRequestToMetadataListESQuery(
     body: {
       query: buildQueryBody(
         request,
-        queryBuilderOptions?.unenrolledAgentIds!,
-        queryBuilderOptions?.statusAgentIds!
+        queryBuilderOptions?.unenrolledAgentIds,
+        queryBuilderOptions?.statusAgentIds
       ),
       track_total_hits: true,
       sort: MetadataSortMethod,

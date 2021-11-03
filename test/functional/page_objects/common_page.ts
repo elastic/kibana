@@ -30,7 +30,8 @@ export class CommonPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly login = this.ctx.getPageObject('login');
+  private readonly loginPage = this.ctx.getPageObject('login');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -60,18 +61,22 @@ export class CommonPageObject extends FtrService {
     if (loginPage && !wantedLoginPage) {
       this.log.debug('Found login page');
       if (this.config.get('security.disableTestUser')) {
-        await this.login.login(
+        await this.loginPage.login(
           this.config.get('servers.kibana.username'),
           this.config.get('servers.kibana.password')
         );
       } else {
-        await this.login.login('test_user', 'changeme');
+        await this.loginPage.login('test_user', 'changeme');
       }
 
-      await this.find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-        6 * this.defaultFindTimeout
-      );
+      if (appUrl.includes('/status')) {
+        await this.testSubjects.find('statusPageRoot');
+      } else {
+        await this.find.byCssSelector(
+          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+          6 * this.defaultFindTimeout
+        );
+      }
       await this.browser.get(appUrl, insertTimestamp);
       currentUrl = await this.browser.getCurrentUrl();
       this.log.debug(`Finished login process currentUrl = ${currentUrl}`);
@@ -219,6 +224,7 @@ export class CommonPageObject extends FtrService {
       basePath = '',
       shouldLoginIfPrompted = true,
       hash = '',
+      search = '',
       disableWelcomePrompt = true,
       insertTimestamp = true,
     } = {}
@@ -230,11 +236,13 @@ export class CommonPageObject extends FtrService {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
         hash: hash || appConfig.hash,
+        search,
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}/app/${appName}`,
         hash,
+        search,
       });
     }
 
@@ -337,6 +345,12 @@ export class CommonPageObject extends FtrService {
     await this.browser.pressKeys(this.browser.keys.TAB);
   }
 
+  // Pause the browser at a certain place for debugging
+  // Not meant for usage in CI, only for dev-usage
+  async pause() {
+    return this.browser.pause();
+  }
+
   /**
    * Clicks cancel button on modal
    * @param overlayWillStay pass in true if your test will show multiple modals in succession
@@ -395,7 +409,7 @@ export class CommonPageObject extends FtrService {
     const toastShown = await this.find.existsByCssSelector('.euiToast');
     if (toastShown) {
       try {
-        await this.closeToast();
+        await this.find.clickByCssSelector('.euiToast__closeButton');
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
       }
@@ -487,5 +501,13 @@ export class CommonPageObject extends FtrService {
     } else {
       await this.testSubjects.exists(validator);
     }
+  }
+
+  async setTime(time: { from: string; to: string }) {
+    await this.kibanaServer.uiSettings.replace({ 'timepicker:timeDefaults': JSON.stringify(time) });
+  }
+
+  async unsetTime() {
+    await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
   }
 }

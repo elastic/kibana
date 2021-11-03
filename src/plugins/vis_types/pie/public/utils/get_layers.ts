@@ -133,7 +133,6 @@ export const getLayers = (
   syncColors: boolean
 ): PartitionLayer[] => {
   const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
     valueFont: {
       fontWeight: 700,
     },

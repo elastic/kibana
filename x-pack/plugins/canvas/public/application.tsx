@@ -37,6 +37,7 @@ import {
   services,
   LegacyServicesProvider,
   CanvasPluginServices,
+  pluginServices as canvasServices,
 } from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
@@ -77,7 +78,7 @@ export const renderApp = ({
           <presentationUtil.ContextProvider>
             <I18nProvider>
               <Provider store={canvasStore}>
-                <App />
+                <App history={params.history} />
               </Provider>
             </I18nProvider>
           </presentationUtil.ContextProvider>
@@ -151,7 +152,13 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(<HelpMenu functionRegistry={expressions.getFunctions()} />, domNode);
+      ReactDOM.render(
+        <HelpMenu
+          functionRegistry={expressions.getFunctions()}
+          notifyService={canvasServices.getServices().notify}
+        />,
+        domNode
+      );
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });

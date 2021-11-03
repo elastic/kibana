@@ -42,7 +42,7 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { isDraggedField, normalizeOperationDataType } from './utils';
+import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
@@ -268,6 +268,12 @@ export function getIndexPatternDatasource({
       return columnLabelMap;
     },
 
+    isValidColumn: (state: IndexPatternPrivateState, layerId: string, columnId: string) => {
+      const layer = state.layers[layerId];
+
+      return !isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId]);
+    },
+
     renderDimensionTrigger: (
       domElement: Element,
       props: DatasourceDimensionTriggerProps<IndexPatternPrivateState>
@@ -444,21 +450,23 @@ export function getIndexPatternDatasource({
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
-        (
-          getErrorMessages(
-            layer,
-            state.indexPatterns[layer.indexPatternId],
-            state,
-            layerId,
-            core
-          ) ?? []
-        ).map((message) => ({
-          shortMessage: '', // Not displayed currently
-          longMessage: typeof message === 'string' ? message : message.message,
-          fixAction: typeof message === 'object' ? message.fixAction : undefined,
-        }))
-      );
+      const layerErrors = Object.entries(state.layers)
+        .filter(([_, layer]) => !!state.indexPatterns[layer.indexPatternId])
+        .map(([layerId, layer]) =>
+          (
+            getErrorMessages(
+              layer,
+              state.indexPatterns[layer.indexPatternId],
+              state,
+              layerId,
+              core
+            ) ?? []
+          ).map((message) => ({
+            shortMessage: '', // Not displayed currently
+            longMessage: typeof message === 'string' ? message : message.message,
+            fixAction: typeof message === 'object' ? message.fixAction : undefined,
+          }))
+        );
 
       // Single layer case, no need to explain more
       if (layerErrors.length <= 1) {

@@ -78,7 +78,7 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { getIsInvalidDateRange } from '../utils';
-import { TRANSFORM_STATS_URL } from '../../../../../common/constants';
+import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -284,7 +284,7 @@ const handleIsolateEndpointHost = async (
   dispatch({
     type: 'endpointIsolationRequestStateChange',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error TS2345
     payload: createLoadingResourceState(getCurrentIsolationRequestState(state)),
   });
 
@@ -320,7 +320,7 @@ async function getEndpointPackageInfo(
   dispatch({
     type: 'endpointPackageInfoStateChanged',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error TS2345
     payload: createLoadingResourceState<PackageListItem>(endpointPackageInfo(state)),
   });
 
@@ -785,7 +785,9 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
   });
 
   try {
-    const transformStatsResponse: TransformStatsResponse = await http.get(TRANSFORM_STATS_URL);
+    const transformStatsResponse: TransformStatsResponse = await http.get(
+      METADATA_TRANSFORM_STATS_URL
+    );
 
     dispatch({
       type: 'metadataTransformStatsChanged',

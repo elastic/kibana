@@ -6,30 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { EsQuerySortValue, SortDirection } from '../../../../../../data/public';
-import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
-import { fetchAnchorProvider, updateSearchSource } from './anchor';
+import { IndexPattern, SortDirection } from '../../../../../../data/public';
+import { createSearchSourceStub } from './_stubs';
+import { fetchAnchor, updateSearchSource } from './anchor';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { EsHitRecord, EsHitRecordList } from '../../../types';
+import { EsHitRecordList } from '../../../types';
 
 describe('context app', function () {
-  let fetchAnchor: (
-    indexPatternId: string,
-    anchorId: string,
-    sort: EsQuerySortValue[]
-  ) => Promise<EsHitRecord>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let searchSourceStub: any;
+  const indexPattern = {
+    id: 'INDEX_PATTERN_ID',
+    isTimeNanosBased: () => false,
+    popularizeField: () => {},
+  } as unknown as IndexPattern;
 
   describe('function fetchAnchor', function () {
     beforeEach(() => {
       searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
-      fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
     });
 
     it('should use the `fetch` method of the SearchSource', function () {
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -38,7 +37,7 @@ describe('context app', function () {
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -49,7 +48,7 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource index pattern', function () {
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -59,7 +58,7 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource version flag to true', function () {
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -70,7 +69,7 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource size to 1', function () {
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -81,7 +80,7 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource query to an ids query', function () {
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -103,7 +102,7 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource sort order', function () {
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -145,7 +144,7 @@ describe('context app', function () {
     it('should reject with an error when no hits were found', function () {
       searchSourceStub._stubHits = [];
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(
@@ -161,7 +160,7 @@ describe('context app', function () {
     it('should return the first hit after adding an anchor marker', function () {
       searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
+      return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then((anchorDocument) => {
@@ -174,16 +173,18 @@ describe('context app', function () {
   describe('useNewFields API', () => {
     beforeEach(() => {
       searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
-      fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub, true);
     });
 
     it('should request fields if useNewFieldsApi set', function () {
       searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(() => {
+      return fetchAnchor(
+        'id',
+        indexPattern,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        true
+      ).then(() => {
         const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
         const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
         expect(setFieldsSpy.calledOnce).toBe(true);

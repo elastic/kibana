@@ -165,6 +165,14 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    logsEndpoint: {
+      alias: 'le',
+      describe:
+        'By default .logs-endpoint.action and .logs-endpoint.action.responses are not indexed. \
+        Add endpoint actions and responses using this option. Starting with v7.16.0.',
+      type: 'boolean',
+      default: false,
+    },
     ssl: {
       alias: 'ssl',
       describe: 'Use https for elasticsearch and kbn clients',
@@ -226,6 +234,7 @@ async function main() {
     argv.alertIndex,
     argv.alertsPerHost,
     argv.fleet,
+    argv.logsEndpoint,
     {
       ancestors: argv.ancestors,
       generations: argv.generations,
