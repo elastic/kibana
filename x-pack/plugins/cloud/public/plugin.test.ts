@@ -136,16 +136,31 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.identify).not.toHaveBeenCalled();
       });
 
-      it('calls FS.event when security is available', async () => {
-        const { initContext } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
+      describe('with memory', () => {
+        beforeAll(() => {
+          // @ts-expect-error
+          window.performance.memory = {
+            someMetric: 1,
+          };
         });
 
-        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
-          kibana_version_str: initContext.env.packageInfo.version,
+        afterAll(() => {
+          // @ts-expect-error
+          delete window.performance.memory;
+        });
+
+        it('calls FS.event when security is available', async () => {
+          const { initContext } = await setupPlugin({
+            config: { full_story: { enabled: true, org_id: 'foo' } },
+            currentUserProps: {
+              username: '1234',
+            },
+          });
+
+          expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
+            kibana_version_str: initContext.env.packageInfo.version,
+            some_metric_int: 1,
+          });
         });
       });
 
