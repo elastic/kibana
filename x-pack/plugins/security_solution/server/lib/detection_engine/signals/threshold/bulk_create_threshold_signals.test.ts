@@ -32,6 +32,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         aggregations: {
           'threshold_0:source.ip': {
             buckets: [
+              // @ts-expect-error not full primary_interface
               {
                 key: '127.0.0.1',
                 doc_count: 15,
@@ -141,6 +142,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         aggregations: {
           'threshold_0:source.ip': {
             buckets: [
+              // @ts-expect-error not full interface
               {
                 key: '127.0.0.1',
                 doc_count: 15,
@@ -203,6 +205,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
         aggregations: {
           threshold_0: {
             buckets: [
+              // @ts-expect-error not full interface
               {
                 key: '',
                 doc_count: 15,
