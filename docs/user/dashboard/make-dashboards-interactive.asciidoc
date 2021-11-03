@@ -94,17 +94,23 @@ To save the panel to the dashboard:
 [[explore-the-underlying-documents]]
 === Open panel data in Discover
 
-You can add interactions to panels that allow you to open *Discover* and explore the panel data. To use the *Discover* interactions, the panel must use only one index pattern, and you must enable <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.`>> and <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>> in kibana.yml. 
+You can add interactions to panels that allow you to open *Discover* and explore the panel data. To use the *Discover* interactions, the panel must use only one {data source}, and you must enable <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.`>> and <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>> in kibana.yml. 
 
 If you are using 7.13.0 and earlier, panel interactions are enabled by default.
 
 There are two types of *Discover* interactions that you can add to dashboards:
 
-* *Panel interactions* &mdash; Opens the panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
+Panel interactions:: 
+Opens the panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
 +
-To use panel interactions, open the panel menu, then click *Explore underlying data*.
+To use panel interactions, open the panel menu, then click one of the following options: 
 
-* *Series data interactions* &mdash; Opens the series data in *Discover*.
+* *Explore underlying data* &mdash; Opens visualization editor panel data in *Discover*.
+
+* *Open in Discover* &mdash; Opens *Discover* saved search data in *Discover*.
+
+Series data interactions::
+Opens the series data in *Discover*.
 +
 To use series data interactions, click a data series in the panel.
 
