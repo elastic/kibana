@@ -255,7 +255,7 @@ export const AvailablePackages: React.FC = memo(() => {
                 defaultMessage:
                   'Monitor, detect and diagnose complex performance issues from your application.',
               })}
-              href={addBasePath('/app/integrations/detail/apm')}
+              href={addBasePath('/app/home#/tutorial/apm')}
               icon={<EuiIcon type="logoObservability" size="xxl" />}
             />
           </TrackApplicationView>
