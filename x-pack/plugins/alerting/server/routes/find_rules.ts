@@ -79,6 +79,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         executionStatus,
         actions,
         scheduledTaskId,
+        taskId,
         ...rest
       }) => ({
         ...rest,

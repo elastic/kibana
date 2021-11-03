@@ -61,6 +61,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialAlert<AlertTypeParams>> = ({
   actions,
   alertTypeId,
   scheduledTaskId,
+  taskId,
   createdBy,
   updatedBy,
   createdAt,

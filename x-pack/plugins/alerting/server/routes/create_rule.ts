@@ -59,6 +59,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   actions,
   alertTypeId,
   scheduledTaskId,
+  taskId,
   createdBy,
   updatedBy,
   createdAt,

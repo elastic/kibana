@@ -53,6 +53,9 @@
         "type": "flattened",
         "ignore_above": 4096
       },
+      "taskId": {
+        "type": "keyword"
+      },
       "scheduledTaskId": {
         "type": "keyword"
       },
