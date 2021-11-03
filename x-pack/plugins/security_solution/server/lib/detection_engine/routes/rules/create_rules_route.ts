@@ -106,14 +106,13 @@ export const createRulesRoute = (
           await rulesClient.muteAll({ id: createdRule.id });
         }
 
-        const ruleStatuses = await context.securitySolution.getExecutionLogClient().find({
-          logsCount: 1,
+        const ruleStatus = await context.securitySolution.getExecutionLogClient().getCurrentStatus({
           ruleId: createdRule.id,
           spaceId: context.securitySolution.getSpaceId(),
         });
         const [validated, errors] = newTransformValidate(
           createdRule,
-          ruleStatuses[0],
+          ruleStatus,
           isRuleRegistryEnabled
         );
         if (errors != null) {

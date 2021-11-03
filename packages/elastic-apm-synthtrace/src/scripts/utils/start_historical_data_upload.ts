@@ -10,7 +10,7 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { Worker } from 'worker_threads';
 import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
-import { Logger, LogLevel } from './logger';
+import { Logger, LogLevel } from '../../lib/utils/create_logger';
 
 export async function startHistoricalDataUpload({
   from,
