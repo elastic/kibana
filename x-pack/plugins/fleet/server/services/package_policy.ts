@@ -918,9 +918,13 @@ export function overridePackageInputs(
   ];
 
   for (const override of inputsOverride) {
-    let originalInput = inputs.find(
-      (i) => i.type === override.type && i.policy_template === override.policy_template
-    );
+    // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
+    // policy template, so we only match on `type` in that case.
+    let originalInput = override.policy_template
+      ? inputs.find(
+          (i) => i.type === override.type && i.policy_template === override.policy_template
+        )
+      : inputs.find((i) => i.type === override.type);
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
@@ -1019,7 +1023,14 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
+
     result.vars[name] = { ...originalVar, ...overrideVal };
+
+    // Ensure that any value from the original object is persisted on the newly merged resulting object,
+    // even if we merge other data about the given variable
+    if (originalVar?.value) {
+      result.vars[name].value = originalVar.value;
+    }
   }
 
   return result;
