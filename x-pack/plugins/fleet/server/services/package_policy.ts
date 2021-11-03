@@ -9,7 +9,7 @@ import { omit, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLte from 'semver/functions/lte';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest, LogMeta } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
@@ -68,6 +68,8 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
+import type { PackagePolicyUpgradeUsage } from './upgrade_usage';
+import { sendTelemetryEvents } from './upgrade_usage';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -83,17 +85,6 @@ export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
   'read',
   'read_cross_cluster',
 ]);
-
-interface PackagePolicyUpgradeLogMeta extends LogMeta {
-  package_policy_upgrade: {
-    package_name: string;
-    current_version: string;
-    new_version: string;
-    status: 'success' | 'failure';
-    error?: any[];
-    dryRun?: boolean;
-  };
-}
 
 class PackagePolicyService {
   public async create(
@@ -369,7 +360,8 @@ class PackagePolicyService {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser },
+    currentVersion?: string
   ): Promise<PackagePolicy> {
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
@@ -445,22 +437,22 @@ class PackagePolicyService {
         currentVersion: packagePolicy.package.version,
       });
 
-      const upgradeMeta: PackagePolicyUpgradeLogMeta = {
-        package_policy_upgrade: {
+      if (packagePolicy.package.version !== currentVersion) {
+        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
           package_name: packagePolicy.package.name,
+          current_version: currentVersion || 'unknown',
           new_version: packagePolicy.package.version,
-          current_version: 'unknown',
           status: 'success',
           dryRun: false,
-        },
-      };
-
-      appContextService
-        .getLogger()
-        .info<PackagePolicyUpgradeLogMeta>(
-          `Package policy successfully upgraded ${JSON.stringify(upgradeMeta)}`,
-          upgradeMeta
+        };
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          upgradeTelemetry
         );
+        appContextService.getLogger().info(`Package policy upgraded successfully`);
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      }
     }
 
     return newPolicy;
@@ -629,7 +621,14 @@ class PackagePolicyService {
         );
         updatePackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
-        await this.update(soClient, esClient, id, updatePackagePolicy, options);
+        await this.update(
+          soClient,
+          esClient,
+          id,
+          updatePackagePolicy,
+          options,
+          packagePolicy.package.version
+        );
         result.push({
           id,
           name: packagePolicy.name,
@@ -691,24 +690,27 @@ class PackagePolicyService {
       const hasErrors = 'errors' in updatedPackagePolicy;
 
       if (packagePolicy.package.version !== packageInfo.version) {
-        const upgradeMeta: PackagePolicyUpgradeLogMeta = {
-          package_policy_upgrade: {
-            package_name: packageInfo.name,
-            current_version: packagePolicy.package.version,
-            new_version: packageInfo.version,
-            status: hasErrors ? 'failure' : 'success',
-            error: hasErrors ? updatedPackagePolicy.errors : undefined,
-            dryRun: true,
-          },
+        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
+          package_name: packageInfo.name,
+          current_version: packagePolicy.package.version,
+          new_version: packageInfo.version,
+          status: hasErrors ? 'failure' : 'success',
+          error: hasErrors ? updatedPackagePolicy.errors : undefined,
+          dryRun: true,
         };
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          upgradeTelemetry
+        );
         appContextService
           .getLogger()
-          .info<PackagePolicyUpgradeLogMeta>(
+          .info(
             `Package policy upgrade dry run ${
               hasErrors ? 'resulted in errors' : 'ran successfully'
-            } ${JSON.stringify(upgradeMeta)}`,
-            upgradeMeta
+            }`
           );
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
       }
 
       return {
