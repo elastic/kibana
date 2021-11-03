@@ -96,6 +96,19 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="uploadFile"
+                    href={addBasePath('#/tutorial_directory/fileDataViz')}
+                    iconType="importAction"
+                  >
+                    <FormattedMessage
+                      id="home.addData.uploadFileButtonLabel"
+                      defaultMessage="Upload a file"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
 
