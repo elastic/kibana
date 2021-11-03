@@ -391,6 +391,8 @@ export const ModelsList: FC = () => {
               },
             })
           );
+          // Need to fetch model state updates
+          await fetchModelsStats([item]);
         } catch (e) {
           displayErrorToast(
             e,
@@ -430,6 +432,8 @@ export const ModelsList: FC = () => {
               },
             })
           );
+          // Need to fetch model state updates
+          await fetchModelsStats([item]);
         } catch (e) {
           displayErrorToast(
             e,
