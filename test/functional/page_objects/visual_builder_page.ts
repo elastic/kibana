@@ -505,12 +505,27 @@ export class VisualBuilderPageObject extends FtrService {
     return await annotationTooltipDetails.getVisibleText();
   }
 
+  public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
+    await this.retry.try(async () => {
+      const isPopoverOpened = await this.testSubjects.exists('switchIndexPatternSelectionMode');
+      if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
+        await this.testSubjects.click('switchIndexPatternSelectionModePopover');
+      }
+      if (shouldOpen) {
+        await this.testSubjects.existOrFail('switchIndexPatternSelectionMode');
+      } else {
+        await this.testSubjects.missingOrFail('switchIndexPatternSelectionMode');
+      }
+    });
+  }
+
   public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
-    await this.testSubjects.click('switchIndexPatternSelectionModePopover');
+    await this.toggleIndexPatternSelectionModePopover(true);
     await this.testSubjects.setEuiSwitch(
       'switchIndexPatternSelectionMode',
       useKibanaIndices ? 'check' : 'uncheck'
     );
+    await this.toggleIndexPatternSelectionModePopover(false);
   }
 
   public async setIndexPatternValue(value: string, useKibanaIndices?: boolean) {
