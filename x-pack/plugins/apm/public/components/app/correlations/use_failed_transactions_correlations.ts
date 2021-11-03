@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -35,7 +35,7 @@ import { useFetchParams } from './use_fetch_params';
 const LOADED_OVERALL_HISTOGRAM = 0.05;
 const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
 const LOADED_DONE = 1;
-const PROGRESS_STEP_P_VALUES = 0.8;
+const PROGRESS_STEP_P_VALUES = 0.9;
 
 export function useFailedTransactionsCorrelations() {
   const abortCtrl = useRef(new AbortController());
@@ -84,7 +84,7 @@ export function useFailedTransactionsCorrelations() {
       };
 
       // Initial call to fetch the overall distribution for the log-log plot.
-      const { overallHistogram } = await callApmApi({
+      const { overallHistogram, percentileThresholdValue } = await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
         signal: abortCtrl.current.signal,
         params: {
@@ -95,6 +95,7 @@ export function useFailedTransactionsCorrelations() {
         },
       });
       responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
       const { overallHistogram: errorHistogram } = await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
@@ -138,6 +139,7 @@ export function useFailedTransactionsCorrelations() {
       setResponse({
         loaded: LOADED_FIELD_CANDIDATES,
       });
+      setResponse.flush();
 
       const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
         [];
@@ -169,6 +171,7 @@ export function useFailedTransactionsCorrelations() {
             ]);
         }
 
+        chunkLoadCounter++;
         setResponse({
           ...responseUpdate,
           loaded:
@@ -180,11 +183,11 @@ export function useFailedTransactionsCorrelations() {
         if (isCancelledRef.current) {
           return;
         }
-
-        chunkLoadCounter++;
       }
 
-      const fieldStats = await callApmApi({
+      setResponse.flush();
+
+      const { stats } = await callApmApi({
         endpoint: 'POST /internal/apm/correlations/field_stats',
         signal: abortCtrl.current.signal,
         params: {
@@ -195,19 +198,21 @@ export function useFailedTransactionsCorrelations() {
         },
       });
 
-      responseUpdate.fieldStats = fieldStats.stats;
+      responseUpdate.fieldStats = stats;
       setResponse({ ...responseUpdate, loaded: LOADED_DONE, isRunning: false });
       setResponse.flush();
     } catch (e) {
-      const err = e as Error | IHttpFetchError;
-      setResponse({
-        error:
-          'response' in err
-            ? err.body?.message ?? err.response?.statusText
-            : err.message,
-        isRunning: false,
-      });
-      setResponse.flush();
+      if (!isCancelledRef.current) {
+        const err = e as Error | IHttpFetchError<ResponseErrorBody>;
+        setResponse({
+          error:
+            'response' in err
+              ? err.body?.message ?? err.response?.statusText
+              : err.message,
+          isRunning: false,
+        });
+        setResponse.flush();
+      }
     }
   }, [fetchParams, setResponse]);
 
@@ -222,7 +227,10 @@ export function useFailedTransactionsCorrelations() {
   // auto-update
   useEffect(() => {
     startFetch();
-    return cancelFetch;
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrl.current.abort();
+    };
   }, [startFetch, cancelFetch]);
 
   const { error, loaded, isRunning, ...returnedResponse } = response;

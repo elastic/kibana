@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 
 import {
   DEBOUNCE_INTERVAL,
@@ -85,7 +85,7 @@ export function useLatencyCorrelations() {
       };
 
       // Initial call to fetch the overall distribution for the log-log plot.
-      const { overallHistogram } = await callApmApi({
+      const { overallHistogram, percentileThresholdValue } = await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
         signal: abortCtrl.current.signal,
         params: {
@@ -96,6 +96,7 @@ export function useLatencyCorrelations() {
         },
       });
       responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
       if (isCancelledRef.current) {
         return;
@@ -122,6 +123,7 @@ export function useLatencyCorrelations() {
       setResponse({
         loaded: LOADED_FIELD_CANDIDATES,
       });
+      setResponse.flush();
 
       const chunkSize = 10;
       let chunkLoadCounter = 0;
@@ -149,18 +151,20 @@ export function useLatencyCorrelations() {
           return;
         }
 
+        chunkLoadCounter++;
         setResponse({
           loaded:
             LOADED_FIELD_CANDIDATES +
             (chunkLoadCounter / fieldCandidateChunks.length) *
               PROGRESS_STEP_FIELD_VALUE_PAIRS,
         });
-        chunkLoadCounter++;
       }
 
       if (isCancelledRef.current) {
         return;
       }
+
+      setResponse.flush();
 
       chunkLoadCounter = 0;
 
@@ -191,6 +195,7 @@ export function useLatencyCorrelations() {
             getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
         }
 
+        chunkLoadCounter++;
         setResponse({
           ...responseUpdate,
           loaded:
@@ -202,11 +207,11 @@ export function useLatencyCorrelations() {
         if (isCancelledRef.current) {
           return;
         }
-
-        chunkLoadCounter++;
       }
 
-      const fieldStats = await callApmApi({
+      setResponse.flush();
+
+      const { stats } = await callApmApi({
         endpoint: 'POST /internal/apm/correlations/field_stats',
         signal: abortCtrl.current.signal,
         params: {
@@ -217,7 +222,7 @@ export function useLatencyCorrelations() {
         },
       });
 
-      responseUpdate.fieldStats = fieldStats.stats;
+      responseUpdate.fieldStats = stats;
       setResponse({
         ...responseUpdate,
         loaded: LOADED_DONE,
@@ -225,15 +230,17 @@ export function useLatencyCorrelations() {
       });
       setResponse.flush();
     } catch (e) {
-      const err = e as Error | IHttpFetchError;
-      setResponse({
-        error:
-          'response' in err
-            ? err.body?.message ?? err.response?.statusText
-            : err.message,
-        isRunning: false,
-      });
-      setResponse.flush();
+      if (!isCancelledRef.current) {
+        const err = e as Error | IHttpFetchError<ResponseErrorBody>;
+        setResponse({
+          error:
+            'response' in err
+              ? err.body?.message ?? err.response?.statusText
+              : err.message,
+          isRunning: false,
+        });
+        setResponse.flush();
+      }
     }
   }, [fetchParams, setResponse]);
 
@@ -248,7 +255,10 @@ export function useLatencyCorrelations() {
   // auto-update
   useEffect(() => {
     startFetch();
-    return cancelFetch;
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrl.current.abort();
+    };
   }, [startFetch, cancelFetch]);
 
   const { error, loaded, isRunning, ...returnedResponse } = response;
