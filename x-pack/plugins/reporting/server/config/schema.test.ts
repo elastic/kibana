@@ -60,8 +60,8 @@ describe('Reporting Config Schema', () => {
           },
           "timeouts": Object {
             "openUrl": "PT1M",
-            "renderComplete": "PT30S",
-            "waitForElements": "PT30S",
+            "renderComplete": "PT1M",
+            "waitForElements": "PT1M",
           },
           "zoom": 2,
         },
@@ -96,7 +96,7 @@ describe('Reporting Config Schema', () => {
           "pollEnabled": true,
           "pollInterval": "PT3S",
           "pollIntervalErrorMultiplier": 10,
-          "timeout": "PT2M",
+          "timeout": "PT3M",
         },
         "roles": Object {
           "allow": Array [
@@ -161,8 +161,8 @@ describe('Reporting Config Schema', () => {
           },
           "timeouts": Object {
             "openUrl": "PT1M",
-            "renderComplete": "PT30S",
-            "waitForElements": "PT30S",
+            "renderComplete": "PT1M",
+            "waitForElements": "PT1M",
           },
           "zoom": 2,
         },
@@ -196,7 +196,7 @@ describe('Reporting Config Schema', () => {
           "pollEnabled": true,
           "pollInterval": "PT3S",
           "pollIntervalErrorMultiplier": 10,
-          "timeout": "PT2M",
+          "timeout": "PT3M",
         },
         "roles": Object {
           "allow": Array [
