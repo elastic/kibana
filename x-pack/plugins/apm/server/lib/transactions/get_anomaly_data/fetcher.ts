@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '../../../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { rangeQuery } from '../../../../server/utils/queries';
+import { rangeQuery } from '../../../../../observability/server';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
@@ -82,7 +82,7 @@ export function anomalySeriesFetcher({
       },
     };
 
-    return (ml.mlSystem.mlAnomalySearch(params, []) as unknown) as Promise<
+    return ml.mlSystem.mlAnomalySearch(params, []) as unknown as Promise<
       ESSearchResponse<unknown, typeof params>
     >;
   });

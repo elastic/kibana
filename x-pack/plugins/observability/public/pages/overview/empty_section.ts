@@ -69,7 +69,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.uptime.link', {
         defaultMessage: 'Install Heartbeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+      href: core.http.basePath.prepend('/app/integrations/detail/synthetics/overview'),
     },
     {
       id: 'ux',
@@ -97,7 +97,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
           'Are 503 errors stacking up? Are services responding? Is CPU and RAM utilization jumping? See warnings as they happen—not as part of the post-mortem.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
-        defaultMessage: 'Create alert',
+        defaultMessage: 'Create rule',
       }),
       href: core.http.basePath.prepend(
         '/app/management/insightsAndAlerting/triggersActions/alerts'

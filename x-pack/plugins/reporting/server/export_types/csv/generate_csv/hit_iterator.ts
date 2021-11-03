@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { UnwrapPromise } from '@kbn/utility-types';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'src/core/server';
 import { CancellationToken } from '../../../../common';
 import { LevelLogger } from '../../../lib';
 import { ScrollConfig } from '../../../types';
 
-type SearchResponse = UnwrapPromise<ReturnType<ElasticsearchClient['search']>>;
-type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
-
-function parseResponse(response: SearchResponse) {
+function parseResponse(response: TransportResult<estypes.SearchResponse>) {
   if (!response?.body._scroll_id) {
     throw new Error(
       i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedScrollIdErrorMessage', {
@@ -44,11 +41,14 @@ export function createHitIterator(logger: LevelLogger) {
   return async function* hitIterator(
     scrollSettings: ScrollConfig,
     elasticsearchClient: ElasticsearchClient,
-    searchRequest: SearchRequest,
+    searchRequest: estypes.SearchRequest,
     cancellationToken: CancellationToken
   ) {
     logger.debug('executing search request');
-    async function search(index: SearchRequest['index'], body: SearchRequest['body']) {
+    async function search(
+      index: estypes.SearchRequest['index'],
+      body: estypes.SearchRequest['body']
+    ) {
       return parseResponse(
         await elasticsearchClient.search({
           index,
@@ -60,7 +60,7 @@ export function createHitIterator(logger: LevelLogger) {
       );
     }
 
-    async function scroll(scrollId: string | undefined) {
+    async function scroll(scrollId: string) {
       logger.debug('executing scroll request');
       return parseResponse(
         await elasticsearchClient.scroll({

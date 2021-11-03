@@ -18,20 +18,19 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
       monitorId: schema.string(),
       dateStart: schema.maybe(schema.string()),
       dateEnd: schema.maybe(schema.string()),
-      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, context, request }): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
 
-    const alertsClient = context.alerting?.getAlertsClient();
+    const rulesClient = context.alerting?.getRulesClient();
 
     return await libs.requests.getMonitorDetails({
       uptimeEsClient,
       monitorId,
       dateStart,
       dateEnd,
-      alertsClient,
+      rulesClient,
     });
   },
 });

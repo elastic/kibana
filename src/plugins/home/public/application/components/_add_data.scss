@@ -1,4 +1,12 @@
-// Accounting for no `flush="both"` prop on EuiButtonEmpty
-.homDataAdd__actionButton {
-  margin-right: 0;
+.homDataAdd__illustration {
+  display: block;
+  margin: 0 auto #{-($euiSizeXXL + $euiSizeXS)} auto;
+
+  @include euiBreakpoint('m', 'l', 'xl') {
+    margin-bottom: -$euiSizeXXL;
+  }
+
+  @include euiBreakpoint('l', 'xl') {
+    width: 80%;
+  }
 }

@@ -23,7 +23,7 @@ import { SourceEnginesLogic } from './source_engines_logic';
 describe('SourceEnginesLogic', () => {
   const { http } = mockHttpValues;
   const { mount } = new LogicMounter(SourceEnginesLogic);
-  const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -227,7 +227,7 @@ describe('SourceEnginesLogic', () => {
 
         expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
           expect.objectContaining({
-            endpoint: '/api/app_search/engines/some-engine/source_engines',
+            endpoint: '/internal/app_search/engines/some-engine/source_engines',
           })
         );
         expect(SourceEnginesLogic.actions.onSourceEnginesFetch).toHaveBeenCalledWith([
@@ -245,7 +245,7 @@ describe('SourceEnginesLogic', () => {
 
         expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
           expect.objectContaining({
-            endpoint: '/api/app_search/engines',
+            endpoint: '/internal/app_search/engines',
             query: { type: 'indexed' },
           })
         );
@@ -283,7 +283,7 @@ describe('SourceEnginesLogic', () => {
           await nextTick();
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/app_search/engines/some-engine/source_engines/bulk_create',
+            '/internal/app_search/engines/some-engine/source_engines/bulk_create',
             {
               body: JSON.stringify({ source_engine_slugs: ['source-engine-3', 'source-engine-4'] }),
             }
@@ -292,8 +292,8 @@ describe('SourceEnginesLogic', () => {
             { name: 'source-engine-3' },
             { name: 'source-engine-4' },
           ]);
-          expect(setSuccessMessage).toHaveBeenCalledWith(
-            '2 engines have been added to this meta engine.'
+          expect(flashSuccessToast).toHaveBeenCalledWith(
+            '2 engines were added to this meta engine'
           );
         });
 
@@ -341,7 +341,7 @@ describe('SourceEnginesLogic', () => {
           await nextTick();
 
           expect(http.delete).toHaveBeenCalledWith(
-            '/api/app_search/engines/some-engine/source_engines/source-engine-2'
+            '/internal/app_search/engines/some-engine/source_engines/source-engine-2'
           );
           expect(SourceEnginesLogic.actions.onSourceEngineRemove).toHaveBeenCalledWith(
             'source-engine-2'
@@ -352,8 +352,8 @@ describe('SourceEnginesLogic', () => {
           SourceEnginesLogic.actions.removeSourceEngine('source-engine-2');
           await nextTick();
 
-          expect(setSuccessMessage).toHaveBeenCalledWith(
-            'Engine source-engine-2 has been removed from this meta engine.'
+          expect(flashSuccessToast).toHaveBeenCalledWith(
+            "Engine 'source-engine-2' was removed from this meta engine"
           );
         });
 

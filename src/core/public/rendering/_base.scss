@@ -38,8 +38,17 @@
 @mixin kbnAffordForHeader($headerHeight) {
   @include euiHeaderAffordForFixed($headerHeight);
 
+  #securitySolutionStickyKQL,
   #app-fixed-viewport {
     top: $headerHeight;
+  }
+
+  @include euiBreakpoint('xl', 'l') {
+    .kbnStickyMenu {
+      position: sticky;
+      max-height: calc(100vh - #{$headerHeight + $euiSize});
+      top: $headerHeight + $euiSize;
+    }
   }
 }
 
@@ -48,6 +57,12 @@
 
   &.kbnBody--hasHeaderBanner {
     @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
+
+    // Prevents banners from covering full screen data grids
+    .euiDataGrid--fullScreen {
+      height: calc(100vh - #{$kbnHeaderBannerHeight});
+      top: $kbnHeaderBannerHeight;
+    }
   }
   &.kbnBody--chromeHidden {
     @include kbnAffordForHeader(0);

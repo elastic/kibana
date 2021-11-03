@@ -79,7 +79,6 @@ describe('getOptimizerCacheKey()', () => {
 
     await expect(getOptimizerCacheKey(config)).resolves.toMatchInlineSnapshot(`
             Object {
-              "bootstrap": "<bootstrap cache>",
               "deletedPaths": Array [
                 "/foo/bar/c",
               ],

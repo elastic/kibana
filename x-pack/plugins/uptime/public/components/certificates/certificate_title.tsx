@@ -11,14 +11,14 @@ import { useSelector } from 'react-redux';
 import { certificatesSelector } from '../../state/certificates/certificates';
 
 export const CertificateTitle = () => {
-  const { data: certificates } = useSelector(certificatesSelector);
+  const total = useSelector(certificatesSelector);
 
   return (
     <FormattedMessage
       id="xpack.uptime.certificates.heading"
       defaultMessage="TLS Certificates ({total})"
       values={{
-        total: <span data-test-subj="uptimeCertTotal">{certificates?.total ?? 0}</span>,
+        total: <span data-test-subj="uptimeCertTotal">{total ?? 0}</span>,
       }}
     />
   );

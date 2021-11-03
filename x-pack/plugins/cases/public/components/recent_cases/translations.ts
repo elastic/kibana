@@ -22,6 +22,10 @@ export const NO_CASES = i18n.translate('xpack.cases.recentCases.noCasesMessage',
   defaultMessage: 'No cases have been created yet. Put your detective hat on and',
 });
 
+export const NO_CASES_READ_ONLY = i18n.translate('xpack.cases.recentCases.noCasesMessageReadOnly', {
+  defaultMessage: 'No cases have been created yet.',
+});
+
 export const RECENT_CASES = i18n.translate('xpack.cases.recentCases.recentCasesSidebarTitle', {
   defaultMessage: 'Recent cases',
 });

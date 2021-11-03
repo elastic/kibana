@@ -5,13 +5,11 @@
 ```ts
 
 import { Action } from 'history';
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
-import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -21,7 +19,7 @@ import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -39,9 +37,9 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestOptions } from '@elastic/elasticsearch';
+import { TransportRequestParams } from '@elastic/elasticsearch';
+import { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -232,14 +230,6 @@ export interface ChromeBadge {
 }
 
 // @public (undocumented)
-export interface ChromeBrand {
-    // (undocumented)
-    logo?: string;
-    // (undocumented)
-    smallLogo?: string;
-}
-
-// @public (undocumented)
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
@@ -332,7 +322,6 @@ export interface ChromeNavLinks {
     getForceAppSwitcherNavigation$(): Observable<boolean>;
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
-    showOnly(id: string): void;
 }
 
 // @public
@@ -355,11 +344,8 @@ export interface ChromeRecentlyAccessedHistoryItem {
 
 // @public
 export interface ChromeStart {
-    addApplicationClass(className: string): void;
     docTitle: ChromeDocTitle;
-    getApplicationClasses$(): Observable<string[]>;
     getBadge$(): Observable<ChromeBadge | undefined>;
-    getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
     // Warning: (ae-forgotten-export) The symbol "ChromeBreadcrumbsAppendExtension" needs to be exported by the entry point index.d.ts
     getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
@@ -367,13 +353,11 @@ export interface ChromeStart {
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
+    hasHeaderBanner$(): Observable<boolean>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
-    removeApplicationClass(className: string): void;
-    setAppTitle(appTitle: string): void;
     setBadge(badge?: ChromeBadge): void;
-    setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
@@ -473,9 +457,13 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public
 export interface DeprecationsServiceStart {
+    // Warning: (ae-incompatible-release-tags) The symbol "getAllDeprecations" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+    // Warning: (ae-incompatible-release-tags) The symbol "getDeprecations" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
+    // Warning: (ae-incompatible-release-tags) The symbol "isDeprecationResolvable" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
+    // Warning: (ae-incompatible-release-tags) The symbol "resolveDeprecation" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
@@ -487,6 +475,16 @@ export interface DocLinksStart {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly settings: string;
+        readonly elasticStackGetStarted: string;
+        readonly apm: {
+            readonly kibanaSettings: string;
+            readonly supportedServiceMaps: string;
+            readonly customLinks: string;
+            readonly droppedTransactionSpans: string;
+            readonly upgrading: string;
+            readonly metaData: string;
+        };
         readonly canvas: {
             readonly guide: string;
         };
@@ -506,9 +504,13 @@ export interface DocLinksStart {
             readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
+            readonly suricataModule: string;
+            readonly zeekModule: string;
         };
         readonly auditbeat: {
             readonly base: string;
+            readonly auditdModule: string;
+            readonly systemModule: string;
         };
         readonly metricbeat: {
             readonly base: string;
@@ -524,6 +526,9 @@ export interface DocLinksStart {
         };
         readonly heartbeat: {
             readonly base: string;
+        };
+        readonly libbeat: {
+            readonly getStarted: string;
         };
         readonly logstash: {
             readonly base: string;
@@ -585,6 +590,7 @@ export interface DocLinksStart {
         };
         readonly search: {
             readonly sessions: string;
+            readonly sessionLimits: string;
         };
         readonly indexPatterns: {
             readonly introduction: string;
@@ -595,10 +601,20 @@ export interface DocLinksStart {
         readonly addData: string;
         readonly kibana: string;
         readonly upgradeAssistant: string;
+        readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
+            readonly privileges: string;
             readonly guide: string;
             readonly gettingStarted: string;
+            readonly ml: string;
+            readonly ruleChangeLog: string;
+            readonly detectionsReq: string;
+            readonly networkMap: string;
+            readonly troubleshootGaps: string;
+        };
+        readonly securitySolution: {
+            readonly trustedApps: string;
         };
         readonly query: {
             readonly eql: string;
@@ -606,6 +622,7 @@ export interface DocLinksStart {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
+            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -643,7 +660,16 @@ export interface DocLinksStart {
             timeUnits: string;
             updateTransform: string;
         }>;
-        readonly observability: Record<string, string>;
+        readonly observability: Readonly<{
+            guide: string;
+            infrastructureThreshold: string;
+            logsThreshold: string;
+            metricsThreshold: string;
+            monitorStatus: string;
+            monitorUptime: string;
+            tlsCertificate: string;
+            uptimeDurationAnomaly: string;
+        }>;
         readonly alerting: Record<string, string>;
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
@@ -652,6 +678,7 @@ export interface DocLinksStart {
             clusterPrivileges: string;
             elasticsearchSettings: string;
             elasticsearchEnableSecurity: string;
+            elasticsearchEnableApiKeys: string;
             indicesPrivileges: string;
             kibanaTLS: string;
             kibanaPrivileges: string;
@@ -659,22 +686,57 @@ export interface DocLinksStart {
             mappingRolesFieldRules: string;
             runAsPrivilege: string;
         }>;
+        readonly spaces: Readonly<{
+            kibanaLegacyUrlAliases: string;
+            kibanaDisableLegacyUrlAliasesApi: string;
+        }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
+        readonly fleet: Readonly<{
+            datastreamsILM: string;
+            beatsAgentComparison: string;
+            guide: string;
+            fleetServer: string;
+            fleetServerAddFleetServer: string;
+            settings: string;
+            settingsFleetServerHostSettings: string;
+            troubleshooting: string;
+            elasticAgent: string;
+            datastreams: string;
+            datastreamsNamingScheme: string;
+            installElasticAgent: string;
+            upgradeElasticAgent: string;
+            upgradeElasticAgent712lower: string;
+            learnMoreBlog: string;
+            apiKeysLearnMore: string;
+        }>;
+        readonly ecs: {
+            readonly guide: string;
+        };
+        readonly clients: {
+            readonly guide: string;
+            readonly goOverview: string;
+            readonly javaIndex: string;
+            readonly jsIntro: string;
+            readonly netGuide: string;
+            readonly perlGuide: string;
+            readonly phpGuide: string;
+            readonly pythonGuide: string;
+            readonly rubyOverview: string;
+            readonly rustGuide: string;
+        };
     };
 }
 
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "DomainDeprecationDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
-export interface DomainDeprecationDetails extends DeprecationsDetails {
-    // (undocumented)
+// @internal (undocumented)
+export type DomainDeprecationDetails = DeprecationsDetails & {
     domainId: string;
-}
+};
 
 export { EnvironmentMode }
 
@@ -722,6 +784,8 @@ export class HttpFetchError extends Error implements IHttpFetchError {
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
     asSystemRequest?: boolean;
+    // (undocumented)
+    context?: KibanaExecutionContext;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -741,17 +805,17 @@ export interface HttpFetchQuery {
 // @public
 export interface HttpHandler {
     // (undocumented)
-    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
+    <TResponseBody = unknown>(path: string, options: HttpFetchOptions & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+    <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 // @public
@@ -803,7 +867,7 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse<TResponseBody = any> {
+export interface HttpResponse<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
     readonly request: Readonly<Request>;
@@ -870,9 +934,9 @@ export interface IExternalUrlPolicy {
 }
 
 // @public (undocumented)
-export interface IHttpFetchError extends Error {
+export interface IHttpFetchError<TResponseBody = unknown> extends Error {
     // (undocumented)
-    readonly body?: any;
+    readonly body?: TResponseBody;
     // (undocumented)
     readonly name: string;
     // @deprecated (undocumented)
@@ -892,7 +956,7 @@ export interface IHttpInterceptController {
 }
 
 // @public
-export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly response?: Readonly<Response>;
 }
@@ -918,6 +982,16 @@ export interface IUiSettingsClient {
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
 }
+
+// @public
+export type KibanaExecutionContext = {
+    readonly type: string;
+    readonly name: string;
+    readonly id: string;
+    readonly description: string;
+    readonly url?: string;
+    parent?: KibanaExecutionContext;
+};
 
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
@@ -964,13 +1038,18 @@ export interface OverlayBannersStart {
 // @public (undocumented)
 export interface OverlayFlyoutOpenOptions {
     // (undocumented)
+    'aria-label'?: string;
+    // (undocumented)
     'data-test-subj'?: string;
     // (undocumented)
     className?: string;
     // (undocumented)
     closeButtonAriaLabel?: string;
     // (undocumented)
+    hideCloseButton?: boolean;
+    // (undocumented)
     maxWidth?: boolean | number | string;
+    onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
@@ -1102,6 +1181,23 @@ export type ResolveDeprecationResponse = {
     reason: string;
 };
 
+// @public
+export interface ResolvedSimpleSavedObject<T = unknown> {
+    alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
+    outcome: SavedObjectsResolveResponse['outcome'];
+    saved_object: SimpleSavedObject<T>;
+}
+
+// @public (undocumented)
+export interface ResponseErrorBody {
+    // (undocumented)
+    attributes?: Record<string, unknown>;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
+}
+
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1195,6 +1291,20 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 // @public (undocumented)
+export interface SavedObjectsBulkResolveObject {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+    // (undocumented)
+    resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+}
+
+// @public (undocumented)
 export interface SavedObjectsBulkUpdateObject<T = unknown> {
     // (undocumented)
     attributes: T;
@@ -1223,6 +1333,12 @@ export class SavedObjectsClient {
         id: string;
         type: string;
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkResolve: <T = unknown>(objects?: Array<{
+        id: string;
+        type: string;
+    }>) => Promise<{
+        resolved_objects: ResolvedSimpleSavedObject<T>[];
+    }>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
@@ -1231,6 +1347,7 @@ export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
     find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
+    resolve: <T = unknown>(type: string, id: string) => Promise<ResolvedSimpleSavedObject<T>>;
     update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
@@ -1452,6 +1569,13 @@ export interface SavedObjectsMigrationVersion {
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 // @public (undocumented)
+export interface SavedObjectsResolveResponse<T = unknown> {
+    alias_target_id?: string;
+    outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+    saved_object: SavedObject<T>;
+}
+
+// @public (undocumented)
 export interface SavedObjectsStart {
     // (undocumented)
     client: SavedObjectsClientContract;
@@ -1488,7 +1612,7 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
 
 // @public
 export class SimpleSavedObject<T = unknown> {
-    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -1505,6 +1629,7 @@ export class SimpleSavedObject<T = unknown> {
     id: SavedObject<T>['id'];
     // (undocumented)
     migrationVersion: SavedObject<T>['migrationVersion'];
+    namespaces: SavedObject<T>['namespaces'];
     // (undocumented)
     references: SavedObject<T>['references'];
     // (undocumented)
@@ -1617,6 +1742,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:166:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

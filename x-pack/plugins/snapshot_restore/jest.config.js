@@ -9,4 +9,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/snapshot_restore'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/snapshot_restore',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/snapshot_restore/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { useContext, useEffect } from 'react';
-import { useServices } from '../../../services';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { usePlatformService } from '../../../services';
 import { WorkpadRoutingContext } from '..';
 
 const fullscreenClass = 'canvas-isFullscreen';
 
 export const useFullscreenPresentationHelper = () => {
   const { isFullscreen } = useContext(WorkpadRoutingContext);
-  const services = useServices();
-  const { setFullscreen } = services.platform;
+  const { setFullscreen } = usePlatformService();
 
   useEffect(() => {
     const body = document.querySelector('body');
@@ -28,4 +28,10 @@ export const useFullscreenPresentationHelper = () => {
       setFullscreen(true);
     }
   }, [isFullscreen, setFullscreen]);
+
+  // Remove fullscreen when component unmounts
+  useEffectOnce(() => () => {
+    setFullscreen(true);
+    document.querySelector('body')?.classList.remove(fullscreenClass);
+  });
 };

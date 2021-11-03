@@ -6,17 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiHorizontalRule, EuiPageContent } from '@elastic/eui';
 
 interface ManagementLandingPageProps {
   version: string;
+  onAppMounted: (id: string) => void;
   setBreadcrumbs: () => void;
 }
 
-export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLandingPageProps) => {
+export const ManagementLandingPage = ({
+  version,
+  setBreadcrumbs,
+  onAppMounted,
+}: ManagementLandingPageProps) => {
   setBreadcrumbs();
+
+  useEffect(() => {
+    onAppMounted('');
+  }, [onAppMounted]);
 
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">

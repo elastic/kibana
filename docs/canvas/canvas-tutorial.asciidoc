@@ -9,9 +9,9 @@ To familiarize yourself with *Canvas*, add the Sample eCommerce orders data, the
 
 To create a workpad of the eCommerce store data, add the data set, then create the workpad.
 
-. On the {kib} *Home* page, click *Try our sample data*.
+. Go to the {kib} *Home* page, then click *Try our sample data*.
 
-. From *Sample eCommerce orders data*, click *Add data*.
+. On the *Sample eCommerce orders data* card, click *Add data*.
 
 . Open the main menu, then click *Canvas*.
 
@@ -26,8 +26,8 @@ To customize your workpad to look the way you want, add your own images.
 +
 The default Elastic logo image appears on the page.
 
-. To replace the Elastic logo with your own image, select the image, then use the editor.
-
+. To add your own image, click the Elastic logo, then drag the image file to the *Select or drag and drop an image* field.
++
 [role="screenshot"]
 image::images/canvas-image-element.png[Image showing how to add the image element]
 

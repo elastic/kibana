@@ -20,8 +20,19 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     error: undefined,
     endpointDetails: {
       activityLog: {
-        page: 1,
-        pageSize: 50,
+        paging: {
+          disabled: false,
+          page: 1,
+          pageSize: 50,
+          startDate: 'now-1d',
+          endDate: 'now',
+          isInvalidDateRange: false,
+          autoRefreshOptions: {
+            enabled: false,
+            duration: DEFAULT_POLL_INTERVAL,
+          },
+          recentlyUsedDateRanges: [],
+        },
         logData: createUninitialisedResourceState(),
       },
       hostDetails: {
@@ -37,7 +48,7 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     policyItems: [],
     selectedPolicyId: undefined,
     policyItemsLoading: false,
-    endpointPackageInfo: undefined,
+    endpointPackageInfo: createUninitialisedResourceState(),
     nonExistingPolicies: {},
     agentPolicies: {},
     endpointsExist: true,
@@ -49,10 +60,10 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     agentsWithEndpointsTotalError: undefined,
     endpointsTotal: 0,
     endpointsTotalError: undefined,
-    queryStrategyVersion: undefined,
     policyVersionInfo: undefined,
     hostStatus: undefined,
     isolationRequestState: createUninitialisedResourceState(),
     endpointPendingActions: createLoadedResourceState(new Map()),
+    metadataTransformStats: createUninitialisedResourceState(),
   };
 };

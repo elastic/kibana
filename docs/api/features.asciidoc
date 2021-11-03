@@ -134,7 +134,6 @@ The API returns the following:
             "index-pattern",
             "search",
             "visualization",
-            "timelion-sheet",
             "canvas-workpad"
           ]
         },
@@ -152,7 +151,6 @@ The API returns the following:
             "index-pattern",
             "search",
             "visualization",
-            "timelion-sheet",
             "canvas-workpad",
             "dashboard"
           ]

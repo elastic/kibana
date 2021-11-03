@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
   const security = getService('security');
-  const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await PageObjects.common.unsetTime();
     });
 
     it('should display registered flights sample data sets', async () => {
@@ -74,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('dashboard', () => {
       beforeEach(async () => {
+        await time();
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
@@ -84,22 +86,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(18);
+        expect(panelCount).to.be(17);
       });
 
       it('should render visualizations', async () => {
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        log.debug('Checking pie charts rendered');
-        await pieChart.expectPieSliceCount(4);
-        log.debug('Checking area, bar and heatmap charts rendered');
-        await dashboardExpect.seriesElementCount(15);
+        log.debug('Checking charts rendered');
+        await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
         log.debug('Checking saved searches rendered');
         await dashboardExpect.savedSearchRowCount(10);
         log.debug('Checking input controls rendered');
@@ -107,32 +103,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Checking tag cloud rendered');
         await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
         log.debug('Checking vega chart rendered');
-        const tsvb = await find.existsByCssSelector('.vgaVis__view');
-        expect(tsvb).to.be(true);
+        expect(await find.existsByCssSelector('.vgaVis__view')).to.be(true);
       });
 
       it('should launch sample logs data set dashboard', async () => {
         await PageObjects.home.launchSampleDashboard('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(11);
+        expect(panelCount).to.be(13);
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
         await PageObjects.home.launchSampleDashboard('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const todayYearMonthDay = moment().format('MMM D, YYYY');
-        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(12);
+        expect(panelCount).to.be(15);
       });
     });
 
@@ -163,5 +150,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isInstalled).to.be(false);
       });
     });
+
+    async function time() {
+      const today = moment().format('MMM D, YYYY');
+      const from = `${today} @ 00:00:00.000`;
+      const to = `${today} @ 23:59:59.999`;
+      await PageObjects.common.setTime({ from, to });
+    }
   });
 }

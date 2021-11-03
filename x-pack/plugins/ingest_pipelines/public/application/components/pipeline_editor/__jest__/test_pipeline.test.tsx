@@ -356,6 +356,21 @@ describe('Test pipeline', () => {
       expect(statusIconLabel).toEqual('Success');
     });
 
+    describe('Configuration tab', () => {
+      it('should not clear up form when clicking configuration tab', async () => {
+        const { actions, find, exists } = testBed;
+
+        // Click processor to open manage flyout
+        await actions.clickProcessor('processors>0');
+        // Verify flyout opened
+        expect(exists('editProcessorForm')).toBe(true);
+        // Click the "Configuration" tab
+        await actions.clickProcessorConfigurationTab();
+        // Verify type selector has not changed
+        expect(find('processorTypeSelector.input').text()).toBe('Set');
+      });
+    });
+
     describe('Output tab', () => {
       beforeEach(async () => {
         const { actions } = testBed;

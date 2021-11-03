@@ -25,7 +25,7 @@ const pageSchema = schema.object({
   current: schema.nullable(schema.number()),
   size: schema.nullable(schema.number()),
   total_pages: schema.nullable(schema.number()),
-  total_results: schema.number(),
+  total_results: schema.nullable(schema.number()),
 });
 
 const oauthConfigSchema = schema.object({
@@ -45,12 +45,59 @@ const displayFieldSchema = schema.object({
 
 const displaySettingsSchema = schema.object({
   titleField: schema.maybe(schema.string()),
-  subtitleField: schema.maybe(schema.string()),
-  descriptionField: schema.maybe(schema.string()),
+  subtitleField: schema.nullable(schema.string()),
+  descriptionField: schema.nullable(schema.string()),
   urlField: schema.maybe(schema.string()),
+  typeField: schema.nullable(schema.string()),
+  mediaTypeField: schema.nullable(schema.string()),
+  createdByField: schema.nullable(schema.string()),
+  updatedByField: schema.nullable(schema.string()),
   color: schema.string(),
   urlFieldIsLinkable: schema.boolean(),
   detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
+});
+
+const sourceSettingsSchema = schema.object({
+  content_source: schema.object({
+    name: schema.maybe(schema.string()),
+    indexing: schema.maybe(
+      schema.object({
+        enabled: schema.maybe(schema.boolean()),
+        features: schema.maybe(
+          schema.object({
+            thumbnails: schema.maybe(
+              schema.object({
+                enabled: schema.boolean(),
+              })
+            ),
+            content_extraction: schema.maybe(
+              schema.object({
+                enabled: schema.boolean(),
+              })
+            ),
+          })
+        ),
+        schedule: schema.maybe(
+          schema.object({
+            full: schema.maybe(schema.string()),
+            incremental: schema.maybe(schema.string()),
+            delete: schema.maybe(schema.string()),
+            permissions: schema.maybe(schema.string()),
+            blocked_windows: schema.maybe(
+              schema.arrayOf(
+                schema.object({
+                  job_type: schema.string(),
+                  day: schema.string(),
+                  start: schema.string(),
+                  end: schema.string(),
+                })
+              )
+            ),
+          })
+        ),
+      })
+    ),
+  }),
 });
 
 // Account routes
@@ -60,7 +107,7 @@ export function registerAccountSourcesRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources',
+      path: '/internal/workplace_search/account/sources',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -75,7 +122,7 @@ export function registerAccountSourcesStatusRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/status',
+      path: '/internal/workplace_search/account/sources/status',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -90,7 +137,7 @@ export function registerAccountSourceRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{id}',
+      path: '/internal/workplace_search/account/sources/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -104,7 +151,7 @@ export function registerAccountSourceRoute({
 
   router.delete(
     {
-      path: '/api/workplace_search/account/sources/{id}',
+      path: '/internal/workplace_search/account/sources/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -123,7 +170,7 @@ export function registerAccountCreateSourceRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/account/create_source',
+      path: '/internal/workplace_search/account/create_source',
       validate: {
         body: schema.object({
           service_type: schema.string(),
@@ -131,7 +178,7 @@ export function registerAccountCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.boolean(),
+          indexPermissions: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -147,7 +194,7 @@ export function registerAccountSourceDocumentsRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/account/sources/{id}/documents',
+      path: '/internal/workplace_search/account/sources/{id}/documents',
       validate: {
         body: schema.object({
           query: schema.string(),
@@ -170,7 +217,7 @@ export function registerAccountSourceFederatedSummaryRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{id}/federated_summary',
+      path: '/internal/workplace_search/account/sources/{id}/federated_summary',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -189,7 +236,7 @@ export function registerAccountSourceReauthPrepareRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{id}/reauth_prepare',
+      path: '/internal/workplace_search/account/sources/{id}/reauth_prepare',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -211,13 +258,9 @@ export function registerAccountSourceSettingsRoute({
 }: RouteDependencies) {
   router.patch(
     {
-      path: '/api/workplace_search/account/sources/{id}/settings',
+      path: '/internal/workplace_search/account/sources/{id}/settings',
       validate: {
-        body: schema.object({
-          content_source: schema.object({
-            name: schema.string(),
-          }),
-        }),
+        body: sourceSettingsSchema,
         params: schema.object({
           id: schema.string(),
         }),
@@ -235,7 +278,7 @@ export function registerAccountPreSourceRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/pre_sources/{id}',
+      path: '/internal/workplace_search/account/pre_sources/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -254,7 +297,7 @@ export function registerAccountPrepareSourcesRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{serviceType}/prepare',
+      path: '/internal/workplace_search/account/sources/{serviceType}/prepare',
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -277,7 +320,7 @@ export function registerAccountSourceSearchableRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/account/sources/{id}/searchable',
+      path: '/internal/workplace_search/account/sources/{id}/searchable',
       validate: {
         body: schema.object({
           searchable: schema.boolean(),
@@ -299,7 +342,7 @@ export function registerAccountSourceDisplaySettingsConfig({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+      path: '/internal/workplace_search/account/sources/{id}/display_settings/config',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -313,7 +356,7 @@ export function registerAccountSourceDisplaySettingsConfig({
 
   router.post(
     {
-      path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+      path: '/internal/workplace_search/account/sources/{id}/display_settings/config',
       validate: {
         body: displaySettingsSchema,
         params: schema.object({
@@ -333,7 +376,7 @@ export function registerAccountSourceSchemasRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{id}/schemas',
+      path: '/internal/workplace_search/account/sources/{id}/schemas',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -347,7 +390,7 @@ export function registerAccountSourceSchemasRoute({
 
   router.post(
     {
-      path: '/api/workplace_search/account/sources/{id}/schemas',
+      path: '/internal/workplace_search/account/sources/{id}/schemas',
       validate: {
         body: schemaValuesSchema,
         params: schema.object({
@@ -367,7 +410,7 @@ export function registerAccountSourceReindexJobRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}',
+      path: '/internal/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}',
       validate: {
         params: schema.object({
           sourceId: schema.string(),
@@ -387,7 +430,7 @@ export function registerAccountSourceDownloadDiagnosticsRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
+      path: '/internal/workplace_search/account/sources/{sourceId}/download_diagnostics',
       validate: {
         params: schema.object({
           sourceId: schema.string(),
@@ -396,6 +439,7 @@ export function registerAccountSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }
@@ -407,7 +451,7 @@ export function registerOrgSourcesRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources',
+      path: '/internal/workplace_search/org/sources',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -422,7 +466,7 @@ export function registerOrgSourcesStatusRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/status',
+      path: '/internal/workplace_search/org/sources/status',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -437,7 +481,7 @@ export function registerOrgSourceRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{id}',
+      path: '/internal/workplace_search/org/sources/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -451,7 +495,7 @@ export function registerOrgSourceRoute({
 
   router.delete(
     {
-      path: '/api/workplace_search/org/sources/{id}',
+      path: '/internal/workplace_search/org/sources/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -470,7 +514,7 @@ export function registerOrgCreateSourceRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/org/create_source',
+      path: '/internal/workplace_search/org/create_source',
       validate: {
         body: schema.object({
           service_type: schema.string(),
@@ -494,7 +538,7 @@ export function registerOrgSourceDocumentsRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/org/sources/{id}/documents',
+      path: '/internal/workplace_search/org/sources/{id}/documents',
       validate: {
         body: schema.object({
           query: schema.string(),
@@ -517,7 +561,7 @@ export function registerOrgSourceFederatedSummaryRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{id}/federated_summary',
+      path: '/internal/workplace_search/org/sources/{id}/federated_summary',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -536,7 +580,7 @@ export function registerOrgSourceReauthPrepareRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{id}/reauth_prepare',
+      path: '/internal/workplace_search/org/sources/{id}/reauth_prepare',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -558,13 +602,9 @@ export function registerOrgSourceSettingsRoute({
 }: RouteDependencies) {
   router.patch(
     {
-      path: '/api/workplace_search/org/sources/{id}/settings',
+      path: '/internal/workplace_search/org/sources/{id}/settings',
       validate: {
-        body: schema.object({
-          content_source: schema.object({
-            name: schema.string(),
-          }),
-        }),
+        body: sourceSettingsSchema,
         params: schema.object({
           id: schema.string(),
         }),
@@ -582,7 +622,7 @@ export function registerOrgPreSourceRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/pre_sources/{id}',
+      path: '/internal/workplace_search/org/pre_sources/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -601,7 +641,7 @@ export function registerOrgPrepareSourcesRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{serviceType}/prepare',
+      path: '/internal/workplace_search/org/sources/{serviceType}/prepare',
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -625,7 +665,7 @@ export function registerOrgSourceSearchableRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/org/sources/{id}/searchable',
+      path: '/internal/workplace_search/org/sources/{id}/searchable',
       validate: {
         body: schema.object({
           searchable: schema.boolean(),
@@ -647,7 +687,7 @@ export function registerOrgSourceDisplaySettingsConfig({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+      path: '/internal/workplace_search/org/sources/{id}/display_settings/config',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -661,7 +701,7 @@ export function registerOrgSourceDisplaySettingsConfig({
 
   router.post(
     {
-      path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+      path: '/internal/workplace_search/org/sources/{id}/display_settings/config',
       validate: {
         body: displaySettingsSchema,
         params: schema.object({
@@ -681,7 +721,7 @@ export function registerOrgSourceSchemasRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{id}/schemas',
+      path: '/internal/workplace_search/org/sources/{id}/schemas',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -695,7 +735,7 @@ export function registerOrgSourceSchemasRoute({
 
   router.post(
     {
-      path: '/api/workplace_search/org/sources/{id}/schemas',
+      path: '/internal/workplace_search/org/sources/{id}/schemas',
       validate: {
         body: schemaValuesSchema,
         params: schema.object({
@@ -715,7 +755,7 @@ export function registerOrgSourceReindexJobRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}',
+      path: '/internal/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}',
       validate: {
         params: schema.object({
           sourceId: schema.string(),
@@ -735,7 +775,7 @@ export function registerOrgSourceDownloadDiagnosticsRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
+      path: '/internal/workplace_search/org/sources/{sourceId}/download_diagnostics',
       validate: {
         params: schema.object({
           sourceId: schema.string(),
@@ -744,6 +784,7 @@ export function registerOrgSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }
@@ -754,7 +795,7 @@ export function registerOrgSourceOauthConfigurationsRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/settings/connectors',
+      path: '/internal/workplace_search/org/settings/connectors',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -764,7 +805,7 @@ export function registerOrgSourceOauthConfigurationsRoute({
 
   router.post(
     {
-      path: '/api/workplace_search/org/settings/connectors',
+      path: '/internal/workplace_search/org/settings/connectors',
       validate: {
         body: oauthConfigSchema,
       },
@@ -776,7 +817,7 @@ export function registerOrgSourceOauthConfigurationsRoute({
 
   router.put(
     {
-      path: '/api/workplace_search/org/settings/connectors',
+      path: '/internal/workplace_search/org/settings/connectors',
       validate: {
         body: oauthConfigSchema,
       },
@@ -793,7 +834,7 @@ export function registerOrgSourceOauthConfigurationRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/settings/connectors/{serviceType}',
+      path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -807,7 +848,7 @@ export function registerOrgSourceOauthConfigurationRoute({
 
   router.post(
     {
-      path: '/api/workplace_search/org/settings/connectors/{serviceType}',
+      path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -822,7 +863,7 @@ export function registerOrgSourceOauthConfigurationRoute({
 
   router.put(
     {
-      path: '/api/workplace_search/org/settings/connectors/{serviceType}',
+      path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -837,7 +878,7 @@ export function registerOrgSourceOauthConfigurationRoute({
 
   router.delete(
     {
-      path: '/api/workplace_search/org/settings/connectors/{serviceType}',
+      path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -850,6 +891,25 @@ export function registerOrgSourceOauthConfigurationRoute({
   );
 }
 
+export function registerOrgSourceSynchronizeRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/internal/workplace_search/org/sources/{id}/sync',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/sync',
+    })
+  );
+}
+
 // Same route is used for org and account. `state` passes the context.
 export function registerOauthConnectorParamsRoute({
   router,
@@ -857,7 +917,7 @@ export function registerOauthConnectorParamsRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/sources/create',
+      path: '/internal/workplace_search/sources/create',
       validate: {
         query: schema.object({
           kibana_host: schema.string(),
@@ -915,5 +975,6 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
+  registerOrgSourceSynchronizeRoute(dependencies);
   registerOauthConnectorParamsRoute(dependencies);
 };

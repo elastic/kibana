@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID,
@@ -13,26 +13,33 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export async function getServiceNodeMetadata({
   kuery,
   serviceName,
   serviceNodeName,
   setup,
+  start,
+  end,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
   const { apmEventClient } = setup;
 
   const query = mergeProjection(
     getServiceNodesProjection({
       kuery,
-      setup,
       serviceName,
       serviceNodeName,
+      environment: ENVIRONMENT_ALL.value,
+      start,
+      end,
     }),
     {
       body: {

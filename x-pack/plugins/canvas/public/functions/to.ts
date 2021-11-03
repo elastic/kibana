@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-expect-error untyped Elastic library
 import { castProvider } from '@kbn/interpreter/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';

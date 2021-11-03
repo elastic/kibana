@@ -16,14 +16,11 @@ import {
   ActionDetailsStrategyResponse,
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
-
-import { getInspectResponse, InspectResponse } from './helpers';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionDetailsArgs {
   actionDetails: Record<string, string>;
   id: string;
-  inspect: InspectResponse;
-  isInspected: boolean;
 }
 
 interface UseActionDetails {
@@ -33,10 +30,8 @@ interface UseActionDetails {
 }
 
 export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseActionDetails) => {
-  const {
-    data,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actionDetails', { actionId, filterQuery }],
@@ -54,19 +49,20 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
         )
         .toPromise();
 
-      return {
-        ...responseData,
-        inspect: getInspectResponse(responseData, {} as InspectResponse),
-      };
+      if (!responseData.actionDetails) throw new Error();
+
+      return responseData;
     },
     {
       enabled: !skip,
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.action_details.fetchError', {
             defaultMessage: 'Error while fetching action details',
           }),
         }),
+      retryDelay: 1000,
     }
   );
 };

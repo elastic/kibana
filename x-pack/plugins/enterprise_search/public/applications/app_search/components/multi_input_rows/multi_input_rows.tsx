@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useValues, useActions } from 'kea';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { EuiForm, EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
@@ -49,7 +50,7 @@ export const MultiInputRows: React.FC<Props> = ({
   const { values, addedNewRow, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     if (onChange) {
       onChange(filterEmptyValues(values));
     }

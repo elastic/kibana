@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "security solution list REST API",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "main": "./target/index.js",
-  "types": "./target/index.d.ts",
+  "browser": "./target_web/index.js",
+  "main": "./target_node/index.js",
+  "types": "./target_types/index.d.ts",
   "private": true
 }

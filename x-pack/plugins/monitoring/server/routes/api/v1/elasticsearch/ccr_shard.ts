@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 // @ts-ignore
 import { handleError } from '../../../../lib/errors/handle_error';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 // @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
@@ -35,7 +35,7 @@ async function getCcrStat(req: LegacyRequest, esIndexPattern: string, filters: u
   const params = {
     index: esIndexPattern,
     size: 1,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.ccr_stats',
       'hits.hits._source.elasticsearch.ccr',
       'hits.hits._source.timestamp',

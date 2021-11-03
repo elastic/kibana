@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
 import { AggTypesDependencies } from '../../agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 

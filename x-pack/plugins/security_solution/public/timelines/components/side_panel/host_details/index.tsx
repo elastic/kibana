@@ -61,10 +61,11 @@ interface HostDetailsProps {
   expandedHost: { hostName: string };
   handleOnHostClosed: () => void;
   isFlyoutView?: boolean;
+  isDraggable?: boolean;
 }
 
 export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
-  ({ contextID, expandedHost, handleOnHostClosed, isFlyoutView }) => {
+  ({ contextID, expandedHost, handleOnHostClosed, isDraggable, isFlyoutView }) => {
     const { hostName } = expandedHost;
 
     if (!hostName) {
@@ -108,7 +109,11 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
         </StyledEuiFlexButtonWrapper>
         <EuiSpacer size="m" />
         <StyledPanelContent>
-          <ExpandableHostDetails contextID={contextID} hostName={hostName} />
+          <ExpandableHostDetails
+            contextID={contextID}
+            hostName={hostName}
+            isDraggable={isDraggable}
+          />
         </StyledPanelContent>
       </>
     );

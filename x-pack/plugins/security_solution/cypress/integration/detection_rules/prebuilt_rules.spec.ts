@@ -34,7 +34,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
@@ -50,7 +50,7 @@ describe('Alerts rules, prebuilt rules', () => {
     const expectedNumberOfPages = Math.ceil(totalNumberOfPrebuiltRules / rowsPerPage);
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
@@ -72,7 +72,7 @@ describe('Actions with prebuilt rules', () => {
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();

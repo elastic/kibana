@@ -27,7 +27,7 @@ export const useCreateTransforms = (): ReturnTransform => {
   const [, dispatchToaster] = useStateToaster();
   const [transformSettings] = useUiSetting$<TransformConfigSchema>(
     DEFAULT_TRANSFORMS,
-    (JSON.stringify(defaultTransformsSetting) as unknown) as TransformConfigSchema // TODO: The types are not 100% correct within uiSettings$, so I have to cast here. Once that is fixed, this cast can be removed
+    JSON.stringify(defaultTransformsSetting) as unknown as TransformConfigSchema // TODO: The types are not 100% correct within uiSettings$, so I have to cast here. Once that is fixed, this cast can be removed
   );
   const [transforms, setTransforms] = useState<Omit<ReturnTransform, 'loading'>>({
     createTransforms: noop,

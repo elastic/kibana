@@ -12,7 +12,7 @@ import { JiraActionConnector } from './types';
 jest.mock('../../../../common/lib/kibana');
 
 describe('JiraActionConnectorFields renders', () => {
-  test('alerting Jira connector fields is rendered', () => {
+  test('alerting Jira connector fields are rendered', () => {
     const actionConnector = {
       secrets: {
         email: 'email',
@@ -34,6 +34,8 @@ describe('JiraActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
 
@@ -74,6 +76,8 @@ describe('JiraActionConnectorFields renders', () => {
         editActionSecrets={() => {}}
         readOnly={false}
         consumer={'case'}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
@@ -104,6 +108,8 @@ describe('JiraActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
@@ -125,6 +131,8 @@ describe('JiraActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
@@ -152,6 +160,8 @@ describe('JiraActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);

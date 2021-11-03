@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
 
-  describe('Lens', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/115614
+  describe.skip('Lens', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -81,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens datatable with palette panel open', async () => {
-      await PageObjects.lens.openTablePalettePanel();
+      await PageObjects.lens.openPalettePanel('lnsDatatable');
       await a11y.testAppSnapshot();
     });
 
@@ -142,8 +143,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: 'ip',
+          operation: 'date_histogram',
+          field: '@timestamp',
         },
         1
       );

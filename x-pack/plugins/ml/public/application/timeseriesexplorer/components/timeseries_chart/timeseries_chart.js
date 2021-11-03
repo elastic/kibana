@@ -547,9 +547,18 @@ class TimeseriesChartIntl extends Component {
 
     // Create the path elements for the forecast value line and bounds area.
     if (contextForecastData) {
-      fcsGroup.append('path').attr('class', 'area forecast');
-      fcsGroup.append('path').attr('class', 'values-line forecast');
-      fcsGroup.append('g').attr('class', 'focus-chart-markers forecast');
+      fcsGroup
+        .append('path')
+        .attr('class', 'area forecast')
+        .attr('data-test-subj', 'mlForecastArea');
+      fcsGroup
+        .append('path')
+        .attr('class', 'values-line forecast')
+        .attr('data-test-subj', 'mlForecastValuesline');
+      fcsGroup
+        .append('g')
+        .attr('class', 'focus-chart-markers forecast')
+        .attr('data-test-subj', 'mlForecastMarkers');
     }
 
     fcsGroup
@@ -962,13 +971,8 @@ class TimeseriesChartIntl extends Component {
   }
 
   drawContextElements(cxtGroup, cxtWidth, cxtChartHeight, swlHeight) {
-    const {
-      bounds,
-      contextChartData,
-      contextForecastData,
-      modelPlotEnabled,
-      annotationData,
-    } = this.props;
+    const { bounds, contextChartData, contextForecastData, modelPlotEnabled, annotationData } =
+      this.props;
     const data = contextChartData;
 
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
@@ -1132,10 +1136,12 @@ class TimeseriesChartIntl extends Component {
       .attr('height', ANNOTATION_SYMBOL_HEIGHT)
       .attr('width', (d) => {
         const start = Math.max(this.contextXScale(moment(d.timestamp)) + 1, contextXRangeStart);
-        const end =
+        const end = Math.min(
+          contextXRangeEnd,
           typeof d.end_timestamp !== 'undefined'
             ? this.contextXScale(moment(d.end_timestamp)) - 1
-            : start + ANNOTATION_MIN_WIDTH;
+            : start + ANNOTATION_MIN_WIDTH
+        );
         const width = Math.max(ANNOTATION_MIN_WIDTH, end - start);
         return width;
       });

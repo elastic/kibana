@@ -57,23 +57,19 @@ export const Page: FC<Props> = ({ jobId }) => {
   ]);
 
   const mlContext = useMlContext();
-  const { currentIndexPattern } = mlContext;
+  const { currentDataView } = mlContext;
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;
   const { isAdvancedEditorEnabled, disableSwitchToForm, isJobCreated } = state;
   const { jobType } = state.form;
-  const {
-    initiateWizard,
-    setJobClone,
-    switchToAdvancedEditor,
-    switchToForm,
-  } = createAnalyticsForm.actions;
+  const { initiateWizard, setJobClone, switchToAdvancedEditor, switchToForm } =
+    createAnalyticsForm.actions;
 
   useEffect(() => {
     initiateWizard();
 
-    if (currentIndexPattern) {
+    if (currentDataView) {
       (async function () {
         if (jobId !== undefined) {
           const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId, true);
@@ -195,8 +191,8 @@ export const Page: FC<Props> = ({ jobId }) => {
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
-                      defaultMessage="Source index pattern: {indexTitle}"
-                      values={{ indexTitle: currentIndexPattern.title }}
+                      defaultMessage="Source data view: {dataViewTitle}"
+                      values={{ dataViewTitle: currentDataView.title }}
                     />
                   </h2>
                 </EuiFlexItem>

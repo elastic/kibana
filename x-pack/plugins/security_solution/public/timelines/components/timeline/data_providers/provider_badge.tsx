@@ -159,9 +159,10 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
       [isEnabled, isExcluded]
     );
 
-    const formattedValue = useMemo(() => (isString(val) && val === '' ? getEmptyString() : val), [
-      val,
-    ]);
+    const formattedValue = useMemo(
+      () => (isString(val) && val === '' ? getEmptyString() : val),
+      [val]
+    );
 
     const prefix = useMemo(() => (isExcluded ? <span>{i18n.NOT} </span> : null), [isExcluded]);
 

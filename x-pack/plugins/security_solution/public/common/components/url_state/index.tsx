@@ -6,56 +6,40 @@
  */
 
 import React from 'react';
-import { compose, Dispatch } from 'redux';
+
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { timelineActions } from '../../../timelines/store/timeline';
-import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
-import { UrlStateContainerPropTypes, UrlStateProps } from './types';
+import { UrlStateContainerPropTypes, UrlStateProps, UrlStateStateToPropsType } from './types';
 import { useUrlStateHooks } from './use_url_state';
-import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
-import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { makeMapStateToProps } from './helpers';
 
-export const UrlStateContainer: React.FC<UrlStateContainerPropTypes> = (
-  props: UrlStateContainerPropTypes
-) => {
-  useUrlStateHooks(props);
-  return null;
-};
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setInitialStateFromUrl: dispatchSetInitialStateFromUrl(dispatch),
-  updateTimeline: dispatchUpdateTimeline(dispatch),
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
-    dispatch(timelineActions.updateIsLoading({ id, isLoading })),
-});
-
-export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteSpyState>>(
-  connect(makeMapStateToProps, mapDispatchToProps)
-)(
-  React.memo(
-    UrlStateContainer,
-    (prevProps, nextProps) =>
-      prevProps.pathName === nextProps.pathName && deepEqual(prevProps.urlState, nextProps.urlState)
-  )
-);
-
-const UseUrlStateComponent: React.FC<UrlStateProps> = (props) => {
-  const [routeProps] = useRouteSpy();
-  const urlStateReduxProps: RouteSpyState & UrlStateProps = {
-    ...routeProps,
-    ...props,
-  };
-  return <UrlStateRedux {...urlStateReduxProps} />;
-};
-
-export const UseUrlState = React.memo(
-  UseUrlStateComponent,
+export const UseUrlStateMemo = React.memo(
+  function UrlState(props: UrlStateContainerPropTypes) {
+    useUrlStateHooks(props);
+    return null;
+  },
   (prevProps, nextProps) =>
+    prevProps.pathName === nextProps.pathName &&
+    deepEqual(prevProps.urlState, nextProps.urlState) &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    prevProps.search === nextProps.search &&
     deepEqual(prevProps.navTabs, nextProps.navTabs)
 );
+
+export const UseUrlStateComponent: React.FC<UrlStateProps & UrlStateStateToPropsType> = (props) => {
+  const [routeProps] = useRouteSpy();
+
+  return (
+    <UseUrlStateMemo
+      {...{
+        ...routeProps,
+        ...props,
+      }}
+    />
+  );
+};
+
+export const UseUrlState = connect(makeMapStateToProps)(UseUrlStateComponent);

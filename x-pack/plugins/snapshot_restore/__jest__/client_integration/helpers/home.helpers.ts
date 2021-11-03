@@ -255,6 +255,7 @@ export type TestSubjects =
   | 'snapshotDetail.version'
   | 'snapshotLink'
   | 'snapshotList'
+  | 'snapshotListEmpty'
   | 'snapshotList.cell'
   | 'snapshotList.closeButton'
   | 'snapshotList.content'
@@ -378,4 +379,7 @@ export type TestSubjects =
   | 'verifyRepositoryButton'
   | 'version'
   | 'version.title'
-  | 'version.value';
+  | 'version.value'
+  | 'maxSnapshotsWarning'
+  | 'repositoryErrorsWarning'
+  | 'repositoryErrorsPrompt';

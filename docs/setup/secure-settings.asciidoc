@@ -18,8 +18,8 @@ To create the `kibana.keystore`, use the `create` command:
 bin/kibana-keystore create
 ----------------------------------------------------------------
 
-The file `kibana.keystore` will be created in the directory defined by the
-<<path-data, `path.data`>> configuration setting.
+The file `kibana.keystore` will be created in the `config` directory defined by the
+environment variable `KBN_PATH_CONF`.
 
 [float]
 [[list-settings]]

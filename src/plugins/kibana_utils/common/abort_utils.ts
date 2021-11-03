@@ -25,9 +25,10 @@ export class AbortError extends Error {
  *
  * @param signal The `AbortSignal` to generate the `Promise` from
  */
-export function abortSignalToPromise(
-  signal: AbortSignal
-): { promise: Promise<never>; cleanup: () => void } {
+export function abortSignalToPromise(signal: AbortSignal): {
+  promise: Promise<never>;
+  cleanup: () => void;
+} {
   let abortHandler: () => void;
   const cleanup = () => {
     if (abortHandler) {

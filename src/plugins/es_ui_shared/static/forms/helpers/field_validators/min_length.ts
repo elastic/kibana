@@ -11,32 +11,34 @@ import { hasMinLengthString } from '../../../validators/string';
 import { hasMinLengthArray } from '../../../validators/array';
 import { ERROR_CODE } from './types';
 
-export const minLengthField = ({
-  length = 0,
-  message,
-}: {
-  length: number;
-  message: string | ((err: Partial<ValidationError>) => string);
-}) => (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
+export const minLengthField =
+  ({
+    length = 0,
+    message,
+  }: {
+    length: number;
+    message: string | ((err: Partial<ValidationError>) => string);
+  }) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
 
-  // Validate for Arrays
-  if (Array.isArray(value)) {
-    return hasMinLengthArray(length)(value)
+    // Validate for Arrays
+    if (Array.isArray(value)) {
+      return hasMinLengthArray(length)(value)
+        ? undefined
+        : {
+            code: 'ERR_MIN_LENGTH',
+            length,
+            message: typeof message === 'function' ? message({ length }) : message,
+          };
+    }
+
+    // Validate for Strings
+    return hasMinLengthString(length)((value as string).trim())
       ? undefined
       : {
           code: 'ERR_MIN_LENGTH',
           length,
           message: typeof message === 'function' ? message({ length }) : message,
         };
-  }
-
-  // Validate for Strings
-  return hasMinLengthString(length)((value as string).trim())
-    ? undefined
-    : {
-        code: 'ERR_MIN_LENGTH',
-        length,
-        message: typeof message === 'function' ? message({ length }) : message,
-      };
-};
+  };

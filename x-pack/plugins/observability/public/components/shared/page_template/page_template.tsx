@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, ExclusiveUnion } from '@elastic/eui';
+import { EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
@@ -17,6 +17,7 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
+import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
@@ -28,13 +29,12 @@ export type WrappedPageTemplateProps = Pick<
   | 'pageContentProps'
   | 'pageHeader'
   | 'restrictWidth'
+  | 'template'
   | 'isEmptyState'
-> &
-  // recreate the exclusivity of bottomBar-related props
-  ExclusiveUnion<
-    { template?: 'default' } & Pick<KibanaPageTemplateProps, 'bottomBar' | 'bottomBarProps'>,
-    { template: KibanaPageTemplateProps['template'] }
-  >;
+  | 'noDataConfig'
+> & {
+  showSolutionNav?: boolean;
+};
 
 export interface ObservabilityPageTemplateDependencies {
   currentAppId$: Observable<string | undefined>;
@@ -52,6 +52,7 @@ export function ObservabilityPageTemplate({
   getUrlForApp,
   navigateToApp,
   navigationSections$,
+  showSolutionNav = true,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -75,13 +76,26 @@ export function ObservabilityPageTemplate({
               exact: !!entry.matchFullPath,
               strict: !entry.ignoreTrailingSlash,
             }) != null;
-
+          const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.label,
+            name: entry.isNewFeature ? (
+              <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
+            ) : (
+              entry.label
+            ),
             href,
             isSelected,
             onClick: (event) => {
+              if (entry.onClick) {
+                entry.onClick(event);
+              }
+
+              // Hides NEW badge when the item is clicked
+              if (entry.isNewFeature) {
+                hideBadge(badgeLocalStorageId);
+              }
+
               if (
                 event.button !== 0 ||
                 event.defaultPrevented ||
@@ -108,11 +122,15 @@ export function ObservabilityPageTemplate({
     <KibanaPageTemplate
       restrictWidth={false}
       {...pageTemplateProps}
-      solutionNav={{
-        icon: 'logoObservability',
-        items: sideNavItems,
-        name: sideNavTitle,
-      }}
+      solutionNav={
+        showSolutionNav
+          ? {
+              icon: 'logoObservability',
+              items: sideNavItems,
+              name: sideNavTitle,
+            }
+          : undefined
+      }
     >
       {children}
     </KibanaPageTemplate>

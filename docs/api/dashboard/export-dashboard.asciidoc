@@ -4,6 +4,8 @@
 <titleabbrev>Export dashboard</titleabbrev>
 ++++
 
+deprecated::[7.15.0,Use <<saved-objects-api-export>> instead.]
+
 experimental[] Export dashboards and corresponding saved objects.
 
 [[dashboard-api-export-request]]

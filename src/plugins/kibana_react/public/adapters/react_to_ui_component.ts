@@ -15,24 +15,24 @@ import { UiComponent, UiComponentInstance } from '../../../kibana_utils/public';
  *
  * @param ReactComp A React component.
  */
-export const reactToUiComponent = <Props extends object>(
-  ReactComp: ComponentType<Props>
-): UiComponent<Props> => () => {
-  let lastEl: HTMLElement | undefined;
+export const reactToUiComponent =
+  <Props extends object>(ReactComp: ComponentType<Props>): UiComponent<Props> =>
+  () => {
+    let lastEl: HTMLElement | undefined;
 
-  const render: UiComponentInstance<Props>['render'] = (el, props) => {
-    lastEl = el;
-    renderReact(h(ReactComp, props), el);
+    const render: UiComponentInstance<Props>['render'] = (el, props) => {
+      lastEl = el;
+      renderReact(h(ReactComp, props), el);
+    };
+
+    const unmount: UiComponentInstance<Props>['unmount'] = () => {
+      if (lastEl) unmountComponentAtNode(lastEl);
+    };
+
+    const comp: UiComponentInstance<Props> = {
+      render,
+      unmount,
+    };
+
+    return comp;
   };
-
-  const unmount: UiComponentInstance<Props>['unmount'] = () => {
-    if (lastEl) unmountComponentAtNode(lastEl);
-  };
-
-  const comp: UiComponentInstance<Props> = {
-    render,
-    unmount,
-  };
-
-  return comp;
-};

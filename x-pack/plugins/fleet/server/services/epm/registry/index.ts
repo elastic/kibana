@@ -52,8 +52,14 @@ export interface SearchParams {
  * @param pkgkey a string containing the package name delimited by the package version
  */
 export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // this will return an empty string if `indexOf` returns -1
-  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
+  // If no version is provided, use the provided package key as the
+  // package name and return an empty version value
+  if (!pkgkey.includes('-')) {
+    return { pkgName: pkgkey, pkgVersion: '' };
+  }
+
+  const pkgName = pkgkey.includes('-') ? pkgkey.substr(0, pkgkey.indexOf('-')) : pkgkey;
+
   if (pkgName === '') {
     throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
   }
@@ -90,16 +96,12 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
   const url = new URL(
     `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
-  }
+  setKibanaVersion(url);
+
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
@@ -138,11 +140,18 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
+  // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
+  const disableVersionCheck =
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? true;
+  if (disableVersionCheck) {
+    return;
+  }
+
   const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
   const kibanaBranch = appContextService.getKibanaBranch();
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
+  // on main, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'main') {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 }

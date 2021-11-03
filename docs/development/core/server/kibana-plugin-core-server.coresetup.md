@@ -4,7 +4,7 @@
 
 ## CoreSetup interface
 
-Context passed to the plugins `setup` method.
+Context passed to the `setup` method of `standard` plugins.
 
 <b>Signature:</b>
 
@@ -20,6 +20,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  [context](./kibana-plugin-core-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-core-server.contextsetup.md) |
 |  [deprecations](./kibana-plugin-core-server.coresetup.deprecations.md) | <code>DeprecationsServiceSetup</code> | [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) |
 |  [elasticsearch](./kibana-plugin-core-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |
+|  [executionContext](./kibana-plugin-core-server.coresetup.executioncontext.md) | <code>ExecutionContextSetup</code> | [ExecutionContextSetup](./kibana-plugin-core-server.executioncontextsetup.md) |
 |  [getStartServices](./kibana-plugin-core-server.coresetup.getstartservices.md) | <code>StartServicesAccessor&lt;TPluginsStart, TStart&gt;</code> | [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) |
 |  [http](./kibana-plugin-core-server.coresetup.http.md) | <code>HttpServiceSetup &amp; {</code><br/><code>        resources: HttpResources;</code><br/><code>    }</code> | [HttpServiceSetup](./kibana-plugin-core-server.httpservicesetup.md) |
 |  [i18n](./kibana-plugin-core-server.coresetup.i18n.md) | <code>I18nServiceSetup</code> | [I18nServiceSetup](./kibana-plugin-core-server.i18nservicesetup.md) |

@@ -66,9 +66,7 @@ export function emptifyMock<T>(
           : dataAccessLayer.relatedEvents(...args);
       },
 
-      async eventsWithEntityIDAndCategory(
-        ...args
-      ): Promise<{
+      async eventsWithEntityIDAndCategory(...args): Promise<{
         events: SafeResolverEvent[];
         nextEvent: string | null;
       }> {

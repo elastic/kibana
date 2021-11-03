@@ -24,8 +24,7 @@ export const getInputControlVisRenderer: (
     if (!registeredController) {
       const { createInputControlVisController } = await import('./vis_controller');
 
-      const Controller = createInputControlVisController(deps, handlers);
-      registeredController = new Controller(domNode);
+      registeredController = createInputControlVisController(deps, handlers, domNode);
       inputControlVisRegistry.set(domNode, registeredController);
 
       handlers.onDestroy(() => {

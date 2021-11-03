@@ -17,6 +17,7 @@ export {
   getFile,
   getInstallationObject,
   getInstallation,
+  getInstallations,
   getPackageInfo,
   getPackages,
   getLimitedPackages,
@@ -52,7 +53,7 @@ export function createInstallableFrom<T>(
   return savedObject
     ? {
         ...from,
-        status: installationStatuses.Installed,
+        status: savedObject.attributes.install_status,
         savedObject,
       }
     : {

@@ -11,6 +11,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Reporting Functional Tests with Security disabled', function () {
     this.tags('ciGroup2');
+
+    before(async () => {
+      const reportingAPI = getService('reportingAPI');
+      await reportingAPI.logTaskManagerHealth();
+    });
+
     loadTestFile(require.resolve('./management'));
   });
 }

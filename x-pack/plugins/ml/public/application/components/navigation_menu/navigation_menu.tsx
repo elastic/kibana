@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { FC } from 'react';
 
 import { isFullLicense } from '../../license';
 
@@ -16,6 +15,7 @@ export type TabId =
   | 'access-denied'
   | 'anomaly_detection'
   | 'data_frame_analytics'
+  | 'trained_models'
   | 'datavisualizer'
   | 'overview'
   | 'settings';
@@ -27,13 +27,5 @@ interface Props {
 export const NavigationMenu: FC<Props> = ({ tabId }) => {
   const disableLinks = isFullLicense() === false;
 
-  return (
-    <Fragment>
-      <EuiFlexGroup justifyContent="spaceBetween" className="mlNavigationMenu" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <MainTabs tabId={tabId} disableLinks={disableLinks} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Fragment>
-  );
+  return <MainTabs tabId={tabId} disableLinks={disableLinks} />;
 };

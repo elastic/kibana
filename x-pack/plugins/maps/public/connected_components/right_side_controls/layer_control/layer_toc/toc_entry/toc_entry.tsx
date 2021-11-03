@@ -8,8 +8,8 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
-
-import { EuiIcon, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
@@ -40,6 +40,7 @@ export interface ReduxDispatchProps {
   hideTOCDetails: (layerId: string) => void;
   showTOCDetails: (layerId: string) => void;
   toggleVisible: (layerId: string) => void;
+  cancelEditing: () => void;
 }
 
 export interface OwnProps {
@@ -281,6 +282,7 @@ export class TOCEntry extends Component<Props, State> {
           openLayerSettings={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
           supportsFitToBounds={this.state.supportsFitToBounds}
+          editModeActiveForLayer={this.props.editModeActiveForLayer}
         />
 
         {this._renderQuickActions()}
@@ -331,6 +333,24 @@ export class TOCEntry extends Component<Props, State> {
         {this._renderDetailsToggle()}
 
         {this._renderCancelModal()}
+
+        {this.props.editModeActiveForLayer && (
+          <div className="mapTocEntry-isInEditingMode__row">
+            <EuiIcon type="vector" size="s" />
+            <span className="mapTocEntry-isInEditingMode__editFeatureText">
+              <FormattedMessage
+                id="xpack.maps.layerControl.tocEntry.EditFeatures"
+                defaultMessage="Edit features"
+              />
+            </span>
+            <EuiButtonEmpty size="xs" flush="both" onClick={this.props.cancelEditing}>
+              <FormattedMessage
+                id="xpack.maps.layerControl.tocEntry.exitEditModeAriaLabel"
+                defaultMessage="Exit"
+              />
+            </EuiButtonEmpty>
+          </div>
+        )}
       </div>
     );
   }

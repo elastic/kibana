@@ -12,7 +12,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHeaderLinks } from '@elas
 import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { NAV } from '../../constants';
-import { PERSONAL_SOURCES_PATH } from '../../routes';
+import { PRIVATE_SOURCES_PATH } from '../../routes';
 
 export const WorkplaceSearchHeaderActions: React.FC = () => {
   if (!externalUrl.enterpriseSearchUrl) return null;
@@ -24,7 +24,7 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
           <EuiButtonEmptyTo
             data-test-subj="PersonalDashboardButton"
             iconType="user"
-            to={PERSONAL_SOURCES_PATH}
+            to={PRIVATE_SOURCES_PATH}
             size="s"
           >
             {NAV.PERSONAL_DASHBOARD}

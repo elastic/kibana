@@ -21,6 +21,7 @@ export interface RecentCasesProps extends Owner {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
+  hasWritePermissions: boolean;
   maxCasesToShow: number;
 }
 
@@ -29,11 +30,11 @@ const RecentCasesComponent = ({
   caseDetailsNavigation,
   createCaseNavigation,
   maxCasesToShow,
+  hasWritePermissions,
 }: Omit<RecentCasesProps, 'owner'>) => {
   const currentUser = useCurrentUser();
-  const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
-    'recentlyCreated'
-  );
+  const [recentCasesFilterBy, setRecentCasesFilterBy] =
+    useState<RecentCasesFilterMode>('recentlyCreated');
 
   const recentCasesFilterOptions = useMemo(
     () =>
@@ -47,7 +48,7 @@ const RecentCasesComponent = ({
               },
             ],
           }
-        : {},
+        : { reporters: [] },
     [currentUser, recentCasesFilterBy]
   );
 
@@ -77,6 +78,7 @@ const RecentCasesComponent = ({
           createCaseNavigation={createCaseNavigation}
           filterOptions={recentCasesFilterOptions}
           maxCasesToShow={maxCasesToShow}
+          hasWritePermissions={hasWritePermissions}
         />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">

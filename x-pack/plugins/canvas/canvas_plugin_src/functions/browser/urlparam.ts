@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { parse } from 'url';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -43,8 +42,9 @@ export function urlparam(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const query = parse(window.location.href, true).query;
-      return query[args.param] || args.default;
+      const url = new URL(window.location.href);
+      const query = url.searchParams;
+      return query.get(args.param) || args.default;
     },
   };
 }

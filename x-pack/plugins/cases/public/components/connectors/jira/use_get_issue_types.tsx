@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, IToasts } from 'kibana/public';
 import { ActionConnector } from '../../../../common';
 import { getIssueTypes } from './api';
 import { IssueTypes } from './types';
@@ -14,10 +14,7 @@ import * as i18n from './translations';
 
 interface Props {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   connector?: ActionConnector;
   handleIssueType: (options: Array<{ value: string; text: string }>) => void;
 }
@@ -56,13 +53,14 @@ export const useGetIssueTypes = ({
         });
 
         if (!didCancel.current) {
-          setIsLoading(false);
           const asOptions = (res.data ?? []).map((type) => ({
             text: type.name ?? '',
             value: type.id ?? '',
           }));
+
           setIssueTypes(res.data ?? []);
           handleIssueType(asOptions);
+          setIsLoading(false);
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
               title: i18n.ISSUE_TYPES_API_ERROR,

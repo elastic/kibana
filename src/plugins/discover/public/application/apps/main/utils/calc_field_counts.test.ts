@@ -12,10 +12,10 @@ import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 
 describe('calcFieldCounts', () => {
   test('returns valid field count data', async () => {
-    const rows = ([
+    const rows = [
       { _id: 1, _source: { message: 'test1', bytes: 20 } },
       { _id: 2, _source: { name: 'test2', extension: 'jpg' } },
-    ] as unknown) as ElasticSearchHit[];
+    ] as unknown as ElasticSearchHit[];
     const result = calcFieldCounts({}, rows, indexPatternMock);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -29,10 +29,10 @@ describe('calcFieldCounts', () => {
     `);
   });
   test('updates field count data', async () => {
-    const rows = ([
+    const rows = [
       { _id: 1, _source: { message: 'test1', bytes: 20 } },
       { _id: 2, _source: { name: 'test2', extension: 'jpg' } },
-    ] as unknown) as ElasticSearchHit[];
+    ] as unknown as ElasticSearchHit[];
     const result = calcFieldCounts({ message: 2 }, rows, indexPatternMock);
     expect(result).toMatchInlineSnapshot(`
       Object {

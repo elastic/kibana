@@ -12,7 +12,7 @@ export * from '../../common/translations';
 export const INCIDENT_MANAGEMENT_SYSTEM_TITLE = i18n.translate(
   'xpack.cases.configureCases.incidentManagementSystemTitle',
   {
-    defaultMessage: 'Connect to external incident management system',
+    defaultMessage: 'External incident management system',
   }
 );
 
@@ -20,7 +20,7 @@ export const INCIDENT_MANAGEMENT_SYSTEM_DESC = i18n.translate(
   'xpack.cases.configureCases.incidentManagementSystemDesc',
   {
     defaultMessage:
-      'You may optionally connect cases to an external incident management system of your choosing. This will allow you to push case data as an incident in your chosen third-party system.',
+      'Connect your cases to an external incident management system. You can then push case data as an incident in a third-party system.',
   }
 );
 
@@ -38,7 +38,7 @@ export const ADD_NEW_CONNECTOR = i18n.translate('xpack.cases.configureCases.addN
 export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsTitle',
   {
-    defaultMessage: 'Case Closures',
+    defaultMessage: 'Case closures',
   }
 );
 
@@ -46,14 +46,14 @@ export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsDesc',
   {
     defaultMessage:
-      'Define how you wish cases to be closed. Automated case closures require an established connection to an external incident management system.',
+      'Define how to close your cases. Automatic closures require an established connection to an external incident management system.',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_SUB_CASES = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsSubCases',
   {
-    defaultMessage: 'Automated closures of sub-cases is not currently supported.',
+    defaultMessage: 'Automatic closure of sub-cases is not supported.',
   }
 );
 
@@ -143,14 +143,6 @@ export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
   }
 );
 
-export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
-  'xpack.cases.configureCases.warningMessage',
-  {
-    defaultMessage:
-      'The selected connector has been deleted. Either select a different connector or create a new one.',
-  }
-);
-
 export const COMMENT = i18n.translate('xpack.cases.configureCases.commentMapping', {
   defaultMessage: 'Comments',
 });
@@ -170,3 +162,17 @@ export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string =>
     values: { connectorName },
     defaultMessage: 'Update { connectorName }',
   });
+
+export const DEPRECATED_TOOLTIP_TEXT = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipText',
+  {
+    defaultMessage: 'deprecated',
+  }
+);
+
+export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipContent',
+  {
+    defaultMessage: 'This connector is deprecated. Update it, or create a new one.',
+  }
+);

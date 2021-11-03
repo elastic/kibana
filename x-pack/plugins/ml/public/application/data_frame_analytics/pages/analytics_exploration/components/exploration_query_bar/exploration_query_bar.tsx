@@ -10,14 +10,11 @@ import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } f
 import { i18n } from '@kbn/i18n';
 
 import { debounce } from 'lodash';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Dictionary } from '../../../../../../../common/types/common';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
-import {
-  esKuery,
-  esQuery,
-  Query,
-  QueryStringInput,
-} from '../../../../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../../../../src/plugins/data_views/common';
+import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
@@ -32,7 +29,7 @@ interface ErrorMessage {
 }
 
 export interface ExplorationQueryBarProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   setSearchQuery: (update: {
     queryString: string;
     query?: SavedSearchQuery;
@@ -60,9 +57,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
-  const regex = useMemo(() => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'), [
-    filters?.columnId,
-  ]);
+  const regex = useMemo(
+    () => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'),
+    [filters?.columnId]
+  );
 
   /**
    * Restoring state from the URL once on load. If a filter option is active
@@ -93,16 +91,16 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
    */
   useEffect(() => {
     try {
-      let convertedQuery;
+      let convertedQuery: estypes.QueryDslQueryContainer = {};
       switch (query.language) {
         case SEARCH_QUERY_LANGUAGE.KUERY:
-          convertedQuery = esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(query.query as string),
+          convertedQuery = toElasticsearchQuery(
+            fromKueryExpression(query.query as string),
             indexPattern
           );
           break;
         case SEARCH_QUERY_LANGUAGE.LUCENE:
-          convertedQuery = esQuery.luceneStringToDsl(query.query as string);
+          convertedQuery = luceneStringToDsl(query.query as string);
           break;
         default:
           setErrorMessage({

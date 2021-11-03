@@ -13,5 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./health_route'));
     loadTestFile(require.resolve('./task_management'));
     loadTestFile(require.resolve('./task_management_removed_types'));
+
+    loadTestFile(require.resolve('./migrations'));
   });
 }

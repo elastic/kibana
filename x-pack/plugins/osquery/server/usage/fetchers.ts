@@ -9,7 +9,8 @@ import {
   AggregationsSingleBucketAggregate,
   AggregationsTopHitsAggregate,
   AggregationsValueAggregate,
-} from '@elastic/elasticsearch/api/types';
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PackagePolicyServiceInterface } from '../../../fleet/server';
 import { getRouteMetric } from '../routes/usage';
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';
@@ -44,6 +45,11 @@ export async function getPolicyLevelUsage(
   const agentResponse = await esClient.search({
     body: {
       size: 0,
+      query: {
+        match: {
+          active: true,
+        },
+      },
       aggs: {
         policied: {
           filter: {
@@ -55,6 +61,7 @@ export async function getPolicyLevelUsage(
       },
     },
     index: '.fleet-agents',
+    ignore_unavailable: true,
   });
   const policied = agentResponse.body.aggregations?.policied as AggregationsSingleBucketAggregate;
   if (policied && typeof policied.doc_count === 'number') {
@@ -85,7 +92,8 @@ export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy
   return packagePolicies.items.reduce(
     (acc, item) => {
       ++acc.queryGroups.total;
-      if (item.inputs.length === 0) {
+      const policyAgents = item.inputs.reduce((sum, input) => sum + input.streams.length, 0);
+      if (policyAgents === 0) {
         ++acc.queryGroups.empty;
       }
       return acc;
@@ -117,6 +125,7 @@ export async function getLiveQueryUsage(
       },
     },
     index: '.fleet-actions',
+    ignore_unavailable: true,
   });
   const result: LiveQueryUsage = {
     session: await getRouteMetric(soClient, 'live_query'),
@@ -130,6 +139,46 @@ export async function getLiveQueryUsage(
     };
   }
 
+  return result;
+}
+
+export function extractBeatUsageMetrics(
+  metricResponse: Pick<SearchResponse<unknown>, 'aggregations'>
+) {
+  const lastDayAggs = metricResponse.aggregations?.lastDay as AggregationsSingleBucketAggregate;
+  const result: BeatMetricsUsage = {
+    memory: {
+      rss: {},
+    },
+    cpu: {},
+  };
+
+  if (lastDayAggs) {
+    if ('max_rss' in lastDayAggs) {
+      result.memory.rss.max = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
+    }
+
+    if ('avg_rss' in lastDayAggs) {
+      result.memory.rss.avg = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
+    }
+
+    if ('max_cpu' in lastDayAggs) {
+      result.cpu.max = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
+    }
+
+    if ('avg_cpu' in lastDayAggs) {
+      result.cpu.avg = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
+    }
+
+    if ('latest' in lastDayAggs) {
+      const latest = (lastDayAggs.latest as AggregationsTopHitsAggregate).hits.hits[0]?._source
+        ?.monitoring.metrics.beat;
+      if (latest) {
+        result.cpu.latest = latest.cpu.total.time.ms;
+        result.memory.rss.latest = latest.memstats.rss;
+      }
+    }
+  }
   return result;
 }
 
@@ -185,39 +234,8 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
       },
     },
     index: METRICS_INDICES,
+    ignore_unavailable: true,
   });
-  const lastDayAggs = metricResponse.aggregations?.lastDay as AggregationsSingleBucketAggregate;
-  const result: BeatMetricsUsage = {
-    memory: {
-      rss: {},
-    },
-    cpu: {},
-  };
 
-  if ('max_rss' in lastDayAggs) {
-    result.memory.rss.max = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
-  }
-
-  if ('avg_rss' in lastDayAggs) {
-    result.memory.rss.avg = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
-  }
-
-  if ('max_cpu' in lastDayAggs) {
-    result.cpu.max = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
-  }
-
-  if ('avg_cpu' in lastDayAggs) {
-    result.cpu.avg = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
-  }
-
-  if ('latest' in lastDayAggs) {
-    const latest = (lastDayAggs.latest as AggregationsTopHitsAggregate).hits.hits[0]?._source
-      ?.monitoring.metrics.beat;
-    if (latest) {
-      result.cpu.latest = latest.cpu.total.time.ms;
-      result.memory.rss.latest = latest.memstats.rss;
-    }
-  }
-
-  return result;
+  return extractBeatUsageMetrics(metricResponse);
 }

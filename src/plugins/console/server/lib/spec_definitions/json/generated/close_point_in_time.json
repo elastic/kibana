@@ -1,0 +1,11 @@
+{
+  "close_point_in_time": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_pit"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/point-in-time-api.html"
+  }
+}

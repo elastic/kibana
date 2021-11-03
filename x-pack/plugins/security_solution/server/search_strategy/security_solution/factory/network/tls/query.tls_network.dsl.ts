@@ -47,7 +47,7 @@ const getAggs = (querySize: number, sort: SortField<NetworkTlsFields>) => ({
       },
       ja3: {
         terms: {
-          field: 'tls.server.ja3s',
+          field: 'tls.client.ja3',
         },
       },
     },
@@ -75,9 +75,9 @@ export const buildNetworkTlsQuery = ({
   const filter = ip ? [...defaultFilter, { term: { [`${flowTarget}.ip`]: ip } }] : defaultFilter;
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggs: {

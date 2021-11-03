@@ -18,6 +18,8 @@ import {
   EndpointFields,
   HostPolicyResponseActionStatus,
 } from '../../../../../common/search_strategy/security_solution/hosts';
+import { AgentStatus } from '../../../../common/components/endpoint/agent_status';
+import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
 
 interface Props {
   contextID?: string;
@@ -73,7 +75,24 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
               : getEmptyTagValue(),
         },
       ],
-      [], // needs 4 columns for design
+      [
+        {
+          title: i18n.FLEET_AGENT_STATUS,
+          description:
+            data != null && data.elasticAgentStatus ? (
+              <>
+                <AgentStatus hostStatus={data.elasticAgentStatus} />
+                <EndpointHostIsolationStatus
+                  isIsolated={Boolean(data.isolation)}
+                  pendingIsolate={data.pendingActions?.isolate ?? 0}
+                  pendingUnIsolate={data.pendingActions?.unisolate ?? 0}
+                />
+              </>
+            ) : (
+              getEmptyTagValue()
+            ),
+        },
+      ],
     ],
     [data, getDefaultRenderer]
   );

@@ -21,7 +21,13 @@ import {
   generateAgentSelection,
 } from './helpers';
 
-import { SELECT_AGENT_LABEL, generateSelectedAgentsMessage } from './translations';
+import {
+  SELECT_AGENT_LABEL,
+  generateSelectedAgentsMessage,
+  ALL_AGENTS_LABEL,
+  AGENT_POLICY_LABEL,
+  AGENT_SELECTION_LABEL,
+} from './translations';
 
 import {
   AGENT_GROUP_KEY,
@@ -37,7 +43,7 @@ interface AgentsTableProps {
 }
 
 const perPage = 10;
-const DEBOUNCE_DELAY = 100; // ms
+const DEBOUNCE_DELAY = 300; // ms
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
   // search related
@@ -56,11 +62,18 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   // grouping related
   const osqueryPolicyData = useOsqueryPolicies();
-  const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
-    osqueryPolicyData
-  );
+  const {
+    loading: groupsLoading,
+    totalCount: totalNumAgents,
+    groups,
+    isFetched: groupsFetched,
+  } = useAgentGroups(osqueryPolicyData);
   const grouper = useMemo(() => new AgentGrouper(), []);
-  const { agentsLoading, agents } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
+  const {
+    isLoading: agentsLoading,
+    data: agents,
+    isFetched: agentsFetched,
+  } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
     perPage,
   });
 
@@ -72,33 +85,70 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   useEffect(() => {
     if (agentSelection && !defaultValueInitialized.current && options.length) {
-      if (agentSelection.policiesSelected) {
-        const policyOptions = find(['label', 'Policy'], options);
+      if (agentSelection.allAgentsSelected) {
+        const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
+
+        if (allAgentsOptions?.options) {
+          setSelectedOptions(allAgentsOptions.options);
+          defaultValueInitialized.current = true;
+        }
+      }
+
+      if (agentSelection.policiesSelected.length) {
+        const policyOptions = find(['label', AGENT_POLICY_LABEL], options);
 
         if (policyOptions) {
           const defaultOptions = policyOptions.options?.filter((option) =>
-            agentSelection.policiesSelected.includes(option.label)
+            // @ts-expect-error update types
+            agentSelection.policiesSelected.includes(option.key)
           );
 
           if (defaultOptions?.length) {
             setSelectedOptions(defaultOptions);
+            defaultValueInitialized.current = true;
           }
-          defaultValueInitialized.current = true;
+        }
+      }
+
+      if (agentSelection.agents.length) {
+        const agentOptions = find(['label', AGENT_SELECTION_LABEL], options);
+
+        if (agentOptions) {
+          const defaultOptions = agentOptions.options?.filter((option) =>
+            // @ts-expect-error update types
+            agentSelection.agents.includes(option.key)
+          );
+
+          if (defaultOptions?.length) {
+            setSelectedOptions(defaultOptions);
+            defaultValueInitialized.current = true;
+          }
         }
       }
     }
-  }, [agentSelection, options]);
+  }, [agentSelection, options, selectedOptions]);
 
   useEffect(() => {
-    // update the groups when groups or agents have changed
-    grouper.setTotalAgents(totalNumAgents);
-    grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
-    grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents!);
-    const newOptions = grouper.generateOptions();
-    setOptions(newOptions);
-  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, grouper]);
+    if (agentsFetched && groupsFetched) {
+      // update the groups when groups or agents have changed
+      grouper.setTotalAgents(totalNumAgents);
+      grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
+      grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
+      // @ts-expect-error update types
+      grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
+      const newOptions = grouper.generateOptions();
+      setOptions(newOptions);
+    }
+  }, [
+    groups.platforms,
+    groups.policies,
+    totalNumAgents,
+    groupsLoading,
+    agents,
+    agentsFetched,
+    groupsFetched,
+    grouper,
+  ]);
 
   const onSelection = useCallback(
     (selection: GroupOption[]) => {

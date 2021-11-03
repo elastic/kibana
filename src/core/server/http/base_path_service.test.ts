@@ -7,7 +7,6 @@
  */
 
 import { BasePath } from './base_path_service';
-import { KibanaRequest } from './router';
 import { httpServerMock } from './http_server.mocks';
 
 describe('BasePath', () => {
@@ -36,32 +35,16 @@ describe('BasePath', () => {
   });
 
   describe('#get()', () => {
-    it('returns base path associated with an incoming Legacy.Request request', () => {
-      const request = httpServerMock.createRawRequest();
-
+    it('returns base path associated with an incoming KibanaRequest', () => {
+      const request = httpServerMock.createKibanaRequest();
       const basePath = new BasePath();
+
       basePath.set(request, '/baz/');
       expect(basePath.get(request)).toBe('/baz/');
     });
 
-    it('returns base path associated with an incoming KibanaRequest', () => {
-      const request = httpServerMock.createRawRequest();
-      const basePath = new BasePath();
-
-      basePath.set(KibanaRequest.from(request, undefined), '/baz/');
-      expect(basePath.get(KibanaRequest.from(request, undefined))).toBe('/baz/');
-    });
-
-    it('operates with both Legacy.Request/KibanaRequest requests', () => {
-      const request = httpServerMock.createRawRequest();
-      const basePath = new BasePath();
-
-      basePath.set(request, '/baz/');
-      expect(basePath.get(KibanaRequest.from(request, undefined))).toBe('/baz/');
-    });
-
     it('is based on server base path', () => {
-      const request = httpServerMock.createRawRequest();
+      const request = httpServerMock.createKibanaRequest();
       const basePath = new BasePath('/foo/bar');
 
       basePath.set(request, '/baz/');
@@ -71,7 +54,7 @@ describe('BasePath', () => {
 
   describe('#set()', () => {
     it('#set() cannot be set twice for one request', () => {
-      const request = httpServerMock.createRawRequest();
+      const request = httpServerMock.createKibanaRequest();
       const basePath = new BasePath('/foo/bar');
 
       const setPath = () => basePath.set(request, 'baz/');

@@ -12,16 +12,12 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsCards, AnalyticsChart, QueryClicksTable } from '../components';
 
 import { QueryDetail } from './';
 
 describe('QueryDetail', () => {
-  const mockBreadcrumbs = ['Engines', 'some-engine', 'Analytics'];
-
   beforeEach(() => {
     mockUseParams.mockReturnValue({ query: 'some-query' });
 
@@ -32,16 +28,10 @@ describe('QueryDetail', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<QueryDetail breadcrumbs={mockBreadcrumbs} />);
+    const wrapper = shallow(<QueryDetail />);
 
     expect(wrapper.find(AnalyticsLayout).prop('title')).toEqual('"some-query"');
-    expect(wrapper.find(SetPageChrome).prop('trail')).toEqual([
-      'Engines',
-      'some-engine',
-      'Analytics',
-      'Query',
-      'some-query',
-    ]);
+    expect(wrapper.find(AnalyticsLayout).prop('breadcrumbs')).toEqual(['Query', 'some-query']);
 
     expect(wrapper.find(AnalyticsCards)).toHaveLength(1);
     expect(wrapper.find(AnalyticsChart)).toHaveLength(1);
@@ -50,7 +40,7 @@ describe('QueryDetail', () => {
 
   it('renders empty "" search titles correctly', () => {
     mockUseParams.mockReturnValue({ query: '""' });
-    const wrapper = shallow(<QueryDetail breadcrumbs={mockBreadcrumbs} />);
+    const wrapper = shallow(<QueryDetail />);
 
     expect(wrapper.find(AnalyticsLayout).prop('title')).toEqual('""');
   });

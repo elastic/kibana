@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createMlUrlGeneratorMock } from './ml_url_generator/__mocks__/ml_url_generator';
+
 import { MlPluginSetup, MlPluginStart } from './plugin';
+import { sharePluginMock } from '../../../../src/plugins/share/public/mocks';
+
 const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
   return {
-    urlGenerator: createMlUrlGeneratorMock(),
+    locator: sharePluginMock.createLocator(),
   };
 };
 
 const createStartContract = (): jest.Mocked<MlPluginStart> => {
   return {
-    urlGenerator: createMlUrlGeneratorMock(),
+    locator: sharePluginMock.createLocator(),
   };
 };
 

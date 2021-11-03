@@ -703,13 +703,8 @@ const ReorderableDrag = memo(function ReorderableDrag(
     setReorderState,
   } = useContext(ReorderContext);
 
-  const {
-    value,
-    setActiveDropTarget,
-    activeDraggingProps,
-    reorderableGroup,
-    setA11yMessage,
-  } = props;
+  const { value, setActiveDropTarget, activeDraggingProps, reorderableGroup, setA11yMessage } =
+    props;
 
   const keyboardMode = activeDraggingProps?.keyboardMode;
   const activeDropTarget = activeDraggingProps?.activeDropTarget;

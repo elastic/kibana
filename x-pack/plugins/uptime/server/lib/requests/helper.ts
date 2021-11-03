@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/api/types';
+import {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
@@ -50,7 +53,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
       },
     };
     esMock.search.mockResolvedValueOnce({
-      body: (mockResponse as unknown) as SearchResponse,
+      body: mockResponse as unknown as SearchResponse,
       statusCode: 200,
       headers: {},
       warnings: [],
@@ -81,3 +84,34 @@ export const getUptimeESMockClient = (
     }),
   };
 };
+
+export function mockSearchResult(
+  data: unknown,
+  aggregations: Record<string, AggregationsAggregate> = {}
+): UptimeESClient {
+  const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+  mockEsClient.search = jest.fn().mockResolvedValue({
+    body: {
+      took: 18,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: Array.isArray(data) ? data : [data],
+        max_score: 0.0,
+        total: {
+          value: Array.isArray(data) ? data.length : 0,
+          relation: 'gte',
+        },
+      },
+      aggregations,
+    },
+  });
+
+  return uptimeEsClient;
+}

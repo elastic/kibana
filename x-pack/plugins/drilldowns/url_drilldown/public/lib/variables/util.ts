@@ -15,7 +15,7 @@ export const toPrimitiveOrUndefined = (v: unknown): Primitive | undefined => {
   return String(v);
 };
 
-export const deleteUndefinedKeys = <T extends Record<string, any>>(obj: T): T => {
+export const deleteUndefinedKeys = <T extends Record<string, unknown>>(obj: T): T => {
   Object.keys(obj).forEach((key) => {
     if (obj[key] === undefined) {
       delete obj[key];

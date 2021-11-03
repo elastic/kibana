@@ -9,5 +9,6 @@
 export {
   SavedObjectMetaData,
   SavedObjectFinderUi,
+  SavedObjectFinderUiProps,
   getSavedObjectFinder,
 } from './saved_object_finder';

@@ -15,7 +15,6 @@ import type {
   EnrollmentAPIKey,
   Settings,
   AgentAction,
-  Installation,
 } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
@@ -89,12 +88,14 @@ export const migrateSettingsToV7100: SavedObjectMigrationFn<
 export const migrateAgentActionToV7100 = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationFn<AgentAction, AgentAction> => {
-  return encryptedSavedObjects.createMigration(
-    (agentActionDoc): agentActionDoc is SavedObjectUnsanitizedDoc<AgentAction> => {
+  return encryptedSavedObjects.createMigration({
+    isMigrationNeededPredicate: (
+      agentActionDoc
+    ): agentActionDoc is SavedObjectUnsanitizedDoc<AgentAction> => {
       // @ts-expect-error
       return agentActionDoc.attributes.type === 'CONFIG_CHANGE';
     },
-    (agentActionDoc) => {
+    migration: (agentActionDoc) => {
       let agentActionData;
       try {
         agentActionData = agentActionDoc.attributes.data
@@ -122,15 +123,6 @@ export const migrateAgentActionToV7100 = (
       } else {
         return agentActionDoc;
       }
-    }
-  );
-};
-
-export const migrateInstallationToV7100: SavedObjectMigrationFn<
-  Exclude<Installation, 'install_source'>,
-  Installation
-> = (installationDoc) => {
-  installationDoc.attributes.install_source = 'registry';
-
-  return installationDoc;
+    },
+  });
 };

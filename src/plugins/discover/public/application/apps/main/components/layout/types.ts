@@ -9,24 +9,28 @@
 import {
   IndexPattern,
   IndexPatternAttributes,
+  Query,
   SavedObject,
+  TimeRange,
 } from '../../../../../../../data/common';
 import { ISearchSource } from '../../../../../../../data/public';
-import { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { SavedSearchRefetchSubject, SavedSearchDataSubject } from '../../services/use_saved_search';
+import { DataRefetch$, SavedSearchData } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { SavedSearch } from '../../../../../saved_searches';
+import { RequestAdapter } from '../../../../../../../inspector';
 
 export interface DiscoverLayoutProps {
   indexPattern: IndexPattern;
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-  resetQuery: () => void;
+  inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
+  onChangeIndexPattern: (id: string) => void;
+  onUpdateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+  resetSavedSearch: () => void;
   savedSearch: SavedSearch;
-  savedSearchData$: SavedSearchDataSubject;
-  savedSearchRefetch$: SavedSearchRefetchSubject;
-  searchSessionManager: DiscoverSearchSessionManager;
+  savedSearchData$: SavedSearchData;
+  savedSearchRefetch$: DataRefetch$;
   searchSource: ISearchSource;
   services: DiscoverServices;
   state: AppState;

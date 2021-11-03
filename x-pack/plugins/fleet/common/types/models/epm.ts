@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
@@ -13,9 +14,12 @@ import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
+  monitoringTypes,
   installationStatuses,
 } from '../../constants';
 import type { ValueOf } from '../../types';
+
+import type { CustomIntegrationIcon } from '../../../../../../src/plugins/custom_integrations/common';
 
 import type {
   PackageSpecManifest,
@@ -41,9 +45,9 @@ export interface DefaultPackagesInstallationError {
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload';
 
-export type EpmPackageInstallStatus = 'installed' | 'installing';
+export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
-export type DetailViewPanelName = 'overview' | 'policies' | 'settings' | 'custom';
+export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type DocAssetType = 'doc' | 'notice';
@@ -65,6 +69,7 @@ export enum KibanaAssetType {
   lens = 'lens',
   securityRule = 'security_rule',
   mlModule = 'ml_module',
+  tag = 'tag',
 }
 
 /*
@@ -79,6 +84,7 @@ export enum KibanaSavedObjectType {
   lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
+  tag = 'tag',
 }
 
 export enum ElasticsearchAssetType {
@@ -88,10 +94,11 @@ export enum ElasticsearchAssetType {
   ilmPolicy = 'ilm_policy',
   transform = 'transform',
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
+  mlModel = 'ml_model',
 }
 
 export type DataType = typeof dataTypes;
-
+export type MonitoringType = typeof monitoringTypes;
 export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &
@@ -119,6 +126,11 @@ interface RegistryAdditionalProperties {
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
   data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
+  elasticsearch?: {
+    privileges?: {
+      cluster?: string[];
+    };
+  };
 }
 interface RegistryOverridePropertyValue {
   icons?: RegistryImage[];
@@ -221,6 +233,7 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'data_streams'
   | 'policy_templates'
+  | 'categories'
 >;
 
 export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
@@ -279,7 +292,6 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
-  permissions = 'permissions',
 }
 
 export interface RegistryDataStream {
@@ -295,15 +307,15 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
-  [RegistryDataStreamKeys.permissions]?: RegistryDataStreamPermissions;
 }
 
 export interface RegistryElasticsearch {
-  'index_template.settings'?: object;
-  'index_template.mappings'?: object;
+  privileges?: RegistryDataStreamPrivileges;
+  'index_template.settings'?: estypes.IndicesIndexSettings;
+  'index_template.mappings'?: estypes.MappingTypeMapping;
 }
 
-export interface RegistryDataStreamPermissions {
+export interface RegistryDataStreamPrivileges {
   cluster?: string[];
   indices?: string[];
 }
@@ -348,6 +360,7 @@ export interface EpmPackageAdditions {
   assets: AssetsGroupedByServiceByType;
   removable?: boolean;
   notice?: string;
+  keepPoliciesUpToDate?: boolean;
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
@@ -359,6 +372,19 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   id: string;
 };
+
+export interface IntegrationCardItem {
+  url: string;
+  release?: 'beta' | 'experimental' | 'ga';
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
+  integration: string;
+  id: string;
+  categories: string[];
+}
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -376,21 +402,31 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+  keep_policies_up_to_date: boolean;
 }
 
 export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> = Installed<T> | NotInstalled<T>;
+export type Installable<T> = Installed<T> | Installing<T> | NotInstalled<T> | InstallFailed<T>;
 
 export type Installed<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
 };
 
+export type Installing<T = {}> = T & {
+  status: InstallationStatus['Installing'];
+  savedObject: SavedObject<Installation>;
+};
+
 export type NotInstalled<T = {}> = T & {
   status: InstallationStatus['NotInstalled'];
+};
+
+export type InstallFailed<T = {}> = T & {
+  status: InstallationStatus['InstallFailed'];
 };
 
 export type AssetReference = KibanaAssetReference | EsAssetReference;
@@ -412,7 +448,7 @@ export interface IndexTemplateMappings {
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
 // until "proper" documentation of the new format is available.
-// Ingest Manager does not use nor support the legacy index template v1 format at all
+// Fleet does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
   priority: number;
   index_patterns: string[];
@@ -425,7 +461,7 @@ export interface IndexTemplate {
   _meta: object;
 }
 
-export interface TemplateRef {
+export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }

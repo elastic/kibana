@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { ColorFormatEditor } from './color';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { ColorFormatEditor } from './color';
+export const colorFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./color').then((m) => m.ColorFormatEditor);
+colorFormatEditorFactory.formatId = formatId;

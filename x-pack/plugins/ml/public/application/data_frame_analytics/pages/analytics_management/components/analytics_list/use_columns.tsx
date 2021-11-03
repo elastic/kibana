@@ -32,7 +32,7 @@ import {
 } from './common';
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
@@ -299,6 +299,7 @@ export const useColumns = (
             />
           ) : null,
         width: '90px',
+        'data-test-subj': 'mlAnalyticsTableColumnSpaces',
       });
     }
     // Remove actions if Ml not enabled in current space

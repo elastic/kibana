@@ -53,7 +53,6 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
-
   // filter out any internal packages
   const savedObjectsVisible = packageSavedObjects.saved_objects.filter(
     (o) => !o.attributes.internal
@@ -70,7 +69,6 @@ export async function getPackages(
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
-// Assume packages only export one policy template for now
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
@@ -101,6 +99,8 @@ export async function getPackageSavedObjects(
   });
 }
 
+export const getInstallations = getPackageSavedObjects;
+
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -112,9 +112,17 @@ export async function getPackageInfo(options: {
     Registry.fetchFindLatestPackage(pkgName),
   ]);
 
+  // If no package version is provided, use the installed version in the response
+  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
+
+  // If no installed version of the given package exists, default to the latest version of the package
+  if (!responsePkgVersion) {
+    responsePkgVersion = latestPackage.version;
+  }
+
   const getPackageRes = await getPackageFromSource({
     pkgName,
-    pkgVersion,
+    pkgVersion: responsePkgVersion,
     savedObjectsClient,
     installedPkg: savedObject?.attributes,
   });
@@ -127,6 +135,7 @@ export async function getPackageInfo(options: {
     assets: Registry.groupPathsByService(paths || []),
     removable: !isUnremovablePackage(pkgName),
     notice: Registry.getNoticePath(paths || []),
+    keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
 
@@ -207,7 +216,10 @@ export async function getPackageFromSource(options: {
         installedPkg.package_assets,
         savedObjectsClient
       );
-      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
+
+      if (res) {
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
+      }
     }
     // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {

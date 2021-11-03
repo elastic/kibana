@@ -45,21 +45,25 @@ export const throwErrors = (createError: ErrorFactory) => (errors: Errors) => {
   throw createError(formatErrors(errors));
 };
 
-export const decodeOrThrow = <DecodedValue, EncodedValue, InputValue>(
-  runtimeType: Type<DecodedValue, EncodedValue, InputValue>,
-  createError: ErrorFactory = createPlainError
-) => (inputValue: InputValue) =>
-  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export const decodeOrThrow =
+  <DecodedValue, EncodedValue, InputValue>(
+    runtimeType: Type<DecodedValue, EncodedValue, InputValue>,
+    createError: ErrorFactory = createPlainError
+  ) =>
+  (inputValue: InputValue) =>
+    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 type ValdidationResult<Value> = ReturnType<RouteValidationFunction<Value>>;
 
-export const createValidationFunction = <DecodedValue, EncodedValue, InputValue>(
-  runtimeType: Type<DecodedValue, EncodedValue, InputValue>
-): RouteValidationFunction<DecodedValue> => (inputValue, { badRequest, ok }) =>
-  pipe(
-    runtimeType.decode(inputValue),
-    fold<Errors, DecodedValue, ValdidationResult<DecodedValue>>(
-      (errors: Errors) => badRequest(formatErrors(errors)),
-      (result: DecodedValue) => ok(result)
-    )
-  );
+export const createValidationFunction =
+  <DecodedValue, EncodedValue, InputValue>(
+    runtimeType: Type<DecodedValue, EncodedValue, InputValue>
+  ): RouteValidationFunction<DecodedValue> =>
+  (inputValue, { badRequest, ok }) =>
+    pipe(
+      runtimeType.decode(inputValue),
+      fold<Errors, DecodedValue, ValdidationResult<DecodedValue>>(
+        (errors: Errors) => badRequest(formatErrors(errors)),
+        (result: DecodedValue) => ok(result)
+      )
+    );

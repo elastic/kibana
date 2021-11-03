@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
 
 describe('documents routes', () => {
-  describe('POST /api/app_search/engines/{engineName}/documents', () => {
+  describe('POST /internal/app_search/engines/{engineName}/documents', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/documents',
+        path: '/internal/app_search/engines/{engineName}/documents',
       });
 
       registerDocumentsRoutes({
@@ -35,14 +35,14 @@ describe('documents routes', () => {
 });
 
 describe('document routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/documents/{documentId}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/documents/{documentId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+        path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       });
 
       registerDocumentRoutes({
@@ -58,14 +58,14 @@ describe('document routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{engineName}/documents/{documentId}', () => {
+  describe('DELETE /internal/app_search/engines/{engineName}/documents/{documentId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+        path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       });
 
       registerDocumentRoutes({

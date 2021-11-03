@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return {
@@ -82,12 +83,8 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
-      await this.filterWithSearchString(dashboardTitle);
-      await testSubjects.isDisplayed('mlDashboardSelectionTable > checkboxSelectAll');
-      await testSubjects.clickWhenNotDisabled('mlDashboardSelectionTable > checkboxSelectAll');
-      expect(await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll')).to.be(
-        true
-      );
+      await this.filterDashboardSearchWithSearchString(dashboardTitle);
+      await this.selectAllDashboards();
       await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
       // changing to the dashboard app might take sime time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
@@ -106,11 +103,30 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       await testSubjects.existOrFail('~mlDashboardSelectionTable', { timeout: 60 * 1000 });
     },
 
-    async filterWithSearchString(filter: string) {
+    async filterDashboardSearchWithSearchString(filter: string) {
       await this.waitForDashboardsToLoad();
       const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
+      await this.assertDashboardSearchInputValue(filter);
+    },
+
+    async assertDashboardSearchInputValue(expectedSearchValue: string) {
+      const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
+      const actualSearchValue = await searchBarInput.getAttribute('value');
+      expect(actualSearchValue).to.eql(
+        expectedSearchValue,
+        `Dashboard search input value should be '${expectedSearchValue}' (got '${actualSearchValue}')`
+      );
+    },
+
+    async selectAllDashboards() {
+      await retry.tryForTime(3000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlDashboardSelectionTable > checkboxSelectAll');
+        expect(
+          await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll')
+        ).to.eql(true, 'Checkbox to select all dashboards should be selected');
+      });
     },
 
     async assertClearSelectionButtonVisible(expectVisible: boolean) {

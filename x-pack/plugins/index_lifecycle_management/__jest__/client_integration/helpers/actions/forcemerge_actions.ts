@@ -11,21 +11,20 @@ import { Phase } from '../../../../common/types';
 import { createFormToggleAction } from './form_toggle_action';
 import { createFormSetValueAction } from './form_set_value_action';
 
-const createFormCheckboxAction = (testBed: TestBed, dataTestSubject: string) => async (
-  checked: boolean
-) => {
-  const { form, component } = testBed;
-  await act(async () => {
-    form.selectCheckBox(dataTestSubject, checked);
-  });
-  component.update();
-};
+const createFormCheckboxAction =
+  (testBed: TestBed, dataTestSubject: string) => async (checked: boolean) => {
+    const { form, component } = testBed;
+    await act(async () => {
+      form.selectCheckBox(dataTestSubject, checked);
+    });
+    component.update();
+  };
 
 export const createForceMergeActions = (testBed: TestBed, phase: Phase) => {
   const { exists } = testBed;
   const toggleSelector = `${phase}-forceMergeSwitch`;
   return {
-    forceMergeFieldExists: () => exists(toggleSelector),
+    forceMergeExists: () => exists(toggleSelector),
     toggleForceMerge: createFormToggleAction(testBed, toggleSelector),
     setForcemergeSegmentsCount: createFormSetValueAction(
       testBed,

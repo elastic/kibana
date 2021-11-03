@@ -8,11 +8,11 @@
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 
 const createSavedObjectProviderRegistryMock = () => {
-  return ({
+  return {
     registerProvider: jest.fn(),
     registerDefaultProvider: jest.fn(),
     getProvidersClient: jest.fn(),
-  } as unknown) as jest.Mocked<SavedObjectProviderRegistry>;
+  } as unknown as jest.Mocked<SavedObjectProviderRegistry>;
 };
 
 export const savedObjectProviderRegistryMock = {

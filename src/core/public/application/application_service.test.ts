@@ -15,13 +15,13 @@ import {
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
-import { shallow, mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
-import { App, PublicAppInfo, AppNavLinkStatus, AppStatus, AppUpdater } from './types';
+import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';
 import { act } from 'react-dom/test-utils';
 
 const createApp = (props: Partial<App>): App => {
@@ -364,6 +364,85 @@ describe('#setup()', () => {
       await start.navigateToApp('app1');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
       MockHistory.push.mockClear();
+    });
+
+    it('preserves the deep links if the update does not modify them', async () => {
+      const setup = service.setup(setupDeps);
+
+      const pluginId = Symbol('plugin');
+      const updater$ = new BehaviorSubject<AppUpdater>((app) => ({}));
+
+      const deepLinks: AppDeepLink[] = [
+        {
+          id: 'foo',
+          title: 'Foo',
+          searchable: true,
+          navLinkStatus: AppNavLinkStatus.visible,
+          path: '/foo',
+        },
+        {
+          id: 'bar',
+          title: 'Bar',
+          searchable: false,
+          navLinkStatus: AppNavLinkStatus.hidden,
+          path: '/bar',
+        },
+      ];
+
+      setup.register(pluginId, createApp({ id: 'app1', deepLinks, updater$ }));
+
+      const { applications$ } = await service.start(startDeps);
+
+      updater$.next((app) => ({ defaultPath: '/foo' }));
+
+      let appInfos = await applications$.pipe(take(1)).toPromise();
+
+      expect(appInfos.get('app1')!.deepLinks).toEqual([
+        {
+          deepLinks: [],
+          id: 'foo',
+          keywords: [],
+          navLinkStatus: 1,
+          path: '/foo',
+          searchable: true,
+          title: 'Foo',
+        },
+        {
+          deepLinks: [],
+          id: 'bar',
+          keywords: [],
+          navLinkStatus: 3,
+          path: '/bar',
+          searchable: false,
+          title: 'Bar',
+        },
+      ]);
+
+      updater$.next((app) => ({
+        deepLinks: [
+          {
+            id: 'bar',
+            title: 'Bar',
+            searchable: false,
+            navLinkStatus: AppNavLinkStatus.hidden,
+            path: '/bar',
+          },
+        ],
+      }));
+
+      appInfos = await applications$.pipe(take(1)).toPromise();
+
+      expect(appInfos.get('app1')!.deepLinks).toEqual([
+        {
+          deepLinks: [],
+          id: 'bar',
+          keywords: [],
+          navLinkStatus: 3,
+          path: '/bar',
+          searchable: false,
+          title: 'Bar',
+        },
+      ]);
     });
   });
 });
@@ -723,6 +802,21 @@ describe('#start()', () => {
           "delta",
         ]
       `);
+    });
+
+    it("when openInNewTab is true it doesn't update currentApp$ after mounting", async () => {
+      service.setup(setupDeps);
+
+      const { currentAppId$, navigateToApp } = await service.start(startDeps);
+      const stop$ = new Subject();
+      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
+
+      await navigateToApp('delta', { openInNewTab: true });
+      stop$.next();
+
+      const appIds = await promise;
+
+      expect(appIds).toBeUndefined();
     });
 
     it('updates httpLoadingCount$ while mounting', async () => {

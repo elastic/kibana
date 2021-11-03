@@ -13,4 +13,9 @@ export function plugin() {
 
 export { DataVisualizerPluginStart } from './plugin';
 
-export type { IndexDataVisualizerViewProps } from './application';
+export type {
+  FileDataVisualizerSpec,
+  IndexDataVisualizerSpec,
+  IndexDataVisualizerViewProps,
+} from './application';
+export type { ResultLink } from './application/common/components/results_links';

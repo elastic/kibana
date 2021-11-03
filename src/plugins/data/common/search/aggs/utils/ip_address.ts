@@ -32,16 +32,4 @@ export class IpAddress {
 
     return this.value.toString();
   }
-
-  valueOf(): number | bigint {
-    const value = this.value
-      .toByteArray()
-      .reduce((result, octet) => result * 256n + BigInt(octet), 0n);
-
-    if (value > Number.MAX_SAFE_INTEGER) {
-      return value;
-    }
-
-    return Number(value);
-  }
 }

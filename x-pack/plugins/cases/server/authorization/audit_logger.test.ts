@@ -143,7 +143,7 @@ describe('audit_logger', () => {
       // for reference: https://github.com/facebook/jest/issues/9409#issuecomment-629272237
 
       // This loops through all operation keys
-      it.each(Array.from(Object.keys(Operations)))(
+      it.each(Object.keys(Operations))(
         `creates the correct audit event for operation: "%s" without an error or entity`,
         (operationKey) => {
           // forcing the cast here because using a string throws a type error
@@ -156,7 +156,7 @@ describe('audit_logger', () => {
       );
 
       // This loops through all operation keys
-      it.each(Array.from(Object.keys(Operations)))(
+      it.each(Object.keys(Operations))(
         `creates the correct audit event for operation: "%s" with an error but no entity`,
         (operationKey) => {
           // forcing the cast here because using a string throws a type error
@@ -170,7 +170,7 @@ describe('audit_logger', () => {
       );
 
       // This loops through all operation keys
-      it.each(Array.from(Object.keys(Operations)))(
+      it.each(Object.keys(Operations))(
         `creates the correct audit event for operation: "%s" with an error and entity`,
         (operationKey) => {
           // forcing the cast here because using a string throws a type error
@@ -188,7 +188,7 @@ describe('audit_logger', () => {
       );
 
       // This loops through all operation keys
-      it.each(Array.from(Object.keys(Operations)))(
+      it.each(Object.keys(Operations))(
         `creates the correct audit event for operation: "%s" without an error but with an entity`,
         (operationKey) => {
           // forcing the cast here because using a string throws a type error

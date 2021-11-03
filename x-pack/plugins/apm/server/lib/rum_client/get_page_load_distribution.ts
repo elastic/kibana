@@ -8,7 +8,7 @@
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 
 export const MICRO_TO_SEC = 1000000;
 
@@ -63,15 +63,21 @@ export async function getPageLoadDistribution({
   minPercentile,
   maxPercentile,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   minPercentile?: string;
   maxPercentile?: string;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    start,
+    end,
   });
 
   // we will first get 100 steps using 0sec and 50sec duration,
@@ -137,6 +143,8 @@ export async function getPageLoadDistribution({
       maxDuration: maxPercQuery,
       // we pass 50sec as min to get next steps
       minDuration: maxDuration,
+      start,
+      end,
     });
 
     pageDistVals = pageDistVals.concat(additionalStepsPageVals);
@@ -175,10 +183,14 @@ const getPercentilesDistribution = async ({
   setup,
   minDuration,
   maxDuration,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   minDuration: number;
   maxDuration: number;
+  start: number;
+  end: number;
 }) => {
   const stepValues = getPLDChartSteps({
     minDuration: minDuration + 0.5 * MICRO_TO_SEC,
@@ -188,6 +200,8 @@ const getPercentilesDistribution = async ({
 
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {

@@ -60,10 +60,8 @@ export const ComponentTemplatesSelector = ({
   emptyPrompt: { text, showCreateButton } = {},
 }: Props) => {
   const { data: components, isLoading, error } = useApi().useLoadComponentTemplates();
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [componentsSelected, setComponentsSelected] = useState<ComponentTemplateListItem[]>([]);
   const isInitialized = useRef(false);

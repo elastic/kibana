@@ -10,25 +10,27 @@ import { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
-export const containsCharsField = ({
-  message,
-  chars,
-}: {
-  message: string | ((err: Partial<ValidationError>) => string);
-  chars: string | string[];
-}) => (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
+export const containsCharsField =
+  ({
+    message,
+    chars,
+  }: {
+    message: string | ((err: Partial<ValidationError>) => string);
+    chars: string | string[];
+  }) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
 
-  if (typeof value !== 'string') {
-    return;
-  }
+    if (typeof value !== 'string') {
+      return;
+    }
 
-  const { doesContain, charsFound } = containsChars(chars)(value as string);
-  if (doesContain) {
-    return {
-      code: 'ERR_INVALID_CHARS',
-      charsFound,
-      message: typeof message === 'function' ? message({ charsFound }) : message,
-    };
-  }
-};
+    const { doesContain, charsFound } = containsChars(chars)(value as string);
+    if (doesContain) {
+      return {
+        code: 'ERR_INVALID_CHARS',
+        charsFound,
+        message: typeof message === 'function' ? message({ charsFound }) : message,
+      };
+    }
+  };

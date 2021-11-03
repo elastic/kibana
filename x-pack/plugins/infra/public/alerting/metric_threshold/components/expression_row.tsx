@@ -74,16 +74,8 @@ const StyledHealth = euiStyled(EuiHealth)`
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
-  const {
-    children,
-    setAlertParams,
-    expression,
-    errors,
-    expressionId,
-    remove,
-    fields,
-    canDelete,
-  } = props;
+  const { children, setAlertParams, expression, errors, expressionId, remove, fields, canDelete } =
+    props;
   const {
     aggType = AGGREGATION_TYPES.MAX,
     metric,

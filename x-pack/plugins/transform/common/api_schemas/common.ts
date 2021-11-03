@@ -29,7 +29,7 @@ export const transformStateSchema = schema.oneOf([
 ]);
 
 export const indexPatternTitleSchema = schema.object({
-  /** Title of the index pattern for which to return stats. */
+  /** Title of the data view for which to return stats. */
   indexPatternTitle: schema.string(),
 });
 
@@ -67,6 +67,7 @@ export const runtimeMappingsSchema = schema.maybe(
         schema.literal('date'),
         schema.literal('ip'),
         schema.literal('boolean'),
+        schema.literal('geo_point'),
       ]),
       script: schema.maybe(
         schema.oneOf([

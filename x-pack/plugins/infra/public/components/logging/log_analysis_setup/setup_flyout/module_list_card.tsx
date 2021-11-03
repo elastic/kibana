@@ -39,7 +39,7 @@ export const LogAnalysisModuleListCard: React.FC<{
   const [viewInMlLink, setViewInMlLink] = useState<string>('');
 
   const getMlUrl = async () => {
-    if (!ml.urlGenerator) {
+    if (!ml.locator) {
       toasts.addWarning({
         title: mountReactNode(
           <FormattedMessage
@@ -50,7 +50,7 @@ export const LogAnalysisModuleListCard: React.FC<{
       });
       return;
     }
-    setViewInMlLink(await ml.urlGenerator.createUrl({ page: 'jobs', pageState: { jobId } }));
+    setViewInMlLink(await ml.locator.getUrl({ page: 'jobs', pageState: { jobId } }));
   };
 
   useEffect(() => {

@@ -13,13 +13,10 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getServiceErrorGroupDetailedStatistics({
   kuery,
@@ -32,13 +29,13 @@ export async function getServiceErrorGroupDetailedStatistics({
   start,
   end,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   setup: Setup;
   numBuckets: number;
   transactionType: string;
   groupIds: string[];
-  environment?: string;
+  environment: string;
   start: number;
   end: number;
 }): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
@@ -119,19 +116,21 @@ export async function getServiceErrorGroupPeriods({
   environment,
   comparisonStart,
   comparisonEnd,
+  start,
+  end,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   numBuckets: number;
   transactionType: string;
   groupIds: string[];
-  environment?: string;
+  environment: string;
   comparisonStart?: number;
   comparisonEnd?: number;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
-
   const commonProps = {
     environment,
     kuery,
@@ -162,7 +161,7 @@ export async function getServiceErrorGroupPeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.length ? currentPeriod[0] : undefined;
+  const firstCurrentPeriod = currentPeriod?.[0];
 
   return {
     currentPeriod: keyBy(currentPeriod, 'groupId'),
@@ -170,7 +169,7 @@ export async function getServiceErrorGroupPeriods({
       previousPeriod.map((errorRateGroup) => ({
         ...errorRateGroup,
         timeseries: offsetPreviousPeriodCoordinates({
-          currentPeriodTimeseries: firtCurrentPeriod?.timeseries,
+          currentPeriodTimeseries: firstCurrentPeriod?.timeseries,
           previousPeriodTimeseries: errorRateGroup.timeseries,
         }),
       })),

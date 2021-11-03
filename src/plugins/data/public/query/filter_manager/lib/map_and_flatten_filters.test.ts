@@ -23,11 +23,11 @@ describe('filter manager utilities', () => {
       filters = [
         null,
         [
-          { meta: { index: 'logstash-*' }, exists: { field: '_type' } },
-          { meta: { index: 'logstash-*' }, missing: { field: '_type' } },
+          { meta: { index: 'logstash-*' }, query: { exists: { field: '_type' } } },
+          { meta: { index: 'logstash-*' }, query: { exists: { field: '_type' } } },
         ],
         { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } },
-        { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } },
+        { meta: { index: 'logstash-*' }, query: { range: { bytes: { lt: 2048, gt: 1024 } } } },
         {
           meta: { index: 'logstash-*' },
           query: { match: { _type: { query: 'apache', type: 'phrase' } } },
@@ -47,7 +47,7 @@ describe('filter manager utilities', () => {
       expect(results[0].meta).toHaveProperty('key', '_type');
       expect(results[0].meta).toHaveProperty('value', 'exists');
       expect(results[1].meta).toHaveProperty('key', '_type');
-      expect(results[1].meta).toHaveProperty('value', 'missing');
+      expect(results[1].meta).toHaveProperty('value', 'exists');
       expect(results[2].meta).toHaveProperty('key', 'query');
       expect(results[2].meta).toHaveProperty('value', 'foo:bar');
       expect(results[3].meta).toHaveProperty('key', 'bytes');

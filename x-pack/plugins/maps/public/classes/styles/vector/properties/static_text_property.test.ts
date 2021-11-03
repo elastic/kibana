@@ -44,7 +44,7 @@ const makeProperty = (value: string) => {
 describe('syncTextFieldWithMb', () => {
   test('Should set with value', async () => {
     const dynamicTextProperty = makeProperty('foo');
-    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
+    const mockMbMap = new MockMbMap() as unknown as MbMap;
 
     dynamicTextProperty.syncTextFieldWithMb('foobar', mockMbMap);
 
@@ -60,7 +60,7 @@ describe('syncTextFieldWithMb', () => {
     // Do not remove this logic without verifying that mapbox-gl does not re-issue tile-requests for previously requested tiles
 
     const dynamicTextProperty = makeProperty('');
-    const mockMbMap = (new MockMbMap(undefined) as unknown) as MbMap;
+    const mockMbMap = new MockMbMap(undefined) as unknown as MbMap;
 
     dynamicTextProperty.syncTextFieldWithMb('foobar', mockMbMap);
 

@@ -8,14 +8,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SnapshotNode } from '../../../../../common/http_api';
 import { SavedView } from '../../../../containers/saved_view/saved_view';
 import { AutoSizer } from '../../../../components/auto_sizer';
-import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
 import { NodesOverview } from './nodes_overview';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
-import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
@@ -24,31 +23,30 @@ import { InfraFormatterType } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
-import { IntervalLabel } from './waffle/interval_label';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
-import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { BottomDrawer } from './bottom_drawer';
 import { Legend } from './waffle/legend';
 
+interface Props {
+  shouldLoadDefault: boolean;
+  currentView: SavedView<any> | null;
+  reload: () => Promise<any>;
+  interval: string;
+  nodes: SnapshotNode[];
+  loading: boolean;
+}
+
 export const Layout = React.memo(
-  ({
-    shouldLoadDefault,
-    currentView,
-  }: {
-    shouldLoadDefault: boolean;
-    currentView: SavedView<any> | null;
-  }) => {
+  ({ shouldLoadDefault, currentView, reload, interval, nodes, loading }: Props) => {
     const [showLoading, setShowLoading] = useState(true);
-    const { sourceId, source } = useSourceContext();
+    const { source } = useSourceContext();
     const {
       metric,
       groupBy,
       sort,
       nodeType,
-      accountId,
-      region,
       changeView,
       view,
       autoBounds,
@@ -56,19 +54,7 @@ export const Layout = React.memo(
       legend,
     } = useWaffleOptionsContext();
     const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
-    const { filterQueryAsJson, applyFilterQuery } = useWaffleFiltersContext();
-    const { loading, nodes, reload, interval } = useSnapshot(
-      filterQueryAsJson,
-      [metric],
-      groupBy,
-      nodeType,
-      sourceId,
-      currentTime,
-      accountId,
-      region,
-      false
-    );
-
+    const { applyFilterQuery } = useWaffleFiltersContext();
     const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
     const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
     const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
@@ -92,12 +78,11 @@ export const Layout = React.memo(
       isAutoReloading ? 5000 : null
     );
 
-    const intervalAsString = convertIntervalToString(interval);
     const dataBounds = calculateBoundsFromNodes(nodes);
     const bounds = autoBounds ? dataBounds : boundsOverride;
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
-    const { viewState, onViewChange } = useWaffleViewState();
+    const { onViewChange } = useWaffleViewState();
 
     useEffect(() => {
       if (currentView) {
@@ -153,16 +138,9 @@ export const Layout = React.memo(
                         >
                           <Toolbar nodeType={nodeType} currentTime={currentTime} />
                           <EuiFlexItem grow={false}>
-                            <IntervalLabel intervalAsString={intervalAsString} />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
                             <ViewSwitcher view={view} onChange={changeView} />
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                        <EuiSpacer />
-                        <SavedViewContainer>
-                          <SavedViewsToolbarControls viewState={viewState} />
-                        </SavedViewContainer>
                       </TopActionContainer>
                       <AutoSizer bounds>
                         {({ measureRef, bounds: { height = 0 } }) => (
@@ -220,10 +198,4 @@ const MainContainer = euiStyled.div`
 
 const TopActionContainer = euiStyled.div`
   padding: ${(props) => `12px ${props.theme.eui.paddingSizes.m}`};
-`;
-
-const SavedViewContainer = euiStyled.div`
-  position: relative;
-  z-index: 1;
-  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
 `;

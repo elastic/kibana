@@ -13,6 +13,7 @@ import {
 import { FleetStartContract } from '../../fleet/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract } from '../../features/server';
+import { SecurityPluginStart } from '../../security/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -24,6 +25,7 @@ export interface SetupPlugins {
   actions: ActionsPlugin['setup'];
   data: DataPluginSetup;
   features: PluginSetupContract;
+  security: SecurityPluginStart;
 }
 
 export interface StartPlugins {

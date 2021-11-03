@@ -7,6 +7,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { Observable } from 'rxjs';
 
 import { FieldHook, FieldConfig, FormData } from '../types';
 import { useField } from '../hooks';
@@ -19,6 +20,31 @@ export interface Props<T, FormType = FormData, I = T> {
   component?: FunctionComponent<any>;
   componentProps?: Record<string, any>;
   readDefaultValueOnForm?: boolean;
+  /**
+   * Use this prop to pass down dynamic data **asynchronously** to your validators.
+   * Your validator accesses the dynamic data by resolving the provider() Promise.
+   * The Promise will resolve **when a new value is sent** to the validationData$ Observable.
+   *
+   * ```typescript
+   * validator: ({ customData }) => {
+   *   // Wait until a value is sent to the "validationData$" Observable
+   *   const dynamicData = await customData.provider();
+   * }
+   * ```
+   */
+  validationData$?: Observable<unknown>;
+  /**
+   * Use this prop to pass down dynamic data to your validators. The validation data
+   * is then accessible in your validator inside the `customData.value` property.
+   *
+   * ```typescript
+   * validator: ({ customData: { value: dynamicData } }) => {
+   *   // Validate with the dynamic data
+   *   if (dynamicData) { .. }
+   * }
+   * ```
+   */
+  validationData?: unknown;
   onChange?: (value: I) => void;
   onError?: (errors: string[] | null) => void;
   children?: (field: FieldHook<T, I>) => JSX.Element | null;
@@ -36,6 +62,8 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
     onChange,
     onError,
     children,
+    validationData: customValidationData,
+    validationData$: customValidationData$,
     ...rest
   } = props;
 
@@ -59,12 +87,14 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
   } else {
     if (readDefaultValueOnForm) {
       // Read the field initial value from the "defaultValue" object passed to the form
-      fieldConfig.initialValue =
-        (form.__getFieldDefaultValue(path) as T) ?? fieldConfig.defaultValue;
+      fieldConfig.initialValue = (form.getFieldDefaultValue(path) as T) ?? fieldConfig.defaultValue;
     }
   }
 
-  const field = useField<T, FormType, I>(form, path, fieldConfig, onChange, onError);
+  const field = useField<T, FormType, I>(form, path, fieldConfig, onChange, onError, {
+    customValidationData$,
+    customValidationData,
+  });
 
   // Children prevails over anything else provided.
   if (children) {
@@ -76,7 +106,7 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
       <ComponentToRender
         type={field.type}
         onChange={field.onChange}
-        value={(field.value as unknown) as string}
+        value={field.value as unknown as string}
         {...propsToForward}
       />
     );

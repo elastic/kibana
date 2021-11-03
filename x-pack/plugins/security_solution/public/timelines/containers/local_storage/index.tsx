@@ -9,8 +9,8 @@ import { isEmpty } from 'lodash/fp';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { TimelinesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import { TimelineModel } from '../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineIdLiteral } from '../../../../common/types/timeline';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
 const EMPTY_TIMELINE = {} as {
@@ -85,11 +85,27 @@ export const addTimelineInStorage = (
   id: TimelineIdLiteral,
   timeline: TimelineModel
 ) => {
+  const timelineToStore = cleanStorageTimeline(timeline);
   const timelines = getAllTimelinesInStorage(storage);
   storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
     ...timelines,
-    [id]: timeline,
+    [id]: timelineToStore,
   });
+};
+
+const cleanStorageTimeline = (timeline: TimelineModel) => {
+  // discard unneeded fields to make sure the object serialization works
+  const {
+    documentType,
+    filterManager,
+    isLoading,
+    loadingText,
+    queryFields,
+    selectAll,
+    unit,
+    ...timelineToStore
+  } = timeline;
+  return timelineToStore;
 };
 
 export const useTimelinesStorage = (): TimelinesStorage => {

@@ -23,9 +23,11 @@ export {
   PackagePolicyInputStream,
   NewPackagePolicy,
   UpdatePackagePolicy,
+  DryRunPackagePolicy,
   PackagePolicySOAttributes,
   FullAgentPolicyInput,
   FullAgentPolicy,
+  FullAgentPolicyOutput,
   AgentPolicy,
   AgentPolicySOAttributes,
   NewAgentPolicy,
@@ -63,7 +65,7 @@ export {
   IndexTemplate,
   RegistrySearchResults,
   RegistrySearchResult,
-  TemplateRef,
+  IndexTemplateEntry,
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
@@ -93,3 +95,5 @@ export interface BulkActionResult {
 
 export * from './models';
 export * from './rest_spec';
+export * from './extensions';
+export { FleetRequestHandler, FleetRequestHandlerContext } from './request_context';

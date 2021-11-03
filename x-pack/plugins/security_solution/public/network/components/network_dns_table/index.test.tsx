@@ -25,6 +25,8 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -76,7 +78,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </TestProviders>
       );
 
-      expect(store.getState().network.page.queries!.dns.sort).toEqual({
+      expect(store.getState().network.page.queries?.dns.sort).toEqual({
         direction: 'desc',
         field: 'queryCount',
       });
@@ -85,7 +87,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.dns.sort).toEqual({
+      expect(store.getState().network.page.queries?.dns.sort).toEqual({
         direction: 'asc',
         field: 'dnsName',
       });

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import SemVer from 'semver/classes/semver';
 
 import { NormalizedField, Field as FieldType, ComboBoxOption } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
@@ -43,9 +44,10 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  kibanaVersion: SemVer;
 }
 
-export const NumericType = ({ field }: Props) => {
+export const NumericType = ({ field, kibanaVersion }: Props) => {
   return (
     <>
       <BasicParametersSection>
@@ -102,7 +104,10 @@ export const NumericType = ({ field }: Props) => {
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        {/* The "boost" parameter is deprecated since 8.x */}
+        {kibanaVersion.major < 8 && (
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        )}
       </AdvancedParametersSection>
     </>
   );

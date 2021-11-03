@@ -94,9 +94,7 @@ export const getFilter = async ({
 
   switch (type) {
     case 'threat_match':
-    case 'threshold': {
-      return savedId != null ? savedQueryFilter() : queryFilter();
-    }
+    case 'threshold':
     case 'query': {
       return queryFilter();
     }

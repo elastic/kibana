@@ -20,10 +20,12 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./alerts/get_cases'));
     loadTestFile(require.resolve('./alerts/get_alerts_attached_to_case'));
     loadTestFile(require.resolve('./cases/delete_cases'));
+    loadTestFile(require.resolve('./cases/import_export'));
     loadTestFile(require.resolve('./cases/find_cases'));
     loadTestFile(require.resolve('./cases/get_case'));
     loadTestFile(require.resolve('./cases/patch_cases'));
     loadTestFile(require.resolve('./cases/post_case'));
+    loadTestFile(require.resolve('./cases/resolve_case'));
     loadTestFile(require.resolve('./cases/reporters/get_reporters'));
     loadTestFile(require.resolve('./cases/status/get_status'));
     loadTestFile(require.resolve('./cases/tags/get_tags'));

@@ -15,12 +15,11 @@ import { FeedActivity } from './recent_activity';
 interface OverviewServerData {
   hasUsers: boolean;
   hasOrgSources: boolean;
-  canCreateContentSources: boolean;
   isOldAccount: boolean;
   sourcesCount: number;
   pendingInvitationsCount: number;
   accountsCount: number;
-  personalSourcesCount: number;
+  privateSourcesCount: number;
   activityFeed: FeedActivity[];
 }
 
@@ -52,12 +51,6 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
         setServerData: (_, { hasOrgSources }) => hasOrgSources,
       },
     ],
-    canCreateContentSources: [
-      false,
-      {
-        setServerData: (_, { canCreateContentSources }) => canCreateContentSources,
-      },
-    ],
     isOldAccount: [
       false,
       {
@@ -82,10 +75,10 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
         setServerData: (_, { accountsCount }) => accountsCount,
       },
     ],
-    personalSourcesCount: [
+    privateSourcesCount: [
       0,
       {
-        setServerData: (_, { personalSourcesCount }) => personalSourcesCount,
+        setServerData: (_, { privateSourcesCount }) => privateSourcesCount,
       },
     ],
     activityFeed: [
@@ -104,7 +97,9 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
   listeners: ({ actions }) => ({
     initializeOverview: async () => {
       try {
-        const response = await HttpLogic.values.http.get('/api/workplace_search/overview');
+        const response = await HttpLogic.values.http.get<OverviewServerData>(
+          '/internal/workplace_search/overview'
+        );
         actions.setServerData(response);
       } catch (e) {
         flashAPIErrors(e);

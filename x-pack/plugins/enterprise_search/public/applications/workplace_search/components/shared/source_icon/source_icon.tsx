@@ -21,5 +21,10 @@ interface SourceIconProps {
 }
 
 export const SourceIcon: React.FC<SourceIconProps> = ({ name, serviceType, className, size }) => (
-  <EuiIcon type={images[camelCase(serviceType)]} title={name} className={className} size={size} />
+  <EuiIcon
+    type={images[camelCase(serviceType)]}
+    title={`${name} logo`}
+    className={className}
+    size={size}
+  />
 );

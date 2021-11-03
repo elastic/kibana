@@ -20,6 +20,7 @@ import type {
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
+import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
@@ -89,17 +90,24 @@ function deleteKibanaAssets(
   });
 }
 
-function deleteESAssets(installedObjects: EsAssetReference[], esClient: ElasticsearchClient) {
+function deleteESAssets(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+): Array<Promise<unknown>> {
   return installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
     if (assetType === ElasticsearchAssetType.ingestPipeline) {
       return deletePipeline(esClient, id);
     } else if (assetType === ElasticsearchAssetType.indexTemplate) {
-      return deleteTemplate(esClient, id);
+      return deleteIndexTemplate(esClient, id);
+    } else if (assetType === ElasticsearchAssetType.componentTemplate) {
+      return deleteComponentTemplate(esClient, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
       return deleteTransforms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
       return deleteIlms(esClient, [id]);
+    } else if (assetType === ElasticsearchAssetType.mlModel) {
+      return deleteMlModel(esClient, [id]);
     }
   });
 }
@@ -111,13 +119,34 @@ async function deleteAssets(
 ) {
   const logger = appContextService.getLogger();
 
-  const deletePromises: Array<Promise<unknown>> = [
-    ...deleteESAssets(installedEs, esClient),
-    ...deleteKibanaAssets(installedKibana, savedObjectsClient),
-  ];
+  // must delete index templates first, or component templates which reference them cannot be deleted
+  // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
+  // separate the assets into Index Templates and other assets.
+  type Tuple = [EsAssetReference[], EsAssetReference[]];
+  const [indexTemplatesAndPipelines, otherAssets] = installedEs.reduce<Tuple>(
+    ([indexAssetTypes, otherAssetTypes], asset) => {
+      if (
+        asset.type === ElasticsearchAssetType.indexTemplate ||
+        asset.type === ElasticsearchAssetType.ingestPipeline
+      ) {
+        indexAssetTypes.push(asset);
+      } else {
+        otherAssetTypes.push(asset);
+      }
+
+      return [indexAssetTypes, otherAssetTypes];
+    },
+    [[], []]
+  );
 
   try {
-    await Promise.all(deletePromises);
+    // must delete index templates and pipelines first
+    await Promise.all(deleteESAssets(indexTemplatesAndPipelines, esClient));
+    // then the other asset types
+    await Promise.all([
+      ...deleteESAssets(otherAssets, esClient),
+      ...deleteKibanaAssets(installedKibana, savedObjectsClient),
+    ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!savedObjectsClient.errors.isNotFoundError(err)) {
@@ -126,13 +155,24 @@ async function deleteAssets(
   }
 }
 
-async function deleteTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
+async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*') {
     try {
       await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
     } catch {
-      throw new Error(`error deleting template ${name}`);
+      throw new Error(`error deleting index template ${name}`);
+    }
+  }
+}
+
+async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
+  // '*' shouldn't ever appear here, but it still would delete all templates
+  if (name && name !== '*') {
+    try {
+      await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
+    } catch (error) {
+      throw new Error(`error deleting component template ${name}`);
     }
   }
 }

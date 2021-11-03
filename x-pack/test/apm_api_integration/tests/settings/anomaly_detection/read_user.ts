@@ -10,15 +10,15 @@ import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
-  const apmReadUser = getService('supertestAsApmReadUser');
+  const apmReadUser = getService('legacySupertestAsApmReadUser');
 
   function getJobs() {
-    return apmReadUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
+    return apmReadUser.get(`/internal/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
   }
 
   function createJobs(environments: string[]) {
     return apmReadUser
-      .post(`/api/apm/settings/anomaly-detection/jobs`)
+      .post(`/internal/apm/settings/anomaly-detection/jobs`)
       .send({ environments })
       .set('kbn-xsrf', 'foo');
   }

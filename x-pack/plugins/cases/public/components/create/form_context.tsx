@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { schema, FormProps } from './schema';
 import { Form, useForm } from '../../common/shared_imports';
-import {
-  getConnectorById,
-  getNoneConnector,
-  normalizeActionConnector,
-} from '../configure_cases/utils';
+import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
-import { CaseType, ConnectorTypes } from '../../../common';
+import { CaseType } from '../../../common';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
 import { useOwnerContext } from '../owner_context/use_owner_context';
+import { getConnectorById } from '../utils';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -38,6 +34,7 @@ interface Props {
   children?: JSX.Element | JSX.Element[];
   hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
+  syncAlertsDefaultValue?: boolean;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -46,34 +43,22 @@ export const FormContext: React.FC<Props> = ({
   children,
   hideConnectorServiceNowSir,
   onSuccess,
+  syncAlertsDefaultValue = true,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
   const owner = useOwnerContext();
-  const { connector: configurationConnector } = useCaseConfigure();
   const { postCase } = usePostCase();
   const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();
 
-  const connectorId = useMemo(() => {
-    if (
-      hideConnectorServiceNowSir &&
-      configurationConnector.type === ConnectorTypes.serviceNowSIR
-    ) {
-      return 'none';
-    }
-    return connectors.some((connector) => connector.id === configurationConnector.id)
-      ? configurationConnector.id
-      : 'none';
-  }, [
-    configurationConnector.id,
-    configurationConnector.type,
-    connectors,
-    hideConnectorServiceNowSir,
-  ]);
-
   const submitCase = useCallback(
     async (
-      { connectorId: dataConnectorId, fields, syncAlerts = true, ...dataWithoutConnectorId },
+      {
+        connectorId: dataConnectorId,
+        fields,
+        syncAlerts = syncAlertsDefaultValue,
+        ...dataWithoutConnectorId
+      },
       isValid
     ) => {
       if (isValid) {
@@ -116,6 +101,7 @@ export const FormContext: React.FC<Props> = ({
       onSuccess,
       postComment,
       pushCaseToExternalService,
+      syncAlertsDefaultValue,
     ]
   );
 
@@ -125,9 +111,6 @@ export const FormContext: React.FC<Props> = ({
     schema,
     onSubmit: submitCase,
   });
-  const { setFieldValue } = form;
-  // Set the selected connector to the configuration connector
-  useEffect(() => setFieldValue('connectorId', connectorId), [connectorId, setFieldValue]);
 
   const childrenWithExtraProp = useMemo(
     () =>
@@ -138,7 +121,20 @@ export const FormContext: React.FC<Props> = ({
         : null,
     [children, connectors, isLoadingConnectors]
   );
-  return <Form form={form}>{childrenWithExtraProp}</Form>;
+  return (
+    <Form
+      onKeyDown={(e: KeyboardEvent) => {
+        // It avoids the focus scaping from the flyout when enter is pressed.
+        // https://github.com/elastic/kibana/issues/111120
+        if (e.key === 'Enter') {
+          e.stopPropagation();
+        }
+      }}
+      form={form}
+    >
+      {childrenWithExtraProp}
+    </Form>
+  );
 };
 
 FormContext.displayName = 'FormContext';

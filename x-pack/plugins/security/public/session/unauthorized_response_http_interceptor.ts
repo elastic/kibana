@@ -12,6 +12,7 @@ import type {
   IHttpInterceptController,
 } from 'src/core/public';
 
+import { LogoutReason } from '../../common/types';
 import type { SessionExpired } from './session_expired';
 
 export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
@@ -39,7 +40,7 @@ export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
     }
 
     if (response.status === 401) {
-      this.sessionExpired.logout();
+      this.sessionExpired.logout(LogoutReason.AUTHENTICATION_ERROR);
       controller.halt();
     }
   }

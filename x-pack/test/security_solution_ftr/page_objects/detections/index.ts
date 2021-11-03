@@ -12,9 +12,15 @@ export class DetectionsPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly headerPageObjects = this.ctx.getPageObject('header');
 
   async navigateHome(): Promise<void> {
     await this.navigateToDetectionsPage();
+  }
+
+  async navigateToAlerts(): Promise<void> {
+    await this.navigateToDetectionsPage('alerts');
+    await this.headerPageObjects.waitUntilLoadingHasFinished();
   }
 
   async navigateToRules(): Promise<void> {
@@ -137,6 +143,39 @@ export class DetectionsPageObject extends FtrService {
 
   async selectThresholdRule(): Promise<void> {
     await this.common.clickAndValidate('thresholdRuleType', 'input');
+  }
+
+  async ensureOnAlertsPage(): Promise<void> {
+    await this.testSubjects.existOrFail('detectionsAlertsPage');
+  }
+
+  async openFirstAlertDetailsForHostName(hostName: string): Promise<void> {
+    await this.ensureOnAlertsPage();
+
+    let foundAndHandled = false;
+
+    // Get all event rows
+    const allEvents = await this.testSubjects.findAll('event');
+
+    for (const eventRow of allEvents) {
+      const hostNameButton = await this.testSubjects.findDescendant(
+        'host-details-button',
+        eventRow
+      );
+      const eventRowHostName = (await hostNameButton.getVisibleText()).trim();
+
+      if (eventRowHostName === hostName) {
+        const expandAlertButton = await this.testSubjects.findDescendant('expand-event', eventRow);
+        await expandAlertButton.click();
+        await this.testSubjects.existOrFail('eventDetails');
+        foundAndHandled = true;
+        break;
+      }
+    }
+
+    if (!foundAndHandled) {
+      throw new Error(`no alerts found for host: ${hostName}`);
+    }
   }
 
   private async navigateToDetectionsPage(path: string = ''): Promise<void> {

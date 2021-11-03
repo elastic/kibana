@@ -6,14 +6,12 @@
  */
 
 import { SavedObjectsType } from '../../../../../../../src/core/server';
+import { notesMigrations } from './migrations/notes';
 
 export const noteSavedObjectType = 'siem-ui-timeline-note';
 
 export const noteSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
-    timelineId: {
-      type: 'keyword',
-    },
     eventId: {
       type: 'keyword',
     },
@@ -38,6 +36,8 @@ export const noteSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const noteType: SavedObjectsType = {
   name: noteSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: noteSavedObjectMappings,
+  migrations: notesMigrations,
 };

@@ -23,8 +23,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
-  '**/Gruntfile.js',
-  'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
@@ -40,6 +38,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
+  'packages/kbn-test/jest_integration/jest-preset.js',
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
@@ -59,7 +58,6 @@ export const IGNORE_FILE_GLOBS = [
   // TODO fix file names in APM to remove these
   'x-pack/plugins/apm/public/**/*',
   'x-pack/plugins/apm/scripts/**/*',
-  'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
@@ -68,7 +66,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/BUILD.bazel',
 
   // Buildkite
-  '.buildkite/hooks/*',
+  '.buildkite/**/*',
 ];
 
 /**

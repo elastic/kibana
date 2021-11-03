@@ -24,12 +24,12 @@ export function rabbitmqLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'rabbitmqLogs',
     name: i18n.translate('home.tutorials.rabbitmqLogs.nameTitle', {
-      defaultMessage: 'RabbitMQ logs',
+      defaultMessage: 'RabbitMQ Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.rabbitmqLogs.shortDescription', {
-      defaultMessage: 'Collect RabbitMQ logs.',
+      defaultMessage: 'Collect and parse logs from RabbitMQ servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.rabbitmqLogs.longDescription', {
       defaultMessage:
@@ -56,5 +56,6 @@ export function rabbitmqLogsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['message_queue'],
   };
 }

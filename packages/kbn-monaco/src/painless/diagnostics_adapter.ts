@@ -35,6 +35,11 @@ export class DiagnosticsAdapter {
             return;
           }
 
+          // Reset the model markers if an empty string is provided on change
+          if (model.getValue().trim() === '') {
+            return monaco.editor.setModelMarkers(model, ID, []);
+          }
+
           // Every time a new change is made, wait 500ms before validating
           clearTimeout(handle);
           handle = setTimeout(() => this.validate(model.uri), 500);
@@ -42,8 +47,11 @@ export class DiagnosticsAdapter {
 
         model.onDidChangeLanguage(({ newLanguage }) => {
           // Reset the model markers if the language ID has changed and is no longer "painless"
+          // Otherwise, re-validate
           if (newLanguage !== ID) {
             return monaco.editor.setModelMarkers(model, ID, []);
+          } else {
+            this.validate(model.uri);
           }
         });
 

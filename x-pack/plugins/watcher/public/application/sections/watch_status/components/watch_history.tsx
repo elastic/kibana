@@ -84,14 +84,14 @@ export const WatchHistory = () => {
     setIsActivated(isActive);
   }
 
-  const { error: historyError, data: history, isLoading } = useLoadWatchHistory(
-    loadedWatch.id,
-    watchHistoryTimeSpan
-  );
+  const {
+    error: historyError,
+    data: history,
+    isLoading,
+  } = useLoadWatchHistory(loadedWatch.id, watchHistoryTimeSpan);
 
-  const { error: watchHistoryDetailsError, data: watchHistoryDetails } = useLoadWatchHistoryDetail(
-    detailWatchId
-  );
+  const { error: watchHistoryDetailsError, data: watchHistoryDetails } =
+    useLoadWatchHistoryDetail(detailWatchId);
 
   const executionDetail = watchHistoryDetails
     ? JSON.stringify(watchHistoryDetails.details, null, 2)
@@ -108,7 +108,7 @@ export const WatchHistory = () => {
               defaultMessage="Error loading execution history"
             />
           }
-          error={(historyError as unknown) as Error}
+          error={historyError as unknown as Error}
         />
       </Fragment>
     );
@@ -187,7 +187,7 @@ export const WatchHistory = () => {
                   defaultMessage="Error loading execution details"
                 />
               }
-              error={(watchHistoryDetailsError as unknown) as Error}
+              error={watchHistoryDetailsError as unknown as Error}
               data-test-subj="errorMessage"
             />
           </EuiFlyoutBody>

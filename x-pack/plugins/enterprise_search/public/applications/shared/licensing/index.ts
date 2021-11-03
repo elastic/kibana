@@ -6,3 +6,4 @@
  */
 
 export { LicensingLogic, mountLicensingLogic } from './licensing_logic';
+export { ManageLicenseButton } from './manage_license_button';

@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ITCPSimpleFields, ConfigKeys, ScheduleUnit, DataStream } from '../types';
+import { ITCPSimpleFields, ConfigKeys, DataStream } from '../types';
+import { defaultValues as commonDefaultValues } from '../common/default_values';
 
 interface ITCPSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<ITCPSimpleFields>>;
@@ -19,17 +20,13 @@ interface ITCPSimpleFieldsContextProvider {
   defaultValues?: ITCPSimpleFields;
 }
 
-export const initialValues = {
-  [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: '0',
-  [ConfigKeys.MONITOR_TYPE]: DataStream.TCP,
-  [ConfigKeys.SCHEDULE]: {
-    number: '3',
-    unit: ScheduleUnit.MINUTES,
+export const initialValues: ITCPSimpleFields = {
+  ...commonDefaultValues,
+  [ConfigKeys.METADATA]: {
+    is_tls_enabled: false,
   },
-  [ConfigKeys.APM_SERVICE_NAME]: '',
-  [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: '16',
+  [ConfigKeys.HOSTS]: '',
+  [ConfigKeys.MONITOR_TYPE]: DataStream.TCP,
 };
 
 const defaultContext: ITCPSimpleFieldsContext = {

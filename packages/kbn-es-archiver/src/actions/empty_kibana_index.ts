@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 
@@ -17,7 +17,7 @@ export async function emptyKibanaIndexAction({
   log,
   kbnClient,
 }: {
-  client: KibanaClient;
+  client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {

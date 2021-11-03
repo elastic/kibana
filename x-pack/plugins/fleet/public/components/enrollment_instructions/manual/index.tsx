@@ -7,12 +7,12 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiSelect } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiButtonGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import type { EnrollmentAPIKey } from '../../../types';
-import { PLATFORM_OPTIONS, usePlatform } from '../../../hooks';
+import { PLATFORM_OPTIONS, usePlatform, useStartServices } from '../../../hooks';
 import type { PLATFORM_TYPE } from '../../../hooks';
 
 interface Props {
@@ -34,6 +34,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   fleetServerHosts,
 }) => {
   const { platform, setPlatform } = usePlatform();
+  const { docLinks } = useStartServices();
 
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
@@ -50,19 +51,11 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
         />
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiSelect
-        prepend={
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.enrollmentInstructions.platformSelectLabel"
-              defaultMessage="Platform"
-            />
-          </EuiText>
-        }
+      <EuiButtonGroup
         options={PLATFORM_OPTIONS}
-        value={platform}
-        onChange={(e) => setPlatform(e.target.value as PLATFORM_TYPE)}
-        aria-label={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
+        idSelected={platform}
+        onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
+        legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
           defaultMessage: 'Platform',
         })}
       />
@@ -85,11 +78,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
             defaultMessage="See the {link} for RPM / DEB deploy instructions."
             values={{
               link: (
-                <EuiLink
-                  target="_blank"
-                  external
-                  href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation-configuration.html"
-                >
+                <EuiLink target="_blank" external href={docLinks.links.fleet.installElasticAgent}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
                     defaultMessage="Elastic Agent docs"
@@ -108,11 +97,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
           defaultMessage="If you are having trouble connecting, see our {link}."
           values={{
             link: (
-              <EuiLink
-                target="_blank"
-                external
-                href="https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html"
-              >
+              <EuiLink target="_blank" external href={docLinks.links.fleet.troubleshooting}>
                 <FormattedMessage
                   id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
                   defaultMessage="troubleshooting guide"

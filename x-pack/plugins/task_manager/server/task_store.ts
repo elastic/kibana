@@ -11,7 +11,7 @@
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   SavedObject,
@@ -211,19 +211,18 @@ export class TaskStore {
 
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
     try {
-      ({
-        saved_objects: updatedSavedObjects,
-      } = await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-        docs.map((doc) => ({
-          type: 'task',
-          id: doc.id,
-          options: { version: doc.version },
-          attributes: attributesByDocId.get(doc.id)!,
-        })),
-        {
-          refresh: false,
-        }
-      ));
+      ({ saved_objects: updatedSavedObjects } =
+        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+          docs.map((doc) => ({
+            type: 'task',
+            id: doc.id,
+            options: { version: doc.version },
+            attributes: attributesByDocId.get(doc.id)!,
+          })),
+          {
+            refresh: false,
+          }
+        ));
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -319,9 +318,9 @@ export class TaskStore {
 
       return {
         docs: tasks
-          // @ts-expect-error @elastic/elasticsearch `Hid._id` expected to be `string`
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           .filter((doc) => this.serializer.isRawSavedObject(doc))
-          // @ts-expect-error @elastic/elasticsearch `Hid._id` expected to be `string`
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map(savedObjectToConcreteTaskInstance),
@@ -379,10 +378,8 @@ export class TaskStore {
       );
 
       return {
-        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.total as optional
-        total,
-        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.total as optional
-        updated,
+        total: total || 0,
+        updated: updated || 0,
         version_conflicts: conflictsCorrectedForContinuation,
       };
     } catch (e) {

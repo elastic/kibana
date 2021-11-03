@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageContentBody, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 
 import { ComponentTemplateDeserialized } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
@@ -59,27 +59,28 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   }, [breadcrumbs]);
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.idxMgmt.createComponentTemplate.pageTitle"
               defaultMessage="Create component template"
             />
-          </h1>
-        </EuiTitle>
+          </span>
+        }
+        bottomBorder
+      />
 
-        <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
 
-        <ComponentTemplateForm
-          defaultValue={sourceComponentTemplate}
-          onSave={onSave}
-          isSaving={isSaving}
-          saveError={saveError}
-          clearSaveError={clearSaveError}
-        />
-      </EuiPageContent>
-    </EuiPageBody>
+      <ComponentTemplateForm
+        defaultValue={sourceComponentTemplate}
+        onSave={onSave}
+        isSaving={isSaving}
+        saveError={saveError}
+        clearSaveError={clearSaveError}
+      />
+    </EuiPageContentBody>
   );
 };

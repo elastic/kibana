@@ -5,11 +5,29 @@
  * 2.0.
  */
 
+import { SwimlaneConnectorType } from '../../../common';
+
 export const connector = {
   id: '123',
   name: 'My connector',
   actionTypeId: '.jira',
   config: {},
+  isPreconfigured: false,
+};
+
+export const swimlaneConnector = {
+  id: '123',
+  name: 'My connector',
+  actionTypeId: '.swimlane',
+  config: {
+    connectorType: SwimlaneConnectorType.Cases,
+    mappings: {
+      caseIdConfig: {},
+      caseNameConfig: {},
+      descriptionConfig: {},
+      commentsConfig: {},
+    },
+  },
   isPreconfigured: false,
 };
 

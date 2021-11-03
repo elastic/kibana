@@ -116,7 +116,7 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   // ... which must be valid YAML
   let manifest: ArchivePackage;
   try {
-    manifest = yaml.load(manifestBuffer.toString());
+    manifest = yaml.safeLoad(manifestBuffer.toString());
   } catch (error) {
     throw new PackageInvalidArchiveError(`Could not parse top-level package manifest: ${error}.`);
   }
@@ -194,7 +194,7 @@ export function parseAndVerifyDataStreams(
 
     let manifest;
     try {
-      manifest = yaml.load(manifestBuffer.toString());
+      manifest = yaml.safeLoad(manifestBuffer.toString());
     } catch (error) {
       throw new PackageInvalidArchiveError(
         `Could not parse package manifest for data stream '${dataStreamPath}': ${error}.`
@@ -217,7 +217,6 @@ export function parseAndVerifyDataStreams(
     }
     const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
-    // default ingest pipeline name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L26
     dataStreams.push(
       Object.entries(restOfProps).reduce(
         (validatedDataStream, [key, value]) => {
@@ -233,7 +232,7 @@ export function parseAndVerifyDataStreams(
           type,
           package: pkgName,
           dataset: dataset || `${pkgName}.${dataStreamPath}`,
-          ingest_pipeline: ingestPipeline || 'default',
+          ingest_pipeline: ingestPipeline,
           path: dataStreamPath,
           streams,
         }

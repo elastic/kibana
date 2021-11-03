@@ -14,5 +14,6 @@ export type {
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
   HttpResources,
+  InternalHttpResourcesPreboot,
   InternalHttpResourcesSetup,
 } from './types';

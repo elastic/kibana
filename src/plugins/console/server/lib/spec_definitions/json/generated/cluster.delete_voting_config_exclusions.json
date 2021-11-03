@@ -1,0 +1,14 @@
+{
+  "cluster.delete_voting_config_exclusions": {
+    "url_params": {
+      "wait_for_removal": "__flag__"
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_cluster/voting_config_exclusions"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/voting-config-exclusions.html"
+  }
+}

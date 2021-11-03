@@ -22,7 +22,6 @@ import moment from 'moment';
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const defaultActionsConfig: ActionsConfig = {
-  enabled: false,
   allowedHosts: [],
   enabledActionTypes: [],
   preconfiguredAlertHistoryEsIndex: false,
@@ -37,7 +36,7 @@ const defaultActionsConfig: ActionsConfig = {
     idleInterval: schema.duration().validate('1h'),
     pageSize: 100,
   },
-  tls: {
+  ssl: {
     proxyVerificationMode: 'full',
     verificationMode: 'full',
   },
@@ -47,7 +46,6 @@ describe('ensureUriAllowed', () => {
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [AllowedHosts.Any],
       enabledActionTypes: [],
     };
@@ -77,7 +75,6 @@ describe('ensureUriAllowed', () => {
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: ['github.com'],
       enabledActionTypes: [],
     };
@@ -91,7 +88,6 @@ describe('ensureHostnameAllowed', () => {
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [AllowedHosts.Any],
       enabledActionTypes: [],
     };
@@ -112,7 +108,6 @@ describe('ensureHostnameAllowed', () => {
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: ['github.com'],
       enabledActionTypes: [],
     };
@@ -126,7 +121,6 @@ describe('isUriAllowed', () => {
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [AllowedHosts.Any],
       enabledActionTypes: [],
     };
@@ -152,7 +146,6 @@ describe('isUriAllowed', () => {
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: ['github.com'],
       enabledActionTypes: [],
     };
@@ -166,7 +159,6 @@ describe('isHostnameAllowed', () => {
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [AllowedHosts.Any],
       enabledActionTypes: [],
     };
@@ -181,7 +173,6 @@ describe('isHostnameAllowed', () => {
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: ['github.com'],
       enabledActionTypes: [],
     };
@@ -193,7 +184,6 @@ describe('isActionTypeEnabled', () => {
   test('returns true when "any" actionTypes are allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore', EnabledActionTypes.Any],
     };
@@ -203,7 +193,6 @@ describe('isActionTypeEnabled', () => {
   test('returns false when no actionType is allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [],
       enabledActionTypes: [],
     };
@@ -213,7 +202,6 @@ describe('isActionTypeEnabled', () => {
   test('returns false when the actionType is not in the enabled list', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['foo'],
     };
@@ -223,7 +211,6 @@ describe('isActionTypeEnabled', () => {
   test('returns true when the actionType is in the enabled list', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore', 'foo'],
     };
@@ -235,7 +222,6 @@ describe('ensureActionTypeEnabled', () => {
   test('does not throw when any actionType is allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore', EnabledActionTypes.Any],
     };
@@ -254,7 +240,6 @@ describe('ensureActionTypeEnabled', () => {
   test('throws when actionType is not enabled', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore'],
     };
@@ -268,7 +253,6 @@ describe('ensureActionTypeEnabled', () => {
   test('does not throw when actionType is enabled', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
-      enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore', 'foo'],
     };
@@ -316,38 +300,38 @@ describe('getProxySettings', () => {
       proxyRejectUnauthorizedCertificates: true,
     };
     let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('full');
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('full');
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: false,
-      tls: {},
+      ssl: {},
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('none');
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('none');
   });
 
-  test('returns proper verificationMode value, based on the TLS proxy configuration', () => {
+  test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
-      tls: {
+      ssl: {
         proxyVerificationMode: 'full',
       },
     };
     let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('full');
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('full');
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
-      tls: {
+      ssl: {
         proxyVerificationMode: 'none',
       },
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('none');
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('none');
   });
 
   test('returns proxy headers', () => {
@@ -432,13 +416,13 @@ describe('getProxySettings', () => {
       customHostSettings: [
         {
           url: 'https://elastic.co',
-          tls: {
+          ssl: {
             verificationMode: 'full',
           },
         },
         {
           url: 'smtp://elastic.co:123',
-          tls: {
+          ssl: {
             verificationMode: 'none',
           },
           smtp: {
@@ -465,24 +449,24 @@ describe('getProxySettings', () => {
   });
 });
 
-describe('getTLSSettings', () => {
-  test('returns proper verificationMode value, based on the TLS proxy configuration', () => {
+describe('getSSLSettings', () => {
+  test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
-      tls: {
+      ssl: {
         verificationMode: 'full',
       },
     };
-    let tlsSettings = getActionsConfigurationUtilities(configTrue).getTLSSettings();
-    expect(tlsSettings.verificationMode).toBe('full');
+    let sslSettings = getActionsConfigurationUtilities(configTrue).getSSLSettings();
+    expect(sslSettings.verificationMode).toBe('full');
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
-      tls: {
+      ssl: {
         verificationMode: 'none',
       },
     };
-    tlsSettings = getActionsConfigurationUtilities(configFalse).getTLSSettings();
-    expect(tlsSettings.verificationMode).toBe('none');
+    sslSettings = getActionsConfigurationUtilities(configFalse).getSSLSettings();
+    expect(sslSettings.verificationMode).toBe('none');
   });
 });

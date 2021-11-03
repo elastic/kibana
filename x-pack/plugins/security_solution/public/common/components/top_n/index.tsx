@@ -26,6 +26,7 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -40,11 +41,11 @@ const makeMapStateToProps = () => {
   // The mapped Redux state provided to this component includes the global
   // filters that appear at the top of most views in the app, and all the
   // filters in the active timeline:
-  const mapStateToProps = (state: State) => {
+  const mapStateToProps = (state: State, ownProps: { globalFilters?: Filter[] }) => {
     const activeTimeline: TimelineModel = getTimeline(state, TimelineId.active) ?? timelineDefaults;
     const activeTimelineFilters = activeTimeline.filters ?? EMPTY_FILTERS;
     const activeTimelineInput: inputsModel.InputsRange = getInputsTimeline(state);
-
+    const { globalFilters } = ownProps;
     return {
       activeTimelineEventType: activeTimeline.eventType,
       activeTimelineFilters:
@@ -58,7 +59,7 @@ const makeMapStateToProps = () => {
       dataProviders:
         activeTimeline.activeTab === TimelineTabs.query ? activeTimeline.dataProviders : [],
       globalQuery: getGlobalQuerySelector(state),
-      globalFilters: getGlobalFiltersQuerySelector(state),
+      globalFilters: globalFilters ?? getGlobalFiltersQuerySelector(state),
       kqlMode: activeTimeline.kqlMode,
     };
   };
@@ -80,7 +81,10 @@ export interface OwnProps {
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
+  showLegend?: boolean;
   value?: string[] | string | null;
+  globalFilters?: Filter[];
 }
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = OwnProps & PropsFromRedux;
@@ -99,6 +103,8 @@ const StatefulTopNComponent: React.FC<Props> = ({
   globalQuery = EMPTY_QUERY,
   kqlMode,
   onFilterAdded,
+  paddingSize,
+  showLegend,
   timelineId,
   toggleTopN,
   value,
@@ -153,12 +159,14 @@ const StatefulTopNComponent: React.FC<Props> = ({
       data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={timelineId === TimelineId.active ? undefined : deleteQuery}
-      field={field}
+      field={field as AlertsStackByField}
       filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
       from={timelineId === TimelineId.active ? activeTimelineFrom : from}
       indexPattern={indexPattern}
       options={options}
+      paddingSize={paddingSize}
       query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
+      showLegend={showLegend}
       setAbsoluteRangeDatePickerTarget={timelineId === TimelineId.active ? 'timeline' : 'global'}
       setQuery={setQuery}
       timelineId={timelineId}

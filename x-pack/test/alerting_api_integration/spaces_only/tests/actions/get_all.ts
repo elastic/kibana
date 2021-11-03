@@ -40,13 +40,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connectors`)
         .expect(200);
 
-      // the custom tls connectors have dynamic ports, so remove them before
+      // the custom ssl connectors have dynamic ports, so remove them before
       // comparing to what we expect
-      const nonCustomTlsConnectors = connectors.filter(
-        (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+      const nonCustomSslConnectors = connectors.filter(
+        (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
       );
 
-      expect(nonCustomTlsConnectors).to.eql([
+      expect(nonCustomSslConnectors).to.eql([
         {
           id: 'preconfigured-alert-history-es-index',
           name: 'Alert history Elasticsearch index',
@@ -117,13 +117,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         .get(`${getUrlPrefix(Spaces.other.id)}/api/actions/connectors`)
         .expect(200);
 
-      // the custom tls connectors have dynamic ports, so remove them before
+      // the custom ssl connectors have dynamic ports, so remove them before
       // comparing to what we expect
-      const nonCustomTlsConnectors = connectors.filter(
-        (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+      const nonCustomSslConnectors = connectors.filter(
+        (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
       );
 
-      expect(nonCustomTlsConnectors).to.eql([
+      expect(nonCustomSslConnectors).to.eql([
         {
           id: 'preconfigured-alert-history-es-index',
           name: 'Alert history Elasticsearch index',
@@ -184,13 +184,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
           .expect(200);
 
-        // the custom tls connectors have dynamic ports, so remove them before
+        // the custom ssl connectors have dynamic ports, so remove them before
         // comparing to what we expect
-        const nonCustomTlsConnectors = connectors.filter(
-          (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+        const nonCustomSslConnectors = connectors.filter(
+          (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
         );
 
-        expect(nonCustomTlsConnectors).to.eql([
+        expect(nonCustomSslConnectors).to.eql([
           {
             id: 'preconfigured-alert-history-es-index',
             name: 'Alert history Elasticsearch index',

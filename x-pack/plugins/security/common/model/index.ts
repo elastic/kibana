@@ -33,3 +33,8 @@ export {
   RoleTemplate,
   RoleMapping,
 } from './role_mapping';
+export {
+  PrivilegeDeprecationsRolesByFeatureIdRequest,
+  PrivilegeDeprecationsRolesByFeatureIdResponse,
+  PrivilegeDeprecationsService,
+} from './deprecations';

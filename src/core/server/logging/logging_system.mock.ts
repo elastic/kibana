@@ -42,7 +42,7 @@ const collectLoggingSystemMock = (loggerFactory: LoggerFactory) => {
 };
 
 const clearLoggingSystemMock = (loggerFactory: LoggerFactory) => {
-  const mockedLoggerFactory = (loggerFactory as unknown) as jest.Mocked<ILoggingSystem>;
+  const mockedLoggerFactory = loggerFactory as unknown as jest.Mocked<ILoggingSystem>;
   mockedLoggerFactory.get.mockClear();
   mockedLoggerFactory.asLoggerFactory.mockClear();
   mockedLoggerFactory.upgrade.mockClear();

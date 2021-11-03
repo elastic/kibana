@@ -14,25 +14,17 @@ You can configure the `xpack.banners` settings in your `kibana.yml` file.
 Banners are a https://www.elastic.co/subscriptions[subscription feature].
 ====
 
-[[general-banners-settings-kb]]
-==== General banner settings
+`xpack.banners.placement`::
+Set to `top` to display a banner above the Elastic header. Defaults to `disabled`.
 
-[cols="2*<"]
-|===
+`xpack.banners.textContent`::
+The text to display inside the banner, either plain text or Markdown.
 
-| `xpack.banners.placement`
-| Set to `top` to display a banner above the Elastic header. Defaults to `disabled`.
+`xpack.banners.textColor`::
+The color for the banner text. Defaults to `#8A6A0A`.
 
-| `xpack.banners.textContent`
-| The text to display inside the banner, either plain text or Markdown.
+`xpack.banners.backgroundColor`::
+The color of the banner background. Defaults to `#FFF9E8`.
 
-| `xpack.banners.textColor`
-| The color for the banner text. Defaults to `#8A6A0A`.
-
-| `xpack.banners.backgroundColor`
-| The color of the banner background. Defaults to `#FFF9E8`.
-
-| `xpack.banners.disableSpaceBanners`
-| If true, per-space banner overrides will be disabled. Defaults to `false`.
-
-|===
+`xpack.banners.disableSpaceBanners`::
+If true, per-space banner overrides will be disabled. Defaults to `false`.

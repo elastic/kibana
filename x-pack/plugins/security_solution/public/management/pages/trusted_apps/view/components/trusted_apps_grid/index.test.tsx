@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 
@@ -18,13 +18,14 @@ import {
   createUserChangedUrlAction,
   createGlobalNoMiddlewareStore,
 } from '../../../test_utils';
-
 import { TrustedAppsGrid } from '.';
 import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
+
+jest.mock('../../../../../../common/lib/kibana');
 
 const now = 111111;
 
@@ -85,7 +86,9 @@ describe('TrustedAppsGrid', () => {
         createListLoadedResourceState({ pageSize: 10 }, now)
       )
     );
-    store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
+    store.dispatch(
+      createUserChangedUrlAction('/administration/trusted_apps', '?page_index=2&page_size=50')
+    );
 
     expect(renderList(store).container).toMatchSnapshot();
   });
@@ -127,7 +130,15 @@ describe('TrustedAppsGrid', () => {
     );
     store.dispatch = jest.fn();
 
-    (await renderList(store).findAllByTestId('trustedAppDeleteButton'))[0].click();
+    const renderResult = renderList(store);
+
+    await act(async () => {
+      (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[0].click();
+    });
+
+    await act(async () => {
+      (await renderResult.findByTestId('deleteTrustedAppAction')).click();
+    });
 
     expect(store.dispatch).toBeCalledWith({
       type: 'trustedAppDeletionDialogStarted',

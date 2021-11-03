@@ -24,10 +24,7 @@
         "signature": [
           "LicenseGetLicenseInformation"
         ],
-        "source": {
-          "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

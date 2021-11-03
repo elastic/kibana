@@ -13,7 +13,7 @@ import { RenderingService } from './rendering_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 describe('RenderingService#start', () => {
   let application: ReturnType<typeof applicationServiceMock.createInternalStartContract>;
@@ -28,7 +28,6 @@ describe('RenderingService#start', () => {
 
     chrome = chromeServiceMock.createStartContract();
     chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
-    chrome.getApplicationClasses$.mockReturnValue(of([]));
 
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
@@ -76,26 +75,6 @@ describe('RenderingService#start', () => {
 
     act(() => isVisible$.next(true));
     expect(appWrapper.className).toEqual('kbnAppWrapper');
-  });
-
-  it('adds the application classes to the AppWrapper', () => {
-    const applicationClasses$ = new BehaviorSubject<string[]>([]);
-    const isVisible$ = new BehaviorSubject(true);
-    chrome.getIsVisible$.mockReturnValue(isVisible$);
-    chrome.getApplicationClasses$.mockReturnValue(applicationClasses$);
-    startService();
-
-    const appContainer = targetDomElement.querySelector('div.kbnAppWrapper')!;
-    expect(appContainer.className).toEqual('kbnAppWrapper');
-
-    act(() => applicationClasses$.next(['classA', 'classB']));
-    expect(appContainer.className).toEqual('kbnAppWrapper classA classB');
-
-    act(() => applicationClasses$.next(['classC']));
-    expect(appContainer.className).toEqual('kbnAppWrapper classC');
-
-    act(() => applicationClasses$.next([]));
-    expect(appContainer.className).toEqual('kbnAppWrapper');
   });
 
   it('contains wrapper divs', () => {

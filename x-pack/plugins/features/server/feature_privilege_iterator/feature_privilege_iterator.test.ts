@@ -5,8 +5,23 @@
  * 2.0.
  */
 
+import type { LicenseType } from '../../../licensing/common/types';
+import { LICENSE_TYPE } from '../../../licensing/server';
 import { KibanaFeature } from '../';
+import { SubFeaturePrivilegeConfig } from '../../common';
+import type { FeaturePrivilegeIteratorOptions } from './feature_privilege_iterator';
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
+
+function getFeaturePrivilegeIterator(
+  feature: KibanaFeature,
+  options: Omit<FeaturePrivilegeIteratorOptions, 'licenseHasAtLeast'> & { licenseType: LicenseType }
+) {
+  const { licenseType, ...otherOptions } = options;
+  const licenseHasAtLeast = (licenseTypeToCheck: LicenseType) => {
+    return LICENSE_TYPE[licenseTypeToCheck] <= LICENSE_TYPE[options.licenseType];
+  };
+  return featurePrivilegeIterator(feature, { licenseHasAtLeast, ...otherOptions });
+}
 
 describe('featurePrivilegeIterator', () => {
   it('handles features with no privileges', () => {
@@ -19,7 +34,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
       })
@@ -90,7 +105,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
       })
@@ -219,7 +234,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
         predicate: (privilegeId) => privilegeId === 'all',
@@ -357,7 +372,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: false,
         licenseType: 'basic',
       })
@@ -519,7 +534,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
       })
@@ -682,7 +697,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
       })
@@ -852,7 +867,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
       })
@@ -1020,7 +1035,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
       })
@@ -1088,97 +1103,40 @@ describe('featurePrivilegeIterator', () => {
     ]);
   });
 
-  it('excludes sub feature privileges when the minimum license is not met', () => {
+  describe('excludes sub-feature privileges when the minimum license is not met', () => {
+    function createSubFeaturePrivilegeConfig(licenseType: LicenseType): SubFeaturePrivilegeConfig {
+      return {
+        // This is not a realistic sub-feature privilege config, but we only need the "api" string for our test cases
+        id: `${licenseType}-sub-feature`,
+        name: '',
+        includeIn: 'all',
+        minimumLicense: licenseType,
+        api: [`${licenseType}-api`],
+        savedObject: { all: [], read: [] },
+        ui: [],
+      };
+    }
+
     const feature = new KibanaFeature({
-      id: 'foo',
-      name: 'foo',
+      id: 'feature',
+      name: 'feature-name',
       app: [],
-      category: { id: 'foo', label: 'foo' },
+      category: { id: 'category-id', label: 'category-label' },
       privileges: {
-        all: {
-          api: ['all-api', 'read-api'],
-          app: ['foo'],
-          catalogue: ['foo-catalogue'],
-          management: {
-            section: ['foo-management'],
-          },
-          savedObject: {
-            all: ['all-type'],
-            read: ['read-type'],
-          },
-          alerting: {
-            rule: {
-              all: ['alerting-all-type'],
-            },
-            alert: {
-              read: ['alerting-another-read-type'],
-            },
-          },
-          cases: {
-            all: ['cases-all-type'],
-            read: ['cases-read-type'],
-          },
-          ui: ['ui-action'],
-        },
-        read: {
-          api: ['read-api'],
-          app: ['foo'],
-          catalogue: ['foo-catalogue'],
-          management: {
-            section: ['foo-management'],
-          },
-          savedObject: {
-            all: [],
-            read: ['read-type'],
-          },
-          alerting: {
-            rule: {
-              read: ['alerting-read-type'],
-            },
-            alert: {
-              read: ['alerting-read-type'],
-            },
-          },
-          cases: {
-            read: ['cases-read-type'],
-          },
-          ui: ['ui-action'],
-        },
+        all: { savedObject: { all: ['obj-type'], read: [] }, ui: [] },
+        read: { savedObject: { all: [], read: ['obj-type'] }, ui: [] },
       },
       subFeatures: [
         {
-          name: 'sub feature 1',
+          name: `sub-feature-name`,
           privilegeGroups: [
             {
               groupType: 'independent',
               privileges: [
-                {
-                  id: 'sub-feature-priv-1',
-                  name: 'first sub feature privilege',
-                  includeIn: 'all',
-                  minimumLicense: 'gold',
-                  api: ['sub-feature-api'],
-                  app: ['sub-app'],
-                  catalogue: ['sub-catalogue'],
-                  management: {
-                    section: ['other-sub-management'],
-                    kibana: ['sub-management'],
-                  },
-                  savedObject: {
-                    all: ['all-sub-type'],
-                    read: ['read-sub-type'],
-                  },
-                  alerting: {
-                    alert: {
-                      all: ['alerting-all-sub-type'],
-                    },
-                  },
-                  cases: {
-                    all: ['cases-all-sub-type'],
-                    read: ['cases-read-sub-type'],
-                  },
-                  ui: ['ui-sub-type'],
-                },
+                createSubFeaturePrivilegeConfig('gold'),
+                createSubFeaturePrivilegeConfig('platinum'),
+                createSubFeaturePrivilegeConfig('enterprise'),
+                // Note: we intentionally do not include a sub-feature privilege config for the "trial" license because that should never be used
               ],
             },
           ],
@@ -1186,70 +1144,64 @@ describe('featurePrivilegeIterator', () => {
       ],
     });
 
-    const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
-        augmentWithSubFeaturePrivileges: true,
-        licenseType: 'basic',
-      })
-    );
+    // Each of the test cases below is a minimal check to make sure the correct sub-feature privileges are applied -- nothing more, nothing less
+    // Note: we do not include a test case for the "basic" license, because sub-feature privileges are not enabled at that license level
 
-    expect(actualPrivileges).toEqual([
-      {
-        privilegeId: 'all',
-        privilege: {
-          api: ['all-api', 'read-api'],
-          app: ['foo'],
-          catalogue: ['foo-catalogue'],
-          management: {
-            section: ['foo-management'],
-          },
-          savedObject: {
-            all: ['all-type'],
-            read: ['read-type'],
-          },
-          alerting: {
-            rule: {
-              all: ['alerting-all-type'],
-            },
-            alert: {
-              read: ['alerting-another-read-type'],
-            },
-          },
-          cases: {
-            all: ['cases-all-type'],
-            read: ['cases-read-type'],
-          },
-          ui: ['ui-action'],
-        },
-      },
-      {
-        privilegeId: 'read',
-        privilege: {
-          api: ['read-api'],
-          app: ['foo'],
-          catalogue: ['foo-catalogue'],
-          management: {
-            section: ['foo-management'],
-          },
-          savedObject: {
-            all: [],
-            read: ['read-type'],
-          },
-          alerting: {
-            rule: {
-              read: ['alerting-read-type'],
-            },
-            alert: {
-              read: ['alerting-read-type'],
-            },
-          },
-          cases: {
-            read: ['cases-read-type'],
-          },
-          ui: ['ui-action'],
-        },
-      },
-    ]);
+    it('with a gold license', () => {
+      const actualPrivileges = Array.from(
+        getFeaturePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+          licenseType: 'gold',
+        })
+      );
+      const expectedPrivilege = expect.objectContaining({ api: ['gold-api'] });
+      expect(actualPrivileges).toEqual(
+        expect.arrayContaining([{ privilegeId: 'all', privilege: expectedPrivilege }])
+      );
+    });
+
+    it('with a platinum license', () => {
+      const actualPrivileges = Array.from(
+        getFeaturePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+          licenseType: 'platinum',
+        })
+      );
+      const expectedPrivilege = expect.objectContaining({ api: ['gold-api', 'platinum-api'] });
+      expect(actualPrivileges).toEqual(
+        expect.arrayContaining([{ privilegeId: 'all', privilege: expectedPrivilege }])
+      );
+    });
+
+    it('with an enterprise license', () => {
+      const actualPrivileges = Array.from(
+        getFeaturePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+          licenseType: 'enterprise',
+        })
+      );
+      const expectedPrivilege = expect.objectContaining({
+        api: ['gold-api', 'platinum-api', 'enterprise-api'],
+      });
+      expect(actualPrivileges).toEqual(
+        expect.arrayContaining([{ privilegeId: 'all', privilege: expectedPrivilege }])
+      );
+    });
+
+    it('with a trial license', () => {
+      const actualPrivileges = Array.from(
+        getFeaturePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+          licenseType: 'trial',
+        })
+      );
+      const expectedPrivilege = expect.objectContaining({
+        api: ['gold-api', 'platinum-api', 'enterprise-api'],
+      });
+      expect(actualPrivileges).toEqual(
+        expect.arrayContaining([{ privilegeId: 'all', privilege: expectedPrivilege }])
+      );
+    });
   });
 
   it(`can augment primary feature privileges even if they don't specify their own`, () => {
@@ -1316,7 +1268,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
       })
@@ -1470,7 +1422,7 @@ describe('featurePrivilegeIterator', () => {
     });
 
     const actualPrivileges = Array.from(
-      featurePrivilegeIterator(feature, {
+      getFeaturePrivilegeIterator(feature, {
         augmentWithSubFeaturePrivileges: true,
         licenseType: 'basic',
       })

@@ -12,10 +12,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEmptyValue } from '../../../common/empty_value';

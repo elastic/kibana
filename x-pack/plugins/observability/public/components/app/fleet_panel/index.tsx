@@ -16,9 +16,6 @@ export function FleetPanel() {
   return (
     <EuiCard
       paddingSize="l"
-      betaBadgeLabel={i18n.translate('xpack.observability.fleet.beta', {
-        defaultMessage: 'Beta',
-      })}
       description={
         <EuiTextColor color="subdued">
           {i18n.translate('xpack.observability.fleet.text', {
@@ -30,7 +27,7 @@ export function FleetPanel() {
       footer={
         <EuiLink href={core.http.basePath.prepend('/app/fleet#/')}>
           {i18n.translate('xpack.observability.fleet.button', {
-            defaultMessage: 'Try Fleet Beta',
+            defaultMessage: 'Try Fleet',
           })}
         </EuiLink>
       }

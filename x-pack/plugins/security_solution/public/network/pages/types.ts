@@ -16,7 +16,6 @@ export type SetAbsoluteRangeDatePicker = ActionCreator<{
 }>;
 
 export type NetworkComponentProps = Partial<RouteComponentProps<{}>> & {
-  networkPagePath: string;
   hasMlUserPermissions: boolean;
   capabilitiesFetched: boolean;
 };

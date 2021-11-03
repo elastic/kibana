@@ -6,20 +6,21 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, render } from '@testing-library/react';
 
 import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
+import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
-import { TestProviders } from '../../mock';
+import { TestProviders, TestProvidersComponent } from '../../mock';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
+jest.mock('../../lib/kibana');
+
+jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
   return {
-    useRuleAsync: jest.fn(),
+    useRuleWithFallback: jest.fn(),
   };
 });
 
@@ -31,49 +32,105 @@ const props = {
 };
 
 describe('AlertSummaryView', () => {
-  const mount = useMountAppended();
-
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRuleAsync as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
       rule: {
         note: 'investigation guide',
       },
     });
   });
   test('render correct items', () => {
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders>
         <AlertSummaryView {...props} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="summary-view"]').exists()).toEqual(true);
-  });
-
-  test('render investigation guide', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AlertSummaryView {...props} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
-    });
+    expect(getByTestId('summary-view')).toBeInTheDocument();
   });
 
   test("render no investigation guide if it doesn't exist", async () => {
-    (useRuleAsync as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
       rule: {
         note: null,
       },
     });
-    const wrapper = mount(
+    const { queryByTestId } = render(
       <TestProviders>
         <AlertSummaryView {...props} />
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(false);
+      expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
     });
+  });
+  test.skip('Memory event code renders additional summary rows', () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.code') {
+          return {
+            category: 'event',
+            field: 'event.code',
+            values: ['shellcode_thread'],
+            originalValue: ['shellcode_thread'],
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+    const { container } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+  });
+  test.skip('Behavior event code renders additional summary rows', () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.code') {
+          return {
+            category: 'event',
+            field: 'event.code',
+            values: ['behavior'],
+            originalValue: ['behavior'],
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+    const { container } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+  });
+
+  test("doesn't render empty fields", () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.name') {
+          return {
+            category: 'kibana',
+            field: 'kibana.alert.rule.name',
+            values: undefined,
+            originalValue: undefined,
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...renderProps} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('event-field-kibana.alert.rule.name')).not.toBeInTheDocument();
   });
 });

@@ -14,6 +14,7 @@ export {
   SectionError,
   PageError,
   useAuthorizationContext,
+  Authorization,
 } from './components';
 
 export { Privileges, MissingPrivileges, Error } from './types';

@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSearchRoutes } from './search';
 
 describe('search routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/search', () => {
+  describe('GET /internal/app_search/engines/{engineName}/search', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/schema',
+        path: '/internal/app_search/engines/{engineName}/schema',
       });
 
       registerSearchRoutes({
@@ -28,7 +28,7 @@ describe('search routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v1/engines/:engineName/search.json',
+        path: '/as/engines/:engineName/dashboard_search',
       });
     });
   });

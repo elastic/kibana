@@ -52,9 +52,8 @@ export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments
       // This try/catch may not be necessary once
       // https://github.com/elastic/kibana/issues/78344 is addressed
       try {
-        ({ isDeprecated, createUrl } = services.urlGenerators.getUrlGenerator(
-          DISCOVER_URL_GENERATOR_ID
-        ));
+        ({ isDeprecated, createUrl } =
+          services.urlGenerators.getUrlGenerator(DISCOVER_URL_GENERATOR_ID));
       } catch (e) {
         // Discover plugin is not enabled
         setDiscoverLink(undefined);

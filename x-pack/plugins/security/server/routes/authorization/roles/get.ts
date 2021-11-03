@@ -22,17 +22,16 @@ export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const {
-          body: elasticsearchRoles,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole({
-          name: request.params.name,
-        });
+        const { body: elasticsearchRoles } =
+          await context.core.elasticsearch.client.asCurrentUser.security.getRole({
+            name: request.params.name,
+          });
 
         const elasticsearchRole = elasticsearchRoles[request.params.name];
         if (elasticsearchRole) {
           return response.ok({
             body: transformElasticsearchRoleToRole(
-              // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications` and `transient_metadata`.
+              // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
               elasticsearchRole,
               request.params.name,
               authz.applicationName

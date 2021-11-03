@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
@@ -20,17 +20,22 @@ import {
   withNotifyOnErrors,
 } from '../../../../../../kibana_utils/public';
 import {
+  connectToQueryState,
   DataPublicPluginStart,
   esFilters,
   Filter,
+  FilterManager,
+  IndexPattern,
   Query,
   SearchSessionInfoProvider,
+  syncQueryStateWithUrl,
 } from '../../../../../../data/public';
 import { migrateLegacyQuery } from '../../../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
-import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
-import { handleSourceColumnState } from '../../../angular/helpers';
+import { handleSourceColumnState } from '../../../helpers/state_helpers';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../locator';
+import { VIEW_MODE } from '../components/view_mode_toggle';
 
 export interface AppState {
   /**
@@ -69,6 +74,14 @@ export interface AppState {
    * id of the used saved query
    */
   savedQuery?: string;
+  /**
+   * Table view: Documents vs Field Statistics
+   */
+  viewMode?: VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Field Statistics mode
+   */
+  hideAggregatedPreview?: boolean;
 }
 
 interface GetStateParams {
@@ -107,6 +120,14 @@ export interface GetStateReturn {
    * App state, the _a part of the URL
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
+  /**
+   * Initialize state with filters and query,  start state syncing
+   */
+  initializeAndSync: (
+    indexPattern: IndexPattern,
+    filterManager: FilterManager,
+    data: DataPublicPluginStart
+  ) => () => void;
   /**
    * Start sync between state and URL
    */
@@ -204,26 +225,75 @@ export function getState({
     stateStorage,
   });
 
+  const replaceUrlAppState = async (newPartial: AppState = {}) => {
+    const state = { ...appStateContainer.getState(), ...newPartial };
+    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
     startSync: start,
     stopSync: stop,
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
-    replaceUrlAppState: async (newPartial: AppState = {}) => {
-      const state = { ...appStateContainer.getState(), ...newPartial };
-      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
-    },
+    replaceUrlAppState,
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
     resetAppState: () => {
-      const defaultState = getStateDefaults ? getStateDefaults() : {};
+      const defaultState = handleSourceColumnState(
+        getStateDefaults ? getStateDefaults() : {},
+        uiSettings
+      );
       setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
+    initializeAndSync: (
+      indexPattern: IndexPattern,
+      filterManager: FilterManager,
+      data: DataPublicPluginStart
+    ) => {
+      if (appStateContainer.getState().index !== indexPattern.id) {
+        // used index pattern is different than the given by url/state which is invalid
+        setState(appStateContainerModified, { index: indexPattern.id });
+      }
+      // sync initial app filters from state to filterManager
+      const filters = appStateContainer.getState().filters;
+      if (filters) {
+        filterManager.setAppFilters(cloneDeep(filters));
+      }
+      const query = appStateContainer.getState().query;
+      if (query) {
+        data.query.queryString.setQuery(query);
+      }
+
+      const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
+        data.query,
+        appStateContainer,
+        {
+          filters: esFilters.FilterStateStore.APP_STATE,
+          query: true,
+        }
+      );
+
+      // syncs `_g` portion of url with query services
+      const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(
+        data.query,
+        stateStorage
+      );
+
+      replaceUrlAppState({}).then(() => {
+        start();
+      });
+
+      return () => {
+        stopSyncingQueryAppStateWithStateContainer();
+        stopSyncingGlobalStateWithUrl();
+        stop();
+      };
+    },
   };
 }
 
@@ -291,9 +361,9 @@ export function createSearchSessionRestorationDataProvider(deps: {
         })
       );
     },
-    getUrlGeneratorData: async () => {
+    getLocatorData: async () => {
       return {
-        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
+        id: DISCOVER_APP_LOCATOR,
         initialState: createUrlGeneratorState({
           ...deps,
           getSavedSearchId,
@@ -319,7 +389,7 @@ function createUrlGeneratorState({
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
   shouldRestoreSearchSession: boolean;
-}): DiscoverUrlGeneratorState {
+}): DiscoverAppLocatorParams {
   const appState = appStateContainer.get();
   return {
     filters: data.query.filterManager.getFilters(),
@@ -334,6 +404,12 @@ function createUrlGeneratorState({
     sort: appState.sort,
     savedQuery: appState.savedQuery,
     interval: appState.interval,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
     useHash: false,
   };
 }

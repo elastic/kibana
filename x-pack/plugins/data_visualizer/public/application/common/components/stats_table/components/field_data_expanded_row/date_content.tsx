@@ -6,16 +6,18 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, HorizontalAlignment } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
+import { RIGHT_ALIGNMENT } from '@elastic/eui';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+import { ExpandedRowPanel } from './expanded_row_panel';
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
 interface SummaryTableItem {
   function: string;
@@ -60,8 +62,10 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   const summaryTableColumns = [
     {
       name: '',
-      render: (summaryItem: { display: ReactNode }) => summaryItem.display,
-      width: '75px',
+      field: 'function',
+      render: (func: string, summaryItem: { display: ReactNode }) => summaryItem.display,
+      width: '70px',
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',
@@ -73,10 +77,10 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerDateContent'}>
       <DocumentStatsTable config={config} />
-      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>
+      <ExpandedRowPanel className={'dvSummaryTable__wrapper dvPanel__wrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
-          className={'dataVisualizerSummaryTable'}
+          className={'dvSummaryTable'}
           data-test-subj={'dataVisualizerDateSummaryTable'}
           compressed
           items={summaryTableItems}
@@ -84,7 +88,7 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
           tableCaption={summaryTableTitle}
           tableLayout="auto"
         />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
     </ExpandedRowContent>
   );
 };

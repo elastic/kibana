@@ -7,7 +7,7 @@
 
 import { EventHit, EventSource } from '../search_strategy';
 import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './field_formatters';
-import { eventDetailsFormattedFields, eventHit } from './mock_event_details';
+import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
 
 describe('Events Details Helpers', () => {
   const fields: EventHit['fields'] = eventHit.fields;
@@ -135,7 +135,7 @@ describe('Events Details Helpers', () => {
   it('#getDataFromSourceHits', () => {
     const _source: EventSource = {
       '@timestamp': '2021-02-24T00:41:06.527Z',
-      'signal.status': 'open',
+      'kibana.alert.workflow_status': 'open',
       'signal.rule.name': 'Rawr',
       'threat.indicator': [
         {
@@ -161,8 +161,8 @@ describe('Events Details Helpers', () => {
         isObjectArray: false,
       },
       {
-        category: 'signal',
-        field: 'signal.status',
+        category: 'kibana',
+        field: 'kibana.alert.workflow_status',
         values: ['open'],
         originalValue: ['open'],
         isObjectArray: false,

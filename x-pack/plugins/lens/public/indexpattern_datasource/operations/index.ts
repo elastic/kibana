@@ -35,4 +35,6 @@ export {
   OverallMinIndexPatternColumn,
   OverallMaxIndexPatternColumn,
   OverallAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
 } from './definitions';

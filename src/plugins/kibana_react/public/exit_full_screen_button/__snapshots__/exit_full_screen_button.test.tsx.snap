@@ -2,6 +2,11 @@
 
 exports[`is rendered 1`] = `
 <ExitFullScreenButtonUi
+  chrome={
+    Object {
+      "setIsVisible": [Function],
+    }
+  }
   onExitFullScreenMode={[Function]}
 >
   <div>

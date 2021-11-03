@@ -32,14 +32,6 @@ describe('ExpressionsPublicPlugin', () => {
         expect(setup.getFunctions().add.name).toBe('add');
       });
     });
-
-    describe('.run()', () => {
-      test('can execute simple expression', async () => {
-        const { setup } = await expressionsPluginMock.createPlugin();
-        const bar = await setup.run('var_set name="foo" value="bar" | var name="foo"', null);
-        expect(bar).toBe('bar');
-      });
-    });
   });
 
   describe('start contract', () => {

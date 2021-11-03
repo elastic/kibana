@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should create a user action when creating a case', async () => {
+    it('should create a user action when deleting a case', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
       await deleteCases({ supertest, caseIDs: [postedCase.id] });
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
@@ -106,6 +106,8 @@ export default ({ getService }: FtrProviderContext): void => {
         action_by: defaultUser,
         old_value: null,
         new_value: null,
+        new_val_connector_id: null,
+        old_val_connector_id: null,
         case_id: `${postedCase.id}`,
         comment_id: null,
         sub_case_id: '',

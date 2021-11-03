@@ -54,7 +54,7 @@ describe('FieldNumber', () => {
         }}
       />
     );
-    expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual('');
+    expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(' ');
   });
 
   it('is disabled if the [fieldEnabledProperty] in fieldSettings is false', () => {
@@ -90,10 +90,10 @@ describe('FieldNumber', () => {
     expect(props.updateAction).toHaveBeenCalledWith('foo', 21);
   });
 
-  it('will call updateAction on blur using the minimum possible value if the current value is something other than a number', () => {
+  it('will call clearAction on blur if the current value is something other than a number', () => {
     const wrapper = shallow(<FieldNumber {...props} />);
     wrapper.simulate('blur', { target: { value: '' } });
-    expect(props.updateAction).toHaveBeenCalledWith('foo', 20);
+    expect(props.clearAction).toHaveBeenCalledWith('foo');
   });
 
   it('will call updateAction on blur using the minimum possible value if the value is something lower than the minimum', () => {

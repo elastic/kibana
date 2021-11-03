@@ -26,7 +26,6 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'url_create',
         'store_search_session',
-        'generate_report',
       ];
       const trialPrivileges = await supertest
         .get('/api/security/privileges')
@@ -46,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       // Verify that privileges were re-registered.
-      const expectedBasicLicenseDiscoverPrivileges = ['all', 'read'];
+      const expectedBasicLicenseDiscoverPrivileges = ['all', 'read', 'minimal_all', 'minimal_read'];
       const basicPrivileges = await supertest
         .get('/api/security/privileges')
         .set('kbn-xsrf', 'xxx')

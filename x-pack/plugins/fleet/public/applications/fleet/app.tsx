@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { createHashHistory } from 'history';
-import { Router, Redirect, Route, Switch } from 'react-router-dom';
+import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -19,7 +19,10 @@ import useObservable from 'react-use/lib/useObservable';
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
 import { PackageInstallProvider, useUrlModal } from '../integrations/hooks';
@@ -27,7 +30,6 @@ import { PackageInstallProvider, useUrlModal } from '../integrations/hooks';
 import {
   ConfigContext,
   FleetStatusProvider,
-  IntraAppStateProvider,
   KibanaVersionContext,
   sendGetPermissionsCheck,
   sendSetup,
@@ -39,20 +41,28 @@ import { Error, Loading, SettingFlyout, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
-import { DefaultLayout, WithoutHeaderLayout } from './layouts';
+import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout } from './layouts';
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
+import { MissingESRequirementsPage } from './sections/agents/agent_requirements_page';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
-const ErrorLayout = ({ children }: { children: JSX.Element }) => (
+const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
+  isAddIntegrationsPath,
+  children,
+}) => (
   <EuiErrorBoundary>
-    <DefaultLayout>
-      <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
-    </DefaultLayout>
+    {isAddIntegrationsPath ? (
+      <WithHeaderLayout leftColumn={<DefaultPageTitle />}>{children}</WithHeaderLayout>
+    ) : (
+      <DefaultLayout>
+        <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
+      </DefaultLayout>
+    )}
   </EuiErrorBoundary>
 );
 
@@ -62,6 +72,53 @@ const Panel = styled(EuiPanel)`
   margin-left: auto;
 `;
 
+const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ error }) => {
+  if (error === 'MISSING_SECURITY') {
+    return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
+  }
+
+  if (error === 'MISSING_SUPERUSER_ROLE') {
+    return (
+      <Panel>
+        <EuiEmptyPrompt
+          iconType="securityApp"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.fleet.permissionDeniedErrorTitle"
+                defaultMessage="Permission denied"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.permissionDeniedErrorMessage"
+                defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
+                values={{ roleName: <EuiCode>superuser</EuiCode> }}
+              />
+            </p>
+          }
+        />
+      </Panel>
+    );
+  }
+
+  return (
+    <Error
+      title={
+        <FormattedMessage
+          id="xpack.fleet.permissionsRequestErrorMessageTitle"
+          defaultMessage="Unable to check permissions"
+        />
+      }
+      error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
+        defaultMessage: 'There was a problem checking Fleet permissions',
+      })}
+    />
+  );
+});
+
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
   const { notifications } = useStartServices();
@@ -70,6 +127,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [permissionsError, setPermissionsError] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
+
+  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
 
   useEffect(() => {
     (async () => {
@@ -109,66 +168,15 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
 
   if (isPermissionsLoading || permissionsError) {
     return (
-      <ErrorLayout>
-        {isPermissionsLoading ? (
-          <Loading />
-        ) : permissionsError === 'REQUEST_ERROR' ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.fleet.permissionsRequestErrorMessageTitle"
-                defaultMessage="Unable to check permissions"
-              />
-            }
-            error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
-              defaultMessage: 'There was a problem checking Fleet permissions',
-            })}
-          />
-        ) : (
-          <Panel>
-            <EuiEmptyPrompt
-              iconType="securityApp"
-              title={
-                <h2>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorTitle"
-                      defaultMessage="Permission denied"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorTitle"
-                      defaultMessage="Security is not enabled"
-                    />
-                  )}
-                </h2>
-              }
-              body={
-                <p>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorMessage"
-                      defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
-                      values={{ roleName: <EuiCode>superuser</EuiCode> }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorMessage"
-                      defaultMessage="You must enable security in Kibana and Elasticsearch to use Fleet."
-                    />
-                  )}
-                </p>
-              }
-            />
-          </Panel>
-        )}
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
+        {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
       </ErrorLayout>
     );
   }
 
   if (!isInitialized || initializationError) {
     return (
-      <ErrorLayout>
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
         {initializationError ? (
           <Error
             title={
@@ -205,43 +213,31 @@ export const FleetAppContext: React.FC<{
 }> = memo(
   ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
-    const [routerHistoryInstance] = useState(routerHistory || createHashHistory());
-    // Sync our hash history with Kibana scoped history
-    useEffect(() => {
-      const unlistenParentHistory = history.listen(() => {
-        const newHash = createHashHistory();
-        if (newHash.location.pathname !== routerHistoryInstance.location.pathname) {
-          routerHistoryInstance.replace(newHash.location.pathname);
-        }
-      });
-
-      return unlistenParentHistory;
-    }, [history, routerHistoryInstance]);
 
     return (
-      <startServices.i18n.Context>
-        <KibanaContextProvider services={{ ...startServices }}>
-          <EuiErrorBoundary>
-            <ConfigContext.Provider value={config}>
-              <KibanaVersionContext.Provider value={kibanaVersion}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <UIExtensionsContext.Provider value={extensions}>
-                    <FleetStatusProvider>
-                      <IntraAppStateProvider kibanaScopedHistory={history}>
-                        <Router history={routerHistoryInstance}>
+      <RedirectAppLinks application={startServices.application}>
+        <startServices.i18n.Context>
+          <KibanaContextProvider services={{ ...startServices }}>
+            <EuiErrorBoundary>
+              <ConfigContext.Provider value={config}>
+                <KibanaVersionContext.Provider value={kibanaVersion}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <UIExtensionsContext.Provider value={extensions}>
+                      <FleetStatusProvider>
+                        <Router history={history}>
                           <PackageInstallProvider notifications={startServices.notifications}>
                             {children}
                           </PackageInstallProvider>
                         </Router>
-                      </IntraAppStateProvider>
-                    </FleetStatusProvider>
-                  </UIExtensionsContext.Provider>
-                </EuiThemeProvider>
-              </KibanaVersionContext.Provider>
-            </ConfigContext.Provider>
-          </EuiErrorBoundary>
-        </KibanaContextProvider>
-      </startServices.i18n.Context>
+                      </FleetStatusProvider>
+                    </UIExtensionsContext.Provider>
+                  </EuiThemeProvider>
+                </KibanaVersionContext.Provider>
+              </ConfigContext.Provider>
+            </EuiErrorBoundary>
+          </KibanaContextProvider>
+        </startServices.i18n.Context>
+      </RedirectAppLinks>
     );
   }
 );
@@ -267,7 +263,7 @@ const FleetTopNav = memo(
           defaultMessage: 'Fleet settings',
         }),
         iconType: 'gear',
-        run: () => (window.location.href = getModalHref('settings')),
+        run: () => services.application.navigateToUrl(getModalHref('settings')),
       },
     ];
     return (
@@ -314,12 +310,29 @@ export const AppRoutes = memo(
 
           {/* TODO: Move this route to the Integrations app */}
           <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-            <DefaultLayout>
-              <CreatePackagePolicyPage />
-            </DefaultLayout>
+            <CreatePackagePolicyPage />
           </Route>
 
-          <Redirect to={FLEET_ROUTING_PATHS.agents} />
+          <Route
+            render={({ location }) => {
+              // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+              const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+              if (!shouldRedirectHash) {
+                return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
+              }
+              const pathname = location.hash.replace(/^#(\/fleet)?/, '');
+
+              return (
+                <Redirect
+                  to={{
+                    ...location,
+                    pathname,
+                    hash: undefined,
+                  }}
+                />
+              );
+            }}
+          />
         </Switch>
       </>
     );

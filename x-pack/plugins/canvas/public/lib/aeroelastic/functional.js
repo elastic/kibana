@@ -71,7 +71,10 @@ export const shallowEqual = (a, b) => {
   return true;
 };
 
-export const not = (fun) => (...args) => !fun(...args);
+export const not =
+  (fun) =>
+  (...args) =>
+    !fun(...args);
 
 export const removeDuplicates = (idFun, a) =>
   a.filter((d, i) => a.findIndex((s) => idFun(s) === idFun(d)) === i);

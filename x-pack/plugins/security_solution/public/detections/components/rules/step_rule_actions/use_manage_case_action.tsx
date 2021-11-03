@@ -6,11 +6,11 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { ACTION_URL } from '../../../../../../cases/common';
-import { KibanaServices } from '../../../../common/lib/kibana';
+import { getAllConnectorsUrl, getCreateConnectorUrl } from '../../../../../../cases/common';
+import { convertArrayToCamelCase, KibanaServices } from '../../../../common/lib/kibana';
 
 interface CaseAction {
-  actionTypeId: string;
+  connectorTypeId: string;
   id: string;
   isPreconfigured: boolean;
   name: string;
@@ -28,15 +28,18 @@ export const useManageCaseAction = () => {
     const abortCtrl = new AbortController();
     const fetchActions = async () => {
       try {
-        const actions = await KibanaServices.get().http.fetch<CaseAction[]>(ACTION_URL, {
-          method: 'GET',
-          signal: abortCtrl.signal,
-        });
-        if (!actions.some((a) => a.actionTypeId === '.case' && a.name === CASE_ACTION_NAME)) {
-          await KibanaServices.get().http.post<CaseAction[]>(`${ACTION_URL}/action`, {
+        const actions = convertArrayToCamelCase(
+          await KibanaServices.get().http.fetch<CaseAction[]>(getAllConnectorsUrl(), {
+            method: 'GET',
+            signal: abortCtrl.signal,
+          })
+        ) as CaseAction[];
+
+        if (!actions.some((a) => a.connectorTypeId === '.case' && a.name === CASE_ACTION_NAME)) {
+          await KibanaServices.get().http.post<CaseAction[]>(getCreateConnectorUrl(), {
             method: 'POST',
             body: JSON.stringify({
-              actionTypeId: '.case',
+              connector_type_id: '.case',
               config: {},
               name: CASE_ACTION_NAME,
               secrets: {},

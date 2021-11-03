@@ -25,7 +25,7 @@ import { JA3_HASH_FIELD_NAME } from '../ja3_fingerprint';
 import {
   DESTINATION_PORT_FIELD_NAME,
   SOURCE_PORT_FIELD_NAME,
-} from '../../../network/components/port';
+} from '../../../network/components/port/helpers';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
@@ -62,11 +62,12 @@ import {
 } from '../../../network/components/source_destination/field_names';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });

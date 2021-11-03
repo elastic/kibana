@@ -8,6 +8,7 @@
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { IndexPatternField } from 'src/plugins/data/public';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { getIndexPatternService } from '../../../../kibana_services';
 // @ts-expect-error
@@ -15,16 +16,16 @@ import { ValidatedRange } from '../../../../components/validated_range';
 import { DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../../../../common/constants';
 import { loadIndexSettings } from '../util/load_index_settings';
 import { OnSourceChangeArgs } from '../../source';
-import { IFieldType, SortDirection } from '../../../../../../../../src/plugins/data/public';
+import { SortDirection } from '../../../../../../../../src/plugins/data/public';
 
 interface Props {
   indexPatternId: string;
   isColumnCompressed?: boolean;
   onChange: (args: OnSourceChangeArgs) => void;
   sortField: string;
-  sortFields: IFieldType[];
+  sortFields: IndexPatternField[];
   sortOrder: SortDirection;
-  termFields: IFieldType[];
+  termFields: IndexPatternField[];
   topHitsSplitField: string | null;
   topHitsSize: number;
 }

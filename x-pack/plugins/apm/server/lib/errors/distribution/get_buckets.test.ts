@@ -28,9 +28,8 @@ describe('get buckets', () => {
       environment: 'prod',
       serviceName: 'myServiceName',
       bucketSize: 10,
+      kuery: '',
       setup: {
-        start: 1528113600000,
-        end: 1528977600000,
         apmEventClient: {
           search: clientSpy,
         } as any,
@@ -43,20 +42,19 @@ describe('get buckets', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFilters: {},
         indices: {
-          /* eslint-disable @typescript-eslint/naming-convention */
-          'apm_oss.sourcemapIndices': 'apm-*',
-          'apm_oss.errorIndices': 'apm-*',
-          'apm_oss.onboardingIndices': 'apm-*',
-          'apm_oss.spanIndices': 'apm-*',
-          'apm_oss.transactionIndices': 'apm-*',
-          'apm_oss.metricsIndices': 'apm-*',
-          /* eslint-enable @typescript-eslint/naming-convention */
+          sourcemap: 'apm-*',
+          error: 'apm-*',
+          onboarding: 'apm-*',
+          span: 'apm-*',
+          transaction: 'apm-*',
+          metric: 'apm-*',
           apmAgentConfigurationIndex: '.apm-agent-configuration',
           apmCustomLinkIndex: '.apm-custom-link',
         },
       },
+      start: 1528113600000,
+      end: 1528977600000,
     });
   });
 

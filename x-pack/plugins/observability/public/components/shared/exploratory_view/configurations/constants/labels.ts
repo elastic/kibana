@@ -72,6 +72,17 @@ export const CLS_LABEL = i18n.translate('xpack.observability.expView.fieldLabels
   defaultMessage: 'Cumulative layout shift',
 });
 
+export const DCL_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.dcl', {
+  defaultMessage: 'DOM content loaded',
+});
+
+export const DOCUMENT_ONLOAD_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.onload',
+  {
+    defaultMessage: 'Document complete (onLoad)',
+  }
+);
+
 export const BACKEND_TIME_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.backend',
   {
@@ -158,6 +169,15 @@ export const TAGS_LABEL = i18n.translate('xpack.observability.expView.fieldLabel
 export const METRIC_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.metric', {
   defaultMessage: 'Metric',
 });
+export const LABELS_FIELD = i18n.translate('xpack.observability.expView.fieldLabels.labels', {
+  defaultMessage: 'Labels',
+});
+export const LABELS_BREAKDOWN = i18n.translate(
+  'xpack.observability.expView.fieldLabels.chooseField',
+  {
+    defaultMessage: 'Labels field',
+  }
+);
 export const KPI_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.kpi', {
   defaultMessage: 'KPI',
 });
@@ -208,6 +228,20 @@ export const MONITORS_DURATION_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.monitorDurationLabel',
   {
     defaultMessage: 'Monitor duration',
+  }
+);
+
+export const STEP_DURATION_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.stepDurationLabel',
+  {
+    defaultMessage: 'Step duration',
+  }
+);
+
+export const STEP_NAME_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.stepNameLabel',
+  {
+    defaultMessage: 'Step name',
   }
 );
 
@@ -272,7 +306,7 @@ export const CARRIER_LOCATION = i18n.translate(
 export const RESPONSE_LATENCY = i18n.translate(
   'xpack.observability.expView.fieldLabels.responseLatency',
   {
-    defaultMessage: 'Response latency',
+    defaultMessage: 'Latency',
   }
 );
 
@@ -294,7 +328,7 @@ export const CPU_USAGE = i18n.translate('xpack.observability.expView.fieldLabels
 export const TRANSACTIONS_PER_MINUTE = i18n.translate(
   'xpack.observability.expView.fieldLabels.transactionPerMinute',
   {
-    defaultMessage: 'Transactions per minute',
+    defaultMessage: 'Throughput',
   }
 );
 

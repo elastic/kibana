@@ -24,6 +24,15 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
+jest.mock('../../crud_app/services/documentation_links', () => {
+  const coreMocks = jest.requireActual('../../../../../../src/core/public/mocks');
+
+  return {
+    init: jest.fn(),
+    documentationLinks: coreMocks.docLinksServiceMock.createStartContract().links,
+  };
+});
+
 const { setup } = pageHelpers.jobList;
 
 describe('Smoke test cloning an existing rollup job from job list', () => {

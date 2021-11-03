@@ -63,6 +63,7 @@ import {
   StyleMetaDescriptor,
   StylePropertyField,
   StylePropertyOptions,
+  TileMetaFeature,
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
@@ -89,9 +90,8 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
-  pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
-  isTimeAware: () => boolean;
-  getIcon: () => ReactElement<any>;
+  isTimeAware(): boolean;
+  getIcon(): ReactElement<any>;
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement<any>;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -255,9 +255,9 @@ export class VectorStyle implements IVectorStyle {
     mapColors: string[]
   ) {
     const originalProperties = this.getRawProperties();
-    const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
-      originalProperties
-    ) as VECTOR_STYLES[]).filter((key) => {
+    const invalidStyleNames: VECTOR_STYLES[] = (
+      Object.keys(originalProperties) as VECTOR_STYLES[]
+    ).filter((key) => {
       const dynamicOptions = getDynamicOptions(originalProperties, key);
       if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
         return false;
@@ -488,9 +488,53 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  async pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest) {
-    const features = _.get(sourceDataRequest.getData(), 'features', []);
+  async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
+    const supportedShapeTypes = await this._source.getSupportedShapeTypes();
+    const styleMeta: StyleMetaDescriptor = {
+      geometryTypes: {
+        isPointsOnly:
+          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POINT),
+        isLinesOnly:
+          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE),
+        isPolygonsOnly:
+          supportedShapeTypes.length === 1 &&
+          supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
+      },
+      fieldMeta: {},
+    };
 
+    const dynamicProperties = this.getDynamicPropertiesArray();
+    if (dynamicProperties.length === 0 || !metaFeatures) {
+      // no additional meta data to pull from source data request.
+      return styleMeta;
+    }
+
+    dynamicProperties.forEach((dynamicProperty) => {
+      const ordinalStyleMeta =
+        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
+      const categoricalStyleMeta =
+        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
+
+      const name = dynamicProperty.getFieldName();
+      if (!styleMeta.fieldMeta[name]) {
+        styleMeta.fieldMeta[name] = {};
+      }
+      if (categoricalStyleMeta) {
+        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
+      }
+
+      if (ordinalStyleMeta) {
+        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+      }
+    });
+
+    return styleMeta;
+  }
+
+  async pluckStyleMetaFromSourceDataRequest(
+    sourceDataRequest: DataRequest
+  ): Promise<StyleMetaDescriptor> {
+    const features = _.get(sourceDataRequest.getData(), 'features', []);
     const supportedFeatures = await this._source.getSupportedShapeTypes();
     const hasFeatureType = {
       [VECTOR_SHAPE_TYPE.POINT]: false,
@@ -548,21 +592,24 @@ export class VectorStyle implements IVectorStyle {
       return styleMeta;
     }
 
-    dynamicProperties.forEach((dynamicProperty) => {
-      const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
-      const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
-      const name = dynamicProperty.getFieldName();
-      if (!styleMeta.fieldMeta[name]) {
-        styleMeta.fieldMeta[name] = {};
-      }
-      if (categoricalStyleMeta) {
-        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
-      }
+    dynamicProperties.forEach(
+      (dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>) => {
+        const categoricalStyleMeta =
+          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+        const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
+        const name = dynamicProperty.getFieldName();
+        if (!styleMeta.fieldMeta[name]) {
+          styleMeta.fieldMeta[name] = {};
+        }
+        if (categoricalStyleMeta) {
+          styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
+        }
 
-      if (ordinalStyleMeta) {
-        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+        if (ordinalStyleMeta) {
+          styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+        }
       }
-    });
+    );
 
     return styleMeta;
   }
@@ -653,8 +700,7 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  getIcon = () => {
-    const isLinesOnly = this._getIsLinesOnly();
+  _getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -676,14 +722,20 @@ export class VectorStyle implements IVectorStyle {
 
     return (
       <VectorIcon
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         symbolId={this._getSymbolId()}
         strokeColor={strokeColor}
         fillColor={fillColor}
       />
     );
-  };
+  }
+
+  getIcon() {
+    const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this._getIsPointsOnly();
+    return this._getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
+  }
 
   _getLegendDetailStyleProperties = () => {
     return this.getDynamicPropertiesArray().filter((styleProperty) => {
@@ -813,8 +865,6 @@ export class VectorStyle implements IVectorStyle {
     mbMap: MbMap;
     textLayerId: string;
   }) {
-    mbMap.setLayoutProperty(textLayerId, 'icon-allow-overlap', true);
-    mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
@@ -833,6 +883,7 @@ export class VectorStyle implements IVectorStyle {
   }) {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-allow-overlap', true);
 
     this._iconStyleProperty.syncIconWithMb(
       symbolLayerId,

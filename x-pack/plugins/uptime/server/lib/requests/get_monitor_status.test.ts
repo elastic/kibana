@@ -85,9 +85,13 @@ describe('getMonitorStatus', () => {
       filters: exampleFilter,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-10m',
         to: 'now-1m',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
       },
     });
     expect(esMock.search).toHaveBeenCalledTimes(1);
@@ -144,6 +148,14 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-10m",
                       "lte": "now-1m",
                     },
@@ -202,8 +214,12 @@ describe('getMonitorStatus', () => {
       uptimeEsClient,
       locations: ['fairbanks', 'harrisburg'],
       numTimes: 1,
-      timerange: {
+      timespanRange: {
         from: 'now-2m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
     });
@@ -261,6 +277,14 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-2m",
                       "lte": "now",
                     },
@@ -298,8 +322,12 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const clientParameters = {
-      timerange: {
+      timespanRange: {
         from: 'now-15m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
       numTimes: 5,
@@ -415,6 +443,14 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-15m",
                       "lte": "now",
                     },
@@ -485,8 +521,12 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const clientParameters = {
-      timerange: {
+      timespanRange: {
         from: 'now-15m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
       numTimes: 5,
@@ -562,6 +602,14 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-15m",
                       "lte": "now",
                     },
@@ -618,9 +666,13 @@ describe('getMonitorStatus', () => {
       filters: undefined,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-12m',
         to: 'now-2m',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
       },
     };
 
@@ -684,6 +736,14 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-12m",
                       "lte": "now-2m",
                     },
@@ -810,9 +870,13 @@ describe('getMonitorStatus', () => {
       uptimeEsClient,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-10m',
         to: 'now-1m',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
       },
     });
     expect(result.length).toBe(8);

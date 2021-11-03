@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { FormData, FormHook } from '../types';
 import { unflattenObject } from '../lib';
@@ -24,6 +24,9 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
 ): HookReturn<I, T> => {
   const { watch, form } = options;
   const ctx = useFormDataContext<T, I>();
+  const watchToArray: string[] = watch === undefined ? [] : Array.isArray(watch) ? watch : [watch];
+  // We will use "stringifiedWatch" to compare if the array has changed in the useMemo() below
+  const stringifiedWatch = watchToArray.join('.');
 
   let getFormData: Context<T, I>['getFormData'];
   let getFormData$: Context<T, I>['getFormData$'];
@@ -54,16 +57,14 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getFormData, formData]);
 
-  useEffect(() => {
-    const subscription = getFormData$().subscribe((raw) => {
+  const subscription = useMemo(() => {
+    return getFormData$().subscribe((raw) => {
       if (!isMounted.current && Object.keys(raw).length === 0) {
         return;
       }
 
-      if (watch) {
-        const pathsToWatchArray: string[] = Array.isArray(watch) ? watch : [watch];
-
-        if (pathsToWatchArray.some((path) => previousRawData.current[path] !== raw[path])) {
+      if (watchToArray.length > 0) {
+        if (watchToArray.some((path) => previousRawData.current[path] !== raw[path])) {
           previousRawData.current = raw;
           // Only update the state if one of the field we watch has changed.
           setFormData(unflattenObject<I>(raw));
@@ -72,8 +73,13 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
         setFormData(unflattenObject<I>(raw));
       }
     });
+    // To compare we use the stringified version of the "watchToArray" array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stringifiedWatch, getFormData$]);
+
+  useEffect(() => {
     return subscription.unsubscribe;
-  }, [getFormData$, watch]);
+  }, [subscription]);
 
   useEffect(() => {
     isMounted.current = true;

@@ -18,4 +18,5 @@ export interface UsageStats {
   'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no'?: number;
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes'?: number;
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no'?: number;
+  'apiCalls.disableLegacyUrlAliases.total'?: number;
 }

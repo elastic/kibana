@@ -48,15 +48,12 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
     databaseDocumentID: '_id',
     entityIDs: { origin: 'origin', firstChild: 'firstChild', secondChild: 'secondChild' },
   };
-  const {
-    tree,
-    relatedEvents,
-    nodeDataResponse,
-  } = mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
-    originID: metadata.entityIDs.origin,
-    firstChildID: metadata.entityIDs.firstChild,
-    secondChildID: metadata.entityIDs.secondChild,
-  });
+  const { tree, relatedEvents, nodeDataResponse } =
+    mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
+      originID: metadata.entityIDs.origin,
+      firstChildID: metadata.entityIDs.firstChild,
+      secondChildID: metadata.entityIDs.secondChild,
+    });
 
   return {
     metadata,

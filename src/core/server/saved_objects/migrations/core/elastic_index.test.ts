@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as Index from './elastic_index';
@@ -164,7 +164,7 @@ describe('ElasticIndex', () => {
       client.tasks.get.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
-        } as estypes.TaskGetResponse)
+        } as estypes.TasksGetResponse)
       );
 
       const info = {
@@ -248,7 +248,7 @@ describe('ElasticIndex', () => {
             reason: 'all shards failed',
             failed_shards: [],
           },
-        } as estypes.TaskGetResponse)
+        } as estypes.TasksGetResponse)
       );
 
       const info = {
@@ -412,38 +412,7 @@ describe('ElasticIndex', () => {
       expect(client.search).toHaveBeenCalledWith({
         body: {
           size: 100,
-          query: {
-            bool: {
-              must_not: [
-                {
-                  term: {
-                    type: 'fleet-agent-events',
-                  },
-                },
-                {
-                  term: {
-                    type: 'tsvb-validation-telemetry',
-                  },
-                },
-                {
-                  bool: {
-                    must: [
-                      {
-                        match: {
-                          type: 'search-session',
-                        },
-                      },
-                      {
-                        match: {
-                          'search-session.persisted': false,
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
+          query: Index.excludeUnusedTypesQuery,
         },
         index,
         scroll: '5m',

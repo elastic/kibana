@@ -116,8 +116,8 @@ export const ExplorationPageWrapper: FC<Props> = ({
   const resultsField = jobConfig?.dest.results_field ?? '';
   const scatterplotFieldOptions = useScatterplotFieldOptions(
     indexPattern,
-    jobConfig?.analyzed_fields.includes,
-    jobConfig?.analyzed_fields.excludes,
+    jobConfig?.analyzed_fields?.includes,
+    jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
 

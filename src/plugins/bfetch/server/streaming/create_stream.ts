@@ -15,9 +15,9 @@ import { createNDJSONStream } from './create_ndjson_stream';
 export function createStream<Payload, Response>(
   response$: Observable<Response>,
   logger: Logger,
-  compressionDisabled: boolean
+  compress: boolean
 ): Stream {
-  return compressionDisabled
-    ? createNDJSONStream(response$, logger)
-    : createCompressedStream(response$, logger);
+  return compress
+    ? createCompressedStream(response$, logger)
+    : createNDJSONStream(response$, logger);
 }

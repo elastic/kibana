@@ -19,7 +19,11 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
-import { Loading } from '../../../../../shared/loading';
+import { getPageDescription } from '../../../../../test_helpers';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
 import { AddSourceList } from './add_source_list';
@@ -54,14 +58,28 @@ describe('AddSourceList', () => {
     expect(wrapper.find(AvailableSourcesList)).toHaveLength(1);
   });
 
-  it('returns loading when loading', () => {
-    setMockValues({
-      ...mockValues,
-      dataLoading: true,
-    });
+  it('does not render header when loading', () => {
+    setMockValues({ ...mockValues, dataLoading: true });
     const wrapper = shallow(<AddSourceList />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('pageHeader')).toBe(undefined);
+  });
+
+  describe('layout', () => {
+    it('renders the default workplace search layout when on an organization view', () => {
+      setMockValues({ ...mockValues, isOrganization: true });
+      const wrapper = shallow(<AddSourceList />);
+
+      expect(wrapper.type()).toEqual(WorkplaceSearchPageTemplate);
+    });
+
+    it('renders the personal dashboard layout and a header when not in an organization', () => {
+      setMockValues({ ...mockValues, isOrganization: false });
+      const wrapper = shallow(<AddSourceList />);
+
+      expect(wrapper.type()).toEqual(PersonalDashboardLayout);
+      expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
+    });
   });
 
   describe('filters sources', () => {
@@ -97,49 +115,51 @@ describe('AddSourceList', () => {
   });
 
   describe('content headings', () => {
-    it('should render correct organization heading with sources', () => {
-      const wrapper = shallow(<AddSourceList />);
+    describe('organization view', () => {
+      it('should render the correct organization heading with sources', () => {
+        const wrapper = shallow(<AddSourceList />);
 
-      expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
-        ADD_SOURCE_ORG_SOURCE_DESCRIPTION
-      );
-    });
-
-    it('should render correct organization heading without sources', () => {
-      setMockValues({
-        ...mockValues,
-        contentSources: [],
-      });
-      const wrapper = shallow(<AddSourceList />);
-
-      expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
-        ADD_SOURCE_NEW_SOURCE_DESCRIPTION + ADD_SOURCE_ORG_SOURCE_DESCRIPTION
-      );
-    });
-
-    it('should render correct account heading with sources', () => {
-      const wrapper = shallow(<AddSourceList />);
-      setMockValues({
-        ...mockValues,
-        isOrganization: false,
+        expect(getPageDescription(wrapper)).toEqual(ADD_SOURCE_ORG_SOURCE_DESCRIPTION);
       });
 
-      expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
-        ADD_SOURCE_ORG_SOURCE_DESCRIPTION
-      );
+      it('should render the correct organization heading without sources', () => {
+        setMockValues({
+          ...mockValues,
+          contentSources: [],
+        });
+        const wrapper = shallow(<AddSourceList />);
+
+        expect(getPageDescription(wrapper)).toEqual(
+          ADD_SOURCE_NEW_SOURCE_DESCRIPTION + ADD_SOURCE_ORG_SOURCE_DESCRIPTION
+        );
+      });
     });
 
-    it('should render correct account heading without sources', () => {
-      setMockValues({
-        ...mockValues,
-        isOrganization: false,
-        contentSources: [],
-      });
-      const wrapper = shallow(<AddSourceList />);
+    describe('personal dashboard view', () => {
+      it('should render the correct personal heading with sources', () => {
+        setMockValues({
+          ...mockValues,
+          isOrganization: false,
+        });
+        const wrapper = shallow(<AddSourceList />);
 
-      expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
-        ADD_SOURCE_NEW_SOURCE_DESCRIPTION + ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION
-      );
+        expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
+          ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION
+        );
+      });
+
+      it('should render the correct personal heading without sources', () => {
+        setMockValues({
+          ...mockValues,
+          isOrganization: false,
+          contentSources: [],
+        });
+        const wrapper = shallow(<AddSourceList />);
+
+        expect(wrapper.find(ViewContentHeader).prop('description')).toEqual(
+          ADD_SOURCE_NEW_SOURCE_DESCRIPTION + ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION
+        );
+      });
     });
   });
 

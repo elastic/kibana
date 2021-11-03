@@ -14,6 +14,7 @@ import {
 import { setFilter } from '../state/actions/elements';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';
+import { clearValue } from '../state/actions/resolved_args';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
 // TODO: consider warning if these methods are invoked but not implemented by the renderer...?
@@ -25,8 +26,9 @@ export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
   update() {},
   event() {},
   onDestroy() {},
-  getRenderMode: () => 'display',
+  getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isInteractive: () => true,
 });
 
 export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHandlers => ({
@@ -42,6 +44,10 @@ export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHan
 
   onComplete(fn: () => void) {
     this.done = fn;
+  },
+
+  onDestroy(fn: () => void) {
+    this.destroy = fn;
   },
 
   // TODO: these functions do not match the `onXYZ` and `xyz` pattern elsewhere.
@@ -105,7 +111,7 @@ export const createDispatchedHandlerFactory = (
       },
 
       getFilter() {
-        return element.filter;
+        return element.filter || '';
       },
 
       onComplete(fn: () => void) {
@@ -119,6 +125,8 @@ export const createDispatchedHandlerFactory = (
       },
 
       onEmbeddableDestroyed() {
+        const argumentPath = [element.id, 'expressionRenderable'];
+        dispatch(clearValue({ path: argumentPath }));
         dispatch(fetchEmbeddableRenderable(element.id));
       },
 

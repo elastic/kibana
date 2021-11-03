@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from 'src/core/public';
+import type { HttpStart } from 'src/core/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
 
 interface GetAllowedTypesResponse {
-  types: string[];
+  types: SavedObjectManagementTypeInfo[];
 }
 
-export async function getAllowedTypes(http: HttpStart) {
+export async function getAllowedTypes(http: HttpStart): Promise<SavedObjectManagementTypeInfo[]> {
   const response = await http.get<GetAllowedTypesResponse>(
     '/api/kibana/management/saved_objects/_allowed_types'
   );

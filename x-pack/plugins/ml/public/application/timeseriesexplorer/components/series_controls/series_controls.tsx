@@ -112,9 +112,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
-  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<PartitionFieldsConfig>(
-    ML_ENTITY_FIELDS_CONFIG
-  );
+  const [storageFieldsConfig, setStorageFieldsConfig] =
+    useStorage<PartitionFieldsConfig>(ML_ENTITY_FIELDS_CONFIG);
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {

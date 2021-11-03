@@ -24,12 +24,12 @@ import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { useDebounceWithOptions } from '../../../../../shared_components';
+import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
 import { ParamEditorProps } from '../../index';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {
-  LensMathSuggestion,
+  LensMathSuggestions,
   SUGGESTION_TYPE,
   suggest,
   getSuggestion,
@@ -49,6 +49,18 @@ import { regenerateLayerFromAst } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
+function tableHasData(
+  activeData: ParamEditorProps<FormulaIndexPatternColumn>['activeData'],
+  layerId: string,
+  columnId: string
+) {
+  const table = activeData?.[layerId];
+  if (!table || table.rows.length === 0) {
+    return false;
+  }
+  return table.rows.some((row) => row[columnId] != null);
+}
+
 export const WrappedFormulaEditor = ({
   activeData,
   ...rest
@@ -59,7 +71,13 @@ export const WrappedFormulaEditor = ({
     activeData,
     rest.layerId
   );
-  return <MemoizedFormulaEditor {...rest} dateHistogramInterval={dateHistogramInterval} />;
+  return (
+    <MemoizedFormulaEditor
+      {...rest}
+      dateHistogramInterval={dateHistogramInterval}
+      hasData={tableHasData(activeData, rest.layerId, rest.columnId)}
+    />
+  );
 };
 
 const MemoizedFormulaEditor = React.memo(FormulaEditor);
@@ -76,8 +94,10 @@ export function FormulaEditor({
   isFullscreen,
   setIsCloseable,
   dateHistogramInterval,
+  hasData,
 }: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
+  hasData: boolean;
 }) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [warnings, setWarnings] = useState<
@@ -91,9 +111,10 @@ export function FormulaEditor({
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
-  const visibleOperationsMap = useMemo(() => filterByVisibleOperation(operationDefinitionMap), [
-    operationDefinitionMap,
-  ]);
+  const visibleOperationsMap = useMemo(
+    () => filterByVisibleOperation(operationDefinitionMap),
+    [operationDefinitionMap]
+  );
 
   const baseInterval =
     'interval' in dateHistogramInterval
@@ -179,7 +200,12 @@ export function FormulaEditor({
       }
 
       if (errors.length) {
-        if (currentColumn.params.isFormulaBroken) {
+        // Replace the previous error with the new one
+        const previousFormulaWasBroken = currentColumn.params.isFormulaBroken;
+        // If the user is changing a previous formula and there are currently no result
+        // show the most up-to-date state with the error message.
+        const previousFormulaWasOkButNoData = !currentColumn.params.isFormulaBroken && !hasData;
+        if (previousFormulaWasBroken || previousFormulaWasOkButNoData) {
           // If the formula is already broken, show the latest error message in the workspace
           if (currentColumn.params.formula !== text) {
             updateLayer(
@@ -303,8 +329,9 @@ export function FormulaEditor({
     [text]
   );
 
-  const errorCount = warnings.filter((marker) => marker.severity === monaco.MarkerSeverity.Error)
-    .length;
+  const errorCount = warnings.filter(
+    (marker) => marker.severity === monaco.MarkerSeverity.Error
+  ).length;
   const warningCount = warnings.filter(
     (marker) => marker.severity === monaco.MarkerSeverity.Warning
   ).length;
@@ -329,7 +356,7 @@ export function FormulaEditor({
       context: monaco.languages.CompletionContext
     ) => {
       const innerText = model.getValue();
-      let aSuggestions: { list: LensMathSuggestion[]; type: SUGGESTION_TYPE } = {
+      let aSuggestions: LensMathSuggestions = {
         list: [],
         type: SUGGESTION_TYPE.FIELD,
       };
@@ -367,7 +394,13 @@ export function FormulaEditor({
 
       return {
         suggestions: aSuggestions.list.map((s) =>
-          getSuggestion(s, aSuggestions.type, visibleOperationsMap, context.triggerCharacter)
+          getSuggestion(
+            s,
+            aSuggestions.type,
+            visibleOperationsMap,
+            context.triggerCharacter,
+            aSuggestions.range
+          )
         ),
       };
     },
@@ -541,6 +574,8 @@ export function FormulaEditor({
       dimension: { width: 320, height: 200 },
       fixedOverflowWidgets: true,
       matchBrackets: 'always',
+      // Undocumented Monaco option to force left margin width
+      lineDecorationsWidth: 16,
     },
   };
 
@@ -579,7 +614,6 @@ export function FormulaEditor({
             <div className="lnsFormula__editorHeader">
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup">
-                  {/* TODO: Replace `bolt` with `wordWrap` icon (after latest EUI is deployed) and hook up button to enable/disable word wrapping. */}
                   <EuiToolTip
                     content={
                       isWordWrapped
@@ -593,7 +627,7 @@ export function FormulaEditor({
                     position="top"
                   >
                     <EuiButtonIcon
-                      iconType="bolt"
+                      iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
                       display={!isWordWrapped ? 'fill' : undefined}
                       color={'text'}
                       aria-label={
@@ -617,7 +651,6 @@ export function FormulaEditor({
                 </EuiFlexItem>
 
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup" grow={false}>
-                  {/* TODO: Replace `bolt` with `fullScreenExit` icon (after latest EUI is deployed). */}
                   <EuiButtonEmpty
                     onClick={() => {
                       toggleFullscreen();
@@ -625,7 +658,7 @@ export function FormulaEditor({
                       setIsHelpOpen(!isFullscreen);
                       trackUiEvent('toggle_formula_fullscreen');
                     }}
-                    iconType={isFullscreen ? 'bolt' : 'fullScreen'}
+                    iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
                     size="xs"
                     color="text"
                     flush="right"
@@ -719,16 +752,21 @@ export function FormulaEditor({
                         color="text"
                         onClick={() => setIsHelpOpen(!isHelpOpen)}
                       >
-                        <EuiIcon type="help" />
+                        <EuiIcon type="documentation" />
                         <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
                       </EuiLink>
                     </EuiToolTip>
                   ) : (
-                    <EuiToolTip
-                      content={i18n.translate('xpack.lens.formula.editorHelpOverlayToolTip', {
-                        defaultMessage: 'Function reference',
-                      })}
+                    <TooltipWrapper
+                      tooltipContent={i18n.translate(
+                        'xpack.lens.formula.editorHelpOverlayToolTip',
+                        {
+                          defaultMessage: 'Function reference',
+                        }
+                      )}
+                      condition={!isHelpOpen}
                       position="top"
+                      delay="regular"
                     >
                       <EuiPopover
                         panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
@@ -740,10 +778,14 @@ export function FormulaEditor({
                         button={
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
-                            onClick={() => setIsHelpOpen(!isHelpOpen)}
-                            iconType="help"
+                            onClick={() => {
+                              if (!isHelpOpen) {
+                                trackUiEvent('open_formula_popover');
+                              }
+                              setIsHelpOpen(!isHelpOpen);
+                            }}
+                            iconType="documentation"
                             color="text"
-                            size="s"
                             aria-label={i18n.translate(
                               'xpack.lens.formula.editorHelpInlineShowToolTip',
                               {
@@ -759,7 +801,7 @@ export function FormulaEditor({
                           operationDefinitionMap={visibleOperationsMap}
                         />
                       </EuiPopover>
-                    </EuiToolTip>
+                    </TooltipWrapper>
                   )}
                 </EuiFlexItem>
 

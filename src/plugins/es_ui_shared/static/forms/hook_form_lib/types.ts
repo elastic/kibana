@@ -36,6 +36,8 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   /** Access the fields on the form. */
   getFields: () => FieldsMap;
+  /** Access the defaultValue for a specific field */
+  getFieldDefaultValue: (path: string) => unknown;
   /**
    * Return the form data. It accepts an optional options object with an `unflatten` parameter (defaults to `true`).
    * If you are only interested in the raw form data, pass `unflatten: false` to the handler
@@ -53,12 +55,15 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (
-    fieldNames: string[]
+    fieldNames: string[],
+    /** Run only blocking validations */
+    onlyBlocking?: boolean
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;
-  __getFieldDefaultValue: (path: string) => unknown;
+  __getFormDefaultValue: () => FormData;
+  __getFieldsRemoved: () => FieldsMap;
 }
 
 export type FormSchema<T extends FormData = FormData> = {
@@ -106,6 +111,8 @@ export interface FieldHook<T = unknown, I = T> {
   readonly errors: ValidationError[];
   readonly isValid: boolean;
   readonly isPristine: boolean;
+  readonly isDirty: boolean;
+  readonly isModified: boolean;
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;
@@ -137,6 +144,7 @@ export interface FieldHook<T = unknown, I = T> {
     formData?: any;
     value?: I;
     validationType?: string;
+    onlyBlocking?: boolean;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
   // Flag to indicate if the field value will be included in the form data outputted
@@ -185,6 +193,11 @@ export interface ValidationFuncArg<I extends FormData, V = unknown> {
   };
   formData: I;
   errors: readonly ValidationError[];
+  customData: {
+    /** Async handler that will resolve whenever a value is sent to the `validationData$` Observable */
+    provider: () => Promise<unknown>;
+    value: unknown;
+  };
 }
 
 export type ValidationFunc<

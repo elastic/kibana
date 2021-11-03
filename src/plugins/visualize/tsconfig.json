@@ -1,17 +1,12 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
@@ -30,5 +25,6 @@
     { "path": "../home/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
   ]
 }

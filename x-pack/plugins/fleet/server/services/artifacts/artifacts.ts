@@ -87,6 +87,7 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
     await esClient.delete({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
       id,
+      refresh: 'wait_for',
     });
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);
@@ -102,11 +103,13 @@ export const listArtifacts = async (
   try {
     const searchResult = await esClient.search<ArtifactElasticsearchProperties>({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
-      sort: `${sortField}:${sortOrder}`,
       q: kuery,
       from: (page - 1) * perPage,
       ignore_unavailable: true,
       size: perPage,
+      body: {
+        sort: [{ [sortField]: { order: sortOrder } }],
+      },
     });
 
     return {

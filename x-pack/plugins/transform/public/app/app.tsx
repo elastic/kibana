@@ -35,7 +35,7 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
         title={
           <FormattedMessage
             id="xpack.transform.app.checkingPrivilegesErrorMessage"
-            defaultMessage="Error fetching user privileges from the server."
+            defaultMessage="Error fetching user privileges from the server"
           />
         }
         error={apiError}
@@ -44,21 +44,19 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
   }
 
   return (
-    <div data-test-subj="transformApp">
-      <Router history={history}>
-        <Switch>
-          <Route
-            path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-            component={CloneTransformSection}
-          />
-          <Route
-            path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-            component={CreateTransformSection}
-          />
-          <Route path={`/`} component={TransformManagementSection} />
-        </Switch>
-      </Router>
-    </div>
+    <Router history={history}>
+      <Switch>
+        <Route
+          path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+          component={CloneTransformSection}
+        />
+        <Route
+          path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+          component={CreateTransformSection}
+        />
+        <Route path={`/`} component={TransformManagementSection} />
+      </Switch>
+    </Router>
   );
 };
 

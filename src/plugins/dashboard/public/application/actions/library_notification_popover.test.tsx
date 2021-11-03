@@ -7,8 +7,9 @@
  */
 
 import React from 'react';
-import { DashboardContainer } from '..';
 import { mountWithIntl } from '@kbn/test/jest';
+
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
 import {
@@ -73,10 +74,10 @@ describe('LibraryNotificationPopover', () => {
     }
 
     defaultProps = {
-      unlinkAction: ({
+      unlinkAction: {
         execute: jest.fn(),
         getDisplayName: () => 'test unlink',
-      } as unknown) as LibraryNotificationProps['unlinkAction'],
+      } as unknown as LibraryNotificationProps['unlinkAction'],
       displayName: 'test display',
       context: { embeddable: contactCardEmbeddable },
       icon: 'testIcon',

@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
 import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
@@ -18,12 +17,6 @@ import { timelineActions } from '../../store/timeline';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
-
-const Visible = styled.div<{ show?: boolean }>`
-  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
-`;
-
-Visible.displayName = 'Visible';
 
 interface OwnProps {
   timelineId: TimelineId;
@@ -35,9 +28,12 @@ type VoidFunc = () => void;
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    getTimelineShowStatus(state, timelineId)
-  );
+  const {
+    activeTab,
+    show,
+    status: timelineStatus,
+    updated,
+  } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
   const [focusOwnership, setFocusOwnership] = useState(true);
   const [triggerOnBlur, setTriggerOnBlur] = useState(true);
@@ -124,9 +120,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
     <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
       <>
         <EuiFocusTrap disabled={!focusOwnership}>
-          <Visible show={show}>
-            <Pane timelineId={timelineId} />
-          </Visible>
+          <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
         <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
       </>

@@ -9,8 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { IndexPattern } from './types';
 import { FieldItem } from './field_item';
 import { FieldsAccordion, FieldsAccordionProps, FieldItemSharedProps } from './fields_accordion';
@@ -21,7 +20,6 @@ describe('Fields Accordion', () => {
   let defaultProps: FieldsAccordionProps;
   let indexPattern: IndexPattern;
   let core: ReturnType<typeof coreMock['createSetup']>;
-  let data: DataPublicPluginStart;
   let fieldProps: FieldItemSharedProps;
 
   beforeEach(() => {
@@ -45,12 +43,11 @@ describe('Fields Accordion', () => {
       ],
     } as IndexPattern;
     core = coreMock.createSetup();
-    data = dataPluginMock.createStartContract();
     core.http.post.mockClear();
 
     fieldProps = {
       indexPattern,
-      data,
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       core,
       highlight: '',
       dateRange: {

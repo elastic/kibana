@@ -45,15 +45,13 @@ export function defineKeyRotationRoutes({
     async (context, request, response) => {
       if (config.keyRotation.decryptionOnlyKeys.length === 0) {
         return response.badRequest({
-          body:
-            'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
+          body: 'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
         });
       }
 
       if (rotationInProgress) {
         return response.customError({
-          body:
-            'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
+          body: 'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
           statusCode: 429,
         });
       }

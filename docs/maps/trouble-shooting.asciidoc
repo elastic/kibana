@@ -51,10 +51,3 @@ Increase <<settings, `server.maxPayload`>> for large index patterns.
 ==== Custom tiles are not displayed
 * When using a custom tile service, ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your {kib} domain have permission to access your tile server domain.
 * Ensure custom vector and tile services have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
-
-[float]
-==== Coordinate and region map visualizations not available in New Visualization menu
-
-Kibana’s out-of-the-box settings no longer offers coordinate and region maps as a
-choice in the New Visualization menu because you can create these maps in the Maps app.
-If you want to create new coordinate and region map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.

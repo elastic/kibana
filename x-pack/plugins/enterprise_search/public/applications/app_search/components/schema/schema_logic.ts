@@ -108,7 +108,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     ],
   },
   selectors: {
-    hasSchema: [(selectors) => [selectors.schema], (schema) => Object.keys(schema).length > 0],
+    hasSchema: [
+      (selectors) => [selectors.cachedSchema],
+      (cachedSchema) => Object.keys(cachedSchema).length > 0,
+    ],
     hasSchemaChanged: [
       (selectors) => [selectors.schema, selectors.cachedSchema],
       (schema, cachedSchema) => !isEqual(schema, cachedSchema),
@@ -143,9 +146,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       clearFlashMessages();
 
       try {
-        const response = await http.post(`/api/app_search/engines/${engineName}/schema`, {
-          body: JSON.stringify(schema),
-        });
+        const response = await http.post<SchemaApiResponse>(
+          `/internal/app_search/engines/${engineName}/schema`,
+          { body: JSON.stringify(schema) }
+        );
         actions.onSchemaLoad(response);
         flashSuccessToast(successMessage || UPDATE_SCHEMA_SUCCESS);
       } catch (e) {

@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import styled from 'styled-components';
 
-import { EuiFormRow } from '@elastic/eui';
+import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { FieldHook } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
+import { useKibana } from '../../common/lib/kibana';
+
+const StyledEuiCodeBlock = styled(EuiCodeBlock)`
+  min-height: 100px;
+`;
 
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
@@ -17,6 +24,7 @@ interface LiveQueryQueryFieldProps {
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { value, setValue, errors } = field;
   const error = errors[0]?.message;
 
@@ -28,8 +36,25 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
   );
 
   return (
-    <EuiFormRow isInvalid={typeof error === 'string'} error={error} fullWidth>
-      <OsqueryEditor defaultValue={value} disabled={disabled} onChange={handleEditorChange} />
+    <EuiFormRow
+      isInvalid={typeof error === 'string'}
+      error={error}
+      fullWidth
+      labelAppend={<OsquerySchemaLink />}
+      isDisabled={!permissions.writeLiveQueries || disabled}
+    >
+      {!permissions.writeLiveQueries || disabled ? (
+        <StyledEuiCodeBlock
+          language="sql"
+          fontSize="m"
+          paddingSize="m"
+          transparentBackground={!value.length}
+        >
+          {value}
+        </StyledEuiCodeBlock>
+      ) : (
+        <OsqueryEditor defaultValue={value} onChange={handleEditorChange} />
+      )}
     </EuiFormRow>
   );
 };

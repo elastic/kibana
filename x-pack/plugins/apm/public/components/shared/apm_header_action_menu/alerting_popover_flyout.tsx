@@ -18,7 +18,7 @@ import { AlertType } from '../../../../common/alert_types';
 import { AlertingFlyout } from '../../alerting/alerting_flyout';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'Alerts and rules',
 });
 const transactionDurationLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionDuration',
@@ -26,18 +26,18 @@ const transactionDurationLabel = i18n.translate(
 );
 const transactionErrorRateLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionErrorRate',
-  { defaultMessage: 'Transaction error rate' }
+  { defaultMessage: 'Failed transaction rate' }
 );
 const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
   defaultMessage: 'Error count',
 });
 const createThresholdAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createThresholdAlert',
-  { defaultMessage: 'Create threshold alert' }
+  { defaultMessage: 'Create threshold rule' }
 );
 const createAnomalyAlertAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createAnomalyAlert',
-  { defaultMessage: 'Create anomaly alert' }
+  { defaultMessage: 'Create anomaly rule' }
 );
 
 const CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID =
@@ -66,7 +66,6 @@ export function AlertingPopoverAndFlyout({
 
   const button = (
     <EuiHeaderLink
-      size="xs"
       color="text"
       iconType="arrowDown"
       iconSide="right"
@@ -102,7 +101,7 @@ export function AlertingPopoverAndFlyout({
               {
                 name: i18n.translate(
                   'xpack.apm.home.alertsMenu.viewActiveAlerts',
-                  { defaultMessage: 'View active alerts' }
+                  { defaultMessage: 'Manage rules' }
                 ),
                 href: basePath.prepend(
                   '/app/management/insightsAndAlerting/triggersActions/alerts'
@@ -147,7 +146,7 @@ export function AlertingPopoverAndFlyout({
       ],
     },
 
-    // transaction error rate panel
+    // Failed transactions panel
     {
       id: CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID,
       title: transactionErrorRateLabel,

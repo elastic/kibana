@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "GCP Storage Bucket Permissions Modification",
   "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:\"storage.setIamPermissions\" and event.outcome:success",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:\"storage.setIamPermissions\" and event.outcome:success\n",
   "references": [
     "https://cloud.google.com/storage/docs/access-control/iam-permissions"
   ],

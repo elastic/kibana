@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
@@ -196,22 +196,21 @@ export const TemplateForm = ({
   };
 
   const buildTemplateObject = useCallback(
-    (initialTemplate: TemplateDeserialized) => (
-      wizardData: WizardContent
-    ): TemplateDeserialized => {
-      const outputTemplate = {
-        ...wizardData.logistics,
-        _kbnMeta: initialTemplate._kbnMeta,
-        composedOf: wizardData.components,
-        template: {
-          settings: wizardData.settings,
-          mappings: wizardData.mappings,
-          aliases: wizardData.aliases,
-        },
-      };
+    (initialTemplate: TemplateDeserialized) =>
+      (wizardData: WizardContent): TemplateDeserialized => {
+        const outputTemplate = {
+          ...wizardData.logistics,
+          _kbnMeta: initialTemplate._kbnMeta,
+          composedOf: wizardData.components,
+          template: {
+            settings: wizardData.settings,
+            mappings: wizardData.mappings,
+            aliases: wizardData.aliases,
+          },
+        };
 
-      return cleanupTemplateObject(outputTemplate);
-    },
+        return cleanupTemplateObject(outputTemplate);
+      },
     []
   );
 
@@ -292,7 +291,7 @@ export const TemplateForm = ({
   return (
     <>
       {/* Form header */}
-      {title}
+      <EuiPageHeader pageTitle={<span data-test-subj="pageTitle">{title}</span>} bottomBorder />
 
       <EuiSpacer size="m" />
 

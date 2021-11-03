@@ -5,22 +5,8 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../../ecs';
-import { CursorType, Maybe } from '../../../common';
-
-export interface TimelineEdges {
-  node: TimelineItem;
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-  _index?: Maybe<string>;
-  data: TimelineNonEcsData[];
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-  value?: Maybe<string[] | string>;
-}
+export type {
+  TimelineEdges,
+  TimelineItem,
+  TimelineNonEcsData,
+} from '../../../../../../timelines/common';

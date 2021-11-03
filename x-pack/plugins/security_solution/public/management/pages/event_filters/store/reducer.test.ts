@@ -67,6 +67,25 @@ describe('event filters reducer', () => {
       });
     });
 
+    it('change form values without entry', () => {
+      const newComment = 'new comment';
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'eventFiltersChangeForm',
+        payload: { newComment },
+      });
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        form: {
+          ...initialState.form,
+          newComment,
+          submissionResourceState: {
+            type: 'UninitialisedResourceState',
+          },
+        },
+      });
+    });
+
     it('change form status', () => {
       const result = eventFiltersPageReducer(initialState, {
         type: 'eventFiltersFormStateChanged',
@@ -128,7 +147,7 @@ describe('event filters reducer', () => {
   describe('UserChangedUrl', () => {
     const userChangedUrlAction = (
       search: string = '',
-      pathname = '/event_filters'
+      pathname = '/administration/event_filters'
     ): UserChangedUrl => ({
       type: 'userChangedUrl',
       payload: { search, pathname, hash: '' },
@@ -165,6 +184,37 @@ describe('event filters reducer', () => {
             active: true,
           },
         });
+      });
+    });
+  });
+
+  describe('ForceRefresh', () => {
+    it('sets the force refresh state to true', () => {
+      const result = eventFiltersPageReducer(
+        {
+          ...initialState,
+          listPage: { ...initialState.listPage, forceRefresh: false },
+        },
+        { type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } }
+      );
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        listPage: { ...initialState.listPage, forceRefresh: true },
+      });
+    });
+    it('sets the force refresh state to false', () => {
+      const result = eventFiltersPageReducer(
+        {
+          ...initialState,
+          listPage: { ...initialState.listPage, forceRefresh: true },
+        },
+        { type: 'eventFiltersForceRefresh', payload: { forceRefresh: false } }
+      );
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        listPage: { ...initialState.listPage, forceRefresh: false },
       });
     });
   });

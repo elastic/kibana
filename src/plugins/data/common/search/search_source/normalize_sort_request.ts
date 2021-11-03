@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../..';
 import { EsQuerySortValue, SortOptions } from './types';
 
 export function normalizeSortRequest(

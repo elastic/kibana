@@ -1,8 +1,44 @@
 [[upgrade]]
 == Upgrade {kib}
 
-Depending on the {kib} version you're upgrading from, the upgrade process to 7.0
-varies.
+You can always upgrade to the latest patch release or from one minor version 
+to another within the same major version series.
+
+For major version upgrades:
+
+. Upgrade to the last minor version released before the new major version.
+. Use the Upgrade Assistant to determine what changes you need to make before the major version upgrade.
+. When you've addressed all the critical issues, upgrade {es} and then upgrade {kib}.
+
+IMPORTANT: You can upgrade to pre-release versions of 8.0 for testing, 
+but upgrading from a pre-release to the final GA version is not supported.
+Pre-releases should only be used for testing in a temporary environment.
+
+[discrete]
+[[upgrade-paths]]
+=== Recommended upgrade paths to 8.0
+
+[cols="<1,3",options="header",]
+|====
+|Upgrading from   
+|Upgrade path 
+
+|7.16
+|Upgrade to 8.0
+
+|6.8–7.15
+a|
+
+. Upgrade to 7.16
+. Upgrade to 8.0
+
+|6.0–6.7
+a|
+
+. Upgrade to 6.8
+. Upgrade to 7.16
+. Upgrade to 8.0
+|====
 
 [float]
 [[upgrade-before-you-begin]]

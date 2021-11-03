@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-require('../packages/kbn-spec-to-console/bin/spec_to_console');
+require('@kbn/spec-to-console/bin/spec_to_console');

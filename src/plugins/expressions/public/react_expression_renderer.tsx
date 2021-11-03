@@ -13,10 +13,9 @@ import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { IExpressionLoaderParams, ExpressionRenderError } from './types';
+import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
-import { ExpressionRendererEvent } from './render';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
@@ -30,7 +29,11 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   onEvent?: (event: ExpressionRendererEvent) => void;
-  onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters) => void;
+  onData$?: <TData, TInspectorAdapters>(
+    data: TData,
+    adapters?: TInspectorAdapters,
+    partial?: boolean
+  ) => void;
   /**
    * An observable which can be used to re-run the expression without destroying the component
    */
@@ -54,7 +57,8 @@ const defaultState: State = {
   error: null,
 };
 
-export const ReactExpressionRenderer = ({
+// eslint-disable-next-line import/no-default-export
+export default function ReactExpressionRenderer({
   className,
   dataAttrs,
   padding,
@@ -65,7 +69,7 @@ export const ReactExpressionRenderer = ({
   reload$,
   debounce,
   ...expressionLoaderOptions
-}: ReactExpressionRendererProps) => {
+}: ReactExpressionRendererProps) {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
   const [state, setState] = useState<State>({ ...defaultState });
   const hasCustomRenderErrorHandler = !!renderError;
@@ -75,9 +79,8 @@ export const ReactExpressionRenderer = ({
   const hasHandledErrorRef = useRef(false);
 
   // will call done() in LayoutEffect when done with rendering custom error state
-  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> = useRef(
-    null
-  );
+  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> =
+    useRef(null);
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
   const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
   const firstRender = useRef(true);
@@ -135,8 +138,8 @@ export const ReactExpressionRenderer = ({
     }
     if (onData$) {
       subs.push(
-        expressionLoaderRef.current.data$.subscribe((newData) => {
-          onData$(newData, expressionLoaderRef.current?.inspect());
+        expressionLoaderRef.current.data$.subscribe(({ partial, result }) => {
+          onData$(result, expressionLoaderRef.current?.inspect(), partial);
         })
       );
     }
@@ -167,6 +170,7 @@ export const ReactExpressionRenderer = ({
   }, [
     hasCustomRenderErrorHandler,
     onEvent,
+    expressionLoaderOptions.interactive,
     expressionLoaderOptions.renderMode,
     expressionLoaderOptions.syncColors,
   ]);
@@ -233,4 +237,4 @@ export const ReactExpressionRenderer = ({
       />
     </div>
   );
-};
+}

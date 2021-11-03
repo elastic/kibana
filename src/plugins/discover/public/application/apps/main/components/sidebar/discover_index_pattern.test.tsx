@@ -66,11 +66,11 @@ function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel:
 
 describe('DiscoverIndexPattern', () => {
   test('Invalid props dont cause an exception', () => {
-    const props = ({
+    const props = {
       indexPatternList: null,
       selectedIndexPattern: null,
       onChangeIndexPattern: jest.fn(),
-    } as unknown) as DiscoverIndexPatternProps;
+    } as unknown as DiscoverIndexPatternProps;
 
     expect(shallow(<DiscoverIndexPattern {...props} />)).toMatchSnapshot(`""`);
   });

@@ -11,9 +11,10 @@ import 'brace/ext/language_tools';
 import { AceInterface } from './ace_types';
 import './osquery_highlight_rules';
 
-((ace as unknown) as AceInterface).define(
+(ace as unknown as AceInterface).define(
   'ace/mode/osquery',
   ['require', 'exports', 'ace/mode/sql', 'ace/mode/osquery_highlight_rules'],
+  // eslint-disable-next-line prefer-arrow-callback
   function (acequire, exports) {
     const TextMode = acequire('./sql').Mode;
     const OsqueryHighlightRules = acequire('./osquery_highlight_rules').OsqueryHighlightRules;

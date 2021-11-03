@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ENDPOINT_POLICY = i18n.translate(
   'xpack.securitySolution.host.details.endpoint.endpointPolicy',
   {
-    defaultMessage: 'Integration',
+    defaultMessage: 'Endpoint integration policy',
   }
 );
 
@@ -24,6 +24,13 @@ export const POLICY_STATUS = i18n.translate(
 export const SENSORVERSION = i18n.translate(
   'xpack.securitySolution.host.details.endpoint.sensorversion',
   {
-    defaultMessage: 'Sensor Version',
+    defaultMessage: 'Endpoint version',
+  }
+);
+
+export const FLEET_AGENT_STATUS = i18n.translate(
+  'xpack.securitySolution.host.details.endpoint.fleetAgentStatus',
+  {
+    defaultMessage: 'Agent status',
   }
 );

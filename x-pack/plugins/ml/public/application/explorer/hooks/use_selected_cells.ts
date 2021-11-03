@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { SWIMLANE_TYPE } from '../explorer_constants';
 import { AppStateSelectedCells } from '../explorer_utils';
-import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
+import { ExplorerAppState } from '../../../../common/types/locator';
 import { useTimefilter } from '../../contexts/kibana';
 
 export const useSelectedCells = (

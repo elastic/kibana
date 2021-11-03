@@ -14,6 +14,7 @@ import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 
 // Needed to mock the data services used by the ExceptionItem component
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('When on the Event Filters List Page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -41,7 +42,7 @@ describe('When on the Event Filters List Page', () => {
     waitForAction = mockedContext.middlewareSpy.waitForAction;
 
     act(() => {
-      history.push('/event_filters');
+      history.push('/administration/event_filters');
     });
   });
 
@@ -108,20 +109,15 @@ describe('When on the Event Filters List Page', () => {
     it('should render expected fields on card', async () => {
       render();
       await dataReceived();
-      const eventMeta = ([] as HTMLElement[]).map.call(
-        renderResult.getByTestId('exceptionsViewerItemDetails').querySelectorAll('dd'),
-        (ele) => ele.textContent
-      );
 
-      expect(eventMeta).toEqual([
-        'some name',
-        'Linux',
-        'April 20th 2020 @ 11:25:31',
-        'some user',
-        'April 20th 2020 @ 11:25:31',
-        'some user',
-        'some description',
-      ]);
+      [
+        ['subHeader-touchedBy-createdBy-value', 'some user'],
+        ['subHeader-touchedBy-updatedBy-value', 'some user'],
+        ['header-created-value', '4/20/2020'],
+        ['header-updated-value', '4/20/2020'],
+      ].forEach(([suffix, value]) =>
+        expect(renderResult.getByTestId(`eventFilterCard-${suffix}`).textContent).toEqual(value)
+      );
     });
 
     it('should show API error if one is encountered', async () => {
@@ -143,8 +139,13 @@ describe('When on the Event Filters List Page', () => {
     it('should show modal when delete is clicked on a card', async () => {
       render();
       await dataReceived();
-      act(() => {
-        fireEvent.click(renderResult.getByTestId('exceptionsViewerDeleteBtn'));
+
+      await act(async () => {
+        (await renderResult.findAllByTestId('eventFilterCard-header-actions-button'))[0].click();
+      });
+
+      await act(async () => {
+        (await renderResult.findByTestId('deleteEventFilterAction')).click();
       });
 
       expect(
@@ -156,7 +157,7 @@ describe('When on the Event Filters List Page', () => {
   describe('And search is dispatched', () => {
     beforeEach(async () => {
       act(() => {
-        history.push('/event_filters?filter=test');
+        history.push('/administration/event_filters?filter=test');
       });
       renderResult = render();
       await act(async () => {
@@ -180,7 +181,7 @@ describe('When on the Event Filters List Page', () => {
     beforeEach(async () => {
       renderResult = render();
       act(() => {
-        history.push('/event_filters', {
+        history.push('/administration/event_filters', {
           onBackButtonNavigateTo: [{ appId: 'appId' }],
           backButtonLabel: 'back to fleet',
           backButtonUrl: '/fleet',
@@ -196,7 +197,7 @@ describe('When on the Event Filters List Page', () => {
 
     it('back button is not present', () => {
       act(() => {
-        history.push('/event_filters');
+        history.push('/administration/event_filters');
       });
       expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
     });

@@ -16,8 +16,8 @@ Jira connectors have the following configuration properties.
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
 URL::       Jira instance URL.
 Project key:: Jira project key.
-Email (or username)::  The account email (or username) for HTTP Basic authentication.
-API token (or password)::  Jira API authentication token (or password) for HTTP Basic authentication.
+Email::  The account email for HTTP Basic authentication.
+API token::  Jira API authentication token for HTTP Basic authentication.
 
 [float]
 [[jira-connector-networking-configuration]]

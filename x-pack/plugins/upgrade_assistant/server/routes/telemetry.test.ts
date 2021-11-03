@@ -44,8 +44,8 @@ describe('Upgrade Assistant Telemetry API', () => {
     it('returns correct payload with single option', async () => {
       const returnPayload = {
         overview: true,
-        cluster: false,
-        indices: false,
+        elasticsearch: false,
+        kibana: false,
       };
 
       (upsertUIOpenOption as jest.Mock).mockResolvedValue(returnPayload);
@@ -65,8 +65,8 @@ describe('Upgrade Assistant Telemetry API', () => {
     it('returns correct payload with multiple option', async () => {
       const returnPayload = {
         overview: true,
-        cluster: true,
-        indices: true,
+        elasticsearch: true,
+        kibana: true,
       };
 
       (upsertUIOpenOption as jest.Mock).mockResolvedValue(returnPayload);
@@ -79,8 +79,8 @@ describe('Upgrade Assistant Telemetry API', () => {
         createRequestMock({
           body: {
             overview: true,
-            cluster: true,
-            indices: true,
+            elasticsearch: true,
+            kibana: true,
           },
         }),
         kibanaResponseFactory

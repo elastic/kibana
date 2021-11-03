@@ -14,24 +14,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
-import { ErrorGroupList } from './List';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
+import { ErrorDistribution } from '../error_group_details/Distribution';
+import { ErrorGroupList } from './error_group_list';
 
-interface ErrorGroupOverviewProps {
-  serviceName: string;
-}
+export function ErrorGroupOverview() {
+  const { serviceName } = useApmServiceContext();
 
-export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   const {
-    urlParams: { environment, kuery, start, end, sortField, sortDirection },
-  } = useUrlParams();
-  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+    query: { environment, kuery, sortField, sortDirection, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/errors');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
+    environment,
+    kuery,
   });
 
   const { data: errorGroupListData } = useFetcher(
@@ -40,7 +46,7 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
 
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/errors',
+          endpoint: 'GET /internal/apm/services/{serviceName}/errors',
           params: {
             path: {
               serviceName,
@@ -60,12 +66,6 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
     [environment, kuery, serviceName, start, end, sortField, sortDirection]
   );
 
-  useTrackPageview({
-    app: 'apm',
-    path: 'error_group_overview',
-  });
-  useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
-
   if (!errorDistributionData || !errorGroupListData) {
     return null;
   }
@@ -73,19 +73,32 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiPanel>
-          <ErrorDistribution
-            distribution={errorDistributionData}
-            title={i18n.translate(
-              'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
-              { defaultMessage: 'Error occurrences' }
-            )}
-          />
-        </EuiPanel>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <ChartPointerEventContextProvider>
+            <EuiFlexItem>
+              <EuiPanel hasBorder={true}>
+                <ErrorDistribution
+                  fetchStatus={status}
+                  distribution={errorDistributionData}
+                  title={i18n.translate(
+                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+                    { defaultMessage: 'Error occurrences' }
+                  )}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FailedTransactionRateChart
+                kuery={kuery}
+                environment={environment}
+              />
+            </EuiFlexItem>
+          </ChartPointerEventContextProvider>
+        </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiPanel>
+        <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h3>
               {i18n.translate(

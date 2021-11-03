@@ -15,6 +15,7 @@ import type {
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
+import { isQueryValid } from './operations/definitions/filters';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -52,7 +53,7 @@ export function isColumnInvalid(
   indexPattern: IndexPattern
 ) {
   const column: IndexPatternColumn | undefined = layer.columns[columnId];
-  if (!column) return;
+  if (!column || !indexPattern) return;
 
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
   // check also references for errors
@@ -68,7 +69,13 @@ export function isColumnInvalid(
     operationDefinitionMap
   );
 
-  return (operationErrorMessages && operationErrorMessages.length > 0) || referencesHaveErrors;
+  const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
+
+  return (
+    (operationErrorMessages && operationErrorMessages.length > 0) ||
+    referencesHaveErrors ||
+    filterHasError
+  );
 }
 
 function getReferencesErrors(

@@ -11,7 +11,7 @@ import { Alert } from '../../../types';
 describe('alert reducer', () => {
   let initialAlert: Alert;
   beforeAll(() => {
-    initialAlert = ({
+    initialAlert = {
       params: {},
       consumer: 'alerts',
       alertTypeId: null,
@@ -21,7 +21,7 @@ describe('alert reducer', () => {
       actions: [],
       tags: [],
       notifyWhen: 'onActionGroupChange',
-    } as unknown) as Alert;
+    } as unknown as Alert;
   });
 
   // setAlert

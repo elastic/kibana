@@ -13,7 +13,7 @@ describe('getTransactionType', () => {
       expect(
         getTransactionType({
           transactionTypes: ['worker', 'request'],
-          urlParams: { transactionType: 'custom' },
+          transactionType: 'custom',
           agentName: 'nodejs',
         })
       ).toBe('custom');
@@ -25,7 +25,6 @@ describe('getTransactionType', () => {
       expect(
         getTransactionType({
           transactionTypes: [],
-          urlParams: {},
         })
       ).toBeUndefined();
     });
@@ -37,7 +36,6 @@ describe('getTransactionType', () => {
         expect(
           getTransactionType({
             transactionTypes: ['worker', 'request'],
-            urlParams: {},
             agentName: 'nodejs',
           })
         ).toEqual('request');
@@ -49,7 +47,6 @@ describe('getTransactionType', () => {
         expect(
           getTransactionType({
             transactionTypes: ['worker', 'custom'],
-            urlParams: {},
             agentName: 'nodejs',
           })
         ).toEqual('worker');
@@ -62,7 +59,6 @@ describe('getTransactionType', () => {
       expect(
         getTransactionType({
           transactionTypes: ['http-request', 'page-load'],
-          urlParams: {},
           agentName: 'js-base',
         })
       ).toEqual('page-load');

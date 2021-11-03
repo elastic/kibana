@@ -7,7 +7,3 @@
 
 export { EnterpriseSearchPageTemplate, PageTemplateProps } from './page_template';
 export { generateNavLink } from './nav_link_helpers';
-
-// TODO: Delete these once KibanaPageTemplate migration is done
-export { Layout } from './layout';
-export { SideNav, SideNavLink, SideNavItem } from './side_nav';

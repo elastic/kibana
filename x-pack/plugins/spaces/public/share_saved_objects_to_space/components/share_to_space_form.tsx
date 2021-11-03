@@ -12,12 +12,12 @@ import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { ShareToSpaceTarget } from '../../types';
+import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
 import { ShareModeControl } from './share_mode_control';
 
 interface Props {
-  spaces: ShareToSpaceTarget[];
+  spaces: SpacesDataEntry[];
   objectNoun: string;
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;
@@ -61,7 +61,7 @@ export const ShareToSpaceForm = (props: Props) => {
           defaultMessage="Your changes appear in each space you select. {makeACopyLink} if you don't want to synchronize your changes."
           values={{
             makeACopyLink: (
-              <EuiLink data-test-subj="sts-copy-link" onClick={() => makeCopy()}>
+              <EuiLink data-test-subj="sts-copy-button" onClick={() => makeCopy()}>
                 <FormattedMessage
                   id="xpack.spaces.shareToSpace.shareWarningLink"
                   defaultMessage="Make a copy"
@@ -77,7 +77,7 @@ export const ShareToSpaceForm = (props: Props) => {
   ) : null;
 
   return (
-    <div data-test-subj="share-to-space-form">
+    <>
       {createCopyCallout}
 
       <ShareModeControl
@@ -89,6 +89,6 @@ export const ShareToSpaceForm = (props: Props) => {
         enableCreateNewSpaceLink={enableCreateNewSpaceLink}
         enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
       />
-    </div>
+    </>
   );
 };

@@ -32,14 +32,14 @@ import {
   SanitizedAlert,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
-  AlertTypeRegistry,
+  RuleTypeRegistry,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
-import { AlertsClient } from '../alerts_client';
+import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
   ActionGroup,
@@ -49,12 +49,17 @@ import {
   AlertInstanceContext,
   WithoutReservedActionGroups,
 } from '../../common';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType, UntypedNormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
+import {
+  createAlertEventLogRecordObject,
+  Event,
+} from '../lib/create_alert_event_log_record_object';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
-type Event = Exclude<IEvent, undefined>;
+// 1,000,000 nanoseconds in 1 millisecond
+const Millis2Nanos = 1000 * 1000;
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
@@ -67,6 +72,7 @@ interface AlertTaskInstance extends ConcreteTaskInstance {
 
 export class TaskRunner<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -78,17 +84,19 @@ export class TaskRunner<
   private taskInstance: AlertTaskInstance;
   private alertType: NormalizedAlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
     ActionGroupIds,
     RecoveryActionGroupId
   >;
-  private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly ruleTypeRegistry: RuleTypeRegistry;
 
   constructor(
     alertType: NormalizedAlertType<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -102,7 +110,7 @@ export class TaskRunner<
     this.logger = context.logger;
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
-    this.alertTypeRegistry = context.alertTypeRegistry;
+    this.ruleTypeRegistry = context.ruleTypeRegistry;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -129,7 +137,7 @@ export class TaskRunner<
 
     const path = addSpaceIdToPath('/', spaceId);
 
-    const fakeRequest = KibanaRequest.from(({
+    const fakeRequest = KibanaRequest.from({
       headers: requestHeaders,
       path: '/',
       route: { settings: {} },
@@ -141,7 +149,7 @@ export class TaskRunner<
           url: '/',
         },
       },
-    } as unknown) as Request);
+    } as unknown as Request);
 
     this.context.basePathService.set(fakeRequest, path);
 
@@ -151,9 +159,9 @@ export class TaskRunner<
   private getServicesWithSpaceLevelPermissions(
     spaceId: string,
     apiKey: RawAlert['apiKey']
-  ): [Services, PublicMethodsOf<AlertsClient>] {
+  ): [Services, PublicMethodsOf<RulesClient>] {
     const request = this.getFakeKibanaRequest(spaceId, apiKey);
-    return [this.context.getServices(request), this.context.getAlertsClientWithRequest(request)];
+    return [this.context.getServices(request), this.context.getRulesClientWithRequest(request)];
   }
 
   private getExecutionHandler(
@@ -168,6 +176,7 @@ export class TaskRunner<
   ) {
     return createExecutionHandler<
       Params,
+      ExtractedParams,
       State,
       InstanceState,
       InstanceContext,
@@ -187,6 +196,8 @@ export class TaskRunner<
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
+      supportsEphemeralTasks: this.context.supportsEphemeralTasks,
+      maxEphemeralActionsPerAlert: this.context.maxEphemeralActionsPerAlert,
     });
   }
 
@@ -236,7 +247,7 @@ export class TaskRunner<
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
-    const alertType = this.alertTypeRegistry.get(alertTypeId);
+    const alertType = this.ruleTypeRegistry.get(alertTypeId);
 
     const alertInstances = mapValues<
       Record<string, RawAlertInstance>,
@@ -253,44 +264,55 @@ export class TaskRunner<
 
     let updatedAlertTypeState: void | Record<string, unknown>;
     try {
-      updatedAlertTypeState = await this.alertType.executor({
-        alertId,
-        services: {
-          ...services,
-          alertInstanceFactory: createAlertInstanceFactory<
-            InstanceState,
-            InstanceContext,
-            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-          >(alertInstances),
-        },
-        params,
-        state: alertTypeState as State,
-        startedAt: this.taskInstance.startedAt!,
-        previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-        spaceId,
-        namespace,
-        name,
-        tags,
-        createdBy,
-        updatedBy,
-        rule: {
+      const ctx = {
+        type: 'alert',
+        name: `execute ${alert.alertTypeId}`,
+        id: alertId,
+        description: `execute [${alert.alertTypeId}] with name [${name}] in [${
+          namespace ?? 'default'
+        }] namespace`,
+      };
+
+      updatedAlertTypeState = await this.context.executionContext.withContext(ctx, () =>
+        this.alertType.executor({
+          alertId,
+          services: {
+            ...services,
+            alertInstanceFactory: createAlertInstanceFactory<
+              InstanceState,
+              InstanceContext,
+              WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+            >(alertInstances),
+          },
+          params,
+          state: alertTypeState as State,
+          startedAt: this.taskInstance.startedAt!,
+          previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
+          spaceId,
+          namespace,
           name,
           tags,
-          consumer,
-          producer: alertType.producer,
-          ruleTypeId: alert.alertTypeId,
-          ruleTypeName: alertType.name,
-          enabled,
-          schedule,
-          actions,
           createdBy,
           updatedBy,
-          createdAt,
-          updatedAt,
-          throttle,
-          notifyWhen,
-        },
-      });
+          rule: {
+            name,
+            tags,
+            consumer,
+            producer: alertType.producer,
+            ruleTypeId: alert.alertTypeId,
+            ruleTypeName: alertType.name,
+            enabled,
+            schedule,
+            actions,
+            createdBy,
+            updatedBy,
+            createdAt,
+            updatedAt,
+            throttle,
+            notifyWhen,
+          },
+        })
+      );
     } catch (err) {
       event.message = `alert execution failure: ${alertLabel}`;
       event.error = event.error || {};
@@ -364,7 +386,8 @@ export class TaskRunner<
                 string,
                 AlertInstance<InstanceState, InstanceContext>
               ]) => {
-                const shouldExecuteAction = alertInstance.scheduledActionGroupOrSubgroupHasChanged();
+                const shouldExecuteAction =
+                  alertInstance.scheduledActionGroupOrSubgroupHasChanged();
                 if (!shouldExecuteAction) {
                   this.logger.debug(
                     `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
@@ -453,19 +476,19 @@ export class TaskRunner<
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
-    const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+    const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
     let alert: SanitizedAlert<Params>;
 
     // Ensure API key is still valid and user has access
     try {
-      alert = await alertsClient.get({ id: alertId });
+      alert = await rulesClient.get({ id: alertId });
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
     try {
-      this.alertTypeRegistry.ensureAlertTypeEnabled(alert.alertTypeId);
+      this.ruleTypeRegistry.ensureRuleTypeEnabled(alert.alertTypeId);
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
     }
@@ -476,7 +499,7 @@ export class TaskRunner<
       schedule: asOk(
         // fetch the alert again to ensure we return the correct schedule as it may have
         // cahnged during the task execution
-        (await alertsClient.get({ id: alertId })).schedule
+        (await rulesClient.get({ id: alertId })).schedule
       ),
     };
   }
@@ -489,39 +512,33 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    const runDate = new Date().toISOString();
-    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDate}`);
+    const runDate = new Date();
+    const runDateString = runDate.toISOString();
+    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
-    const event: IEvent = {
-      // explicitly set execute timestamp so it will be before other events
-      // generated here (new-instance, schedule-action, etc)
-      '@timestamp': runDate,
-      event: {
-        action: EVENT_LOG_ACTIONS.execute,
-        kind: 'alert',
-        category: [this.alertType.producer],
+    const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
+
+    const event = createAlertEventLogRecordObject({
+      timestamp: runDateString,
+      ruleId: alertId,
+      ruleType: this.alertType as UntypedNormalizedAlertType,
+      action: EVENT_LOG_ACTIONS.execute,
+      namespace,
+      task: {
+        scheduled: this.taskInstance.runAt.toISOString(),
+        scheduleDelay: Millis2Nanos * scheduleDelay,
       },
-      kibana: {
-        saved_objects: [
-          {
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: 'alert',
-            id: alertId,
-            type_id: this.alertType.id,
-            namespace,
-          },
-        ],
-      },
-      rule: {
-        id: alertId,
-        license: this.alertType.minimumLicenseRequired,
-        category: this.alertType.id,
-        ruleset: this.alertType.producer,
-        namespace,
-      },
-    };
+      savedObjects: [
+        {
+          id: alertId,
+          type: 'alert',
+          typeId: this.alertType.id,
+          relation: SAVED_OBJECT_REL_PRIMARY,
+        },
+      ],
+    });
 
     eventLogger.startTiming(event);
 
@@ -558,6 +575,11 @@ export class TaskRunner<
     event.kibana = event.kibana || {};
     event.kibana.alerting = event.kibana.alerting || {};
     event.kibana.alerting.status = executionStatus.status;
+
+    // Copy duration into execution status if available
+    if (null != event.event?.duration) {
+      executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
+    }
 
     // if executionStatus indicates an error, fill in fields in
     // event from it
@@ -601,9 +623,9 @@ export class TaskRunner<
           };
         },
         (err: ElasticsearchError) => {
-          const message = `Executing Alert "${alertId}" has resulted in Error: ${getEsErrorMessage(
-            err
-          )}`;
+          const message = `Executing Alert ${spaceId}:${
+            this.alertType.id
+          }:${alertId} has resulted in Error: ${getEsErrorMessage(err)}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
             this.logger.debug(message);
           } else {
@@ -693,6 +715,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertLabel: string;
   namespace: string | undefined;
   ruleType: NormalizedAlertType<
+    AlertTypeParams,
     AlertTypeParams,
     AlertTypeState,
     {
@@ -814,7 +837,6 @@ function generateNewAndRecoveredInstanceEvents<
         license: ruleType.minimumLicenseRequired,
         category: ruleType.id,
         ruleset: ruleType.producer,
-        namespace,
         name: rule.name,
       },
     };

@@ -18,6 +18,7 @@ import {
   getHover,
   suggest,
   monacoPositionToOffset,
+  offsetToRowColumn,
   getInfoAtZeroIndexedPosition,
 } from './math_completion';
 
@@ -40,7 +41,7 @@ const stringOperation = () => ({ dataType: 'string', isBucketed: true });
 
 // Only one of each type is needed
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
-  sum: ({
+  sum: {
     type: 'sum',
     input: 'field',
     buildColumn: buildGenericColumn('sum'),
@@ -51,15 +52,15 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       signature: 'field: string',
       description: 'description',
     },
-  } as unknown) as GenericOperationDefinition,
-  count: ({
+  } as unknown as GenericOperationDefinition,
+  count: {
     type: 'count',
     input: 'field',
     buildColumn: buildGenericColumn('count'),
     getPossibleOperationForField: (field: IndexPatternField) =>
       field.name === 'Records' ? numericOperation() : null,
-  } as unknown) as GenericOperationDefinition,
-  last_value: ({
+  } as unknown as GenericOperationDefinition,
+  last_value: {
     type: 'last_value',
     input: 'field',
     buildColumn: buildGenericColumn('last_value'),
@@ -67,8 +68,8 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       dataType: field.type,
       isBucketed: false,
     }),
-  } as unknown) as GenericOperationDefinition,
-  moving_average: ({
+  } as unknown as GenericOperationDefinition,
+  moving_average: {
     type: 'moving_average',
     input: 'fullReference',
     requiredReferences: [
@@ -81,18 +82,18 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     operationParams: [{ name: 'window', type: 'number', required: true }],
     buildColumn: buildGenericColumn('moving_average'),
     getPossibleOperation: numericOperation,
-  } as unknown) as GenericOperationDefinition,
-  cumulative_sum: ({
+  } as unknown as GenericOperationDefinition,
+  cumulative_sum: {
     type: 'cumulative_sum',
     input: 'fullReference',
     buildColumn: buildGenericColumn('cumulative_sum'),
     getPossibleOperation: numericOperation,
-  } as unknown) as GenericOperationDefinition,
-  terms: ({
+  } as unknown as GenericOperationDefinition,
+  terms: {
     type: 'terms',
     input: 'field',
     getPossibleOperationForField: stringOperation,
-  } as unknown) as GenericOperationDefinition,
+  } as unknown as GenericOperationDefinition,
 };
 
 describe('math completion', () => {
@@ -360,6 +361,36 @@ describe('math completion', () => {
         data: dataPluginMock.createStartContract(),
       });
       expect(results.list).toEqual(['bytes', 'memory']);
+    });
+  });
+
+  describe('offsetToRowColumn', () => {
+    it('should work with single-line strings', () => {
+      const input = `0123456`;
+      expect(offsetToRowColumn(input, 5)).toEqual(
+        expect.objectContaining({
+          lineNumber: 1,
+          column: 6,
+        })
+      );
+    });
+
+    it('should work with multi-line strings accounting for newline characters', () => {
+      const input = `012
+456
+89')`;
+      expect(offsetToRowColumn(input, 0)).toEqual(
+        expect.objectContaining({
+          lineNumber: 1,
+          column: 1,
+        })
+      );
+      expect(offsetToRowColumn(input, 9)).toEqual(
+        expect.objectContaining({
+          lineNumber: 3,
+          column: 2,
+        })
+      );
     });
   });
 

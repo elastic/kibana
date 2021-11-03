@@ -24,6 +24,7 @@ import {
   DeleteExceptionListItemByIdOptions,
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
+  ExportExceptionListAndItemsOptions,
   FindEndpointListItemOptions,
   FindExceptionListItemOptions,
   FindExceptionListOptions,
@@ -38,6 +39,10 @@ import {
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
+import {
+  ExportExceptionListAndItemsReturn,
+  exportExceptionListAndItems,
+} from './export_exception_list_and_items';
 import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
@@ -54,7 +59,6 @@ import {
 } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import { createEndpointEventFiltersList } from './create_endoint_event_filters_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -114,18 +118,6 @@ export class ExceptionListClient {
   public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return createEndpointTrustedAppsList({
-      savedObjectsClient,
-      user,
-      version: 1,
-    });
-  };
-
-  /**
-   * Create the Endpoint Event Filters Agnostic list if it does not yet exist (`null` is returned if it does exist)
-   */
-  public createEndpointEventFiltersList = async (): Promise<ExceptionListSchema | null> => {
-    const { savedObjectsClient, user } = this;
-    return createEndpointEventFiltersList({
       savedObjectsClient,
       user,
       version: 1,
@@ -503,6 +495,21 @@ export class ExceptionListClient {
       savedObjectsClient,
       sortField,
       sortOrder,
+    });
+  };
+
+  public exportExceptionListAndItems = async ({
+    listId,
+    id,
+    namespaceType,
+  }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
+    const { savedObjectsClient } = this;
+
+    return exportExceptionListAndItems({
+      id,
+      listId,
+      namespaceType,
+      savedObjectsClient,
     });
   };
 }

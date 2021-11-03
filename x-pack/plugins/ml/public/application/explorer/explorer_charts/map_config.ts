@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common/constants';
+import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
 import { AnomaliesTableData } from '../explorer_utils';
 

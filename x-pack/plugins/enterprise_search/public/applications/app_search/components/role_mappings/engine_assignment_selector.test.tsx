@@ -90,9 +90,11 @@ describe('EngineAssignmentSelector', () => {
   it('handles engine checkbox click', async () => {
     const wrapper = shallow(<EngineAssignmentSelector />);
     await waitFor(() =>
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: engines[0].name, value: engines[0].name }])
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: engines[0].name, value: engines[0].name }])
     );
     wrapper.update();
 
