@@ -42,6 +42,7 @@
     }
   }
 }
+
 .kbnDocViewer__tableActionsCell,
 .kbnDocViewer__tableFieldNameCell {
   align-items: flex-start;
@@ -60,4 +61,8 @@
   line-height: $euiLineHeight;
   color: $euiColorFullShade;
   vertical-align: top;
+}
+
+.kbnDocViewer__warning {
+  margin-right: $euiSizeS;
 }
