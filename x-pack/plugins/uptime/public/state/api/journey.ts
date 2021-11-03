@@ -51,10 +51,12 @@ export async function fetchLastSuccessfulStep({
   monitorId,
   timestamp,
   stepIndex,
+  location,
 }: {
   monitorId: string;
   timestamp: string;
   stepIndex: number;
+  location?: string;
 }): Promise<JourneyStep> {
   return await apiService.get(
     `/api/uptime/synthetics/step/success/`,
@@ -62,6 +64,7 @@ export async function fetchLastSuccessfulStep({
       monitorId,
       timestamp,
       stepIndex,
+      location,
     },
     JourneyStepType
   );

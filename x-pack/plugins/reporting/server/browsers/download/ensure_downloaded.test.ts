@@ -17,8 +17,7 @@ import { LevelLogger } from '../../lib';
 jest.mock('./checksum');
 jest.mock('./download');
 
-// https://github.com/elastic/kibana/issues/115881
-describe.skip('ensureBrowserDownloaded', () => {
+describe('ensureBrowserDownloaded', () => {
   let logger: jest.Mocked<LevelLogger>;
 
   beforeEach(() => {
