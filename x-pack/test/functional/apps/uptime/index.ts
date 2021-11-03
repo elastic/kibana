@@ -56,10 +56,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
-      // loadTestFile(require.resolve('./locations'));
+      loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
-      // loadTestFile(require.resolve('./synthetics_integration'));
+      loadTestFile(require.resolve('./synthetics_integration'));
     });
 
     describe('with generated data but no data reset', () => {
