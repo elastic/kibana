@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render, waitFor, within } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
