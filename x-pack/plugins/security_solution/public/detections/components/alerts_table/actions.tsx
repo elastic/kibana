@@ -288,7 +288,7 @@ export const isEqlRuleWithGroupId = (ecsData: Ecs) => {
 
 export const isThresholdRule = (ecsData: Ecs) => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  return ruleType.length && ruleType[0] === 'threshold';
+  return Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold';
 };
 
 export const buildAlertsKqlFilter = (
@@ -411,10 +411,11 @@ export const sendAlertToTimelineAction = async ({
    */
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
   const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
-  const ruleNote = getField(ecsData, ALERT_RULE_NOTE)[0];
-  const noteContent = ruleNote ?? '';
-  const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID)[0];
-  const timelineId = ruleTimelineId ?? '';
+  const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
+  const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
+  const timelineId =
+    Array.isArray(ruleTimelineId) && ruleTimelineId.length > 0 ? ruleTimelineId[0] : '';
   const { to, from } = determineToAndFrom({ ecs });
 
   // For now we do not want to populate the template timeline if we have alertIds

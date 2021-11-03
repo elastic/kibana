@@ -211,7 +211,11 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
 });
 RedirectRoute.displayName = 'RedirectRoute';
 
-const racFieldMappings: Record<string, string> = {
+const siemSignalsFieldMappings: Record<string, string> = {
+  [ALERT_RULE_UUID]: 'signal.rule.id',
+};
+
+const alertFieldMappings: Record<string, string> = {
   'signal.rule.id': ALERT_RULE_UUID,
 };
 
@@ -223,6 +227,10 @@ const racFieldMappings: Record<string, string> = {
  * (signal.*), whichever is present. For backwards compatibility.
  */
 export const getField = (ecsData: Ecs, field: string) => {
-  const aadField = (racFieldMappings[field] ?? field).replace('signal', 'kibana.alert');
-  return get(aadField, ecsData) ?? get(field, ecsData);
+  const aadField = (alertFieldMappings[field] ?? field).replace('signal', 'kibana.alert');
+  const siemSignalsField = (siemSignalsFieldMappings[field] ?? field).replace(
+    'kibana.alert',
+    'signal'
+  );
+  return get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
 };
