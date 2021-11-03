@@ -6,16 +6,13 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import {
   Axis,
   BarSeries,
   BrushEndListener,
   Chart,
   ElementClickListener,
-  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
@@ -24,6 +21,7 @@ import {
 } from '@elastic/charts';
 import moment from 'moment';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../../../src/plugins/charts/common';
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -48,8 +46,11 @@ export const DocumentCountChart: FC<Props> = ({
   interval,
 }) => {
   const {
-    services: { data },
+    services: { data, uiSettings, fieldFormats },
   } = useDataVisualizerKibana();
+
+  const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
+  const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
   const seriesName = i18n.translate(
     'xpack.dataVisualizer.dataGrid.field.documentCountChart.seriesLabel',
@@ -62,8 +63,6 @@ export const DocumentCountChart: FC<Props> = ({
     min: timeRangeEarliest,
     max: timeRangeLatest,
   };
-
-  const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
 
   const adjustedChartPoints = useMemo(() => {
     // Display empty chart when no data in range
@@ -127,7 +126,9 @@ export const DocumentCountChart: FC<Props> = ({
           id="bottom"
           position={Position.Bottom}
           showOverlappingTicks={true}
-          tickFormat={dateFormatter}
+          tickFormat={(value) => xAxisFormatter.convert(value)}
+          timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
+          style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
         />
         <Axis id="left" position={Position.Left} />
         <BarSeries
