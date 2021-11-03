@@ -6,7 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { exportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExportExceptionDetails,
+  exportExceptionDetails,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 const createSchema = <Required extends t.Props, Optional extends t.Props>(
@@ -29,9 +32,13 @@ export const exportRulesDetails = {
   missing_rules_count: t.number,
 };
 
-export const exportRulesDetailsSchema = createSchema(
-  exportRulesDetails,
-  exportExceptionDetails as Optional
-);
+const exportRulesDetailsSchema = t.exact(t.type(exportRulesDetails));
+export type ExportRulesDetailsSchema = t.TypeOf<typeof exportRulesDetailsSchema>;
 
-export type ExportRulesDetails = t.TypeOf<typeof exportRulesDetailsSchema>;
+// With exceptions
+export const exportRulesDetailsWithExceptionsSchema = createSchema<
+  ExportRulesDetailsSchema,
+  ExportExceptionDetails
+>(exportRulesDetails, exportExceptionDetails);
+
+export type ExportRulesDetails = t.TypeOf<typeof exportRulesDetailsWithExceptionsSchema>;
