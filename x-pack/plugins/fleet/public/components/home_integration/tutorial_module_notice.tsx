@@ -22,7 +22,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
   const pkgInfo =
     !isLoading &&
     packagesData?.response &&
-    packagesData.response.find((pkg) => pkg.name === moduleName);
+    packagesData.response.find((pkg) => pkg.name === moduleName && pkg.name !== 'apm'); // APM needs special handling
 
   if (hasIngestManager && pkgInfo) {
     return (
