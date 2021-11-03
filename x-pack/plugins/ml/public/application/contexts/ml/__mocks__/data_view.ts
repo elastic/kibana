@@ -7,7 +7,7 @@
 
 import type { DataView } from '../../../../../../../../src/plugins/data_views/public';
 
-export const indexPatternMock = {
+export const dataViewMock = {
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
   fields: [],

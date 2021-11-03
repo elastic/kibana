@@ -53,7 +53,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   jobs,
 }) => {
   const { from, to } = getTimeFilterRange();
-  const { currentIndexPattern: indexPattern } = useMlContext();
+  const { currentDataView: dataView } = useMlContext();
 
   const jobPrefixValidator = composeValidators(
     patternValidator(/^([a-z0-9]+[a-z0-9\-_]*)?$/),
@@ -181,7 +181,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.useFullDataLabel"
                 defaultMessage="Use full {indexPatternTitle} data"
-                values={{ indexPatternTitle: indexPattern.title }}
+                values={{ indexPatternTitle: dataView.title }}
               />
             }
             checked={formState.useFullIndexData}

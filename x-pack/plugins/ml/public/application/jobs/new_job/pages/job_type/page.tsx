@@ -45,9 +45,9 @@ export const Page: FC = () => {
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
-  const { currentSavedSearch, currentIndexPattern } = mlContext;
+  const { currentSavedSearch, currentDataView } = mlContext;
 
-  const isTimeBasedIndex = timeBasedIndexCheck(currentIndexPattern);
+  const isTimeBasedIndex = timeBasedIndexCheck(currentDataView);
   const indexWarningTitle =
     !isTimeBasedIndex && isSavedSearchSavedObject(currentSavedSearch)
       ? i18n.translate(
@@ -57,13 +57,13 @@ export const Page: FC = () => {
               '{savedSearchTitle} uses data view {dataViewName} which is not time based',
             values: {
               savedSearchTitle: currentSavedSearch.attributes.title as string,
-              dataViewName: currentIndexPattern.title,
+              dataViewName: currentDataView.title,
             },
           }
         )
       : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewNotTimeBasedMessage', {
           defaultMessage: 'Data view {dataViewName} is not time based',
-          values: { dataViewName: currentIndexPattern.title },
+          values: { dataViewName: currentDataView.title },
         });
 
   const pageTitleLabel = isSavedSearchSavedObject(currentSavedSearch)
@@ -73,7 +73,7 @@ export const Page: FC = () => {
       })
     : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewPageTitleLabel', {
         defaultMessage: 'data view {dataViewName}',
-        values: { dataViewName: currentIndexPattern.title },
+        values: { dataViewName: currentDataView.title },
       });
 
   const recognizerResults = {
@@ -85,13 +85,13 @@ export const Page: FC = () => {
 
   const getUrlParams = () => {
     return !isSavedSearchSavedObject(currentSavedSearch)
-      ? `?index=${currentIndexPattern.id}`
+      ? `?index=${currentDataView.id}`
       : `?savedSearchId=${currentSavedSearch.id}`;
   };
 
   const addSelectionToRecentlyAccessed = async () => {
     const title = !isSavedSearchSavedObject(currentSavedSearch)
-      ? currentIndexPattern.title
+      ? currentDataView.title
       : (currentSavedSearch.attributes.title as string);
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR)!;
 
@@ -101,7 +101,7 @@ export const Page: FC = () => {
         pageState: {
           ...(currentSavedSearch?.id
             ? { savedSearchId: currentSavedSearch.id }
-            : { index: currentIndexPattern.id }),
+            : { index: currentDataView.id }),
         },
       },
       { absolute: true }
@@ -270,7 +270,7 @@ export const Page: FC = () => {
 
           <EuiFlexGrid gutterSize="l" columns={4}>
             <DataRecognizer
-              indexPattern={currentIndexPattern}
+              indexPattern={currentDataView}
               savedSearch={currentSavedSearch}
               results={recognizerResults}
             />

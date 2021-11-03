@@ -7,7 +7,7 @@
 
 import type { DataViewsContract } from '../../../../../../../../src/plugins/data_views/public';
 
-export const indexPatternsMock = new (class {
+export const dataViewsContractMock = new (class {
   fieldFormats = [];
   config = {};
   savedObjectsClient = {};
