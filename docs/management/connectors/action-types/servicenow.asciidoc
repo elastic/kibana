@@ -116,7 +116,10 @@ Severity::             The severity of the incident.
 Impact::               The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
 Category::             The category of the incident.
 Subcategory::          The category of the incident.
-Correlation ID::       All actions sharing this ID will be associated with the same ServiceNow incident. If an incident exists in ServiceNow with the same correlation ID the incident will be updated. Default value: `<rule ID>:<alert instance ID>`.
+Correlation ID::            Actions using the same correlation ID will be associated with the same ServiceNow incident. This value determines whether a new ServiceNow incident will be created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as {{ruleID}}:{{alert ID}} to form the Correlation ID value in ServiceNow. The maximum character length for this value is 100 characters.
+
+NOTE: Using the default configuration of {{ruleID}}:{{alert ID}} ensures that ServiceNow will create a separate incident for every generated alert that uses a unique alert ID. In other words, if the rule generates multiple alerts that all use the same alert IDs, ServiceNow will create a single ticket for that alert and continually update it.
+
 Correlation Display::  A descriptive label of the alert for correlation purposes in ServiceNow.
 Short description::    A short description for the incident, used for searching the contents of the knowledge base.
 Description::          The details about the incident.
