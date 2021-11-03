@@ -10,10 +10,7 @@ import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 
-import {
-  getIndexPatternAndSavedSearch,
-  IndexPatternAndSavedSearch,
-} from '../../../../../util/index_utils';
+import { getDataViewAndSavedSearch, DataViewAndSavedSearch } from '../../../../../util/index_utils';
 
 import { SourceSelection } from './source_selection';
 
@@ -83,27 +80,25 @@ jest.mock('../../../../../contexts/kibana', () => ({
 
 jest.mock('../../../../../util/index_utils', () => {
   return {
-    getIndexPatternAndSavedSearch: jest.fn(
-      async (id: string): Promise<IndexPatternAndSavedSearch> => {
-        return {
-          indexPattern: {
-            // @ts-expect-error fields should not be empty
-            fields: [],
-            title:
-              id === 'the-remote-saved-search-id'
-                ? 'my_remote_cluster:index-pattern-title'
-                : 'index-pattern-title',
-          },
-          savedSearch: null,
-        };
-      }
-    ),
+    getDataViewAndSavedSearch: jest.fn(async (id: string): Promise<DataViewAndSavedSearch> => {
+      return {
+        dataView: {
+          // @ts-expect-error fields should not be empty
+          fields: [],
+          title:
+            id === 'the-remote-saved-search-id'
+              ? 'my_remote_cluster:index-pattern-title'
+              : 'index-pattern-title',
+        },
+        savedSearch: null,
+      };
+    }),
     isCcsIndexPattern: (a: string) => a.includes(':'),
   };
 });
 
 const mockOnClose = jest.fn();
-const mockGetDataViewAndSavedSearch = getIndexPatternAndSavedSearch as jest.Mock;
+const mockGetDataViewAndSavedSearch = getDataViewAndSavedSearch as jest.Mock;
 
 describe('Data Frame Analytics: <SourceSelection />', () => {
   afterEach(() => {

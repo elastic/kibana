@@ -12,6 +12,10 @@ import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 function getCell(esaggsResult: any, row: number, column: number): unknown | undefined {
+  if (esaggsResult && !esaggsResult.columns) {
+    throw new Error(`Unexpected esaggs result: ${JSON.stringify(esaggsResult, undefined, ' ')}`);
+  }
+
   const columnId = esaggsResult?.columns[column]?.id;
   if (!columnId) {
     return;
@@ -37,8 +41,7 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
 
-  // FLAKY https://github.com/elastic/kibana/issues/107028
-  describe.skip('esaggs timeshift tests', () => {
+  describe('esaggs timeshift tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
@@ -98,6 +101,7 @@ export default function ({
         'esaggs_shift_single_percentile',
         expression
       ).getResponse();
+
       // percentile is not stable
       expect(getCell(result, 0, 0)).to.be.within(10000, 20000);
       expect(getCell(result, 0, 1)).to.be.within(10000, 20000);
