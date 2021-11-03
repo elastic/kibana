@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { CoreStart } from 'kibana/public';
-
-const enableComparisonByDefault = 'observability:enableComparisonByDefault';
+import { enableComparisonByDefault } from '../../../../../observability/public';
 
 export function getComparisonEnabled({
   core,
