@@ -93,23 +93,24 @@ const esEvents = toElasticsearchOutput([
 
 Via the CLI, you can upload scenarios, either using a fixed time range or continuously generating data. Some examples are available in in `src/scripts/examples`. Here's an example for live data:
 
-`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
+`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
 
 For a fixed time window:
-`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
+`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
 
-The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
+The script will try to automatically find bootstrapped APM indices. __If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.__
 
 The following options are supported:
-| Option | Description | Default |
-| -------------- | ------------------------------------------------------- | ------------ |
-| `--from` | The start of the time window. | `now - 15m` |
-| `--to` | The end of the time window. | `now` |
-| `--live` | Continously ingest data | `false` |
-| `--bucketSize` | Size of bucket for which to generate data. | `15m` |
-| `--clean` | Clean APM indices before indexing new data. | `false` |
-| `--interval` | The interval at which to index data. | `10s` |
-| `--logLevel` | Log level. | `info` |
-| `--lookback` | The lookback window for which data should be generated. | `15m` |
-| `--target` | Elasticsearch target, including username/password. | **Required** |
-| `--workers` | Amount of simultaneously connected ES clients. | `1` |
+| Option            | Description                                             | Default      |
+| ------------------| ------------------------------------------------------- | ------------ |
+| `--target`        | Elasticsearch target, including username/password.      | **Required** |
+| `--from`          | The start of the time window.                           | `now - 15m`  |
+| `--to`            | The end of the time window.                             | `now`        |
+| `--live`          | Continously ingest data                                 | `false`      |
+| `--clean`         | Clean APM indices before indexing new data.             | `false`      |
+| `--workers`       | Amount of Node.js worker threads                        | `5`          |
+| `--bucketSize`    | Size of bucket for which to generate data.              | `15m`        |
+| `--interval`      | The interval at which to index data.                    | `10s`        |
+| `--clientWorkers` | Number of simultaneously connected ES clients           | `5`          |
+| `--batchSize`     | Number of documents per bulk index request              | `1000`       |
+| `--logLevel`      | Log level.                                              | `info`       |

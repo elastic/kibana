@@ -24,16 +24,14 @@ import { getCurationsBreadcrumbs } from '../utils';
 
 import { CurationsHistory } from './curations_history/curations_history';
 import { CurationsOverview } from './curations_overview';
-import { CurationsSettings, CurationsSettingsLogic } from './curations_settings';
+import { CurationsSettings } from './curations_settings';
 
 export const Curations: React.FC = () => {
-  const { dataLoading: curationsDataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
+  const { dataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
   const {
     engine: { search_relevance_suggestions_active: searchRelevanceSuggestionsActive },
   } = useValues(EngineLogic);
-
-  const { dataLoading: curationsSettingsDataLoading } = useValues(CurationsSettingsLogic);
 
   const suggestionsEnabled = searchRelevanceSuggestionsActive;
 
@@ -82,8 +80,6 @@ export const Curations: React.FC = () => {
     loadCurations();
   }, [meta.page.current]);
 
-  const isLoading = curationsSettingsDataLoading || curationsDataLoading;
-
   return (
     <AppSearchPageTemplate
       pageChrome={getCurationsBreadcrumbs()}
@@ -98,9 +94,9 @@ export const Curations: React.FC = () => {
             {CREATE_NEW_CURATION_TITLE}
           </EuiButtonTo>,
         ],
-        tabs: isLoading ? undefined : pageTabs,
+        tabs: dataLoading ? undefined : pageTabs,
       }}
-      isLoading={isLoading}
+      isLoading={dataLoading}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
       {selectedPageTab === 'history' && <CurationsHistory />}

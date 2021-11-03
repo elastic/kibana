@@ -17,7 +17,6 @@ import { argv } from 'yargs';
 import { Logger } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
-import { unwrapEsResponse } from '../../../observability/common/utils/unwrap_es_response';
 import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
 import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
 import { generateSampleDocuments } from './generate-sample-documents';
@@ -87,18 +86,13 @@ async function uploadData() {
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
       search: (body) => {
-        return unwrapEsResponse(client.search(body)) as Promise<any>;
+        return client.search(body) as Promise<any>;
       },
       indicesStats: (body) => {
-        return unwrapEsResponse(client.indices.stats(body));
+        return client.indices.stats(body);
       },
       transportRequest: ((params) => {
-        return unwrapEsResponse(
-          client.transport.request({
-            method: params.method,
-            path: params.path,
-          })
-        );
+        return;
       }) as CollectTelemetryParams['transportRequest'],
     },
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/api/types';
+import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
@@ -196,7 +196,7 @@ export class ReportingStore {
       await ilmPolicyManager.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
-      this.logger.error(e.body.error);
+      this.logger.error(e.body?.error);
       throw e;
     }
   }

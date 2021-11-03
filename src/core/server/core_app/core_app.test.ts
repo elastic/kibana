@@ -139,6 +139,46 @@ describe('CoreApp', () => {
 
       expect(mockResponseFactory.renderCoreApp).toHaveBeenCalled();
     });
+
+    it('main route handles unknown public API requests', () => {
+      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+
+      const [[, handler]] = prebootHTTPResourcesRegistrar.register.mock.calls;
+      const mockResponseFactory = httpResourcesMock.createResponseFactory();
+      handler(
+        {} as unknown as RequestHandlerContext,
+        httpServerMock.createKibanaRequest({ path: '/api/status' }),
+        mockResponseFactory
+      );
+
+      expect(mockResponseFactory.renderCoreApp).not.toHaveBeenCalled();
+      expect(mockResponseFactory.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        headers: { 'Retry-After': '30' },
+        body: 'Kibana server is not ready yet',
+        bypassErrorFormat: true,
+      });
+    });
+
+    it('main route handles unknown internal API requests', () => {
+      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+
+      const [[, handler]] = prebootHTTPResourcesRegistrar.register.mock.calls;
+      const mockResponseFactory = httpResourcesMock.createResponseFactory();
+      handler(
+        {} as unknown as RequestHandlerContext,
+        httpServerMock.createKibanaRequest({ path: '/internal/security/me' }),
+        mockResponseFactory
+      );
+
+      expect(mockResponseFactory.renderCoreApp).not.toHaveBeenCalled();
+      expect(mockResponseFactory.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        headers: { 'Retry-After': '30' },
+        body: 'Kibana server is not ready yet',
+        bypassErrorFormat: true,
+      });
+    });
   });
 
   describe('`/app/{id}/{any*}` route', () => {

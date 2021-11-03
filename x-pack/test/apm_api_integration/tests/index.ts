@@ -37,8 +37,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency'));
     });
 
-    describe('metadata/event_metadata', function () {
-      loadTestFile(require.resolve('./metadata/event_metadata'));
+    describe('event_metadata/event_metadata', function () {
+      loadTestFile(require.resolve('./event_metadata/event_metadata'));
     });
 
     describe('metrics_charts/metrics_charts', function () {
@@ -113,11 +113,11 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     describe('services/error_groups_main_statistics', function () {
-      loadTestFile(require.resolve('./services/error_groups_main_statistics'));
+      loadTestFile(require.resolve('./services/error_groups/error_groups_main_statistics'));
     });
 
     describe('services/error_groups_detailed_statistics', function () {
-      loadTestFile(require.resolve('./services/error_groups_detailed_statistics'));
+      loadTestFile(require.resolve('./services/error_groups/error_groups_detailed_statistics'));
     });
 
     describe('services/detailed_statistics', function () {
@@ -239,6 +239,28 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('latency/service_apis', function () {
       loadTestFile(require.resolve('./latency/service_apis'));
+    });
+
+    // Errors
+    describe('errors/group_id', function () {
+      loadTestFile(require.resolve('./errors/group_id'));
+    });
+
+    describe('errors/distribution', function () {
+      loadTestFile(require.resolve('./errors/distribution'));
+    });
+
+    describe('errors/error_group_list', function () {
+      loadTestFile(require.resolve('./errors/error_group_list'));
+    });
+
+    // Dependencies
+    describe('dependencies/metadata', function () {
+      loadTestFile(require.resolve('./dependencies/metadata'));
+    });
+
+    describe('dependencies/top_dependencies', function () {
+      loadTestFile(require.resolve('./dependencies/top_dependencies'));
     });
 
     registry.run(providerContext);

@@ -6,20 +6,17 @@
  * Side Public License, v 1.
  */
 
-import uuidv5 from 'uuid/v5';
-
 let seq = 0;
 
-const namespace = 'f38d5b83-8eee-4f5b-9aa6-2107e15a71e3';
-
-function generateId(seed?: string) {
-  return uuidv5(seed ?? String(seq++), namespace).replace(/-/g, '');
+function generateId(seed?: string, length: number = 32) {
+  const str = seed ?? String(seq++);
+  return str.padStart(length, '0');
 }
 
 export function generateShortId(seed?: string) {
-  return generateId(seed).substr(0, 16);
+  return generateId(seed, 16);
 }
 
 export function generateLongId(seed?: string) {
-  return generateId(seed).substr(0, 32);
+  return generateId(seed, 32);
 }

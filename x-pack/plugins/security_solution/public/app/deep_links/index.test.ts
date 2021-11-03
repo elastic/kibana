@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getDeepLinks, PREMIUM_DEEP_LINK_IDS } from '.';
+import { getDeepLinks } from '.';
 import { AppDeepLink, Capabilities } from '../../../../../../src/core/public';
 import { SecurityPageName } from '../types';
 import { mockGlobalState } from '../../common/mock';
@@ -28,7 +28,7 @@ const basicLicense = 'basic';
 const platinumLicense = 'platinum';
 
 describe('deepLinks', () => {
-  it('should return a subset of links for basic license and the full set for platinum', () => {
+  it('should return a all basic license deep links in the premium deep links', () => {
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense);
     const platinumLinks = getDeepLinks(mockGlobalState.app.enableExperimental, platinumLicense);
 
@@ -50,8 +50,17 @@ describe('deepLinks', () => {
       });
     };
     testAllBasicInPlatinum(basicLinks, platinumLinks);
+  });
 
-    PREMIUM_DEEP_LINK_IDS.forEach((premiumDeepLinkId) => {
+  it('should not return premium deep links in basic license deep links', () => {
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense);
+    const platinumLinks = getDeepLinks(mockGlobalState.app.enableExperimental, platinumLicense);
+
+    [
+      SecurityPageName.hostsAnomalies,
+      SecurityPageName.networkAnomalies,
+      SecurityPageName.caseConfigure,
+    ].forEach((premiumDeepLinkId) => {
       expect(findDeepLink(premiumDeepLinkId, platinumLinks)).toBeTruthy();
       expect(findDeepLink(premiumDeepLinkId, basicLinks)).toBeFalsy();
     });

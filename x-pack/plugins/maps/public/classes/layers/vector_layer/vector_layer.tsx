@@ -76,7 +76,7 @@ import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './u
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
-import { getFeatureId } from './assign_feature_ids';
+import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
 
 export function isVectorLayer(layer: ILayer) {
   return (layer as IVectorLayer).canShowTooltip !== undefined;
@@ -102,6 +102,7 @@ export interface IVectorLayer extends ILayer {
   getJoinsDisabledReason(): string | null;
   getValidJoins(): InnerJoin[];
   getSource(): IVectorSource;
+  getFeatureId(feature: Feature): string | number | undefined;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
@@ -819,133 +820,76 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     mvtSourceLayer?: string,
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
+    const sourceId = this.getId();
+    const labelLayerId = this._getMbLabelLayerId();
     const pointLayerId = this._getMbPointLayerId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
     const symbolLayer = mbMap.getLayer(symbolLayerId);
 
-    // Point layers symbolized as circles require 2 mapbox layers because
-    // "circle" layers do not support "text" style properties
-    // Point layers symbolized as icons only contain a single mapbox layer.
+    //
+    // Create marker layer
+    // "circle" layer type for points
+    // "symbol" layer type for icons
+    //
     let markerLayerId;
-    let textLayerId;
     if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
       markerLayerId = pointLayerId;
-      textLayerId = this._getMbTextLayerId();
+      if (!pointLayer) {
+        const mbLayer: MbLayer = {
+          id: pointLayerId,
+          type: 'circle',
+          source: sourceId,
+          paint: {},
+        };
+
+        if (mvtSourceLayer) {
+          mbLayer['source-layer'] = mvtSourceLayer;
+        }
+        mbMap.addLayer(mbLayer, labelLayerId);
+      }
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
-      this._setMbCircleProperties(mbMap, mvtSourceLayer, timesliceMaskConfig);
     } else {
       markerLayerId = symbolLayerId;
-      textLayerId = symbolLayerId;
+      if (!symbolLayer) {
+        const mbLayer: MbLayer = {
+          id: symbolLayerId,
+          type: 'symbol',
+          source: sourceId,
+        };
+        if (mvtSourceLayer) {
+          mbLayer['source-layer'] = mvtSourceLayer;
+        }
+        mbMap.addLayer(mbLayer, labelLayerId);
+      }
       if (pointLayer) {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
-        mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
       }
-      this._setMbSymbolProperties(mbMap, mvtSourceLayer, timesliceMaskConfig);
+    }
+
+    const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
+    if (!_.isEqual(filterExpr, mbMap.getFilter(markerLayerId))) {
+      mbMap.setFilter(markerLayerId, filterExpr);
+    }
+
+    if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
+      this.getCurrentStyle().setMBPaintPropertiesForPoints({
+        alpha: this.getAlpha(),
+        mbMap,
+        pointLayerId: markerLayerId,
+      });
+    } else {
+      this.getCurrentStyle().setMBSymbolPropertiesForPoints({
+        alpha: this.getAlpha(),
+        mbMap,
+        symbolLayerId: markerLayerId,
+      });
     }
 
     this.syncVisibilityWithMb(mbMap, markerLayerId);
     mbMap.setLayerZoomRange(markerLayerId, this.getMinZoom(), this.getMaxZoom());
-    if (markerLayerId !== textLayerId) {
-      this.syncVisibilityWithMb(mbMap, textLayerId);
-      mbMap.setLayerZoomRange(textLayerId, this.getMinZoom(), this.getMaxZoom());
-    }
-  }
-
-  _setMbCircleProperties(
-    mbMap: MbMap,
-    mvtSourceLayer?: string,
-    timesliceMaskConfig?: TimesliceMaskConfig
-  ) {
-    const sourceId = this.getId();
-    const pointLayerId = this._getMbPointLayerId();
-    const pointLayer = mbMap.getLayer(pointLayerId);
-    if (!pointLayer) {
-      const mbLayer: MbLayer = {
-        id: pointLayerId,
-        type: 'circle',
-        source: sourceId,
-        paint: {},
-      };
-
-      if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
-      }
-      mbMap.addLayer(mbLayer);
-    }
-
-    const textLayerId = this._getMbTextLayerId();
-    const textLayer = mbMap.getLayer(textLayerId);
-    if (!textLayer) {
-      const mbLayer: MbLayer = {
-        id: textLayerId,
-        type: 'symbol',
-        source: sourceId,
-      };
-      if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
-      }
-      mbMap.addLayer(mbLayer);
-    }
-
-    const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
-    if (!_.isEqual(filterExpr, mbMap.getFilter(pointLayerId))) {
-      mbMap.setFilter(pointLayerId, filterExpr);
-      mbMap.setFilter(textLayerId, filterExpr);
-    }
-
-    this.getCurrentStyle().setMBPaintPropertiesForPoints({
-      alpha: this.getAlpha(),
-      mbMap,
-      pointLayerId,
-    });
-
-    this.getCurrentStyle().setMBPropertiesForLabelText({
-      alpha: this.getAlpha(),
-      mbMap,
-      textLayerId,
-    });
-  }
-
-  _setMbSymbolProperties(
-    mbMap: MbMap,
-    mvtSourceLayer?: string,
-    timesliceMaskConfig?: TimesliceMaskConfig
-  ) {
-    const sourceId = this.getId();
-    const symbolLayerId = this._getMbSymbolLayerId();
-    const symbolLayer = mbMap.getLayer(symbolLayerId);
-
-    if (!symbolLayer) {
-      const mbLayer: MbLayer = {
-        id: symbolLayerId,
-        type: 'symbol',
-        source: sourceId,
-      };
-      if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
-      }
-      mbMap.addLayer(mbLayer);
-    }
-
-    const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
-    if (!_.isEqual(filterExpr, mbMap.getFilter(symbolLayerId))) {
-      mbMap.setFilter(symbolLayerId, filterExpr);
-    }
-
-    this.getCurrentStyle().setMBSymbolPropertiesForPoints({
-      alpha: this.getAlpha(),
-      mbMap,
-      symbolLayerId,
-    });
-
-    this.getCurrentStyle().setMBPropertiesForLabelText({
-      alpha: this.getAlpha(),
-      mbMap,
-      textLayerId: symbolLayerId,
-    });
   }
 
   _setMbLinePolygonProperties(
@@ -954,6 +898,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
     const sourceId = this.getId();
+    const labelLayerId = this._getMbLabelLayerId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
 
@@ -968,7 +913,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       if (mvtSourceLayer) {
         mbLayer['source-layer'] = mvtSourceLayer;
       }
-      mbMap.addLayer(mbLayer);
+      mbMap.addLayer(mbLayer, labelLayerId);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       const mbLayer: MbLayer = {
@@ -980,7 +925,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       if (mvtSourceLayer) {
         mbLayer['source-layer'] = mvtSourceLayer;
       }
-      mbMap.addLayer(mbLayer);
+      mbMap.addLayer(mbLayer, labelLayerId);
     }
 
     this.getCurrentStyle().setMBPaintProperties({
@@ -1046,10 +991,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   _syncStylePropertiesWithMb(mbMap: MbMap, timeslice?: Timeslice) {
     const timesliceMaskConfig = this._getTimesliceMaskConfig(timeslice);
+    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
     this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
     this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
-    // label layers added after geometry layers to ensure they are on top
-    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
   }
 
   _getTimesliceMaskConfig(timeslice?: Timeslice): TimesliceMaskConfig | undefined {
@@ -1076,14 +1020,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('circle');
   }
 
-  _getMbTextLayerId() {
-    return this.makeMbLayerId('text');
-  }
-
-  // _getMbTextLayerId is labels for Points and MultiPoints
-  // _getMbLabelLayerId is labels for not Points and MultiPoints
-  // _getMbLabelLayerId used to be called _getMbCentroidLayerId
-  // TODO merge textLayer and labelLayer into single layer
   _getMbLabelLayerId() {
     return this.makeMbLayerId('label');
   }
@@ -1103,7 +1039,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getMbTooltipLayerIds() {
     return [
       this._getMbPointLayerId(),
-      this._getMbTextLayerId(),
       this._getMbLabelLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
@@ -1154,6 +1089,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
   }
 
+  getFeatureId(feature: Feature): string | number | undefined {
+    return feature.properties?.[GEOJSON_FEATURE_ID_PROPERTY_NAME];
+  }
+
   getFeatureById(id: string | number) {
     const featureCollection = this._getSourceFeatureCollection();
     if (!featureCollection) {
@@ -1161,7 +1100,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const targetFeature = featureCollection.features.find((feature) => {
-      return getFeatureId(feature, this.getSource()) === id;
+      return this.getFeatureId(feature) === id;
     });
     return targetFeature ? targetFeature : null;
   }
