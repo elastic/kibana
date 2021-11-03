@@ -92,7 +92,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
             footer={
               <EuiButton
                 iconType="analyzeEvent"
-                color="secondary"
+                color="success"
                 href={`${basePath}/app/integrations#/detail/apm-0.4.0/overview`}
               >
                 {i18n.translate(
