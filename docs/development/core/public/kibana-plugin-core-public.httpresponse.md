@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface HttpResponse<TResponseBody = any> 
+export interface HttpResponse<TResponseBody = unknown> 
 ```
 
 ## Properties
