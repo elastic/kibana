@@ -30,6 +30,6 @@ export const exportExceptionDetails = {
   missing_exception_lists_count: t.number,
 };
 
-export const exportExceptionDetailsSchema = t.type(exportExceptionDetails);
+export const exportExceptionDetailsSchema = t.exact(t.type(exportExceptionDetails));
 
 export type ExportExceptionDetails = t.TypeOf<typeof exportExceptionDetailsSchema>;

@@ -6,10 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import {
-  ExportExceptionDetails,
-  exportExceptionDetails,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { exportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 const createSchema = <Required extends t.Props, Optional extends t.Props>(
@@ -36,9 +33,9 @@ const exportRulesDetailsSchema = t.exact(t.type(exportRulesDetails));
 export type ExportRulesDetailsSchema = t.TypeOf<typeof exportRulesDetailsSchema>;
 
 // With exceptions
-export const exportRulesDetailsWithExceptionsSchema = createSchema<
-  ExportRulesDetailsSchema,
-  ExportExceptionDetails
->(exportRulesDetails, exportExceptionDetails);
+export const exportRulesDetailsWithExceptionsSchema = createSchema(
+  exportRulesDetails,
+  exportExceptionDetails
+);
 
 export type ExportRulesDetails = t.TypeOf<typeof exportRulesDetailsWithExceptionsSchema>;

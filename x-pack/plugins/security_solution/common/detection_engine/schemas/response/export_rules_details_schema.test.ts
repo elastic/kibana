@@ -20,12 +20,15 @@ import {
   getOutputDetailsSample,
   getOutputDetailsSampleWithExceptions,
 } from './export_rules_details_schema.mock';
-import { ExportRulesDetails, exportRulesDetailsSchema } from './export_rules_details_schema';
+import {
+  ExportRulesDetails,
+  exportRulesDetailsWithExceptionsSchema,
+} from './export_rules_details_schema';
 
-describe('exportRulesDetailsSchema', () => {
+describe('exportRulesDetailsWithExceptionsSchema', () => {
   test('it should validate export details response', () => {
     const payload = getOutputDetailsSample();
-    const decoded = exportRulesDetailsSchema.decode(payload);
+    const decoded = exportRulesDetailsWithExceptionsSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -35,7 +38,7 @@ describe('exportRulesDetailsSchema', () => {
 
   test('it should validate export details with exceptions details response', () => {
     const payload = getOutputDetailsSampleWithExceptions();
-    const decoded = exportRulesDetailsSchema.decode(payload);
+    const decoded = exportRulesDetailsWithExceptionsSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -48,7 +51,7 @@ describe('exportRulesDetailsSchema', () => {
       extraKey?: string;
     } = getOutputDetailsSample();
     payload.extraKey = 'some extra key';
-    const decoded = exportRulesDetailsSchema.decode(payload);
+    const decoded = exportRulesDetailsWithExceptionsSchema.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
