@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('can open job selection flyout', async () => {
           await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
-          await ml.dashboardEmbeddables.openJobSelectionFlyout();
+          await ml.dashboardEmbeddables.openAnomalyJobSelectionFlyout('ml_anomaly_charts');
           await a11y.testAppSnapshot();
         });
 

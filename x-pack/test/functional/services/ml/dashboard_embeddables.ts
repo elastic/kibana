@@ -93,13 +93,21 @@ export function MachineLearningDashboardEmbeddablesProvider(
       });
     },
 
-    async openJobSelectionFlyout() {
+    async assertAnomalySwimlaneExists() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(`mlAnomalySwimlaneEmbeddableWrapper`);
+      });
+    },
+
+    async openAnomalyJobSelectionFlyout(
+      mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts'
+    ) {
       await retry.tryForTime(60 * 1000, async () => {
         await dashboardAddPanel.clickEditorMenuButton();
         await testSubjects.existOrFail('dashboardEditorContextMenu', { timeout: 2000 });
 
         await dashboardAddPanel.clickEmbeddableFactoryGroupButton('ml');
-        await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');
+        await dashboardAddPanel.clickAddNewEmbeddableLink(mlEmbeddableType);
 
         await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
       });
