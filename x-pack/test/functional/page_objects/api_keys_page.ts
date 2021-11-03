@@ -83,9 +83,9 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async bulkDeleteApiKeys() {
-      const hasApiKeysToDelete = await find.existsByCssSelector(
-        '[data-test-subj="checkboxSelectAll"]'
-      );
+      const hasApiKeysToDelete = await testSubjects.exists('checkboxSelectAll', {
+        allowHidden: true,
+      });
       if (hasApiKeysToDelete) {
         await testSubjects.click('checkboxSelectAll');
         await testSubjects.click('bulkInvalidateActionButton');
