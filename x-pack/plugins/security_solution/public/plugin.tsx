@@ -351,7 +351,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       let kibanaDataViews: SourcererModel['kibanaDataViews'];
       try {
         // check for/generate default Security Solution Kibana data view
-        const sourcererDataViews = await coreStart.http.fetch(SOURCERER_API_URL, {
+        const sourcererDataViews: {
+          defaultDataView: SourcererModel['defaultDataView'];
+          kibanaDataViews: SourcererModel['kibanaDataViews'];
+        } = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({
             patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
