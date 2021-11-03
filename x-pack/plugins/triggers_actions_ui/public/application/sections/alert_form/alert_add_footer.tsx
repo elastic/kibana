@@ -55,7 +55,7 @@ export const AlertAddFooter = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            color="secondary"
+            color="success"
             data-test-subj="saveAlertButton"
             type="submit"
             iconType="check"
