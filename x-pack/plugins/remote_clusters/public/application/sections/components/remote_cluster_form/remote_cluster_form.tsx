@@ -20,7 +20,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
@@ -391,7 +391,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     if (this.props.isSaving) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

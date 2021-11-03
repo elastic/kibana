@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiHorizontalRule,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
@@ -794,7 +794,7 @@ export class FollowerIndexForm extends PureComponent {
     if (apiStatus === API_STATUS.SAVING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }
