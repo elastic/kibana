@@ -30,7 +30,6 @@ import { useShowTimeline } from '../../../common/utils/timeline/use_show_timelin
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { navTabs, cloudPostureNavTabs } from '../home_navigations';
-import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
  * rather than applying them to the timeline bar directly

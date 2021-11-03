@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, RouteProps, Route, Switch } from 'react-router-dom';
-import { OVERVIEW_PATH } from '../../common/constants';
+import { Route, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';

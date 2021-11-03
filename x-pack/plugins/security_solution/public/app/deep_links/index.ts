@@ -10,12 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityPageName, CloudPosturePage } from '../types';
-import {
-  AppDeepLink,
-  ApplicationStart,
-  AppNavLinkStatus,
-  Capabilities,
-} from '../../../../../../src/core/public';
+import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   DETECT,
