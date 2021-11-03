@@ -4387,7 +4387,6 @@
     "share.contextMenu.permalinksLabel": "パーマリンク",
     "share.contextMenuTitle": "この {objectType} を共有",
     "share.urlGenerators.error.createUrlFnProvided": "このジェネレーターは非推奨とマークされています。createUrl fn を付けないでください。",
-    "share.urlGenerators.error.migrateCalledNotDeprecated": "非推奨以外のジェネレーターで migrate を呼び出すことはできません。",
     "share.urlGenerators.error.migrationFnGivenNotDeprecated": "移行機能を提供する場合、このジェネレーターに非推奨マークを付ける必要があります",
     "share.urlGenerators.error.noCreateUrlFnProvided": "このジェネレーターには非推奨のマークがありません。createUrl fn を付けてください。",
     "share.urlGenerators.error.noMigrationFnProvided": "アクセスリンクジェネレーターに非推奨マークが付いている場合、移行機能を提供する必要があります。",

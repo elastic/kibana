@@ -4430,7 +4430,6 @@
     "share.contextMenu.permalinksLabel": "固定链接",
     "share.contextMenuTitle": "共享此 {objectType}",
     "share.urlGenerators.error.createUrlFnProvided": "此生成器标记为已过时。切勿提供 createUrl 函数。",
-    "share.urlGenerators.error.migrateCalledNotDeprecated": "无法在非过时的生成器上调用迁移。",
     "share.urlGenerators.error.migrationFnGivenNotDeprecated": "如果提供了迁移函数，则必须将此生成器标记为已过时",
     "share.urlGenerators.error.noCreateUrlFnProvided": "此生成器未标记为已过时。请提供 createUrl 函数。",
     "share.urlGenerators.error.noMigrationFnProvided": "如果访问链接生成器标记为已过时，则必须提供迁移函数。",
