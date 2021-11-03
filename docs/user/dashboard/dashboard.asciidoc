@@ -5,7 +5,7 @@
 --
 **_Visualize your data with dashboards._**
 
-The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<index-patterns, index patterns>> into a collection of panels 
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of panels 
 that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. 
 
 [role="screenshot"]
@@ -53,7 +53,7 @@ To create dashboards, you must meet the minimum requirements.
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
 
 * When the read-only indicator appears, you have insufficient privileges
 to create or save dashboards, and the options to create and save dashboards are not visible. For more information,

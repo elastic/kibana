@@ -23,9 +23,6 @@ import {
   Settings,
   TooltipType,
   XYChartElementEvent,
-  GridLineStyle,
-  AxisStyle,
-  RecursivePartial,
 } from '@elastic/charts';
 import { IUiSettingsClient } from 'kibana/public';
 import {
@@ -38,7 +35,7 @@ import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search'
 import { FetchStatus } from '../../../../types';
 import { DiscoverServices } from '../../../../../build_services';
 import { useDataState } from '../../utils/use_data_state';
-import { LEGACY_TIME_AXIS } from '../../../../../../../charts/common';
+import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../charts/common';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
@@ -184,46 +181,6 @@ export function DiscoverHistogram({
   const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
-  const gridLineStyle: RecursivePartial<GridLineStyle> = useLegacyTimeAxis
-    ? {}
-    : { strokeWidth: 0.1, stroke: isDarkMode ? 'white' : 'black' };
-  const verticalAxisStyle: RecursivePartial<AxisStyle> = useLegacyTimeAxis
-    ? {}
-    : {
-        axisLine: {
-          visible: false,
-        },
-        tickLabel: {
-          fontSize: 11,
-        },
-      };
-  const xAxisStyle: RecursivePartial<AxisStyle> = useLegacyTimeAxis
-    ? {}
-    : {
-        axisLine: {
-          stroke: isDarkMode ? 'lightgray' : 'darkgray',
-          strokeWidth: 1,
-        },
-        tickLine: {
-          size: 12,
-          strokeWidth: 0.15,
-          stroke: isDarkMode ? 'white' : 'black',
-          padding: -10,
-          visible: true,
-        },
-        tickLabel: {
-          fontSize: 11,
-          padding: 0,
-          alignment: {
-            vertical: Position.Bottom,
-            horizontal: Position.Left,
-          },
-          offset: {
-            x: 1.5,
-            y: 0,
-          },
-        },
-      };
 
   return (
     <React.Fragment>
@@ -244,16 +201,13 @@ export function DiscoverHistogram({
             ticks={2}
             integersOnly
             tickFormat={(value) => xAxisFormatter.convert(value)}
-            gridLine={gridLineStyle}
-            style={verticalAxisStyle}
           />
           <Axis
             id="discover-histogram-bottom-axis"
             position={Position.Bottom}
             tickFormat={formatXValue}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            gridLine={gridLineStyle}
-            style={xAxisStyle}
+            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
           <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
           <Endzones
