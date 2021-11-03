@@ -219,23 +219,32 @@ export const useDataVisualizerGridData = (
   );
 
   const configsWithoutStats = useMemo(() => {
-    const existMetricFields: FieldRequestConfig[] = metricConfigs.map((config) => {
-      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
-      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
-        props.cardinality = config.stats.cardinality;
-      }
-      return props;
-    });
+    const existMetricFields = metricConfigs
+      .map((config) => {
+        if (config?.stats?.cardinality !== undefined) {
+          return {
+            fieldName: config.fieldName,
+            type: config.type,
+            cardinality: config.stats.cardinality,
+          };
+        }
+      })
+      .filter((c) => c !== undefined) as FieldRequestConfig[];
 
     // Pass the field name, type and cardinality in the request.
     // Top values will be obtained on a sample if cardinality > 100000.
-    const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs.map((config) => {
-      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
-      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
-        props.cardinality = config.stats.cardinality;
-      }
-      return props;
-    });
+    const existNonMetricFields = nonMetricConfigs
+      .map((config) => {
+        if (config?.stats?.cardinality !== undefined) {
+          return {
+            fieldName: config.fieldName,
+            type: config.type,
+            cardinality: config.stats.cardinality,
+          };
+        }
+      })
+      .filter((c) => c !== undefined) as FieldRequestConfig[];
+
     return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
   }, [metricConfigs, nonMetricConfigs]);
 
