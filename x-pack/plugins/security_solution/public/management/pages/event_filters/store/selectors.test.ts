@@ -42,6 +42,8 @@ import {
 describe('event filters selectors', () => {
   let initialState: EventFiltersListPageState;
 
+  // When `setToLoadingState()` is called, this variable will hold the prevousState in order to
+  // avoid ts-ignores due to know issues (#830) around the LoadingResourceState
   let previousStateWhileLoading: EventFiltersListPageState['listPage']['data'] | undefined;
 
   const setToLoadedState = () => {
