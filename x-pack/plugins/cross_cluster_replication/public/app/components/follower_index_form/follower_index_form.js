@@ -727,7 +727,7 @@ export class FollowerIndexForm extends PureComponent {
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
-                color="secondary"
+                color="success"
                 iconType="check"
                 onClick={this.sendForm}
                 fill
