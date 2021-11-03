@@ -69,7 +69,6 @@ describe('aggregate()', () => {
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find
       .mockResolvedValueOnce({

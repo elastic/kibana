@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }) {
       //Source should be correct
       expect(
         mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0].startsWith(
-          `/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=geometry&index=geo_shapes*&requestBody=(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))&geoFieldType=geo_shape`
+          `/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=geometry&index=geo_shapes*&requestBody=(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))`
         )
       ).to.equal(true);
 
@@ -75,6 +75,35 @@ export default function ({ getPageObjects, getService }) {
           '#6092c0',
         ],
         'fill-opacity': 1,
+      });
+    });
+
+    it('Style should include toomanyfeatures layer', async () => {
+      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+
+      const layer = mapboxStyle.layers.find((mbLayer) => {
+        return mbLayer.id === `${VECTOR_SOURCE_ID}_toomanyfeatures`;
+      });
+
+      expect(layer).to.eql({
+        id: 'caffa63a-ebfb-466d-8ff6-d797975b88ab_toomanyfeatures',
+        type: 'line',
+        source: 'caffa63a-ebfb-466d-8ff6-d797975b88ab',
+        'source-layer': 'meta',
+        minzoom: 0,
+        maxzoom: 24,
+        filter: [
+          'all',
+          ['==', ['get', 'hits.total.relation'], 'gte'],
+          ['>=', ['get', 'hits.total.value'], 10002],
+        ],
+        layout: { visibility: 'visible' },
+        paint: {
+          'line-color': '#fec514',
+          'line-width': 3,
+          'line-dasharray': [2, 1],
+          'line-opacity': 1,
+        },
       });
     });
   });

@@ -11,6 +11,7 @@ import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_na
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
+import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
@@ -64,34 +65,52 @@ export const usePrimaryNavigationItems = ({
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
-  return useMemo(() => {
-    return [
-      {
-        id: 'main',
-        name: '',
-        items: [navTabs.overview],
-      },
-      {
-        ...securityNavGroup.detect,
-        items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
-      },
-      {
-        ...securityNavGroup.explore,
-        items: [navTabs.hosts, navTabs.network, ...(navTabs.ueba != null ? [navTabs.ueba] : [])],
-      },
-      {
-        ...securityNavGroup.investigate,
-        items: hasCasesReadPermissions ? [navTabs.timelines, navTabs.case] : [navTabs.timelines],
-      },
-      {
-        ...securityNavGroup.manage,
-        items: [
-          navTabs.endpoints,
-          navTabs.trusted_apps,
-          navTabs.event_filters,
-          ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
-        ],
-      },
-    ];
-  }, [navTabs, hasCasesReadPermissions, canSeeHostIsolationExceptions]);
+  const uiCapabilities = useKibana().services.application.capabilities;
+  return useMemo(
+    () =>
+      uiCapabilities.siem.show
+        ? [
+            {
+              id: 'main',
+              name: '',
+              items: [navTabs.overview],
+            },
+            {
+              ...securityNavGroup.detect,
+              items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
+            },
+            {
+              ...securityNavGroup.explore,
+              items: [
+                navTabs.hosts,
+                navTabs.network,
+                ...(navTabs.ueba != null ? [navTabs.ueba] : []),
+              ],
+            },
+            {
+              ...securityNavGroup.investigate,
+              items: hasCasesReadPermissions
+                ? [navTabs.timelines, navTabs.case]
+                : [navTabs.timelines],
+            },
+            {
+              ...securityNavGroup.manage,
+              items: [
+                navTabs.endpoints,
+                navTabs.trusted_apps,
+                navTabs.event_filters,
+                ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
+              ],
+            },
+          ]
+        : hasCasesReadPermissions
+        ? [
+            {
+              ...securityNavGroup.investigate,
+              items: [navTabs.case],
+            },
+          ]
+        : [],
+    [uiCapabilities.siem.show, navTabs, hasCasesReadPermissions, canSeeHostIsolationExceptions]
+  );
 }

@@ -1266,6 +1266,21 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.IField.getMbFieldName",
+            "type": "Function",
+            "tags": [],
+            "label": "getMbFieldName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.IField.getRootName",
             "type": "Function",
             "tags": [],
@@ -1498,10 +1513,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IField.supportsAutoDomain",
+            "id": "def-public.IField.supportsFieldMetaFromLocalData",
             "type": "Function",
             "tags": [],
-            "label": "supportsAutoDomain",
+            "label": "supportsFieldMetaFromLocalData",
             "description": [],
             "signature": [
               "() => boolean"
@@ -1513,25 +1528,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IField.supportsFieldMeta",
+            "id": "def-public.IField.supportsFieldMetaFromEs",
             "type": "Function",
             "tags": [],
-            "label": "supportsFieldMeta",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.IField.canReadFromGeoJson",
-            "type": "Function",
-            "tags": [],
-            "label": "canReadFromGeoJson",
+            "label": "supportsFieldMetaFromEs",
             "description": [],
             "signature": [
               "() => boolean"
@@ -1720,6 +1720,21 @@
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.isMvt",
+            "type": "Function",
+            "tags": [],
+            "label": "isMvt",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
           {
             "parentPluginId": "maps",
             "id": "def-public.IVectorSource.getTooltipProperties",
@@ -2926,9 +2941,9 @@
         "label": "SourceEditorArgs",
         "description": [],
         "signature": [
-          "{ onChange: (...args: ",
+          "{ clearJoins: () => void; currentLayerType: string; hasJoins: boolean; onChange: (...args: ",
           "OnSourceChangeArgs",
-          "[]) => void; currentLayerType?: string | undefined; }"
+          "[]) => Promise<void>; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
         "deprecated": false,

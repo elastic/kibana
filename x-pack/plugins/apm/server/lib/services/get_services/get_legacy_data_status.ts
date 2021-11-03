@@ -19,7 +19,7 @@ export async function getLegacyDataStatus(
   const { apmEventClient } = setup;
 
   const params = {
-    terminateAfter: 1,
+    terminate_after: 1,
     apm: {
       events: [ProcessorEvent.transaction],
       includeLegacyData: true,

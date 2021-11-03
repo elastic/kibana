@@ -9,7 +9,7 @@ import { omit, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLte from 'semver/functions/lte';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest, LogMeta } from 'src/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
@@ -83,6 +83,17 @@ export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
   'read',
   'read_cross_cluster',
 ]);
+
+interface PackagePolicyUpgradeLogMeta extends LogMeta {
+  package_policy_upgrade: {
+    package_name: string;
+    current_version: string;
+    new_version: string;
+    status: 'success' | 'failure';
+    error?: any[];
+    dryRun?: boolean;
+  };
+}
 
 class PackagePolicyService {
   public async create(
@@ -393,6 +404,7 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
+
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
       inputs = await this._compilePackagePolicyInputs(
         registryPkgInfo,
@@ -432,6 +444,23 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         currentVersion: packagePolicy.package.version,
       });
+
+      const upgradeMeta: PackagePolicyUpgradeLogMeta = {
+        package_policy_upgrade: {
+          package_name: packagePolicy.package.name,
+          new_version: packagePolicy.package.version,
+          current_version: 'unknown',
+          status: 'success',
+          dryRun: false,
+        },
+      };
+
+      appContextService
+        .getLogger()
+        .info<PackagePolicyUpgradeLogMeta>(
+          `Package policy successfully upgraded ${JSON.stringify(upgradeMeta)}`,
+          upgradeMeta
+        );
     }
 
     return newPolicy;
@@ -660,6 +689,27 @@ class PackagePolicyService {
       updatedPackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
       const hasErrors = 'errors' in updatedPackagePolicy;
+
+      if (packagePolicy.package.version !== packageInfo.version) {
+        const upgradeMeta: PackagePolicyUpgradeLogMeta = {
+          package_policy_upgrade: {
+            package_name: packageInfo.name,
+            current_version: packagePolicy.package.version,
+            new_version: packageInfo.version,
+            status: hasErrors ? 'failure' : 'success',
+            error: hasErrors ? updatedPackagePolicy.errors : undefined,
+            dryRun: true,
+          },
+        };
+        appContextService
+          .getLogger()
+          .info<PackagePolicyUpgradeLogMeta>(
+            `Package policy upgrade dry run ${
+              hasErrors ? 'resulted in errors' : 'ran successfully'
+            } ${JSON.stringify(upgradeMeta)}`,
+            upgradeMeta
+          );
+      }
 
       return {
         name: updatedPackagePolicy.name,
@@ -1062,7 +1112,9 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      const indexOfInput = inputs.indexOf(originalInput);
+      inputs[indexOfInput] = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      originalInput = inputs[indexOfInput];
     }
 
     if (override.streams) {
@@ -1081,10 +1133,24 @@ export function overridePackageInputs(
         }
 
         if (stream.vars) {
-          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
+          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          originalInput.streams[indexOfStream] = deepMergeVars(
+            originalStream,
+            stream as InputsOverride
+          );
+          originalStream = originalInput.streams[indexOfStream];
         }
       }
     }
+
+    // Filter all stream that have been removed from the input
+    originalInput.streams = originalInput.streams.filter((originalStream) => {
+      return (
+        override.streams?.some(
+          (s) => s.data_stream.dataset === originalStream.data_stream.dataset
+        ) ?? false
+      );
+    });
   }
 
   const resultingPackagePolicy: NewPackagePolicy = {

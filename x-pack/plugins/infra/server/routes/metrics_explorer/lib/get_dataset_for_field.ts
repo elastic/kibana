@@ -24,7 +24,7 @@ export const getDatasetForField = async (
   const params = {
     allow_no_indices: true,
     ignore_unavailable: true,
-    terminateAfter: 1,
+    terminate_after: 1,
     index: indexPattern,
     body: {
       query: {

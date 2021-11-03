@@ -13,7 +13,6 @@ import { getEMSSettings } from '../../kibana_services';
 import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';
 import { TileLayer } from './tile_layer/tile_layer';
 import { VectorTileLayer } from './vector_tile_layer/vector_tile_layer';
-// @ts-expect-error
 import { EMSTMSSource } from '../sources/ems_tms_source';
 
 export function createBasemapLayerDescriptor(): LayerDescriptor | null {

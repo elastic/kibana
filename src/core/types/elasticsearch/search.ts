@@ -7,7 +7,7 @@
  */
 
 import { ValuesType } from 'utility-types';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 type InvalidAggregationRequest = unknown;
 

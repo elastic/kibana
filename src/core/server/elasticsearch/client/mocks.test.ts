@@ -39,9 +39,9 @@ describe('Mocked client', () => {
   });
 
   it('used EventEmitter functions should be mocked', () => {
-    expectMocked(client.on);
-    expectMocked(client.off);
-    expectMocked(client.once);
+    expectMocked(client.diagnostic.on);
+    expectMocked(client.diagnostic.off);
+    expectMocked(client.diagnostic.once);
   });
 
   it('`child` should be mocked and return a mocked Client', () => {

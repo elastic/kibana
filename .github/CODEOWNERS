@@ -96,15 +96,15 @@
 # Observability Shared
 /x-pack/plugins/observability/ @elastic/observability-ui
 
-# Logs and Metrics (Infra)
-/x-pack/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/plugins/infra/server/routes/log* @elastic/logs-metrics-ui @elastic/logs-ui
-/x-pack/plugins/infra/public/pages/logs/ @elastic/logs-metrics-ui @elastic/logs-ui
-/x-pack/plugins/infra/server/routes/metrics* @elastic/logs-metrics-ui @elastic/metrics-ui
-/x-pack/plugins/infra/public/pages/metrics/ @elastic/logs-metrics-ui @elastic/metrics-ui
+# Infra Monitoring
+/x-pack/plugins/infra/ @elastic/infra-monitoring-ui
+/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui
+/x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui
 
-# Stack Monitoring
-/x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui @elastic/logs-metrics-ui @elastic/metrics-ui
+# Elastic Stack Monitoring
+/x-pack/plugins/monitoring/ @elastic/infra-monitoring-ui
+/x-pack/test/functional/apps/monitoring @elastic/infra-monitoring-ui
+/x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
 
 # Fleet
 /x-pack/plugins/fleet/ @elastic/fleet
@@ -290,6 +290,7 @@
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/interactive_setup/ @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
+/test/interactive_setup_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security
