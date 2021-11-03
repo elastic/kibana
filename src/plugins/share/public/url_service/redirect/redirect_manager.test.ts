@@ -76,9 +76,12 @@ describe('on page mount', () => {
         })
       )}`
     );
-    expect(spy).toHaveBeenCalledWith({
-      num: 2,
-    });
+    expect(spy).toHaveBeenCalledWith(
+      {
+        num: 2,
+      },
+      { replace: true }
+    );
   });
 
   test('throws if locator does not exist', async () => {
