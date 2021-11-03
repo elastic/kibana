@@ -24,6 +24,7 @@ export type {
 export * from './config';
 export * from './rule_data_plugin_service';
 export * from './rule_data_client';
+export * from './alert_data_client/audit_events';
 
 export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 export {
