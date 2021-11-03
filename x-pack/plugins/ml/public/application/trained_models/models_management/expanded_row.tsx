@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC, Fragment, useEffect, useState } from 'react';
 import { omit } from 'lodash';
 import {
   EuiBadge,
@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiListGroup,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
@@ -26,11 +27,13 @@ import {
 } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import { ModelItemFull } from './models_list';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { timeFormatter } from '../../../../common/util/date_utils';
 import { isDefined } from '../../../../common/types/guards';
 import { isPopulatedObject } from '../../../../common';
+import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -86,6 +89,12 @@ export function formatToListItems(
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
+  const mlLocator = useMlLocator();
+
+  const [deploymentStatsItems, setDeploymentStats] = useState<EuiDescriptionListProps['listItems']>(
+    []
+  );
+
   const {
     inference_config: inferenceConfig,
     stats,
@@ -119,6 +128,38 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const {
     services: { share },
   } = useMlKibana();
+
+  useEffect(
+    function updateDeploymentState() {
+      (async function () {
+        const { nodes, ...deploymentStats } = stats.deployment_stats ?? {};
+
+        if (!isPopulatedObject(deploymentStats)) return;
+
+        const result = formatToListItems(deploymentStats)!;
+
+        const items: EuiListGroupItemProps[] = [];
+        for (const v of nodes!) {
+          const nodeObject = Object.values(v.node)[0];
+          const href = await mlLocator!.getUrl({
+            page: ML_PAGES.TRAINED_MODELS_NODES,
+          });
+          items.push({
+            label: nodeObject.name,
+            href,
+          });
+        }
+
+        result.push({
+          title: 'nodes',
+          description: <EuiListGroup size={'s'} gutterSize={'s'} listItems={items} />,
+        });
+
+        setDeploymentStats(result);
+      })();
+    },
+    [stats.deployment_stats]
+  );
 
   const tabs = [
     {
@@ -248,7 +289,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             content: (
               <>
                 <EuiSpacer size={'m'} />
-                {stats.deployment_stats && (
+                {!!deploymentStatsItems?.length ? (
                   <>
                     <EuiPanel>
                       <EuiTitle size={'xs'}>
@@ -263,12 +304,12 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       <EuiDescriptionList
                         compressed={true}
                         type="column"
-                        listItems={formatToListItems(stats.deployment_stats)}
+                        listItems={deploymentStatsItems}
                       />
                     </EuiPanel>
                     <EuiSpacer size={'m'} />
                   </>
-                )}
+                ) : null}
                 <EuiFlexGrid columns={2}>
                   {stats.inference_stats && (
                     <EuiFlexItem>

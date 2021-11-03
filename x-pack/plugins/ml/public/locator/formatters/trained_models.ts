@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TrainedModelsUrlState } from '../../../common/types/locator';
+import { TrainedModelsNodesUrlState, TrainedModelsUrlState } from '../../../common/types/locator';
 import { ML_PAGES } from '../../../common/constants/locator';
 
 export function formatTrainedModelsManagementUrl(
@@ -13,4 +13,11 @@ export function formatTrainedModelsManagementUrl(
   mlUrlGeneratorState: TrainedModelsUrlState['pageState']
 ): string {
   return `${appBasePath}/${ML_PAGES.TRAINED_MODELS_MANAGE}`;
+}
+
+export function formatTrainedModelsNodesManagementUrl(
+  appBasePath: string,
+  mlUrlGeneratorState: TrainedModelsNodesUrlState['pageState']
+): string {
+  return `${appBasePath}/${ML_PAGES.TRAINED_MODELS_NODES}`;
 }
