@@ -348,7 +348,7 @@ export class RemoteClusterForm extends Component<Props, State> {
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="remoteClusterFormSaveButton"
-                color="secondary"
+                color="success"
                 iconType="check"
                 onClick={this.save}
                 fill
