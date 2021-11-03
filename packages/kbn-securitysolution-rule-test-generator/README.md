@@ -10,3 +10,4 @@ yarn kbn bootstrap
 cd x-pack/plugins/security_solution
 node scripts/detection_engine/generate_rule_tests
 ```
+
