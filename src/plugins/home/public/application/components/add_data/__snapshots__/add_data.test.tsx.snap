@@ -83,6 +83,21 @@ exports[`AddData render 1`] = `
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButtonEmpty
+              data-test-subj="uploadFile"
+              href="#/tutorial_directory/fileDataViz"
+              iconType="importAction"
+            >
+              <FormattedMessage
+                defaultMessage="Upload a file"
+                id="home.addData.uploadFileButtonLabel"
+                values={Object {}}
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
