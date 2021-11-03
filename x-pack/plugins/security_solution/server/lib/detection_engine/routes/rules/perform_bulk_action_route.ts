@@ -47,6 +47,7 @@ export const performBulkActionRoute = (
 
       try {
         const rulesClient = context.alerting?.getRulesClient();
+        const exceptionsClient = context.lists?.getExceptionListClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
@@ -108,16 +109,10 @@ export const performBulkActionRoute = (
           case BulkAction.delete:
             await Promise.all(
               rules.data.map(async (rule) => {
-                const ruleStatuses = await ruleStatusClient.find({
-                  logsCount: 6,
-                  ruleId: rule.id,
-                  spaceId: context.securitySolution.getSpaceId(),
-                });
                 await deleteRules({
+                  ruleId: rule.id,
                   rulesClient,
                   ruleStatusClient,
-                  ruleStatuses,
-                  id: rule.id,
                 });
               })
             );
@@ -128,7 +123,7 @@ export const performBulkActionRoute = (
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
                 await rulesClient.create({
-                  data: duplicateRule(rule),
+                  data: duplicateRule(rule, isRuleRegistryEnabled),
                 });
               })
             );
@@ -136,13 +131,14 @@ export const performBulkActionRoute = (
           case BulkAction.export:
             const exported = await getExportByObjectIds(
               rulesClient,
+              exceptionsClient,
               savedObjectsClient,
               rules.data.map(({ params }) => ({ rule_id: params.ruleId })),
               logger,
               isRuleRegistryEnabled
             );
 
-            const responseBody = `${exported.rulesNdjson}${exported.exportDetails}`;
+            const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;
 
             return response.ok({
               headers: {

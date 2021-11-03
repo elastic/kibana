@@ -328,6 +328,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           )}
           <EuiFlexItem grow={false}>
             <EuiButton
+              id="submit-button"
               disabled={!enabled || !agentSelected || !queryValueProvided || isSubmitting}
               onClick={submit}
             >

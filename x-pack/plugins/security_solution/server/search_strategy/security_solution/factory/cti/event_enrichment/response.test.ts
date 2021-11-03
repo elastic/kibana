@@ -18,7 +18,7 @@ describe('parseEventEnrichmentResponse', () => {
     const parsedResponse = await parseEventEnrichmentResponse(options, response);
 
     const expectedInspect = expect.objectContaining({
-      allowNoIndices: true,
+      allow_no_indices: true,
       body: {
         _source: false,
         fields: ['*'],
@@ -57,7 +57,7 @@ describe('parseEventEnrichmentResponse', () => {
           },
         },
       },
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       index: ['filebeat-*'],
     });
     const parsedInspect = JSON.parse(parsedResponse.inspect.dsl[0]);

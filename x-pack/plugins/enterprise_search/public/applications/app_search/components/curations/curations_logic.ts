@@ -61,7 +61,6 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     dataLoading: [
       true,
       {
-        loadCurations: () => true,
         onCurationsLoad: () => false,
       },
     ],
@@ -126,6 +125,9 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       } catch (e) {
         flashAPIErrors(e);
       }
+    },
+    onSelectPageTab: () => {
+      clearFlashMessages();
     },
   }),
 });

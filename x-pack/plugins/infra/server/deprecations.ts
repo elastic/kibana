@@ -142,7 +142,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
     }),
   };
 
-export const configDeprecations: ConfigDeprecationProvider = () => [
+export const configDeprecations: ConfigDeprecationProvider = ({ deprecate }) => [
   ...Object.keys(FIELD_DEPRECATION_FACTORIES).map(
     (key): ConfigDeprecation =>
       (completeConfig, rootPath, addDeprecation) => {

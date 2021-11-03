@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ProcessorEvent } from '../../../common/processor_event';
 
@@ -31,7 +31,7 @@ export async function getOverallLatencyDistribution(
       log: [],
     };
 
-    const { setup, ...rawParams } = options;
+    const { setup, termFilters, ...rawParams } = options;
     const { apmEventClient } = setup;
     const params = {
       // pass on an empty index because we're using only the body attribute
@@ -86,7 +86,11 @@ export async function getOverallLatencyDistribution(
 
     // #3: get histogram chart data
     const { body: transactionDurationRangesRequestBody } =
-      getTransactionDurationRangesRequest(params, histogramRangeSteps);
+      getTransactionDurationRangesRequest(
+        params,
+        histogramRangeSteps,
+        termFilters
+      );
 
     const transactionDurationRangesResponse = (await apmEventClient.search(
       'get_transaction_duration_ranges',

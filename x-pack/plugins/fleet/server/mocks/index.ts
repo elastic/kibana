@@ -57,8 +57,8 @@ export const createAppContextStartContractMock = (): MockedFleetAppContext => {
       agentIdVerificationEnabled: true,
     },
     config$,
-    kibanaVersion: '8.0.0',
-    kibanaBranch: 'master',
+    kibanaVersion: '8.99.0', // Fake version :)
+    kibanaBranch: 'main',
   };
 };
 
@@ -114,7 +114,6 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
     getAgentStatusForAgentPolicy: jest.fn(),
-    authenticateAgentWithAccessToken: jest.fn(),
     getAgent: jest.fn(),
     listAgents: jest.fn(),
   };

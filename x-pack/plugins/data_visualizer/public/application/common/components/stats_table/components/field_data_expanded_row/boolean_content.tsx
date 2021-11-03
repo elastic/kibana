@@ -7,7 +7,7 @@
 
 import React, { FC, ReactNode, useMemo } from 'react';
 import { EuiBasicTable, EuiSpacer, RIGHT_ALIGNMENT, HorizontalAlignment } from '@elastic/eui';
-import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -137,9 +137,9 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
             splitSeriesAccessors={['x']}
             stackAccessors={['x']}
             xAccessor="x"
-            xScaleType="ordinal"
+            xScaleType={ScaleType.Ordinal}
             yAccessors={['count']}
-            yScaleType="linear"
+            yScaleType={ScaleType.Linear}
           />
         </Chart>
       </ExpandedRowPanel>

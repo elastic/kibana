@@ -36,7 +36,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   describe('Observability annotations', () => {
     describe('when creating an annotation', () => {
       afterEach(async () => {
-        const indexExists = (await es.indices.exists({ index: DEFAULT_INDEX_NAME })).body;
+        const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
         if (indexExists) {
           await es.indices.delete({
             index: DEFAULT_INDEX_NAME,
@@ -153,10 +153,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         });
 
         // @ts-expect-error doesn't handle number
-        expect(search.body.hits.total.value).to.be(1);
+        expect(search.hits.total.value).to.be(1);
 
-        expect(search.body.hits.hits[0]._source).to.eql(response.body._source);
-        expect(search.body.hits.hits[0]._id).to.eql(response.body._id);
+        expect(search.hits.hits[0]._source).to.eql(response.body._source);
+        expect(search.hits.hits[0]._id).to.eql(response.body._id);
       });
 
       it('returns the annotation', async () => {
@@ -242,9 +242,9 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         });
 
         // @ts-expect-error doesn't handler number
-        expect(initialSearch.body.hits.total.value).to.be(2);
+        expect(initialSearch.hits.total.value).to.be(2);
 
-        const [id1, id2] = initialSearch.body.hits.hits.map((hit) => hit._id);
+        const [id1, id2] = initialSearch.hits.hits.map((hit) => hit._id);
 
         expect(
           (
@@ -261,9 +261,9 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         });
 
         // @ts-expect-error doesn't handler number
-        expect(searchAfterFirstDelete.body.hits.total.value).to.be(1);
+        expect(searchAfterFirstDelete.hits.total.value).to.be(1);
 
-        expect(searchAfterFirstDelete.body.hits.hits[0]._id).to.be(id2);
+        expect(searchAfterFirstDelete.hits.hits[0]._id).to.be(id2);
 
         expect(
           (
@@ -280,7 +280,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         });
 
         // @ts-expect-error doesn't handle number
-        expect(searchAfterSecondDelete.body.hits.total.value).to.be(0);
+        expect(searchAfterSecondDelete.hits.total.value).to.be(0);
       });
     });
   });

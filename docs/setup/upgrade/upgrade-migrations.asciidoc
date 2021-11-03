@@ -16,8 +16,8 @@ WARNING: The following instructions assumes {kib} is using the default index nam
 
 Saved objects are stored in two indices: 
 
-* `.kibana_{kibana_version}_001`, or if the `kibana.index` configuration setting is set `.{kibana.index}_{kibana_version}_001`. E.g. for Kibana v7.12.0 `.kibana_7.12.0_001`.
-* `.kibana_task_manager_{kibana_version}_001`, or if the `xpack.tasks.index` configuration setting is set `.{xpack.tasks.index}_{kibana_version}_001` E.g. for Kibana v7.12.0 `.kibana_task_manager_7.12.0_001`.
+* `.kibana_{kibana_version}_001`, e.g. for Kibana v7.12.0 `.kibana_7.12.0_001`.
+* `.kibana_task_manager_{kibana_version}_001`, e.g. for Kibana v7.12.0 `.kibana_task_manager_7.12.0_001`.
  
 The index aliases `.kibana` and `.kibana_task_manager` will always point to
 the most up-to-date saved object indices.

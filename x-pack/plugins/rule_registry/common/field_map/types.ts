@@ -6,5 +6,5 @@
  */
 
 export interface FieldMap {
-  [key: string]: { type: string; required?: boolean; array?: boolean };
+  [key: string]: { type: string; required?: boolean; array?: boolean; path?: string };
 }

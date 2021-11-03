@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { logSourceColumnConfigurationRT } from '../../log_sources/log_source_configuration';
 import {
   logEntryAfterCursorRT,

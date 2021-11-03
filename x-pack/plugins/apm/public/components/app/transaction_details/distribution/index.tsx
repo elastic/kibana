@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import {
   EuiBadge,
@@ -16,29 +16,26 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useUiTracker } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/search_strategies/constants';
 
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-import {
-  TransactionDistributionChart,
-  TransactionDistributionChartData,
-} from '../../../shared/charts/transaction_distribution_chart';
-import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
+import { useTransactionColors } from '../../correlations/use_transaction_colors';
 
 import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
+
+import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
@@ -71,15 +68,8 @@ export function TransactionDistribution({
   selection,
   traceSamples,
 }: TransactionDistributionProps) {
-  const { serviceName, transactionType } = useApmServiceContext();
-
-  const {
-    core: { notifications },
-  } = useApmPluginContext();
-
+  const transactionColors = useTransactionColors();
   const { urlParams } = useUrlParams();
-  const { transactionName } = urlParams;
-
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
   const markerCurrentTransaction =
@@ -99,68 +89,6 @@ export function TransactionDistribution({
     }
   );
 
-  const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/transactions/view');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const {
-    data = { log: [] },
-    status,
-    error,
-  } = useFetcher(
-    (callApmApi) => {
-      if (serviceName && environment && start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/latency/overall_distribution',
-          params: {
-            query: {
-              serviceName,
-              transactionName,
-              transactionType,
-              kuery,
-              environment,
-              start,
-              end,
-              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-            },
-          },
-        });
-      }
-    },
-    [
-      serviceName,
-      transactionName,
-      transactionType,
-      kuery,
-      environment,
-      start,
-      end,
-    ]
-  );
-
-  const overallHistogram =
-    data.overallHistogram === undefined && status !== FETCH_STATUS.LOADING
-      ? []
-      : data.overallHistogram;
-  const hasData =
-    Array.isArray(overallHistogram) && overallHistogram.length > 0;
-
-  useEffect(() => {
-    if (isErrorMessage(error)) {
-      notifications.toasts.addDanger({
-        title: i18n.translate(
-          'xpack.apm.transactionDetails.distribution.errorTitle',
-          {
-            defaultMessage: 'An error occurred fetching the distribution',
-          }
-        ),
-        text: error.toString(),
-      });
-    }
-  }, [error, notifications.toasts]);
-
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
   const onTrackedChartSelection = (brushEvent: XYBrushEvent) => {
@@ -173,18 +101,8 @@ export function TransactionDistribution({
     trackApmEvent({ metric: 'transaction_distribution_chart_clear_selection' });
   };
 
-  const transactionDistributionChartData: TransactionDistributionChartData[] =
-    [];
-
-  if (Array.isArray(overallHistogram)) {
-    transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-        { defaultMessage: 'All transactions' }
-      ),
-      histogram: overallHistogram,
-    });
-  }
+  const { chartData, hasData, percentileThresholdValue, status } =
+    useTransactionDistributionChartData();
 
   return (
     <div data-test-subj="apmTransactionDistributionTabContent">
@@ -244,15 +162,46 @@ export function TransactionDistribution({
         )}
       </EuiFlexGroup>
 
+      <EuiText color="subdued" size="xs">
+        <FormattedMessage
+          id="xpack.apm.transactionDetails.tabs.transactionDistributionChartDescription"
+          defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {allTransactions} and {allFailedTransactions}."
+          values={{
+            allTransactions: (
+              <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+                <FormattedMessage
+                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartAllTransactions"
+                  defaultMessage="all transactions"
+                />
+              </span>
+            ),
+            allFailedTransactions: (
+              <span
+                style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
+              >
+                <FormattedMessage
+                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartAllFailedTransactions"
+                  defaultMessage="all failed transactions"
+                />
+              </span>
+            ),
+          }}
+        />
+      </EuiText>
+
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
-        data={transactionDistributionChartData}
+        data={chartData}
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={data.percentileThresholdValue ?? 0}
+        markerValue={percentileThresholdValue ?? 0}
         onChartSelection={onTrackedChartSelection as BrushEndListener}
         hasData={hasData}
+        palette={[
+          transactionColors.ALL_TRANSACTIONS,
+          transactionColors.ALL_FAILED_TRANSACTIONS,
+        ]}
         selection={selection}
         status={status}
       />
