@@ -19,7 +19,7 @@ interface Props {
 
 const Status = {
   Healthy: (
-    <EuiBadge color="secondary">
+    <EuiBadge color="success">
       <FormattedMessage id="xpack.fleet.agentHealth.healthyStatusText" defaultMessage="Healthy" />
     </EuiBadge>
   ),
