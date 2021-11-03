@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(body.metadata.spanType).to.equal(span.type);
         expect(body.metadata.spanSubtype).to.equal(span.subType);
 
-        synthtraceEsClient.clean();
+        await synthtraceEsClient.clean();
       });
     }
   );
