@@ -39,7 +39,13 @@ export const analyticsJobExplorationRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    basicResolvers(deps)
+  );
 
   const [globalState] = useUrlState('_g');
 
