@@ -211,7 +211,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
             </EuiDescriptionList>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => setAction('changePassword')} size="s">
+            <EuiButton
+              onClick={() => setAction('changePassword')}
+              size="s"
+              data-test-subj="editUserChangePasswordButton"
+            >
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.changePasswordButton"
                 defaultMessage="Change password"
