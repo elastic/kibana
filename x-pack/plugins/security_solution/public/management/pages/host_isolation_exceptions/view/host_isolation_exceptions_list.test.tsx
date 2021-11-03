@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
@@ -168,10 +168,10 @@ describe('When on the host isolation exceptions page', () => {
       it('should show the create flyout when the add button is pressed', async () => {
         render();
         await dataReceived();
-        act(() => {
-          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+        userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+        waitFor(() => {
+          expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
         });
-        expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
 
       it('should show the create flyout when the show location is create', async () => {
