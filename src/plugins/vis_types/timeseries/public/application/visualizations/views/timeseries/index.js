@@ -168,9 +168,6 @@ export const TimeSeries = ({
         onPointerUpdate={handleCursorUpdate}
         theme={[
           {
-            crosshair: {
-              ...chartTheme.crosshair,
-            },
             axes: {
               tickLabel: {
                 padding: {

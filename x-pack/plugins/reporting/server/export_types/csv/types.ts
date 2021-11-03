@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export type { JobParamsPDFV2, TaskPayloadPDFV2 } from '../../../common/types';
+export type {
+  RawValue,
+  JobParamsDeprecatedCSV,
+  TaskPayloadDeprecatedCSV,
+  SearchRequestDeprecatedCSV,
+  SavedSearchGeneratorResultDeprecatedCSV,
+} from '../../../common/types';
