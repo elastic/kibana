@@ -8,8 +8,8 @@ import { useState, useEffect } from 'react';
 
 interface UseProcessTreeDeps {
   sessionId: string;
-  forward: IProcessEvent[];
-  backward?: IProcessEvent[];
+  forward: ProcessEvent[];
+  backward?: ProcessEvent[];
   searchQuery?: string;
 }
 
@@ -20,12 +20,12 @@ export enum Action {
   output = 'output',
 }
 
-interface IUser {
+interface User {
   id: string;
   name: string;
 }
 
-interface IProcessFields {
+interface ProcessFields {
   args: string[];
   args_count: number;
   command_line: string;
@@ -36,19 +36,19 @@ interface IProcessFields {
   working_directory: string;
   pid: number;
   pgid: number;
-  user: IUser;
+  user: User;
   end?: string;
   exit_code?: number;
 }
 
-interface IProcessSelf extends IProcessFields {
-  parent: IProcessFields;
-  session: IProcessFields;
-  entry: IProcessFields;
-  last_user_entered?: IProcessFields;
+interface ProcessSelf extends ProcessFields {
+  parent: ProcessFields;
+  session: ProcessFields;
+  entry: ProcessFields;
+  last_user_entered?: ProcessFields;
 }
 
-export interface IProcessEvent {
+export interface ProcessEvent {
   '@timestamp': string;
   event: {
     kind: string;
@@ -73,30 +73,30 @@ export interface IProcessEvent {
       version: string;
     };
   };
-  process: IProcessSelf;
+  process: ProcessSelf;
 
   // TODO: alerts? output? file_descriptors?
 }
 
-export interface IProcess {
-  events: IProcessEvent[];
-  children: IProcess[];
-  parent: IProcess | undefined;
+export interface Process {
+  events: ProcessEvent[];
+  children: Process[];
+  parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null; // either false, or set to searchQuery
   getEntityID(): string;
   hasOutput(): boolean;
   hasAlerts(): boolean;
   getOutput(): string;
-  getLatest(): IProcessEvent;
+  getLatest(): ProcessEvent;
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
 }
 
-class Process implements IProcess {
-  events: IProcessEvent[];
-  children: IProcess[];
-  parent: IProcess | undefined;
+class ProcessImpl implements Process {
+  events: ProcessEvent[];
+  children: Process[];
+  parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null;
 
@@ -118,12 +118,14 @@ class Process implements IProcess {
 
   hasAlerts() {
     // TODO: endpoint alerts schema uncertain (kind = alert comes from ECS)
+    // endpoint-dev code sets event.action to rule_detection and rule_prevention.
+    // alerts mechanics at elastic needs a research spike.
     return !!this.events.find(({ event }) => event.kind === 'alert');
   }
 
   getLatest() {
     const forksExecsOnly = this.events.filter((event) => {
-      return [Action.fork, Action.exec, Action.end].includes(event.event.action as Action);
+      return [Action.fork, Action.exec, Action.end].includes(event.event.action);
     });
 
     // returns the most recent fork, exec, or exit
@@ -165,21 +167,21 @@ export const useProcessTree = ({
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   const initializedProcessMap: ProcessMap = {
-    [sessionId]: new Process(),
+    [sessionId]: new ProcessImpl(),
   };
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
   const [forwardIndex, setForwardIndex] = useState(0);
   const [backwardIndex, setBackwardIndex] = useState(0);
-  const [searchResults, setSearchResults] = useState<IProcess[]>([]);
-  const [orphans, setOrphans] = useState<IProcess[]>([]);
+  const [searchResults, setSearchResults] = useState<Process[]>([]);
+  const [orphans, setOrphans] = useState<Process[]>([]);
 
-  const updateProcessMap = (events: IProcessEvent[]) => {
+  const updateProcessMap = (events: ProcessEvent[]) => {
     events.forEach((event) => {
       let process = processMap[event.process.entity_id];
 
       if (!process) {
-        process = new Process();
+        process = new ProcessImpl();
         processMap[event.process.entity_id] = process;
       }
 
@@ -187,7 +189,7 @@ export const useProcessTree = ({
     });
   };
 
-  const buildProcessTree = (events: IProcessEvent[], backwardDirection: boolean = false) => {
+  const buildProcessTree = (events: ProcessEvent[], backwardDirection: boolean = false) => {
     events.forEach((event) => {
       const process = processMap[event.process.entity_id];
       const parentProcess = processMap[event.process.parent.entity_id];
@@ -246,8 +248,6 @@ export const useProcessTree = ({
         let { parent } = process;
 
         while (parent) {
-          // eslint-disable-next-line no-console
-          console.log('auto expanding', parent.getLatest().process.name);
           parent.autoExpand = true;
           parent = parent.parent;
         }
@@ -256,15 +256,12 @@ export const useProcessTree = ({
   };
 
   const processNewEvents = (
-    events: IProcessEvent[] | undefined,
+    events: ProcessEvent[] | undefined,
     backwardDirection: boolean = false
   ) => {
     if (!events || events.length === 0) {
       return;
     }
-
-    // eslint-disable-next-line no-console
-    console.log(`processing ${events.length} commands`);
 
     updateProcessMap(events);
     buildProcessTree(events, backwardDirection);

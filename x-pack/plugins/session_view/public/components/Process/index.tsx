@@ -7,15 +7,15 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
 import { EuiButton, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IProcess } from '../../hooks/use_process_tree';
+import { Process } from '../../hooks/use_process_tree';
 
 const TREE_INDENT = 32;
 
-interface IProcessDeps {
-  process: IProcess;
+interface ProcessDeps {
+  process: Process;
   isSessionLeader?: boolean;
   depth?: number;
-  onProcessSelected(process: IProcess): void;
+  onProcessSelected(process: Process): void;
 }
 
 /**
@@ -27,14 +27,13 @@ export function Process({
   isSessionLeader = false,
   depth = 0,
   onProcessSelected,
-}: IProcessDeps) {
+}: ProcessDeps) {
   const { euiTheme } = useEuiTheme();
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
 
   useEffect(() => {
     setChildrenExpanded(isSessionLeader || process.autoExpand);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [process.autoExpand]);
+  }, [isSessionLeader, process.autoExpand]);
 
   const darkTextCSS = `
     color: ${euiTheme.colors.text};
@@ -54,7 +53,7 @@ export function Process({
 
   const { interactive } = event.process;
 
-  function renderChildren() {
+  const renderChildren = () => {
     const { children } = process;
 
     if (!childrenExpanded || !children || children.length === 0) {
@@ -84,14 +83,21 @@ export function Process({
 
     return (
       <div css={childrenCSS}>
-        {children.map((child: IProcess) => {
-          return <Process process={child} depth={newDepth} onProcessSelected={onProcessSelected} />;
+        {children.map((child: Process) => {
+          return (
+            <Process
+              key={child.getEntityID()}
+              process={child}
+              depth={newDepth}
+              onProcessSelected={onProcessSelected}
+            />
+          );
         })}
       </div>
     );
-  }
+  };
 
-  function renderButtons() {
+  const renderButtons = () => {
     const buttonCSS = `
       line-height: 18px;
       height: 20px;
@@ -119,12 +125,12 @@ export function Process({
     }
 
     return buttons;
-  }
+  };
 
   /**
    * gets border, bg and hover colors for a process
    */
-  function getProcessColors() {
+  const getProcessColors = () => {
     const bgColor = 'none';
     const hoverColor = '#6B5FC6';
     const borderColor = 'transparent';
@@ -149,7 +155,7 @@ export function Process({
     // }
 
     return { bgColor, borderColor, hoverColor };
-  }
+  };
 
   const { bgColor, borderColor, hoverColor } = getProcessColors();
 
@@ -189,7 +195,7 @@ export function Process({
     line-height: 24px;
   `;
 
-  function renderSessionLeader() {
+  const renderSessionLeader = () => {
     const { name, user } = process.getLatest().process;
     const sessionIcon = interactive ? 'consoleApp' : 'compute';
 
@@ -202,7 +208,7 @@ export function Process({
         <EuiIcon type="user" /> <b css={darkTextCSS}>{user.name}</b>
       </>
     );
-  }
+  };
 
   // TODO: not customizable for now (cmd previously offered a template string to render)
   const template = () => {
@@ -236,12 +242,12 @@ export function Process({
     `;
 
     return (
-      <>
+      <span>
         <span css={workingDirCSS}>{workingDirectory}</span>&nbsp;
         <span css={darkTextCSS}>{args[0]}</span>&nbsp;
         {args.slice(1).join(' ')}
         {exitCode && <small> [exit_code: {exitCode}]</small>}
-      </>
+      </span>
     );
   };
 
@@ -255,16 +261,13 @@ export function Process({
     `;
 
     return (
-      <>
+      <span>
         {process.isUserEntered() && <EuiIcon css={userEnteredIconCSS} type="user" />}
         <EuiIcon type="console" /> {template()}
-      </>
+      </span>
     );
   }
 
-  /**
-   * calls up to terminal to show details for this command
-   */
   function onProcessClicked(e: MouseEvent): void {
     e.stopPropagation();
 
@@ -281,7 +284,7 @@ export function Process({
   const id = process.getEntityID();
 
   return (
-    <>
+    <div>
       <div data-id={id} key={id} css={processCSS}>
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div css={wrapperCSS} onClick={onProcessClicked}>
@@ -290,6 +293,6 @@ export function Process({
         </div>
       </div>
       {renderChildren()}
-    </>
+    </div>
   );
 }
