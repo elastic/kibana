@@ -138,7 +138,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  color="secondary"
+                  color="success"
                   iconType="check"
                   onClick={form.submit}
                   data-test-subj="submitButton"
