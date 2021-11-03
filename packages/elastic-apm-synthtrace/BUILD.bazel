@@ -73,6 +73,7 @@ ts_project(
   root_dir = "src",
   source_map = True,
   tsconfig = ":tsconfig",
+  validate = False,
 )
 
 js_library(
