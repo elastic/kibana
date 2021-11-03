@@ -139,79 +139,84 @@ export const DashboardListing = ({
       );
     }
 
-    const emptyAction =
-      unsavedDashboardIds.length === 1 ? (
-        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="pencil"
-              color="primary"
-              onClick={() => redirectTo({ destination: 'dashboard' })}
-              data-test-subj={`edit-unsaved-${getNewDashboardTitle().split(' ').join('-')}`}
-              aria-label={dashboardUnsavedListingStrings.getEditAriaLabel(getNewDashboardTitle())}
-            >
-              {dashboardUnsavedListingStrings.getEditTitle()}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              color="danger"
-              onClick={() =>
-                confirmDiscardUnsavedChanges(core.overlays, () => {
-                  dashboardSessionStorage.clearState(DASHBOARD_PANELS_UNSAVED_ID);
-                  setUnsavedDashboardIds(
-                    dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
-                  );
-                })
-              }
-              data-test-subj={`discard-unsaved-${getNewDashboardTitle().split(' ').join('-')}`}
-              aria-label={dashboardUnsavedListingStrings.getDiscardAriaLabel(
-                getNewDashboardTitle()
-              )}
-            >
-              {dashboardUnsavedListingStrings.getDiscardTitle()}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiButton
-          onClick={createItem}
-          fill
-          iconType="plusInCircle"
-          data-test-subj="createDashboardPromptButton"
-        >
-          {noItemsStrings.getCreateNewDashboardText()}
-        </EuiButton>
-      );
+    const isEditingFirstDashboard = unsavedDashboardIds.length === 1;
+
+    const emptyAction = isEditingFirstDashboard ? (
+      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            color="danger"
+            onClick={() =>
+              confirmDiscardUnsavedChanges(core.overlays, () => {
+                dashboardSessionStorage.clearState(DASHBOARD_PANELS_UNSAVED_ID);
+                setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+              })
+            }
+            data-test-subj="discardDashboardPromptButton"
+            aria-label={dashboardUnsavedListingStrings.getDiscardAriaLabel(getNewDashboardTitle())}
+          >
+            {dashboardUnsavedListingStrings.getDiscardTitle()}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="pencil"
+            color="primary"
+            onClick={() => redirectTo({ destination: 'dashboard' })}
+            data-test-subj="createDashboardPromptButton"
+            aria-label={dashboardUnsavedListingStrings.getEditAriaLabel(getNewDashboardTitle())}
+          >
+            {dashboardUnsavedListingStrings.getEditTitle()}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      <EuiButton
+        onClick={createItem}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="createDashboardPromptButton"
+      >
+        {noItemsStrings.getCreateNewDashboardText()}
+      </EuiButton>
+    );
 
     return (
       <EuiEmptyPrompt
         iconType="dashboardApp"
-        title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadEditTitle()}</h1>}
+        title={
+          <h1 id="dashboardListingHeading">
+            {isEditingFirstDashboard
+              ? noItemsStrings.getReadEditInProgressTitle()
+              : noItemsStrings.getReadEditTitle()}
+          </h1>
+        }
         body={
           <>
             <p>{noItemsStrings.getReadEditDashboardDescription()}</p>
-            <p>
-              <FormattedMessage
-                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                values={{
-                  sampleDataInstallLink: (
-                    <EuiLink
-                      onClick={() =>
-                        core.application.navigateToApp('home', {
-                          path: '#/tutorial_directory/sampleData',
-                        })
-                      }
-                    >
-                      {noItemsStrings.getSampleDataLinkText()}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
+            {!isEditingFirstDashboard && (
+              <p>
+                <FormattedMessage
+                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  values={{
+                    sampleDataInstallLink: (
+                      <EuiLink
+                        onClick={() =>
+                          core.application.navigateToApp('home', {
+                            path: '#/tutorial_directory/sampleData',
+                          })
+                        }
+                      >
+                        {noItemsStrings.getSampleDataLinkText()}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            )}
           </>
         }
         actions={emptyAction}
