@@ -23,7 +23,7 @@ interface MonitorStatusRowProps {
 }
 
 export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProps) => {
-  const color = status === STATUS.UP ? 'secondary' : 'danger';
+  const color = status === STATUS.UP ? 'success' : 'danger';
 
   let checkListArray = [...locationNames];
   // If un-named location exists, move it to end

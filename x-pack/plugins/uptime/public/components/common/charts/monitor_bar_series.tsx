@@ -114,7 +114,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
         />
       }
     >
-      <EuiText color="secondary">--</EuiText>
+      <EuiText color="success">--</EuiText>
     </EuiToolTip>
   );
 };

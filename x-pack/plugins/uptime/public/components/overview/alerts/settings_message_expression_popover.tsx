@@ -37,7 +37,7 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
       button={
         <EuiExpression
           aria-label={ariaLabel}
-          color="secondary"
+          color="success"
           description={description}
           isActive={isOpen}
           onClick={() => setIsOpen(!isOpen)}

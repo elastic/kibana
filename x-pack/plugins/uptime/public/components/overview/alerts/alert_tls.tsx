@@ -23,7 +23,7 @@ export const AlertTlsComponent: React.FC<Props> = (props) => (
       <EuiFlexItem>
         <EuiExpression
           aria-label={TlsTranslations.criteriaAriaLabel}
-          color="secondary"
+          color="success"
           description={TlsTranslations.criteriaDescription}
           value={TlsTranslations.criteriaValue}
         />

@@ -23,7 +23,7 @@ const BadgeItem = styled.div`
 export const TagLabel: React.FC<StatusTag> = ({ color, label, status }) => {
   return (
     <BadgeItem>
-      <EuiBadge color={status === STATUS.DOWN ? 'danger' : 'secondary'}>{label}</EuiBadge>
+      <EuiBadge color={status === STATUS.DOWN ? 'danger' : 'success'}>{label}</EuiBadge>
     </BadgeItem>
   );
 };

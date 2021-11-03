@@ -144,7 +144,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
                   button={
                     <EuiExpression
                       aria-label={ariaLabel}
-                      color={'secondary'}
+                      color={'success'}
                       data-test-subj={'uptimeCreateStatusAlert.' + id}
                       description={description}
                       value={value}

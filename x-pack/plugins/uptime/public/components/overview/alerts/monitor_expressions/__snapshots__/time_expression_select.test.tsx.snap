@@ -16,7 +16,7 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
       >
         <span
           aria-label="Open the popover for time range value field"
-          class="euiExpression euiExpression-isUppercase euiExpression--secondary"
+          class="euiExpression euiExpression-isUppercase euiExpression--success"
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueExpression"
         >
           <span
@@ -46,7 +46,7 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
       >
         <span
           aria-label="Open the popover for time range unit select field"
-          class="euiExpression euiExpression-isUppercase euiExpression--secondary"
+          class="euiExpression euiExpression-isUppercase euiExpression--success"
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitExpression"
         >
           <span
