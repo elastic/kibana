@@ -50,11 +50,7 @@ export function modelsProvider(
       );
 
       try {
-        const { body, statusCode } = await client.asCurrentUser.ingest.getPipeline();
-
-        if (statusCode !== 200) {
-          return modelIdsMap;
-        }
+        const { body } = await client.asCurrentUser.ingest.getPipeline();
 
         for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
           const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
