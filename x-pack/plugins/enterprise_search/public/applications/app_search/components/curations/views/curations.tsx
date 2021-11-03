@@ -30,10 +30,10 @@ export const Curations: React.FC = () => {
   const { dataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
   const {
-    engine: { search_relevance_suggestions_active: searchRelevanceSuggestionsActive },
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
   } = useValues(EngineLogic);
 
-  const suggestionsEnabled = searchRelevanceSuggestionsActive;
+  const suggestionsEnabled = adaptiveRelevanceSuggestionsActive;
 
   const OVERVIEW_TAB = {
     label: i18n.translate(
@@ -72,7 +72,7 @@ export const Curations: React.FC = () => {
     ),
   };
 
-  const pageTabs = searchRelevanceSuggestionsActive
+  const pageTabs = adaptiveRelevanceSuggestionsActive
     ? [OVERVIEW_TAB, HISTORY_TAB, SETTINGS_TAB]
     : [OVERVIEW_TAB, SETTINGS_TAB];
 
