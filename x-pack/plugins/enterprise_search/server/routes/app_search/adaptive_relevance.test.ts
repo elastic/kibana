@@ -7,17 +7,17 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerSearchRelevanceSuggestionsRoutes } from './search_relevance_suggestions';
+import { registerSearchRelevanceSuggestionsRoutes } from './adaptive_relevance';
 
 describe('search relevance insights routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('POST /internal/app_search/engines/{name}/search_relevance_suggestions', () => {
+  describe('POST /internal/app_search/engines/{name}/adaptive_relevance/suggestions', () => {
     const mockRouter = new MockRouter({
       method: 'post',
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions',
     });
 
     beforeEach(() => {
@@ -33,15 +33,15 @@ describe('search relevance insights routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions',
+        path: '/api/as/v0/engines/:engineName/adaptive_relevance/suggestions',
       });
     });
   });
 
-  describe('PUT /internal/app_search/engines/{name}/search_relevance_suggestions', () => {
+  describe('PUT /internal/app_search/engines/{name}/adaptive_relevance/suggestions', () => {
     const mockRouter = new MockRouter({
       method: 'put',
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions',
     });
 
     beforeEach(() => {
@@ -62,15 +62,15 @@ describe('search relevance insights routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions',
+        path: '/api/as/v0/engines/:engineName/adaptive_relevance/suggestions',
       });
     });
   });
 
-  describe('GET /internal/app_search/engines/{name}/search_relevance_suggestions/settings', () => {
+  describe('GET /internal/app_search/engines/{name}/adaptive_relevance/settings', () => {
     const mockRouter = new MockRouter({
       method: 'get',
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/settings',
     });
 
     beforeEach(() => {
@@ -86,15 +86,15 @@ describe('search relevance insights routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+        path: '/api/as/v0/engines/:engineName/adaptive_relevance/settings',
       });
     });
   });
 
-  describe('PUT /internal/app_search/engines/{name}/search_relevance_suggestions/settings', () => {
+  describe('PUT /internal/app_search/engines/{name}/adaptive_relevance/settings', () => {
     const mockRouter = new MockRouter({
       method: 'put',
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/settings',
     });
 
     beforeEach(() => {
@@ -111,15 +111,15 @@ describe('search relevance insights routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+        path: '/api/as/v0/engines/:engineName/adaptive_relevance/settings',
       });
     });
   });
 
-  describe('GET /internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/adaptive_relevance/suggestions/{query}', () => {
     const mockRouter = new MockRouter({
       method: 'get',
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions/{query}',
     });
 
     beforeEach(() => {
@@ -136,7 +136,7 @@ describe('search relevance insights routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/:engineName/search_relevance_suggestions/:query',
+        path: '/as/engines/:engineName/adaptive_relevance/suggestions/:query',
       });
     });
   });

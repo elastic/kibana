@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await reportingAPI.migrateReportingIndices(); // ensure that the ILM policy exists for the first test
     });
 
     after(async () => {

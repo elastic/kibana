@@ -29,6 +29,7 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
     () => http.get(`/internal/osquery/saved_query/${savedQueryId}`),
     {
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
       onSuccess: (data) => {
         if (data.error) {
           setErrorToast(data.error, {
