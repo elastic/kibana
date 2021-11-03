@@ -224,14 +224,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ]);
 
   const expressionExists = Boolean(expression);
-  const hasLoaded = Boolean(
-    activeVisualization && visualization.state && datasourceMap && datasourceStates
-  );
   useEffect(() => {
-    if (hasLoaded) {
-      dispatchLens(setSaveable(expressionExists));
-    }
-  }, [hasLoaded, expressionExists, dispatchLens]);
+    dispatchLens(setSaveable(expressionExists));
+  }, [expressionExists, dispatchLens]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
