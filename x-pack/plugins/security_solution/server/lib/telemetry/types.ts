@@ -226,7 +226,7 @@ export interface ExceptionListItem {
 }
 
 export interface ListTemplate {
-  '@timestamp': number;
+  '@timestamp': string;
   detection_rule?: TelemetryEvent;
   endpoint_exception?: TelemetryEvent;
   endpoint_event_filter?: TelemetryEvent;
