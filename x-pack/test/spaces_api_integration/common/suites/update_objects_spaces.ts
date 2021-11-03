@@ -76,6 +76,7 @@ export function updateObjectsSpacesTestSuiteFactory(
         const { objects, spacesToAdd, spacesToRemove } = testCase;
         const apiResponse = response.body as SavedObjectsUpdateObjectsSpacesResponse;
 
+        let hasRefreshed = false;
         for (let i = 0; i < objects.length; i++) {
           const { id, existingNamespaces, expectAliasDifference, failure } = objects[i];
           const object = apiResponse.objects[i];
@@ -96,7 +97,10 @@ export function updateObjectsSpacesTestSuiteFactory(
 
             if (expectAliasDifference !== undefined) {
               // if we deleted an object that had an alias pointing to it, the alias should have been deleted as well
-              await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
+              if (!hasRefreshed) {
+                await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
+                hasRefreshed = true;
+              }
               const searchResponse = await es.search({
                 index: '.kibana',
                 body: {

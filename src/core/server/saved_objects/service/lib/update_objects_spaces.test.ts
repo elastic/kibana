@@ -435,13 +435,14 @@ describe('#updateObjectsSpaces', () => {
 
       it('deletes aliases for objects that were removed from specific spaces using "deleteBehavior: exclusive"', async () => {
         const space1 = 'space-to-remove';
-        const space2 = 'other-space';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] }; // will not be changed
-        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1, space2] }; // will be updated
+        const space2 = 'another-space-to-remove';
+        const space3 = 'other-space';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space3] }; // will not be changed
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1, space2, space3] }; // will be updated
         const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will be deleted
 
         const objects = [obj1, obj2, obj3];
-        const spacesToRemove = [space1];
+        const spacesToRemove = [space1, space2];
         const params = setup({ objects, spacesToRemove });
         // this test case does not call mget
         mockBulkResults({ error: false }, { error: false }); // result2 for obj2 and obj3
@@ -449,7 +450,7 @@ describe('#updateObjectsSpaces', () => {
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expectBulkArgs(
-          { action: 'update', object: { ...obj2, namespaces: [space2] } },
+          { action: 'update', object: { ...obj2, namespaces: [space3] } },
           { action: 'delete', object: obj3 }
         );
         expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledTimes(2);
@@ -458,7 +459,7 @@ describe('#updateObjectsSpaces', () => {
           expect.objectContaining({
             type: obj2.type,
             id: obj2.id,
-            namespaces: [space1],
+            namespaces: [space1, space2],
             deleteBehavior: 'inclusive',
           })
         );
