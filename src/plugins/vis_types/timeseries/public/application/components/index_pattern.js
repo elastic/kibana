@@ -27,7 +27,6 @@ import { IndexPatternSelect } from './lib/index_pattern_select';
 import { YesNo } from './yes_no';
 import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../../data/public';
-import { FormValidationContext } from '../contexts/form_validation_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -35,6 +34,8 @@ import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../.
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
+import { PanelModelContext } from '../contexts/panel_model_context';
+import { FormValidationContext } from '../contexts/form_validation_context';
 import { getDataStart, getUISettings } from '../../services';
 import { UI_SETTINGS } from '../../../../../data/common';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
@@ -76,11 +77,14 @@ export const IndexPattern = ({
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
-
+  const panelModel = useContext(PanelModelContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
+
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
   const [fetchedIndex, setFetchedIndex] = useState(null);
+
+  const isTimeSeries = panelModel.type === PANEL_TYPES.TIMESERIES;
 
   const handleMaxBarsChange = useCallback(
     ({ target }) => {
@@ -126,7 +130,7 @@ export const IndexPattern = ({
   const selectedTimeRangeOption = timeRangeOptions.find(
     ({ value }) => model[TIME_RANGE_MODE_KEY] === value
   );
-  const isTimeSeries = model.type === PANEL_TYPES.TIMESERIES;
+
   const isDataTimerangeModeInvalid =
     !disabled &&
     selectedTimeRangeOption &&
