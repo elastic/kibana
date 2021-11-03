@@ -30,7 +30,9 @@ export default function ({ getService, getPageObjects }) {
       // <caption class="euiScreenReaderOnly euiTableCaption">This table contains 1 rows out of 1 rows; Page 1 of 1.</caption>
       // but "<caption class="euiScreenReaderOnly euiTableCaption">" always exists so we have to wait until there's text
       await retry.waitForWithTimeout('The APM table has a caption', 5000, async () => {
-        return (await (await find.byCssSelector('caption')).getAttribute('innerHTML')).includes('This table contains ');
+        return (await (await find.byCssSelector('caption')).getAttribute('innerHTML')).includes(
+          'This table contains '
+        );
       });
 
       await find.clickByDisplayedLinkText('apm-a-rum-test-e2e-general-usecase');
