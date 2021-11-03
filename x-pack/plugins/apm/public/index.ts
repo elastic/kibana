@@ -23,4 +23,4 @@ export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
   pluginInitializerContext: PluginInitializerContext<ConfigSchema>
 ) => new ApmPlugin(pluginInitializerContext);
 
-export { ApmPluginSetup, ApmPluginStart };
+export type { ApmPluginSetup, ApmPluginStart };

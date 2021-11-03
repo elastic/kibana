@@ -17,9 +17,9 @@ import { PresentationControlsService } from './controls';
 import { PresentationDataViewsService } from './data_views';
 import { PresentationDataService } from './data';
 
-export { PresentationCapabilitiesService } from './capabilities';
-export { PresentationDashboardsService } from './dashboards';
-export { PresentationLabsService } from './labs';
+export type { PresentationCapabilitiesService } from './capabilities';
+export type { PresentationDashboardsService } from './dashboards';
+export type { PresentationLabsService } from './labs';
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
   dataViews: PresentationDataViewsService;

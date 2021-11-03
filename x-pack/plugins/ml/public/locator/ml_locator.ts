@@ -28,7 +28,7 @@ import {
 } from './formatters';
 import { formatTrainedModelsManagementUrl } from './formatters/trained_models';
 
-export { MlLocatorParams, MlLocator };
+export type { MlLocatorParams, MlLocator };
 
 export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
   public readonly id = ML_APP_LOCATOR;

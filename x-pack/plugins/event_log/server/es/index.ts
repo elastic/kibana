@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { EsContext, createEsContext } from './context';
+export type { EsContext } from './context';
+export { createEsContext } from './context';

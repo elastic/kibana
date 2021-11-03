@@ -20,7 +20,7 @@ import {
 } from './';
 import { ScreenshotObservableHandler } from './observable_handler';
 
-export { ElementPosition, ElementsPositionAndAttribute, ScreenshotResults };
+export type { ElementPosition, ElementsPositionAndAttribute, ScreenshotResults };
 
 const getTimeouts = (captureConfig: CaptureConfig) => ({
   openUrl: {

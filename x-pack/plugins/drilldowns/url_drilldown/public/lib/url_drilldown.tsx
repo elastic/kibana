@@ -93,7 +93,6 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     onConfig,
     context,
   }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const variables = React.useMemo(() => this.getVariableList(context), [context]);
 
     return (

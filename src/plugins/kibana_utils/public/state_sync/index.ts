@@ -26,18 +26,15 @@
  * @packageDocumentation
  */
 
-export {
-  createSessionStorageStateStorage,
-  createKbnUrlStateStorage,
+export type {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
   IStateStorage,
 } from './state_sync_state_storage';
-export { IStateSyncConfig, INullableBaseStateContainer } from './types';
 export {
-  syncState,
-  syncStates,
-  StopSyncStateFnType,
-  StartSyncStateFnType,
-  ISyncStateRef,
-} from './state_sync';
+  createSessionStorageStateStorage,
+  createKbnUrlStateStorage,
+} from './state_sync_state_storage';
+export type { IStateSyncConfig, INullableBaseStateContainer } from './types';
+export type { StopSyncStateFnType, StartSyncStateFnType, ISyncStateRef } from './state_sync';
+export { syncState, syncStates } from './state_sync';

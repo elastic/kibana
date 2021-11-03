@@ -8,10 +8,7 @@
 export const PLUGIN_ID = 'reportingExample';
 export const PLUGIN_NAME = 'reportingExample';
 
-export { MyForwardableState } from './types';
+export type { MyForwardableState } from './types';
 
-export {
-  REPORTING_EXAMPLE_LOCATOR_ID,
-  ReportingExampleLocatorDefinition,
-  ReportingExampleLocatorParams,
-} from './locator';
+export type { ReportingExampleLocatorParams } from './locator';
+export { REPORTING_EXAMPLE_LOCATOR_ID, ReportingExampleLocatorDefinition } from './locator';

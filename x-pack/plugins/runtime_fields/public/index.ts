@@ -7,14 +7,10 @@
 
 import { RuntimeFieldsPlugin } from './plugin';
 
-export {
-  RuntimeFieldEditorFlyoutContent,
-  RuntimeFieldEditorFlyoutContentProps,
-  RuntimeFieldEditor,
-  RuntimeFieldFormState,
-} from './components';
+export type { RuntimeFieldEditorFlyoutContentProps, RuntimeFieldFormState } from './components';
+export { RuntimeFieldEditorFlyoutContent, RuntimeFieldEditor } from './components';
 export { RUNTIME_FIELD_OPTIONS } from './constants';
-export { RuntimeField, RuntimeType, PluginSetup as RuntimeFieldsSetup } from './types';
+export type { RuntimeField, RuntimeType, PluginSetup as RuntimeFieldsSetup } from './types';
 
 export function plugin() {
   return new RuntimeFieldsPlugin();

@@ -93,4 +93,5 @@ const useKibana = () => {
   return useKibanaReactPlugin<KibanaReactContextServices>();
 };
 
-export { AppDependencies, useKibana };
+export type { AppDependencies };
+export { useKibana };

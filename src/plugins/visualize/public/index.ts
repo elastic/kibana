@@ -11,9 +11,9 @@ import { VisualizePlugin, VisualizePluginSetup } from './plugin';
 
 export { VisualizeConstants } from './application/visualize_constants';
 
-export { IEditorController, EditorRenderProps } from './application/types';
+export type { IEditorController, EditorRenderProps } from './application/types';
 
-export { VisualizePluginSetup };
+export type { VisualizePluginSetup };
 
 export const plugin = (context: PluginInitializerContext) => {
   return new VisualizePlugin(context);

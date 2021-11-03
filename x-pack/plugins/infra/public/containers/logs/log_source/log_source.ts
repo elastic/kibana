@@ -26,14 +26,14 @@ import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_confi
 import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
 import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
 
-export {
+export type {
   LogIndexField,
   LogSourceConfiguration,
   LogSourceConfigurationProperties,
   LogSourceConfigurationPropertiesPatch,
   LogSourceStatus,
-  ResolveLogSourceConfigurationError,
 };
+export { ResolveLogSourceConfigurationError };
 
 export const useLogSource = ({
   sourceId,

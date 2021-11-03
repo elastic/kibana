@@ -11,7 +11,7 @@ import type { FieldSpec } from '../../../../../src/plugins/data/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { FieldFormatParams } from '../../../../../src/plugins/field_formats/common';
 
-export {
+export type {
   FieldBasedIndexPatternColumn,
   IndexPatternColumn,
   OperationType,

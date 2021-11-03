@@ -21,10 +21,12 @@ export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
 export { isAgentUpgradeable } from './is_agent_upgradeable';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
-export {
+export type {
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,
   PackagePolicyInputValidationResults,
+} from './validate_package_policy';
+export {
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,

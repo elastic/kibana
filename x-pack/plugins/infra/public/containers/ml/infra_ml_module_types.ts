@@ -15,7 +15,7 @@ import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload } from './api/ml_get_module';
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 
-export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
+export type { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 
 export interface SetUpModuleArgs {
   start?: number | undefined;

@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsManagement, ISavedObjectsManagement } from './management';
+export type { ISavedObjectsManagement } from './management';
+export { SavedObjectsManagement } from './management';

@@ -7,4 +7,4 @@
  */
 
 export { registerTestBed } from './testbed';
-export { TestBed, TestBedConfig, SetupFunc, UnwrapPromise } from './types';
+export type { TestBed, TestBedConfig, SetupFunc, UnwrapPromise } from './types';

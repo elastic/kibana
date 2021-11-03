@@ -11,6 +11,7 @@ export { Rule } from './rule';
 export { RuleGroup } from './rule_group';
 export { ExceptAllRule } from './except_all_rule';
 export { ExceptAnyRule } from './except_any_rule';
-export { FieldRule, FieldRuleValue } from './field_rule';
+export type { FieldRuleValue } from './field_rule';
+export { FieldRule } from './field_rule';
 export { generateRulesFromRaw } from './rule_builder';
 export { RuleBuilderError } from './rule_builder_error';

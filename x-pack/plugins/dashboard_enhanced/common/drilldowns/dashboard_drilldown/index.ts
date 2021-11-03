@@ -7,4 +7,4 @@
 
 export { createExtract, createInject } from './dashboard_drilldown_persistable_state';
 export { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
-export { DrilldownConfig } from './types';
+export type { DrilldownConfig } from './types';

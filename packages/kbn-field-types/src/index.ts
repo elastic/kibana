@@ -15,4 +15,5 @@ export {
   getFilterableKbnTypeNames,
 } from './kbn_field_types';
 
-export { KBN_FIELD_TYPES, ES_FIELD_TYPES, KbnFieldTypeOptions } from './types';
+export type { KbnFieldTypeOptions } from './types';
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from './types';

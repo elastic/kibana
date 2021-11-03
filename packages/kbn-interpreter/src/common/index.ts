@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  fromExpression,
-  toExpression,
-  safeElementFromExpression,
-  Ast,
-  ExpressionFunctionAST,
-} from './lib/ast';
+export type { Ast, ExpressionFunctionAST } from './lib/ast';
+export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
 export { Fn } from './lib/fn';
 export { getType } from './lib/get_type';
 export { castProvider } from './lib/cast';

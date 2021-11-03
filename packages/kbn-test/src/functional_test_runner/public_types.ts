@@ -103,4 +103,4 @@ export interface FtrConfigProviderContext {
   readConfigFile(path: string): Promise<Config>;
 }
 
-export { Test, Suite };
+export type { Test, Suite };

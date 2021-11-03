@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export {
-  AuthenticationService,
+export type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
 } from './authentication_service';
+export { AuthenticationService } from './authentication_service';

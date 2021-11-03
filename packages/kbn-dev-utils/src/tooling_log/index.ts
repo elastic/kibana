@@ -8,8 +8,10 @@
 
 export { ToolingLog } from './tooling_log';
 export type { ToolingLogOptions } from './tooling_log';
-export { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
-export { pickLevelFromFlags, parseLogLevel, LogLevel, ParsedLogLevel } from './log_levels';
+export type { ToolingLogTextWriterConfig } from './tooling_log_text_writer';
+export { ToolingLogTextWriter } from './tooling_log_text_writer';
+export type { LogLevel, ParsedLogLevel } from './log_levels';
+export { pickLevelFromFlags, parseLogLevel } from './log_levels';
 export { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';
 export type { Writer } from './writer';
 export type { Message } from './message';

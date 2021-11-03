@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ConfigType as Configuration } from '../config';
+export type { ConfigType as Configuration } from '../config';
 import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
 
 export interface ShardsResponse {

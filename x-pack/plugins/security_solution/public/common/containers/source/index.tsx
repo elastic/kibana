@@ -28,7 +28,7 @@ import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
-export { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields, DocValueFields };
 
 export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
   Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(

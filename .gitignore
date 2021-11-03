@@ -19,6 +19,7 @@ target
 .idea
 *.iml
 *.log
+types.eslint.config.js
 
 # Ignore example plugin builds
 /examples/*/build

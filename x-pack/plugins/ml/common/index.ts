@@ -6,7 +6,7 @@
  */
 
 export { ES_CLIENT_TOTAL_HITS_RELATION } from './types/es_client';
-export { ChartData } from './types/field_histograms';
+export type { ChartData } from './types/field_histograms';
 export { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from './constants/anomalies';
 export { getSeverityColor, getSeverityType } from './util/anomaly_utils';
 export { isPopulatedObject } from './util/object_utils';

@@ -110,4 +110,4 @@ export type TypesSetup = ReturnType<TypesService['setup']>;
 export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
-export { VisTypeAlias };
+export type { VisTypeAlias };

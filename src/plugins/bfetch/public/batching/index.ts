@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  createStreamingBatchedFunction,
-  StreamingBatchedFunctionParams,
-} from './create_streaming_batched_function';
+export type { StreamingBatchedFunctionParams } from './create_streaming_batched_function';
+export { createStreamingBatchedFunction } from './create_streaming_batched_function';
