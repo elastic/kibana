@@ -105,8 +105,8 @@ describe.each([
       exceptions_list: getListArrayMock(),
     });
     expect(detailsJson).toEqual({
-      exported_exception_list_count: 0,
-      exported_exception_list_item_count: 0,
+      exported_exception_list_count: 1,
+      exported_exception_list_item_count: 1,
       exported_count: 1,
       exported_rules_count: 1,
       missing_exception_list_item_count: 0,
