@@ -76,7 +76,7 @@ export class ImportView extends Component {
   constructor(props) {
     super(props);
 
-    this.state = getDefaultState(DEFAULT_STATE, this.props.results);
+    this.state = getDefaultState(DEFAULT_STATE, this.props.results, this.props.capabilities);
     this.savedObjectsClient = props.savedObjectsClient;
   }
 
@@ -640,7 +640,7 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFie
   }
 }
 
-function getDefaultState(state, results) {
+function getDefaultState(state, results, capabilities) {
   const indexSettingsString =
     state.indexSettingsString === ''
       ? JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2)
@@ -666,6 +666,9 @@ function getDefaultState(state, results) {
 
   const timeFieldName = results.timestamp_field;
 
+  const createIndexPattern =
+    capabilities.savedObjectsManagement.edit === false ? false : state.createIndexPattern;
+
   return {
     ...DEFAULT_STATE,
     indexSettingsString,
@@ -673,6 +676,7 @@ function getDefaultState(state, results) {
     pipelineString,
     timeFieldName,
     combinedFields,
+    createIndexPattern,
   };
 }
 
