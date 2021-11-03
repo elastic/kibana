@@ -41,7 +41,7 @@ const enabledActionTypes = [
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false, testFiles = [] } = options;
-  const auditLogPath = resolve(__dirname, './fixtures/audit/audit.log');
+  const auditLogPath = resolve(__dirname, './audit.log');
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(

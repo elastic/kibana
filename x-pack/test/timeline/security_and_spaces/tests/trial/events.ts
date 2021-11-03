@@ -69,6 +69,7 @@ const TO = '3000-01-01T00:00:00.000Z';
 const FROM = '2000-01-01T00:00:00.000Z';
 const TEST_URL = '/internal/search/timelineSearchStrategy/';
 const SPACE_1 = 'space1';
+const SPACE_2 = 'space2';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -114,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
   });
 
   describe('Timeline - Events', () => {
-    const logFilePath = Path.resolve(__dirname, '../../../common/fixtures/audit/audit.log');
+    const logFilePath = Path.resolve(__dirname, '../../../common/audit.log');
     const logFile = new FileWrapper(logFilePath);
     const retry = getService('retry');
 
@@ -242,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('logs failure events when unauthorized to read alerts', async () => {
         await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix(SPACE_1)}${TEST_URL}`)
+          .post(`${getSpaceUrlPrefix(SPACE_2)}${TEST_URL}`)
           .auth(obsMinRead.username, obsMinRead.password)
           .set('kbn-xsrf', 'true')
           .set('Content-Type', 'application/json')
@@ -261,7 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(httpEvent).to.be.ok();
         expect(httpEvent.trace.id).to.be.ok();
         expect(httpEvent.user.name).to.be(obsMinRead.username);
-        expect(httpEvent.kibana.space_id).to.be('space1');
+        expect(httpEvent.kibana.space_id).to.be(SPACE_2);
         expect(httpEvent.http.request.method).to.be('post');
         expect(httpEvent.url.path).to.be('/s/space1/internal/search/timelineSearchStrategy/');
 
@@ -270,7 +271,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(findEvents[0].trace.id).to.be.ok();
         expect(findEvents[0].event.outcome).to.be('failure');
         expect(findEvents[0].user.name).to.be(obsMinRead.username);
-        expect(findEvents[0].kibana.space_id).to.be('space1');
+        expect(findEvents[0].kibana.space_id).to.be(SPACE_2);
       });
     });
   });
