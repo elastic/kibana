@@ -482,7 +482,17 @@ export class LensAttributes {
 
   getMainYAxis(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
     const { breakdown } = layerConfig;
-    const { sourceField, operationType, label } = layerConfig.seriesConfig.yAxisColumns[0];
+    const {
+      sourceField,
+      operationType,
+      label: colLabel,
+    } = layerConfig.seriesConfig.yAxisColumns[0];
+
+    let label = layerConfig.name || colLabel;
+
+    if (layerConfig.seriesConfig.reportType === ReportTypes.CORE_WEB_VITAL) {
+      label = colLabel;
+    }
 
     if (sourceField === RECORDS_PERCENTAGE_FIELD) {
       return getDistributionInPercentageColumn({ label, layerId, columnFilter }).main;
