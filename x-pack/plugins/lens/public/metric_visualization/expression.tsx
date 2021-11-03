@@ -64,16 +64,30 @@ function getColorStyling(
   ) {
     return {};
   }
-  const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
-  // if no stops are defined, just pick the color in the middle
-  const colorIndex = palette.params.stops.length
-    ? Math.max(
-        0,
-        palette.params.stops.findIndex((v) => v > value)
-      )
-    : Math.floor(palette.params.colors.length / 2);
 
-  const color = palette.params.colors[colorIndex];
+  const { continuity = 'above', rangeMin, rangeMax, stops, colors } = palette.params;
+
+  if (continuity === 'none' && (value < rangeMin || value > rangeMax)) {
+    return {};
+  }
+  if (continuity === 'below' && value > rangeMax) {
+    return {};
+  }
+  if (continuity === 'above' && value < rangeMin) {
+    return {};
+  }
+  const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
+  const rawIndex = stops.findIndex((v) => v > value);
+
+  let colorIndex = rawIndex;
+  if (['all', 'below'].includes(continuity) && value < rangeMin) {
+    colorIndex = 0;
+  }
+  if (['all', 'above'].includes(continuity) && value > rangeMax) {
+    colorIndex = stops.length - 1;
+  }
+
+  const color = colors[colorIndex];
   const styling = {
     [cssProp]: color,
   };

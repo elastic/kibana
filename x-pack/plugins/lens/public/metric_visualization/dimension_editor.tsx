@@ -49,6 +49,12 @@ export function MetricDimensionEditor(
   const currentColorMode = state?.colorMode || ColorMode.None;
   const hasDynamicColoring = currentColorMode !== ColorMode.None;
 
+  const currentMinMax = {
+    min: Math.min(firstRow[accessor] * 2, firstRow[accessor] === 0 ? -50 : 0),
+    // if value is 0, then fallback to 100 as last resort
+    max: Math.max(firstRow[accessor] * 2, firstRow[accessor] === 0 ? 100 : 0),
+  };
+
   const activePalette = state?.palette || {
     type: 'palette',
     name: defaultPaletteParams.name,
@@ -56,13 +62,9 @@ export function MetricDimensionEditor(
       ...defaultPaletteParams,
       stops: undefined,
       colorStops: undefined,
+      rangeMin: currentMinMax.min,
+      rangeMax: (currentMinMax.max * 3) / 4,
     },
-  };
-
-  const currentMinMax = {
-    min: Math.min(firstRow[accessor] * 2, firstRow[accessor] === 0 ? -50 : 0),
-    // if value is 0, then fallback to 100 as last resort
-    max: Math.max(firstRow[accessor] * 2, firstRow[accessor] === 0 ? 100 : 0),
   };
 
   // overwrite the artifical computed min/max with the custom stops if provided
@@ -129,7 +131,6 @@ export function MetricDimensionEditor(
                 ...activePalette,
                 params: {
                   ...activePalette.params,
-                  // just need the colors, the actual stop values will be ignored
                   stops: displayStops,
                 },
               };
@@ -163,7 +164,10 @@ export function MetricDimensionEditor(
             <EuiFlexItem>
               <EuiColorPaletteDisplay
                 data-test-subj="lnsMetric_dynamicColoring_palette"
-                palette={getStopsForFixedMode(displayStops, activePalette.params?.colorStops)}
+                palette={getStopsForFixedMode(
+                  activePalette.params?.stops || displayStops,
+                  activePalette.params?.colorStops
+                )}
                 type={FIXED_PROGRESSION}
                 onClick={() => {
                   setIsPaletteOpen(!isPaletteOpen);
@@ -199,7 +203,6 @@ export function MetricDimensionEditor(
                       palette: newPalette,
                     });
                   }}
-                  showContinuity={false}
                   showRangeTypeSelector={false}
                 />
               </PalettePanelContainer>
