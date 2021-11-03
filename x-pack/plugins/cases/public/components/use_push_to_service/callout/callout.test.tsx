@@ -57,7 +57,7 @@ describe('Callout', () => {
     const className =
       wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
-    expect(className.includes('euiButton--secondary')).toBeTruthy();
+    expect(className.includes('euiButton--success')).toBeTruthy();
   });
 
   it('transform the button color correctly - warning', () => {
