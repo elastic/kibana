@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import {
-  EuiInMemoryTable,
+  EuiBadge,
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiButton,
-  EuiSpacer,
-  EuiButtonIcon,
-  EuiBadge,
-  SearchFilterConfig,
+  EuiInMemoryTable,
   EuiSearchBarProps,
+  EuiSpacer,
+  EuiTitle,
+  SearchFilterConfig,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -48,9 +48,10 @@ import { ListingPageUrlState } from '../../../../common/types/common';
 import { usePageUrlState } from '../../util/url_state';
 import { ExpandedRow } from './expanded_row';
 import { isPopulatedObject } from '../../../../common';
-import { timeFormatter } from '../../../../common/util/date_utils';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -81,6 +82,8 @@ export const ModelsList: FC = () => {
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
+
+  const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
   const [pageState, updatePageState] = usePageUrlState(
     ML_PAGES.TRAINED_MODELS_MANAGE,
@@ -144,6 +147,9 @@ export const ModelsList: FC = () => {
           expandedItemsToRefresh.push(tableItem);
         }
       }
+
+      // Need to fetch state for 3rd party models to enable/disable actions
+      await fetchModelsStats(newItems.filter((v) => v.model_type.includes('pytorch')));
 
       setItems(newItems);
 
@@ -216,7 +222,7 @@ export const ModelsList: FC = () => {
             model!.stats!.deployment_stats = stats;
           }
         } catch (e) {
-          // For stopped models state endpoint returns 404
+          // For stopped models stats endpoint returns 404
           if (e.body.statusCode !== 404) {
             throw new Error(e);
           }
@@ -368,9 +374,11 @@ export const ModelsList: FC = () => {
       description: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
         defaultMessage: 'Start allocation',
       }),
-      icon: 'download',
+      icon: 'continuityAboveBelow',
       type: 'icon',
       isPrimary: true,
+      enabled: (item) =>
+        !['started', 'starting'].includes(item.stats?.deployment_stats?.state ?? ''),
       available: (item) => item.model_type === 'pytorch',
       onClick: async (item) => {
         try {
@@ -407,7 +415,10 @@ export const ModelsList: FC = () => {
       type: 'icon',
       isPrimary: true,
       available: (item) => item.model_type === 'pytorch',
-      enabled: (item) => !isPopulatedObject(item.pipelines),
+      enabled: (item) =>
+        !isPopulatedObject(item.pipelines) &&
+        isPopulatedObject(item.stats?.deployment_stats) &&
+        item.stats?.deployment_stats?.state !== 'stopped',
       onClick: async (item) => {
         try {
           await trainedModelsApiService.stopModelAllocation(item.model_id);
@@ -534,7 +545,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'Created at',
       }),
       dataType: 'date',
-      render: timeFormatter,
+      render: (v: number) => dateFormatter(v),
       sortable: true,
       'data-test-subj': 'mlModelsTableColumnCreatedAt',
     },
