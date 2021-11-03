@@ -28,7 +28,13 @@ const userMock = {
   roles: ['superuser'],
 };
 
-describe('EditUserPage', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/115473
+// FLAKY: https://github.com/elastic/kibana/issues/115474
+// FLAKY: https://github.com/elastic/kibana/issues/116889
+// FLAKY: https://github.com/elastic/kibana/issues/117081
+// FLAKY: https://github.com/elastic/kibana/issues/116891
+// FLAKY: https://github.com/elastic/kibana/issues/116890
+describe.skip('EditUserPage', () => {
   const coreStart = coreMock.createStart();
   let history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
   const authc = securityMock.createSetup().authc;

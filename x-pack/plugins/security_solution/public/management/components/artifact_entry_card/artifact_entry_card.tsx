@@ -80,16 +80,20 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
             data-test-subj={getTestId('subHeader')}
           />
 
-          <EuiSpacer size="l" />
-
           {!hideDescription && (
-            <DescriptionField data-test-subj={getTestId('description')}>
-              {artifact.description}
-            </DescriptionField>
+            <>
+              <EuiSpacer size="s" />
+              <DescriptionField data-test-subj={getTestId('description')}>
+                {artifact.description}
+              </DescriptionField>
+            </>
           )}
 
           {!hideComments ? (
-            <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
+            <>
+              <EuiSpacer size="s" />
+              <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
+            </>
           ) : null}
         </CardSectionPanel>
 
