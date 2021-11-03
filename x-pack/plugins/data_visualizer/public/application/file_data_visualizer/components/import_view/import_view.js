@@ -85,7 +85,7 @@ export class ImportView extends Component {
   }
 
   clickReset = () => {
-    const state = getDefaultState(this.state, this.props.results);
+    const state = getDefaultState(this.state, this.props.results, this.props.capabilities);
     this.setState(state, () => {
       this.loadIndexPatternNames();
     });
