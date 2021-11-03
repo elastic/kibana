@@ -1598,7 +1598,7 @@ export class RulesClient {
     id: string,
     ruleTypeId: string,
     schedule: IntervalSchedule,
-    taskId?: string | null
+    taskId: string | null
   ) {
     return await this.taskManager.schedule({
       taskType: `alerting:${ruleTypeId}`,

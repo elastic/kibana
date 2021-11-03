@@ -66,7 +66,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   schedule: IntervalSchedule;
   actions: AlertAction[];
   params: Params;
-  taskId?: string;
+  taskId: string;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
