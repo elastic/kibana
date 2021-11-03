@@ -319,13 +319,6 @@ describe('useLatencyCorrelations', () => {
           isRunning: false,
           loaded: 0,
         });
-        expect(result.current.response).toEqual({
-          ccsWarning: false,
-          fieldStats: undefined,
-          latencyCorrelations: undefined,
-          overallHistogram: undefined,
-          percentileThresholdValue: undefined,
-        });
       } finally {
         unmount();
       }
