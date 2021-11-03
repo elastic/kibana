@@ -177,7 +177,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveAlertButton(alertName);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
