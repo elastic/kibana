@@ -11,7 +11,7 @@ import { HostStatus, HostPolicyResponseActionStatus } from '../../../../../commo
 export const HOST_STATUS_TO_BADGE_COLOR = Object.freeze<{
   [key in HostStatus]: string;
 }>({
-  [HostStatus.HEALTHY]: 'secondary',
+  [HostStatus.HEALTHY]: 'success',
   [HostStatus.UNHEALTHY]: 'warning',
   [HostStatus.UPDATING]: 'primary',
   [HostStatus.OFFLINE]: 'default',
@@ -22,7 +22,7 @@ export const HOST_STATUS_TO_BADGE_COLOR = Object.freeze<{
 export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<{
   [key in keyof typeof HostPolicyResponseActionStatus]: string;
 }>({
-  success: 'secondary',
+  success: 'success',
   warning: 'warning',
   failure: 'danger',
   unsupported: 'default',
@@ -31,7 +31,7 @@ export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<{
 export const POLICY_STATUS_TO_BADGE_COLOR = Object.freeze<{
   [key in keyof typeof HostPolicyResponseActionStatus]: string;
 }>({
-  success: 'secondary',
+  success: 'success',
   warning: 'warning',
   failure: 'danger',
   unsupported: 'default',

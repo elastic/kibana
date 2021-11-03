@@ -87,11 +87,11 @@ exports[`item_details_card ItemDetailsCard should render correctly with actions 
               key="1"
             >
               <ItemDetailsAction
-                color="secondary"
+                color="success"
                 key=".6"
                 size="s"
               >
-                secondary
+                success
               </ItemDetailsAction>
             </EuiFlexItem>
             <EuiFlexItem

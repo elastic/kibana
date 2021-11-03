@@ -13,7 +13,7 @@ exports[`ProgressInline it renders 1`] = `
     className="siemProgressInline__bar"
   >
     <EuiProgress
-      color="secondary"
+      color="success"
       max={100}
       value={50}
     />
