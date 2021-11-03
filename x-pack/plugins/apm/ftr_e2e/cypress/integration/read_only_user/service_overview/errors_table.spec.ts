@@ -17,11 +17,6 @@ const serviceOverviewHref = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
-const errorsPageHref = url.format({
-  pathname: '/app/apm/services/opbeans-java/errors',
-  query: { rangeFrom: start, rangeTo: end },
-});
-
 describe('Errors table', () => {
   before(async () => {
     await synthtrace.index(
@@ -47,21 +42,17 @@ describe('Errors table', () => {
       cy.contains('[MockError] Foo');
     });
 
-    describe('when click on View errors', () => {
-      it('navigates to the errors page', () => {
-        cy.visit(serviceOverviewHref);
-        cy.contains('opbeans-java');
-        cy.contains('a', 'View errors').click();
-        cy.url().should('include', '/opbeans-java/errors');
-      });
+    it('navigates to the errors page', () => {
+      cy.visit(serviceOverviewHref);
+      cy.contains('opbeans-java');
+      cy.contains('a', 'View errors').click();
+      cy.url().should('include', '/opbeans-java/errors');
+    });
 
-      describe('when clicking on an error in the list', () => {
-        it('navigates to error detail page', () => {
-          cy.visit(errorsPageHref);
-          cy.contains('a', '[MockError] Foo').click();
-          cy.contains('div', '[MockError] Foo');
-        });
-      });
+    it('navigates to error detail page', () => {
+      cy.visit(serviceOverviewHref);
+      cy.contains('a', '[MockError] Foo').click();
+      cy.contains('div', 'Exception message');
     });
   });
 });
