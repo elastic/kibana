@@ -221,6 +221,7 @@ export const useDataVisualizerGridData = (
   const configsWithoutStats = useMemo(() => {
     const existMetricFields = metricConfigs
       .map((config) => {
+        if (config.existsInDocs === false) return;
         if (config?.stats?.cardinality !== undefined) {
           return {
             fieldName: config.fieldName,
@@ -233,8 +234,9 @@ export const useDataVisualizerGridData = (
 
     // Pass the field name, type and cardinality in the request.
     // Top values will be obtained on a sample if cardinality > 100000.
-    const existNonMetricFields = nonMetricConfigs
+    const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
       .map((config) => {
+        if (config.existsInDocs === false) return;
         if (config?.stats?.cardinality !== undefined) {
           return {
             fieldName: config.fieldName,
