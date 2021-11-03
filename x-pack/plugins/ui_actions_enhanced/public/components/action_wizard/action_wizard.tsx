@@ -366,10 +366,10 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
               disabled={!actionFactory.isCompatibleLicense()}
-              betaBadgeLabel={actionFactory.isBeta ? txtBetaActionFactoryLabel : undefined}
-              betaBadgeTooltipContent={
-                actionFactory.isBeta ? txtBetaActionFactoryTooltip : undefined
-              }
+              betaBadgeProps={{
+                label: actionFactory.isBeta ? txtBetaActionFactoryLabel : undefined,
+                tooltipContent: actionFactory.isBeta ? txtBetaActionFactoryTooltip : undefined,
+              }}
             >
               {actionFactory.getIconType(context) && (
                 <EuiIcon type={actionFactory.getIconType(context)!} size="m" />

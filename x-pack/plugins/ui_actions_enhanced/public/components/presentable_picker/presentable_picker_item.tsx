@@ -44,8 +44,10 @@ export const PresentablePickerItem: React.FC<PresentablePickerItemProps> = ({
       data-test-subj={`${TEST_SUBJ_PRESENTABLE_ITEM}-${item.id}`}
       onClick={() => onSelect(item.id)}
       disabled={!isLicenseCompatible}
-      betaBadgeLabel={item.isBeta ? txtBetaActionFactoryLabel : undefined}
-      betaBadgeTooltipContent={item.isBeta ? txtBetaActionFactoryTooltip : undefined}
+      betaBadgeProps={{
+        label: item.isBeta ? txtBetaActionFactoryLabel : undefined,
+        tooltipContent: item.isBeta ? txtBetaActionFactoryTooltip : undefined,
+      }}
     >
       {item.getIconType(context) && <EuiIcon type={item.getIconType(context)!} size="m" />}
     </EuiKeyPadMenuItem>

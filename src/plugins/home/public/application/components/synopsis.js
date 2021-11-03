@@ -22,7 +22,7 @@ export function Synopsis({ id, description, iconUrl, iconType, title, url, onCli
 
   return (
     <EuiCard
-      betaBadgeLabel={isBeta ? 'Beta' : null}
+      betaBadgeProps={{ label: isBeta ? 'Beta' : null }}
       className="homSynopsis__card"
       data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
       description={description}
