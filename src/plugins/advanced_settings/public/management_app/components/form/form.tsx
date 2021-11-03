@@ -368,7 +368,7 @@ export class Form extends PureComponent<FormProps> {
               <EuiButton
                 className="mgtAdvancedSettingsForm__button"
                 disabled={areChangesInvalid}
-                color="secondary"
+                color="success"
                 fill
                 size="s"
                 iconType="check"

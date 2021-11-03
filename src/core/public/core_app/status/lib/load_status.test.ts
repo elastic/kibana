@@ -174,7 +174,7 @@ describe('response processing', () => {
           id: 'available',
           title: 'Green',
           message: 'Elasticsearch is available',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
       },
       {
@@ -183,12 +183,12 @@ describe('response processing', () => {
           id: 'available',
           title: 'Green',
           message: 'SavedObjects service has completed migrations and is available',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
       },
       {
         id: 'plugin:1',
-        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'secondary' },
+        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'success' },
       },
       {
         id: 'plugin:2',
