@@ -37,7 +37,7 @@ import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
+} from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

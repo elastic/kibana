@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldMap } from '../../../../../../rule_registry/common/field_map';
+import { FieldMap } from '../../../rule_registry/common/field_map';
 
 export const alertsFieldMap: FieldMap = {
   'kibana.alert.ancestors': {

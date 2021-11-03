@@ -46,15 +46,15 @@ import {
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
+import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
-  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_EVENT_CATEGORY,
-  ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
-import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+  ALERT_GROUP_ID,
+} from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors

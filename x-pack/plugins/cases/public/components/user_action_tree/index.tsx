@@ -12,8 +12,10 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
 import classNames from 'classnames';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -421,9 +423,15 @@ export const UserActionTree = React.memo(
                 }
 
                 const ruleId =
-                  comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? null;
+                  comment?.rule?.id ??
+                  manualAlertsData[alertId]?.signal?.rule?.id?.[0] ??
+                  get(manualAlertsData[alertId], ALERT_RULE_UUID)[0] ??
+                  null;
                 const ruleName =
-                  comment?.rule?.name ?? manualAlertsData[alertId]?.signal?.rule?.name?.[0] ?? null;
+                  comment?.rule?.name ??
+                  manualAlertsData[alertId]?.signal?.rule?.name?.[0] ??
+                  get(manualAlertsData[alertId], ALERT_RULE_NAME)[0] ??
+                  null;
 
                 return [
                   ...comments,

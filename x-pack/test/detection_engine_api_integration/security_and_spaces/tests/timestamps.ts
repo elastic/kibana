@@ -11,7 +11,7 @@ import {
   EqlCreateSchema,
   QueryCreateSchema,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { ALERT_ORIGINAL_TIME } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
+import { ALERT_ORIGINAL_TIME } from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
