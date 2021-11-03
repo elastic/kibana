@@ -26,7 +26,7 @@ const strings = {
       defaultMessage: 'To',
     }),
   getInvalidDateLabel: (date: string) =>
-    i18n.translate('xpack.canvas.workpad_filters.timeFilter.to', {
+    i18n.translate('xpack.canvas.workpad_filters.timeFilter.invalidDate', {
       defaultMessage: 'Invalid date: {date}',
       values: {
         date,
