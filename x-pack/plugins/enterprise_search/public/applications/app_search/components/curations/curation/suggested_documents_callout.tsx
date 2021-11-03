@@ -22,13 +22,13 @@ export const SuggestedDocumentsCallout: React.FC = () => {
     curation: { suggestion, queries },
   } = useValues(CurationLogic);
   const {
-    engine: { search_relevance_suggestions_active: searchRelevanceSuggestionsActive },
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
   } = useValues(EngineLogic);
 
   if (
     typeof suggestion === 'undefined' ||
     suggestion.status !== 'pending' ||
-    searchRelevanceSuggestionsActive === false
+    adaptiveRelevanceSuggestionsActive === false
   ) {
     return null;
   }
