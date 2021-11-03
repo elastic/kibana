@@ -233,7 +233,7 @@ export function DiscoverHistogram({
         },
       };
 
-  const toolTiTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
+  const toolTipTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
     defaultMessage: 'Warning',
   });
 
@@ -268,7 +268,7 @@ export function DiscoverHistogram({
       >
         <EuiFlexItem grow={false}>{timeRange}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip type="alert" color="warning" title={toolTiTitle} content={toolTipContent} />
+          <EuiIconTip type="alert" color="warning" title={toolTipTitle} content={toolTipContent} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
