@@ -140,7 +140,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             <progress
               aria-hidden={false}
               aria-labelledby="CanvasAssetManagerLabel"
-              className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
+              className="euiProgress euiProgress--native euiProgress--s euiProgress--success"
               max={25000}
               style={null}
               value={0}
@@ -651,7 +651,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
             <progress
               aria-hidden={false}
               aria-labelledby="CanvasAssetManagerLabel"
-              className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
+              className="euiProgress euiProgress--native euiProgress--s euiProgress--success"
               max={25000}
               style={null}
               value={2}
