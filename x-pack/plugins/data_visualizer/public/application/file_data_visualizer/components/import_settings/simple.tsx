@@ -14,7 +14,7 @@ import {
   CombinedField,
   CombinedFieldsReadOnlyForm,
 } from '../../../common/components/combined_fields';
-import { DataViewToolTip } from './data_view_tooltip';
+import { CreateDataViewToolTip } from './create_data_view_tooltip';
 
 interface Props {
   index: string;
@@ -72,7 +72,7 @@ export const SimpleSettings: FC<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <DataViewToolTip showTooltip={canCreateDataView === false}>
+      <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
         <EuiCheckbox
           id="createIndexPattern"
           label={
@@ -86,7 +86,7 @@ export const SimpleSettings: FC<Props> = ({
           onChange={onCreateIndexPatternChange}
           data-test-subj="dataVisualizerFileCreateIndexPatternCheckbox"
         />
-      </DataViewToolTip>
+      </CreateDataViewToolTip>
 
       <EuiSpacer size="m" />
 

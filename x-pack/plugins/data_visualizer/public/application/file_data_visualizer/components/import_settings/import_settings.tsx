@@ -63,7 +63,8 @@ export const ImportSettings: FC<Props> = ({
     },
   } = useDataVisualizerKibana();
 
-  const canCreateDataView = capabilities.savedObjectsManagement.edit as boolean;
+  const canCreateDataView =
+    capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true;
 
   const tabs = [
     {

@@ -21,7 +21,7 @@ import {
 import { CombinedField, CombinedFieldsForm } from '../../../common/components/combined_fields';
 import { JsonEditor, EDITOR_MODE } from '../json_editor';
 import { FindFileStructureResponse } from '../../../../../../file_upload/common';
-import { DataViewToolTip } from './data_view_tooltip';
+import { CreateDataViewToolTip } from './create_data_view_tooltip';
 const EDITOR_HEIGHT = '300px';
 
 interface Props {
@@ -101,7 +101,7 @@ export const AdvancedSettings: FC<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <DataViewToolTip showTooltip={canCreateDataView === false}>
+      <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
         <EuiCheckbox
           id="createIndexPattern"
           label={
@@ -114,7 +114,7 @@ export const AdvancedSettings: FC<Props> = ({
           disabled={initialized === true || canCreateDataView === false}
           onChange={onCreateIndexPatternChange}
         />
-      </DataViewToolTip>
+      </CreateDataViewToolTip>
 
       <EuiSpacer size="s" />
 

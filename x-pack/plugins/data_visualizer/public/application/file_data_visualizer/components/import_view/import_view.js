@@ -667,7 +667,9 @@ function getDefaultState(state, results, capabilities) {
   const timeFieldName = results.timestamp_field;
 
   const createIndexPattern =
-    capabilities.savedObjectsManagement.edit === false ? false : state.createIndexPattern;
+    capabilities.savedObjectsManagement.edit === false && capabilities.indexPatterns.save === false
+      ? false
+      : state.createIndexPattern;
 
   return {
     ...DEFAULT_STATE,

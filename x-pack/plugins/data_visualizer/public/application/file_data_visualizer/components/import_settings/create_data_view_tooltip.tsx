@@ -14,7 +14,7 @@ interface Props {
   showTooltip: boolean;
 }
 
-export const DataViewToolTip: FC<Props> = ({ children, showTooltip }) => {
+export const CreateDataViewToolTip: FC<Props> = ({ children, showTooltip }) => {
   return (
     <EuiToolTip
       position="top"
@@ -22,7 +22,7 @@ export const DataViewToolTip: FC<Props> = ({ children, showTooltip }) => {
         showTooltip ? (
           <FormattedMessage
             id="xpack.dataVisualizer.file.cannotCreateDataView.tooltip"
-            defaultMessage="You require permission to create data views"
+            defaultMessage="You need permission to create data views."
           />
         ) : null
       }
