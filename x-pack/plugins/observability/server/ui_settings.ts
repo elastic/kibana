@@ -44,7 +44,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
   [enableComparisonByDefault]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableComparisonByDefault', {
-      defaultMessage: 'Enable comparison by Default',
+      defaultMessage: 'Comparison feature',
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
