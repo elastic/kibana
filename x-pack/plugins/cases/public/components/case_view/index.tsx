@@ -38,24 +38,22 @@ import * as i18n from './translations';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
-import { OwnerProvider } from '../owner_context';
 import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 import { useKibana } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation;
   caseId: string;
   configureCasesNavigation: CasesNavigation;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   onComponentInitialized?: () => void;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
-  userCanCrud: boolean;
   /**
    * A React `Ref` that Exposes data refresh callbacks.
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale
@@ -94,7 +92,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     caseDetailsNavigation,
     caseId,
     configureCasesNavigation,
-    getCaseDetailHrefWithCommentId,
     fetchCase,
     onCaseDataSuccess,
     onComponentInitialized,
@@ -104,10 +101,10 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     subCaseId,
     updateCase,
     useFetchAlertData,
-    userCanCrud,
     refreshRef,
     hideSyncAlerts = false,
   }) => {
+    const { userCanCrud } = useCasesContext();
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
@@ -426,7 +423,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 {!initLoadingData && (
                   <>
                     <UserActionTree
-                      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
                       getRuleDetailsHref={ruleDetailsNavigation?.href}
                       onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                       caseServices={caseServices}
@@ -525,7 +521,6 @@ export const CaseView = React.memo(
     allCasesNavigation,
     caseDetailsNavigation,
     configureCasesNavigation,
-    getCaseDetailHrefWithCommentId,
     onCaseDataSuccess,
     onComponentInitialized,
     actionsNavigation,
@@ -533,7 +528,6 @@ export const CaseView = React.memo(
     showAlertDetails,
     timelineIntegration,
     useFetchAlertData,
-    userCanCrud,
     refreshRef,
     hideSyncAlerts,
   }: CaseViewProps) => {
@@ -592,29 +586,25 @@ export const CaseView = React.memo(
     ) : (
       data && (
         <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-          <OwnerProvider owner={[data.owner]}>
-            {getLegacyUrlConflictCallout()}
-            <CaseComponent
-              allCasesNavigation={allCasesNavigation}
-              caseData={data}
-              caseDetailsNavigation={caseDetailsNavigation}
-              caseId={caseId}
-              configureCasesNavigation={configureCasesNavigation}
-              getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-              fetchCase={fetchCase}
-              onCaseDataSuccess={onCaseDataSuccess}
-              onComponentInitialized={onComponentInitialized}
-              actionsNavigation={actionsNavigation}
-              ruleDetailsNavigation={ruleDetailsNavigation}
-              showAlertDetails={showAlertDetails}
-              subCaseId={subCaseId}
-              updateCase={updateCase}
-              useFetchAlertData={useFetchAlertData}
-              userCanCrud={userCanCrud}
-              refreshRef={refreshRef}
-              hideSyncAlerts={hideSyncAlerts}
-            />
-          </OwnerProvider>
+          {getLegacyUrlConflictCallout()}
+          <CaseComponent
+            allCasesNavigation={allCasesNavigation}
+            caseData={data}
+            caseDetailsNavigation={caseDetailsNavigation}
+            caseId={caseId}
+            configureCasesNavigation={configureCasesNavigation}
+            fetchCase={fetchCase}
+            onCaseDataSuccess={onCaseDataSuccess}
+            onComponentInitialized={onComponentInitialized}
+            actionsNavigation={actionsNavigation}
+            ruleDetailsNavigation={ruleDetailsNavigation}
+            showAlertDetails={showAlertDetails}
+            subCaseId={subCaseId}
+            updateCase={updateCase}
+            useFetchAlertData={useFetchAlertData}
+            refreshRef={refreshRef}
+            hideSyncAlerts={hideSyncAlerts}
+          />
         </CasesTimelineIntegrationProvider>
       )
     );

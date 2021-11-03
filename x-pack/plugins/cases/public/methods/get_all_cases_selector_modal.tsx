@@ -8,21 +8,22 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCasesSelectorModalProps } from '../components/all_cases/selector_modal';
-import { OwnerProvider } from '../components/owner_context';
-import { Owner } from '../types';
+import { CasesProvider, CasesContextValue } from '../components/cases_context';
 
-export type GetAllCasesSelectorModalProps = AllCasesSelectorModalProps & Owner;
+export type GetAllCasesSelectorModalProps = AllCasesSelectorModalProps & CasesContextValue;
 
 const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
   () => import('../components/all_cases/selector_modal')
 );
 export const getAllCasesSelectorModalLazy = ({
   owner,
+  appId,
+  userCanCrud,
   ...props
 }: GetAllCasesSelectorModalProps) => (
-  <OwnerProvider owner={owner}>
+  <CasesProvider value={{ owner, appId, userCanCrud }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <AllCasesSelectorModalLazy {...props} />
     </Suspense>
-  </OwnerProvider>
+  </CasesProvider>
 );

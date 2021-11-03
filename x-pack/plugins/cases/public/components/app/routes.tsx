@@ -23,9 +23,10 @@ import {
   getCasesSubCaseDetailWithCommentPath,
 } from '../../common/navigation';
 import { CasesRoutesProps } from './types';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
-const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, appId, ...props }) => {
-  const { userCanCrud } = props;
+const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, ...props }) => {
+  const { userCanCrud, appId } = useCasesContext();
   const { getAppUrl, navigateTo } = useNavigation(appId);
 
   const viewProps = useMemo(
@@ -70,7 +71,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, appId, ...prop
           });
         },
       },
-      getCaseDetailHrefWithCommentId: (commentId: string) => '',
     }),
     [props, getAppUrl, navigateTo]
   );
@@ -142,7 +142,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, appId, ...prop
 
   const configureCaseProps = useMemo(
     (): ConfigureCaseProps => ({
-      userCanCrud: props.userCanCrud,
       allCasesNavigation: {
         href: getAppUrl({
           deepLinkId: casesDeepLinkIds.cases,
@@ -157,7 +156,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, appId, ...prop
         },
       },
     }),
-    [props.userCanCrud, getAppUrl, navigateTo]
+    [getAppUrl, navigateTo]
   );
 
   return (
@@ -166,7 +165,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, appId, ...prop
         <AllCases {...allCasesProps} />
       </Route>
 
-      {/* Using individual conditionals since Switch don't work well with Fragment wrapped Routes */}
+      {/* Using individual conditionals since Switch do not work with Fragment wrapped Routes */}
       {userCanCrud && (
         <Route path={getCasesCreatePath(path)}>
           <CreateCase {...createCaseProps} />

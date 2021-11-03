@@ -7,19 +7,23 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CreateCaseFlyoutProps } from '../components/create/flyout';
-import { OwnerProvider } from '../components/owner_context';
-import { Owner } from '../types';
+import type { CreateCaseFlyoutProps } from '../components/create/flyout';
+import { CasesProvider, CasesContextValue } from '../components/cases_context';
 
-export type GetCreateCaseFlyoutProps = CreateCaseFlyoutProps & Owner;
+export type GetCreateCaseFlyoutProps = CreateCaseFlyoutProps & CasesContextValue;
 
 const CreateCaseFlyout: React.FC<CreateCaseFlyoutProps> = lazy(
   () => import('../components/create/flyout')
 );
-export const getCreateCaseFlyoutLazy = ({ owner, ...props }: GetCreateCaseFlyoutProps) => (
-  <OwnerProvider owner={owner}>
+export const getCreateCaseFlyoutLazy = ({
+  owner,
+  appId,
+  userCanCrud,
+  ...props
+}: GetCreateCaseFlyoutProps) => (
+  <CasesProvider value={{ owner, appId, userCanCrud }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CreateCaseFlyout {...props} />
     </Suspense>
-  </OwnerProvider>
+  </CasesProvider>
 );

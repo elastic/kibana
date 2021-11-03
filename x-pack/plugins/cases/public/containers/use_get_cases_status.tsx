@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 
-import { useOwnerContext } from '../components/owner_context/use_owner_context';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { getCasesStatus } from './api';
 import * as i18n from './translations';
 import { CasesStatus } from './types';
@@ -31,7 +31,7 @@ export interface UseGetCasesStatus extends CasesStatusState {
 }
 
 export const useGetCasesStatus = (): UseGetCasesStatus => {
-  const owner = useOwnerContext();
+  const { owner } = useCasesContext();
   const [casesStatusState, setCasesStatusState] = useState<CasesStatusState>(initialData);
   const toasts = useToasts();
   const isCancelledRef = useRef(false);

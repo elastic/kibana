@@ -178,3 +178,10 @@ export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
     defaultMessage: 'Unable to create or edit cases',
   }
 );
+
+export const SEND_ALERT_TO_TIMELINE = i18n.translate(
+  'xpack.securitySolution.cases.caseView.sendAlertToTimelineTooltip',
+  {
+    defaultMessage: 'Investigate in timeline',
+  }
+);

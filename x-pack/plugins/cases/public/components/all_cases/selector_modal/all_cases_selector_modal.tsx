@@ -23,7 +23,6 @@ export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   onRowClick: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
-  userCanCrud: boolean;
   onClose?: () => void;
 }
 
@@ -35,15 +34,7 @@ const Modal = styled(EuiModal)`
 `;
 
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
-  ({
-    alertData,
-    createCaseNavigation,
-    hiddenStatuses,
-    onRowClick,
-    updateCase,
-    userCanCrud,
-    onClose,
-  }) => {
+  ({ alertData, createCaseNavigation, hiddenStatuses, onRowClick, updateCase, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const closeModal = useCallback(() => {
       if (onClose) {
@@ -70,7 +61,6 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
             hiddenStatuses={hiddenStatuses}
             isSelectorView={true}
             onRowClick={onClick}
-            userCanCrud={userCanCrud}
             updateCase={updateCase}
           />
         </EuiModalBody>

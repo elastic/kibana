@@ -10,34 +10,24 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 
-import { useAppUrl } from '../../common/lib/kibana';
 import * as i18n from './translations';
-import { casesDeepLinkIds } from '../../common/navigation';
+import { useCaseViewNavigation } from '../../common/navigation/hooks';
 
 interface UserActionCopyLinkProps {
   id: string;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
 }
 
-const UserActionCopyLinkComponent = ({
-  id: commentId,
-  getCaseDetailHrefWithCommentId,
-}: UserActionCopyLinkProps) => {
-  const { getAppUrl } = useAppUrl('securitySolutionUI');
-  const { detailName: caseId, subCaseId } = useParams<{
+const UserActionCopyLinkComponent = ({ id: commentId }: UserActionCopyLinkProps) => {
+  const { getUrl } = useCaseViewNavigation();
+
+  const { detailName, subCaseId } = useParams<{
     detailName: string;
     subCaseId?: string;
   }>();
 
   const handleAnchorLink = useCallback(() => {
-    copy(
-      getAppUrl({
-        deepLinkId: casesDeepLinkIds.cases,
-        path: `${caseId}/${commentId}`,
-        absolute: true,
-      })
-    );
-  }, [caseId, commentId, getAppUrl]);
+    copy(getUrl({ detailName, subCaseId, commentId }, true));
+  }, [detailName, subCaseId, commentId, getUrl]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>

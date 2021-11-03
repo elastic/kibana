@@ -97,7 +97,6 @@ export const caseProps: CaseComponentProps = {
     href: 'configure-cases-href',
     onClick: jest.fn(),
   },
-  getCaseDetailHrefWithCommentId: jest.fn(),
   onComponentInitialized: jest.fn(),
   actionsNavigation: {
     href: jest.fn(),
@@ -771,7 +770,6 @@ describe('CaseView ', () => {
                 href: 'configure-cases-href',
                 onClick: jest.fn(),
               },
-              getCaseDetailHrefWithCommentId: jest.fn(),
               onComponentInitialized: jest.fn(),
               ruleDetailsNavigation: {
                 href: jest.fn(),

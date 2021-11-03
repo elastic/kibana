@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppDeepLink } from '../../../../../src/core/public';
+import { AppDeepLink } from '../../../../../../src/core/public';
+import { getCasesCreatePath, getCasesConfigurePath } from './paths';
 
 export const casesDeepLinkIds = {
   cases: 'cases',
@@ -14,24 +15,14 @@ export const casesDeepLinkIds = {
   casesConfigure: 'cases_configure',
 } as const;
 
-export type CASES_DEEP_LINK_ID = typeof casesDeepLinkIds[keyof typeof casesDeepLinkIds];
-
-export const getCasesCreatePath = (casesPath: string) => `${casesPath}/create`;
-export const getCasesConfigurePath = (casesPath: string) => `${casesPath}/configure`;
-export const getCasesDetailPath = (casesPath: string) => `${casesPath}/:detailName`;
-export const getCasesSubCaseDetailPath = (casesPath: string) =>
-  `${getCasesDetailPath(casesPath)}/sub-cases/:subCaseId`;
-export const getCasesDetailWithCommentPath = (casesPath: string) =>
-  `${getCasesDetailPath(casesPath)}/:commentId`;
-export const getCasesSubCaseDetailWithCommentPath = (casesPath: string) =>
-  `${getCasesSubCaseDetailPath(casesPath)}/:commentId`;
+export type CasesDeepLinkId = typeof casesDeepLinkIds[keyof typeof casesDeepLinkIds];
 
 export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   path,
   extend = {},
 }: {
   path: string;
-  extend?: Partial<Record<CASES_DEEP_LINK_ID, Partial<T>>>;
+  extend?: Partial<Record<CasesDeepLinkId, Partial<T>>>;
 }) => ({
   title: i18n.translate('xpack.cases.navigation.cases', {
     defaultMessage: 'Cases',

@@ -63,7 +63,6 @@ export interface UserActionTreeProps {
   connectors: ActionConnector[];
   data: Case;
   fetchUserActions: () => void;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
@@ -136,7 +135,6 @@ export const UserActionTree = React.memo(
     connectors,
     data: caseData,
     fetchUserActions,
-    getCaseDetailHrefWithCommentId,
     getRuleDetailsHref,
     actionsNavigation,
     isLoadingDescription,
@@ -309,7 +307,6 @@ export const UserActionTree = React.memo(
         actions: (
           <UserActionContentToolbar
             commentMarkdown={caseData.description}
-            getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
             quoteLabel={i18n.QUOTE}
@@ -323,7 +320,6 @@ export const UserActionTree = React.memo(
       [
         MarkdownDescription,
         caseData,
-        getCaseDetailHrefWithCommentId,
         handleManageMarkdownEditId,
         handleManageQuote,
         isLoadingDescription,
@@ -385,7 +381,6 @@ export const UserActionTree = React.memo(
                     ),
                     actions: (
                       <UserActionContentToolbar
-                        getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
                         id={comment.id}
                         commentMarkdown={comment.comment}
                         editLabel={i18n.EDIT_COMMENT}
@@ -432,7 +427,6 @@ export const UserActionTree = React.memo(
                         getAlertAttachment({
                           action,
                           alertId,
-                          getCaseDetailHrefWithCommentId,
                           getRuleDetailsHref,
                           index: alertIndex,
                           loadingAlertData,
@@ -461,7 +455,6 @@ export const UserActionTree = React.memo(
                         getGeneratedAlertsAttachment({
                           action,
                           alertIds,
-                          getCaseDetailHrefWithCommentId,
                           getRuleDetailsHref,
                           onRuleDetailsClick,
                           renderInvestigateInTimelineActionComponent,
@@ -484,7 +477,6 @@ export const UserActionTree = React.memo(
                           comment,
                           userCanCrud,
                           isLoadingIds,
-                          getCaseDetailHrefWithCommentId,
                           actionsNavigation,
                           action,
                         }),
@@ -502,7 +494,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
               ];
@@ -565,7 +556,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
                 ...footers,
@@ -588,7 +578,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
               ];
@@ -606,7 +595,6 @@ export const UserActionTree = React.memo(
         manageMarkdownEditIds,
         handleManageMarkdownEditId,
         handleSaveComment,
-        getCaseDetailHrefWithCommentId,
         actionsNavigation,
         userCanCrud,
         isLoadingIds,

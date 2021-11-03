@@ -6,16 +6,14 @@
  */
 
 import { useContext } from 'react';
-import { OwnerContext } from '.';
+import { CasesContext } from '.';
 
-export const useOwnerContext = () => {
-  const ownerContext = useContext(OwnerContext);
+export const useCasesContext = () => {
+  const casesContext = useContext(CasesContext);
 
-  if (ownerContext.length === 0) {
-    throw new Error(
-      'useOwnerContext must be used within an OwnerProvider and not be an empty array'
-    );
+  if (!casesContext) {
+    throw new Error('useCasesContext must be used within a CasesProvider and have a defined value');
   }
 
-  return ownerContext;
+  return casesContext;
 };

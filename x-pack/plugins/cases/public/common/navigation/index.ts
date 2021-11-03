@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { CasesRoutes } from './routes';
-import { CasesRoutesProps } from './types';
-
-export type CasesProps = CasesRoutesProps;
-// eslint-disable-next-line import/no-default-export
-export { CasesRoutes as default };
+export * from './deep_links';
+export * from './paths';

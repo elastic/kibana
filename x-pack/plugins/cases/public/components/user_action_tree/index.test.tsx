@@ -34,7 +34,6 @@ const defaultProps = {
   caseServices: {},
   caseUserActions: [],
   connectors: [],
-  getCaseDetailHrefWithCommentId: jest.fn(),
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
   onRuleDetailsClick: jest.fn(),

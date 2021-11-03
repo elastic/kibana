@@ -19,13 +19,8 @@ import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public'
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 
-import { CasesProps } from './components/app';
-import { AllCasesProps } from './components/all_cases';
-import { CaseViewProps } from './components/case_view';
-import { ConfigureCasesProps } from './components/configure_cases';
-import { CreateCaseProps } from './components/create';
 import { RecentCasesProps } from './components/recent_cases';
-import { GetAllCasesSelectorModalProps, GetCreateCaseFlyoutProps } from './methods';
+import { GetCasesProps, GetAllCasesSelectorModalProps, GetCreateCaseFlyoutProps } from './methods';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -52,23 +47,13 @@ export type StartServices = CoreStart &
     security: SecurityPluginSetup;
   };
 
-export interface Owner {
-  owner: string[];
-}
-
 export interface CasesUiStart {
   /**
    * Get cases
-   * @param props CasesProps
-   * @return {ReactElement<CasesProps>}
+   * @param props GetCasesProps
+   * @return {ReactElement<GetCasesProps>}
    */
-  getCases: (props: CasesProps) => ReactElement<CasesProps>;
-  /**
-   * Get the all cases table
-   * @param props AllCasesProps
-   * @returns A react component that displays all cases
-   */
-  getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
+  getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
   /**
    * Modal to select a case in a list of all owner cases
    * @param props GetAllCasesSelectorModalProps
@@ -83,24 +68,6 @@ export interface CasesUiStart {
    * @returns A react component that is a flyout for creating a case
    */
   getCreateCaseFlyout: (props: GetCreateCaseFlyoutProps) => ReactElement<GetCreateCaseFlyoutProps>;
-  /**
-   * Get the case view component
-   * @param props CaseViewProps
-   * @returns A react component for viewing a specific case
-   */
-  getCaseView: (props: CaseViewProps) => ReactElement<CaseViewProps>;
-  /**
-   * Get the configure case component
-   * @param props ConfigureCasesProps
-   * @returns A react component for configuring a specific case
-   */
-  getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
-  /**
-   * Get the create case form
-   * @param props CreateCaseProps
-   * @returns A react component for creating a new case
-   */
-  getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
   /**
    * Get the recent cases component
    * @param props RecentCasesProps

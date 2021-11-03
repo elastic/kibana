@@ -43,7 +43,6 @@ jest.mock('../../common/lib/kibana', () => ({
 
 const props = {
   id: 'comment-id',
-  getCaseDetailHrefWithCommentId: jest.fn().mockReturnValue('random-url'),
 };
 
 describe('UserActionCopyLink ', () => {

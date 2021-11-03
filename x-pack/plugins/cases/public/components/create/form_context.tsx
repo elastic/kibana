@@ -16,7 +16,7 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
 import { CaseType } from '../../../common';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
-import { useOwnerContext } from '../owner_context/use_owner_context';
+import { useCasesContext } from '../cases_context/use_cases_context';
 import { getConnectorById } from '../utils';
 
 const initialCaseValue: FormProps = {
@@ -46,7 +46,7 @@ export const FormContext: React.FC<Props> = ({
   syncAlertsDefaultValue = true,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
-  const owner = useOwnerContext();
+  const { owner } = useCasesContext();
   const { postCase } = usePostCase();
   const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();

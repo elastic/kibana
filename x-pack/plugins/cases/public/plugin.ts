@@ -11,10 +11,6 @@ import { KibanaServices } from './common/lib/kibana';
 import { getCaseConnectorUi } from './components/connectors';
 import {
   getCasesLazy,
-  getAllCasesLazy,
-  getCaseViewLazy,
-  getConfigureCasesLazy,
-  getCreateCaseLazy,
   getRecentCasesLazy,
   getAllCasesSelectorModalLazy,
   getCreateCaseFlyoutLazy,
@@ -41,41 +37,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
     return {
-      /**
-       * Get the cases
-       * @param props CasesProps
-       * @return {ReactElement<CasesProps>}
-       */
       getCases: getCasesLazy,
-      /**
-       * Get the all cases table
-       * @param props AllCasesProps
-       * @return {ReactElement<AllCasesProps>}
-       */
-      getAllCases: getAllCasesLazy,
-      /**
-       * Get the case view component
-       * @param props CaseViewProps
-       * @return {ReactElement<CaseViewProps>}
-       */
-      getCaseView: getCaseViewLazy,
-      /**
-       * Get the configure case component
-       * @param props ConfigureCasesProps
-       * @return {ReactElement<ConfigureCasesProps>}
-       */
-      getConfigureCases: getConfigureCasesLazy,
-      /**
-       * Get the create case form
-       * @param props CreateCaseProps
-       * @return {ReactElement<CreateCaseProps>}
-       */
-      getCreateCase: getCreateCaseLazy,
-      /**
-       * Get the recent cases component
-       * @param props RecentCasesProps
-       * @return {ReactElement<RecentCasesProps>}
-       */
       getRecentCases: getRecentCasesLazy,
       getCreateCaseFlyout: getCreateCaseFlyoutLazy,
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,

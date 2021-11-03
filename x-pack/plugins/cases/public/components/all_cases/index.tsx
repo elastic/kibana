@@ -7,9 +7,8 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { Owner } from '../../types';
+import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
-import { OwnerProvider } from '../owner_context';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { AllCasesList } from './all_cases_list';
 import { CasesTableHeader } from './header';
@@ -20,12 +19,11 @@ export interface AllCasesProps {
   createCaseNavigation: CasesNavigation;
   disableAlerts?: boolean;
   showTitle?: boolean;
-  userCanCrud: boolean;
 }
 
 export const AllCases: React.FC<AllCasesProps> = (props) => {
-  const { createCaseNavigation, configureCasesNavigation, showTitle, userCanCrud } = props;
-
+  const { createCaseNavigation, configureCasesNavigation, showTitle } = props;
+  const { userCanCrud } = useCasesContext();
   const [refresh, setRefresh] = useState<number>(0);
   const doRefresh = useCallback(() => {
     setRefresh((prev) => prev + 1);

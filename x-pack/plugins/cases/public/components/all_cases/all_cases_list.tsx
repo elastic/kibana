@@ -35,6 +35,7 @@ import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
 import { useConnectors } from '../../containers/configure/use_connectors';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -64,7 +65,6 @@ interface AllCasesListProps {
   showTitle?: boolean;
   updateCase?: (newCase: Case) => void;
   doRefresh?: () => void;
-  userCanCrud: boolean;
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
@@ -79,8 +79,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     showTitle,
     updateCase, // only modal
     doRefresh,
-    userCanCrud,
   }) => {
+    const { userCanCrud } = useCasesContext();
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions =
       !isEmpty(hiddenStatuses) && firstAvailableStatus ? { status: firstAvailableStatus } : {};

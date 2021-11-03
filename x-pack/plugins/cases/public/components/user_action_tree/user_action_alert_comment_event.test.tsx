@@ -15,7 +15,6 @@ import { CommentType } from '../../../common';
 
 const props = {
   alertId: 'alert-id-1',
-  getCaseDetailHrefWithCommentId: jest.fn().mockReturnValue('someCaseDetail-withcomment'),
   getRuleDetailsHref: jest.fn().mockReturnValue('some-detection-rule-link'),
   onRuleDetailsClick: jest.fn(),
   ruleId: 'rule-id-1',

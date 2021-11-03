@@ -14,10 +14,9 @@ import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { Owner } from '../../types';
-import { OwnerProvider } from '../owner_context';
+import { CasesProvider, CasesContextValue } from '../cases_context';
 
-export interface RecentCasesProps extends Owner {
+export interface RecentCasesProps {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
@@ -31,7 +30,7 @@ const RecentCasesComponent = ({
   createCaseNavigation,
   maxCasesToShow,
   hasWritePermissions,
-}: Omit<RecentCasesProps, 'owner'>) => {
+}: RecentCasesProps) => {
   const currentUser = useCurrentUser();
   const [recentCasesFilterBy, setRecentCasesFilterBy] =
     useState<RecentCasesFilterMode>('recentlyCreated');
@@ -92,13 +91,15 @@ const RecentCasesComponent = ({
   );
 };
 
-export const RecentCases: React.FC<RecentCasesProps> = React.memo((props) => {
-  return (
-    <OwnerProvider owner={props.owner}>
-      <RecentCasesComponent {...props} />
-    </OwnerProvider>
-  );
-});
+export const RecentCases: React.FC<RecentCasesProps & CasesContextValue> = React.memo(
+  ({ owner, appId, userCanCrud, ...props }) => {
+    return (
+      <CasesProvider value={{ appId, owner, userCanCrud }}>
+        <RecentCasesComponent {...props} />
+      </CasesProvider>
+    );
+  }
+);
 
 // eslint-disable-next-line import/no-default-export
 export { RecentCases as default };
