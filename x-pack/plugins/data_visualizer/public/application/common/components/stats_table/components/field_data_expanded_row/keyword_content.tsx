@@ -47,7 +47,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
       <TopValues
         stats={stats}
         fieldFormat={fieldFormat}
-        barColor="secondary"
+        barColor="success"
         onAddFilter={onAddFilter}
       />
       {EMSSuggestion && stats && <ChoroplethMap stats={stats} suggestion={EMSSuggestion} />}
