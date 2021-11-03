@@ -17,7 +17,7 @@ function StatusIcon({ status }: { status: string }) {
     case WATCH_STATES.OK:
     case ACTION_STATES.OK:
     case ACTION_STATES.ACKNOWLEDGED:
-      return <EuiIcon type="check" color="secondary" />;
+      return <EuiIcon type="check" color="success" />;
     case ACTION_STATES.THROTTLED:
       return <EuiIcon type="clock" color="warning" />;
     case WATCH_STATES.DISABLED:
