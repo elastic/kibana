@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './colors';
-export * from './components';
-export * from './utils';
-export * from '../../common/static/styles';
+export * from './multilayer_timeaxis';
