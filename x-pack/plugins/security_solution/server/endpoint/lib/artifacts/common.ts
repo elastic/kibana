@@ -25,6 +25,9 @@ export const ArtifactConstants = {
 
   SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   GLOBAL_EVENT_FILTERS_NAME: 'endpoint-eventfilterlist',
+
+  SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+  GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME: 'endpoint-hostisolationexceptionlist',
 };
 
 export const ManifestConstants = {

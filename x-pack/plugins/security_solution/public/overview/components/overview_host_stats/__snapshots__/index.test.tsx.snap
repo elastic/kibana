@@ -38,6 +38,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
+    buttonElement="button"
+    element="div"
     id="host-stat-accordion-groupauditbeat"
     initialIsOpen={false}
     isLoading={false}
@@ -273,6 +275,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
+    buttonElement="button"
+    element="div"
     id="host-stat-accordion-groupendgame"
     initialIsOpen={false}
     isLoading={false}
@@ -540,6 +544,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
+    buttonElement="button"
+    element="div"
     id="host-stat-accordion-groupfilebeat"
     initialIsOpen={false}
     isLoading={false}
@@ -615,6 +621,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
+    buttonElement="button"
+    element="div"
     id="host-stat-accordion-groupwinlogbeat"
     initialIsOpen={false}
     isLoading={false}

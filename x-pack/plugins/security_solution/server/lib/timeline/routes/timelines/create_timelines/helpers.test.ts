@@ -32,17 +32,12 @@ const notes = [
 const existingNoteIds = undefined;
 const isImmutable = true;
 
-jest.mock('moment', () => {
-  const mockMoment = {
-    toISOString: jest
-      .fn()
-      .mockReturnValueOnce('2020-11-03T11:37:31.655Z')
-      .mockReturnValue('2020-11-04T11:37:31.655Z'),
-    subtract: jest.fn(),
-  };
-  mockMoment.subtract.mockReturnValue(mockMoment);
-  return jest.fn().mockReturnValue(mockMoment);
-});
+// System under test uses moment.js under the hood, so we need to mock time.
+// Mocking moment via jest.mock('moment') breaks imports of moment in other files.
+// Instead, we simply mock Date.now() via jest API and moment starts using it.
+// This affects all the tests in this file and doesn't affect tests in other files.
+// https://jestjs.io/docs/timer-mocks
+jest.useFakeTimers('modern').setSystemTime(new Date('2020-11-04T11:37:31.655Z'));
 
 jest.mock('../../../saved_object/timelines', () => ({
   persistTimeline: jest.fn().mockResolvedValue({

@@ -9,7 +9,7 @@ import { getOr, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
-import { APP_NAME, APP_ID } from '../../../../../common/constants';
+import { APP_NAME, APP_UI_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
@@ -54,6 +54,7 @@ export const useSetBreadcrumbs = () => {
 
                   dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
 
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   navigateToUrl(breadcrumb.href!);
                 },
               }
@@ -91,7 +92,7 @@ export const getBreadcrumbsForRoute = (
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_ID, { deepLinkId: SecurityPageName.overview });
+  const overviewPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.overview });
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getAppOverviewUrl(overviewPath),

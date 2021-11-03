@@ -78,9 +78,9 @@ export class CanvasPlugin implements Plugin {
       plugins.home.sampleData.addAppLinksToSampleDataset
     );
 
-    // we need the kibana index provided by global config for the Canvas usage collector
-    const globalConfig = this.initializerContext.config.legacy.get();
-    registerCanvasUsageCollector(plugins.usageCollection, globalConfig.kibana.index);
+    // we need the kibana index for the Canvas usage collector
+    const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
+    registerCanvasUsageCollector(plugins.usageCollection, kibanaIndex);
 
     setupInterpreter(expressionsFork);
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { InteractiveSetupViewState, EnrollmentToken, Certificate, PingResult } from './types';
+export type { EnrollmentToken, Certificate, PingResult, StatusResult } from './types';
 export { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
 export {
   ERROR_CONFIGURE_FAILURE,

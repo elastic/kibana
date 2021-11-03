@@ -26,7 +26,7 @@ export function ObservabilityHeaderMenu(): React.ReactElement | null {
       <EuiHeaderLinks>
         <EuiHeaderLink
           color="primary"
-          href={prepend('/app/home#/tutorial_directory/logging')}
+          href={prepend('/app/integrations/browse')}
           iconType="indexOpen"
         >
           {addDataLinkText}
@@ -37,5 +37,5 @@ export function ObservabilityHeaderMenu(): React.ReactElement | null {
 }
 
 const addDataLinkText = i18n.translate('xpack.observability.home.addData', {
-  defaultMessage: 'Add data',
+  defaultMessage: 'Add integrations',
 });

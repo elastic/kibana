@@ -8,7 +8,7 @@
 import { actionsMock } from '../../mocks';
 import { createActionTypeRegistry } from '../index.test';
 import {
-  ServiceNowPublicConfigurationType,
+  ServiceNowPublicConfigurationBaseType,
   ServiceNowSecretConfigurationType,
   ExecutorParams,
   PushToServiceResponse,
@@ -56,7 +56,7 @@ describe('ServiceNow', () => {
     beforeAll(() => {
       const { actionTypeRegistry } = createActionTypeRegistry();
       actionType = actionTypeRegistry.get<
-        ServiceNowPublicConfigurationType,
+        ServiceNowPublicConfigurationBaseType,
         ServiceNowSecretConfigurationType,
         ExecutorParams,
         PushToServiceResponse | {}
@@ -91,7 +91,7 @@ describe('ServiceNow', () => {
     beforeAll(() => {
       const { actionTypeRegistry } = createActionTypeRegistry();
       actionType = actionTypeRegistry.get<
-        ServiceNowPublicConfigurationType,
+        ServiceNowPublicConfigurationBaseType,
         ServiceNowSecretConfigurationType,
         ExecutorParams,
         PushToServiceResponse | {}

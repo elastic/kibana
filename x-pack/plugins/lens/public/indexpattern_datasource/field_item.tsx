@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import {
   Axis,
-  BarSeries,
+  HistogramBarSeries,
   Chart,
   niceTimeFormatter,
   Position,
@@ -165,7 +165,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
+      .post<FieldStatsResponse<string | number>>(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
             indexPattern,
@@ -178,7 +178,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           fieldName: field.name,
         }),
       })
-      .then((results: FieldStatsResponse<string | number>) => {
+      .then((results) => {
         setState((s) => ({
           ...s,
           isLoading: false,
@@ -348,7 +348,7 @@ function FieldPanelHeader({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-              defaultMessage: 'Edit index pattern field',
+              defaultMessage: 'Edit data view field',
             })}
           >
             <EuiButtonIcon
@@ -356,7 +356,7 @@ function FieldPanelHeader({
               iconType="pencil"
               data-test-subj="lnsFieldListPanelEdit"
               aria-label={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-                defaultMessage: 'Edit index pattern field',
+                defaultMessage: 'Edit data view field',
               })}
             />
           </EuiToolTip>
@@ -366,7 +366,7 @@ function FieldPanelHeader({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.removeFieldLabel', {
-              defaultMessage: 'Remove index pattern field',
+              defaultMessage: 'Remove data view field',
             })}
           >
             <EuiButtonIcon
@@ -375,7 +375,7 @@ function FieldPanelHeader({
               data-test-subj="lnsFieldListPanelRemove"
               color="danger"
               aria-label={i18n.translate('xpack.lens.indexPattern.removeFieldLabel', {
-                defaultMessage: 'Remove index pattern field',
+                defaultMessage: 'Remove data view field',
               })}
             />
           </EuiToolTip>
@@ -636,7 +636,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             showOverlappingTicks={true}
           />
 
-          <BarSeries
+          <HistogramBarSeries
             data={histogram.buckets}
             id={specId}
             xAccessor={'key'}
@@ -664,7 +664,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             tickFormat={(d) => formatter.convert(d)}
           />
 
-          <BarSeries
+          <HistogramBarSeries
             data={histogram.buckets}
             id={specId}
             xAccessor={'key'}

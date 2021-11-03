@@ -227,7 +227,7 @@ export const checkIsUpdateViaImportFailureCases = (
       return { body: UPDAT_TIMELINE_VIA_IMPORT_NOT_ALLOWED_ERROR_MESSAGE, statusCode: 405 };
     } else {
       return {
-        body: getImportExistingTimelineError(existTimeline!.savedObjectId),
+        body: getImportExistingTimelineError(existTimeline.savedObjectId),
         statusCode: 405,
       };
     }

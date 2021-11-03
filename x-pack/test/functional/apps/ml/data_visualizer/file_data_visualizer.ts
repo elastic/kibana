@@ -309,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('sets the index name');
           await ml.dataVisualizerFileBased.setIndexName(testData.indexName);
 
-          await ml.testExecution.logTestStep('sets the create index pattern checkbox');
+          await ml.testExecution.logTestStep('sets the create data view checkbox');
           await ml.dataVisualizerFileBased.setCreateIndexPatternCheckboxState(
             testData.createIndexPattern
           );

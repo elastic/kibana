@@ -16,6 +16,7 @@ import { SavedSearch } from '../../../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
+import type { TopNavMenuData } from '../../../../../../../navigation/public';
 
 /**
  * Helper function to build the top nav links
@@ -38,7 +39,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
-}) => {
+}): TopNavMenuData[] => {
   const options = {
     id: 'options',
     label: i18n.translate('discover.localMenu.localMenu.optionsTitle', {
@@ -76,6 +77,8 @@ export const getTopNavLinks = ({
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
+    iconType: 'save',
+    emphasize: true,
     run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
   };
 
@@ -153,9 +156,9 @@ export const getTopNavLinks = ({
   return [
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
-    ...(services.capabilities.discover.save ? [saveSearch] : []),
     openSearch,
     shareSearch,
     inspectSearch,
+    ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];
 };

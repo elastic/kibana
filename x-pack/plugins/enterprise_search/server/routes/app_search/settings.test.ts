@@ -57,13 +57,21 @@ describe('log settings routes', () => {
 
     describe('validates', () => {
       it('validates good data', () => {
-        const request = {
+        mockRouter.shouldValidate({
           body: {
             analytics: { enabled: true },
+          },
+        });
+        mockRouter.shouldValidate({
+          body: {
             api: { enabled: true },
           },
-        };
-        mockRouter.shouldValidate(request);
+        });
+        mockRouter.shouldValidate({
+          body: {
+            crawler: { enabled: true },
+          },
+        });
       });
 
       it('rejects bad data', () => {

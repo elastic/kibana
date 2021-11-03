@@ -8,6 +8,7 @@
 
 import type { ISearchSource } from '../../../data/public';
 import { DiscoverGridSettingsColumn } from '../application/components/discover_grid/types';
+import { VIEW_MODE } from '../application/apps/main/components/view_mode_toggle';
 
 /** @internal **/
 export interface SavedSearchAttributes {
@@ -22,14 +23,19 @@ export interface SavedSearchAttributes {
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
 }
+
+/** @internal **/
+export type SortOrder = [string, string];
 
 /** @public **/
 export interface SavedSearch {
   searchSource: ISearchSource;
   id?: string;
   title?: string;
-  sort?: Array<[string, string]>;
+  sort?: SortOrder[];
   columns?: string[];
   description?: string;
   grid?: {
@@ -41,4 +47,6 @@ export interface SavedSearch {
     aliasTargetId?: string;
     errorJSON?: string;
   };
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
 }

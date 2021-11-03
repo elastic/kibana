@@ -362,6 +362,11 @@ export type MachineLearningCreateSchema = CreateSchema<
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
+export const previewRulesSchema = t.intersection([
+  sharedCreateSchema,
+  createTypeSpecific,
+  t.type({ invocationCount: t.number }),
+]);
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
@@ -426,3 +431,9 @@ export const fullResponseSchema = t.intersection([
   t.exact(t.partial(responseOptionalFields)),
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
+
+export interface PreviewResponse {
+  previewId: string | undefined;
+  errors: string[] | undefined;
+  warnings: string[] | undefined;
+}

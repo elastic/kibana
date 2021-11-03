@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   const originalTestData: TestData = {
-    suiteTitle: 'original index pattern',
+    suiteTitle: 'original data view',
     sourceIndexOrSavedSearch: 'ft_farequote',
     expected: {
       totalDocCountFormatted: '86,274',
@@ -188,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
   }
 
-  describe('index pattern management', function () {
+  describe('data view management', function () {
     this.tags(['mlqa']);
     const indexPatternTitle = 'ft_farequote';
     before(async () => {

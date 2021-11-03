@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
 import { Inspect, Maybe, PageInfoPaginated, SortField } from '../../common';

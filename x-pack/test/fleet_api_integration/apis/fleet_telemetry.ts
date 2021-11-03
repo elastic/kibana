@@ -107,7 +107,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return the correct telemetry values for fleet', async () => {
       const {
-        body: [apiResponse],
+        body: [{ stats: apiResponse }],
       } = await supertest
         .post(`/api/telemetry/v2/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')

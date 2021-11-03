@@ -15,6 +15,7 @@ export type TabId =
   | 'access-denied'
   | 'anomaly_detection'
   | 'data_frame_analytics'
+  | 'trained_models'
   | 'datavisualizer'
   | 'overview'
   | 'settings';

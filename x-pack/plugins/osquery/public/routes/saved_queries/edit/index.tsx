@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiConfirmModal,
+  EuiText,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -20,7 +21,6 @@ import { useParams } from 'react-router-dom';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 
@@ -65,7 +65,7 @@ const EditSavedQueryPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               {viewMode ? (
                 <FormattedMessage
@@ -87,8 +87,7 @@ const EditSavedQueryPageComponent = () => {
                 />
               )}
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -118,7 +117,6 @@ const EditSavedQueryPageComponent = () => {
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
           defaultValue={savedQueryDetails?.attributes}
-          // @ts-expect-error update types
           handleSubmit={updateSavedQueryMutation.mutateAsync}
           viewMode={viewMode}
         />

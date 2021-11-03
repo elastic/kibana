@@ -105,17 +105,6 @@ describe('inject_exceptions_list', () => {
     ).toEqual<FuncReturn>([{ ...mockExceptionsList()[0], id: '456' }]);
   });
 
-  test('logs an error if found with a different saved object reference id', () => {
-    injectExceptionsReferences({
-      logger,
-      exceptionsList: mockExceptionsList(),
-      savedObjectReferences: [{ ...mockSavedObjectReferences()[0], id: '456' }],
-    });
-    expect(logger.error).toBeCalledWith(
-      'The id of the "saved object reference id": 456 is not the same as the "saved object id": 123. Preferring and using the "saved object reference id" instead of the "saved object id"'
-    );
-  });
-
   test('returns exceptionItem if the saved object reference cannot match as a fall back', () => {
     expect(
       injectExceptionsReferences({

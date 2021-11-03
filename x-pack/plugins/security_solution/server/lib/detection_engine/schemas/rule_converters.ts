@@ -6,6 +6,9 @@
  */
 
 import uuid from 'uuid';
+
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
@@ -25,7 +28,7 @@ import {
 } from '../../../../common/detection_engine/schemas/request';
 import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
-import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
@@ -37,7 +40,6 @@ import {
   transformToNotifyWhen,
   transformActions,
 } from '../rules/utils';
-import { ruleTypeMappings } from '../signals/utils';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
 
