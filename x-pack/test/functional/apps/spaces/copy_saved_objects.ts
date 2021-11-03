@@ -17,7 +17,8 @@ export default function spaceSelectorFunctonalTests({
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['security', 'settings', 'copySavedObjectsToSpace']);
 
-  describe('Copy Saved Objects to Space', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/44575
+  describe.skip('Copy Saved Objects to Space', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/spaces/copy_saved_objects');
 
