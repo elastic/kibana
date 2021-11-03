@@ -34,9 +34,12 @@ import { BrowserRouter as Router, useHistory } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type {
+  JobAppParamsPDF,
+  JobParamsPDFV2,
+  JobParamsPNGV2,
+} from '../../../../plugins/reporting/public';
 import { constants, ReportingStart } from '../../../../plugins/reporting/public';
-import type { JobParamsPDFV2 } from '../../../../plugins/reporting/server/export_types/printable_pdf_v2/types';
-import type { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png_v2/types';
 
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
@@ -81,7 +84,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       });
   });
 
-  const getPDFJobParamsDefault = () => {
+  const getPDFJobParamsDefault = (): JobAppParamsPDF => {
     return {
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,

@@ -18,6 +18,17 @@ export interface ReportingSetup {
 export type ReportingStart = ReportingSetup;
 
 export { constants } from '../common';
+export type {
+  JobParamsCSV,
+  JobParamsDownloadCSV,
+  JobParamsPNG,
+  JobParamsPNGV2,
+  JobAppParamsPDFV2,
+  JobParamsPDF,
+  JobParamsPDFV2,
+  JobAppParamsPDF,
+} from '../common/types';
+
 export { ReportingAPIClient, ReportingPublicPlugin as Plugin };
 
 export function plugin(initializerContext: PluginInitializerContext) {
