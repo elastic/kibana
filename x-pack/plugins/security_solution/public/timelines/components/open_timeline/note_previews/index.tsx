@@ -69,7 +69,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
     <EuiButtonIcon
       title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
-      color="subdued"
+      color="text"
       iconType="arrowRight"
       onClick={handleClick}
     />

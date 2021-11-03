@@ -171,7 +171,7 @@ class KeyedTimeslider extends Component<Props, State> {
           <EuiButtonIcon
             onClick={this.props.closeTimeslider}
             iconType="cross"
-            color="subdued"
+            color="text"
             className="mapTimeslider__close"
             aria-label={i18n.translate('xpack.maps.timeslider.closeLabel', {
               defaultMessage: 'Close timeslider',

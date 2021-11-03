@@ -184,7 +184,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                       aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
                         defaultMessage: 'Actions',
                       })}
-                      color="subdued"
+                      color="text"
                       iconType="boxesHorizontal"
                       onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                       data-test-subj="mlAnomalyTimelinePanelMenu"
