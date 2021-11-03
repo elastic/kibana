@@ -144,7 +144,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
     name: i18n.NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.process.name,
@@ -157,7 +157,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     align: 'right',
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
     width: '8%',
   },
@@ -165,14 +165,14 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     align: 'right',
     name: i18n.NUMBER_OF_INSTANCES,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) => defaultToEmptyTag(node.instances),
     width: '8%',
   },
   {
     name: i18n.HOSTS,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: getHostNames(node),
@@ -185,7 +185,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
     name: i18n.LAST_COMMAND,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.process != null ? node.process.args : null,
@@ -198,7 +198,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
     name: i18n.LAST_USER,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.user != null ? node.user.name : null,
