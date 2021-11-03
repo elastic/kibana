@@ -9,9 +9,7 @@
 import React, { Component, AriaAttributes } from 'react';
 import classNames from 'classnames';
 import AceEditor, { IAceEditorProps } from 'react-ace';
-import { EuiI18n } from '@elastic/eui';
-// @ts-ignore
-import { htmlIdGenerator, keys } from '@elastic/eui/lib/services';
+import { EuiI18n, htmlIdGenerator, keys } from '@elastic/eui';
 
 import './_index.scss';
 

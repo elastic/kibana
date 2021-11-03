@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { EuiCodeEditor, EuiCodeEditorProps } from '../../../src/plugins/es_ui_shared/public';
+
 import { XJson } from '../../../src/plugins/es_ui_shared/public';
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 

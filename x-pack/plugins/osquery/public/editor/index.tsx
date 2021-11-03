@@ -6,9 +6,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import 'brace/theme/tomorrow';
+
+import { EuiCodeEditor } from '../shared_imports';
 
 import './osquery_mode.ts';
 
