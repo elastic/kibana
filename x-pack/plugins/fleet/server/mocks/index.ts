@@ -19,6 +19,7 @@ import { securityMock } from '../../../security/server/mocks';
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from '../services';
 import type { FleetAppContext } from '../plugin';
+import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
@@ -59,6 +60,7 @@ export const createAppContextStartContractMock = (): MockedFleetAppContext => {
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
+    telemetryEventsSender: createMockTelemetryEventsSender(),
   };
 };
 

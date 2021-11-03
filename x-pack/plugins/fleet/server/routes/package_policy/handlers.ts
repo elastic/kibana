@@ -146,7 +146,8 @@ export const updatePackagePolicyHandler: RequestHandler<
       esClient,
       request.params.packagePolicyId,
       { ...newData, package: pkg, inputs },
-      { user }
+      { user },
+      packagePolicy.package?.version
     );
     return response.ok({
       body: { item: updatedPackagePolicy },
