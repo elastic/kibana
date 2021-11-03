@@ -508,15 +508,15 @@ export class VisualBuilderPageObject extends FtrService {
   public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
     await this.retry.try(async () => {
       const isPopoverOpened = await this.testSubjects.exists(
-        'switchIndexPatternSelectionModePopoverContent'
+        'switchIndexPatternSelectionMode'
       );
       if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
-        await this.testSubjects.click('switchIndexPatternSelectionModePopoverButton');
+        await this.testSubjects.click('switchIndexPatternSelectionModePopover');
       }
       if (shouldOpen) {
-        await this.testSubjects.existOrFail('switchIndexPatternSelectionModePopoverContent');
+        await this.testSubjects.existOrFail('switchIndexPatternSelectionMode');
       } else {
-        await this.testSubjects.missingOrFail('switchIndexPatternSelectionModePopoverContent');
+        await this.testSubjects.missingOrFail('switchIndexPatternSelectionMode');
       }
     });
   }
