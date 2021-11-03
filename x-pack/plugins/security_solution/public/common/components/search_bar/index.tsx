@@ -44,6 +44,7 @@ const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
 interface SiemSearchBarProps {
   id: InputsModelId;
   indexPattern: DataViewBase;
+  pollForSignalIndex?: () => void;
   timelineId?: string;
   dataTestSubj?: string;
 }
@@ -62,6 +63,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     id,
     indexPattern,
     isLoading = false,
+    pollForSignalIndex,
     queries,
     savedQuery,
     setSavedQuery,
@@ -95,6 +97,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
+        // if the function is there, call it to check if the signals index exists yet
+        // in order to update the index fields
+        if (pollForSignalIndex != null) {
+          pollForSignalIndex();
+        }
         const isQuickSelection =
           payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
         let updateSearchBar: UpdateReduxSearchBar = {
@@ -139,7 +146,18 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         window.setTimeout(() => updateSearch(updateSearchBar), 0);
       },
-      [id, toStr, end, fromStr, start, filterManager, filterQuery, queries, updateSearch]
+      [
+        id,
+        pollForSignalIndex,
+        toStr,
+        end,
+        fromStr,
+        start,
+        filterManager,
+        filterQuery,
+        queries,
+        updateSearch,
+      ]
     );
 
     const onRefresh = useCallback(

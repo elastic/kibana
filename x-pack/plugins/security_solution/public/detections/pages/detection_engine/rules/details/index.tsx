@@ -126,6 +126,7 @@ import {
   AlertsTableFilterGroup,
   FILTER_OPEN,
 } from '../../../../components/alerts_table/alerts_filter_group';
+import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -217,6 +218,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: ruleLoading,
     isExistingRule,
   } = useRuleWithFallback(ruleId);
+  const { pollForSignalIndex } = useSignalHelpers();
   const [loadingStatus, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
   const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
     ruleStatus?.current_status ?? null
@@ -697,7 +699,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-          <SiemSearchBar id="global" indexPattern={indexPattern} />
+          <SiemSearchBar
+            id="global"
+            pollForSignalIndex={pollForSignalIndex}
+            indexPattern={indexPattern}
+          />
         </FiltersGlobal>
 
         <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

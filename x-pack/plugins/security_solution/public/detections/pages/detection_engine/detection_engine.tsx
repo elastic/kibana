@@ -67,6 +67,8 @@ import {
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSignalHelpers } from '../../../common/containers/sourcerer/use_signal_helpers';
+
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
@@ -78,8 +80,6 @@ import {
   FILTER_OPEN,
 } from '../../components/alerts_table/alerts_filter_group';
 import { EmptyPage } from '../../../common/components/empty_page';
-import { sourcererSelectors } from '../../../common/store';
-
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -236,22 +236,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indicesExist, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
-    []
-  );
-  const getSignalIndexNameSelector = useMemo(
-    () => sourcererSelectors.signalIndexNameSelector(),
-    []
-  );
-  const signalIndexNameSourcerer = useDeepEqualSelector(getSignalIndexNameSelector);
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
-  const isSignalIndexNeedsInit = useMemo(
-    () => !indicesExist && !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
-    [defaultDataView.title, indicesExist, signalIndexNameSourcerer]
-  );
+  const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     focusUtilityBarAction(containerElement.current);
@@ -307,12 +294,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     );
   }
 
-  if ((!loading && isSignalIndexNeedsInit) || needsListsConfiguration) {
+  if ((!loading && signalIndexNeedsInit) || needsListsConfiguration) {
     return (
       <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineNoIndex
-          needsSignalsIndex={isSignalIndexNeedsInit}
+          needsSignalsIndex={signalIndexNeedsInit}
           needsListsIndex={needsListsConfiguration}
         />
       </SecuritySolutionPageWrapper>
@@ -323,18 +310,22 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {!isSignalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false) ? (
+      {!signalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false) ? (
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
           data-test-subj="no_feature_permissions-alerts"
           title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
         />
-      ) : !isSignalIndexNeedsInit && hasIndexRead && canUserREAD ? (
+      ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
+            <SiemSearchBar
+              id="global"
+              pollForSignalIndex={pollForSignalIndex}
+              indexPattern={indexPattern}
+            />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper
             noPadding={globalFullScreen}
