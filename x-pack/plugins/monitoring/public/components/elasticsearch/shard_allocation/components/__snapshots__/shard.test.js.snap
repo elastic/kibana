@@ -27,7 +27,7 @@ exports[`Shard should show for assigned replica shards 1`] = `
   onMouseLeave={[Function]}
 >
   <EuiBadge
-    color="secondary"
+    color="success"
   >
     0
   </EuiBadge>
