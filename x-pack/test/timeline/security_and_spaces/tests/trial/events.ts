@@ -264,7 +264,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(httpEvent.user.name).to.be(obsMinRead.username);
         expect(httpEvent.kibana.space_id).to.be(SPACE_2);
         expect(httpEvent.http.request.method).to.be('post');
-        expect(httpEvent.url.path).to.be('/s/space1/internal/search/timelineSearchStrategy/');
+        expect(httpEvent.url.path).to.be('/s/space2/internal/search/timelineSearchStrategy/');
 
         const findEvents = content.filter((c) => c.event.action === 'alert_find');
         expect(findEvents.length).to.equal(1);
