@@ -153,6 +153,7 @@ describe('Task Runner', () => {
     params: {
       bar: true,
     },
+    taskId: '',
     actions: [
       {
         group: 'default',

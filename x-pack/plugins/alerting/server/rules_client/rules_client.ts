@@ -174,6 +174,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
+    | 'taskId'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -1598,7 +1599,7 @@ export class RulesClient {
     id: string,
     ruleTypeId: string,
     schedule: IntervalSchedule,
-    taskId: string | null
+    taskId: string | undefined
   ) {
     return await this.taskManager.schedule({
       taskType: `alerting:${ruleTypeId}`,
@@ -1699,7 +1700,6 @@ export class RulesClient {
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
-      ...(taskId ? { taskId } : {}),
       ...(executionStatus
         ? { executionStatus: alertExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),

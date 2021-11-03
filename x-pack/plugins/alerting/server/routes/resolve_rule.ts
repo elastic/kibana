@@ -34,7 +34,6 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>
   executionStatus,
   actions,
   scheduledTaskId,
-  taskId,
   ...rest
 }) => ({
   ...rest,

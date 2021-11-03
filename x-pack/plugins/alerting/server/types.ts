@@ -220,7 +220,7 @@ export interface RawAlert extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
-  taskId?: string | null;
+  taskId?: string;
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
