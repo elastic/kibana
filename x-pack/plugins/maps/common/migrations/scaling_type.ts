@@ -24,7 +24,15 @@ export function migrateUseTopHitsToScalingType({
     return attributes;
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    // Do not fail migration for invalid layerListJSON
+    // Maps application can display invalid layerListJSON error when saved object is viewed
+    return attributes;
+  }
+
   layerList.forEach((layerDescriptor: LayerDescriptor) => {
     if (isEsDocumentSource(layerDescriptor)) {
       const sourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;

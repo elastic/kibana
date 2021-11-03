@@ -17,6 +17,17 @@ describe('setEmsTmsDefaultModes', () => {
     });
   });
 
+  test('Should handle malformed layerListJSON attribute', () => {
+    const attributes = {
+      title: 'my map',
+      layerListJSON: 'I am not expected JSON array',
+    };
+    expect(setEmsTmsDefaultModes({ attributes })).toEqual({
+      title: 'my map',
+      layerListJSON: 'I am not expected JSON array',
+    });
+  });
+
   test('Should add lightModeDefault to existing EMS_TMS source descriptors', () => {
     const layerListJSON = JSON.stringify([
       {
