@@ -288,11 +288,25 @@ describe('Reporting Config Schema', () => {
     `);
   });
 
-  it(`logs the proper validation messages`, () => {
-    // kibanaServer
-    const throwValidationErr = () => ConfigSchema.validate({ kibanaServer: { hostname: '0' } });
-    expect(throwValidationErr).toThrowError(
-      `[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`
-    );
-  });
+  for (const address of ['0', '0.0', '0.0.0']) {
+    it(`fails to validate "kibanaServer.hostname" with an invalid hostname: "${address}"`, () => {
+      expect(() =>
+        ConfigSchema.validate({
+          kibanaServer: { hostname: address },
+        })
+      ).toThrowError(`[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`);
+    });
+  }
+
+  for (const address of ['0.0.0.0', '0000:0000:0000:0000:0000:0000:0000:0000', '::']) {
+    it(`fails to validate "kibanaServer.hostname" hostname as zero: "${address}"`, () => {
+      expect(() =>
+        ConfigSchema.validate({
+          kibanaServer: { hostname: address },
+        })
+      ).toThrowError(
+        `[kibanaServer.hostname]: cannot use '0.0.0.0' as Kibana host name, consider using the default (localhost) instead`
+      );
+    });
+  }
 });
