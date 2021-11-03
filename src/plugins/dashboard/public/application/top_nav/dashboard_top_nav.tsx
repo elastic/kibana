@@ -64,11 +64,7 @@ export interface DashboardTopNavState {
 
 type CompleteDashboardAppState = Required<
   DashboardAppState,
-  | 'getLatestDashboardState'
-  | 'dashboardContainer'
-  | 'savedDashboard'
-  | 'indexPatterns'
-  | 'applyFilters'
+  'getLatestDashboardState' | 'dashboardContainer' | 'savedDashboard' | 'applyFilters'
 >;
 
 export const isCompleteDashboardAppState = (
@@ -78,7 +74,6 @@ export const isCompleteDashboardAppState = (
     Boolean(state.getLatestDashboardState) &&
     Boolean(state.dashboardContainer) &&
     Boolean(state.savedDashboard) &&
-    Boolean(state.indexPatterns) &&
     Boolean(state.applyFilters)
   );
 };
@@ -132,7 +127,7 @@ export function DashboardTopNav({
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
-    DashboardConstants.DASHBOARDS_ID
+    DashboardConstants.DASHBOARD_ID
   );
 
   useEffect(() => {
@@ -163,6 +158,7 @@ export function DashboardTopNav({
           notifications: core.notifications,
           overlays: core.overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
+          reportUiCounter: usageCollection?.reportUiCounter,
         }),
       }));
     }
@@ -174,6 +170,7 @@ export function DashboardTopNav({
     core.savedObjects,
     core.overlays,
     uiSettings,
+    usageCollection,
   ]);
 
   const createNewVisType = useCallback(
@@ -183,7 +180,7 @@ export function DashboardTopNav({
 
       if (visType) {
         if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+          trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
 
         if ('aliasPath' in visType) {
@@ -202,10 +199,11 @@ export function DashboardTopNav({
         path,
         state: {
           originatingApp: DashboardConstants.DASHBOARDS_ID,
+          searchSessionId: data.search.session.getSessionId(),
         },
       });
     },
-    [trackUiMetric, stateTransferService]
+    [stateTransferService, data.search.session, trackUiMetric]
   );
 
   const clearAddPanel = useCallback(() => {
@@ -406,17 +404,27 @@ export function DashboardTopNav({
     (anchorElement: HTMLElement) => {
       if (!share) return;
       const currentState = dashboardAppState.getLatestDashboardState();
+      const timeRange = timefilter.getTime();
       ShowShareModal({
         share,
+        timeRange,
         kibanaVersion,
         anchorElement,
         dashboardCapabilities,
+        dashboardSessionStorage,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
       });
     },
-    [dashboardAppState, dashboardCapabilities, share, kibanaVersion]
+    [
+      share,
+      timefilter,
+      kibanaVersion,
+      dashboardAppState,
+      dashboardCapabilities,
+      dashboardSessionStorage,
+    ]
   );
 
   const dashboardTopNavActions = useMemo(() => {
@@ -480,7 +488,7 @@ export function DashboardTopNav({
       dashboardAppState.getLatestDashboardState().viewMode,
       dashboardTopNavActions,
       {
-        hideWriteControls: dashboardCapabilities.hideWriteControls,
+        showWriteControls: dashboardCapabilities.showWriteControls,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
         isSaveInProgress: state.isSaveInProgress,
         isNewDashboard: !savedDashboard.id,
@@ -543,7 +551,6 @@ export function DashboardTopNav({
           createType: title,
           onClick: createNewVisType(visType as VisTypeAlias),
           'data-test-subj': `dashboardQuickButton${name}`,
-          isDarkModeEnabled: IS_DARK_THEME,
         };
       } else {
         const { name, icon, title, titleInWizard } = visType as BaseVisType;
@@ -553,7 +560,6 @@ export function DashboardTopNav({
           createType: titleInWizard || title,
           onClick: createNewVisType(visType as BaseVisType),
           'data-test-subj': `dashboardQuickButton${name}`,
-          isDarkModeEnabled: IS_DARK_THEME,
         };
       }
     }

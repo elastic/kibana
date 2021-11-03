@@ -7,16 +7,16 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_JAVA_HEAP_MEMORY_MAX,
   METRIC_JAVA_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_HEAP_MEMORY_USED,
   AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 const series = {
   heapMemoryUsed: {
@@ -58,29 +58,34 @@ export function getHeapMemoryChart({
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
-  environment?: string;
-  kuery?: string;
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  kuery: string;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
-  return withApmSpan('get_heap_memory_charts', () =>
-    fetchAndTransformMetrics({
-      environment,
-      kuery,
-      setup,
-      serviceName,
-      serviceNodeName,
-      chartBase,
-      aggs: {
-        heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },
-        heapMemoryCommitted: {
-          avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED },
-        },
-        heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } },
+  return fetchAndTransformMetrics({
+    environment,
+    kuery,
+    setup,
+    serviceName,
+    serviceNodeName,
+    start,
+    end,
+    chartBase,
+    aggs: {
+      heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },
+      heapMemoryCommitted: {
+        avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED },
       },
-      additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
-    })
-  );
+      heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } },
+    },
+    additionalFilters: [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }],
+    operationName: 'get_heap_memory_charts',
+  });
 }

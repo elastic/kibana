@@ -27,16 +27,16 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
-import { Loading } from '../../../../shared/loading';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { SourceIcon } from '../../../components/shared/source_icon';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { NAV } from '../../../constants';
 import { ContentSource } from '../../../types';
 import { GroupLogic } from '../group_logic';
 
 const HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerTitle',
   {
-    defaultMessage: 'Shared content source prioritization',
+    defaultMessage: 'Organizational content source prioritization',
   }
 );
 const HEADER_DESCRIPTION = i18n.translate(
@@ -54,7 +54,7 @@ const ZERO_STATE_TITLE = i18n.translate(
 const ZERO_STATE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.zeroStateButtonText',
   {
-    defaultMessage: 'Add shared content sources',
+    defaultMessage: 'Add organizational content sources',
   }
 );
 const SOURCE_TABLE_HEADER = i18n.translate(
@@ -71,18 +71,15 @@ const PRIORITY_TABLE_HEADER = i18n.translate(
 );
 
 export const GroupSourcePrioritization: React.FC = () => {
-  const { updatePriority, saveGroupSourcePrioritization, showSharedSourcesModal } = useActions(
-    GroupLogic
-  );
+  const { updatePriority, saveGroupSourcePrioritization, showOrgSourcesModal } =
+    useActions(GroupLogic);
 
   const {
-    group: { contentSources, name: groupName },
+    group: { contentSources = [], name: groupName },
     dataLoading,
     activeSourcePriorities,
     groupPrioritiesUnchanged,
   } = useValues(GroupLogic);
-
-  if (dataLoading) return <Loading />;
 
   const headerAction = (
     <EuiButton
@@ -120,7 +117,7 @@ export const GroupSourcePrioritization: React.FC = () => {
             )}
           </>
         }
-        actions={<EuiButton onClick={showSharedSourcesModal}>{ZERO_STATE_BUTTON_TEXT}</EuiButton>}
+        actions={<EuiButton onClick={showOrgSourcesModal}>{ZERO_STATE_BUTTON_TEXT}</EuiButton>}
       />
       <EuiSpacer size="xxl" />
     </EuiPanel>
@@ -167,13 +164,17 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader
-        title={HEADER_TITLE}
-        description={HEADER_DESCRIPTION}
-        action={headerAction}
-      />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS, groupName || '...', NAV.SOURCE_PRIORITIZATION]}
+      pageViewTelemetry="group_overview"
+      pageHeader={{
+        pageTitle: HEADER_TITLE,
+        description: HEADER_DESCRIPTION,
+        rightSideItems: [headerAction],
+      }}
+      isLoading={dataLoading}
+    >
       {hasSources ? sourceTable : zeroState}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

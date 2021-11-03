@@ -41,3 +41,5 @@ export type {
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from './update_objects_spaces';
+
+export { getIndexForType } from './get_index_for_type';

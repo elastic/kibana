@@ -24,7 +24,7 @@ import { EditFilterList } from '../../../settings/filter_lists';
 
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 enum MODE {
   NEW,
@@ -85,7 +85,7 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
 
-  const { context } = useResolver(undefined, undefined, deps.config, {
+  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
     checkFullLicense,
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),

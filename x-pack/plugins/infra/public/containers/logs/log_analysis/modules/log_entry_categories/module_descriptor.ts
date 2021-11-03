@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { HttpHandler } from 'src/core/public';
 import {
@@ -124,6 +124,7 @@ const setUpModule = async (
       jobOverrides,
       datafeedOverrides,
       query,
+      useDedicatedIndex: true,
     },
     fetch
   );

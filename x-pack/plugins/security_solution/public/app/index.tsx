@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Route, Switch } from 'react-router-dom';
 
+import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import { RenderAppProps } from './types';
 
@@ -15,13 +17,32 @@ export const renderApp = ({
   element,
   history,
   onAppLeave,
+  setHeaderActionMenu,
   services,
   store,
-  SubPluginRoutes,
+  usageCollection,
+  subPluginRoutes,
 }: RenderAppProps): (() => void) => {
+  const ApplicationUsageTrackingProvider =
+    usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   render(
-    <SecurityApp history={history} onAppLeave={onAppLeave} services={services} store={store}>
-      <SubPluginRoutes />
+    <SecurityApp
+      history={history}
+      onAppLeave={onAppLeave}
+      services={services}
+      setHeaderActionMenu={setHeaderActionMenu}
+      store={store}
+    >
+      <ApplicationUsageTrackingProvider>
+        <Switch>
+          {subPluginRoutes.map((route, index) => {
+            return <Route key={`route-${index}`} {...route} />;
+          })}
+          <Route>
+            <NotFoundPage />
+          </Route>
+        </Switch>
+      </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element
   );

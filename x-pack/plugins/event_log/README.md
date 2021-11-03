@@ -127,11 +127,15 @@ Below is a document in the expected structure, with descriptions of the fields:
   // Custom fields that are not part of ECS.
   kibana: {
     server_uuid: "UUID of kibana server, for diagnosing multi-Kibana scenarios",
+    task: {
+      scheduled: "ISO date of when the task for this event was supposed to start",
+      schedule_delay: "delay in nanoseconds between when this task was supposed to start and when it actually started",
+    },
     alerting: {
       instance_id: "alert instance id, for relevant documents",
       action_group_id: "alert action group, for relevant documents",
       action_subgroup: "alert action subgroup, for relevant documents",
-      status: "overall alert status, after alert execution",
+      status: "overall alert status, after rule  execution",
     },
     saved_objects: [
       {
@@ -141,6 +145,7 @@ Below is a document in the expected structure, with descriptions of the fields:
         type: " saved object type",
       },
     ],
+    version: "7.15.0"
   },
 }
 ```
@@ -160,21 +165,26 @@ plugins:
   - `action: execute-via-http` - generated when an action is executed via HTTP request
 
 - `provider: alerting`
-  - `action: execute` - generated when an alert executor runs
-  - `action: execute-action` - generated when an alert schedules an action to run
-  - `action: new-instance` - generated when an alert has a new instance id that is active
-  - `action: recovered-instance` - generated when an alert has a previously active instance id that is no longer active
-  - `action: active-instance` - generated when an alert determines an instance id is active
+  - `action: execute` - generated when a rule executor runs
+  - `action: execute-action` - generated when a rule schedules an action to run
+  - `action: new-instance` - generated when a rule has a new instance id that is active
+  - `action: recovered-instance` - generated when a rule has a previously active instance id that is no longer active
+  - `action: active-instance` - generated when a rule determines an instance id is active
 
 For the `saved_objects` array elements, these are references to saved objects
-associated with the event.  For the `alerting` provider, those are alert saved
-ojects and for the `actions` provider those are action saved objects.  The 
-`alerts:execute-action` event includes both the alert and action saved object
-references.  For that event, only the alert reference has the optional `rel`
+associated with the event.  For the `alerting` provider, those are rule saved
+ojects and for the `actions` provider those are connector saved objects.  The 
+`alerts:execute-action` event includes both the rule and connector saved object
+references.  For that event, only the rule reference has the optional `rel`
 property with a `primary` value.  This property is used when searching the
 event log to indicate which saved objects should be directly searchable via 
-saved object references.  For the `alerts:execute-action` event, searching 
-only via the alert saved object reference will return the event.
+saved object references.  For the `alerts:execute-action` event, only searching 
+via the rule saved object reference will return the event; searching via the
+connector save object reference will **NOT** return the event.  The 
+`actions:execute` event also includes both the rule and connector saved object
+references, and both of them have the `rel` property with a `primary` value,
+allowing those events to be returned in searches of either the rule or 
+connector.
 
 
 ## Event Log index - associated resources
@@ -194,7 +204,7 @@ For ad-hoc diagnostic purposes, your go to tools are Discover and Lens. Your
 user will need to have access to the index, which is considered a Kibana
 system index due to it's prefix.
 
-Add the event log index as an index pattern.  The only customization needed is
+Add the event log index as a data view.  The only customization needed is
 to set the `event.duration` field to a duration in nanoseconds.  You'll
 probably want it displayed as milliseconds.
 
@@ -261,6 +271,7 @@ Request Body:
 |Property|Description|Type|
 |---|---|---|
 |ids|The array ids of the saved object.|string array|
+|legacyIds|The array legacy ids of the saved object. This filter applies to the rules creted in Kibana versions before 8.0.0.|string array|
 
 Response body:
 
@@ -274,7 +285,8 @@ interface EventLogClient {
   findEventsBySavedObjectIds(
     type: string,
     ids: string[],
-    options?: Partial<FindOptionsType>
+    options?: Partial<FindOptionsType>,
+    legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
 }
 
@@ -394,7 +406,8 @@ export interface IEventLogClient {
   findEventsBySavedObjectIds(
     type: string,
     ids: string[],
-    options?: Partial<FindOptionsType>
+    options?: Partial<FindOptionsType>,
+    legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
 }
 ```
@@ -414,7 +427,7 @@ yarn test:jest x-pack/plugins/event_log --watch
 
 ### API Integration tests
 
-See: [`x-pack/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/master/x-pack/test/plugin_api_integration/test_suites/event_log).
+See: [`x-pack/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/main/x-pack/test/plugin_api_integration/test_suites/event_log).
 
 To develop integration tests, first start the test server from the root of the repo:
 

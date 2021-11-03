@@ -8,13 +8,14 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'src/core/server';
 
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
+
 import { isAgentUpgradeable } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { appContextService } from '../../services';
-import { esKuery } from '../../../../../../src/plugins/data/server';
-import type { KueryNode } from '../../../../../../src/plugins/data/server';
 
 import { savedObjectToAgent } from './saved_objects';
 
@@ -24,27 +25,31 @@ const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
 function _joinFilters(filters: Array<string | undefined | KueryNode>) {
   return filters
     .filter((filter) => filter !== undefined)
-    .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
-      | KueryNode
-      | undefined => {
-      if (kuery === undefined) {
-        return acc;
-      }
-      const kueryNode: KueryNode =
-        typeof kuery === 'string'
-          ? esKuery.fromKueryExpression(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery))
-          : kuery;
+    .reduce(
+      (
+        acc: KueryNode | undefined,
+        kuery: string | KueryNode | undefined
+      ): KueryNode | undefined => {
+        if (kuery === undefined) {
+          return acc;
+        }
+        const kueryNode: KueryNode =
+          typeof kuery === 'string'
+            ? fromKueryExpression(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery))
+            : kuery;
 
-      if (!acc) {
-        return kueryNode;
-      }
+        if (!acc) {
+          return kueryNode;
+        }
 
-      return {
-        type: 'function',
-        function: 'and',
-        arguments: [acc, kueryNode],
-      };
-    }, undefined as KueryNode | undefined);
+        return {
+          type: 'function',
+          function: 'and',
+          arguments: [acc, kueryNode],
+        };
+      },
+      undefined as KueryNode | undefined
+    );
 }
 
 export async function listAgents(

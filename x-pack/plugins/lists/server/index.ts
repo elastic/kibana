@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 
 import { ConfigSchema } from './config';
 import { ListPlugin } from './plugin';
@@ -18,7 +18,10 @@ export {
 } from './services/exception_lists/exception_list_client_types';
 export { ExceptionListClient } from './services/exception_lists/exception_list_client';
 export type { ListPluginSetup, ListsApiRequestHandlerContext } from './types';
+export type { ExportExceptionListAndItemsReturn } from './services/exception_lists/export_exception_list_and_items';
 
-export const config = { schema: ConfigSchema };
+export const config: PluginConfigDescriptor = {
+  schema: ConfigSchema,
+};
 export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
   new ListPlugin(initializerContext);

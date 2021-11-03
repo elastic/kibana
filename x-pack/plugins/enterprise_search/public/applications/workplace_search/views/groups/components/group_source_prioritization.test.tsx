@@ -14,13 +14,11 @@ import { shallow } from 'enzyme';
 
 import { EuiTable, EuiEmptyPrompt, EuiRange } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
-
 import { GroupSourcePrioritization } from './group_source_prioritization';
 
 const updatePriority = jest.fn();
 const saveGroupSourcePrioritization = jest.fn();
-const showSharedSourcesModal = jest.fn();
+const showOrgSourcesModal = jest.fn();
 
 const mockValues = {
   group: groups[0],
@@ -38,22 +36,24 @@ describe('GroupSourcePrioritization', () => {
     setMockActions({
       updatePriority,
       saveGroupSourcePrioritization,
-      showSharedSourcesModal,
+      showOrgSourcesModal,
     });
 
     setMockValues(mockValues);
   });
+
   it('renders', () => {
     const wrapper = shallow(<GroupSourcePrioritization />);
 
     expect(wrapper.find(EuiTable)).toHaveLength(1);
   });
 
-  it('returns loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
+  it('handles loading state fallbacks', () => {
+    setMockValues({ ...mockValues, group: {}, dataLoading: true });
     const wrapper = shallow(<GroupSourcePrioritization />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('isLoading')).toEqual(true);
+    expect(wrapper.prop('pageChrome')).toEqual(['Groups', '...', 'Source Prioritization']);
   });
 
   it('renders empty state', () => {

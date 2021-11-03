@@ -14,6 +14,7 @@ export interface SpanOptions {
   type?: string;
   subtype?: string;
   labels?: Record<string, string>;
+  intercept?: boolean;
 }
 
 type Span = Exclude<typeof agent.currentSpan, undefined | null>;
@@ -36,23 +37,27 @@ export async function withSpan<T>(
 ): Promise<T> {
   const options = parseSpanOptions(optionsOrName);
 
-  const { name, type, subtype, labels } = options;
+  const { name, type, subtype, labels, intercept } = options;
 
   if (!agent.isStarted()) {
     return cb();
   }
+
+  let createdSpan: Span | undefined;
 
   // When a span starts, it's marked as the active span in its context.
   // When it ends, it's not untracked, which means that if a span
   // starts directly after this one ends, the newly started span is a
   // child of this span, even though it should be a sibling.
   // To mitigate this, we queue a microtask by awaiting a promise.
-  await Promise.resolve();
+  if (!intercept) {
+    await Promise.resolve();
 
-  const span = agent.startSpan(name);
+    createdSpan = agent.startSpan(name) ?? undefined;
 
-  if (!span) {
-    return cb();
+    if (!createdSpan) {
+      return cb();
+    }
   }
 
   // If a span is created in the same context as the span that we just
@@ -61,33 +66,51 @@ export async function withSpan<T>(
   // mitigate this we create a new context.
 
   return runInNewContext(() => {
+    const promise = cb(createdSpan);
+
+    let span: Span | undefined = createdSpan;
+
+    if (intercept) {
+      span = agent.currentSpan ?? undefined;
+    }
+
+    if (!span) {
+      return promise;
+    }
+
+    const targetedSpan = span;
+
+    if (name) {
+      targetedSpan.name = name;
+    }
+
     // @ts-ignore
     if (type) {
-      span.type = type;
+      targetedSpan.type = type;
     }
     if (subtype) {
-      span.subtype = subtype;
+      targetedSpan.subtype = subtype;
     }
 
     if (labels) {
-      span.addLabels(labels);
+      targetedSpan.addLabels(labels);
     }
 
-    return cb(span)
+    return promise
       .then((res) => {
-        if (!span.outcome || span.outcome === 'unknown') {
-          span.outcome = 'success';
+        if (!targetedSpan.outcome || targetedSpan.outcome === 'unknown') {
+          targetedSpan.outcome = 'success';
         }
         return res;
       })
       .catch((err) => {
-        if (!span.outcome || span.outcome === 'unknown') {
-          span.outcome = 'failure';
+        if (!targetedSpan.outcome || targetedSpan.outcome === 'unknown') {
+          targetedSpan.outcome = 'failure';
         }
         throw err;
       })
       .finally(() => {
-        span.end();
+        targetedSpan.end();
       });
   });
 }

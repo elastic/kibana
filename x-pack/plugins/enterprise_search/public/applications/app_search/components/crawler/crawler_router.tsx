@@ -5,23 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { useActions } from 'kea';
 
-import { getEngineBreadcrumbs } from '../engine';
+import { ENGINE_CRAWLER_DOMAIN_PATH, ENGINE_CRAWLER_PATH } from '../../routes';
 
-import { CRAWLER_TITLE } from './constants';
-import { CrawlerLanding } from './crawler_landing';
+import { CrawlerLogic } from './crawler_logic';
+
 import { CrawlerOverview } from './crawler_overview';
+import { CrawlerSingleDomain } from './crawler_single_domain';
 
 export const CrawlerRouter: React.FC = () => {
+  const { fetchCrawlerData } = useActions(CrawlerLogic);
+
+  useEffect(() => {
+    fetchCrawlerData();
+  }, []);
+
   return (
     <Switch>
-      <Route>
-        <SetPageChrome trail={getEngineBreadcrumbs([CRAWLER_TITLE])} />
-        {process.env.NODE_ENV === 'development' ? <CrawlerOverview /> : <CrawlerLanding />}
+      <Route exact path={ENGINE_CRAWLER_PATH}>
+        <CrawlerOverview />
+      </Route>
+      <Route exact path={ENGINE_CRAWLER_DOMAIN_PATH}>
+        <CrawlerSingleDomain />
       </Route>
     </Switch>
   );

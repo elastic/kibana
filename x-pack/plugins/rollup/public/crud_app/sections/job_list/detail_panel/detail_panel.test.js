@@ -70,7 +70,7 @@ describe('<DetailPanel />', () => {
       ({ component, find, exists } = initTestBed({ isLoading: true }));
       const loading = find('rollupJobDetailLoading');
       expect(loading.length).toBeTruthy();
-      expect(loading.text()).toEqual('Loading rollup job...');
+      expect(loading.text()).toEqual('Loading rollup job…');
 
       // Make sure the title and the tabs are visible
       expect(exists('detailPanelTabSelected')).toBeTruthy();

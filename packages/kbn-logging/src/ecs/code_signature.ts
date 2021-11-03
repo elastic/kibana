@@ -7,15 +7,17 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-code_signature.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-code_signature.html
  *
  * @internal
  */
 export interface EcsCodeSignature {
+  digest_algorithm?: string;
   exists?: boolean;
   signing_id?: string;
   status?: string;
   subject_name?: string;
+  timestamp?: string;
   team_id?: string;
   trusted?: boolean;
   valid?: boolean;

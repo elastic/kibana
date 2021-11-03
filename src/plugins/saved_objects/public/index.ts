@@ -17,7 +17,12 @@ export {
   SaveResult,
   showSaveModal,
 } from './save_modal';
-export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
+export {
+  getSavedObjectFinder,
+  SavedObjectFinderUi,
+  SavedObjectFinderUiProps,
+  SavedObjectMetaData,
+} from './finder';
 export {
   SavedObjectLoader,
   SavedObjectLoaderFindOptions,

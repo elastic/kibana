@@ -17,31 +17,29 @@ interface UserActionAvatarProps {
   updatedAt?: string | null;
 }
 
-const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatarProps) => {
-  return (
-    <>
-      <LocalizedDateTooltip date={new Date(createdAt)}>
-        <FormattedRelative
-          data-test-subj="user-action-title-creation-relative-time"
-          value={createdAt}
-        />
-      </LocalizedDateTooltip>
-      {updatedAt && (
-        <EuiTextColor color="subdued">
-          {/* be careful of the extra space at the beginning of the parenthesis */}
-          {' ('}
-          {i18n.EDITED_FIELD}{' '}
-          <LocalizedDateTooltip date={new Date(updatedAt)}>
-            <FormattedRelative
-              data-test-subj="user-action-title-edited-relative-time"
-              value={updatedAt}
-            />
-          </LocalizedDateTooltip>
-          {')'}
-        </EuiTextColor>
-      )}
-    </>
-  );
-};
+const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatarProps) => (
+  <>
+    <LocalizedDateTooltip date={new Date(createdAt)}>
+      <FormattedRelative
+        data-test-subj="user-action-title-creation-relative-time"
+        value={createdAt}
+      />
+    </LocalizedDateTooltip>
+    {updatedAt && (
+      <EuiTextColor color="subdued">
+        {/* be careful of the extra space at the beginning of the parenthesis */}
+        {' ('}
+        {i18n.EDITED_FIELD}{' '}
+        <LocalizedDateTooltip date={new Date(updatedAt)}>
+          <FormattedRelative
+            data-test-subj="user-action-title-edited-relative-time"
+            value={updatedAt}
+          />
+        </LocalizedDateTooltip>
+        {')'}
+      </EuiTextColor>
+    )}
+  </>
+);
 
 export const UserActionTimestamp = memo(UserActionTimestampComponent);

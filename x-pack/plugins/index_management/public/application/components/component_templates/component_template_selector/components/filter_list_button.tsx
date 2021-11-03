@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFilterButton, EuiPopover, EuiFilterSelectItem } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiFilterSelectItem, EuiFilterGroup } from '@elastic/eui';
 
 interface Filter {
   name: string;
@@ -67,26 +67,28 @@ export function FilterListButton({ onChange, filters }: Props) {
   );
 
   return (
-    <EuiPopover
-      ownFocus
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      data-test-subj="filterList"
-    >
-      <div className="euiFilterSelect__items">
-        {Object.entries(filters).map(([filter, item], index) => (
-          <EuiFilterSelectItem
-            checked={(item as Filter).checked}
-            key={index}
-            onClick={() => toggleFilter(filter)}
-            data-test-subj="filterItem"
-          >
-            {(item as Filter).name}
-          </EuiFilterSelectItem>
-        ))}
-      </div>
-    </EuiPopover>
+    <EuiFilterGroup className="componentTemplates__filterListButton">
+      <EuiPopover
+        ownFocus
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        data-test-subj="filterList"
+      >
+        <div className="euiFilterSelect__items">
+          {Object.entries(filters).map(([filter, item], index) => (
+            <EuiFilterSelectItem
+              checked={(item as Filter).checked}
+              key={index}
+              onClick={() => toggleFilter(filter)}
+              data-test-subj="filterItem"
+            >
+              {(item as Filter).name}
+            </EuiFilterSelectItem>
+          ))}
+        </div>
+      </EuiPopover>
+    </EuiFilterGroup>
   );
 }

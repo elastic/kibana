@@ -14,11 +14,13 @@ import type { SavedObjectsFindResponse } from 'src/core/server';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import type { SessionsConfigSchema } from '../';
 import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
-import { mockUrls } from '../__mocks__';
+import { sharePluginMock } from '../../../../../../../src/plugins/share/public/mocks';
+import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 import { SearchSessionsMgmtAPI } from './api';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
+let mockShareStart: jest.Mocked<SharePluginStart>;
 let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 
@@ -26,6 +28,7 @@ describe('Search Sessions Management API', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockShareStart = sharePluginMock.createStartContract();
     mockConfig = {
       defaultExpiration: moment.duration('7d'),
       management: {
@@ -52,6 +55,7 @@ describe('Search Sessions Management API', () => {
                 status: 'complete',
                 initialState: {},
                 restoreState: {},
+                idMapping: [],
               },
             },
           ],
@@ -59,7 +63,7 @@ describe('Search Sessions Management API', () => {
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
+        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
@@ -78,10 +82,12 @@ describe('Search Sessions Management API', () => {
             "id": "hello-pizza-123",
             "initialState": Object {},
             "name": "Veggie",
-            "reloadUrl": "hello-cool-undefined-url",
+            "numSearches": 0,
+            "reloadUrl": undefined,
             "restoreState": Object {},
-            "restoreUrl": "hello-cool-undefined-url",
+            "restoreUrl": undefined,
             "status": "complete",
+            "version": undefined,
           },
         ]
       `);
@@ -100,6 +106,7 @@ describe('Search Sessions Management API', () => {
                 expires: moment().subtract(3, 'days'),
                 initialState: {},
                 restoreState: {},
+                idMapping: {},
               },
             },
           ],
@@ -107,7 +114,7 @@ describe('Search Sessions Management API', () => {
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
+        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
@@ -120,7 +127,7 @@ describe('Search Sessions Management API', () => {
       sessionsClient.find = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
+        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
@@ -149,7 +156,7 @@ describe('Search Sessions Management API', () => {
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
+        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
@@ -177,7 +184,7 @@ describe('Search Sessions Management API', () => {
 
     test('send cancel calls the cancel endpoint with a session ID', async () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
+        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
@@ -192,7 +199,7 @@ describe('Search Sessions Management API', () => {
       sessionsClient.delete = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
+        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
@@ -221,7 +228,7 @@ describe('Search Sessions Management API', () => {
 
     test('send extend throws an error for now', async () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
+        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
@@ -234,7 +241,7 @@ describe('Search Sessions Management API', () => {
     test('displays error on reject', async () => {
       sessionsClient.extend = jest.fn().mockRejectedValue({});
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
+        locators: mockShareStart.url.locators,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });

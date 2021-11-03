@@ -6,11 +6,15 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import { Geometry, Position } from 'geojson';
+import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
+import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
@@ -23,6 +27,9 @@ import {
   getLayerList,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getLayerById,
+  getEditState,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -42,26 +49,22 @@ import {
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
+  UPDATE_EDIT_STATE,
 } from './map_action_constants';
-import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
+import {
+  autoFitToBounds,
+  syncDataForAllLayers,
+  syncDataForLayerDueToDrawing,
+} from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
-import {
-  DrawState,
-  MapCenter,
-  MapCenterAndZoom,
-  MapExtent,
-  Timeslice,
-} from '../../common/descriptor_types';
+import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { scaleBounds } from '../../common/elasticsearch_util';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
-
-export interface MapExtentState {
-  zoom: number;
-  extent: MapExtent;
-  center: MapCenter;
-}
+import { updateTooltipStateForLayer } from './tooltip_actions';
+import { VectorLayer } from '../classes/layers/vector_layer';
+import { SET_DRAW_MODE } from './ui_actions';
+import { expandToTileBoundaries } from '../classes/util/geo_tile_utils';
+import { getToasts } from '../kibana_services';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -130,55 +133,50 @@ export function mapDestroyed() {
 }
 
 export function mapExtentChanged(mapExtentState: MapExtentState) {
-  return async (
+  return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const dataFilters = getDataFilters(getState());
-    const { extent, zoom: newZoom } = mapExtentState;
-    const { buffer, zoom: currentZoom } = dataFilters;
+    const { extent, zoom: nextZoom } = mapExtentState;
+    const { buffer: prevBuffer, zoom: prevZoom } = getDataFilters(getState());
 
-    if (extent) {
-      let doesBufferContainExtent = false;
-      if (buffer) {
-        const bufferGeometry = turfBboxPolygon([
-          buffer.minLon,
-          buffer.minLat,
-          buffer.maxLon,
-          buffer.maxLat,
-        ]);
-        const extentGeometry = turfBboxPolygon([
-          extent.minLon,
-          extent.minLat,
-          extent.maxLon,
-          extent.maxLat,
-        ]);
-
-        doesBufferContainExtent = turfBooleanContains(bufferGeometry, extentGeometry);
-      }
-
-      if (!doesBufferContainExtent || currentZoom !== newZoom) {
-        dataFilters.buffer = scaleBounds(extent, 0.5);
-      }
+    let doesPrevBufferContainNextExtent = true;
+    if (prevBuffer) {
+      const bufferGeometry = turfBboxPolygon([
+        prevBuffer.minLon,
+        prevBuffer.minLat,
+        prevBuffer.maxLon,
+        prevBuffer.maxLat,
+      ]);
+      const extentGeometry = turfBboxPolygon([
+        extent.minLon,
+        extent.minLat,
+        extent.maxLon,
+        extent.maxLat,
+      ]);
+      doesPrevBufferContainNextExtent = turfBooleanContains(bufferGeometry, extentGeometry);
     }
 
     dispatch({
       type: MAP_EXTENT_CHANGED,
-      mapState: {
-        ...dataFilters,
+      mapViewContext: {
         ...mapExtentState,
-      },
+        buffer:
+          !prevBuffer || !doesPrevBufferContainNextExtent || prevZoom !== nextZoom
+            ? expandToTileBoundaries(extent, Math.ceil(nextZoom))
+            : prevBuffer,
+      } as MapViewContext,
     });
 
-    if (currentZoom !== newZoom) {
+    if (prevZoom !== nextZoom) {
       getLayerList(getState()).map((layer) => {
-        if (!layer.showAtZoomLevel(newZoom)) {
-          dispatch(cleanTooltipStateForLayer(layer.getId()));
+        if (!layer.showAtZoomLevel(nextZoom)) {
+          dispatch(updateTooltipStateForLayer(layer));
         }
       });
     }
 
-    await dispatch(syncDataForAllLayers());
+    dispatch(syncDataForAllLayers(false));
   };
 }
 
@@ -218,10 +216,6 @@ export function clearGoto() {
   return { type: CLEAR_GOTO };
 }
 
-function generateQueryTimestamp() {
-  return new Date().toISOString();
-}
-
 export function setQuery({
   query,
   timeFilters,
@@ -246,11 +240,6 @@ export function setQuery({
     getState: () => MapStoreState
   ) => {
     const prevQuery = getQuery(getState());
-    const prevTriggeredAt =
-      prevQuery && prevQuery.queryLastTriggeredAt
-        ? prevQuery.queryLastTriggeredAt
-        : generateQueryTimestamp();
-
     const prevTimeFilters = getTimeFilters(getState());
 
     function getNextTimeslice() {
@@ -267,11 +256,7 @@ export function setQuery({
     const nextQueryContext = {
       timeFilters: timeFilters ? timeFilters : prevTimeFilters,
       timeslice: getNextTimeslice(),
-      query: {
-        ...(query ? query : prevQuery),
-        // ensure query changes to trigger re-fetch when "Refresh" clicked
-        queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
-      },
+      query: query ? query : prevQuery,
       filters: filters ? filters : getFilters(getState()),
       searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
@@ -286,7 +271,7 @@ export function setQuery({
       searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),
     };
 
-    if (_.isEqual(nextQueryContext, prevQueryContext)) {
+    if (!forceRefresh && _.isEqual(nextQueryContext, prevQueryContext)) {
       // do nothing if query context has not changed
       return;
     }
@@ -299,7 +284,7 @@ export function setQuery({
     if (getMapSettings(getState()).autoFitToDataBounds) {
       dispatch(autoFitToBounds());
     } else {
-      await dispatch(syncDataForAllLayers());
+      await dispatch(syncDataForAllLayers(forceRefresh));
     }
   };
 }
@@ -313,5 +298,105 @@ export function updateDrawState(drawState: DrawState | null) {
       type: UPDATE_DRAW_STATE,
       drawState,
     });
+  };
+}
+
+export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const editState = getEditState(getState());
+    if (!editState) {
+      return;
+    }
+    dispatch({
+      type: UPDATE_EDIT_STATE,
+      editState: {
+        ...editState,
+        drawShape: shapeToDraw,
+      },
+    });
+  };
+}
+
+export function setEditLayerToSelectedLayer() {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layerId = getSelectedLayerId(getState());
+    if (!layerId) {
+      return;
+    }
+    dispatch(updateEditLayer(layerId));
+  };
+}
+
+export function updateEditLayer(layerId: string | null) {
+  return (dispatch: Dispatch) => {
+    if (layerId !== null) {
+      dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
+    }
+    dispatch({
+      type: SET_DRAW_MODE,
+      drawMode: DRAW_MODE.NONE,
+    });
+    dispatch({
+      type: UPDATE_EDIT_STATE,
+      editState: layerId ? { layerId } : undefined,
+    });
+  };
+}
+
+export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const editState = getEditState(getState());
+    const layerId = editState ? editState.layerId : undefined;
+    if (!layerId) {
+      return;
+    }
+    const layer = getLayerById(layerId, getState());
+    if (!layer || !(layer instanceof VectorLayer)) {
+      return;
+    }
+
+    try {
+      await layer.addFeature(geometry);
+      await dispatch(syncDataForLayerDueToDrawing(layer));
+    } catch (e) {
+      getToasts().addError(e, {
+        title: i18n.translate('xpack.maps.mapActions.addFeatureError', {
+          defaultMessage: `Unable to add feature to index.`,
+        }),
+      });
+    }
+  };
+}
+
+export function deleteFeatureFromIndex(featureId: string) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const editState = getEditState(getState());
+    const layerId = editState ? editState.layerId : undefined;
+    if (!layerId) {
+      return;
+    }
+    const layer = getLayerById(layerId, getState());
+    if (!layer || !(layer instanceof VectorLayer)) {
+      return;
+    }
+    try {
+      await layer.deleteFeature(featureId);
+      await dispatch(syncDataForLayerDueToDrawing(layer));
+    } catch (e) {
+      getToasts().addError(e, {
+        title: i18n.translate('xpack.maps.mapActions.removeFeatureError', {
+          defaultMessage: `Unable to remove feature from index.`,
+        }),
+      });
+    }
   };
 }

@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { NameList } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IAggConfigs } from 'src/plugins/data/public';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
-import { IndexPattern } from '../../index_patterns';
+import { IndexPattern } from '../..';
 import { SearchSource } from './search_source';
 
 /**
@@ -90,7 +89,7 @@ export interface SearchSourceFields {
   aggs?: object | IAggConfigs | (() => object);
   from?: number;
   size?: number;
-  source?: NameList;
+  source?: boolean | estypes.Fields;
   version?: boolean;
   /**
    * Retrieve fields via the search Fields API
@@ -101,7 +100,7 @@ export interface SearchSourceFields {
    *
    * @deprecated It is recommended to use `fields` wherever possible.
    */
-  fieldsFromSource?: NameList;
+  fieldsFromSource?: estypes.Fields;
   /**
    * {@link IndexPatternService}
    */

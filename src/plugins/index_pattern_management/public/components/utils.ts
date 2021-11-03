@@ -7,35 +7,48 @@
  */
 
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { IndexPatternManagementStart } from '../plugin';
+import { IFieldType, IndexPattern, IndexPatternListItem } from 'src/plugins/data/public';
+import { i18n } from '@kbn/i18n';
+
+const defaultIndexPatternListName = i18n.translate(
+  'indexPatternManagement.editIndexPattern.list.defaultIndexPatternListName',
+  {
+    defaultMessage: 'Default',
+  }
+);
+
+const rollupIndexPatternListName = i18n.translate(
+  'indexPatternManagement.editIndexPattern.list.rollupIndexPatternListName',
+  {
+    defaultMessage: 'Rollup',
+  }
+);
+
+const isRollup = (indexPatternType: string = '') => {
+  return indexPatternType === 'rollup';
+};
 
 export async function getIndexPatterns(
   defaultIndex: string,
-  indexPatternManagementStart: IndexPatternManagementStart,
   indexPatternsService: IndexPatternsContract
 ) {
   const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
-  const indexPatternsListItems = await Promise.all(
-    existingIndexPatterns.map(async ({ id, title }) => {
-      const isDefault = defaultIndex === id;
-      const pattern = await indexPatternsService.get(id);
-      const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
-        pattern,
-        isDefault
-      );
+  const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
+    const { id, title } = idxPattern;
+    const isDefault = defaultIndex === id;
+    const tags = getTags(idxPattern, isDefault);
 
-      return {
-        id,
-        title,
-        default: isDefault,
-        tags,
-        // the prepending of 0 at the default pattern takes care of prioritization
-        // so the sorting will but the default index on top
-        // or on bottom of a the table
-        sort: `${isDefault ? '0' : '1'}${title}`,
-      };
-    })
-  );
+    return {
+      id,
+      title,
+      default: isDefault,
+      tags,
+      // the prepending of 0 at the default pattern takes care of prioritization
+      // so the sorting will but the default index on top
+      // or on bottom of a the table
+      sort: `${isDefault ? '0' : '1'}${title}`,
+    };
+  });
 
   return (
     indexPatternsListItems.sort((a, b) => {
@@ -49,3 +62,82 @@ export async function getIndexPatterns(
     }) || []
   );
 }
+
+export const getTags = (indexPattern: IndexPatternListItem | IndexPattern, isDefault: boolean) => {
+  const tags = [];
+  if (isDefault) {
+    tags.push({
+      key: 'default',
+      name: defaultIndexPatternListName,
+    });
+  }
+  if (isRollup(indexPattern.type)) {
+    tags.push({
+      key: 'rollup',
+      name: rollupIndexPatternListName,
+    });
+  }
+  return tags;
+};
+
+export const areScriptedFieldsEnabled = (indexPattern: IndexPatternListItem | IndexPattern) => {
+  return !isRollup(indexPattern.type);
+};
+
+export const getFieldInfo = (
+  indexPattern: IndexPatternListItem | IndexPattern,
+  field: IFieldType
+) => {
+  if (!isRollup(indexPattern.type)) {
+    return [];
+  }
+
+  const allAggs = indexPattern.typeMeta?.aggs;
+  const fieldAggs: string[] | undefined =
+    allAggs && Object.keys(allAggs).filter((agg) => allAggs[agg][field.name]);
+
+  if (!fieldAggs || !fieldAggs.length) {
+    return [];
+  }
+
+  return ['Rollup aggregations:'].concat(
+    fieldAggs.map((aggName) => {
+      const agg = allAggs![aggName][field.name];
+      switch (aggName) {
+        case 'date_histogram':
+          return i18n.translate(
+            'indexPatternManagement.editIndexPattern.list.dateHistogramSummary',
+            {
+              defaultMessage: '{aggName} (interval: {interval}, {delay} {time_zone})',
+              values: {
+                aggName,
+                interval: agg.fixed_interval,
+                delay: agg.delay
+                  ? i18n.translate(
+                      'indexPatternManagement.editIndexPattern.list.DateHistogramDelaySummary',
+                      {
+                        defaultMessage: 'delay: {delay},',
+                        values: {
+                          delay: agg.delay,
+                        },
+                      }
+                    )
+                  : '',
+                time_zone: agg.time_zone,
+              },
+            }
+          );
+        case 'histogram':
+          return i18n.translate('indexPatternManagement.editIndexPattern.list.histogramSummary', {
+            defaultMessage: '{aggName} (interval: {interval})',
+            values: {
+              aggName,
+              interval: agg.interval,
+            },
+          });
+        default:
+          return aggName;
+      }
+    })
+  );
+};

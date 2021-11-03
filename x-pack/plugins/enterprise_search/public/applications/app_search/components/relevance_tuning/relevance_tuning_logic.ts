@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
 import {
-  setSuccessMessage,
+  flashSuccessToast,
   flashAPIErrors,
   clearFlashMessages,
 } from '../../../shared/flash_messages';
@@ -24,6 +24,7 @@ import {
   RESET_CONFIRMATION_MESSAGE,
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
+  SUCCESS_CHANGES_MESSAGE,
   BOOST_TYPE_TO_EMPTY_BOOST,
 } from './constants';
 import { Boost, BoostFunction, BoostOperation, BoostType, SearchSettings } from './types';
@@ -87,7 +88,7 @@ interface RelevanceTuningActions {
     optionType: keyof Pick<Boost, 'operation' | 'function'>;
     value: string;
   };
-  updateSearchValue(query: string): string;
+  setPrecision(precision: number): { precision: number };
 }
 
 interface RelevanceTuningValues {
@@ -142,18 +143,23 @@ export const RelevanceTuningLogic = kea<
       optionType,
       value,
     }),
-    updateSearchValue: (query) => query,
+    setPrecision: (precision) => ({ precision }),
   }),
   reducers: () => ({
     searchSettings: [
       {
         search_fields: {},
         boosts: {},
+        precision: 2,
       },
       {
         onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
         setSearchSettings: (_, { searchSettings }) => searchSettings,
         setSearchSettingsResponse: (_, { searchSettings }) => searchSettings,
+        setPrecision: (currentSearchSettings, { precision }) => ({
+          ...currentSearchSettings,
+          precision,
+        }),
       },
     ],
     schema: [
@@ -183,6 +189,7 @@ export const RelevanceTuningLogic = kea<
     unsavedChanges: [
       false,
       {
+        setPrecision: () => true,
         setSearchSettings: () => true,
         setSearchSettingsResponse: () => false,
       },
@@ -236,10 +243,10 @@ export const RelevanceTuningLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/search_settings/details`;
+      const url = `/internal/app_search/engines/${engineName}/search_settings/details`;
 
       try {
-        const response = await http.get(url);
+        const response = await http.get<RelevanceTuningProps>(url);
         actions.onInitializeRelevanceTuning({
           ...response,
           searchSettings: {
@@ -259,21 +266,26 @@ export const RelevanceTuningLogic = kea<
 
       const { engineName } = EngineLogic.values;
       const { http } = HttpLogic.values;
-      const { search_fields: searchFields, boosts } = removeBoostStateProps(values.searchSettings);
-      const url = `/api/app_search/engines/${engineName}/search_settings_search`;
+      const {
+        search_fields: searchFields,
+        boosts,
+        precision,
+      } = removeBoostStateProps(values.searchSettings);
+      const url = `/internal/app_search/engines/${engineName}/search`;
 
       actions.setResultsLoading(true);
 
       const filteredBoosts = removeEmptyValueBoosts(boosts);
 
       try {
-        const response = await http.post(url, {
+        const response = await http.post<{ results: Result[] }>(url, {
           query: {
             query,
           },
           body: JSON.stringify({
             boosts: isEmpty(filteredBoosts) ? undefined : filteredBoosts,
             search_fields: isEmpty(searchFields) ? undefined : searchFields,
+            precision,
           }),
         });
 
@@ -298,13 +310,13 @@ export const RelevanceTuningLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/search_settings`;
+      const url = `/internal/app_search/engines/${engineName}/search_settings`;
 
       try {
-        const response = await http.put(url, {
+        const response = await http.put<SearchSettings>(url, {
           body: JSON.stringify(removeBoostStateProps(values.searchSettings)),
         });
-        setSuccessMessage(UPDATE_SUCCESS_MESSAGE);
+        flashSuccessToast(UPDATE_SUCCESS_MESSAGE, { text: SUCCESS_CHANGES_MESSAGE });
         actions.onSearchSettingsSuccess(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -322,11 +334,11 @@ export const RelevanceTuningLogic = kea<
         const { http } = HttpLogic.values;
         const { engineName } = EngineLogic.values;
 
-        const url = `/api/app_search/engines/${engineName}/search_settings/reset`;
+        const url = `/internal/app_search/engines/${engineName}/search_settings/reset`;
 
         try {
-          const response = await http.post(url);
-          setSuccessMessage(DELETE_SUCCESS_MESSAGE);
+          const response = await http.post<SearchSettings>(url);
+          flashSuccessToast(DELETE_SUCCESS_MESSAGE, { text: SUCCESS_CHANGES_MESSAGE });
           actions.onSearchSettingsSuccess(response);
         } catch (e) {
           flashAPIErrors(e);
@@ -463,8 +475,10 @@ export const RelevanceTuningLogic = kea<
         },
       });
     },
-    updateSearchValue: (query) => {
-      actions.setSearchQuery(query);
+    setSearchQuery: () => {
+      actions.getSearchResults();
+    },
+    setPrecision: () => {
       actions.getSearchResults();
     },
   }),

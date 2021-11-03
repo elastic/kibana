@@ -8,36 +8,30 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 
 import { timelineActions } from '../../../store/timeline';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
-const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
+jest.mock('../../../../common/lib/kibana');
+
+jest.mock('../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+  useDeepEqualSelector: jest.fn(),
+}));
 
 describe('Providers', () => {
-  const isLoading: boolean = true;
   const mount = useMountAppended();
-  const filterManager = new FilterManager(mockUiSettingsForFilterManager);
   const mockOnDataProviderRemoved = jest.spyOn(timelineActions, 'removeProvider');
-
-  const manageTimelineForTesting = {
-    test: {
-      ...getTimelineDefaults('test'),
-      filterManager,
-      isLoading,
-    },
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: false });
   });
 
   describe('rendering', () => {
@@ -82,13 +76,12 @@ describe('Providers', () => {
     });
 
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when the close button is clicked', () => {
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: true });
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -120,13 +113,12 @@ describe('Providers', () => {
     });
 
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: true });
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
       wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
@@ -172,17 +164,16 @@ describe('Providers', () => {
     });
 
     test('while loading data, it does NOT invoke the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: true });
       const mockOnToggleDataProviderEnabled = jest.spyOn(
         timelineActions,
         'updateDataProviderEnabled'
       );
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -231,6 +222,7 @@ describe('Providers', () => {
     });
 
     test('while loading data, it does NOT invoke the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: true });
       const mockOnToggleDataProviderExcluded = jest.spyOn(
         timelineActions,
         'updateDataProviderExcluded'
@@ -238,11 +230,9 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -311,16 +301,15 @@ describe('Providers', () => {
     });
 
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when you click on the close button is clicked', () => {
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: true });
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
 
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={mockDataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -375,6 +364,7 @@ describe('Providers', () => {
     });
 
     test('while loading data, it does NOT invoke the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: true });
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnToggleDataProviderEnabled = jest.spyOn(
@@ -384,11 +374,9 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 
@@ -448,6 +436,7 @@ describe('Providers', () => {
     });
 
     test('while loading data, it does NOT invoke the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: true });
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnToggleDataProviderExcluded = jest.spyOn(
@@ -457,11 +446,9 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
-            </DroppableWrapper>
-          </ManageGlobalTimeline>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers browserFields={{}} dataProviders={dataProviders} timelineId="test" />
+          </DroppableWrapper>
         </TestProviders>
       );
 

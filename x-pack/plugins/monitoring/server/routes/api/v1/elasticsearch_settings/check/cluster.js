@@ -23,6 +23,7 @@ export function clusterSettingsCheckRoute(server) {
         const response = await checkClusterSettings(req); // needs to be try/catch to handle privilege error
         return response;
       } catch (err) {
+        console.log(err);
         throw handleSettingsError(err);
       }
     },

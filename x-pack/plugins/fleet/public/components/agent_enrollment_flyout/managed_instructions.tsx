@@ -11,15 +11,17 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } from '../../hooks';
+import { useGetOneEnrollmentAPIKey, useLink, useFleetStatus } from '../../hooks';
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
-  FleetServerRequirementPage,
+  deploymentModeStep,
   ServiceTokenStep,
   FleetServerCommandStep,
   useFleetServerInstructions,
-} from '../../applications/fleet/sections/agents/agent_requirements_page';
+  addFleetServerHostStep,
+} from '../../applications/fleet/sections/agents/agent_requirements_page/components';
+import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
 import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { BaseProps } from './types';
@@ -36,7 +38,7 @@ const DefaultMissingRequirements = () => {
         defaultMessage="Before enrolling agents, {link}."
         values={{
           link: (
-            <EuiLink href={getHref('fleet')}>
+            <EuiLink href={getHref('overview')}>
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.setUpAgentsLink"
                 defaultMessage="set up central management for Elastic Agents"
@@ -53,67 +55,93 @@ const FleetServerMissingRequirements = () => {
   return <FleetServerRequirementPage />;
 };
 
-export const ManagedInstructions = React.memo<Props>(({ agentPolicy, agentPolicies }) => {
-  const fleetStatus = useFleetStatus();
-
-  const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-  const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
-
-  const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
-  const settings = useGetSettings();
-  const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
-
-  const steps = useMemo(() => {
-    const {
-      serviceToken,
-      getServiceToken,
-      isLoadingServiceToken,
-      installCommand,
-      platform,
-      setPlatform,
-    } = fleetServerInstructions;
-    const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
-    const baseSteps: EuiContainedStepProps[] = [
-      DownloadStep(),
-      !agentPolicy
-        ? AgentPolicySelectionStep({
-            agentPolicies,
-            setSelectedAPIKeyId,
-            setIsFleetServerPolicySelected,
-          })
-        : AgentEnrollmentKeySelectionStep({ agentPolicy, setSelectedAPIKeyId }),
-    ];
-    if (isFleetServerPolicySelected) {
-      baseSteps.push(
-        ...[
-          ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
-          FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
-        ]
-      );
-    } else {
-      baseSteps.push({
-        title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
-          defaultMessage: 'Enroll and start the Elastic Agent',
-        }),
-        children: selectedAPIKeyId && apiKey.data && (
-          <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
-        ),
-      });
-    }
-    return baseSteps;
-  }, [
+export const ManagedInstructions = React.memo<Props>(
+  ({
     agentPolicy,
     agentPolicies,
-    selectedAPIKeyId,
-    apiKey.data,
+    viewDataStep,
+    setSelectedPolicyId,
     isFleetServerPolicySelected,
-    settings.data?.item?.fleet_server_hosts,
-    fleetServerInstructions,
-  ]);
+    settings,
+  }) => {
+    const fleetStatus = useFleetStatus();
 
-  return (
-    <>
-      {fleetStatus.isReady ? (
+    const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
+
+    const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
+    const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
+
+    const fleetServerSteps = useMemo(() => {
+      const {
+        serviceToken,
+        getServiceToken,
+        isLoadingServiceToken,
+        installCommand,
+        platform,
+        setPlatform,
+        deploymentMode,
+        setDeploymentMode,
+        addFleetServerHost,
+      } = fleetServerInstructions;
+
+      return [
+        deploymentModeStep({ deploymentMode, setDeploymentMode }),
+        addFleetServerHostStep({ addFleetServerHost }),
+        ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
+        FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
+      ];
+    }, [fleetServerInstructions]);
+
+    const steps = useMemo(() => {
+      const fleetServerHosts = settings?.fleet_server_hosts || [];
+      const baseSteps: EuiContainedStepProps[] = [
+        DownloadStep(),
+        !agentPolicy
+          ? AgentPolicySelectionStep({
+              agentPolicies,
+              selectedApiKeyId,
+              setSelectedAPIKeyId,
+              setSelectedPolicyId,
+            })
+          : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
+      ];
+      if (isFleetServerPolicySelected) {
+        baseSteps.push(...fleetServerSteps);
+      } else {
+        baseSteps.push({
+          title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
+            defaultMessage: 'Enroll and start the Elastic Agent',
+          }),
+          children: selectedApiKeyId && apiKey.data && (
+            <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
+          ),
+        });
+      }
+
+      if (viewDataStep) {
+        baseSteps.push({ 'data-test-subj': 'view-data-step', ...viewDataStep });
+      }
+
+      return baseSteps;
+    }, [
+      agentPolicy,
+      selectedApiKeyId,
+      setSelectedPolicyId,
+      setSelectedAPIKeyId,
+      agentPolicies,
+      apiKey.data,
+      fleetServerSteps,
+      isFleetServerPolicySelected,
+      settings?.fleet_server_hosts,
+      viewDataStep,
+    ]);
+
+    if (fleetStatus.isReady && settings?.fleet_server_hosts.length === 0) {
+      return null;
+    }
+
+    if (fleetStatus.isReady) {
+      return (
         <>
           <EuiText>
             <FormattedMessage
@@ -124,12 +152,18 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicy, agentPolici
           <EuiSpacer size="l" />
           <EuiSteps steps={steps} />
         </>
-      ) : fleetStatus.missingRequirements?.length === 1 &&
+      );
+    }
+
+    return (
+      <>
+        {fleetStatus.missingRequirements?.length === 1 &&
         fleetStatus.missingRequirements[0] === 'fleet_server' ? (
-        <FleetServerMissingRequirements />
-      ) : (
-        <DefaultMissingRequirements />
-      )}
-    </>
-  );
-});
+          <FleetServerMissingRequirements />
+        ) : (
+          <DefaultMissingRequirements />
+        )}
+      </>
+    );
+  }
+);

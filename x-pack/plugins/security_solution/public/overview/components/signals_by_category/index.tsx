@@ -7,43 +7,49 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { Filter, Query } from '@kbn/es-query';
 
-import { AlertsHistogramPanel } from '../../../detections/components/alerts_histogram_panel';
-import { alertsHistogramOptions } from '../../../detections/components/alerts_histogram_panel/config';
+import { AlertsHistogramPanel } from '../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import * as i18n from '../../pages/translations';
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
-interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import { UpdateDateRange } from '../../../common/components/charts/common';
+
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
+
+import * as i18n from '../../pages/translations';
+
+import { useFiltersForSignalsByCategory } from './use_filters_for_signals_by_category';
+
+interface Props {
   combinedQueries?: string;
-  filters?: Filter[];
+  filters: Filter[];
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
-  onlyField?: string;
+  onlyField?: AlertsStackByField;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
+  showLegend?: boolean;
   timelineId?: string;
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
   combinedQueries,
-  deleteQuery,
   filters,
-  from,
   headerChildren,
   onlyField,
+  paddingSize,
   query,
+  showLegend,
   setAbsoluteRangeDatePickerTarget = 'global',
-  setQuery,
   timelineId,
-  to,
 }) => {
   const dispatch = useDispatch();
   const { signalIndexName } = useSignalIndex();
+  const filtersForSignalsByCategory = useFiltersForSignalsByCategory(filters);
+
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
@@ -64,21 +70,20 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   return (
     <AlertsHistogramPanel
       combinedQueries={combinedQueries}
-      deleteQuery={deleteQuery}
-      filters={filters}
-      from={from}
+      filters={filtersForSignalsByCategory}
       headerChildren={headerChildren}
-      onlyField={onlyField}
-      query={query}
-      signalIndexName={signalIndexName}
-      setQuery={setQuery}
-      showTotalAlertsCount={true}
-      showLinkToAlerts={onlyField == null ? true : false}
-      stackByOptions={onlyField == null ? alertsHistogramOptions : undefined}
       legendPosition={'right'}
+      onlyField={onlyField}
+      paddingSize={paddingSize}
+      query={query}
+      showLegend={showLegend}
+      showLinkToAlerts={onlyField == null ? true : false}
+      showStackBy={onlyField == null}
+      showTotalAlertsCount={true}
+      signalIndexName={signalIndexName}
       timelineId={timelineId}
-      to={to}
       title={i18n.ALERT_COUNT}
+      titleSize={onlyField == null ? 'm' : 's'}
       updateDateRange={updateDateRangeCallback}
     />
   );

@@ -9,7 +9,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieVisualizationState } from './types';
+import type { PieVisualizationState } from '../../common/expressions';
 
 export function toExpression(
   state: PieVisualizationState,
@@ -56,6 +56,8 @@ function expressionHelper(
           legendDisplay: [layer.legendDisplay],
           legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
+          legendMaxLines: [layer.legendMaxLines ?? 1],
+          truncateLegend: [layer.truncateLegend ?? true],
           nestedLegend: [!!layer.nestedLegend],
           ...(state.palette
             ? {

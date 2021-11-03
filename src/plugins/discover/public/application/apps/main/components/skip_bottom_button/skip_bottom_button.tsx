@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import './skip_bottom_button.scss';
 import { EuiSkipLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -25,7 +26,7 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
         // prevent the anchor to reload the page on click
         event.preventDefault();
         // The destinationId prop cannot be leveraged here as the table needs
-        // to be updated first (angular logic)
+        // to be updated firsts
         onClick();
       }}
       className="dscSkipButton"

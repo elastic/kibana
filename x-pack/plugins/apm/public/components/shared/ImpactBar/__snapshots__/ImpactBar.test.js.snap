@@ -4,7 +4,12 @@ exports[`ImpactBar component should render with default values 1`] = `
 <EuiProgress
   color="primary"
   max={100}
-  size="l"
+  size="m"
+  style={
+    Object {
+      "width": "96px",
+    }
+  }
   value={25}
 />
 `;
@@ -14,6 +19,11 @@ exports[`ImpactBar component should render with overridden values 1`] = `
   color="danger"
   max={5}
   size="s"
+  style={
+    Object {
+      "width": "96px",
+    }
+  }
   value={2}
 />
 `;

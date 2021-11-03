@@ -1,5 +1,9 @@
 {
   "id": "metricsEntities",
+  "owner": {
+    "name": "Security solution",
+    "githubTeam": "security-solution"
+  },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "metricsEntities"],

@@ -174,6 +174,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     timestampOverride: timestampOverride ?? '',
     name,
     description,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     note: note!,
     references,
     severity: {
@@ -378,31 +379,29 @@ export const getActionMessageRuleParams = (ruleType: Type): string[] => {
   return ruleParamsKeys;
 };
 
-export const getActionMessageParams = memoizeOne(
-  (ruleType: Type | undefined): ActionVariables => {
-    if (!ruleType) {
-      return { state: [], params: [] };
-    }
-    const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
-    // Prefixes are being added automatically by the ActionTypeForm
-    return {
-      state: [{ name: 'signals_count', description: 'state.signals_count' }],
-      params: [],
-      context: [
-        {
-          name: 'results_link',
-          description: 'context.results_link',
-          useWithTripleBracesInTemplates: true,
-        },
-        { name: 'alerts', description: 'context.alerts' },
-        ...actionMessageRuleParams.map((param) => {
-          const extendedParam = `rule.${param}`;
-          return { name: extendedParam, description: `context.${extendedParam}` };
-        }),
-      ],
-    };
+export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariables => {
+  if (!ruleType) {
+    return { state: [], params: [] };
   }
-);
+  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+  // Prefixes are being added automatically by the ActionTypeForm
+  return {
+    state: [{ name: 'signals_count', description: 'state.signals_count' }],
+    params: [],
+    context: [
+      {
+        name: 'results_link',
+        description: 'context.results_link',
+        useWithTripleBracesInTemplates: true,
+      },
+      { name: 'alerts', description: 'context.alerts' },
+      ...actionMessageRuleParams.map((param) => {
+        const extendedParam = `rule.${param}`;
+        return { name: extendedParam, description: `context.${extendedParam}` };
+      }),
+    ],
+  };
+});
 
 // typed as null not undefined as the initial state for this value is null.
 export const userHasPermissions = (canUserCRUD: boolean | null): boolean =>

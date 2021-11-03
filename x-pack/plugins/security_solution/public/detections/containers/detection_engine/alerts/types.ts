@@ -48,7 +48,7 @@ export interface AlertsIndex {
   index_mapping_outdated: boolean;
 }
 
-export type CasesFromAlertsResponse = string[];
+export type CasesFromAlertsResponse = Array<{ id: string; title: string }>;
 
 export interface Privilege {
   username: string;

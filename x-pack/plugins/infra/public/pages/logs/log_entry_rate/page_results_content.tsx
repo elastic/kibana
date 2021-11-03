@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import React, { useCallback, useMemo } from 'react';
 import { encode, RisonValue } from 'rison-node';
 import type { Query } from '../../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
-import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
   CategoryJobNoticesSection,
@@ -32,6 +30,10 @@ import { AnomaliesResults } from './sections/anomalies';
 import { useDatasetFiltering } from './use_dataset_filtering';
 import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
 import { useLogAnalysisResultsUrlState } from './use_log_entry_rate_results_url_state';
+import { isJobStatusWithResults } from '../../../../common/log_analysis';
+import { LogsPageTemplate } from '../page_template';
+import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -42,12 +44,15 @@ export const PAGINATION_DEFAULTS = {
   pageSize: 25,
 };
 
-export const LogEntryRateResultsContent: React.FunctionComponent = () => {
+export const LogEntryRateResultsContent: React.FunctionComponent<{
+  pageTitle: string;
+}> = ({ pageTitle }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
+
   const navigateToApp = useKibana().services.application?.navigateToApp;
 
-  const { sourceId } = useLogSourceContext();
+  const { sourceId, sourceStatus } = useLogSourceContext();
 
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
@@ -157,12 +162,14 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
   const { showModuleList, showModuleSetup } = useLogAnalysisSetupFlyoutStateContext();
 
-  const showLogEntryRateSetup = useCallback(() => showModuleSetup('logs_ui_analysis'), [
-    showModuleSetup,
-  ]);
-  const showLogEntryCategoriesSetup = useCallback(() => showModuleSetup('logs_ui_categories'), [
-    showModuleSetup,
-  ]);
+  const showLogEntryRateSetup = useCallback(
+    () => showModuleSetup('logs_ui_analysis'),
+    [showModuleSetup]
+  );
+  const showLogEntryCategoriesSetup = useCallback(
+    () => showModuleSetup('logs_ui_categories'),
+    [showModuleSetup]
+  );
 
   const hasAnomalyResults = logEntryAnomalies.length > 0;
 
@@ -188,76 +195,78 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   );
 
   return (
-    <>
-      <ResultsContentPage>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <DatasetsSelector
-                  availableDatasets={datasets}
-                  isLoading={isLoadingDatasets}
-                  selectedDatasets={selectedDatasets}
-                  onChangeDatasetSelection={setSelectedDatasets}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
-                  start={friendlyTimeRange.startTime}
-                  end={friendlyTimeRange.endTime}
-                  onTimeChange={handleSelectedTimeRangeChange}
-                  isPaused={autoRefresh.isPaused}
-                  refreshInterval={autoRefresh.interval}
-                  onRefreshChange={handleAutoRefreshChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <LogAnalysisJobProblemIndicator
-              hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
-              hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
-              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              hasStoppedJobs={hasStoppedLogEntryRateJobs}
-              isFirstUse={false /* the first use message is already shown by the section below */}
-              moduleName={logEntryRateModuleDescriptor.moduleName}
-              onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
-              onRecreateMlJobForUpdate={showLogEntryRateSetup}
-            />
-            <CategoryJobNoticesSection
-              hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
-              hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
-              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
-              isFirstUse={isFirstUse}
-              moduleName={logEntryCategoriesModuleDescriptor.moduleName}
-              onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
-              onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
-              qualityWarnings={categoryQualityWarnings}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="m">
-              <AnomaliesResults
-                isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
-                onViewModuleList={showModuleList}
-                anomalies={logEntryAnomalies}
-                timeRange={timeRange.value}
-                page={page}
-                fetchNextPage={fetchNextPage}
-                fetchPreviousPage={fetchPreviousPage}
-                changeSortOptions={changeSortOptions}
-                changePaginationOptions={changePaginationOptions}
-                sortOptions={sortOptions}
-                paginationOptions={paginationOptions}
+    <LogsPageTemplate
+      hasData={sourceStatus?.logIndexStatus !== 'missing'}
+      pageHeader={{
+        pageTitle,
+        rightSideItems: [<ManageJobsButton onClick={showModuleList} size="s" />],
+      }}
+    >
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <DatasetsSelector
+                availableDatasets={datasets}
+                isLoading={isLoadingDatasets}
                 selectedDatasets={selectedDatasets}
-                jobIds={jobIds}
-                autoRefresh={autoRefresh}
+                onChangeDatasetSelection={setSelectedDatasets}
               />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ResultsContentPage>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSuperDatePicker
+                start={friendlyTimeRange.startTime}
+                end={friendlyTimeRange.endTime}
+                onTimeChange={handleSelectedTimeRangeChange}
+                isPaused={autoRefresh.isPaused}
+                refreshInterval={autoRefresh.interval}
+                onRefreshChange={handleAutoRefreshChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LogAnalysisJobProblemIndicator
+            hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+            hasStoppedJobs={hasStoppedLogEntryRateJobs}
+            isFirstUse={false /* the first use message is already shown by the section below */}
+            moduleName={logEntryRateModuleDescriptor.moduleName}
+            onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
+            onRecreateMlJobForUpdate={showLogEntryRateSetup}
+          />
+          <MLJobsAwaitingNodeWarning jobIds={jobIds} />
+          <CategoryJobNoticesSection
+            hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+            hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
+            isFirstUse={isFirstUse}
+            moduleName={logEntryCategoriesModuleDescriptor.moduleName}
+            onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
+            onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
+            qualityWarnings={categoryQualityWarnings}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AnomaliesResults
+            isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
+            anomalies={logEntryAnomalies}
+            timeRange={timeRange.value}
+            page={page}
+            fetchNextPage={fetchNextPage}
+            fetchPreviousPage={fetchPreviousPage}
+            changeSortOptions={changeSortOptions}
+            changePaginationOptions={changePaginationOptions}
+            sortOptions={sortOptions}
+            paginationOptions={paginationOptions}
+            selectedDatasets={selectedDatasets}
+            jobIds={jobIds}
+            autoRefresh={autoRefresh}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {isLogEntryFlyoutOpen ? (
         <LogEntryFlyout
           logEntryId={flyoutLogEntryId}
@@ -266,16 +275,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           sourceId={sourceId}
         />
       ) : null}
-    </>
+    </LogsPageTemplate>
   );
 };
-
-// This is needed due to the flex-basis: 100% !important; rule that
-// kicks in on small screens via media queries breaking when using direction="column"
-export const ResultsContentPage = euiStyled(EuiPage)`
-  flex: 1 0 0%;
-
-  .euiFlexGroup--responsive > .euiFlexItem {
-    flex-basis: auto !important;
-  }
-`;

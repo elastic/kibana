@@ -8,11 +8,14 @@
 import { createRules } from './create_rules';
 import { getCreateMlRulesOptionsMock } from './create_rules.mock';
 
-describe('createRules', () => {
-  it('calls the alertsClient with legacy ML params', async () => {
-    const ruleOptions = getCreateMlRulesOptionsMock();
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('createRules - %s', (_, isRuleRegistryEnabled) => {
+  it('calls the rulesClient with legacy ML params', async () => {
+    const ruleOptions = getCreateMlRulesOptionsMock(isRuleRegistryEnabled);
     await createRules(ruleOptions);
-    expect(ruleOptions.alertsClient.create).toHaveBeenCalledWith(
+    expect(ruleOptions.rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({
@@ -24,13 +27,13 @@ describe('createRules', () => {
     );
   });
 
-  it('calls the alertsClient with ML params', async () => {
+  it('calls the rulesClient with ML params', async () => {
     const ruleOptions = {
-      ...getCreateMlRulesOptionsMock(),
+      ...getCreateMlRulesOptionsMock(isRuleRegistryEnabled),
       machineLearningJobId: ['new_job_1', 'new_job_2'],
     };
     await createRules(ruleOptions);
-    expect(ruleOptions.alertsClient.create).toHaveBeenCalledWith(
+    expect(ruleOptions.rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({

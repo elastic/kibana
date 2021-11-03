@@ -29,7 +29,6 @@ const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
   },
   defaultProps: {
     getUrlForApp: () => {},
-    navigateToApp: () => {},
   },
 });
 

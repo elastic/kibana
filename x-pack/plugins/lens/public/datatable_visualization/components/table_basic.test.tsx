@@ -6,15 +6,18 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EuiDataGrid } from '@elastic/eui';
-import { IAggType, IFieldFormat } from 'src/plugins/data/public';
+import { IAggType } from 'src/plugins/data/public';
+import { IFieldFormat } from 'src/plugins/field_formats/common';
+import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
-import { LensMultiTable } from '../../types';
-import { DatatableProps } from '../expression';
+import { LensMultiTable } from '../../../common';
+import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { IUiSettingsClient } from 'kibana/public';
 
@@ -83,6 +86,13 @@ function copyData(data: LensMultiTable): LensMultiTable {
   return JSON.parse(JSON.stringify(data));
 }
 
+async function waitForWrapperUpdate(wrapper: ReactWrapper) {
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 0));
+  });
+  wrapper.update();
+}
+
 describe('DatatableComponent', () => {
   let onDispatchEvent: jest.Mock;
 
@@ -102,7 +112,7 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           renderMode="edit"
         />
       )
@@ -123,13 +133,13 @@ describe('DatatableComponent', () => {
           rowHasRowClickTriggerActions={[true, true, true]}
           renderMode="edit"
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         />
       )
     ).toMatchSnapshot();
   });
 
-  test('it should not render actions on header when it is in read only mode', () => {
+  test('it should render hide and reset actions on header even when it is in read only mode', () => {
     const { data, args } = sampleArgs();
 
     expect(
@@ -141,15 +151,15 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           rowHasRowClickTriggerActions={[false, false, false]}
-          renderMode="display"
+          renderMode="view"
           paletteService={chartPluginMock.createPaletteRegistry()}
-          uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         />
       )
     ).toMatchSnapshot();
   });
 
-  test('it invokes executeTriggerActions with correct context on click on top value', () => {
+  test('it invokes executeTriggerActions with correct context on click on top value', async () => {
     const { args, data } = sampleArgs();
 
     const wrapper = mountWithIntl(
@@ -167,11 +177,13 @@ describe('DatatableComponent', () => {
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
     wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
+
+    await waitForWrapperUpdate(wrapper);
 
     wrapper.find('[data-test-subj="lensDatatableFilterOut"]').first().simulate('click');
 
@@ -192,7 +204,7 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it invokes executeTriggerActions with correct context on click on timefield', () => {
+  test('it invokes executeTriggerActions with correct context on click on timefield', async () => {
     const { args, data } = sampleArgs();
 
     const wrapper = mountWithIntl(
@@ -210,11 +222,13 @@ describe('DatatableComponent', () => {
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
     wrapper.find('[data-test-subj="dataGridRowCell"]').at(1).simulate('focus');
+
+    await waitForWrapperUpdate(wrapper);
 
     wrapper.find('[data-test-subj="lensDatatableFilterFor"]').first().simulate('click');
 
@@ -235,7 +249,7 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it invokes executeTriggerActions with correct context on click on timefield from range', () => {
+  test('it invokes executeTriggerActions with correct context on click on timefield from range', async () => {
     const data: LensMultiTable = {
       type: 'lens_multitable',
       tables: {
@@ -292,11 +306,13 @@ describe('DatatableComponent', () => {
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
     wrapper.find('[data-test-subj="dataGridRowCell"]').at(0).simulate('focus');
+
+    await waitForWrapperUpdate(wrapper);
 
     wrapper.find('[data-test-subj="lensDatatableFilterFor"]').first().simulate('click');
 
@@ -340,9 +356,10 @@ describe('DatatableComponent', () => {
         )}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
+    expect(component.find(VisualizationContainer)).toHaveLength(1);
     expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
   });
 
@@ -362,7 +379,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
@@ -410,9 +427,9 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
@@ -440,9 +457,9 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
@@ -468,9 +485,9 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
@@ -496,7 +513,7 @@ describe('DatatableComponent', () => {
         getType={jest.fn()}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
     // mnake a copy of the data, changing only the name of the first column
@@ -529,9 +546,9 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
@@ -564,9 +581,9 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
     expect(wrapper.find('[data-test-subj="lnsDataTable-footer-a"]').exists()).toEqual(false);
@@ -599,9 +616,9 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 
@@ -633,9 +650,9 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
-        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
       />
     );
 

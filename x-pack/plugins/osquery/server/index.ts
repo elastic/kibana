@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { OsqueryPlugin } from './plugin';
-import { ConfigSchema } from './config';
+import { ConfigSchema, ConfigType } from './config';
 
-export const config = {
+export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
   exposeToBrowser: {
-    enabled: true,
     actionEnabled: true,
     savedQueries: true,
     packs: true,

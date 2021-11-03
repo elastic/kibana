@@ -16,6 +16,32 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ACTIONS_THROTTLE_INPUT =
   '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
 
+export const EMAIL_ACTION_BTN = '[data-test-subj=".email-ActionTypeSelectOption"]';
+
+export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
+
+export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
+
+export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';
+
+export const EMAIL_ACTION_SUBJECT_INPUT = '[data-test-subj="subjectInput"]';
+
+export const FROM_VALIDATION_ERROR = '.euiFormErrorText';
+
+export const CONNECTOR_NAME_INPUT = '[data-test-subj="nameInput"]';
+
+export const EMAIL_CONNECTOR_FROM_INPUT = '[data-test-subj="emailFromInput"]';
+
+export const EMAIL_CONNECTOR_HOST_INPUT = '[data-test-subj="emailHostInput"]';
+
+export const EMAIL_CONNECTOR_PORT_INPUT = '[data-test-subj="emailPortInput"]';
+
+export const EMAIL_CONNECTOR_USER_INPUT = '[data-test-subj="emailUserInput"]';
+
+export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInput"]';
+
+export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSelectInput"]';
+
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -32,8 +58,6 @@ export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
-export const COMBO_BOX_RESULT = '.euiFilterSelectItem';
-
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
@@ -43,9 +67,6 @@ export const THREAT_MAPPING_COMBO_BOX_INPUT =
 
 export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
-
-export const THREAT_MATCH_INDICATOR_QUERY_INPUT =
-  '[data-test-subj="detectionEngineStepDefineRuleThreatMatchIndices"] [data-test-subj="queryInput"]';
 
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
@@ -181,10 +202,10 @@ export const SCHEDULE_INTERVAL_UNITS_INPUT =
   '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="timeType"]';
 
 export const SCHEDULE_LOOKBACK_AMOUNT_INPUT =
-  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="interval"]';
 
 export const SCHEDULE_LOOKBACK_UNITS_INPUT =
-  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="schedule-units-input"]';
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
 export const SEVERITY_DROPDOWN =
   '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';

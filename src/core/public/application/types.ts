@@ -83,7 +83,7 @@ export interface AppNavOptions {
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
+   * takes precedence over the `icon` property.
    */
   euiIconType?: string;
 
@@ -780,7 +780,10 @@ export interface ApplicationStart {
    * @param options.path - optional path inside application to deep link to
    * @param options.absolute - if true, will returns an absolute url instead of a relative one
    */
-  getUrlForApp(appId: string, options?: { path?: string; absolute?: boolean }): string;
+  getUrlForApp(
+    appId: string,
+    options?: { path?: string; absolute?: boolean; deepLinkId?: string }
+  ): string;
 
   /**
    * An observable that emits the current application id and each subsequent id update.

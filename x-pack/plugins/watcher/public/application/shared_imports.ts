@@ -12,4 +12,6 @@ export {
   sendRequest,
   useRequest,
   XJson,
+  PageError,
+  EuiCodeEditor,
 } from '../../../../../src/plugins/es_ui_shared/public';

@@ -12,7 +12,7 @@ import { multiPoint } from '@turf/helpers';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';
@@ -81,9 +81,7 @@ export class ESPewPewSource extends AbstractESAggSource {
         value: sourceTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.pewPew.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        }),
+        label: getDataViewLabel(),
         value: indexPatternTitle,
       },
       {
@@ -141,6 +139,20 @@ export class ESPewPewSource extends AbstractESAggSource {
         },
       },
     });
+
+    // pewpew source is often used with security solution index-pattern
+    // Some underlying indices may not contain geo fields
+    // Filter out documents without geo fields to avoid shard failures for those indices
+    searchSource.setField('filter', [
+      ...searchSource.getField('filter'),
+      // destGeoField exists ensured by buffer filter
+      // so only need additional check for sourceGeoField
+      {
+        exists: {
+          field: this._descriptor.sourceGeoField,
+        },
+      },
+    ]);
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),

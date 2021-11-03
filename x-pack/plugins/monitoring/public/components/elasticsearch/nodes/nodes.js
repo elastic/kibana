@@ -137,7 +137,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         <AlertsStatus
           showBadge={true}
           alerts={alerts}
-          stateFilter={(state) => (state.nodeId || state.nodeUuid) === node.resolver.uuid}
+          stateFilter={(state) => (state.nodeId || state.nodeUuid) === node.resolver}
         />
       );
     },
@@ -298,15 +298,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const {
-    sorting,
-    pagination,
-    onTableChange,
-    clusterUuid,
-    setupMode,
-    fetchMoreData,
-    alerts,
-  } = props;
+  const { sorting, pagination, onTableChange, clusterUuid, setupMode, alerts } = props;
 
   const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts);
 
@@ -481,7 +473,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
               },
             }}
             onTableChange={onTableChange}
-            fetchMoreData={fetchMoreData}
+            {...props}
           />
         </EuiPageContent>
       </EuiPageBody>

@@ -15,7 +15,7 @@ describe('readUploadedFileAsText', () => {
   });
 
   it('throws an error if the file cannot be read', async () => {
-    const badFile = ('causes an error' as unknown) as File;
+    const badFile = 'causes an error' as unknown as File;
     await expect(readUploadedFileAsText(badFile)).rejects.toThrow();
   });
 });

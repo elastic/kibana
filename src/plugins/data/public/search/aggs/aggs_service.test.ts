@@ -11,7 +11,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
 import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
+import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import { dataPluginMock } from '../../mocks';
 
 import {

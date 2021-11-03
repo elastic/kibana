@@ -20,9 +20,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IIndexPattern } from '../..';
-import { getDisplayValueFromFilter, Filter } from '../../../common';
+import { Filter } from '../../../common';
 import { FilterLabel } from '../filter_bar';
-import { mapAndFlattenFilters } from '../../query';
+import { mapAndFlattenFilters, getDisplayValueFromFilter } from '../../query';
 
 interface Props {
   filters: Filter[];

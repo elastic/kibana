@@ -7,12 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type {
-  HttpFetchOptions,
-  HttpFetchOptionsWithPath,
-  HttpHandler,
-  HttpStart,
-} from 'kibana/public';
+import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from 'kibana/public';
 import { merge } from 'lodash';
 import { act } from '@testing-library/react';
 
@@ -30,29 +25,28 @@ export type ResponseProviderCallback<F extends (...args: any) => any = (...args:
  *
  * @example
  *  type FleetSetupResponseProvidersMock = ResponseProvidersInterface<{
- *    fleetSetup: () => PostIngestSetupResponse;
+ *    fleetSetup: () => PostFleetSetupResponse;
  *  }>;
  */
 export type ResponseProvidersInterface<
   I extends Record<string, ResponseProviderCallback> = Record<string, ResponseProviderCallback>
 > = I;
 
-type SingleResponseProvider<
-  F extends ResponseProviderCallback = ResponseProviderCallback
-> = jest.MockedFunction<F> & {
-  /**
-   * Delay responding to the HTTP call until this promise is resolved. Use it to introduce
-   * elongated delays in order to test intermediate UI states.
-   *
-   * @example
-   * apiMocks.responseProvider.someProvider.mockDelay
-   *    // Delay this response by 1/2 second
-   *    .mockImplementation(
-   *      () => new Promise(r => setTimeout(r, 500))
-   *    )
-   */
-  mockDelay: jest.MockedFunction<() => Promise<void>>;
-};
+type SingleResponseProvider<F extends ResponseProviderCallback = ResponseProviderCallback> =
+  jest.MockedFunction<F> & {
+    /**
+     * Delay responding to the HTTP call until this promise is resolved. Use it to introduce
+     * elongated delays in order to test intermediate UI states.
+     *
+     * @example
+     * apiMocks.responseProvider.someProvider.mockDelay
+     *    // Delay this response by 1/2 second
+     *    .mockImplementation(
+     *      () => new Promise(r => setTimeout(r, 500))
+     *    )
+     */
+    mockDelay: jest.MockedFunction<() => Promise<void>>;
+  };
 
 /**
  * The interface for a `core.http` set of mocked API responses.
@@ -72,11 +66,9 @@ interface MockedApi<R extends ResponseProvidersInterface = ResponseProvidersInte
    * available - `mockDelay()` - which can be used to delay the given response being returned by the
    * associated HTTP method.
    */
-  responseProvider: Readonly<
-    {
-      [K in keyof R]: SingleResponseProvider<R[K]>;
-    }
-  >;
+  responseProvider: Readonly<{
+    [K in keyof R]: SingleResponseProvider<R[K]>;
+  }>;
 }
 
 type HttpMethods = keyof Pick<
@@ -87,7 +79,8 @@ type HttpMethods = keyof Pick<
 const HTTP_METHODS: HttpMethods[] = ['delete', 'fetch', 'get', 'post', 'put', 'head', 'patch'];
 
 export type ApiHandlerMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> = (
-  http: jest.Mocked<HttpStart>
+  http: jest.Mocked<HttpStart>,
+  options?: { ignoreUnMockedApiRouteErrors?: boolean }
 ) => MockedApi<R>;
 
 interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> {
@@ -102,7 +95,7 @@ interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInte
    * The handler for providing a response to for this API call.
    * It should return the "raw" value, __NOT__ a `Promise`
    */
-  handler: (...args: Parameters<HttpHandler>) => any;
+  handler: (options: HttpFetchOptionsWithPath) => any;
   /**
    * A function that returns a promise. The API response will be delayed until this promise is
    * resolved. This can be helpful when wanting to test an intermediate UI state while the API
@@ -137,8 +130,9 @@ export type ApiHandlerMockFactoryProps<
 export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}>(
   mocks: ApiHandlerMockFactoryProps<R>
 ): ApiHandlerMock<R> => {
-  return (http) => {
+  return (http, options) => {
     let inflightApiCalls = 0;
+    const { ignoreUnMockedApiRouteErrors = false } = options ?? {};
     const apiDoneListeners: Array<() => void> = [];
     const markApiCallAsHandled = async (delay?: RouteMock['delay']) => {
       inflightApiCalls++;
@@ -167,7 +161,7 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
     const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce(
       (providers, routeMock) => {
         // FIXME: find a way to remove the ignore below. May need to limit the calling signature of `RouteMock['handler']`
-        // @ts-ignore
+        // @ts-expect-error TS2322
         const routeResponseCallbackMock: SingleResponseProvider<R[keyof R]> = jest.fn(
           routeMock.handler
         );
@@ -203,16 +197,31 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
         const routeMock = methodMocks.find((handler) => pathMatchesPattern(handler.path, path));
 
         if (routeMock) {
-          markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
-
-          await responseProvider[routeMock.id].mockDelay();
-
           // Use the handler defined for the HTTP Mocked interface (not the one passed on input to
           // the factory) for retrieving the response value because that one could have had its
           // response value manipulated by the individual test case.
-          return responseProvider[routeMock.id](...args);
+
+          markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
+          await responseProvider[routeMock.id].mockDelay();
+
+          const fetchOptions: HttpFetchOptionsWithPath = isHttpFetchOptionsWithPath(args[0])
+            ? args[0]
+            : {
+                // Ignore below is needed because the http service methods are defined via an overloaded interface.
+                // If the first argument is NOT fetch with options, then we know that its a string and `args` has
+                // a potential for being of `.length` 2.
+                // @ts-expect-error TS2493
+                ...(args[1] || {}),
+                path: args[0],
+              };
+
+          return responseProvider[routeMock.id](fetchOptions);
         } else if (priorMockedFunction) {
           return priorMockedFunction(...args);
+        }
+
+        if (ignoreUnMockedApiRouteErrors) {
+          return;
         }
 
         const err = new ApiRouteNotMocked(`API [${method.toUpperCase()} ${path}] is not MOCKED!`);
@@ -294,7 +303,7 @@ export const composeHttpHandlerMocks = <
       },
       // Ignore here because we populate this object with the entries provided
       // via the input argument `handlerMocks`
-      // @ts-ignore
+      // @ts-expect-error TS2322
       responseProvider: {},
     };
 

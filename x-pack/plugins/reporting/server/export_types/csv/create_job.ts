@@ -5,33 +5,19 @@
  * 2.0.
  */
 
-import { cryptoFactory } from '../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
-import {
-  IndexPatternSavedObjectDeprecatedCSV,
-  JobParamsDeprecatedCSV,
-  TaskPayloadDeprecatedCSV,
-} from './types';
+import { JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV } from './types';
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV>
 > = function createJobFactoryFn(reporting, logger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
-
-  return async function createJob(jobParams, context, request) {
-    const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
-
-    const savedObjectsClient = context.core.savedObjects.client;
-    const indexPatternSavedObject = ((await savedObjectsClient.get(
-      'index-pattern',
-      jobParams.indexPatternId
-    )) as unknown) as IndexPatternSavedObjectDeprecatedCSV;
+  return async function createJob(jobParams, context) {
+    logger.warn(
+      `The "/generate/csv" endpoint is deprecated. Please recreate the POST URL used to automate this CSV export.`
+    );
 
     return {
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(request, logger),
-      indexPatternSavedObject,
+      isDeprecated: true,
       ...jobParams,
     };
   };

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-// @ts-expect-error untyped lib
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { SerializableRecord } from '@kbn/utility-types';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
-import { Datatable } from 'src/plugins/expressions';
+import { Datatable, ExecutionContext } from 'src/plugins/expressions';
+import { Adapters } from 'src/plugins/inspector';
 
 const errors = getFunctionErrors().csv;
 
 describe('csv', () => {
   const fn = functionWrapper(csv);
+
   const expected: Datatable = {
     type: 'datatable',
     columns: [
@@ -30,43 +32,59 @@ describe('csv', () => {
 
   it('should return a datatable', () => {
     expect(
-      fn(null, {
-        data: `name,number
+      fn(
+        null,
+        {
+          data: `name,number
 one,1
 two,2
 fourty two,42`,
-      })
+        },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      )
     ).toEqual(expected);
   });
 
   it('should allow custom delimiter', () => {
     expect(
-      fn(null, {
-        data: `name\tnumber
+      fn(
+        null,
+        {
+          data: `name\tnumber
 one\t1
 two\t2
 fourty two\t42`,
-        delimiter: '\t',
-      })
+          delimiter: '\t',
+        },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      )
     ).toEqual(expected);
 
     expect(
-      fn(null, {
-        data: `name%SPLIT%number
+      fn(
+        null,
+        {
+          data: `name%SPLIT%number
 one%SPLIT%1
 two%SPLIT%2
 fourty two%SPLIT%42`,
-        delimiter: '%SPLIT%',
-      })
+          delimiter: '%SPLIT%',
+        },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      )
     ).toEqual(expected);
   });
 
   it('should allow custom newline', () => {
     expect(
-      fn(null, {
-        data: `name,number\rone,1\rtwo,2\rfourty two,42`,
-        newline: '\r',
-      })
+      fn(
+        null,
+        {
+          data: `name,number\rone,1\rtwo,2\rfourty two,42`,
+          newline: '\r',
+        },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      )
     ).toEqual(expected);
   });
 
@@ -83,10 +101,14 @@ fourty two%SPLIT%42`,
     };
 
     expect(
-      fn(null, {
-        data: `foo," bar  ", baz, " buz "
+      fn(
+        null,
+        {
+          data: `foo," bar  ", baz, " buz "
 1,2,3,4`,
-      })
+        },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      )
     ).toEqual(expectedResult);
   });
 
@@ -106,22 +128,30 @@ fourty two%SPLIT%42`,
     };
 
     expect(
-      fn(null, {
-        data: `foo," bar  ", baz, " buz "
+      fn(
+        null,
+        {
+          data: `foo," bar  ", baz, " buz "
 1,"  best  ",3, "  ok"
 "  good", bad, better   , " worst    " `,
-      })
+        },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      )
     ).toEqual(expectedResult);
   });
 
   it('throws when given invalid csv', () => {
     expect(() => {
-      fn(null, {
-        data: `name,number
+      fn(
+        null,
+        {
+          data: `name,number
 one|1
 two.2
 fourty two,42`,
-      });
+        },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      );
     }).toThrow(new RegExp(errors.invalidInputCSV().message));
   });
 });

@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
-import { User } from '../../common/api';
+import { User } from '../../common';
 import { Authorization } from '../authorization/authorization';
 import {
   AlertServiceContract,
@@ -18,6 +18,7 @@ import {
   AttachmentService,
 } from '../services';
 import { ActionsClient } from '../../../actions/server';
+import { LensServerPluginSetup } from '../../../lens/server';
 
 /**
  * Parameters for initializing a cases client
@@ -33,6 +34,7 @@ export interface CasesClientArgs {
   readonly alertsService: AlertServiceContract;
   readonly attachmentService: AttachmentService;
   readonly logger: Logger;
+  readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
 }

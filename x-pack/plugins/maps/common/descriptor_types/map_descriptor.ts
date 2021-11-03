@@ -10,18 +10,13 @@
 import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
-import { Query } from '../../../../../src/plugins/data/common';
-import { DRAW_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
+import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {
   minLon: number;
   minLat: number;
   maxLon: number;
   maxLat: number;
-};
-
-export type MapQuery = Query & {
-  queryLastTriggeredAt?: string;
 };
 
 export type MapCenter = {
@@ -63,8 +58,13 @@ export type TooltipState = {
 
 export type DrawState = {
   actionId: string;
-  drawType: DRAW_TYPE;
+  drawShape?: DRAW_SHAPE;
   filterLabel?: string; // point radius filter alias
   geometryLabel?: string;
   relation?: ES_SPATIAL_RELATIONS;
+};
+
+export type EditState = {
+  layerId: string;
+  drawShape?: DRAW_SHAPE;
 };

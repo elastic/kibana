@@ -14,6 +14,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiText } from '@elastic/eui';
+
 import { ExampleResultDetailCard } from './example_result_detail_card';
 
 describe('ExampleResultDetailCard', () => {
@@ -35,5 +37,33 @@ describe('ExampleResultDetailCard', () => {
     const wrapper = shallow(<ExampleResultDetailCard />);
 
     expect(wrapper.find('[data-test-subj="DefaultUrlLabel"]')).toHaveLength(1);
+  });
+
+  it('shows formatted value when date can be parsed', () => {
+    const date = '2021-06-28';
+    setMockValues({
+      ...exampleResult,
+      searchResultConfig: { detailFields: [{ fieldName: 'date', label: 'Date' }] },
+      exampleDocuments: [{ date }],
+      schemaFields: { date: 'date' },
+    });
+    const wrapper = shallow(<ExampleResultDetailCard />);
+
+    expect(wrapper.find(EuiText).children().text()).toContain(
+      new Date(Date.parse(date)).toLocaleString()
+    );
+  });
+
+  it('shows non-formatted value when not a date field', () => {
+    const value = '9999';
+    setMockValues({
+      ...exampleResult,
+      searchResultConfig: { detailFields: [{ fieldName: 'value', label: 'Value' }] },
+      exampleDocuments: [{ value }],
+      schemaFields: { value: 'text' },
+    });
+    const wrapper = shallow(<ExampleResultDetailCard />);
+
+    expect(wrapper.find(EuiText).children().text()).toContain(value);
   });
 });

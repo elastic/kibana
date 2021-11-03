@@ -16,25 +16,12 @@ import { ToolingLog, isAxiosResponseError, createFailError, REPO_ROOT } from '@k
 
 import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
+import { parseArchive } from './import_export/parse_archive';
 
 interface ImportApiResponse {
   success: boolean;
   [key: string]: unknown;
 }
-
-interface SavedObject {
-  id: string;
-  type: string;
-  [key: string]: unknown;
-}
-
-async function parseArchive(path: string): Promise<SavedObject[]> {
-  return (await Fs.readFile(path, 'utf-8'))
-    .split('\n\n')
-    .filter((line) => !!line)
-    .map((line) => JSON.parse(line));
-}
-
 export class KbnClientImportExport {
   constructor(
     public readonly log: ToolingLog,

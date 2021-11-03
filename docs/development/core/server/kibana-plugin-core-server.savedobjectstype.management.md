@@ -9,5 +9,5 @@ An optional [saved objects management section](./kibana-plugin-core-server.saved
 <b>Signature:</b>
 
 ```typescript
-management?: SavedObjectsTypeManagementDefinition;
+management?: SavedObjectsTypeManagementDefinition<Attributes>;
 ```

@@ -38,6 +38,7 @@ interface Props {
   eventOutcome: string | null | undefined;
   hostName: string | null | undefined;
   id: string;
+  isDraggable?: boolean;
   processExecutable: string | null | undefined;
   processName: string | null | undefined;
   processPid: number | null | undefined;
@@ -61,6 +62,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     eventOutcome,
     hostName,
     id,
+    isDraggable,
     processExecutable,
     processName,
     processPid,
@@ -95,6 +97,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
             eventId={id}
             hostName={hostName}
             hostNameSeparator={hostNameSeparator}
+            isDraggable={isDraggable}
             userDomain={domain}
             userDomainField={userDomainField}
             userName={user}
@@ -116,6 +119,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.logon_type"
+                  isDraggable={isDraggable}
                   queryValue={String(endgameLogonType)}
                   value={`${endgameLogonType} - ${getHumanReadableLogonType(endgameLogonType)}`}
                 />
@@ -136,6 +140,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.target_logon_id"
+                  isDraggable={isDraggable}
                   value={endgameTargetLogonId}
                 />
               </TokensFlexItem>
@@ -155,6 +160,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventId={id}
+              isDraggable={isDraggable}
               processPid={processPid}
               processName={processName}
               processExecutable={processExecutable}
@@ -176,6 +182,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_user_name"
+                  isDraggable={isDraggable}
                   iconType="user"
                   value={endgameSubjectUserName}
                 />
@@ -197,6 +204,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_domain_name"
+                  isDraggable={isDraggable}
                   value={endgameSubjectDomainName}
                 />
               </TokensFlexItem>
@@ -216,6 +224,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_logon_id"
+                  isDraggable={isDraggable}
                   value={endgameSubjectLogonId}
                 />
               </TokensFlexItem>

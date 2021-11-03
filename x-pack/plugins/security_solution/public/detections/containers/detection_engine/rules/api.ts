@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import { camelCase } from 'lodash';
+import {
+  FullResponseSchema,
+  PreviewResponse,
+} from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -14,6 +18,8 @@ import {
   DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
   DETECTION_ENGINE_TAGS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_PREVIEW,
+  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
 import {
   UpdateRulesProps,
@@ -35,6 +41,7 @@ import {
   PatchRuleProps,
   BulkActionProps,
   BulkActionResponse,
+  PreviewRulesProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -91,6 +98,21 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
   });
 
 /**
+ * Preview provided Rule
+ *
+ * @param rule CreateRulesSchema to add
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
+  KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
+    method: 'POST',
+    body: JSON.stringify(rule),
+    signal,
+  });
+
+/**
  * Fetches all rules from the Detection Engine API
  *
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
@@ -117,8 +139,9 @@ export const fetchRules = async ({
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const filterString = convertRulesFilterToKQL(filterOptions);
 
+  // Sort field is camel cased because we use that in our mapping, but display snake case on the front end
   const getFieldNameForSortField = (field: string) => {
-    return field === 'name' ? `${field}.keyword` : field;
+    return field === 'name' ? `${field}.keyword` : camelCase(field);
   };
 
   const query = {
@@ -350,9 +373,9 @@ export const getRuleStatusById = async ({
   id: string;
   signal: AbortSignal;
 }): Promise<RuleStatusResponse> =>
-  KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
+  KibanaServices.get().http.fetch<RuleStatusResponse>(INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL, {
     method: 'POST',
-    body: JSON.stringify({ ids: [id] }),
+    body: JSON.stringify({ ruleId: id }),
     signal,
   });
 

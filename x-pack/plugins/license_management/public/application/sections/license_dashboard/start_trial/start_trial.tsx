@@ -268,6 +268,8 @@ export class StartTrial extends Component<Props, State> {
           <EuiFlexItem>
             {this.acknowledgeModal(dependencies!.docLinks)}
             <EuiCard
+              // @ts-ignore - Known issue from EUI, while they fix their types I've been told that we can just ignore this for now.
+              hasBorder
               title={
                 <FormattedMessage
                   id="xpack.licenseMgmt.licenseDashboard.startTrialTitle"

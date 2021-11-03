@@ -120,7 +120,7 @@ export class UiActionsExecutionService {
         context,
         trigger,
       })),
-      title: '', // intentionally don't have any title
+      title: '', // Empty title is set intentionally.
       closeMenu: () => {
         tasks.forEach((t) => t.defer.resolve());
         session.close();

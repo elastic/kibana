@@ -8,20 +8,19 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { ContainerType } from '../../../../common/service_metadata';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { getAgentIcon } from '../AgentIcon/get_agent_icon';
+import { getAgentIcon } from '../agent_icon/get_agent_icon';
 import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
-import { AlertDetails } from './alert_details';
 
 interface Props {
   serviceName: string;
+  start: string;
+  end: string;
 }
 
 const cloudIcons: Record<string, string> = {
@@ -62,24 +61,17 @@ interface PopoverItem {
   component: ReactChild;
 }
 
-export function ServiceIcons({ serviceName }: Props) {
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
-  const [
-    selectedIconPopover,
-    setSelectedIconPopover,
-  ] = useState<Icons | null>();
+export function ServiceIcons({ start, end, serviceName }: Props) {
+  const [selectedIconPopover, setSelectedIconPopover] =
+    useState<Icons | null>();
 
   const theme = useTheme();
-
-  const { alerts } = useApmServiceContext();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
+          endpoint: 'GET /internal/apm/services/{serviceName}/metadata/icons',
           params: {
             path: { serviceName },
             query: { start, end },
@@ -95,7 +87,7 @@ export function ServiceIcons({ serviceName }: Props) {
       if (selectedIconPopover && serviceName && start && end) {
         return callApmApi({
           isCachable: true,
-          endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
+          endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
           params: {
             path: { serviceName },
             query: { start, end },
@@ -145,19 +137,6 @@ export function ServiceIcons({ serviceName }: Props) {
         defaultMessage: 'Cloud',
       }),
       component: <CloudDetails cloud={details?.cloud} />,
-    },
-    {
-      key: 'alerts',
-      icon: {
-        type: 'bell',
-        color: theme.eui.euiColorDanger,
-        size: 'm',
-      },
-      isVisible: alerts.length > 0,
-      title: i18n.translate('xpack.apm.serviceIcons.alerts', {
-        defaultMessage: 'Alerts',
-      }),
-      component: <AlertDetails alerts={alerts} />,
     },
   ];
 

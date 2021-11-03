@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { CasesFindRequest } from '../../../../common/api';
+import { CASES_URL, CasesFindRequest } from '../../../../common';
 import { wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
-import { CASES_URL } from '../../../../common/constants';
 
 export function initFindCasesApi({ router, logger }: RouteDeps) {
   router.get(

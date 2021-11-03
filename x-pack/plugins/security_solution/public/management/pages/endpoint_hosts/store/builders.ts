@@ -7,7 +7,7 @@
 
 import { Immutable } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
-import { createUninitialisedResourceState } from '../../../state';
+import { createLoadedResourceState, createUninitialisedResourceState } from '../../../state';
 import { EndpointState } from '../types';
 
 export const initialEndpointPageState = (): Immutable<EndpointState> => {
@@ -19,7 +19,22 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     loading: false,
     error: undefined,
     endpointDetails: {
-      activityLog: createUninitialisedResourceState(),
+      activityLog: {
+        paging: {
+          disabled: false,
+          page: 1,
+          pageSize: 50,
+          startDate: 'now-1d',
+          endDate: 'now',
+          isInvalidDateRange: false,
+          autoRefreshOptions: {
+            enabled: false,
+            duration: DEFAULT_POLL_INTERVAL,
+          },
+          recentlyUsedDateRanges: [],
+        },
+        logData: createUninitialisedResourceState(),
+      },
       hostDetails: {
         details: undefined,
         detailsLoading: false,
@@ -33,7 +48,7 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     policyItems: [],
     selectedPolicyId: undefined,
     policyItemsLoading: false,
-    endpointPackageInfo: undefined,
+    endpointPackageInfo: createUninitialisedResourceState(),
     nonExistingPolicies: {},
     agentPolicies: {},
     endpointsExist: true,
@@ -45,9 +60,10 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     agentsWithEndpointsTotalError: undefined,
     endpointsTotal: 0,
     endpointsTotalError: undefined,
-    queryStrategyVersion: undefined,
     policyVersionInfo: undefined,
     hostStatus: undefined,
     isolationRequestState: createUninitialisedResourceState(),
+    endpointPendingActions: createLoadedResourceState(new Map()),
+    metadataTransformStats: createUninitialisedResourceState(),
   };
 };

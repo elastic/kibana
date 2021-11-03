@@ -7,17 +7,18 @@
 
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices } from '../../../../alerting/server';
 import {
   ActionGroupId,
-  GEO_CONTAINMENT_ID,
   GeoContainmentInstanceState,
   GeoContainmentAlertType,
   GeoContainmentInstanceContext,
   GeoContainmentState,
 } from './alert_type';
+
+import { GEO_CONTAINMENT_ID } from './alert_type';
 
 export type LatestEntityLocation = GeoContainmentInstanceState;
 
@@ -103,7 +104,7 @@ export function getActiveEntriesAndGenerateAlerts(
     locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
       const context = {
         entityId: entityName,
-        entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
+        entityDateTime: dateInShape || null,
         entityDocumentId: docId,
         detectionDateTime: new Date(currIntervalEndTime).toISOString(),
         entityLocation: `POINT (${location[0]} ${location[1]})`,

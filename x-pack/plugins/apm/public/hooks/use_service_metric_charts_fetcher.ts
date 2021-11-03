@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useFetcher } from './use_fetcher';
+import { useTimeRange } from './use_time_range';
+import { useApmParams } from './use_apm_params';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: [],
@@ -18,20 +18,29 @@ const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
 
 export function useServiceMetricChartsFetcher({
   serviceNodeName,
+  kuery,
+  environment,
 }: {
   serviceNodeName: string | undefined;
+  kuery: string;
+  environment: string;
 }) {
   const {
-    urlParams: { environment, kuery, start, end },
-  } = useUrlParams();
-  const { agentName } = useApmServiceContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
 
-  const { data = INITIAL_DATA, error, status } = useFetcher(
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { agentName, serviceName } = useApmServiceContext();
+
+  const {
+    data = INITIAL_DATA,
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
+          endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
           params: {
             path: { serviceName },
             query: {

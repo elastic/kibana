@@ -15,7 +15,7 @@ import { CasesFromAlertsResponse } from './types';
 
 interface CasesFromAlertsStatus {
   loading: boolean;
-  caseIds: CasesFromAlertsResponse;
+  casesInfo: CasesFromAlertsResponse;
 }
 
 export const useCasesFromAlerts = ({ alertId }: { alertId: string }): CasesFromAlertsStatus => {
@@ -48,5 +48,5 @@ export const useCasesFromAlerts = ({ alertId }: { alertId: string }): CasesFromA
       isMounted = false;
     };
   }, [alertId, addError]);
-  return { loading, caseIds: cases };
+  return { loading, casesInfo: cases };
 };

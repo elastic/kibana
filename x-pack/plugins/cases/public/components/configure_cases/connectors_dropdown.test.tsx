@@ -8,11 +8,13 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { EuiSuperSelect } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
 
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
 import { useKibana } from '../../common/lib/kibana';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -27,11 +29,10 @@ describe('ConnectorsDropdown', () => {
     selectedConnector: 'none',
   };
 
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+
   beforeAll(() => {
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.servicenow',
-      iconClass: 'logoSecurity',
-    });
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -73,7 +74,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-servicenow-1",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -84,7 +85,9 @@ describe('ConnectorsDropdown', () => {
                 type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector
               </span>
@@ -96,7 +99,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-resilient-2",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -107,7 +110,9 @@ describe('ConnectorsDropdown', () => {
                 type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector 2
               </span>
@@ -119,7 +124,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-jira-1",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -130,7 +135,9 @@ describe('ConnectorsDropdown', () => {
                 type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 Jira
               </span>
@@ -142,7 +149,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-servicenow-sir",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -153,13 +160,52 @@ describe('ConnectorsDropdown', () => {
                 type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector SIR
               </span>
             </EuiFlexItem>
           </EuiFlexGroup>,
           "value": "servicenow-sir",
+        },
+        Object {
+          "data-test-subj": "dropdown-connector-servicenow-uses-table-api",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="logoSecurity"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <span>
+                My Connector
+                 (deprecated)
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIconTip)
+                aria-label="This connector is deprecated. Update it, or create a new one."
+                color="warning"
+                content="This connector is deprecated. Update it, or create a new one."
+                size="m"
+                type="alert"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "servicenow-uses-table-api",
         },
       ]
     `);
@@ -218,5 +264,38 @@ describe('ConnectorsDropdown', () => {
     expect(
       options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-sir')
     ).toBeFalsy();
+  });
+
+  test('it does not throw when accessing the icon if the connector type is not registered', () => {
+    expect(() =>
+      mount(
+        <ConnectorsDropdown
+          {...props}
+          connectors={[
+            {
+              id: 'none',
+              actionTypeId: '.none',
+              name: 'None',
+              config: {},
+              isPreconfigured: false,
+            },
+          ]}
+        />,
+        {
+          wrappingComponent: TestProviders,
+        }
+      )
+    ).not.toThrowError();
+  });
+
+  test('it shows the deprecated tooltip when the connector is deprecated', () => {
+    render(<ConnectorsDropdown {...props} selectedConnector="servicenow-uses-table-api" />, {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    const tooltips = screen.getAllByLabelText(
+      'This connector is deprecated. Update it, or create a new one.'
+    );
+    expect(tooltips[0]).toBeInTheDocument();
   });
 });

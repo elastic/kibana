@@ -41,6 +41,7 @@ export type {
   SavedObjectsExportError,
   SavedObjectsExportTransformContext,
   SavedObjectsExportTransform,
+  SavedObjectsExportExcludedObject,
 } from './export';
 
 export { SavedObjectsSerializer } from './serialization';
@@ -89,6 +90,7 @@ export type {
   SavedObjectStatusMeta,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from './types';
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';

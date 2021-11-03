@@ -53,12 +53,12 @@ describe('Execute Report Task', () => {
 
     const task = new MonitorReportsTask(mockReporting, configType, logger);
     const taskDef = task.getTaskDefinition();
-    const taskRunner = taskDef.createTaskRunner(({
+    const taskRunner = taskDef.createTaskRunner({
       taskInstance: {
         id: 'random-task-id',
         params: { index: 'cool-reporting-index', id: 'cool-reporting-id' },
       },
-    } as unknown) as RunContext);
+    } as unknown as RunContext);
     expect(taskRunner).toHaveProperty('run');
     expect(taskRunner).toHaveProperty('cancel');
   });

@@ -145,51 +145,55 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
       <div
         class="euiText euiText--small"
       >
-        <dl
-          class="euiDescriptionList euiDescriptionList--row"
+        <div
+          class="euiTextColor euiTextColor--default"
         >
-          <dt
-            class="euiDescriptionList__title"
+          <dl
+            class="euiDescriptionList euiDescriptionList--row"
           >
-            Response Body
-          </dt>
-          <dd
-            class="euiDescriptionList__description"
-          >
-            <div
-              class="euiText euiText--medium"
+            <dt
+              class="euiDescriptionList__title"
             >
-              Body size is 1MB.
-            </div>
-            <div
-              class="euiSpacer euiSpacer--s"
-            />
-            <div
-              class="euiText euiText--medium"
+              Response Body
+            </dt>
+            <dd
+              class="euiDescriptionList__description"
             >
-              Body not recorded. Read our 
-              <a
-                class="euiLink euiLink--primary"
-                href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
-                rel="noopener"
-                target="_blank"
+              <div
+                class="euiText euiText--medium"
               >
-                docs
-                <span
-                  aria-label="External link"
-                  class="euiLink__externalIcon"
-                  data-euiicon-type="popout"
-                />
-                <span
-                  class="euiScreenReaderOnly"
+                Body size is 1MB.
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiText euiText--medium"
+              >
+                Body not recorded. Read our 
+                <a
+                  class="euiLink euiLink--primary"
+                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
+                  rel="noopener"
+                  target="_blank"
                 >
-                  (opens in a new tab or window)
-                </span>
-              </a>
-               for more information on recording response bodies.
-            </div>
-          </dd>
-        </dl>
+                  docs
+                  <span
+                    aria-label="External link"
+                    class="euiLink__externalIcon"
+                    data-euiicon-type="popout"
+                  />
+                  <span
+                    class="euiScreenReaderOnly"
+                  >
+                    (opens in a new tab or window)
+                  </span>
+                </a>
+                 for more information on recording response bodies.
+              </div>
+            </dd>
+          </dl>
+        </div>
       </div>
     </div>
   </div>

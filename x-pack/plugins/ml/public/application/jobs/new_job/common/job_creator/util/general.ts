@@ -258,15 +258,19 @@ export function convertToMultiMetricJob(
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   stashJobForCloning(jobCreator, true, true);
-
   navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashJobForCloning(jobCreator, true, true);
-
   navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
+}
+
+export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+  jobCreator.createdBy = null;
+  stashJobForCloning(jobCreator, true, false);
+  navigateToPath('/jobs/new_job');
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
@@ -310,6 +314,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
     case JOB_TYPE.CATEGORIZATION:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
         defaultMessage: 'Categorization',
+      });
+    case JOB_TYPE.RARE:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.rare', {
+        defaultMessage: 'Rare',
       });
     default:
       return '';

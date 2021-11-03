@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -14,7 +15,19 @@ import type {
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
+import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+
+import type {
+  CustomIntegrationsStart,
+  CustomIntegrationsSetup,
+} from 'src/plugins/custom_integrations/public';
+
+import type { SharePluginStart } from 'src/plugins/share/public';
+
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
+
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -24,23 +37,24 @@ import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public'
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
+import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
-import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
+import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
-import { FLEET_BASE_PATH } from './constants';
+import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
-import {
-  TutorialDirectoryNotice,
-  TutorialDirectoryHeaderLink,
-  TutorialModuleNotice,
-} from './components/home_integration';
+import { createPackageSearchProvider } from './search_provider';
+import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
+import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
 export { FleetConfigType } from '../common/types';
+
+import { setCustomIntegrations } from './services/custom_integrations';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
@@ -60,14 +74,21 @@ export interface FleetSetupDeps {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
+  globalSearch?: GlobalSearchPluginSetup;
+  customIntegrations: CustomIntegrationsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface FleetStartDeps {
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
+  customIntegrations: CustomIntegrationsStart;
+  share: SharePluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
   storage: Storage;
+  share: SharePluginStart;
   cloud?: CloudSetup;
 }
 
@@ -87,6 +108,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
 
+    setCustomIntegrations(deps.customIntegrations);
+
+    // TODO: this is a contract leak and an issue.  We shouldn't be setting a module-level
+    // variable from plugin setup.  Refactor to an abstraction, if necessary.
     // Set up http client
     setHttpClient(core.http);
 
@@ -97,6 +122,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     core.application.register({
       id: INTEGRATIONS_PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
+      appRoute: '/app/integrations',
       title: i18n.translate('xpack.fleet.integrationsAppTitle', {
         defaultMessage: 'Integrations',
       }),
@@ -112,9 +138,20 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
+          cloud: deps.cloud,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
-        const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
+
+        const Tracker =
+          deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+        const unmount = renderApp(
+          startServices,
+          params,
+          config,
+          kibanaVersion,
+          extensions,
+          Tracker
+        );
 
         return () => {
           unmount();
@@ -130,6 +167,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       title: i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' }),
       order: 9020,
       euiIconType: 'logoElastic',
+      appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
           CoreStart,
@@ -169,24 +207,27 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Register components for home/add data integration
     if (deps.home) {
-      deps.home.tutorials.registerDirectoryNotice(PLUGIN_ID, TutorialDirectoryNotice);
       deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
 
       deps.home.featureCatalogue.register({
         id: 'fleet',
         title: i18n.translate('xpack.fleet.featureCatalogueTitle', {
-          defaultMessage: 'Add Elastic Agent',
+          defaultMessage: 'Add Elastic Agent integrations',
         }),
         description: i18n.translate('xpack.fleet.featureCatalogueDescription', {
-          defaultMessage: 'Add and manage your fleet of Elastic Agents and integrations.',
+          defaultMessage: 'Add and manage integrations with Elastic Agent',
         }),
         icon: 'indexManagementApp',
         showOnHomePage: true,
-        path: FLEET_BASE_PATH,
+        path: INTEGRATIONS_BASE_PATH,
         category: FeatureCatalogueCategory.DATA,
         order: 510,
       });
+    }
+
+    if (deps.globalSearch) {
+      deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
     }
 
     return {};
@@ -194,6 +235,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
   public start(core: CoreStart): FleetStart {
     let successPromise: ReturnType<FleetStart['isInitialized']>;
+    const registerExtension = createExtensionRegistrationCallback(this.extensions);
+
+    registerExtension({
+      package: CUSTOM_LOGS_INTEGRATION_NAME,
+      view: 'package-detail-assets',
+      Component: LazyCustomLogsAssetsExtension,
+    });
 
     return {
       isInitialized: () => {
@@ -205,7 +253,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
             if (permissionsResponse?.success) {
               return core.http
-                .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
+                .post<PostFleetSetupResponse>(setupRouteService.getSetupPath())
                 .then(({ isInitialized }) =>
                   isInitialized
                     ? Promise.resolve(true)
@@ -219,8 +267,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
         return successPromise;
       },
-
-      registerExtension: createExtensionRegistrationCallback(this.extensions),
+      registerExtension,
     };
   }
 

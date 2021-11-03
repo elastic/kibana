@@ -1,0 +1,61 @@
+---
+id: kibDevTutorialDebugging
+slug: /kibana-dev-docs/tutorials/debugging
+title: Debugging in development
+summary: Learn how to debug Kibana while running from source
+date: 2021-04-26
+tags: ['kibana', 'onboarding', 'dev', 'tutorials', 'debugging']
+---
+
+There are multiple ways to go about debugging Kibana when running from source.
+
+## Debugging using Chrome DevTools
+
+You will need to run Node using `--inspect` or `--inspect-brk` in order to enable the inspector. Additional information can be found in the [Node.js docs](https://nodejs.org/en/docs/guides/debugging-getting-started/).
+
+Once Node is running with the inspector enabled, you can open `chrome://inspect` in your Chrome browser. You should see a remote target for the inspector running. Click "inspect". You can now begin using the debugger.
+
+Next we will go over how to exactly enable the inspector for different aspects of the codebase.
+
+### Jest Unit Tests
+
+You will need to run Jest directly from the Node script:
+
+`node --inspect-brk scripts/jest [TestPathPattern]`
+
+### Functional Test Runner
+
+`node --inspect-brk scripts/functional_test_runner`
+
+### Development Server
+
+`node --inspect-brk scripts/kibana`
+
+## Debugging using logging
+
+When running Kibana, it's sometimes helpful to enable verbose logging.
+
+`yarn start --verbose`
+
+Using verbose logging usually results in much more information than you're interested in. The [logging documentation](https://www.elastic.co/guide/en/kibana/current/logging-settings.html) covers ways to change the log level of certain types.
+
+In the following example of a configuration stored in `config/kibana.dev.yml` we are logging all Elasticsearch queries and any logs created by the Management plugin.
+
+```
+logging:
+  appenders:
+    console:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+  root:
+    appenders: [default, console]
+    level: info
+
+  loggers:
+    - name: plugins.management
+      level: debug
+    - name: elasticsearch.query
+      level: debug
+```

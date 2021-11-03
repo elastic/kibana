@@ -16,7 +16,6 @@ import { shallow } from 'enzyme';
 
 import { EuiConfirmModal } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
 
 import { SourceConfig } from './source_config';
@@ -41,14 +40,11 @@ describe('SourceConfig', () => {
     expect(wrapper.find(EuiConfirmModal)).toHaveLength(1);
   });
 
-  it('returns loading when loading', () => {
-    setMockValues({
-      sourceConfigData,
-      dataLoading: true,
-    });
+  it('renders a breadcrumb fallback while data is loading', () => {
+    setMockValues({ dataLoading: true, sourceConfigData: {} });
     const wrapper = shallow(<SourceConfig sourceIndex={1} />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('pageChrome')).toEqual(['Settings', 'Content source connectors', '...']);
   });
 
   it('handles delete click', () => {

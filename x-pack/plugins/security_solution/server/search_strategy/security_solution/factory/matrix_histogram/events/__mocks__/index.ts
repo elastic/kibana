@@ -14,6 +14,7 @@ import {
 export const mockOptions: MatrixHistogramRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -31,6 +32,7 @@ export const mockOptions: MatrixHistogramRequestOptions = {
 export const expectedDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -38,8 +40,8 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -85,6 +87,7 @@ export const expectedDsl = {
 export const expectedThresholdDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -92,8 +95,8 @@ export const expectedThresholdDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -141,6 +144,7 @@ export const expectedThresholdDsl = {
 export const expectedThresholdMissingFieldDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -148,8 +152,8 @@ export const expectedThresholdMissingFieldDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -193,7 +197,7 @@ export const expectedThresholdMissingFieldDsl = {
 };
 
 export const expectedThresholdWithCardinalityDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   body: {
     aggregations: {
       eventActionGroup: {
@@ -240,9 +244,10 @@ export const expectedThresholdWithCardinalityDsl = {
     },
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -256,6 +261,7 @@ export const expectedThresholdWithCardinalityDsl = {
 export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -263,8 +269,8 @@ export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -310,7 +316,7 @@ export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
 };
 
 export const expectedThresholdGroupWithCardinalityDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   body: {
     aggregations: {
       eventActionGroup: {
@@ -359,9 +365,10 @@ export const expectedThresholdGroupWithCardinalityDsl = {
     },
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -375,6 +382,7 @@ export const expectedThresholdGroupWithCardinalityDsl = {
 export const expectedIpIncludingMissingDataDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -382,8 +390,8 @@ export const expectedIpIncludingMissingDataDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -437,6 +445,7 @@ export const expectedIpIncludingMissingDataDsl = {
 export const expectedIpNotIncludingMissingDataDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -444,8 +453,8 @@ export const expectedIpNotIncludingMissingDataDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {

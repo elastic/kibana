@@ -28,11 +28,12 @@ import {
   defaultStringRenderer,
 } from './zeek_signature';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });

@@ -35,6 +35,7 @@ const defaultProps = {
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('percentile', () => {
@@ -80,6 +81,7 @@ describe('percentile', () => {
           displayName: 'bytes',
           type: 'number',
           esTypes: ['long'],
+          searchable: true,
           aggregatable: true,
         })
       ).toEqual({
@@ -96,6 +98,7 @@ describe('percentile', () => {
           displayName: 'response_time',
           type: 'histogram',
           esTypes: ['histogram'],
+          searchable: true,
           aggregatable: true,
         })
       ).toEqual({
@@ -112,6 +115,7 @@ describe('percentile', () => {
           displayName: 'origin',
           type: 'string',
           esTypes: ['keyword'],
+          searchable: true,
           aggregatable: true,
         })
       ).toBeUndefined();
@@ -282,12 +286,12 @@ describe('percentile', () => {
 
       jest.runAllTimers();
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiFieldNumber);
+      const input = instance.find(
+        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
+      );
 
       await act(async () => {
-        input.prop('onChange')!({ target: { value: '27' } } as React.ChangeEvent<HTMLInputElement>);
+        input.simulate('change', { target: { value: '27' } });
       });
 
       instance.update();
@@ -323,14 +327,12 @@ describe('percentile', () => {
 
       jest.runAllTimers();
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiFieldNumber);
+      const input = instance.find(
+        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
+      );
 
       await act(async () => {
-        input.prop('onChange')!({
-          target: { value: '12.12' },
-        } as React.ChangeEvent<HTMLInputElement>);
+        input.simulate('change', { target: { value: '12.12' } });
       });
 
       instance.update();

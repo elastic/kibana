@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft 365 Teams Custom Application Interaction Allowed",
   "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:o365.audit and event.provider:MicrosoftTeams and event.category:web and event.action:TeamsTenantSettingChanged and o365.audit.Name:\"Allow sideloading and interaction of custom apps\" and o365.audit.NewValue:True and event.outcome:success",
+  "query": "event.dataset:o365.audit and event.provider:MicrosoftTeams and\nevent.category:web and event.action:TeamsTenantSettingChanged and\no365.audit.Name:\"Allow sideloading and interaction of custom apps\" and\no365.audit.NewValue:True and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/deploy-and-publish/apps-upload"
   ],

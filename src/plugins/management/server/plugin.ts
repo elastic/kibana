@@ -9,7 +9,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
 import { LocatorPublic } from 'src/plugins/share/common';
 import type { SharePluginSetup } from 'src/plugins/share/server';
-import { ManagementAppLocator, ManagementAppLocatorParams } from '../common/locator';
+import { ManagementAppLocatorDefinition, ManagementAppLocatorParams } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
 
 interface ManagementSetupDependencies {
@@ -21,7 +21,8 @@ export interface ManagementSetup {
 }
 
 export class ManagementServerPlugin
-  implements Plugin<ManagementSetup, object, ManagementSetupDependencies> {
+  implements Plugin<ManagementSetup, object, ManagementSetupDependencies>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -31,7 +32,7 @@ export class ManagementServerPlugin
   public setup(core: CoreSetup, { share }: ManagementSetupDependencies) {
     this.logger.debug('management: Setup');
 
-    const locator = share.url.locators.create(new ManagementAppLocator());
+    const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
 
     core.capabilities.registerProvider(capabilitiesProvider);
 

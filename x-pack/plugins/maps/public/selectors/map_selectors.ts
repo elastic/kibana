@@ -9,6 +9,7 @@ import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
+import type { Query } from 'src/plugins/data/common';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
@@ -28,9 +29,9 @@ import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   SOURCE_DATA_REQUEST_ID,
+  SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
-  SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
@@ -39,12 +40,12 @@ import {
   AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
+  EditState,
   Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
@@ -55,6 +56,7 @@ import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { ILayer } from '../classes/layers/layer';
+import { getIsReadOnly } from './ui_selectors';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
@@ -177,7 +179,7 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 
 export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
 
-export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
+export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
@@ -196,12 +198,8 @@ export const isUsingSearch = (state: MapStoreState): boolean => {
 export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
-export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
-  return !!map.mapState.drawState;
-};
-
-export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
-  map.mapState.refreshTimerLastTriggeredAt;
+export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
+  map.mapState.editState;
 
 function getLayerDescriptor(state: MapStoreState, layerId: string) {
   const layerListRaw = getLayerListRaw(state);
@@ -224,22 +222,22 @@ export const getDataFilters = createSelector(
   getMapZoom,
   getTimeFilters,
   getTimeslice,
-  getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getIsReadOnly,
   (
     mapExtent,
     mapBuffer,
     mapZoom,
     timeFilters,
     timeslice,
-    refreshTimerLastTriggeredAt,
     query,
     filters,
     searchSessionId,
-    searchSessionMapBuffer
+    searchSessionMapBuffer,
+    isReadOnly
   ) => {
     return {
       extent: mapExtent,
@@ -247,10 +245,10 @@ export const getDataFilters = createSelector(
       zoom: mapZoom,
       timeFilters,
       timeslice,
-      refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,
+      isReadOnly,
     };
   }
 );

@@ -28,7 +28,7 @@ storiesOf('shareables/Footer/Scrubber', module)
     <ExampleContext style={{ height: 172 }}>
       <ScrubberComponent
         isScrubberVisible={true}
-        pages={(workpads[0].pages as unknown) as CanvasRenderedPage[]}
+        pages={workpads[0].pages as unknown as CanvasRenderedPage[]}
       />
     </ExampleContext>
   ));

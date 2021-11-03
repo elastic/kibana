@@ -5,63 +5,166 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
-import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues } from '../../../__mocks__/kea_logic';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiCode } from '@elastic/eui';
+import { getPageHeaderActions } from '../../../test_helpers';
 
-import { Loading } from '../../../shared/loading';
-import { rerender } from '../../../test_helpers';
-
+import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
+import { AddDomainForm } from './components/add_domain/add_domain_form';
+import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
+import { CrawlRequestsTable } from './components/crawl_requests_table';
+import { CrawlerStatusBanner } from './components/crawler_status_banner';
+import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
+import { DomainsTable } from './components/domains_table';
+import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CrawlerOverview } from './crawler_overview';
+import {
+  CrawlerDomainFromServer,
+  CrawlerPolicies,
+  CrawlerRules,
+  CrawlerStatus,
+  CrawlEventFromServer,
+} from './types';
 
-const actions = {
-  fetchCrawlerData: jest.fn(),
-};
+const domains: CrawlerDomainFromServer[] = [
+  {
+    id: 'x',
+    name: 'moviedatabase.com',
+    document_count: 13,
+    created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+    sitemaps: [],
+    entry_points: [],
+    crawl_rules: [],
+    default_crawl_rule: {
+      id: '-',
+      policy: CrawlerPolicies.allow,
+      rule: CrawlerRules.regex,
+      pattern: '.*',
+    },
+    deduplication_enabled: false,
+    deduplication_fields: ['title'],
+    available_deduplication_fields: ['title', 'description'],
+  },
+  {
+    id: 'y',
+    name: 'swiftype.com',
+    last_visited_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+    document_count: 40,
+    created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+    sitemaps: [],
+    entry_points: [],
+    crawl_rules: [],
+    deduplication_enabled: false,
+    deduplication_fields: ['title'],
+    available_deduplication_fields: ['title', 'description'],
+  },
+];
 
-const values = {
-  dataLoading: false,
-  domains: [],
-};
+const events: CrawlEventFromServer[] = [
+  {
+    id: 'a',
+    stage: 'crawl',
+    status: CrawlerStatus.Canceled,
+    created_at: 'Mon, 31 Aug 2020 11:00:00 +0000',
+    began_at: 'Mon, 31 Aug 2020 12:00:00 +0000',
+    completed_at: 'Mon, 31 Aug 2020 13:00:00 +0000',
+  },
+  {
+    id: 'b',
+    stage: 'crawl',
+    status: CrawlerStatus.Success,
+    created_at: 'Mon, 31 Aug 2020 14:00:00 +0000',
+    began_at: 'Mon, 31 Aug 2020 15:00:00 +0000',
+    completed_at: 'Mon, 31 Aug 2020 16:00:00 +0000',
+  },
+];
 
 describe('CrawlerOverview', () => {
-  let wrapper: ShallowWrapper;
+  const mockValues = {
+    dataLoading: false,
+    domains,
+    events,
+    mostRecentCrawlRequest: null,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues(values);
-    setMockActions(actions);
-    wrapper = shallow(<CrawlerOverview />);
   });
 
-  it('renders', () => {
-    expect(wrapper.find(EuiCode)).toHaveLength(1);
+  it('contains a crawler status banner', () => {
+    setMockValues(mockValues);
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(CrawlerStatusBanner)).toHaveLength(1);
   });
 
-  it('calls fetchCrawlerData on page load', () => {
-    expect(actions.fetchCrawlerData).toHaveBeenCalledTimes(1);
+  it('contains a crawler status indicator', () => {
+    setMockValues(mockValues);
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(getPageHeaderActions(wrapper).find(CrawlerStatusIndicator)).toHaveLength(1);
   });
 
-  // TODO after DomainsTable is built in a future PR
-  // it('contains a DomainsTable', () => {})
+  it('contains a popover to manage crawls', () => {
+    setMockValues(mockValues);
 
-  // TODO after CrawlRequestsTable is built in a future PR
-  // it('containss a CrawlRequestsTable,() => {})
+    const wrapper = shallow(<CrawlerOverview />);
 
-  // TODO after AddDomainForm is built in a future PR
-  // it('contains an AddDomainForm' () => {})
+    expect(getPageHeaderActions(wrapper).find(ManageCrawlsPopover)).toHaveLength(1);
+  });
 
-  // TODO after empty state is added in a future PR
-  // it('has an empty state',  () => {} )
+  it('hides the domain and crawl request tables when there are no domains, and no crawl requests', () => {
+    setMockValues({ ...mockValues, domains: [], events: [] });
 
-  it('shows an empty state when data is loading', () => {
-    setMockValues({ dataLoading: true });
-    rerender(wrapper);
+    const wrapper = shallow(<CrawlerOverview />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.find(AddDomainForm)).toHaveLength(1);
+    expect(wrapper.find(AddDomainFormSubmitButton)).toHaveLength(1);
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(0);
+    expect(wrapper.find(DomainsTable)).toHaveLength(0);
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(0);
+  });
+
+  it('shows the domain and the crawl request tables when there are domains, but no crawl requests', () => {
+    setMockValues({ ...mockValues, events: [] });
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(AddDomainForm)).toHaveLength(0);
+    expect(wrapper.find(AddDomainFormSubmitButton)).toHaveLength(0);
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
+    expect(wrapper.find(DomainsTable)).toHaveLength(1);
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
+  });
+
+  it('hides the domain table and shows the crawl request tables when there are crawl requests but no domains', () => {
+    setMockValues({ ...mockValues, domains: [] });
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(AddDomainForm)).toHaveLength(1);
+    expect(wrapper.find(AddDomainFormSubmitButton)).toHaveLength(1);
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(0);
+    expect(wrapper.find(DomainsTable)).toHaveLength(0);
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
+  });
+
+  it('shows the domain and the crawl request tables when there are crawl requests and domains', () => {
+    setMockValues(mockValues);
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(AddDomainForm)).toHaveLength(0);
+    expect(wrapper.find(AddDomainFormSubmitButton)).toHaveLength(0);
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
+    expect(wrapper.find(DomainsTable)).toHaveLength(1);
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
   });
 });

@@ -3,7 +3,8 @@
     "types": [
       "node"
     ],
-    "noErrorTruncation": true
+    "noErrorTruncation": true,
+    "assumeChangesOnlyAffectDirectDependencies": true
   },
   "include": [
     "./apm_api_integration/**/*",
@@ -11,6 +12,8 @@
     "../../typings/**/*"
   ],
   "exclude": [
-    "**/__fixtures__/**/*"
+    "**/__fixtures__/**/*",
+    "**/target/**",
+    "**/node_modules/**"
   ]
 }

@@ -25,6 +25,7 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
   timelineId,
   deleteQuery,
   endDate,
+  entityType,
   filterQuery,
   indexNames,
   pageFilters,
@@ -74,6 +75,7 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
       <AlertsTable
         timelineId={timelineId}
         endDate={endDate}
+        entityType={entityType}
         startDate={startDate}
         pageFilters={pageFilters}
       />

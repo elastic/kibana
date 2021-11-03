@@ -352,8 +352,7 @@ describe('OIDCAuthenticationProvider', () => {
     describe('implicit flow', () => {
       defineAuthenticationFlowTests(() => ({
         request: httpServerMock.createKibanaRequest({
-          path:
-            '/api/security/oidc/callback?authenticationResponseURI=http://kibana/api/security/oidc/implicit#id_token=sometoken',
+          path: '/api/security/oidc/callback?authenticationResponseURI=http://kibana/api/security/oidc/implicit#id_token=sometoken',
         }),
         attempt: {
           type: OIDCLogin.LoginWithImplicitFlow,

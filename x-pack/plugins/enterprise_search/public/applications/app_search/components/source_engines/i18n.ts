@@ -37,7 +37,7 @@ export const ADD_SOURCE_ENGINES_SUCCESS_MESSAGE = (sourceEngineNames: string[]) 
     'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesSuccessMessage',
     {
       defaultMessage:
-        '{sourceEnginesCount, plural, one {# engine has} other {# engines have}} been added to this meta engine.',
+        '{sourceEnginesCount, plural, one {# engine was} other {# engines were}} added to this meta engine',
       values: { sourceEnginesCount: sourceEngineNames.length },
     }
   );
@@ -61,7 +61,7 @@ export const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
   i18n.translate(
     'xpack.enterpriseSearch.appSearch.engine.souceEngines.removeSourceEngineSuccessMessage',
     {
-      defaultMessage: 'Engine {engineName} has been removed from this meta engine.',
+      defaultMessage: "Engine '{engineName}' was removed from this meta engine",
       values: { engineName },
     }
   );

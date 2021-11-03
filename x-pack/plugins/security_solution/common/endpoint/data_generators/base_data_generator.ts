@@ -12,6 +12,61 @@ const OS_FAMILY = ['windows', 'macos', 'linux'];
 /** Array of 14 day offsets */
 const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
 
+const USERS = [
+  'elastic',
+  'shay',
+  'Damian',
+  'Sarai',
+  'Deirdre',
+  'Shawana',
+  'Treena',
+  'Ellamae',
+  'Myriam',
+  'Roberto',
+  'Cordell',
+  'Demetrice',
+  'Audrea',
+  'Shanel',
+  'Gail',
+  'Hermila',
+  'Mara',
+  'Elden',
+  'Malisa',
+  'Derick',
+  'Teddy',
+  'Dovie',
+  'Betty',
+  'Kay',
+  'Sharice',
+  'Evalyn',
+  'Teressa',
+  'Teisha',
+  'Marianne',
+  'Cherelle',
+  'Tabitha',
+  'Deneen',
+  'Leo',
+  'Tess',
+  'Clair',
+  'Marty',
+  'Dexter',
+  'Candis',
+  'Dina',
+  'Bennett',
+  'Vesta',
+  'Trinity',
+  'Drusilla',
+  'Bree',
+  'Bryon',
+  'Johnson',
+  'Justa',
+  'Jada',
+  'Armand',
+  'Raeann',
+  'Yolande',
+  'Genevieve',
+];
+
 /**
  * A generic base class to assist in creating domain specific data generators. It includes
  * several general purpose random data generators for use within the class and exposes one
@@ -36,6 +91,10 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     throw new Error('method not implemented!');
   }
 
+  public randomUser(): string {
+    return this.randomChoice(USERS);
+  }
+
   /** Returns a future ISO date string */
   protected randomFutureDate(from?: Date): string {
     const now = from ? from.getTime() : Date.now();
@@ -48,9 +107,14 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     return new Date(now - this.randomChoice(DAY_OFFSETS)).toISOString();
   }
 
-  /** Generate either `true` or `false` */
-  protected randomBoolean(): boolean {
-    return this.random() < 0.5;
+  /**
+   * Generate either `true` or `false`. By default, the boolean is calculated by determining if a
+   * float is less than `0.5`, but that can be adjusted via the input argument
+   *
+   * @param isLessThan
+   */
+  protected randomBoolean(isLessThan: number = 0.5): boolean {
+    return this.random() < isLessThan;
   }
 
   /** generate random OS family value */
@@ -61,6 +125,11 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   /** generate a UUID (v4) */
   protected randomUUID(): string {
     return uuid.v4();
+  }
+
+  /** generate a seeded random UUID v4 */
+  protected seededUUIDv4(): string {
+    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
 
   /** Generate a random number up to the max provided */
@@ -97,10 +166,10 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   protected randomVersion(): string {
-    return [6, ...this.randomNGenerator(10, 2)].map((x) => x.toString()).join('.');
+    return [7, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
   }
 
-  protected randomChoice<T>(choices: T[]): T {
+  protected randomChoice<T>(choices: T[] | readonly T[]): T {
     return choices[this.randomN(choices.length)];
   }
 

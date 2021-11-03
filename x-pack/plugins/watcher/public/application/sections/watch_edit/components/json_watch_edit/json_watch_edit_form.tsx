@@ -10,7 +10,6 @@ import React, { Fragment, useContext, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCodeEditor,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +24,7 @@ import { XJsonMode } from '@kbn/ace';
 
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
-import { XJson } from '../../../../shared_imports';
+import { XJson, EuiCodeEditor } from '../../../../shared_imports';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { goToWatchList } from '../../../../lib/navigation';

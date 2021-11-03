@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiFieldNumber, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -22,7 +22,7 @@ import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
-import { FramePublicAPI } from '../../../../types';
+import { FrameDatasourceAPI } from '../../../../types';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -38,6 +38,7 @@ const defaultProps = {
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('terms', () => {
@@ -59,7 +60,7 @@ describe('terms', () => {
             size: 3,
             orderDirection: 'asc',
           },
-          sourceField: 'category',
+          sourceField: 'source',
         },
         col2: {
           label: 'Count',
@@ -87,7 +88,7 @@ describe('terms', () => {
         expect.objectContaining({
           arguments: expect.objectContaining({
             orderBy: ['_key'],
-            field: ['category'],
+            field: ['source'],
             size: [3],
             otherBucket: [true],
           }),
@@ -769,6 +770,34 @@ describe('terms', () => {
       expect(select.prop('disabled')).toEqual(false);
     });
 
+    it('should disable missing bucket setting if field is not a string', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={
+            {
+              ...layer.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...layer.columns.col1.params,
+                otherBucket: true,
+              },
+            } as TermsIndexPatternColumn
+          }
+        />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select.prop('disabled')).toEqual(true);
+    });
+
     it('should update state when clicking other bucket toggle', () => {
       const updateLayerSpy = jest.fn();
       const instance = shallow(
@@ -784,11 +813,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-other-bucket"]')
         .find(EuiSwitch)
-        .prop('onChange')!({
-        target: {
-          checked: true,
-        },
-      } as EuiSwitchEvent);
+        .simulate('change', {
+          target: {
+            checked: true,
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -842,11 +871,11 @@ describe('terms', () => {
       instance
         .find(EuiSelect)
         .find('[data-test-subj="indexPattern-terms-orderBy"]')
-        .prop('onChange')!({
-        target: {
-          value: 'column$$$col2',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'column$$$col2',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -902,11 +931,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-orderDirection"]')
         .find(EuiSelect)
-        .prop('onChange')!({
-        target: {
-          value: 'desc',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'desc',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -995,8 +1024,8 @@ describe('terms', () => {
         indexPatternId: '',
       };
     });
-    it('returns empty array', () => {
-      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([]);
+    it('returns undefined for no errors found', () => {
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual(undefined);
     });
     it('returns error message if the sourceField does not exist in index pattern', () => {
       layer = {
@@ -1048,10 +1077,10 @@ describe('terms', () => {
       });
       it('returns fix action which calls field information endpoint and creates a pinned top values', async () => {
         const errorMessage = termsOperation.getErrorMessage!(layer, 'col1', indexPattern)![0];
-        const fixAction = (typeof errorMessage === 'object'
-          ? errorMessage.fixAction!.newState
-          : undefined)!;
-        const coreMock = ({
+        const fixAction = (
+          typeof errorMessage === 'object' ? errorMessage.fixAction!.newState : undefined
+        )!;
+        const coreMock = {
           uiSettings: {
             get: () => undefined,
           },
@@ -1071,17 +1100,17 @@ describe('terms', () => {
               })
             ),
           },
-        } as unknown) as CoreStart;
+        } as unknown as CoreStart;
         const newLayer = await fixAction(
           coreMock,
-          ({
+          {
             query: { language: 'kuery', query: 'a: b' },
             filters: [],
             dateRange: {
               fromDate: '2020',
               toDate: '2021',
             },
-          } as unknown) as FramePublicAPI,
+          } as unknown as FrameDatasourceAPI,
           'first'
         );
         expect(newLayer.columns.col1).toEqual(

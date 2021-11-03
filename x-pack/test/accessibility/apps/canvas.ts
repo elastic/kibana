@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('loads workpads', async function () {
       await retry.waitFor(
         'canvas workpads visible',
-        async () => await testSubjects.exists('canvasWorkpadLoaderTable')
+        async () => await testSubjects.exists('canvasWorkpadTable')
       );
       await a11y.testAppSnapshot();
     });

@@ -4,14 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 
-import { SavedObjectsFindResult, SavedObjectsFindResponse, SavedObject } from 'kibana/server';
-import { isEmpty } from 'lodash';
+import Boom from '@hapi/boom';
+import {
+  SavedObjectsFindResult,
+  SavedObjectsFindResponse,
+  SavedObject,
+  SavedObjectReference,
+} from 'kibana/server';
+import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
 import { AlertInfo } from '.';
+import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
   AssociationType,
+  CaseAttributes,
   CaseConnector,
   CaseResponse,
   CasesClientPostRequest,
@@ -24,17 +31,18 @@ import {
   CommentResponse,
   CommentsResponse,
   CommentType,
-  ConnectorTypeFields,
-  ESCaseAttributes,
-  ESCaseConnector,
-  ESConnectorFields,
+  ConnectorTypes,
+  ENABLE_CASE_CONNECTOR,
   SubCaseAttributes,
   SubCaseResponse,
   SubCasesFindResponse,
   User,
-} from '../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
-import { UpdateAlertRequest } from '../client/alerts/client';
+} from '../../common';
+import { UpdateAlertRequest } from '../client/alerts/types';
+import {
+  parseCommentString,
+  getLensVisualizations,
+} from '../../common/utils/markdown_plugins/utils';
 
 /**
  * Default sort field for querying saved objects.
@@ -55,13 +63,13 @@ export const transformNewCase = ({
   newCase,
   username,
 }: {
-  connector: ESCaseConnector;
+  connector: CaseConnector;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   newCase: CasesClientPostRequest;
   username?: string | null;
-}): ESCaseAttributes => ({
+}): CaseAttributes => ({
   ...newCase,
   closed_at: null,
   closed_by: null,
@@ -135,7 +143,7 @@ export const flattenCaseSavedObject = ({
   subCases,
   subCaseIds,
 }: {
-  savedObject: SavedObject<ESCaseAttributes>;
+  savedObject: SavedObject<CaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
@@ -148,7 +156,6 @@ export const flattenCaseSavedObject = ({
   totalComment,
   totalAlerts,
   ...savedObject.attributes,
-  connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
   subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
 });
@@ -196,47 +203,6 @@ export const flattenCommentSavedObject = (
   ...savedObject.attributes,
 });
 
-export const transformCaseConnectorToEsConnector = (connector: CaseConnector): ESCaseConnector => ({
-  id: connector?.id ?? 'none',
-  name: connector?.name ?? 'none',
-  type: connector?.type ?? '.none',
-  fields:
-    connector?.fields != null
-      ? Object.entries(connector.fields).reduce<ESConnectorFields>(
-          (acc, [key, value]) => [
-            ...acc,
-            {
-              key,
-              value,
-            },
-          ],
-          []
-        )
-      : [],
-});
-
-export const transformESConnectorToCaseConnector = (connector?: ESCaseConnector): CaseConnector => {
-  const connectorTypeField = {
-    type: connector?.type ?? '.none',
-    fields:
-      connector && connector.fields != null && connector.fields.length > 0
-        ? connector.fields.reduce(
-            (fields, { key, value }) => ({
-              ...fields,
-              [key]: value,
-            }),
-            {}
-          )
-        : null,
-  } as ConnectorTypeFields;
-
-  return {
-    id: connector?.id ?? 'none',
-    name: connector?.name ?? 'none',
-    ...connectorTypeField,
-  };
-};
-
 export const getIDsAndIndicesAsArrays = (
   comment: CommentRequestAlertType
 ): { ids: string[]; indices: string[] } => {
@@ -271,17 +237,12 @@ const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[
 /**
  * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
  */
-export const getAlertInfoFromComments = (comments: CommentRequest[] | undefined): AlertInfo[] => {
-  if (comments === undefined) {
-    return [];
-  }
-
-  return comments.reduce((acc: AlertInfo[], comment) => {
+export const getAlertInfoFromComments = (comments: CommentRequest[] = []): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
     const alertInfo = getAndValidateAlertInfoFromComment(comment);
     acc.push(...alertInfo);
     return acc;
   }, []);
-};
 
 type NewCommentArgs = CommentRequest & {
   associationType: AssociationType;
@@ -320,6 +281,15 @@ export const isCommentRequestTypeUser = (
   context: CommentRequest
 ): context is CommentRequestUserType => {
   return context.type === CommentType.user;
+};
+
+/**
+ * A type narrowing function for actions comments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeActions = (
+  context: CommentRequest
+): context is CommentRequestUserType => {
+  return context.type === CommentType.actions;
 };
 
 /**
@@ -426,3 +396,68 @@ export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) 
     );
   }
 }
+
+/**
+ * Returns a connector that indicates that no connector was set.
+ *
+ * @returns the 'none' connector
+ */
+export const getNoneCaseConnector = () => ({
+  id: 'none',
+  name: 'none',
+  type: ConnectorTypes.none,
+  fields: null,
+});
+
+export const extractLensReferencesFromCommentString = (
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
+  comment: string
+): SavedObjectReference[] => {
+  const extract = lensEmbeddableFactory()?.extract;
+
+  if (extract) {
+    const parsedComment = parseCommentString(comment);
+    const lensVisualizations = getLensVisualizations(parsedComment.children);
+    const flattenRefs = flatMap(
+      lensVisualizations,
+      (lensObject) => extract(lensObject)?.references ?? []
+    );
+
+    const uniqRefs = uniqWith(
+      flattenRefs,
+      (refA, refB) => refA.type === refB.type && refA.id === refB.id && refA.name === refB.name
+    );
+
+    return uniqRefs;
+  }
+  return [];
+};
+
+export const getOrUpdateLensReferences = (
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
+  newComment: string,
+  currentComment?: SavedObject<CommentRequestUserType>
+) => {
+  if (!currentComment) {
+    return extractLensReferencesFromCommentString(lensEmbeddableFactory, newComment);
+  }
+
+  const savedObjectReferences = currentComment.references;
+  const savedObjectLensReferences = extractLensReferencesFromCommentString(
+    lensEmbeddableFactory,
+    currentComment.attributes.comment
+  );
+
+  const currentNonLensReferences = xorWith(
+    savedObjectReferences,
+    savedObjectLensReferences,
+    (refA, refB) => refA.type === refB.type && refA.id === refB.id
+  );
+
+  const newCommentLensReferences = extractLensReferencesFromCommentString(
+    lensEmbeddableFactory,
+    newComment
+  );
+
+  return currentNonLensReferences.concat(newCommentLensReferences);
+};

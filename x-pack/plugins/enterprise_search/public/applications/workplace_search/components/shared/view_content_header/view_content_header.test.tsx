@@ -22,7 +22,7 @@ describe('ViewContentHeader', () => {
   it('renders with title and alignItems', () => {
     const wrapper = shallow(<ViewContentHeader {...props} />);
 
-    expect(wrapper.find('h3').text()).toEqual('Header');
+    expect(wrapper.find('h2').text()).toEqual('Header');
     expect(wrapper.find(EuiFlexGroup).prop('alignItems')).toEqual('flexStart');
   });
 
@@ -39,19 +39,29 @@ describe('ViewContentHeader', () => {
     expect(wrapper.find('.action')).toHaveLength(1);
   });
 
-  it('renders small heading', () => {
+  it('renders h1 heading', () => {
     const wrapper = shallow(
-      <ViewContentHeader titleSize="s" {...props} action={<div className="action" />} />
+      <ViewContentHeader
+        titleSize="s"
+        {...props}
+        headingLevel={1}
+        action={<div className="action" />}
+      />
     );
 
-    expect(wrapper.find('h4')).toHaveLength(1);
+    expect(wrapper.find('h1')).toHaveLength(1);
   });
 
-  it('renders large heading', () => {
+  it('renders h3 heading', () => {
     const wrapper = shallow(
-      <ViewContentHeader titleSize="l" {...props} action={<div className="action" />} />
+      <ViewContentHeader
+        titleSize="s"
+        {...props}
+        headingLevel={3}
+        action={<div className="action" />}
+      />
     );
 
-    expect(wrapper.find('h2')).toHaveLength(1);
+    expect(wrapper.find('h3')).toHaveLength(1);
   });
 });

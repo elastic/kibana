@@ -12,7 +12,7 @@
   "license": "Elastic License v2",
   "name": "Azure Conditional Access Policy Modified",
   "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(azure.activitylogs or azure.auditlogs) and ( azure.activitylogs.operation_name:\"Update policy\" or azure.auditlogs.operation_name:\"Update policy\" ) and event.outcome:(Success or success)",
+  "query": "event.dataset:(azure.activitylogs or azure.auditlogs) and\n  (\n    azure.activitylogs.operation_name:\"Update policy\" or\n    azure.auditlogs.operation_name:\"Update policy\"\n  ) and\n  event.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/overview"
   ],

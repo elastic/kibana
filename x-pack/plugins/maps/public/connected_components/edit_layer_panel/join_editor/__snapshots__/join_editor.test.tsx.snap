@@ -9,6 +9,7 @@ exports[`Should render callout when joins are disabled 1`] = `
       <EuiToolTip
         content="Use term joins to augment this layer with properties for data driven styling."
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <FormattedMessage
@@ -36,6 +37,7 @@ exports[`Should render join editor 1`] = `
       <EuiToolTip
         content="Use term joins to augment this layer with properties for data driven styling."
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <FormattedMessage

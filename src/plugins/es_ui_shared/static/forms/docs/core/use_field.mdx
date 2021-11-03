@@ -336,6 +336,18 @@ If you provide a `component` you can pass here any prop you want to forward to t
 
 By default if you don't provide a `defaultValue` prop to `<UseField />`, it will try to read the default value on <DocLink id="formLibCoreUseForm" section="defaultvalue" text="the form `defaultValue` object" />. If you want to prevent this behaviour you can set `readDefaultValueOnForm` to false. This can be usefull for dynamic fields, as <DocLink id="formLibExampleDynamicFields" text="you can see in the examples" />.
 
+### validationData
+
+Use this prop to pass down dynamic data to your field validator. The data is then accessible in the validator through the `customData.value` property.
+
+See an example on how to use this prop in the <DocLink id="formLibExampleValidation" section="dynamic-data-inside-your-validation" text="dynamic data inside your validation" /> section.
+
+### validationData$
+
+Use this prop to pass down an Observable into which you can send, asynchronously, dynamic data required inside your validation.
+
+See an example on how to use this prop in the <DocLink id="formLibExampleValidation" section="asynchronous-dynamic-data-in-the-validator" text="asynchronous dynamic data in the validator" /> section.
+
 ### onChange
 
 **Type:** `(value:T) => void`

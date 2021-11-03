@@ -24,7 +24,7 @@ interface JobSavedObjectStatus {
   };
 }
 
-interface JobStatus {
+export interface JobStatus {
   jobId: string;
   datafeedId?: string | null;
   checks: {
@@ -51,11 +51,10 @@ export function checksFactory(
     // load all non-space jobs and datafeeds
     const { body: adJobs } = await client.asInternalUser.ml.getJobs();
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds();
-    const {
-      body: dfaJobs,
-    } = ((await client.asInternalUser.ml.getDataFrameAnalytics()) as unknown) as {
-      body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
-    };
+    const { body: dfaJobs } =
+      (await client.asInternalUser.ml.getDataFrameAnalytics()) as unknown as {
+        body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
+      };
 
     const savedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
       ({ attributes, namespaces }) => {

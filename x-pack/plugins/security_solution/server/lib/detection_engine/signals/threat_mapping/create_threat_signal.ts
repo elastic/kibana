@@ -9,39 +9,41 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
+import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import { CreateThreatSignalOptions } from './types';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
-  tuples,
-  threatMapping,
-  threatEnrichment,
-  query,
-  inputIndex,
-  type,
-  filters,
-  language,
-  savedId,
-  services,
+  alertId,
+  buildRuleMessage,
+  bulkCreate,
+  completeRule,
+  currentResult,
+  currentThreatList,
+  eventsTelemetry,
   exceptionItems,
+  filters,
+  inputIndex,
+  language,
   listClient,
   logger,
-  eventsTelemetry,
-  alertId,
   outputIndex,
-  ruleSO,
+  query,
+  savedId,
   searchAfterSize,
-  refresh,
-  buildRuleMessage,
-  currentThreatList,
-  currentResult,
+  services,
+  threatEnrichment,
+  threatMapping,
+  tuple,
+  type,
+  wrapHits,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
   });
 
-  if (threatFilter.query.bool.should.length === 0) {
+  if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
     logger.debug(
@@ -64,31 +66,36 @@ export const createThreatSignal = async ({
 
     logger.debug(
       buildRuleMessage(
-        `${threatFilter.query.bool.should.length} indicator items are being checked for existence of matches`
+        `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
       )
     );
 
     const result = await searchAfterAndBulkCreate({
-      tuples,
-      listClient,
-      exceptionsList: exceptionItems,
-      ruleSO,
-      services,
-      logger,
+      buildReasonMessage: buildReasonMessageForThreatMatchAlert,
+      buildRuleMessage,
+      bulkCreate,
+      completeRule,
+      enrichment: threatEnrichment,
       eventsTelemetry,
+      exceptionsList: exceptionItems,
+      filter: esFilter,
       id: alertId,
       inputIndexPattern: inputIndex,
-      signalsIndex: outputIndex,
-      filter: esFilter,
+      listClient,
+      logger,
       pageSize: searchAfterSize,
-      refresh,
-      buildRuleMessage,
-      enrichment: threatEnrichment,
+      services,
+      signalsIndex: outputIndex,
+      sortOrder: 'desc',
+      trackTotalHits: false,
+      tuple,
+      wrapHits,
     });
+
     logger.debug(
       buildRuleMessage(
         `${
-          threatFilter.query.bool.should.length
+          threatFilter.query?.bool.should.length
         } items have completed match checks and the total times to search were ${
           result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
         }ms`

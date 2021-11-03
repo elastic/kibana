@@ -24,7 +24,7 @@ describe('NavControlPopover', () => {
 
     const wrapper = shallow(
       <NavControlPopover
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         serverBasePath={'/server-base-path'}
         anchorPosition={'downRight'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
@@ -57,7 +57,7 @@ describe('NavControlPopover', () => {
 
     const wrapper = mountWithIntl(
       <NavControlPopover
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         serverBasePath={'/server-base-path'}
         anchorPosition={'rightCenter'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}

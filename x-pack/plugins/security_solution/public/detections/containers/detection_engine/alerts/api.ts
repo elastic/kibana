@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
-import { HostIsolationResponse, HostMetadataInfo } from '../../../../../common/endpoint/types';
+import { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
+  ALERTS_AS_DATA_FIND_URL,
+  DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL,
+  DETECTION_ENGINE_RULES_PREVIEW,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -39,8 +42,8 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 export const fetchQueryAlerts = async <Hit, Aggregations>({
   query,
   signal,
-}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> =>
-  KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
+}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
+  return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
       method: 'POST',
@@ -48,12 +51,35 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
       signal,
     }
   );
+};
+
+/**
+ * Fetch Alerts by providing a query
+ *
+ * @param query String to match a dsl
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchQueryRuleRegistryAlerts = async <Hit, Aggregations>({
+  query,
+  signal,
+}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
+  return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
+    ALERTS_AS_DATA_FIND_URL,
+    {
+      method: 'POST',
+      body: JSON.stringify(query),
+      signal,
+    }
+  );
+};
 
 /**
  * Update alert status by query
  *
  * @param query of alerts to update
- * @param status to update to('open' / 'closed' / 'in-progress')
+ * @param status to update to('open' / 'closed' / 'acknowledged')
  * @param signal AbortSignal for cancelling request
  *
  * @throws An error if response is not OK
@@ -62,7 +88,7 @@ export const updateAlertStatus = async ({
   query,
   status,
   signal,
-}: UpdateAlertStatusProps): Promise<UpdateDocumentByQueryResponse> =>
+}: UpdateAlertStatusProps): Promise<estypes.UpdateByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
     body: JSON.stringify({ conflicts: 'proceed', status, ...query }),
@@ -109,6 +135,24 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
   });
 
 /**
+ * Create Preview Index if needed it
+ * @throws An error if response is not OK
+ */
+export const createPreviewIndex = async (): Promise<AlertsIndex> =>
+  KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL, {
+    method: 'POST',
+  });
+
+/**
+ * Create Preview if needed it
+ * @throws An error if response is not OK
+ */
+export const createPreview = async (): Promise<AlertsIndex> =>
+  KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_RULES_PREVIEW, {
+    method: 'POST',
+  });
+
+/**
  * Get Host Isolation index
  *
  * @param agent id
@@ -118,16 +162,16 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
  * @throws An error if response is not OK
  */
 export const createHostIsolation = async ({
-  agentId,
+  endpointId,
   comment = '',
   caseIds,
 }: {
-  agentId: string;
+  endpointId: string;
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
   isolateHost({
-    agent_ids: [agentId],
+    endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
   });
@@ -142,16 +186,16 @@ export const createHostIsolation = async ({
  * @throws An error if response is not OK
  */
 export const createHostUnIsolation = async ({
-  agentId,
+  endpointId,
   comment = '',
   caseIds,
 }: {
-  agentId: string;
+  endpointId: string;
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
   unIsolateHost({
-    agent_ids: [agentId],
+    endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
   });
@@ -180,10 +224,12 @@ export const getCaseIdsFromAlertId = async ({
  */
 export const getHostMetadata = async ({
   agentId,
+  signal,
 }: {
   agentId: string;
-}): Promise<HostMetadataInfo> =>
-  KibanaServices.get().http.fetch<HostMetadataInfo>(
+  signal?: AbortSignal;
+}): Promise<HostInfo> =>
+  KibanaServices.get().http.fetch<HostInfo>(
     resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
-    { method: 'get' }
+    { method: 'GET', signal }
   );

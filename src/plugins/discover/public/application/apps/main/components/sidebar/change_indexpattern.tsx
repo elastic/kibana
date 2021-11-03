@@ -26,17 +26,17 @@ export type ChangeIndexPatternTriggerProps = EuiButtonProps & {
 // TODO: refactor to shared component with ../../../../../../../../x-pack/legacy/plugins/lens/public/indexpattern_plugin/change_indexpattern
 
 export function ChangeIndexPattern({
-  indexPatternRefs,
   indexPatternId,
+  indexPatternRefs,
   onChangeIndexPattern,
-  trigger,
   selectableProps,
+  trigger,
 }: {
-  trigger: ChangeIndexPatternTriggerProps;
+  indexPatternId?: string;
   indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
-  indexPatternId?: string;
   selectableProps?: EuiSelectableProps<{ value: string }>;
+  trigger: ChangeIndexPatternTriggerProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
@@ -67,8 +67,8 @@ export function ChangeIndexPattern({
     >
       <div style={{ width: 320 }}>
         <EuiPopoverTitle>
-          {i18n.translate('discover.fieldChooser.indexPattern.changeIndexPatternTitle', {
-            defaultMessage: 'Change index pattern',
+          {i18n.translate('discover.fieldChooser.indexPattern.changeDataViewTitle', {
+            defaultMessage: 'Change data view',
           })}
         </EuiPopoverTitle>
         <EuiSelectable<{ value: string }>
@@ -83,10 +83,12 @@ export function ChangeIndexPattern({
             checked: id === indexPatternId ? 'on' : undefined,
           }))}
           onChange={(choices) => {
-            const choice = (choices.find(({ checked }) => checked) as unknown) as {
+            const choice = choices.find(({ checked }) => checked) as unknown as {
               value: string;
             };
-            onChangeIndexPattern(choice.value);
+            if (choice.value !== indexPatternId) {
+              onChangeIndexPattern(choice.value);
+            }
             setPopoverIsOpen(false);
           }}
           searchProps={{

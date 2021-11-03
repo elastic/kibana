@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { History } from 'history';
-import { OnSaveProps } from 'src/plugins/saved_objects/public';
-import {
+import type { History } from 'history';
+import type { OnSaveProps } from 'src/plugins/saved_objects/public';
+import { SpacesApi } from '../../../spaces/public';
+import type {
   ApplicationStart,
   AppMountParameters,
   ChromeStart,
@@ -17,22 +18,28 @@ import {
   OverlayStart,
   SavedObjectsStart,
 } from '../../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
-import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
-import { LensAttributeService } from '../lens_attribute_service';
-import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
-import { DashboardFeatureFlagConfig } from '../../../../../src/plugins/dashboard/public';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
+import type { DashboardStart } from '../../../../../src/plugins/dashboard/public';
+import type { LensEmbeddableInput } from '../embeddable/embeddable';
+import type { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
+import type { LensAttributeService } from '../lens_attribute_service';
+import type { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
+import type { DashboardFeatureFlagConfig } from '../../../../../src/plugins/dashboard/public';
 import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
 } from '../../../../../src/plugins/ui_actions/public';
-import {
+import type {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
-import { EditorFrameInstance } from '../types';
+import type { DatasourceMap, EditorFrameInstance, VisualizationMap } from '../types';
+import type { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
+import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
+import type { LensInspector } from '../lens_inspector_service';
+
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
   isCopied?: boolean;
@@ -45,14 +52,14 @@ export interface LensAppProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   redirectTo: (savedObjectId?: string) => void;
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
-  redirectToDashboard?: (input: LensEmbeddableInput, dashboardId: string) => void;
 
   // The initial input passed in by the container when editing. Can be either by reference or by value.
   initialInput?: LensEmbeddableInput;
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
-  initialContext?: VisualizeFieldContext;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
 }
 
 export type RunSave = (
@@ -79,6 +86,9 @@ export interface LensTopNavMenuProps {
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
+  datasourceMap: DatasourceMap;
+  title?: string;
+  lensInspector: LensInspector;
 }
 
 export interface HistoryLocationState {
@@ -91,22 +101,33 @@ export interface LensAppServices {
   chrome: ChromeStart;
   overlays: OverlayStart;
   storage: IStorageWrapper;
+  dashboard: DashboardStart;
+  fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
+  inspector: LensInspector;
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
   notifications: NotificationsStart;
+  usageCollection?: UsageCollectionStart;
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
   savedObjectsClient: SavedObjectsStart['client'];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
+  presentationUtil: PresentationUtilPluginStart;
+  spaces: SpacesApi;
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
 }
 
+export interface LensTopNavTooltips {
+  showExportWarning: () => string | undefined;
+}
+
 export interface LensTopNavActions {
+  inspect: () => void;
   saveAndReturn: () => void;
   showSaveModal: () => void;
   cancel: () => void;

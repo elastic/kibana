@@ -196,11 +196,12 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
     [dispatch, dispatchToaster]
   );
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: ALL_TIMELINE_QUERY_ID }));
-    };
-  }, [dispatch]);
+    },
+    [dispatch]
+  );
 
   return {
     ...allTimelines,

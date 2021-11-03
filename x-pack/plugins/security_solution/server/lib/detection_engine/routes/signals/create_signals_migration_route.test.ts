@@ -43,11 +43,11 @@ describe('creating signals migrations route', () => {
     (getIndexVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': -1 });
     (getSignalVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': [] });
 
-    const securityMock = ({
+    const securityMock = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
       },
-    } as unknown) as SetupPlugins['security'];
+    } as unknown as SetupPlugins['security'];
 
     createSignalsMigrationRoute(server.router, securityMock);
   });

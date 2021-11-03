@@ -66,11 +66,15 @@ const tasks = new Listr(
         execa(
           'node',
           [
-            resolve(__dirname, './jest.js'),
+            resolve(__dirname, '../../../../scripts/jest.js'),
+            '--config',
+            resolve(__dirname, '../jest.config.js'),
             '--reporters',
             resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
             '--collect-coverage',
             'false',
+            '--maxWorkers',
+            4,
           ],
           execaOpts
         ),

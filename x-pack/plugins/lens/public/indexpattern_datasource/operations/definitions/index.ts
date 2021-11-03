@@ -33,6 +33,14 @@ import {
   DerivativeIndexPatternColumn,
   movingAverageOperation,
   MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  overallSumOperation,
+  OverallMinIndexPatternColumn,
+  overallMinOperation,
+  OverallMaxIndexPatternColumn,
+  overallMaxOperation,
+  OverallAverageIndexPatternColumn,
+  overallAverageOperation,
 } from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
 import {
@@ -41,11 +49,12 @@ import {
   formulaOperation,
   FormulaIndexPatternColumn,
 } from './formula';
+import { staticValueOperation, StaticValueIndexPatternColumn } from './static_value';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { FramePublicAPI, OperationMetadata } from '../../../types';
+import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
-import { DateRange } from '../../../../common';
+import { DateRange, LayerType } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
@@ -71,11 +80,16 @@ export type IndexPatternColumn =
   | CountIndexPatternColumn
   | LastValueIndexPatternColumn
   | CumulativeSumIndexPatternColumn
+  | OverallSumIndexPatternColumn
+  | OverallMinIndexPatternColumn
+  | OverallMaxIndexPatternColumn
+  | OverallAverageIndexPatternColumn
   | CounterRateIndexPatternColumn
   | DerivativeIndexPatternColumn
   | MovingAverageIndexPatternColumn
   | MathIndexPatternColumn
-  | FormulaIndexPatternColumn;
+  | FormulaIndexPatternColumn
+  | StaticValueIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
@@ -98,10 +112,16 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  OverallMinIndexPatternColumn,
+  OverallMaxIndexPatternColumn,
+  OverallAverageIndexPatternColumn,
 } from './calculations';
 export { CountIndexPatternColumn } from './count';
 export { LastValueIndexPatternColumn } from './last_value';
 export { RangeIndexPatternColumn } from './ranges';
+export { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
+export { StaticValueIndexPatternColumn } from './static_value';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -126,6 +146,11 @@ const internalOperationDefinitions = [
   movingAverageOperation,
   mathOperation,
   formulaOperation,
+  overallSumOperation,
+  overallMinOperation,
+  overallMaxOperation,
+  overallAverageOperation,
+  staticValueOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -141,8 +166,13 @@ export {
   counterRateOperation,
   derivativeOperation,
   movingAverageOperation,
+  overallSumOperation,
+  overallAverageOperation,
+  overallMaxOperation,
+  overallMinOperation,
 } from './calculations';
 export { formulaOperation } from './formula/formula';
+export { staticValueOperation } from './static_value';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
@@ -157,6 +187,7 @@ export interface ParamEditorProps<C> {
   setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
   columnId: string;
+  layerId: string;
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
@@ -233,7 +264,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * but disable it from usage, this function returns the string describing
    * the status. Otherwise it returns undefined
    */
-  getDisabledStatus?: (indexPattern: IndexPattern, layer: IndexPatternLayer) => string | undefined;
+  getDisabledStatus?: (
+    indexPattern: IndexPattern,
+    layer: IndexPatternLayer,
+    layerType?: LayerType
+  ) => string | undefined;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
    *
@@ -254,7 +289,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
               label: string;
               newState: (
                 core: CoreStart,
-                frame: FramePublicAPI,
+                frame: FrameDatasourceAPI,
                 layerId: string
               ) => Promise<IndexPatternLayer>;
             };
@@ -357,7 +392,11 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
       field: IndexPatternField;
       previousColumn?: IndexPatternColumn;
     },
-    columnParams?: (IndexPatternColumn & C)['params'] & { kql?: string; lucene?: string }
+    columnParams?: (IndexPatternColumn & C)['params'] & {
+      kql?: string;
+      lucene?: string;
+      shift?: string;
+    }
   ) => C;
   /**
    * This method will be called if the user changes the field of an operation.
@@ -407,7 +446,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
               label: string;
               newState: (
                 core: CoreStart,
-                frame: FramePublicAPI,
+                frame: FrameDatasourceAPI,
                 layerId: string
               ) => Promise<IndexPatternLayer>;
             };
@@ -463,6 +502,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
       kql?: string;
       lucene?: string;
+      shift?: string;
     }
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
@@ -567,13 +607,11 @@ export const operationDefinitions = internalOperationDefinitions as GenericOpera
  * (e.g. `import { termsOperation } from './operations/definitions'`). This map is
  * intended to be used in situations where the operation type is not known during compile time.
  */
-export const operationDefinitionMap: Record<
-  string,
-  GenericOperationDefinition
-> = internalOperationDefinitions.reduce(
-  (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
-  {}
-);
+export const operationDefinitionMap: Record<string, GenericOperationDefinition> =
+  internalOperationDefinitions.reduce(
+    (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
+    {}
+  );
 
 /**
  * Cannot map the prev names, but can guarantee the new names are matching up using the type system

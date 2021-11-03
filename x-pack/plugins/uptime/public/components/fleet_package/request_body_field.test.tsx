@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import 'jest-canvas-mock';
+
 import React, { useState, useCallback } from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
@@ -15,8 +17,25 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
+
 describe('<RequestBodyField />', () => {
-  const defaultMode = Mode.TEXT;
+  const defaultMode = Mode.PLAINTEXT;
   const defaultValue = 'sample value';
   const WrappedComponent = () => {
     const [config, setConfig] = useState({
@@ -28,9 +47,10 @@ describe('<RequestBodyField />', () => {
       <RequestBodyField
         type={config.type}
         value={config.value}
-        onChange={useCallback((code) => setConfig({ type: code.type as Mode, value: code.value }), [
-          setConfig,
-        ])}
+        onChange={useCallback(
+          (code) => setConfig({ type: code.type as Mode, value: code.value }),
+          [setConfig]
+        )}
       />
     );
   };

@@ -31,7 +31,7 @@ describe('findAndCleanupTasks', () => {
   const esStart = elasticsearchServiceMock.createStart();
   const spaces = spacesMock.createStart();
   const soService = savedObjectsServiceMock.createStartContract();
-  const coreStartServices = (Promise.resolve([
+  const coreStartServices = Promise.resolve([
     {
       savedObjects: {
         ...soService,
@@ -43,7 +43,7 @@ describe('findAndCleanupTasks', () => {
       spaces,
     },
     {},
-  ]) as unknown) as Promise<[CoreStart, ActionsPluginsStart, unknown]>;
+  ]) as unknown as Promise<[CoreStart, ActionsPluginsStart, unknown]>;
 
   const config: ActionsConfig['cleanupFailedExecutionsTask'] = {
     enabled: true,

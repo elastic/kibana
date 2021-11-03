@@ -19,29 +19,22 @@ interface CaseViewActions {
   allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
-  disabled?: boolean;
 }
 
 const ActionsComponent: React.FC<CaseViewActions> = ({
   allCasesNavigation,
   caseData,
   currentExternalIncident,
-  disabled = false,
 }) => {
   // Delete case
-  const {
-    handleToggleModal,
-    handleOnDeleteConfirm,
-    isDeleted,
-    isDisplayConfirmDeleteModal,
-  } = useDeleteCases();
+  const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
+    useDeleteCases();
 
   const propertyActions = useMemo(
     () => [
       {
-        disabled,
         iconType: 'trash',
-        label: i18n.DELETE_CASE,
+        label: i18n.DELETE_CASE(),
         onClick: handleToggleModal,
       },
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
@@ -54,7 +47,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
           ]
         : []),
     ],
-    [disabled, handleToggleModal, currentExternalIncident]
+    [handleToggleModal, currentExternalIncident]
   );
 
   if (isDeleted) {
@@ -67,7 +60,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
       <ConfirmDeleteCaseModal
         caseTitle={caseData.title}
         isModalVisible={isDisplayConfirmDeleteModal}
-        isPlural={false}
         onCancel={handleToggleModal}
         onConfirm={handleOnDeleteConfirm.bind(null, [
           { id: caseData.id, title: caseData.title, type: caseData.type },

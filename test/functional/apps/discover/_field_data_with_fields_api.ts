@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   describe('discover tab with new fields API', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -63,9 +64,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('doc view should show Time and Document columns', async function () {
+      it('doc view should show @timestamp and Document columns', async function () {
         const Docheader = await PageObjects.discover.getDocHeader();
-        expect(Docheader).to.contain('Time');
+        expect(Docheader).to.contain('@timestamp');
         expect(Docheader).to.contain('Document');
       });
 
@@ -114,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('doc view should sort ascending', async function () {
           const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
-          await find.clickByCssSelector('.fa-sort-down');
+          await testSubjects.click('docTableHeaderFieldSort_@timestamp');
 
           // we don't technically need this sleep here because the tryForTime will retry and the
           // results will match on the 2nd or 3rd attempt, but that debug output is huge in this

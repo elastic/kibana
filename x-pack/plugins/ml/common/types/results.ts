@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
 
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;
@@ -13,6 +14,9 @@ export interface GetStoppedPartitionResult {
 export interface GetDatafeedResultsChartDataResult {
   bucketResults: number[][];
   datafeedResults: number[][];
+  annotationResultsRect: RectAnnotationDatum[];
+  annotationResultsLine: LineAnnotationDatum[];
+  modelSnapshotResultsLine: LineAnnotationDatum[];
 }
 
 export interface DatafeedResultsChartDataParams {

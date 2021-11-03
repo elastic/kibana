@@ -6,37 +6,33 @@
  */
 
 import url from 'url';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { synthtrace } from '../../../../synthtrace';
+import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
-const serviceOverviewPath = '/app/apm/services/opbeans-java/overview';
-const baseUrl = url.format({
-  pathname: serviceOverviewPath,
+const serviceOverviewHref = url.format({
+  pathname: '/app/apm/services/opbeans-java/overview',
   query: { rangeFrom: start, rangeTo: end },
 });
+
+const serviceNodeName = 'opbeans-java-prod-1';
 
 const apisToIntercept = [
   {
     endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/main_statistics',
-    as: 'instancesMainRequest',
+      '/internal/apm/services/opbeans-java/service_overview_instances/main_statistics?*',
+    name: 'instancesMainRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics',
-    as: 'instancesDetailsRequest',
+      '/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics?*',
+    name: 'instancesDetailsRequest',
   },
   {
-    endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/details/02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c',
-    as: 'instanceDetailsRequest',
-  },
-  {
-    endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/details/02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c',
-    as: 'instanceDetailsRequest',
+    endpoint: `/internal/apm/services/opbeans-java/service_overview_instances/details/${serviceNodeName}?*`,
+    name: 'instanceDetailsRequest',
   },
 ];
 
@@ -44,36 +40,42 @@ describe('Instances table', () => {
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
-  describe('when data is not loaded', () => {
-    it('shows empty message', () => {
-      cy.visit(baseUrl);
-      cy.contains('opbeans-java');
-      cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
-        'No items found'
-      );
-    });
-  });
+
+  // describe('when data is not loaded', () => {
+  //   it('shows empty message', () => {
+  //     cy.visit(serviceOverviewHref);
+  //     cy.contains('opbeans-java');
+  //     cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
+  //       'No items found'
+  //     );
+  //   });
+  // });
 
   describe('when data is loaded', () => {
-    before(() => {
-      esArchiverLoad('apm_8.0.0');
+    before(async () => {
+      await synthtrace.index(
+        opbeans({
+          from: new Date(start).getTime(),
+          to: new Date(end).getTime(),
+        })
+      );
     });
-    after(() => {
-      esArchiverUnload('apm_8.0.0');
+
+    after(async () => {
+      await synthtrace.clean();
     });
-    const serviceNodeName =
-      '02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c';
+
     it('has data in the table', () => {
-      cy.visit(baseUrl);
+      cy.visit(serviceOverviewHref);
       cy.contains('opbeans-java');
       cy.contains(serviceNodeName);
     });
     it('shows instance details', () => {
-      apisToIntercept.map(({ endpoint, as }) => {
-        cy.intercept('GET', endpoint).as(as);
+      apisToIntercept.map(({ endpoint, name }) => {
+        cy.intercept('GET', endpoint).as(name);
       });
 
-      cy.visit(baseUrl);
+      cy.visit(serviceOverviewHref);
       cy.contains('opbeans-java');
 
       cy.wait('@instancesMainRequest');
@@ -89,11 +91,11 @@ describe('Instances table', () => {
       });
     });
     it('shows actions available', () => {
-      apisToIntercept.map(({ endpoint, as }) => {
-        cy.intercept('GET', endpoint).as(as);
+      apisToIntercept.map(({ endpoint, name }) => {
+        cy.intercept('GET', endpoint).as(name);
       });
 
-      cy.visit(baseUrl);
+      cy.visit(serviceOverviewHref);
       cy.contains('opbeans-java');
 
       cy.wait('@instancesMainRequest');
@@ -102,7 +104,7 @@ describe('Instances table', () => {
       cy.wait('@instancesDetailsRequest');
       cy.get(
         `[data-test-subj="instanceActionsButton_${serviceNodeName}"]`
-      ).realClick();
+      ).click();
       cy.contains('Pod logs');
       cy.contains('Pod metrics');
       cy.contains('Container logs');

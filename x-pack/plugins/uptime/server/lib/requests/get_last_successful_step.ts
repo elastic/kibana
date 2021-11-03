@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { Ping } from '../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../common/runtime_types/ping';
 
 export interface GetStepScreenshotParams {
   monitorId: string;
   timestamp: string;
   stepIndex: number;
+  location?: string;
 }
 
-export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
-  GetStepScreenshotParams,
-  any
-> = async ({ uptimeEsClient, monitorId, stepIndex, timestamp }) => {
-  const lastSuccessCheckParams: estypes.SearchRequest['body'] = {
+export const getLastSuccessfulStepParams = ({
+  monitorId,
+  stepIndex,
+  timestamp,
+  location,
+}: GetStepScreenshotParams): estypes.SearchRequest['body'] => {
+  return {
     size: 1,
     sort: [
       {
@@ -58,18 +61,48 @@ export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
               'synthetics.step.index': stepIndex,
             },
           },
+          ...(location
+            ? [
+                {
+                  term: {
+                    'observer.geo.name': location,
+                  },
+                },
+              ]
+            : []),
         ],
+        ...(!location
+          ? {
+              must_not: {
+                exists: {
+                  field: 'observer.geo.name',
+                },
+              },
+            }
+          : {}),
       },
     },
   };
+};
+
+export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
+  GetStepScreenshotParams,
+  JourneyStep | null
+> = async ({ uptimeEsClient, monitorId, stepIndex, timestamp, location }) => {
+  const lastSuccessCheckParams = getLastSuccessfulStepParams({
+    monitorId,
+    stepIndex,
+    timestamp,
+    location,
+  });
 
   const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
 
-  if (result?.hits?.total.value < 1) {
+  if (result.hits.total.value < 1) {
     return null;
   }
 
-  const step = result?.hits.hits[0]._source as Ping & { '@timestamp': string };
+  const step = result.hits.hits[0]._source as JourneyStep & { '@timestamp': string };
 
   return {
     ...step,

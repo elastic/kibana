@@ -122,7 +122,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
           defaultMessage="Assign policy"
         />
       }
-      buttonColor="danger"
+      buttonColor="primary"
     >
       <p>
         <FormattedMessage

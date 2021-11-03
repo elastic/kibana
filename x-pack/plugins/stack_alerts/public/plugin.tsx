@@ -26,7 +26,7 @@ export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlerts
 
   public setup(core: CoreSetup, { triggersActionsUi }: StackAlertsPublicSetupDeps) {
     registerAlertTypes({
-      alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
+      ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
       config: this.initializerContext.config.get<Config>(),
     });
   }

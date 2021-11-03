@@ -10,7 +10,8 @@ import moment from 'moment';
 import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import type { estypes } from '@elastic/elasticsearch';
+import { isRangeFilter } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   IEsSearchResponse,
@@ -22,8 +23,8 @@ import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { TimeRange, getTime, isRangeFilter } from '../../../common';
+import { IndexPattern } from '../..';
+import { TimeRange, getTime, calculateBounds } from '../../../common';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 
@@ -125,6 +126,19 @@ export class AggConfigs {
     };
 
     this.aggs.forEach(updateAggTimeRange);
+  }
+
+  /**
+   * Returns the current time range as moment instance (date math will get resolved using the current "now" value or system time if not set)
+   * @returns Current time range as resolved date.
+   */
+  getResolvedTimeRange() {
+    return (
+      this.timeRange &&
+      calculateBounds(this.timeRange, {
+        forceNow: this.forceNow,
+      })
+    );
   }
 
   // clone method will reuse existing AggConfig in the list (will not create new instances)
@@ -344,9 +358,9 @@ export class AggConfigs {
   }
 
   getTimeShiftInterval(): moment.Duration | undefined {
-    const splitAgg = (this.getAll().filter(
-      (agg) => agg.type.type === AggGroupNames.Buckets
-    ) as IBucketAggConfig[]).find((agg) => agg.type.splitForTimeShift(agg, this));
+    const splitAgg = (
+      this.getAll().filter((agg) => agg.type.type === AggGroupNames.Buckets) as IBucketAggConfig[]
+    ).find((agg) => agg.type.splitForTimeShift(agg, this));
     return splitAgg?.type.getTimeShiftInterval(splitAgg);
   }
 
@@ -392,8 +406,8 @@ export class AggConfigs {
                     .map(([filter, field]) => ({
                       range: {
                         [field]: {
-                          gte: moment(filter?.range[field].gte).subtract(shift).toISOString(),
-                          lte: moment(filter?.range[field].lte).subtract(shift).toISOString(),
+                          gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
+                          lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
                         },
                       },
                     })),

@@ -13,7 +13,7 @@ import React from 'react';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { NewsfeedPluginBrowserConfig } from './types';
+import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
 
@@ -21,7 +21,8 @@ export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
 
 export class NewsfeedPublicPlugin
-  implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart> {
+  implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart>
+{
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject(1);
@@ -41,8 +42,10 @@ export class NewsfeedPublicPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
-    const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA);
+  public start(core: CoreStart, { screenshotMode }: NewsfeedPluginStartDependencies) {
+    const isScreenshotMode = screenshotMode.isScreenshotMode();
+
+    const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) => this.mount(api, target),
@@ -56,7 +59,7 @@ export class NewsfeedPublicPlugin
             pathTemplate: `/${endpoint}/v{VERSION}.json`,
           },
         });
-        const { fetchResults$ } = this.createNewsfeedApi(config, endpoint);
+        const { fetchResults$ } = this.createNewsfeedApi(config, endpoint, isScreenshotMode);
         return fetchResults$;
       },
     };
@@ -68,9 +71,10 @@ export class NewsfeedPublicPlugin
 
   private createNewsfeedApi(
     config: NewsfeedPluginBrowserConfig,
-    newsfeedId: NewsfeedApiEndpoint
+    newsfeedId: NewsfeedApiEndpoint,
+    isScreenshotMode: boolean
   ): NewsfeedApi {
-    const api = getApi(config, this.kibanaVersion, newsfeedId);
+    const api = getApi(config, this.kibanaVersion, newsfeedId, isScreenshotMode);
     return {
       markAsRead: api.markAsRead,
       fetchResults$: api.fetchResults$.pipe(

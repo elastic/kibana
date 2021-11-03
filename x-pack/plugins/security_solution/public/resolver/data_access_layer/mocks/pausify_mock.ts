@@ -154,9 +154,7 @@ export function pausifyMock<T>({
       /**
        * Fetch related events for an entity ID
        */
-      async eventsWithEntityIDAndCategory(
-        ...args
-      ): Promise<{
+      async eventsWithEntityIDAndCategory(...args): Promise<{
         events: SafeResolverEvent[];
         nextEvent: string | null;
       }> {

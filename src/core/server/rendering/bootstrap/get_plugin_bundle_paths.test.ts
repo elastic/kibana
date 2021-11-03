@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { InternalPluginInfo, UiPlugins } from '../../plugins';
+import { InternalPluginInfo, PluginType, UiPlugins } from '../../plugins';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 
 const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
@@ -26,6 +26,7 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
     uiPlugins.public.set(pluginId, {
       id: pluginId,
       configPath: 'config-path',
+      type: PluginType.standard,
       optionalPlugins: [],
       requiredPlugins: [],
       requiredBundles: deps,

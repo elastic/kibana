@@ -15,11 +15,19 @@ import { LicensingLogic, mountLicensingLogic } from './licensing_logic';
 describe('LicensingLogic', () => {
   const mockLicense = licensingMock.createLicense();
   const mockLicense$ = new BehaviorSubject(mockLicense);
-  const mount = () => mountLicensingLogic({ license$: mockLicense$ });
+  const mount = (props?: object) =>
+    mountLicensingLogic({ license$: mockLicense$, canManageLicense: true, ...props });
 
   beforeEach(() => {
     jest.clearAllMocks();
     resetContext({});
+  });
+
+  describe('canManageLicense', () => {
+    it('sets value from props', () => {
+      mount({ canManageLicense: false });
+      expect(LicensingLogic.values.canManageLicense).toEqual(false);
+    });
   });
 
   describe('setLicense()', () => {
@@ -61,7 +69,7 @@ describe('LicensingLogic', () => {
     describe('on unmount', () => {
       it('unsubscribes to the license observable', () => {
         const mockUnsubscribe = jest.fn();
-        const unmount = mountLicensingLogic({
+        const unmount = mount({
           license$: { subscribe: () => ({ unsubscribe: mockUnsubscribe }) } as any,
         });
         unmount();

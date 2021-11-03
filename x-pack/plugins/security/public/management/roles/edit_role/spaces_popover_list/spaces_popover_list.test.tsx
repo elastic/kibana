@@ -17,8 +17,8 @@ import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../../../../spaces/public';
 import { SpaceAvatarInternal } from '../../../../../../spaces/public/space_avatar/space_avatar_internal';
 import { spacesManagerMock } from '../../../../../../spaces/public/spaces_manager/mocks';
 import { getUiApi } from '../../../../../../spaces/public/ui_api';
@@ -46,7 +46,8 @@ const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();
 const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
-describe('SpacesPopoverList', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/101454
+describe.skip('SpacesPopoverList', () => {
   async function setup(spaces: Space[]) {
     const wrapper = mountWithIntl(
       <SpacesPopoverList spaces={spaces} buttonText="hello world" spacesApiUi={spacesApiUi} />

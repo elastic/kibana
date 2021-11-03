@@ -24,12 +24,12 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'envoyproxyLogs',
     name: i18n.translate('home.tutorials.envoyproxyLogs.nameTitle', {
-      defaultMessage: 'Envoy Proxy logs',
+      defaultMessage: 'Envoy Proxy Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.envoyproxyLogs.shortDescription', {
-      defaultMessage: 'Collect Envoy Proxy logs.',
+      defaultMessage: 'Collect and parse logs from Envoy Proxy with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.envoyproxyLogs.longDescription', {
       defaultMessage:
@@ -62,5 +62,6 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['elastic_stack', 'datastore'],
   };
 }

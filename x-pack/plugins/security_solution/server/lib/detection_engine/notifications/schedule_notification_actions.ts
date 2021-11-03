@@ -7,12 +7,42 @@
 
 import { mapKeys, snakeCase } from 'lodash/fp';
 import { AlertInstance } from '../../../../../alerting/server';
+import { expandDottedObject } from '../rule_types/utils';
 import { RuleParams } from '../schemas/rule_schemas';
-import { SignalSource } from '../signals/types';
+import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
+import { isRACAlert } from '../signals/utils';
+import { RACAlert } from '../rule_types/types';
 
 export type NotificationRuleTypeParams = RuleParams & {
-  name: string;
   id: string;
+  name: string;
+};
+
+const convertToLegacyAlert = (alert: RACAlert) =>
+  Object.entries(aadFieldConversion).reduce((acc, [legacyField, aadField]) => {
+    const val = alert[aadField];
+    if (val != null) {
+      return {
+        ...acc,
+        [legacyField]: val,
+      };
+    }
+    return acc;
+  }, {});
+
+/*
+ * Formats alerts before sending to `scheduleActions`. We augment the context with
+ * the equivalent "legacy" alert context so that pre-8.0 actions will continue to work.
+ */
+const formatAlertsForNotificationActions = (alerts: unknown[]): unknown[] => {
+  return alerts.map((alert) =>
+    isRACAlert(alert)
+      ? {
+          ...expandDottedObject(convertToLegacyAlert(alert)),
+          ...expandDottedObject(alert),
+        }
+      : alert
+  );
 };
 
 interface ScheduleNotificationActions {
@@ -20,7 +50,7 @@ interface ScheduleNotificationActions {
   signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
-  signals: SignalSource[];
+  signals: unknown[];
 }
 
 export const scheduleNotificationActions = ({
@@ -37,5 +67,5 @@ export const scheduleNotificationActions = ({
     .scheduleActions('default', {
       results_link: resultsLink,
       rule: mapKeys(snakeCase, ruleParams),
-      alerts: signals,
+      alerts: formatAlertsForNotificationActions(signals),
     });

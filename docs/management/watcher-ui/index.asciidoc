@@ -123,9 +123,6 @@ in {es} for this example to work.
 you want to send the message when the condition is met.
 
 . Enter a subject and body for the email.
-+
-[role="screenshot"]
-image:management/watcher-ui/images/threshold-alert/threshold-alert-action.png["Action for threshold alert"]
 
 . To test the action before saving the watch, click *Send test email*.
 +

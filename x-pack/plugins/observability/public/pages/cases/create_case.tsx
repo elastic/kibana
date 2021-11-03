@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../../components/app/cases/translations';
 import { Create } from '../../components/app/cases/create';
-import { CASES_APP_ID } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { getCaseUrl, useFormatUrl } from './links';
-import { casesBreadcrumbs, useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { casesBreadcrumbs, getCaseUrl, useFormatUrl } from './links';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { observabilityAppId } from '../../../common';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
@@ -25,24 +25,27 @@ export const CreateCasePage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const {
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
 
+  const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
   const goTo = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(CASES_APP_ID);
+      return navigateToUrl(casesUrl);
     },
-    [navigateToApp]
+    [casesUrl, navigateToUrl]
   );
 
-  const { formatUrl } = useFormatUrl(CASES_APP_ID);
+  const { formatUrl } = useFormatUrl();
   const href = formatUrl(getCaseUrl());
   useBreadcrumbs([{ ...casesBreadcrumbs.cases, href }, casesBreadcrumbs.create]);
-  if (userPermissions != null && !userPermissions.crud) {
-    navigateToApp(`${CASES_APP_ID}`);
-    return null;
-  }
+
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.crud) {
+      navigateToUrl(casesUrl);
+    }
+  }, [casesUrl, navigateToUrl, userPermissions]);
 
   return (
     <ObservabilityPageTemplate

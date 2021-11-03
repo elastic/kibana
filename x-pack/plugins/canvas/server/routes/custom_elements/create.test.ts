@@ -12,13 +12,13 @@ import { initializeCreateCustomElementRoute } from './create';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
 const mockedUUID = '123abc';
 const now = new Date();

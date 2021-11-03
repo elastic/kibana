@@ -5,13 +5,11 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiText, EuiBetaBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
-
-import { HeroImage } from '../sections/epm/screens/home/header';
 
 import { WithHeaderLayout } from './';
 
@@ -25,29 +23,37 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
 
   return (
     <WithHeaderLayout
-      rightColumn={<HeroImage />}
       leftColumn={
-        <EuiText>
-          <h1>
-            <FormattedMessage id="xpack.fleet.integrationsAppTitle" defaultMessage="Integrations" />{' '}
-            <EuiBetaBadge
-              label={<FormattedMessage id="xpack.fleet.betaLabel" defaultMessage="Beta" />}
-              tooltipContent={
+        <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+          <EuiText>
+            <h1>
+              <FormattedMessage
+                id="xpack.fleet.integrationsHeaderTitle"
+                defaultMessage="Integrations"
+              />
+            </h1>
+          </EuiText>
+
+          <EuiSpacer size="s" />
+
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <p>
                 <FormattedMessage
-                  id="xpack.fleet.integrationsBetaDescription"
-                  defaultMessage="Fleet is not recommended for production environments."
+                  id="xpack.fleet.epm.pageSubtitle"
+                  defaultMessage="Choose an integration to start collecting and analyzing your data."
                 />
-              }
-            />
-          </h1>
-        </EuiText>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       tabs={[
         {
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.integrationsAllLinkText"
-              defaultMessage="Browse"
+              defaultMessage="Browse integrations"
             />
           ),
           isSelected: section === 'browse',
@@ -57,7 +63,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.integrationsInstalledLinkText"
-              defaultMessage="Manage"
+              defaultMessage="Installed integrations"
             />
           ),
           isSelected: section === 'manage',

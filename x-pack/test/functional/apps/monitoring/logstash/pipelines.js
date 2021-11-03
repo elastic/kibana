@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }) {
   const pipelinesList = getService('monitoringLogstashPipelines');
   const lsClusterSummaryStatus = getService('monitoringLogstashSummaryStatus');
 
-  describe('Logstash pipelines', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/116070
+  describe.skip('Logstash pipelines', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
@@ -23,6 +24,8 @@ export default function ({ getService, getPageObjects }) {
         from: 'Jan 22, 2018 @ 09:10:00.000',
         to: 'Jan 22, 2018 @ 09:41:00.000',
       });
+
+      await overview.closeAlertsModal();
 
       // go to pipelines listing
       await overview.clickLsPipelines();

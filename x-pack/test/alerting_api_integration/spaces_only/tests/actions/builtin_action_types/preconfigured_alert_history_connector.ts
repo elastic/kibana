@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getTestAlertData, ObjectRemover } from '../../../../common/lib';
 import { AlertHistoryDefaultIndexName } from '../../../../../../plugins/actions/common';
@@ -17,7 +16,7 @@ const ALERT_HISTORY_OVERRIDE_INDEX = 'kibana-alert-history-not-the-default';
 export default function preconfiguredAlertHistoryConnectorTests({
   getService,
 }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertest = getService('supertest');
   const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -66,7 +65,7 @@ export default function preconfiguredAlertHistoryConnectorTests({
       await waitForStatus(response.body.id, new Set(['active']));
 
       await retry.try(async () => {
-        const result = await es.search({
+        const result = await es.search<any>({
           index: AlertHistoryDefaultIndexName,
         });
         const indexedItems = result.hits.hits;
@@ -104,7 +103,7 @@ export default function preconfiguredAlertHistoryConnectorTests({
       await waitForStatus(response.body.id, new Set(['active']));
 
       await retry.try(async () => {
-        const result = await es.search({
+        const result = await es.search<any>({
           index: ALERT_HISTORY_OVERRIDE_INDEX,
         });
         const indexedItems = result.hits.hits;

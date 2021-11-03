@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export function test(value: any) {
+export function test(value?: Record<string, unknown>) {
   return value && value.__reactMount__;
 }
 
-export function print(value: any, serialize: any) {
+export function print(
+  value: Record<string, unknown>,
+  serialize: (args: Record<string, unknown>) => { replace: (s1: string, s2: string) => unknown }
+) {
   // there is no proper way to correctly indent multiline values
   // so the trick here is to use the Object representation and rewriting the root object name
   return serialize({

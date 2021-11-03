@@ -35,7 +35,11 @@ const defaultDynamicProperties = getDefaultDynamicProperties();
 const euiVisColorPalette = euiPaletteColorBlind();
 
 function isApmIndex(indexPatternTitle: string) {
-  return minimatch(indexPatternTitle, APM_INDEX_PATTERN_TITLE);
+  return APM_INDEX_PATTERN_TITLE.split(',')
+    .map((pattern) => {
+      return minimatch(indexPatternTitle, pattern);
+    })
+    .some(Boolean);
 }
 
 function getSourceField(indexPatternTitle: string) {

@@ -12,25 +12,19 @@ import { calculateAuto } from './calculate_auto';
 export function getBucketSize({
   start,
   end,
-  numBuckets = 100,
+  numBuckets = 50,
+  minBucketSize,
 }: {
   start: number;
   end: number;
   numBuckets?: number;
+  minBucketSize?: number;
 }) {
   const duration = moment.duration(end - start, 'ms');
   const bucketSize = Math.max(
     calculateAuto.near(numBuckets, duration).asSeconds(),
-    1
+    minBucketSize || 1
   );
-  const intervalString = `${bucketSize}s`;
 
-  if (bucketSize < 0) {
-    return {
-      bucketSize: 0,
-      intervalString: 'auto',
-    };
-  }
-
-  return { bucketSize, intervalString };
+  return { bucketSize, intervalString: `${bucketSize}s` };
 }

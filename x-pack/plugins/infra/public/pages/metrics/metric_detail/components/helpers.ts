@@ -23,10 +23,10 @@ import {
 /**
  * Returns a formatter
  */
-export const getFormatter = (
-  formatter: InventoryFormatterType = 'number',
-  template: string = '{{value}}'
-) => (val: ReactText) => (val != null ? createFormatter(formatter, template)(val) : '');
+export const getFormatter =
+  (formatter: InventoryFormatterType = 'number', template: string = '{{value}}') =>
+  (val: ReactText) =>
+    val != null ? createFormatter(formatter, template)(val) : '';
 
 /**
  * Does a series have more then two points?

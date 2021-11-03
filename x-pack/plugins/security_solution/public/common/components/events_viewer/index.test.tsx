@@ -16,11 +16,15 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
+import { EntityType } from '../../../../../timelines/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -36,8 +40,10 @@ const from = '2019-08-27T22:10:56.794Z';
 const to = '2019-08-26T22:10:56.791Z';
 
 const testProps = {
+  defaultCellActions,
   defaultModel: eventsDefaultModel,
   end: to,
+  entityType: EntityType.ALERTS,
   indexNames: [],
   id: TimelineId.test,
   renderCellValue: DefaultCellRenderer,
@@ -60,7 +66,7 @@ describe('StatefulEventsViewer', () => {
     await waitFor(() => {
       wrapper.update();
 
-      expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
+      expect(wrapper.text()).toMatchInlineSnapshot(`"hello grid"`);
     });
   });
 

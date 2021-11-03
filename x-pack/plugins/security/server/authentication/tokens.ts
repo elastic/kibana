@@ -73,7 +73,7 @@ export class Tokens {
       return {
         accessToken,
         refreshToken,
-        // @ts-expect-error @elastic/elasticsearch declared GetUserAccessTokenResponse.authentication: string
+        // @ts-expect-error @elastic/elasticsearch user metadata defined as Record<string, any>
         authenticationInfo: authenticationInfo as AuthenticationInfo,
       };
     } catch (err) {

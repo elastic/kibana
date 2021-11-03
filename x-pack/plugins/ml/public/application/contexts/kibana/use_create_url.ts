@@ -7,47 +7,46 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useMlKibana } from './kibana_context';
-import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
-import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
+import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
+import { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
+import { LocatorGetUrlParams } from '../../../../../../../src/plugins/share/common/url_service';
 
-export const useMlUrlGenerator = () => {
+export const useMlLocator = () => {
   const {
-    services: {
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
-    },
+    services: { share },
   } = useMlKibana();
 
-  return getUrlGenerator(ML_APP_URL_GENERATOR);
+  return share.url.locators.get(ML_APP_LOCATOR);
 };
 
-export const useMlLink = (params: MlUrlGeneratorState): string => {
+export const useMlLink = (params: MlLocatorParams, getUrlParams?: LocatorGetUrlParams): string => {
   const [href, setHref] = useState<string>(params.page);
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
 
   useEffect(() => {
     let isCancelled = false;
-    const generateUrl = async (_params: MlUrlGeneratorState) => {
-      const url = await mlUrlGenerator.createUrl(_params);
-      if (!isCancelled) {
-        setHref(url);
+    const generateUrl = async (_params: MlLocatorParams) => {
+      if (mlLocator) {
+        const url = await mlLocator.getUrl(_params, getUrlParams);
+        if (!isCancelled) {
+          setHref(url);
+        }
       }
     };
     generateUrl(params);
     return () => {
       isCancelled = true;
     };
-  }, [params]);
+  }, [params, getUrlParams]);
 
   return href;
 };
 
 export const useCreateAndNavigateToMlLink = (
-  page: MlUrlGeneratorState['page']
+  page: MlLocatorParams['page']
 ): (() => Promise<void>) => {
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const [globalState] = useUrlState('_g');
 
   const {
@@ -57,7 +56,7 @@ export const useCreateAndNavigateToMlLink = (
   } = useMlKibana();
 
   const redirectToMlPage = useCallback(
-    async (_page: MlUrlGeneratorState['page']) => {
+    async (_page: MlLocatorParams['page']) => {
       const pageState =
         globalState?.refreshInterval !== undefined
           ? {
@@ -69,10 +68,10 @@ export const useCreateAndNavigateToMlLink = (
 
       // TODO: fix ts only interpreting it as MlUrlGenericState if pageState is passed
       // @ts-ignore
-      const url = await mlUrlGenerator.createUrl({ page: _page, pageState });
+      const url = await mlLocator.getUrl({ page: _page, pageState });
       await navigateToUrl(url);
     },
-    [mlUrlGenerator, navigateToUrl]
+    [mlLocator, navigateToUrl]
   );
 
   // returns the onClick callback

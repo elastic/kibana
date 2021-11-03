@@ -7,55 +7,41 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlerData, CrawlerDataFromServer, CrawlerDomain } from './types';
-import { crawlerDataServerToClient } from './utils';
-
-interface CrawlerOverviewValues {
-  dataLoading: boolean;
-  domains: CrawlerDomain[];
-}
+import { CrawlerLogic } from './crawler_logic';
+import { CrawlerDataFromServer, CrawlerDomain } from './types';
+import { crawlerDataServerToClient, getDeleteDomainSuccessMessage } from './utils';
 
 interface CrawlerOverviewActions {
-  fetchCrawlerData(): void;
-  onFetchCrawlerData(data: CrawlerData): { data: CrawlerData };
+  deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
 }
 
-export const CrawlerOverviewLogic = kea<
-  MakeLogicType<CrawlerOverviewValues, CrawlerOverviewActions>
->({
+export const CrawlerOverviewLogic = kea<MakeLogicType<{}, CrawlerOverviewActions>>({
   path: ['enterprise_search', 'app_search', 'crawler', 'crawler_overview'],
   actions: {
-    fetchCrawlerData: true,
-    onFetchCrawlerData: (data) => ({ data }),
+    deleteDomain: (domain) => ({ domain }),
   },
-  reducers: {
-    dataLoading: [
-      true,
-      {
-        onFetchCrawlerData: () => false,
-      },
-    ],
-    domains: [
-      [],
-      {
-        onFetchCrawlerData: (_, { data: { domains } }) => domains,
-      },
-    ],
-  },
-  listeners: ({ actions }) => ({
-    fetchCrawlerData: async () => {
+  listeners: () => ({
+    deleteDomain: async ({ domain }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
-        const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
-        actions.onFetchCrawlerData(crawlerData);
+        const response = await http.delete<CrawlerDataFromServer>(
+          `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
+          {
+            query: {
+              respond_with: 'crawler_details',
+            },
+          }
+        );
+        const crawlerData = crawlerDataServerToClient(response);
+        CrawlerLogic.actions.onReceiveCrawlerData(crawlerData);
+        flashSuccessToast(getDeleteDomainSuccessMessage(domain.url));
       } catch (e) {
         flashAPIErrors(e);
       }

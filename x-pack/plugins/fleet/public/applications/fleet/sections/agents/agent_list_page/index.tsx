@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 
-import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
+import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
   useCapabilities,
@@ -42,7 +42,7 @@ import {
   ContextMenuActions,
 } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENT_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -73,7 +73,7 @@ const RowActions = React.memo<{
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
-      href={getHref('fleet_agent_details', { agentId: agent.id })}
+      href={getHref('agent_details', { agentId: agent.id })}
       key="viewAgent"
     >
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
@@ -146,7 +146,7 @@ function safeMetadata(val: any) {
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications } = useStartServices();
-  useBreadcrumbs('fleet_agent_list');
+  useBreadcrumbs('agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
@@ -328,6 +328,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
+    full: true,
   });
 
   const agentPolicies = useMemo(
@@ -351,6 +352,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return !isHosted;
   };
 
+  const agentToUnenrollHasFleetServer = useMemo(() => {
+    if (!agentToUnenroll || !agentToUnenroll.policy_id) {
+      return false;
+    }
+
+    const agentPolicy = agentPoliciesIndexedById[agentToUnenroll.policy_id];
+
+    if (!agentPolicy) {
+      return false;
+    }
+
+    return agentPolicy.package_policies.some(
+      (ap: string | PackagePolicy) =>
+        typeof ap !== 'string' && ap.package?.name === FLEET_SERVER_PACKAGE
+    );
+  }, [agentToUnenroll, agentPoliciesIndexedById]);
+
   const columns = [
     {
       field: 'local_metadata.host.hostname',
@@ -358,7 +376,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
-        <EuiLink href={getHref('fleet_agent_details', { agentId: agent.id })}>
+        <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
           {safeMetadata(host)}
         </EuiLink>
       ),
@@ -512,6 +530,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               fetchData();
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
+            hasFleetServer={agentToUnenrollHasFleetServer}
           />
         </EuiPortal>
       )}

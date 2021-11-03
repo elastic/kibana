@@ -48,8 +48,9 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
-    ...omit(executionStatus, 'lastExecutionDate'),
+    ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
     last_execution_date: executionStatus.lastExecutionDate,
+    last_duration: executionStatus.lastDuration,
   },
   actions: actions.map(({ group, id, actionTypeId, params }) => ({
     group,
@@ -72,9 +73,9 @@ export const getRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
-        const rule = await alertsClient.get({ id });
+        const rule = await rulesClient.get({ id });
         return res.ok({
           body: rewriteBodyRes(rule),
         });

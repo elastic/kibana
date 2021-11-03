@@ -12,9 +12,10 @@ import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
+const logFilePath = Path.join(__dirname, 'corrupt_outdated_docs.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -39,7 +40,7 @@ describe('migration v2 with corrupt saved object documents', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it('collects corrupt saved object documents accross batches', async () => {
+  it.skip('collects corrupt saved object documents across batches', async () => {
     const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
@@ -75,6 +76,7 @@ describe('migration v2 with corrupt saved object documents', () => {
     root = createRoot();
 
     esServer = await startES();
+    await root.preboot();
     const coreSetup = await root.setup();
 
     coreSetup.savedObjects.registerType({
@@ -110,11 +112,13 @@ describe('migration v2 with corrupt saved object documents', () => {
       const errorMessage = err.message;
       expect(
         errorMessage.startsWith(
-          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: '
+          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 19 corrupt saved object documents were found: '
         )
       ).toBeTruthy();
       expect(
-        errorMessage.endsWith(' To allow migrations to proceed, please delete these documents.')
+        errorMessage.endsWith(
+          'To allow migrations to proceed, please delete or fix these documents.'
+        )
       ).toBeTruthy();
       const expectedCorruptDocIds = [
         '"foo:my_name"',
@@ -149,7 +153,6 @@ function createRoot() {
     {
       migrations: {
         skip: false,
-        enableV2: true,
         batchSize: 5,
       },
       logging: {

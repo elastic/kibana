@@ -16,17 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard Panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-
-      await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('dashboard');
       await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
     });
 
     it('dashboard panel open ', async () => {
-      const header = await dashboardPanelActions.getPanelHeading('[Flights] Airline Carrier');
+      const header = await dashboardPanelActions.getPanelHeading('[Flights] Flight count');
       await dashboardPanelActions.toggleContextMenu(header);
       await a11y.testAppSnapshot();
       // doing this again will close the Context Menu, so that next snapshot can start clean.
@@ -34,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel inspect', async () => {
-      await dashboardPanelActions.openInspectorByTitle('[Flights] Airline Carrier');
+      await dashboardPanelActions.openInspectorByTitle('[Flights] Flight count');
       await a11y.testAppSnapshot();
     });
 
@@ -61,9 +56,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel full screen', async () => {
-      const header = await dashboardPanelActions.getPanelHeading('[Flights] Airline Carrier');
+      const header = await dashboardPanelActions.getPanelHeading('[Flights] Flight count');
       await dashboardPanelActions.toggleContextMenu(header);
-      await dashboardPanelActions.clickContextMenuMoreItem();
 
       await testSubjects.click('embeddablePanelAction-togglePanel');
       await a11y.testAppSnapshot();

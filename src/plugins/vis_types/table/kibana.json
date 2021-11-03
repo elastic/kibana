@@ -1,0 +1,23 @@
+{
+  "id": "visTypeTable",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "expressions",
+    "visualizations",
+    "data"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "share",
+    "visDefaultEditor"
+  ],
+  "optionalPlugins": ["usageCollection"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "Registers the datatable aggregation-based visualization."
+}

@@ -24,7 +24,7 @@ export const RangeField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
-      const event = ({ ...e, value: `${e.currentTarget.value}` } as unknown) as React.ChangeEvent<{
+      const event = { ...e, value: `${e.currentTarget.value}` } as unknown as React.ChangeEvent<{
         value: string;
       }>;
       onFieldChange(event);

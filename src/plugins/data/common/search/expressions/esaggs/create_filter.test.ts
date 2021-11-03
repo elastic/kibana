@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isRangeFilter } from '../../../es_query/filters';
-import { BytesFormat, FieldFormatsGetConfigFn } from '../../../field_formats';
+import { isRangeFilter } from '@kbn/es-query';
+import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../field_formats/common';
 import { AggConfigs, IAggConfig } from '../../aggs';
 import { mockAggTypesRegistry } from '../../aggs/test_helpers';
 
@@ -93,7 +93,7 @@ describe('createFilter', () => {
 
     if (filters) {
       expect(filters.length).toEqual(1);
-      expect(filters[0].query.match_phrase.bytes).toEqual('2048');
+      expect(filters[0].query!.match_phrase!.bytes).toEqual('2048');
     }
   });
 
@@ -109,8 +109,8 @@ describe('createFilter', () => {
       const [rangeFilter] = filters;
 
       if (isRangeFilter(rangeFilter)) {
-        expect(rangeFilter.range.bytes.gte).toEqual(2048);
-        expect(rangeFilter.range.bytes.lt).toEqual(2078);
+        expect(rangeFilter.query.range.bytes.gte).toEqual(2048);
+        expect(rangeFilter.query.range.bytes.lt).toEqual(2078);
       }
     }
   });

@@ -15,10 +15,6 @@ import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
 import { ChromeBreadcrumbsAppendExtension } from '../../types';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
-
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
   const application = applicationServiceMock.createInternalStartContract();
@@ -99,7 +95,7 @@ describe('Header', () => {
 
     act(() => isLocked$.next(true));
     component.update();
-    expect(component.find('nav[aria-label="Primary"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="collapsibleNav"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
 
     act(() =>

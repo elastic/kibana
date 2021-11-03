@@ -8,6 +8,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { IndexPattern } from 'src/plugins/data/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,10 +25,10 @@ import {
   keys,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
-import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
 import { getContextUrl } from '../../helpers/get_context_url';
+import { getSingleDocUrl } from '../../helpers/get_single_doc_url';
 
 interface Props {
   columns: string[];
@@ -69,6 +70,8 @@ export function DiscoverGridFlyout({
   services,
   setExpandedDoc,
 }: Props) {
+  // Get actual hit with updated highlighted searches
+  const actualHit = useMemo(() => hits?.find(({ _id }) => _id === hit?._id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
   const activePage = useMemo<number>(() => {
     const id = getDocFingerprintId(hit);
@@ -106,6 +109,7 @@ export function DiscoverGridFlyout({
         size="m"
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
+        ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle
@@ -138,11 +142,7 @@ export function DiscoverGridFlyout({
                 size="xs"
                 iconType="document"
                 flush="left"
-                href={services.addBasePath(
-                  `/app/discover#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
-                    hit._id as string
-                  )}`
-                )}
+                href={services.addBasePath(getSingleDocUrl(indexPattern.id!, hit._index, hit._id))}
                 data-test-subj="docTableRowAction"
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
@@ -172,7 +172,7 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             )}
             {activePage !== -1 && (
-              <EuiFlexItem>
+              <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination
                   aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
                     defaultMessage: 'Document navigation',
@@ -190,7 +190,7 @@ export function DiscoverGridFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <DocViewer
-            hit={hit}
+            hit={actualHit}
             columns={columns}
             indexPattern={indexPattern}
             filter={(mapping, value, mode) => {

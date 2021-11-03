@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
-import { useGetUserCasesPermissions } from '../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
-import { permissionsReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
+import { APP_UI_ID } from '../../../common/constants';
+import { Case } from '../../../../cases/common';
 
 export const CaseDetailsPage = React.memo(() => {
-  const history = useHistory();
+  const {
+    application: { navigateToApp },
+  } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;
@@ -27,27 +30,39 @@ export const CaseDetailsPage = React.memo(() => {
   }>();
   const search = useGetUrlSearch(navTabs.case);
 
-  if (userPermissions != null && !userPermissions.read) {
-    history.replace(getCaseUrl(search));
-    return null;
-  }
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.case,
+        path: getCaseUrl(search),
+      });
+    }
+  }, [userPermissions, navigateToApp, search]);
+
+  const [spyState, setSpyState] = useState<{ caseTitle: string | undefined }>({
+    caseTitle: undefined,
+  });
+
+  const onCaseDataSuccess = useCallback(
+    (data: Case) => {
+      if (spyState.caseTitle === undefined || spyState.caseTitle !== data.title) {
+        setSpyState({ caseTitle: data.title });
+      }
+    },
+    [spyState.caseTitle]
+  );
 
   return caseId != null ? (
     <>
-      <WrapperPage noPadding>
-        {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
-          <CaseCallOut
-            title={permissionsReadOnlyErrorMessage.title}
-            messages={[{ ...permissionsReadOnlyErrorMessage, title: '' }]}
-          />
-        )}
+      <SecuritySolutionPageWrapper noPadding>
         <CaseView
           caseId={caseId}
           subCaseId={subCaseId}
           userCanCrud={userPermissions?.crud ?? false}
+          onCaseDataSuccess={onCaseDataSuccess}
         />
-      </WrapperPage>
-      <SpyRoute pageName={SecurityPageName.case} />
+      </SecuritySolutionPageWrapper>
+      <SpyRoute state={spyState} pageName={SecurityPageName.case} />
     </>
   ) : null;
 });

@@ -23,10 +23,10 @@ describe('Discover flyout', function () {
 
   const getProps = () => {
     const onClose = jest.fn();
-    const services = ({
+    const services = {
       filterManager: createFilterManagerMock(),
       addBasePath: (path: string) => `/base${path}`,
-    } as unknown) as DiscoverServices;
+    } as unknown as DiscoverServices;
 
     return {
       columns: ['date'],

@@ -44,7 +44,8 @@ interface StartServices {
 export type TodoEmbeddableFactory = EmbeddableFactory<TodoInput, TodoOutput, TodoEmbeddable>;
 
 export class TodoEmbeddableFactoryDefinition
-  implements EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable> {
+  implements EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable>
+{
   public readonly type = TODO_EMBEDDABLE;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}

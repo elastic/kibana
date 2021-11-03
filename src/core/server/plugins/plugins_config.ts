@@ -24,7 +24,6 @@ export type PluginsConfigType = TypeOf<typeof configSchema>;
 export const config: ServiceConfigDescriptor<PluginsConfigType> = {
   path: 'plugins',
   schema: configSchema,
-  deprecations: ({ unusedFromRoot }) => [unusedFromRoot('plugins.scanDirs')],
 };
 
 /** @internal */

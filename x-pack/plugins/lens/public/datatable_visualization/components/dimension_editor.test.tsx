@@ -7,15 +7,16 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
-import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
+import { FramePublicAPI, Operation, VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
-import { createMockDatasource, createMockFramePublicAPI } from '../../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { TableDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { PalettePanelContainer } from './palette_panel_container';
 import { act } from 'react-dom/test-utils';
+import { PalettePanelContainer } from '../../shared_components';
+import { layerTypes } from '../../../common';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;
@@ -28,6 +29,7 @@ describe('data table dimension editor', () => {
   function testState(): DatatableVisualizationState {
     return {
       layerId: 'first',
+      layerType: layerTypes.DATA,
       columns: [
         {
           columnId: 'foo',
@@ -203,14 +205,30 @@ describe('data table dimension editor', () => {
     state.columns[0].colorMode = 'cell';
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);
 
-    act(() =>
-      (instance
+    act(() => {
+      instance
         .find('[data-test-subj="lnsDatatable_dynamicColoring_trigger"]')
         .first()
-        .prop('onClick') as () => void)?.()
-    );
+        .simulate('click');
+    });
 
     expect(instance.find(PalettePanelContainer).exists()).toBe(true);
+  });
+
+  it('should not show the dynamic coloring option for a bucketed operation', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    frame.datasourceLayers.first.getOperationForColumnId = jest.fn(
+      () => ({ isBucketed: true } as Operation)
+    );
+    state.columns[0].colorMode = 'cell';
+    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
+
+    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_groups"]').exists()).toBe(
+      false
+    );
+    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_palette"]').exists()).toBe(
+      false
+    );
   });
 
   it('should show the summary field for non numeric columns', () => {

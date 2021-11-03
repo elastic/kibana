@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('security', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
@@ -132,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`index pattern listing doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('emptyIndexPatternPrompt');
-        await testSubjects.missingOrFail('createIndexPatternButton');
+        await testSubjects.missingOrFail('createIndexPatternButtonFlyout');
       });
 
       it(`shows read-only badge`, async () => {
@@ -178,7 +179,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Discover']);
+        expect(navLinks).to.eql(['Discover']);
       });
 
       it(`doesn't show Index Patterns in management side-nav`, async () => {

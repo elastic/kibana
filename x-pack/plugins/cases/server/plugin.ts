@@ -13,15 +13,14 @@ import {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '../../actions/server';
-import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common/constants';
+import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
 
-import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
 import {
-  caseCommentSavedObjectType,
+  createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
   caseConnectorMappingsSavedObjectType,
-  caseSavedObjectType,
+  createCaseSavedObjectType,
   caseUserActionSavedObjectType,
   subCaseSavedObjectType,
 } from './saved_object_types';
@@ -32,14 +31,12 @@ import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
-
-function createConfig(context: PluginInitializerContext) {
-  return context.config.get<ConfigType>();
-}
+import { LensServerPluginSetup } from '../../lens/server';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
   actions: ActionsPluginSetup;
+  lens: LensServerPluginSetup;
 }
 
 export interface PluginsStart {
@@ -66,25 +63,27 @@ export class CasePlugin {
   private readonly log: Logger;
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
+  private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.log);
   }
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = createConfig(this.initializerContext);
-
-    if (!config.enabled) {
-      return;
-    }
-
+  public setup(core: CoreSetup, plugins: PluginsSetup) {
     this.securityPluginSetup = plugins.security;
+    this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
-    core.savedObjects.registerType(caseCommentSavedObjectType);
+    core.savedObjects.registerType(
+      createCaseCommentSavedObjectType({
+        migrationDeps: {
+          lensEmbeddableFactory: this.lensEmbeddableFactory,
+        },
+      })
+    );
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
-    core.savedObjects.registerType(caseSavedObjectType);
+    core.savedObjects.registerType(createCaseSavedObjectType(core, this.log));
     core.savedObjects.registerType(caseUserActionSavedObjectType);
 
     this.log.debug(
@@ -127,6 +126,7 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
+      lensEmbeddableFactory: this.lensEmbeddableFactory!,
     });
 
     const client = core.elasticsearch.client;

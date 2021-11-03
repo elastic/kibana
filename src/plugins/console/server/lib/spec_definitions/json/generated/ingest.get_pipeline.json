@@ -1,6 +1,7 @@
 {
   "ingest.get_pipeline": {
     "url_params": {
+      "summary": "__flag__",
       "master_timeout": ""
     },
     "methods": [

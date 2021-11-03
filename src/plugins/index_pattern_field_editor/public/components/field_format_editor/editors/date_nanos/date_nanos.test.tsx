@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import type { FieldFormat } from 'src/plugins/data/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 
 import { DateNanosFormatEditor } from './date_nanos';
 
@@ -36,7 +36,7 @@ describe('DateFormatEditor', () => {
     const component = shallow(
       <DateNanosFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

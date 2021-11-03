@@ -18,7 +18,11 @@ export const TopQueriesNoResults: React.FC = () => {
   const { topQueriesNoResults } = useValues(AnalyticsLogic);
 
   return (
-    <AnalyticsLayout isAnalyticsView title={TOP_QUERIES_NO_RESULTS}>
+    <AnalyticsLayout
+      isAnalyticsView
+      title={TOP_QUERIES_NO_RESULTS}
+      breadcrumbs={[TOP_QUERIES_NO_RESULTS]}
+    >
       <AnalyticsSearch />
       <AnalyticsTable items={topQueriesNoResults} hasClicks />
     </AnalyticsLayout>

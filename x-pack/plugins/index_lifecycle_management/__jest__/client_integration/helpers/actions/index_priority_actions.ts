@@ -8,7 +8,7 @@
 import { TestBed } from '@kbn/test/jest';
 import { Phase } from '../../../../common/types';
 import { createFormToggleAction } from './form_toggle_action';
-import { createFormSetValueAction } from './form_set_value_action';
+import { createFormToggleAndSetValueAction } from './form_toggle_and_set_value_action';
 
 export const createIndexPriorityActions = (testBed: TestBed, phase: Phase) => {
   const { exists } = testBed;
@@ -16,6 +16,10 @@ export const createIndexPriorityActions = (testBed: TestBed, phase: Phase) => {
   return {
     indexPriorityExists: () => exists(toggleSelector),
     toggleIndexPriority: createFormToggleAction(testBed, toggleSelector),
-    setIndexPriority: createFormSetValueAction(testBed, `${phase}-indexPriority`),
+    setIndexPriority: createFormToggleAndSetValueAction(
+      testBed,
+      toggleSelector,
+      `${phase}-indexPriority`
+    ),
   };
 };

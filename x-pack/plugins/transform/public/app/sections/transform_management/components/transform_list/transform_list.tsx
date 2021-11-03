@@ -10,12 +10,15 @@ import React, { MouseEventHandler, FC, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageContent,
   EuiPopover,
+  EuiSpacer,
   EuiTitle,
   EuiInMemoryTable,
   EuiSearchBarProps,
@@ -47,15 +50,18 @@ import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { transformFilters, filterTransforms } from './transform_search_bar_filters';
 import { useTableSettings } from './use_table_settings';
+import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
+import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
-  transforms: TransformListRow[]
+  transforms: TransformListRow[],
+  onAlertEdit: (alertRule: TransformHealthAlertRule) => void
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
     const item = transforms.find((transform) => transform.config.id === transformId);
     if (item !== undefined) {
-      m[transformId] = <ExpandedRow item={item} />;
+      m[transformId] = <ExpandedRow item={item} onAlertEdit={onAlertEdit} />;
     }
     return m;
   }, {} as ItemIdToExpandedRowMap);
@@ -76,6 +82,7 @@ export const TransformList: FC<TransformListProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
+  const { setEditAlertRule } = useAlertRuleFlyout();
 
   const [filterActive, setFilterActive] = useState(false);
 
@@ -135,31 +142,44 @@ export const TransformList: FC<TransformListProps> = ({
 
   if (transforms.length === 0) {
     return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            {i18n.translate('xpack.transform.list.emptyPromptTitle', {
-              defaultMessage: 'No transforms found',
-            })}
-          </h2>
-        }
-        actions={[
-          <EuiButtonEmpty
-            onClick={onCreateTransform}
-            isDisabled={disabled}
-            data-test-subj="transformCreateFirstButton"
-          >
-            {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
-              defaultMessage: 'Create your first transform',
-            })}
-          </EuiButtonEmpty>,
-        ]}
-        data-test-subj="transformNoTransformsFound"
-      />
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="l" />
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+            <EuiEmptyPrompt
+              title={
+                <h2>
+                  {i18n.translate('xpack.transform.list.emptyPromptTitle', {
+                    defaultMessage: 'No transforms found',
+                  })}
+                </h2>
+              }
+              actions={[
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onCreateTransform}
+                  isDisabled={disabled}
+                  data-test-subj="transformCreateFirstButton"
+                >
+                  {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
+                    defaultMessage: 'Create your first transform',
+                  })}
+                </EuiButton>,
+              ]}
+              data-test-subj="transformNoTransformsFound"
+            />
+          </EuiPageContent>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
-  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, transforms);
+  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(
+    expandedRowItemIds,
+    transforms,
+    setEditAlertRule
+  );
 
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">

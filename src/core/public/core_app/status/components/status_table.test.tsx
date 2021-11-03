@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import { StatusTable } from './status_table';
 
 const state = {
-  id: 'green',
+  id: 'available' as const,
   uiColor: 'secondary',
   message: 'Ready',
   title: 'green',

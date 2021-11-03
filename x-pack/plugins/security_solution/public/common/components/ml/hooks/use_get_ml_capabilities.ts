@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useAsync, withOptionalSignal } from '@kbn/securitysolution-list-hooks';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { getMlCapabilities } from '../api/get_ml_capabilities';
 
 const _getMlCapabilities = withOptionalSignal(getMlCapabilities);

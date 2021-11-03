@@ -9,12 +9,12 @@ import { useMemo } from 'react';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function useUxQuery() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useUrlParams();
 
   const { start, end, searchTerm, percentile } = urlParams;
 
   const queryParams = useMemo(() => {
-    const { serviceName } = uiFilters;
+    const { serviceName } = uxUiFilters;
 
     if (start && end && serviceName && percentile) {
       return {
@@ -22,12 +22,12 @@ export function useUxQuery() {
         end,
         percentile: String(percentile),
         urlQuery: searchTerm || undefined,
-        uiFilters: JSON.stringify(uiFilters),
+        uiFilters: JSON.stringify(uxUiFilters),
       };
     }
 
     return null;
-  }, [start, end, searchTerm, percentile, uiFilters]);
+  }, [start, end, searchTerm, percentile, uxUiFilters]);
 
   return queryParams;
 }

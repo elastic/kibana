@@ -45,7 +45,7 @@ describe('<FollowerIndicesList />', () => {
     });
 
     test('should show a loading indicator on component', async () => {
-      expect(exists('followerIndexLoading')).toBe(true);
+      expect(exists('sectionLoading')).toBe(true);
     });
   });
 
@@ -314,7 +314,8 @@ describe('<FollowerIndicesList />', () => {
       });
     });
 
-    describe('detail panel', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100951
+    describe.skip('detail panel', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(exists('followerIndexDetail')).toBe(false);
 

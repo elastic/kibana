@@ -14,13 +14,14 @@ import {
   getUrlPrefix,
   ObjectRemover,
   getProducerUnauthorizedErrorMessage,
+  TaskManagerDoc,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('create', () => {
@@ -28,11 +29,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    async function getScheduledTask(id: string) {
-      return await es.get({
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
+      return scheduledTask._source!;
     }
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -127,9 +129,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
 
-              const { _source: taskRecord } = await getScheduledTask(
-                response.body.scheduled_task_id
-              );
+              const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
@@ -417,7 +417,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'Alert type "test.unregistered-alert-type" is not registered.',
+                message: 'Rule type "test.unregistered-alert-type" is not registered.',
               });
               break;
             default:

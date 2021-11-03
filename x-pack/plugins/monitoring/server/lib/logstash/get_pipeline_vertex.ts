@@ -7,14 +7,11 @@
 
 import boom from '@hapi/boom';
 import { get } from 'lodash';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
-// @ts-ignore
 import { getPipelineVertexStatsAggregation } from './get_pipeline_vertex_stats_aggregation';
-// @ts-ignore
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
-import { LegacyRequest } from '../../types';
+import { LegacyRequest, PipelineVersion } from '../../types';
 import {
   ElasticsearchSource,
   ElasticsearchSourceLogstashPipelineVertex,
@@ -135,29 +132,36 @@ export async function getPipelineVertex(
   lsIndexPattern: string,
   clusterUuid: string,
   pipelineId: string,
-  version: { hash: string; firstSeen: string; lastSeen: string },
+  version: PipelineVersion,
   vertexId: string
 ) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
 
-  const options = {
-    clusterUuid,
-    pipelineId,
-    version,
-    vertexId,
-  };
-
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
   const timeseriesInterval = calculateTimeseriesInterval(
-    version.firstSeen,
-    version.lastSeen,
-    minIntervalSeconds
+    Number(version.firstSeen),
+    Number(version.lastSeen),
+    Number(minIntervalSeconds)
   );
 
   const [stateDocument, statsAggregation] = await Promise.all([
-    getPipelineStateDocument(req, lsIndexPattern, options),
-    getPipelineVertexStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
+    getPipelineStateDocument({
+      req,
+      logstashIndexPattern: lsIndexPattern,
+      clusterUuid,
+      pipelineId,
+      version,
+    }),
+    getPipelineVertexStatsAggregation({
+      req,
+      logstashIndexPattern: lsIndexPattern,
+      timeSeriesIntervalInSeconds: timeseriesInterval,
+      clusterUuid,
+      pipelineId,
+      version,
+      vertexId,
+    }),
   ]);
 
   if (stateDocument === null || !statsAggregation) {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -14,67 +13,77 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { RefreshTypes } from '../../types';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, AlertAttributes } from '../types';
+import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
-import { ThreatRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const threatMatchExecutor = async ({
-  rule,
-  tuples,
+  completeRule,
+  tuple,
   listClient,
   exceptionItems,
   services,
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
+  experimentalFeatures,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
-  rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
-  tuples: RuleRangeTuple[];
+  completeRule: CompleteRule<ThreatRuleParams>;
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
-  const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
-  return createThreatSignals({
-    tuples,
-    threatMapping: ruleParams.threatMapping,
-    query: ruleParams.query,
-    inputIndex,
-    type: ruleParams.type,
-    filters: ruleParams.filters ?? [],
-    language: ruleParams.language,
-    savedId: ruleParams.savedId,
+  const ruleParams = completeRule.ruleParams;
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
     services,
+    version,
+    index: ruleParams.index,
+  });
+  return createThreatSignals({
+    alertId: completeRule.alertId,
+    buildRuleMessage,
+    bulkCreate,
+    completeRule,
+    concurrentSearches: ruleParams.concurrentSearches ?? 1,
+    eventsTelemetry,
     exceptionItems,
+    filters: ruleParams.filters ?? [],
+    inputIndex,
+    itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+    language: ruleParams.language,
     listClient,
     logger,
-    eventsTelemetry,
-    alertId: rule.id,
     outputIndex: ruleParams.outputIndex,
-    ruleSO: rule,
+    query: ruleParams.query,
+    savedId: ruleParams.savedId,
     searchAfterSize,
-    refresh,
+    services,
     threatFilters: ruleParams.threatFilters ?? [],
-    threatQuery: ruleParams.threatQuery,
-    threatLanguage: ruleParams.threatLanguage,
-    buildRuleMessage,
     threatIndex: ruleParams.threatIndex,
     threatIndicatorPath: ruleParams.threatIndicatorPath,
-    concurrentSearches: ruleParams.concurrentSearches ?? 1,
-    itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+    threatLanguage: ruleParams.threatLanguage,
+    threatMapping: ruleParams.threatMapping,
+    threatQuery: ruleParams.threatQuery,
+    tuple,
+    type: ruleParams.type,
+    wrapHits,
   });
 };

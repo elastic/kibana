@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Query } from 'src/plugins/data/public';
+import { Feature } from 'geojson';
 import {
   HeatmapStyleDescriptor,
   StyleDescriptor,
@@ -15,6 +16,7 @@ import {
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
+import { LAYER_TYPE } from '../constants';
 
 export type Attribution = {
   label: string;
@@ -26,6 +28,20 @@ export type JoinDescriptor = {
   right: TermJoinSourceDescriptor;
 };
 
+export type TileMetaFeature = Feature & {
+  properties: {
+    'hits.total.relation': string;
+    'hits.total.value': number;
+
+    // For _mvt requests with "aggs" property in request: aggregation statistics returned in the pattern outined below
+    // aggregations._count.min
+    // aggregations._count.max
+    // aggregations.<agg_name>.min
+    // aggregations.<agg_name>.max
+    [key: string]: number | string;
+  };
+};
+
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
@@ -33,10 +49,10 @@ export type LayerDescriptor = {
   __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
   __areTilesLoaded?: boolean;
+  __metaFromTiles?: TileMetaFeature[];
   alpha?: number;
   attribution?: Attribution;
   id: string;
-  joins?: JoinDescriptor[];
   label?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
@@ -50,9 +66,12 @@ export type LayerDescriptor = {
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.VECTOR | LAYER_TYPE.TILED_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
+  joins?: JoinDescriptor[];
   style: VectorStyleDescriptor;
 };
 
 export type HeatmapLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.HEATMAP;
   style: HeatmapStyleDescriptor;
 };

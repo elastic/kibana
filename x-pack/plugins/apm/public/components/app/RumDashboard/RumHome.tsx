@@ -5,58 +5,103 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
-import { MainFilters } from './Panels/MainFilters';
-import { DatePicker } from '../../shared/DatePicker';
+import { WebApplicationSelect } from './Panels/WebApplicationSelect';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
+import { useHasRumData } from './hooks/useHasRumData';
+import { RumDatePicker } from './rum_datepicker';
+import { EmptyStateLoading } from './empty_state_loading';
 
-export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
-  defaultMessage: 'User Experience',
+export const DASHBOARD_LABEL = i18n.translate('xpack.apm.ux.title', {
+  defaultMessage: 'Dashboard',
 });
 
 export function RumHome() {
-  const { observability } = useApmPluginContext();
+  const { core, observability } = useApmPluginContext();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
-  const { isSmall } = useBreakPoints();
+  const { data: rumHasData, status } = useHasRumData();
 
-  const envStyle = isSmall ? {} : { maxWidth: 200 };
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
+    !rumHasData?.hasData
+      ? {
+          solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
+            defaultMessage: 'Observability',
+          }),
+          actions: {
+            elasticAgent: {
+              title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
+                defaultMessage: 'Add the APM integration',
+              }),
+              description: i18n.translate(
+                'xpack.apm.ux.overview.beatsCard.description',
+                {
+                  defaultMessage:
+                    'Enable RUM with the APM agent to collect user experience data.',
+                }
+              ),
+              href: core.http.basePath.prepend(`integrations/detail/apm`),
+            },
+          },
+          docsLink: core.docLinks.links.observability.guide,
+        }
+      : undefined;
+
+  const isLoading = status === 'loading';
 
   return (
-    <CsmSharedContextProvider>
-      <PageTemplateComponent
-        pageHeader={{
-          pageTitle: UX_LABEL,
-          rightSideItems: [
-            <DatePicker />,
-            <div style={envStyle}>
-              <EnvironmentFilter />
-            </div>,
-            <UserPercentile />,
-            <MainFilters />,
-          ],
-        }}
-      >
-        <RumOverview />
-      </PageTemplateComponent>
-    </CsmSharedContextProvider>
+    <Fragment>
+      <CsmSharedContextProvider>
+        <PageTemplateComponent
+          noDataConfig={isLoading ? undefined : noDataConfig}
+          pageHeader={{ children: <PageHeader /> }}
+        >
+          {isLoading && <EmptyStateLoading />}
+          <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+            <RumOverview />
+          </div>
+        </PageTemplateComponent>
+      </CsmSharedContextProvider>
+    </Fragment>
   );
 }
 
-export function UxHomeHeaderItems() {
+function PageHeader() {
+  const sizes = useBreakpoints();
+
+  const datePickerStyle = sizes.isMedium ? {} : { maxWidth: '70%' };
+
   return (
-    <EuiFlexGroup wrap justifyContent={'flexEnd'} responsive={true}>
-      <MainFilters />
-      <EuiFlexItem grow={false}>
-        <DatePicker />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div style={{ width: '100%' }}>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <EuiTitle>
+            <h1 className="eui-textNoWrap">{DASHBOARD_LABEL}</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
+          <RumDatePicker />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <WebApplicationSelect />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UserPercentile />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UxEnvironmentFilter />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 }

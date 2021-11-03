@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { config, FRAME_ANCESTORS_RULE } from './config';
+import { config, CspConfigType } from './config';
+import { CspDirectives } from './csp_directives';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
@@ -15,11 +16,6 @@ const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
  * @public
  */
 export interface ICspConfig {
-  /**
-   * The CSP rules used for Kibana.
-   */
-  readonly rules: string[];
-
   /**
    * Specify whether browsers that do not support CSP should be
    * able to use Kibana. Use `true` to block and `false` to allow.
@@ -33,8 +29,7 @@ export interface ICspConfig {
   readonly warnLegacyBrowsers: boolean;
 
   /**
-   * Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled *and* no custom rules have been
-   * defined, a restrictive 'frame-ancestors' rule will be added to the default CSP rules.
+   * Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled, a restrictive 'frame-ancestors' rule will be added to the default CSP rules.
    */
   readonly disableEmbedding: boolean;
 
@@ -50,9 +45,9 @@ export interface ICspConfig {
  * @public
  */
 export class CspConfig implements ICspConfig {
-  static readonly DEFAULT = new CspConfig();
+  static readonly DEFAULT = new CspConfig(DEFAULT_CONFIG);
 
-  public readonly rules: string[];
+  readonly #directives: CspDirectives;
   public readonly strict: boolean;
   public readonly warnLegacyBrowsers: boolean;
   public readonly disableEmbedding: boolean;
@@ -62,16 +57,15 @@ export class CspConfig implements ICspConfig {
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}) {
-    const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
-
-    this.rules = [...source.rules];
-    this.strict = source.strict;
-    this.warnLegacyBrowsers = source.warnLegacyBrowsers;
-    this.disableEmbedding = source.disableEmbedding;
-    if (!rawCspConfig.rules?.length && source.disableEmbedding) {
-      this.rules.push(FRAME_ANCESTORS_RULE);
+  constructor(rawCspConfig: CspConfigType) {
+    this.#directives = CspDirectives.fromConfig(rawCspConfig);
+    if (rawCspConfig.disableEmbedding) {
+      this.#directives.clearDirectiveValues('frame-ancestors');
+      this.#directives.addDirectiveValue('frame-ancestors', `'self'`);
     }
-    this.header = this.rules.join('; ');
+    this.header = this.#directives.getCspHeader();
+    this.strict = rawCspConfig.strict;
+    this.warnLegacyBrowsers = rawCspConfig.warnLegacyBrowsers;
+    this.disableEmbedding = rawCspConfig.disableEmbedding;
   }
 }

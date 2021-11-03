@@ -32,8 +32,7 @@ export const selfChangingVisFn: SelfChangingVisExpressionFunctionDefinition = {
   name: 'self_changing_vis',
   type: 'render',
   inputTypes: ['kibana_context'],
-  help:
-    'The expression function definition should be registered for a custom visualization to be rendered',
+  help: 'The expression function definition should be registered for a custom visualization to be rendered',
   args: {
     counter: {
       types: ['number'],

@@ -7,7 +7,7 @@
 
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
-import { createWorkspace } from '../../angular/graph_client_workspace';
+import { createWorkspace } from '../../services/workspace/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
 

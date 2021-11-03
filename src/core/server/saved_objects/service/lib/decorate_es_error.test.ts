@@ -53,6 +53,16 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
   });
 
+  it('makes ProductNotSupportedError a SavedObjectsClient/EsUnavailable error', () => {
+    const error = new esErrors.ProductNotSupportedError(
+      'reason',
+      elasticsearchClientMock.createApiResponse()
+    );
+    expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
+    expect(decorateEsError(error)).toBe(error);
+    expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
+  });
+
   it('makes Conflict a SavedObjectsClient/Conflict error', () => {
     const error = new esErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({ statusCode: 409 })
@@ -124,7 +134,7 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(SavedObjectsErrorHelpers.isGeneralError(error)).toBe(false);
     const genericError = decorateEsError(error);
     expect(genericError.message).toEqual(
-      `Saved object index alias [.kibana_8.0.0] not found: Response Error`
+      `Saved object index alias [.kibana_8.0.0] not found: {\"error\":{\"reason\":\"no such index [.kibana_8.0.0] and [require_alias] request flag is [true] and [.kibana_8.0.0] is not an alias\"}}`
     );
     expect(genericError.output.statusCode).toBe(500);
     expect(SavedObjectsErrorHelpers.isGeneralError(error)).toBe(true);

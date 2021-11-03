@@ -11,14 +11,14 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
+  CASE_CONFIGURE_DETAILS_URL,
   CaseConfigureRequestParamsRt,
   throwErrors,
   CasesConfigurePatch,
   excess,
-} from '../../../../common/api';
+} from '../../../../common';
 import { RouteDeps } from '../types';
 import { wrapError, escapeHatch } from '../utils';
-import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 
 export function initPatchCaseConfigure({ router, logger }: RouteDeps) {
   router.patch(

@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Credential Dumping - Detected - Elastic Endgame",
-  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:detection and (event.action:cred_theft_event or endgame.event_subtype_full:cred_theft_event)",
+  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:detection and (event.action:cred_theft_event or endgame.event_subtype_full:cred_theft_event)\n",
   "risk_score": 73,
   "rule_id": "571afc56-5ed9-465d-a2a9-045f099f6e7e",
   "severity": "high",

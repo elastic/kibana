@@ -14,6 +14,17 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
     type: 'long',
     _meta: { description: 'Number of times the user opened one of the in-product help popovers.' },
   },
+  error_fix_action: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of times the user used the fix action of an error displayed in the workspace.',
+    },
+  },
+  open_formula_popover: {
+    type: 'long',
+    _meta: { description: 'Number of times the user opened the in-product formula help popover.' },
+  },
   toggle_fullscreen_formula: {
     type: 'long',
     _meta: {

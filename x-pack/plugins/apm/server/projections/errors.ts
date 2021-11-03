@@ -5,31 +5,27 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
 } from '../../common/elasticsearch_fieldnames';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
+import { environmentQuery } from '../../common/utils/environment_query';
 import { ProcessorEvent } from '../../common/processor_event';
 
 export function getErrorGroupsProjection({
   environment,
   kuery,
-  setup,
   serviceName,
+  start,
+  end,
 }: {
-  environment?: string;
-  kuery?: string;
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  kuery: string;
   serviceName: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
-
   return {
     apm: {
       events: [ProcessorEvent.error as const],

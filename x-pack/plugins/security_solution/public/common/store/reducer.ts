@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers, PreloadedState, AnyAction, Reducer } from 'redux';
+import { combineReducers, AnyAction, Reducer } from 'redux';
 
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
@@ -14,6 +14,7 @@ import { sourcererReducer, sourcererModel } from './sourcerer';
 
 import { HostsPluginReducer } from '../../hosts/store';
 import { NetworkPluginReducer } from '../../network/store';
+import { UebaPluginReducer } from '../../ueba/store';
 import { TimelinePluginReducer } from '../../timelines/store/timeline';
 
 import { SecuritySubPlugins } from '../../app/types';
@@ -24,6 +25,7 @@ import { KibanaIndexPatterns } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
+  UebaPluginReducer &
   NetworkPluginReducer &
   TimelinePluginReducer &
   ManagementPluginReducer;
@@ -32,7 +34,10 @@ export type SubPluginsInitReducer = HostsPluginReducer &
  * Factory for the 'initialState' that is used to preload state into the Security App's redux store.
  */
 export const createInitialState = (
-  pluginsInitState: SecuritySubPlugins['store']['initialState'],
+  pluginsInitState: Omit<
+    SecuritySubPlugins['store']['initialState'],
+    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer'
+  >,
   {
     kibanaIndexPatterns,
     configIndexPatterns,
@@ -44,11 +49,11 @@ export const createInitialState = (
     signalIndexName: string | null;
     enableExperimental: ExperimentalFeatures;
   }
-): PreloadedState<State> => {
-  const preloadedState: PreloadedState<State> = {
+): State => {
+  const preloadedState: State = {
+    ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
-    ...pluginsInitState,
     inputs: createInitialInputsState(),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
@@ -64,6 +69,7 @@ export const createInitialState = (
       signalIndexName,
     },
   };
+
   return preloadedState;
 };
 

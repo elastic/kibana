@@ -11,7 +11,8 @@ import { CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
 export const customElementType: SavedObjectsType = {
   name: CUSTOM_ELEMENT_TYPE,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     dynamic: false,
     properties: {

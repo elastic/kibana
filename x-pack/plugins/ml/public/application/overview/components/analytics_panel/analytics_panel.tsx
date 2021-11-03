@@ -24,15 +24,20 @@ import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
-import { useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
 
 interface Props {
   jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
+  refreshCount: number;
 }
-export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
+export const AnalyticsPanel: FC<Props> = ({
+  jobCreationDisabled,
+  setLazyJobCount,
+  refreshCount,
+}) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
@@ -41,11 +46,12 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
 
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
 
   const redirectToDataFrameAnalyticsManagementPage = async () => {
-    const path = await mlUrlGenerator.createUrl({
+    if (!mlLocator) return;
+    const path = await mlLocator.getUrl({
       page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
     });
     await navigateToPath(path, true);
@@ -63,7 +69,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
 
   useEffect(() => {
     getAnalytics(true);
-  }, []);
+  }, [refreshCount]);
 
   const onRefresh = () => {
     getAnalytics(true);

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisTypeAlias } from 'src/plugins/visualizations/public';
-import { getBasePath, getEditPath } from '../common';
+import type { VisTypeAlias } from 'src/plugins/visualizations/public';
+import { getBasePath, getEditPath } from '../common/constants';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
   aliasPath: getBasePath(),
@@ -42,6 +42,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
           icon: 'lensApp',
           stage: 'production',
           savedObjectType: type,
+          type: 'lens',
           typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
         };
       },

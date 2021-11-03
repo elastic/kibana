@@ -46,6 +46,9 @@ import { useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
+import { RiskScoreColumns } from '../../../ueba/components/risk_score_table';
+import { HostRulesColumns } from '../../../ueba/components/host_rules_table';
+import { HostTacticsColumns } from '../../../ueba/components/host_tactics_table';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -74,6 +77,8 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
+  | HostRulesColumns
+  | HostTacticsColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
@@ -82,6 +87,8 @@ declare type BasicTableColumns =
   | NetworkTopCountriesColumnsNetworkDetails
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
+  | NetworkHttpColumns
+  | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
@@ -97,7 +104,8 @@ export interface BasicTableProps<T> {
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
-  headerUnit: string | React.ReactElement;
+  headerUnit?: string | React.ReactElement;
+  headerSubtitle?: string | React.ReactElement;
   id?: string;
   itemsPerRow?: ItemsPerRow[];
   isInspect?: boolean;
@@ -136,6 +144,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   headerTitle,
   headerTooltip,
   headerUnit,
+  headerSubtitle,
   id,
   isInspect,
   itemsPerRow,
@@ -248,8 +257,12 @@ const PaginatedTableComponent: FC<SiemTables> = ({
         <HeaderSection
           id={id}
           subtitle={
-            !loadingInitial &&
-            `${i18n.SHOWING}: ${headerCount >= 0 ? headerCount.toLocaleString() : 0} ${headerUnit}`
+            !loadingInitial && headerSubtitle
+              ? `${i18n.SHOWING}: ${headerSubtitle}`
+              : headerUnit &&
+                `${i18n.SHOWING}: ${
+                  headerCount >= 0 ? headerCount.toLocaleString() : 0
+                } ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}

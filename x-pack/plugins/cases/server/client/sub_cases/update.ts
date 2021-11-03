@@ -19,31 +19,32 @@ import {
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import { CasesService } from '../../services';
 import {
+  CASE_COMMENT_SAVED_OBJECT,
   CaseStatuses,
-  SubCasesPatchRequest,
-  SubCasesPatchRequestRt,
+  CommentAttributes,
   CommentType,
   excess,
-  throwErrors,
-  SubCasesResponse,
-  SubCasePatchRequest,
+  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
-  ESCaseAttributes,
+  SubCasePatchRequest,
   SubCaseResponse,
+  SubCasesPatchRequest,
+  SubCasesPatchRequestRt,
+  SubCasesResponse,
   SubCasesResponseRt,
+  throwErrors,
   User,
-  CommentAttributes,
-} from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
+  CaseAttributes,
+} from '../../../common';
 import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
 import {
   createAlertUpdateRequest,
+  createCaseError,
   isCommentRequestTypeAlertOrGenAlert,
   flattenSubCaseSavedObject,
 } from '../../common';
-import { createCaseError } from '../../common/error';
-import { UpdateAlertRequest } from '../../client/alerts/client';
+import { UpdateAlertRequest } from '../../client/alerts/types';
 import { CasesClientArgs } from '../types';
 import { CasesClientInternal } from '../client_internal';
 
@@ -123,7 +124,7 @@ async function getParentCases({
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   subCaseIDs: string[];
   subCasesMap: Map<string, SavedObject<SubCaseAttributes>>;
-}): Promise<Map<string, SavedObject<ESCaseAttributes>>> {
+}): Promise<Map<string, SavedObject<CaseAttributes>>> {
   const parentIDInfo = getParentIDs({ subCaseIDs, subCasesMap });
 
   const parentCases = await caseService.getCases({
@@ -147,7 +148,7 @@ async function getParentCases({
       acc.set(subCaseId, so);
     });
     return acc;
-  }, new Map<string, SavedObject<ESCaseAttributes>>());
+  }, new Map<string, SavedObject<CaseAttributes>>());
 }
 
 function getValidUpdateRequests(

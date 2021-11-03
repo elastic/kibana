@@ -17,3 +17,23 @@ export function useUpgradeAssistantHref() {
 
   return getUpgradeAssistantHref(core.http.basePath);
 }
+
+export function useFleetCloudAgentPolicyHref() {
+  const {
+    core: {
+      http: { basePath },
+    },
+  } = useApmPluginContext();
+  return basePath.prepend('/app/fleet#/policies/policy-elastic-agent-on-cloud');
+}
+
+export function useUpgradeApmPackagePolicyHref(packagePolicyId = '') {
+  const {
+    core: {
+      http: { basePath },
+    },
+  } = useApmPluginContext();
+  return basePath.prepend(
+    `/app/fleet/policies/policy-elastic-agent-on-cloud/upgrade-package-policy/${packagePolicyId}?from=integrations-policy-list`
+  );
+}

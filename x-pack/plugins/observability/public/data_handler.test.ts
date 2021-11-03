@@ -7,6 +7,9 @@
 
 import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
+import { ApmIndicesConfig } from '../common/typings';
+
+const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
 const params = {
   absoluteTime: {
@@ -17,14 +20,15 @@ const params = {
     start: 'now-15m',
     end: 'now',
   },
-  bucketSize: '10s',
+  intervalString: '10s',
+  bucketSize: 10,
 };
 
 describe('registerDataHandler', () => {
   const originalConsole = global.console;
   beforeAll(() => {
-    // mocks console to avoid poluting the test output
-    global.console = ({ error: jest.fn() } as unknown) as typeof console;
+    // mocks console to avoid polluting the test output
+    global.console = { error: jest.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {
@@ -58,7 +62,7 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
 
     it('registered data handler', () => {

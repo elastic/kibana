@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { LocalUIFilterName } from '../common/ui_filter';
+import { UxLocalUIFilterName } from '../common/ux_ui_filter';
 
-export type UIFilters = {
-  kuery?: string;
+export type UxUIFilters = {
   environment?: string;
-} & { [key in LocalUIFilterName]?: string[] };
+} & {
+  [key in UxLocalUIFilterName]?: string[];
+};
 
 export interface BreakdownItem {
   name: string;

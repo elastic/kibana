@@ -80,7 +80,9 @@ export function hitsToGeoJson(
   const tmpGeometriesAccumulator: Geometry[] = [];
 
   for (let i = 0; i < hits.length; i++) {
-    const properties = flattenHit(hits[i]);
+    // flattenHit returns value from cache. Create new object to avoid modifying flattenHit cache.
+    // not doing deep copy because copying coordinates can be very expensive for complex geometries.
+    const properties = { ...flattenHit(hits[i]) };
 
     tmpGeometriesAccumulator.length = 0; // truncate accumulator
 
@@ -222,7 +224,7 @@ export function convertESShapeToGeojsonGeometry(value: ESGeometry): Geometry {
       );
       throw new Error(errorMessage);
   }
-  return (geoJson as unknown) as Geometry;
+  return geoJson as unknown as Geometry;
 }
 
 function convertWKTStringToGeojson(value: string): Geometry {
@@ -263,7 +265,7 @@ export function geoShapeToGeometry(
     value.type === GEO_JSON_TYPE.GEOMETRY_COLLECTION ||
     value.type === 'geometrycollection'
   ) {
-    const geometryCollection = (value as unknown) as { geometries: ESGeometry[] };
+    const geometryCollection = value as unknown as { geometries: ESGeometry[] };
     for (let i = 0; i < geometryCollection.geometries.length; i++) {
       geoShapeToGeometry(geometryCollection.geometries[i], accumulator);
     }
@@ -374,11 +376,19 @@ export function clamp(val: number, min: number, max: number): number {
 export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent {
   const width = bounds.maxLon - bounds.minLon;
   const height = bounds.maxLat - bounds.minLat;
+
+  const newMinLon = bounds.minLon - width * scaleFactor;
+  const nexMaxLon = bounds.maxLon + width * scaleFactor;
+
+  const lonDelta = nexMaxLon - newMinLon;
+  const left = lonDelta > 360 ? -180 : newMinLon;
+  const right = lonDelta > 360 ? 180 : nexMaxLon;
+
   return {
-    minLon: bounds.minLon - width * scaleFactor,
-    minLat: bounds.minLat - height * scaleFactor,
-    maxLon: bounds.maxLon + width * scaleFactor,
-    maxLat: bounds.maxLat + height * scaleFactor,
+    minLon: left,
+    minLat: clampToLatBounds(bounds.minLat - height * scaleFactor),
+    maxLon: right,
+    maxLat: clampToLonBounds(bounds.maxLat + height * scaleFactor),
   };
 }
 

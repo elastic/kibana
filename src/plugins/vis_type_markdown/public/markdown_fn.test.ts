@@ -8,6 +8,7 @@
 
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createMarkdownVisFn } from './markdown_fn';
+import { Arguments } from './types';
 
 describe('interpreter/functions#markdown', () => {
   const fn = functionWrapper(createMarkdownVisFn());
@@ -15,7 +16,7 @@ describe('interpreter/functions#markdown', () => {
     font: { spec: { fontSize: 12 } },
     openLinksInNewTab: true,
     markdown: '## hello _markdown_',
-  };
+  } as unknown as Arguments;
 
   it('returns an object with the correct structure', async () => {
     const actual = await fn(null, args, undefined);

@@ -9,6 +9,7 @@ import { CoreSetup } from '../../../../src/core/server';
 
 import { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { savedQueryType, packType } from './lib/saved_query/saved_object_mappings';
+import { usageMetricType } from './routes/usage/saved_object_mappings';
 
 const types = [savedQueryType, packType];
 
@@ -20,9 +21,8 @@ export const initSavedObjects = (
 ) => {
   const config = osqueryContext.config();
 
-  if (config.savedQueries) {
-    savedObjects.registerType(savedQueryType);
-  }
+  savedObjects.registerType(usageMetricType);
+  savedObjects.registerType(savedQueryType);
 
   if (config.packs) {
     savedObjects.registerType(packType);

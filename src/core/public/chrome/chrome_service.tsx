@@ -26,7 +26,6 @@ import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_acce
 import { Header } from './ui';
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
@@ -37,9 +36,11 @@ import {
 export type { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
+const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;
+  kibanaVersion: string;
 }
 
 interface StartDeps {
@@ -103,9 +104,6 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
-    const appTitle$ = new BehaviorSubject<string>('Kibana');
-    const brand$ = new BehaviorSubject<ChromeBrand>({});
-    const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const breadcrumbsAppendExtension$ = new BehaviorSubject<
@@ -116,6 +114,16 @@ export class ChromeService {
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
+    const getKbnVersionClass = () => {
+      // we assume that the version is valid and has the form 'X.X.X'
+      // strip out `SNAPSHOT` and reformat to 'X-X-X'
+      const formattedVersionClass = this.params.kibanaVersion
+        .replace(SNAPSHOT_REGEX, '')
+        .split('.')
+        .join('-');
+      return `kbnVersion-${formattedVersionClass}`;
+    };
+
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!]).pipe(
       map(([headerBanner, isVisible]) => {
@@ -123,6 +131,7 @@ export class ChromeService {
           'kbnBody',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
+          getKbnVersionClass(),
         ];
       })
     );
@@ -197,7 +206,6 @@ export class ChromeService {
         <Header
           loadingCount$={http.getLoadingCount$()}
           application={application}
-          appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
           headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
@@ -221,40 +229,9 @@ export class ChromeService {
         />
       ),
 
-      setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
-
-      getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
-
-      setBrand: (brand: ChromeBrand) => {
-        brand$.next(
-          Object.freeze({
-            logo: brand.logo,
-            smallLogo: brand.smallLogo,
-          })
-        );
-      },
-
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
-
-      getApplicationClasses$: () =>
-        applicationClasses$.pipe(
-          map((set) => [...set]),
-          takeUntil(this.stop$)
-        ),
-
-      addApplicationClass: (className: string) => {
-        const update = new Set([...applicationClasses$.getValue()]);
-        update.add(className);
-        applicationClasses$.next(update);
-      },
-
-      removeApplicationClass: (className: string) => {
-        const update = new Set([...applicationClasses$.getValue()]);
-        update.delete(className);
-        applicationClasses$.next(update);
-      },
 
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
@@ -294,6 +271,13 @@ export class ChromeService {
 
       setHeaderBanner: (headerBanner?: ChromeUserBanner) => {
         headerBanner$.next(headerBanner);
+      },
+
+      hasHeaderBanner$: () => {
+        return headerBanner$.pipe(
+          takeUntil(this.stop$),
+          map((banner) => Boolean(banner))
+        );
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),

@@ -23,9 +23,6 @@ const getTestBedConfig = (testBedConfigArgs?: Partial<TestBedConfig>): TestBedCo
       initialEntries: [`/policies/edit/${POLICY_NAME}`],
       componentRoutePath: `/policies/edit/:policyName`,
     },
-    defaultProps: {
-      getUrlForApp: () => {},
-    },
     ...testBedConfigArgs,
   };
 };
@@ -38,6 +35,7 @@ const EditPolicyContainer = ({ appServicesContext, ...rest }: any) => {
       services={{
         breadcrumbService,
         license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+        getUrlForApp: () => {},
         ...appServicesContext,
       }}
     >

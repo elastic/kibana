@@ -12,10 +12,10 @@ import { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
   variable: string;
-  default: string | number | boolean;
+  default?: string | number | boolean;
 }
 
-type Output = any;
+type Output = unknown;
 
 export type ExpressionFunctionTheme = ExpressionFunctionDefinition<
   'theme',

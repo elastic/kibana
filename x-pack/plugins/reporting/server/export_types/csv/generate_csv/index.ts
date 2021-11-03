@@ -5,20 +5,19 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient, IUiSettingsClient } from 'src/core/server';
+import type { DataView, DataViewsService } from 'src/plugins/data/common';
 import { ReportingConfig } from '../../../';
+import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
 import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { getFieldFormats } from '../../../services';
-import { createEscapeValue } from '../../csv_searchsource/generate_csv/escape_value';
 import { MaxSizeStringBuilder } from '../../csv_searchsource/generate_csv/max_size_string_builder';
-import {
-  IndexPatternSavedObjectDeprecatedCSV,
-  SavedSearchGeneratorResultDeprecatedCSV,
-} from '../types';
+import { SavedSearchGeneratorResultDeprecatedCSV } from '../types';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 import { fieldFormatMapFactory } from './field_format_map';
 import { createFlattenHit } from './flatten_hit';
@@ -43,7 +42,7 @@ interface SearchRequest {
 export interface GenerateCsvParams {
   browserTimezone?: string;
   searchRequest: SearchRequest;
-  indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
+  indexPatternId: string;
   fields: string[];
   metaFields: string[];
   conflictedTypesFields: string[];
@@ -57,12 +56,18 @@ export function createGenerateCsv(logger: LevelLogger) {
     config: ReportingConfig,
     uiSettingsClient: IUiSettingsClient,
     elasticsearchClient: ElasticsearchClient,
-    cancellationToken: CancellationToken
+    dataViews: DataViewsService,
+    cancellationToken: CancellationToken,
+    stream: Writable
   ): Promise<SavedSearchGeneratorResultDeprecatedCSV> {
     const settings = await getUiSettings(job.browserTimezone, uiSettingsClient, config, logger);
     const escapeValue = createEscapeValue(settings.quoteValues, settings.escapeFormulaValues);
     const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
-    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(settings.maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(
+      stream,
+      byteSizeValueToNumber(settings.maxSizeBytes),
+      bom
+    );
 
     const { fields, metaFields, conflictedTypesFields } = job;
     const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
@@ -70,8 +75,6 @@ export function createGenerateCsv(logger: LevelLogger) {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
-        content: '',
         maxSizeReached: true,
         warnings: [],
       };
@@ -87,11 +90,17 @@ export function createGenerateCsv(logger: LevelLogger) {
     let csvContainsFormulas = false;
 
     const flattenHit = createFlattenHit(fields, metaFields, conflictedTypesFields);
+    let dataView: DataView | undefined;
+
+    try {
+      dataView = await dataViews.get(job.indexPatternId);
+    } catch (error) {
+      logger.error(`Failed to get the data view "${job.indexPatternId}": ${error}`);
+    }
+
     const formatsMap = await getFieldFormats()
       .fieldFormatServiceFactory(uiSettingsClient)
-      .then((fieldFormats) =>
-        fieldFormatMapFactory(job.indexPatternSavedObject, fieldFormats, settings.timezone)
-      );
+      .then((fieldFormats) => fieldFormatMapFactory(dataView, fieldFormats, settings.timezone));
 
     const formatCsvValues = createFormatCsvValues(
       escapeValue,
@@ -136,8 +145,6 @@ export function createGenerateCsv(logger: LevelLogger) {
     } finally {
       await iterator.return();
     }
-    const size = builder.getSizeInBytes();
-    logger.debug(`finished generating, total size in bytes: ${size}`);
 
     if (csvContainsFormulas && settings.escapeFormulaValues) {
       warnings.push(
@@ -148,10 +155,8 @@ export function createGenerateCsv(logger: LevelLogger) {
     }
 
     return {
-      content: builder.getString(),
       csvContainsFormulas: csvContainsFormulas && !settings.escapeFormulaValues,
       maxSizeReached,
-      size,
       warnings,
     };
   };

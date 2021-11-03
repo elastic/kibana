@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export function getFieldTypeName(type: string) {
+export function getFieldTypeName(type?: string) {
   switch (type) {
     case 'boolean':
       return i18n.translate('discover.fieldNameIcons.booleanAriaLabel', {

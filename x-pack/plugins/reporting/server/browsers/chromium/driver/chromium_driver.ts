@@ -10,6 +10,8 @@ import { map, truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
+import type { LocatorParams } from '../../../../common/types';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../../common/constants';
 import { getDisallowedOutgoingUrlError } from '../';
 import { ReportingCore } from '../../..';
 import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
@@ -94,10 +96,12 @@ export class HeadlessChromiumDriver {
       conditionalHeaders,
       waitForSelector: pageLoadSelector,
       timeout,
+      locator,
     }: {
       conditionalHeaders: ConditionalHeaders;
       waitForSelector: string;
       timeout: number;
+      locator?: LocatorParams;
     },
     logger: LevelLogger
   ): Promise<void> {
@@ -106,8 +110,27 @@ export class HeadlessChromiumDriver {
     // Reset intercepted request count
     this.interceptedCount = 0;
 
-    const enableScreenshotMode = this.core.getEnableScreenshotMode();
-    await this.page.evaluateOnNewDocument(enableScreenshotMode);
+    /**
+     * Integrate with the screenshot mode plugin contract by calling this function before any other
+     * scripts have run on the browser page.
+     */
+    await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
+
+    if (locator) {
+      await this.page.evaluateOnNewDocument(
+        (key: string, value: unknown) => {
+          Object.defineProperty(window, key, {
+            configurable: false,
+            writable: true,
+            enumerable: true,
+            value,
+          });
+        },
+        REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+        locator
+      );
+    }
+
     await this.page.setRequestInterception(true);
 
     this.registerListeners(conditionalHeaders, logger);
@@ -137,7 +160,7 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.screenshot and return a base64-encoded string of the image
    */
-  public async screenshot(elementPosition: ElementPosition): Promise<string | void> {
+  public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -148,10 +171,15 @@ export class HeadlessChromiumDriver {
       },
     });
 
-    if (screenshot) {
-      return screenshot.toString('base64');
+    if (Buffer.isBuffer(screenshot)) {
+      return screenshot;
     }
-    return screenshot;
+
+    if (typeof screenshot === 'string') {
+      return Buffer.from(screenshot, 'base64');
+    }
+
+    return undefined;
   }
 
   public async evaluate(
@@ -237,7 +265,7 @@ export class HeadlessChromiumDriver {
     }
 
     // @ts-ignore
-    // FIXME: use `await page.target().createCDPSession();`
+    // FIXME: retrieve the client in open() and  pass in the client
     const client = this.page._client;
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
@@ -344,7 +372,6 @@ export class HeadlessChromiumDriver {
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
-    // @ts-ignore
     const targetId = target._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);

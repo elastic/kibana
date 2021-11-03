@@ -26,11 +26,10 @@ describe('FieldTypeIcon', () => {
     const typeIconComponent = mount(
       <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
     );
-    const container = typeIconComponent.find({ 'data-test-subj': 'fieldTypeIcon' });
 
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
 
-    container.simulate('mouseover');
+    typeIconComponent.simulate('mouseover');
 
     // Run the timers so the EuiTooltip will be visible
     jest.runAllTimers();
@@ -38,7 +37,7 @@ describe('FieldTypeIcon', () => {
     typeIconComponent.update();
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
 
-    container.simulate('mouseout');
+    typeIconComponent.simulate('mouseout');
 
     // Run the timers so the EuiTooltip will be hidden again
     jest.runAllTimers();

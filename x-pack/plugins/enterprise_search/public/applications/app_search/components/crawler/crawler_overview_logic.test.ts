@@ -12,110 +12,78 @@ import {
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
+jest.mock('./crawler_logic', () => ({
+  CrawlerLogic: {
+    actions: {
+      onReceiveCrawlerData: jest.fn(),
+    },
+  },
+}));
+
 import { nextTick } from '@kbn/test/jest';
 
+import { CrawlerLogic } from './crawler_logic';
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
-import { CrawlerPolicies, CrawlerRules, CrawlRule } from './types';
 
-const DEFAULT_VALUES = {
-  dataLoading: true,
-  domains: [],
+import { CrawlerDataFromServer, CrawlerDomain } from './types';
+import { crawlerDataServerToClient } from './utils';
+
+const MOCK_SERVER_CRAWLER_DATA: CrawlerDataFromServer = {
+  domains: [
+    {
+      id: '507f1f77bcf86cd799439011',
+      name: 'elastic.co',
+      created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      document_count: 13,
+      sitemaps: [],
+      entry_points: [],
+      crawl_rules: [],
+      deduplication_enabled: false,
+      deduplication_fields: ['title'],
+      available_deduplication_fields: ['title', 'description'],
+    },
+  ],
+  events: [],
+  most_recent_crawl_request: null,
 };
 
-const DEFAULT_CRAWL_RULE: CrawlRule = {
-  id: '-',
-  policy: CrawlerPolicies.allow,
-  rule: CrawlerRules.regex,
-  pattern: '.*',
-};
+const MOCK_CLIENT_CRAWLER_DATA = crawlerDataServerToClient(MOCK_SERVER_CRAWLER_DATA);
 
 describe('CrawlerOverviewLogic', () => {
   const { mount } = new LogicMounter(CrawlerOverviewLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mount();
   });
 
-  it('has expected default values', () => {
-    expect(CrawlerOverviewLogic.values).toEqual(DEFAULT_VALUES);
-  });
-
-  describe('actions', () => {
-    describe('onFetchCrawlerData', () => {
-      const crawlerData = {
-        domains: [
-          {
-            id: '507f1f77bcf86cd799439011',
-            createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
-            url: 'moviedatabase.com',
-            documentCount: 13,
-            sitemaps: [],
-            entryPoints: [],
-            crawlRules: [],
-            defaultCrawlRule: DEFAULT_CRAWL_RULE,
-          },
-        ],
-      };
-
-      beforeEach(() => {
-        CrawlerOverviewLogic.actions.onFetchCrawlerData(crawlerData);
-      });
-
-      it('should set all received data as top-level values', () => {
-        expect(CrawlerOverviewLogic.values.domains).toEqual(crawlerData.domains);
-      });
-
-      it('should set dataLoading to false', () => {
-        expect(CrawlerOverviewLogic.values.dataLoading).toEqual(false);
-      });
-    });
-  });
-
   describe('listeners', () => {
-    describe('fetchCrawlerData', () => {
-      it('calls onFetchCrawlerData with retrieved data that has been converted from server to client', async () => {
-        jest.spyOn(CrawlerOverviewLogic.actions, 'onFetchCrawlerData');
+    describe('deleteDomain', () => {
+      it('calls onReceiveCrawlerData with retrieved data that has been converted from server to client', async () => {
+        jest.spyOn(CrawlerLogic.actions, 'onReceiveCrawlerData');
+        http.delete.mockReturnValue(Promise.resolve(MOCK_SERVER_CRAWLER_DATA));
 
-        http.get.mockReturnValue(
-          Promise.resolve({
-            domains: [
-              {
-                id: '507f1f77bcf86cd799439011',
-                name: 'moviedatabase.com',
-                created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
-                document_count: 13,
-                sitemaps: [],
-                entry_points: [],
-                crawl_rules: [],
-              },
-            ],
-          })
-        );
-        CrawlerOverviewLogic.actions.fetchCrawlerData();
+        CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/crawler');
-        expect(CrawlerOverviewLogic.actions.onFetchCrawlerData).toHaveBeenCalledWith({
-          domains: [
-            {
-              id: '507f1f77bcf86cd799439011',
-              createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
-              url: 'moviedatabase.com',
-              documentCount: 13,
-              sitemaps: [],
-              entryPoints: [],
-              crawlRules: [],
-            },
-          ],
-        });
+        expect(http.delete).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/crawler/domains/1234',
+          {
+            query: { respond_with: 'crawler_details' },
+          }
+        );
+        expect(CrawlerLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
+          MOCK_CLIENT_CRAWLER_DATA
+        );
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('calls flashApiErrors when there is an error', async () => {
-        http.get.mockReturnValue(Promise.reject('error'));
-        CrawlerOverviewLogic.actions.fetchCrawlerData();
+        http.delete.mockReturnValue(Promise.reject('error'));
+
+        CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');

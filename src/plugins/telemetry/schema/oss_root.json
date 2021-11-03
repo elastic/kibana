@@ -64,13 +64,6 @@
         },
         "kibana": {
           "properties": {
-            "timelion_sheet": {
-              "properties": {
-                "total": {
-                  "type": "long"
-                }
-              }
-            },
             "visualization": {
               "properties": {
                 "total": {

@@ -51,11 +51,12 @@ export const getCreateExceptionListItemMinimalSchemaMock = (): CreateExceptionLi
 /**
  * Useful for end to end testing
  */
-export const getCreateExceptionListItemMinimalSchemaMockWithoutId = (): CreateExceptionListItemSchema => ({
-  description: DESCRIPTION,
-  entries: ENTRIES,
-  list_id: LIST_ID,
-  name: NAME,
-  os_types: OS_TYPES,
-  type: ITEM_TYPE,
-});
+export const getCreateExceptionListItemMinimalSchemaMockWithoutId =
+  (): CreateExceptionListItemSchema => ({
+    description: DESCRIPTION,
+    entries: ENTRIES,
+    list_id: LIST_ID,
+    name: NAME,
+    os_types: OS_TYPES,
+    type: ITEM_TYPE,
+  });

@@ -11,7 +11,8 @@ import React, { Fragment } from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, defaultState } from '../default';
+import { DefaultFormatEditor, defaultState } from '../default/default';
+import { formatId } from './constants';
 
 import { FormatEditorSamples } from '../../samples';
 
@@ -20,7 +21,7 @@ interface DateNanosFormatEditorFormatParams {
 }
 
 export class DateNanosFormatEditor extends DefaultFormatEditor<DateNanosFormatEditorFormatParams> {
-  static formatId = 'date_nanos';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [

@@ -17,24 +17,24 @@ const createWaitForValidationAction = (testBed: TestBed) => () => {
   component.update();
 };
 
-const createExpectMessagesAction = (testBed: TestBed) => (
-  expectedMessages: string[],
-  phase?: Phase
-) => {
-  const { form } = testBed;
-  if (phase) {
-    expect(form.getErrorsMessages(`${phase}-phase`)).toEqual(expectedMessages);
-  } else {
-    expect(form.getErrorsMessages()).toEqual(expectedMessages);
-  }
-};
+const createExpectMessagesAction =
+  (testBed: TestBed) => (expectedMessages: string[], phase?: Phase) => {
+    const { form } = testBed;
+    if (phase) {
+      expect(form.getErrorsMessages(`${phase}-phase`)).toEqual(expectedMessages);
+    } else {
+      expect(form.getErrorsMessages()).toEqual(expectedMessages);
+    }
+  };
 
 export const createErrorsActions = (testBed: TestBed) => {
   const { exists } = testBed;
   return {
-    waitForValidation: createWaitForValidationAction(testBed),
-    haveGlobalCallout: () => exists('policyFormErrorsCallout'),
-    havePhaseCallout: (phase: Phase) => exists(`phaseErrorIndicator-${phase}`),
-    expectMessages: createExpectMessagesAction(testBed),
+    errors: {
+      waitForValidation: createWaitForValidationAction(testBed),
+      haveGlobalCallout: () => exists('policyFormErrorsCallout'),
+      havePhaseCallout: (phase: Phase) => exists(`phaseErrorIndicator-${phase}`),
+      expectMessages: createExpectMessagesAction(testBed),
+    },
   };
 };

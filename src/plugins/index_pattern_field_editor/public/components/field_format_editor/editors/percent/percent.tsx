@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { NumberFormatEditor } from '../number';
+import { NumberFormatEditor } from '../number/number';
 import { defaultState } from '../default';
+import { formatId } from './constants';
 
 export class PercentFormatEditor extends NumberFormatEditor {
-  static formatId = 'percent';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [0.1, 0.99999, 1, 100, 1000],

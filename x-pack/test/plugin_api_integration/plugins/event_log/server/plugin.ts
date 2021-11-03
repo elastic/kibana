@@ -26,7 +26,8 @@ export interface EventLogFixtureStartDeps {
 }
 
 export class EventLogFixturePlugin
-  implements Plugin<void, void, EventLogFixtureSetupDeps, EventLogFixtureStartDeps> {
+  implements Plugin<void, void, EventLogFixtureSetupDeps, EventLogFixtureStartDeps>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

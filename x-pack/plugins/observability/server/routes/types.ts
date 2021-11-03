@@ -12,7 +12,7 @@ import type {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import { CoreSetup, CoreStart, KibanaRequest, Logger } from 'kibana/server';
-import { RuleDataClient } from '../../../rule_registry/server';
+import { RuleDataPluginService } from '../../../rule_registry/server';
 
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
 import { ObservabilityRequestHandlerContext } from '../types';
@@ -24,7 +24,7 @@ export interface ObservabilityRouteHandlerResources {
     start: () => Promise<CoreStart>;
     setup: CoreSetup;
   };
-  ruleDataClient: RuleDataClient;
+  ruleDataService: RuleDataPluginService;
   request: KibanaRequest;
   context: ObservabilityRequestHandlerContext;
   logger: Logger;

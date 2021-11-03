@@ -56,10 +56,7 @@ export class RenderingService {
           <div id="globalBannerList">{bannerComponent}</div>
 
           {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-          <AppWrapper
-            chromeVisible$={chrome.getIsVisible$()}
-            classes$={chrome.getApplicationClasses$()}
-          >
+          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
             {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
             <div id="app-fixed-viewport" />
 

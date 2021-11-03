@@ -21,7 +21,7 @@ Parameters for pushing a case to an external system
 
 The ID of a case
 
-Defined in: [cases/push.ts:53](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/push.ts#L53)
+Defined in: [cases/push.ts:53](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/push.ts#L53)
 
 ___
 
@@ -31,4 +31,4 @@ ___
 
 The ID of an external system to push to
 
-Defined in: [cases/push.ts:57](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/cases/push.ts#L57)
+Defined in: [cases/push.ts:57](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/push.ts#L57)

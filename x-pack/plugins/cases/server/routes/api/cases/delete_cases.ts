@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_URL } from '../../../../common';
 
 export function initDeleteCasesApi({ router, logger }: RouteDeps) {
   router.delete(

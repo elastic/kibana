@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
@@ -23,7 +24,6 @@ export enum SavedObjectType {
 export type MlTestResourcesi = ProvidedType<typeof MachineLearningTestResourcesProvider>;
 
 export function MachineLearningTestResourcesProvider({ getService }: FtrProviderContext) {
-  const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const supertest = getService('supertest');
@@ -185,91 +185,6 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         );
         return await this.createSavedSearch(title, body);
       }
-    },
-
-    async setupBrokenAnnotationsIndexState(jobId: string) {
-      // Creates a temporary annotations index with unsupported mappings.
-      await es.indices.create({
-        index: '.ml-annotations-6-wrong-mapping',
-        body: {
-          settings: {
-            number_of_shards: 1,
-          },
-          mappings: {
-            properties: {
-              field1: { type: 'text' },
-            },
-          },
-        },
-      });
-
-      // Ingests an annotation that will cause dynamic mapping to pick up the wrong field type.
-      es.create({
-        id: 'annotation_with_wrong_mapping',
-        index: '.ml-annotations-6-wrong-mapping',
-        body: {
-          annotation: 'Annotation with wrong mapping',
-          create_time: 1597393915910,
-          create_username: '_xpack',
-          timestamp: 1549756800000,
-          end_timestamp: 1549756800000,
-          job_id: jobId,
-          modified_time: 1597393915910,
-          modified_username: '_xpack',
-          type: 'annotation',
-          event: 'user',
-          detector_index: 0,
-        },
-      });
-
-      // Points the read/write aliases for annotations to the broken annotations index
-      // so we can run tests against a state where annotation endpoints return errors.
-      await es.indices.updateAliases({
-        body: {
-          actions: [
-            {
-              add: {
-                index: '.ml-annotations-6-wrong-mapping',
-                alias: '.ml-annotations-read',
-                is_hidden: true,
-              },
-            },
-            { remove: { index: '.ml-annotations-6', alias: '.ml-annotations-read' } },
-            {
-              add: {
-                index: '.ml-annotations-6-wrong-mapping',
-                alias: '.ml-annotations-write',
-                is_hidden: true,
-              },
-            },
-            { remove: { index: '.ml-annotations-6', alias: '.ml-annotations-write' } },
-          ],
-        },
-      });
-    },
-
-    async restoreAnnotationsIndexState() {
-      // restore the original working state of pointing read/write aliases
-      // to the right annotations index.
-      await es.indices.updateAliases({
-        body: {
-          actions: [
-            { add: { index: '.ml-annotations-6', alias: '.ml-annotations-read', is_hidden: true } },
-            { remove: { index: '.ml-annotations-6-wrong-mapping', alias: '.ml-annotations-read' } },
-            {
-              add: { index: '.ml-annotations-6', alias: '.ml-annotations-write', is_hidden: true },
-            },
-            {
-              remove: { index: '.ml-annotations-6-wrong-mapping', alias: '.ml-annotations-write' },
-            },
-          ],
-        },
-      });
-
-      // deletes the temporary annotations index with wrong mappings
-      await es.indices.delete({
-        index: '.ml-annotations-6-wrong-mapping',
-      });
     },
 
     async updateSavedSearchRequestBody(body: object, indexPatternTitle: string): Promise<object> {
@@ -533,26 +448,52 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       log.debug('> ML saved objects deleted.');
     },
 
-    async installFleetPackage(packageIdentifier: string) {
-      log.debug(`Installing Fleet package '${packageIdentifier}'`);
+    async installFleetPackage(packageName: string) {
+      log.debug(`Installing Fleet package '${packageName}'`);
+
+      const version = await this.getFleetPackageVersion(packageName);
 
       await supertest
-        .post(`/api/fleet/epm/packages/${packageIdentifier}`)
+        .post(`/api/fleet/epm/packages/${packageName}-${version}`)
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
 
       log.debug(` > Installed`);
     },
 
-    async removeFleetPackage(packageIdentifier: string) {
-      log.debug(`Removing Fleet package '${packageIdentifier}'`);
+    async removeFleetPackage(packageName: string) {
+      log.debug(`Removing Fleet package '${packageName}'`);
+
+      const version = await this.getFleetPackageVersion(packageName);
 
       await supertest
-        .delete(`/api/fleet/epm/packages/${packageIdentifier}`)
+        .delete(`/api/fleet/epm/packages/${packageName}-${version}`)
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
 
       log.debug(` > Removed`);
+    },
+
+    async getFleetPackageVersion(packageName: string): Promise<string> {
+      log.debug(`Fetching version for Fleet package '${packageName}'`);
+
+      const { body } = await supertest
+        .get(`/api/fleet/epm/packages?experimental=true`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      const packageVersion =
+        body.response.find(
+          ({ name, version }: { name: string; version: string }) => name === packageName && version
+        )?.version ?? '';
+
+      expect(packageVersion).to.not.eql(
+        '',
+        `Fleet package definition for '${packageName}' should exist and have a version`
+      );
+
+      log.debug(` > found version '${packageVersion}'`);
+      return packageVersion;
     },
   };
 }

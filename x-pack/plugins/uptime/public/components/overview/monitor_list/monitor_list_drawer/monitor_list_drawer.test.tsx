@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import 'jest';
 import React from 'react';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { MonitorDetails, MonitorSummary, makePing } from '../../../../../common/runtime_types';

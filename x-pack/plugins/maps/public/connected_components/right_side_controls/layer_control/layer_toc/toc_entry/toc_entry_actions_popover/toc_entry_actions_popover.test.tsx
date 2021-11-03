@@ -37,7 +37,6 @@ class LayerMock extends AbstractLayer implements ILayer {
 const defaultProps = {
   cloneLayer: () => {},
   displayName: 'layer 1',
-  editLayer: () => {},
   escapedDisplayName: 'layer1',
   fitToBounds: () => {},
   isEditButtonDisabled: false,
@@ -46,6 +45,12 @@ const defaultProps = {
   removeLayer: () => {},
   toggleVisible: () => {},
   supportsFitToBounds: true,
+  enableShapeEditing: () => {},
+  enablePointEditing: () => {},
+  openLayerSettings: () => {},
+  editModeActiveForLayer: false,
+  numLayers: 2,
+  showThisLayerOnly: () => {},
 };
 
 describe('TOCEntryActionsPopover', () => {
@@ -90,6 +95,30 @@ describe('TOCEntryActionsPopover', () => {
       return false;
     };
     const component = shallow(<TOCEntryActionsPopover {...defaultProps} layer={layer} />);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should disable Edit features when edit mode active for layer', async () => {
+    const component = shallow(
+      <TOCEntryActionsPopover {...defaultProps} editModeActiveForLayer={true} />
+    );
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should show "show this layer only" action when there are more then 2 layers', async () => {
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} numLayers={3} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

@@ -7,3 +7,5 @@
  */
 
 export * from '../common/stubs';
+// eslint-disable-next-line
+export { createStubDataView } from '../../data_views/public/data_views/data_view.stub';

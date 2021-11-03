@@ -31,7 +31,7 @@ describe('Index Templates tab', () => {
     server.restore();
   });
 
-  describe('when there are no index templates', () => {
+  describe('when there are no index templates of either kind', () => {
     test('should display an empty prompt', async () => {
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
@@ -43,6 +43,26 @@ describe('Index Templates tab', () => {
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyPrompt')).toBe(true);
+    });
+  });
+
+  describe('when there are composable index templates but no legacy index templates', () => {
+    test('only the composable index templates table is visible', async () => {
+      httpRequestsMockHelpers.setLoadTemplatesResponse({
+        templates: [fixtures.getComposableTemplate()],
+        legacyTemplates: [],
+      });
+
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { exists, component } = testBed;
+      component.update();
+
+      expect(exists('sectionLoading')).toBe(false);
+      expect(exists('emptyPrompt')).toBe(false);
+      expect(exists('templateTable')).toBe(true);
+      expect(exists('legacyTemplateTable')).toBe(false);
     });
   });
 

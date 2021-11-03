@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { ColumnId } from './body/column_id';
-import { SortDirection } from './body/sort';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
+export {
+  OnColumnSorted,
+  OnColumnsSorted,
+  OnColumnRemoved,
+  OnColumnResized,
+  OnChangePage,
+  OnPinEvent,
+  OnRowSelected,
+  OnSelectAll,
+  OnUnPinEvent,
+  OnUpdateColumns,
+} from '../../../../common/types/timeline';
 
 export type OnDataProviderEdited = ({
   andProviderId,
@@ -35,38 +45,3 @@ export type OnRangeSelected = (range: string) => void;
 
 /** Invoked when a user updates a column's filter */
 export type OnFilterChange = (filter: { columnId: ColumnId; filter: string }) => void;
-
-/** Invoked when a column is sorted */
-export type OnColumnSorted = (sorted: { columnId: ColumnId; sortDirection: SortDirection }) => void;
-
-export type OnColumnsSorted = (
-  sorted: Array<{ columnId: ColumnId; sortDirection: SortDirection }>
-) => void;
-
-export type OnColumnRemoved = (columnId: ColumnId) => void;
-
-export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta: number }) => void;
-
-/** Invoked when a user clicks to load more item */
-export type OnChangePage = (nextPage: number) => void;
-
-/** Invoked when a user pins an event */
-export type OnPinEvent = (eventId: string) => void;
-
-/** Invoked when a user checks/un-checks a row */
-export type OnRowSelected = ({
-  eventIds,
-  isSelected,
-}: {
-  eventIds: string[];
-  isSelected: boolean;
-}) => void;
-
-/** Invoked when a user checks/un-checks the select all checkbox  */
-export type OnSelectAll = ({ isSelected }: { isSelected: boolean }) => void;
-
-/** Invoked when columns are updated */
-export type OnUpdateColumns = (columns: ColumnHeaderOptions[]) => void;
-
-/** Invoked when a user unpins an event */
-export type OnUnPinEvent = (eventId: string) => void;

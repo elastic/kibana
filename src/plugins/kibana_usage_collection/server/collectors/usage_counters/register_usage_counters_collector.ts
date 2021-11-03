@@ -86,14 +86,13 @@ export function registerUsageCountersUsageCollector(usageCollection: UsageCollec
       },
     },
     fetch: async ({ soClient }: CollectorFetchContext) => {
-      const {
-        saved_objects: rawUsageCounters,
-      } = await soClient.find<UsageCountersSavedObjectAttributes>({
-        type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-        fields: ['count', 'counterName', 'counterType', 'domainId'],
-        filter: `NOT ${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
-        perPage: 10000,
-      });
+      const { saved_objects: rawUsageCounters } =
+        await soClient.find<UsageCountersSavedObjectAttributes>({
+          type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+          fields: ['count', 'counterName', 'counterType', 'domainId'],
+          filter: `NOT ${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
+          perPage: 10000,
+        });
 
       return {
         dailyEvents: rawUsageCounters.reduce((acc, rawUsageCounter) => {

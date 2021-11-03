@@ -9,7 +9,7 @@
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { createPromiseFromStreams } from '@kbn/utils';
@@ -31,13 +31,12 @@ export async function unloadAction({
   kbnClient,
 }: {
   inputDir: string;
-  client: KibanaClient;
+  client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
@@ -47,7 +46,7 @@ export async function unloadAction({
       createReadStream(resolve(inputDir, filename)) as Readable,
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
       createFilterRecordsStream('index'),
-      createDeleteIndexStream(client, stats, log, kibanaPluginIds),
+      createDeleteIndexStream(client, stats, log),
     ] as [Readable, ...Writable[]]);
   }
 

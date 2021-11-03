@@ -14,7 +14,7 @@ exports[`Table render name 2`] = `
     <EuiIconTip
       content={
         <span>
-          This field exists on the index pattern only.
+          This field exists on the data view only.
         </span>
       }
       title="Runtime field"
@@ -105,6 +105,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "actions": Array [
           Object {
+            "available": [Function],
             "data-test-subj": "editFieldFormat",
             "description": "Edit",
             "icon": "pencil",
@@ -138,10 +139,10 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "Elastic",
         "excluded": false,
-        "format": "",
         "hasRuntime": false,
         "info": Array [],
         "isMapped": true,
+        "isUserEditable": true,
         "kbnType": "string",
         "name": "Elastic",
         "searchable": true,
@@ -150,10 +151,10 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "timestamp",
         "excluded": false,
-        "format": "YYYY-MM-DD",
         "hasRuntime": false,
         "info": Array [],
         "isMapped": true,
+        "isUserEditable": true,
         "kbnType": "date",
         "name": "timestamp",
         "type": "date",
@@ -161,10 +162,10 @@ exports[`Table should render normally 1`] = `
       Object {
         "displayName": "conflictingField",
         "excluded": false,
-        "format": "",
         "hasRuntime": false,
         "info": Array [],
         "isMapped": true,
+        "isUserEditable": true,
         "kbnType": "conflict",
         "name": "conflictingField",
         "type": "text, long",
@@ -175,8 +176,20 @@ exports[`Table should render normally 1`] = `
         "hasRuntime": true,
         "info": Array [],
         "isMapped": false,
+        "isUserEditable": true,
         "kbnType": "text",
         "name": "customer",
+        "type": "keyword",
+      },
+      Object {
+        "displayName": "noedit",
+        "excluded": false,
+        "hasRuntime": true,
+        "info": Array [],
+        "isMapped": false,
+        "isUserEditable": false,
+        "kbnType": "text",
+        "name": "noedit",
         "type": "keyword",
       },
     ]

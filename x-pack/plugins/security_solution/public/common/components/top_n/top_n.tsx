@@ -22,9 +22,10 @@ import { TopNOption } from './helpers';
 import * as i18n from './translations';
 import { getIndicesSelector, IndicesSelector } from './selectors';
 import { State } from '../../store';
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
-  width: 600px;
+  min-width: 600px;
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
@@ -50,12 +51,14 @@ const TopNContent = styled.div`
 export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
   defaultView: TimelineEventsType;
-  field: string;
+  field: AlertsStackByField;
   filters: Filter[];
   indexPattern: IIndexPattern;
   options: TopNOption[];
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
+  showLegend?: boolean;
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -71,7 +74,9 @@ const TopNComponent: React.FC<Props> = ({
   from,
   indexPattern,
   options,
+  paddingSize,
   query,
+  showLegend,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   timelineId,
@@ -79,9 +84,10 @@ const TopNComponent: React.FC<Props> = ({
   toggleTopN,
 }) => {
   const [view, setView] = useState<TimelineEventsType>(defaultView);
-  const onViewSelected = useCallback((value: string) => setView(value as TimelineEventsType), [
-    setView,
-  ]);
+  const onViewSelected = useCallback(
+    (value: string) => setView(value as TimelineEventsType),
+    [setView]
+  );
   const indicesSelector = useMemo(getIndicesSelector, []);
   const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
     (state) => indicesSelector(state),
@@ -125,7 +131,9 @@ const TopNComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             indexNames={view === 'raw' ? rawIndices : allIndices}
             onlyField={field}
+            paddingSize={paddingSize}
             query={query}
+            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
@@ -137,14 +145,13 @@ const TopNComponent: React.FC<Props> = ({
           <SignalsByCategory
             combinedQueries={combinedQueries}
             filters={filters}
-            from={from}
             headerChildren={headerChildren}
             onlyField={field}
+            paddingSize={paddingSize}
             query={query}
+            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            setQuery={setQuery}
             timelineId={timelineId}
-            to={to}
           />
         )}
       </TopNContent>

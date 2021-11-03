@@ -28,7 +28,6 @@ export const resetScroll = () => {
     }
   }, 0);
 };
-
 interface GlobalFullScreen {
   globalFullScreen: boolean;
   setGlobalFullScreen: (fullScreen: boolean) => void;
@@ -46,10 +45,10 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
   const setGlobalFullScreen = useCallback(
     (fullScreen: boolean) => {
       if (fullScreen) {
-        document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME);
+        document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
         resetScroll();
       } else {
-        document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME);
+        document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
         resetScroll();
       }
 
@@ -71,9 +70,15 @@ export const useTimelineFullScreen = (): TimelineFullScreen => {
   const dispatch = useDispatch();
   const timelineFullScreen =
     useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
-
   const setTimelineFullScreen = useCallback(
-    (fullScreen: boolean) => dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen })),
+    (fullScreen: boolean) => {
+      if (fullScreen) {
+        document.body.classList.add('euiDataGrid__restrictBody');
+      } else {
+        document.body.classList.remove('euiDataGrid__restrictBody');
+      }
+      dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen }));
+    },
     [dispatch]
   );
   const memoizedReturn = useMemo(

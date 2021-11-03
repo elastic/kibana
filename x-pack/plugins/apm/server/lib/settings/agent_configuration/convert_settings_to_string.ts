@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '../../../../../../../typings/elasticsearch';
+import { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 // needed for backwards compatability
@@ -16,11 +16,13 @@ export function convertConfigSettingsToString(
   const config = hit._source;
 
   if (config.settings?.transaction_sample_rate) {
-    config.settings.transaction_sample_rate = config.settings.transaction_sample_rate.toString();
+    config.settings.transaction_sample_rate =
+      config.settings.transaction_sample_rate.toString();
   }
 
   if (config.settings?.transaction_max_spans) {
-    config.settings.transaction_max_spans = config.settings.transaction_max_spans.toString();
+    config.settings.transaction_max_spans =
+      config.settings.transaction_max_spans.toString();
   }
 
   return hit;

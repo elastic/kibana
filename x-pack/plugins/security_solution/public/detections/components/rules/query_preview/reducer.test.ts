@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import * as i18n from './translations';
+import * as i18n from '../rule_preview/translations';
 import { Action, State, queryPreviewReducer } from './reducer';
 import { initialState } from './';
 
@@ -79,7 +79,9 @@ describe('queryPreviewReducer', () => {
 
       expect(update.language).toEqual('kuery');
       expect(update.queryString).toEqual('host.name:*');
-      expect(update.filters).toEqual([{ meta: { alias: '', disabled: false, negate: false } }]);
+      expect(update.filters).toEqual([
+        { meta: { alias: '', disabled: false, negate: false }, query: {} },
+      ]);
     });
 
     test('should create the queryFilter if query type is not eql', () => {

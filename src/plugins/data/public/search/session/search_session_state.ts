@@ -152,12 +152,14 @@ export interface SessionPureTransitions<
 }
 
 export const sessionPureTransitions: SessionPureTransitions = {
-  start: (state) => ({ appName }) => ({
-    ...createSessionDefaultState(),
-    sessionId: uuid.v4(),
-    startTime: new Date(),
-    appName,
-  }),
+  start:
+    (state) =>
+    ({ appName }) => ({
+      ...createSessionDefaultState(),
+      sessionId: uuid.v4(),
+      startTime: new Date(),
+      appName,
+    }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),
     sessionId,

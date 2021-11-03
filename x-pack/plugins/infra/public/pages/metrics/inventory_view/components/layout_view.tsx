@@ -6,10 +6,18 @@
  */
 
 import React from 'react';
+import { SnapshotNode } from '../../../../../common/http_api';
 import { useSavedViewContext } from '../../../../containers/saved_view/saved_view';
 import { Layout } from './layout';
 
-export const LayoutView = () => {
+interface Props {
+  reload: () => Promise<any>;
+  interval: string;
+  nodes: SnapshotNode[];
+  loading: boolean;
+}
+
+export const LayoutView = (props: Props) => {
   const { shouldLoadDefault, currentView } = useSavedViewContext();
-  return <Layout shouldLoadDefault={shouldLoadDefault} currentView={currentView} />;
+  return <Layout shouldLoadDefault={shouldLoadDefault} currentView={currentView} {...props} />;
 };

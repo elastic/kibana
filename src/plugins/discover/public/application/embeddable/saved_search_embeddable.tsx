@@ -19,14 +19,13 @@ import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../../data/public';
 import { DiscoverServices } from '../../build_services';
 import {
+  Filter,
+  IndexPattern,
+  IndexPatternField,
+  ISearchSource,
   Query,
   TimeRange,
-  Filter,
-  IFieldType,
-  IndexPattern,
-  ISearchSource,
 } from '../../../../data/common';
-import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../../ui_actions/public';
@@ -36,25 +35,32 @@ import {
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
+  SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
-import * as columnActions from '../angular/doc_table/actions/columns';
-import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
-import { handleSourceColumnState } from '../angular/helpers';
+import * as columnActions from '../apps/main/components/doc_table/actions/columns';
+import { handleSourceColumnState } from '../helpers/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
+import { getDefaultSort } from '../apps/main/components/doc_table';
+import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
+import { updateSearchSource } from './helpers/update_search_source';
+import { VIEW_MODE } from '../apps/main/components/view_mode_toggle';
+import { FieldStatsTableEmbeddable } from '../components/data_visualizer_grid/field_stats_table_embeddable';
 
-export interface SearchProps extends Partial<DiscoverGridProps> {
-  settings?: DiscoverGridSettings;
-  description?: string;
-  sharedItemTitle?: string;
-  inspectorAdapters?: Adapters;
+export type SearchProps = Partial<DiscoverGridProps> &
+  Partial<DocTableProps> & {
+    settings?: DiscoverGridSettings;
+    description?: string;
+    sharedItemTitle?: string;
+    inspectorAdapters?: Adapters;
 
-  filter?: (field: IFieldType, value: string[], operator: string) => void;
-  hits?: ElasticSearchHit[];
-  totalHitCount?: number;
-  onMoveColumn?: (column: string, index: number) => void;
-}
+    filter?: (field: IndexPatternField, value: string[], operator: string) => void;
+    hits?: ElasticSearchHit[];
+    totalHitCount?: number;
+    onMoveColumn?: (column: string, index: number) => void;
+  };
 
 interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
@@ -68,7 +74,8 @@ interface SearchEmbeddableConfig {
 
 export class SavedSearchEmbeddable
   extends Embeddable<SearchInput, SearchOutput>
-  implements ISearchEmbeddable {
+  implements ISearchEmbeddable
+{
   private readonly savedSearch: SavedSearch;
   private inspectorAdapters: Adapters;
   private panelTitle: string = '';
@@ -141,26 +148,16 @@ export class SavedSearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
-    searchSource.setField(
-      'sort',
-      getSortForSearchSource(
-        this.searchProps!.sort,
-        this.searchProps!.indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-      )
-    );
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
-      searchSource.setField('fields', [fields]);
-    } else {
-      searchSource.removeField('fields');
-      if (this.searchProps.indexPattern) {
-        const fieldNames = this.searchProps.indexPattern.fields.map((field) => field.name);
-        searchSource.setField('fieldsFromSource', fieldNames);
+    updateSearchSource(
+      searchSource,
+      this.searchProps!.indexPattern,
+      this.searchProps!.sort,
+      useNewFieldsApi,
+      {
+        sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
+        defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
-    }
+    );
 
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
@@ -168,6 +165,14 @@ export class SavedSearchEmbeddable
     this.searchProps!.isLoading = true;
 
     this.updateOutput({ loading: true, error: undefined });
+    const executionContext = {
+      type: this.type,
+      name: 'discover',
+      id: this.savedSearch.id!,
+      description: this.output.title || this.output.defaultTitle || '',
+      url: this.output.editUrl,
+      parent: this.input.executionContext,
+    };
 
     try {
       // Make the request
@@ -185,6 +190,7 @@ export class SavedSearchEmbeddable
                 'This request queries Elasticsearch to fetch the data for the search.',
             }),
           },
+          executionContext,
         })
         .toPromise();
       this.updateOutput({ loading: false, error: undefined });
@@ -193,9 +199,11 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      this.updateOutput({ loading: false, error });
+      if (!this.destroyed) {
+        this.updateOutput({ loading: false, error });
 
-      this.searchProps!.isLoading = false;
+        this.searchProps!.isLoading = false;
+      }
     }
   };
 
@@ -211,7 +219,7 @@ export class SavedSearchEmbeddable
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
       this.savedSearch.sort = getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       );
     }
 
@@ -221,13 +229,13 @@ export class SavedSearchEmbeddable
       isLoading: false,
       sort: getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       ),
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
       inspectorAdapters: this.inspectorAdapters,
-      searchTitle: this.savedSearch.lastSavedTitle,
+      searchTitle: this.savedSearch.title,
       services: this.services,
       onAddColumn: (columnName: string) => {
         if (!props.columns) {
@@ -374,6 +382,28 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       return;
     }
+
+    if (
+      this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
+      this.savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
+      searchProps.services &&
+      searchProps.indexPattern &&
+      Array.isArray(searchProps.columns)
+    ) {
+      ReactDOM.render(
+        <FieldStatsTableEmbeddable
+          services={searchProps.services}
+          indexPattern={searchProps.indexPattern}
+          columns={searchProps.columns}
+          savedSearch={this.savedSearch}
+          filters={this.input.filters}
+          query={this.input.query}
+          onAddFilter={searchProps.onFilter}
+        />,
+        domNode
+      );
+      return;
+    }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
       searchProps,
@@ -397,9 +427,12 @@ export class SavedSearchEmbeddable
     return this.inspectorAdapters;
   }
 
+  public getDescription() {
+    return this.savedSearch.description;
+  }
+
   public destroy() {
     super.destroy();
-    this.savedSearch.destroy();
     if (this.searchProps) {
       delete this.searchProps;
     }

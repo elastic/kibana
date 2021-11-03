@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110892
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from 'kibana/public';
 import { DevToolsPlugin } from './plugin';
 

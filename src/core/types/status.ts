@@ -6,36 +6,58 @@
  * Side Public License, v 1.
  */
 
-import type { OpsMetrics } from '../server/metrics';
+import type {
+  CoreStatus as CoreStatusFromServer,
+  ServiceStatus as ServiceStatusFromServer,
+  ServiceStatusLevel as ServiceStatusLevelFromServer,
+  OpsMetrics,
+} from '../server';
 
-export interface ServerStatus {
-  id: string;
-  title: string;
-  state: string;
-  message: string;
-  uiColor: string;
-  icon?: string;
-  since?: string;
+/**
+ * We need this type to convert the object `ServiceStatusLevel` to a union of the possible strings.
+ * This is because of the "stringification" that occurs when serving HTTP requests.
+ */
+export type ServiceStatusLevel = ReturnType<ServiceStatusLevelFromServer['toString']>;
+
+export interface ServiceStatus extends Omit<ServiceStatusFromServer, 'level'> {
+  level: ServiceStatusLevel;
 }
 
-export type ServerMetrics = OpsMetrics & {
+/**
+ * Copy all the services listed in CoreStatus with their specific ServiceStatus declarations
+ * but overwriting the `level` to its stringified version.
+ */
+export type CoreStatus = {
+  [ServiceName in keyof CoreStatusFromServer]: Omit<CoreStatusFromServer[ServiceName], 'level'> & {
+    level: ServiceStatusLevel;
+  };
+};
+
+export type ServerMetrics = Omit<OpsMetrics, 'collected_at'> & {
+  last_updated: string;
   collection_interval_in_millis: number;
+  requests: {
+    status_codes: Record<number, number>;
+  };
 };
 
 export interface ServerVersion {
   number: string;
   build_hash: string;
-  build_number: string;
-  build_snapshot: string;
+  build_number: number;
+  build_snapshot: boolean;
+}
+
+export interface StatusInfo {
+  overall: ServiceStatus;
+  core: CoreStatus;
+  plugins: Record<string, ServiceStatus>;
 }
 
 export interface StatusResponse {
   name: string;
   uuid: string;
   version: ServerVersion;
-  status: {
-    overall: ServerStatus;
-    statuses: ServerStatus[];
-  };
+  status: StatusInfo;
   metrics: ServerMetrics;
 }

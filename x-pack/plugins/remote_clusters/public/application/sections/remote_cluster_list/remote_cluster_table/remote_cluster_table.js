@@ -330,6 +330,19 @@ export class RemoteClusterTable extends Component {
           )}
         </RemoveClusterButtonProvider>
       ) : undefined,
+      toolsRight: (
+        <EuiButton
+          {...reactRouterNavigate(history, '/add')}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="remoteClusterCreateButton"
+        >
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterList.connectButtonLabel"
+            defaultMessage="Add a remote cluster"
+          />
+        </EuiButton>
+      ),
       onChange: this.onSearch,
       box: {
         incremental: true,

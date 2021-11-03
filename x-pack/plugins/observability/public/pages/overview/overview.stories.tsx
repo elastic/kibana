@@ -10,7 +10,6 @@ import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
@@ -24,7 +23,11 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  createKibanaReactContext,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
+import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -33,42 +36,53 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'synthetics' });
 }
 
+const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
+
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
   wrapper: (storyFn, context, { options }) => {
     unregisterAll();
 
+    const KibanaReactContext = createKibanaReactContext({
+      application: { getUrlForApp: () => '' },
+      chrome: { docTitle: { change: () => {} } },
+      uiSettings: { get: () => [] },
+      usageCollection: { reportUiCounter: () => {} },
+    } as unknown as Partial<CoreStart>);
+
     return (
       <MemoryRouter>
-        <PluginContext.Provider
-          value={{
-            appMountParameters: ({
-              setHeaderActionMenu: () => {},
-            } as unknown) as AppMountParameters,
-            config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
-            core: options as CoreStart,
-            plugins: ({
-              data: {
-                query: {
-                  timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
-                },
+        <KibanaReactContext.Provider>
+          <PluginContext.Provider
+            value={{
+              appMountParameters: {
+                setHeaderActionMenu: () => {},
+              } as unknown as AppMountParameters,
+              config: {
+                unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
               },
-            } as unknown) as ObservabilityPublicPluginsStart,
-            observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-            ObservabilityPageTemplate: KibanaPageTemplate,
-          }}
-        >
-          <EuiThemeProvider>
+              core: options as CoreStart,
+              plugins: {
+                data: {
+                  query: {
+                    timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+                  },
+                },
+              } as unknown as ObservabilityPublicPluginsStart,
+              observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+              ObservabilityPageTemplate: KibanaPageTemplate,
+            }}
+          >
             <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
-          </EuiThemeProvider>
-        </PluginContext.Provider>
+          </PluginContext.Provider>
+        </KibanaReactContext.Provider>
       </MemoryRouter>
     );
   },
 });
 
-const core = ({
+const core = {
   http: {
     basePath: {
       prepend: (link: string) => `http://localhost:5601${link}`,
@@ -143,25 +157,25 @@ const core = ({
       return euiSettings[key];
     },
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreWithAlerts = ({
+const coreWithAlerts = {
   ...core,
   http: {
     ...core.http,
     get: alertsFetchData,
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreWithNewsFeed = ({
+const coreWithNewsFeed = {
   ...core,
   http: {
     ...core.http,
     get: newsFeedFetchData,
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreAlertsThrowsError = ({
+const coreAlertsThrowsError = {
   ...core,
   http: {
     ...core.http,
@@ -169,7 +183,7 @@ const coreAlertsThrowsError = ({
       throw new Error('Error fetching Alerts data');
     },
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
 storiesOf('app/Overview', module)
   .addDecorator(withCore(core))
@@ -177,7 +191,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -272,7 +286,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
 
       return (
@@ -289,7 +303,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -321,7 +335,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -355,7 +369,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'apm',
         fetchData: fetchApmData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',
@@ -386,7 +400,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'apm',
       fetchData: async () => emptyAPMResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
     });
     registerDataHandler({
       appName: 'infra_logs',
@@ -420,7 +434,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching APM data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
       registerDataHandler({
         appName: 'infra_logs',

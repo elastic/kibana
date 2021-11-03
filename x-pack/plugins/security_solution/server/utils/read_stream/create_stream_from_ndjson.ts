@@ -7,19 +7,9 @@
 
 import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import * as t from 'io-ts';
 import { createMapStream, createFilterStream } from '@kbn/utils';
 
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { importRuleValidateTypeDependents } from '../../../common/detection_engine/schemas/request/import_rules_type_dependents';
-import {
-  ImportRulesSchemaDecoded,
-  importRulesSchema,
-  ImportRulesSchema,
-} from '../../../common/detection_engine/schemas/request/import_rules_schema';
+import { ImportRulesSchemaDecoded } from '../../../common/detection_engine/schemas/request/import_rules_schema';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */
@@ -44,27 +34,16 @@ export const filterExportedCounts = (): Transform => {
   );
 };
 
-export const validateRules = (): Transform => {
-  return createMapStream((obj: ImportRulesSchema) => {
-    if (!(obj instanceof Error)) {
-      const decoded = importRulesSchema.decode(obj);
-      const checked = exactCheck(obj, decoded);
-      const onLeft = (errors: t.Errors): BadRequestError | ImportRulesSchemaDecoded => {
-        return new BadRequestError(formatErrors(errors).join());
-      };
-      const onRight = (schema: ImportRulesSchema): BadRequestError | ImportRulesSchemaDecoded => {
-        const validationErrors = importRuleValidateTypeDependents(schema);
-        if (validationErrors.length) {
-          return new BadRequestError(validationErrors.join());
-        } else {
-          return schema as ImportRulesSchemaDecoded;
-        }
-      };
-      return pipe(checked, fold(onLeft, onRight));
-    } else {
-      return obj;
-    }
-  });
+export const filterExportedRulesCounts = (): Transform => {
+  return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
+    (obj) => obj != null && !has('exported_rules_count', obj)
+  );
+};
+
+export const filterExceptions = (): Transform => {
+  return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
+    (obj) => obj != null && !has('list_id', obj)
+  );
 };
 
 // Adaptation from: saved_objects/import/create_limit_stream.ts
@@ -80,13 +59,4 @@ export const createLimitStream = (limit: number): Transform => {
       done(undefined, obj);
     },
   });
-};
-
-export const transformDataToNdjson = (data: unknown[]): string => {
-  if (data.length !== 0) {
-    const dataString = data.map((rule) => JSON.stringify(rule)).join('\n');
-    return `${dataString}\n`;
-  } else {
-    return '';
-  }
 };

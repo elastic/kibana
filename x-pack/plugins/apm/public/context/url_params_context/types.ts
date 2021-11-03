@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { TimeRangeComparisonType } from '../../../common/runtime_types/comparison_type_rt';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { LocalUIFilterName } from '../../../common/ui_filter';
-import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
+import { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
 
-export type IUrlParams = {
+export type UrlParams = {
   detailTab?: string;
   end?: string;
   flyoutDetailTab?: string;
@@ -17,11 +17,15 @@ export type IUrlParams = {
   environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
+  exactStart?: string;
+  exactEnd?: string;
   refreshInterval?: number;
   refreshPaused?: boolean;
   sortDirection?: string;
   sortField?: string;
   start?: string;
+  sampleRangeFrom?: number;
+  sampleRangeTo?: number;
   traceId?: string;
   transactionId?: string;
   transactionName?: string;
@@ -34,4 +38,7 @@ export type IUrlParams = {
   latencyAggregationType?: LatencyAggregationType;
   comparisonEnabled?: boolean;
   comparisonType?: TimeRangeComparisonType;
-} & Partial<Record<LocalUIFilterName, string>>;
+} & Partial<Record<UxLocalUIFilterName, string>>;
+
+export type UxUrlParams = UrlParams;
+export type ApmUrlParams = Omit<UrlParams, 'environment' | 'kuery'>;

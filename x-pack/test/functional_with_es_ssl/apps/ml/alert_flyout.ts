@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
 
@@ -40,7 +40,7 @@ function createTestJobAndDatafeed() {
         categorization_examples_limit: 4,
       },
     },
-    datafeed: ({
+    datafeed: {
       datafeed_id: `datafeed-${jobId}`,
       job_id: jobId,
       query: {
@@ -56,7 +56,7 @@ function createTestJobAndDatafeed() {
       },
       query_delay: '120s',
       indices: ['ft_ecommerce'],
-    } as unknown) as estypes.MlDatafeed,
+    } as unknown as estypes.MlDatafeed,
   };
 }
 
@@ -118,11 +118,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await ml.testExecution.logTestStep('should preview the alert condition');
         await ml.alerting.assertPreviewButtonState(false);
-        await ml.alerting.setTestInterval('2y');
+        await ml.alerting.setTestInterval('5y');
         await ml.alerting.assertPreviewButtonState(true);
 
         // don't check the exact number provided by the backend, just make sure it's > 0
-        await ml.alerting.checkPreview(/Found [1-9]\d* anomalies in the last 2y/);
+        await ml.alerting.checkPreview(/Found [1-9]\d* anomal(y|ies) in the last 5y/);
 
         await ml.testExecution.logTestStep('should create an alert');
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');

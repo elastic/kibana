@@ -11,12 +11,11 @@ import { useValues } from 'kea';
 
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { LicensingLogic } from '../../../shared/licensing';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { LicensingLogic, ManageLicenseButton } from '../../../shared/licensing';
 
 import { PRODUCT_SELECTOR_CALLOUT_HEADING } from '../../constants';
 
-import { LICENSE_CALLOUT_BODY, LICENSE_CALLOUT_BUTTON } from './constants';
+import { LICENSE_CALLOUT_BODY } from './constants';
 
 export const LicenseCallout: React.FC = () => {
   const { hasPlatinumLicense, isTrial } = useValues(LicensingLogic);
@@ -24,7 +23,7 @@ export const LicenseCallout: React.FC = () => {
   if (hasPlatinumLicense && !isTrial) return null;
 
   return (
-    <EuiPanel hasShadow={false} hasBorder className="productCard" paddingSize="l">
+    <EuiPanel hasBorder color="transparent" paddingSize="l">
       <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={7}>
           <EuiText>
@@ -34,9 +33,7 @@ export const LicenseCallout: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={1} />
         <EuiFlexItem grow={false}>
-          <EuiButtonTo to="/app/management/stack/license_management" shouldNotCreateHref>
-            {LICENSE_CALLOUT_BUTTON}
-          </EuiButtonTo>
+          <ManageLicenseButton />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

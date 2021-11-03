@@ -12,9 +12,10 @@ import { AbortError } from '../../../../../../src/plugins/kibana_utils/public';
 import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
 import { ParsedKibanaSearchResponse } from './types';
 
-export type RawResponseParser<RawResponse, Response> = (
-  rawResponse: RawResponse
-) => { data: Response; errors?: SearchStrategyError[] };
+export type RawResponseParser<RawResponse, Response> = (rawResponse: RawResponse) => {
+  data: Response;
+  errors?: SearchStrategyError[];
+};
 
 /**
  * An operator factory that normalizes each {@link IKibanaSearchResponse} by
@@ -30,49 +31,51 @@ export type RawResponseParser<RawResponse, Response> = (
  * @return An operator that adds parsing and error handling transformations to
  * each response payload using the arguments given above.
  */
-export const normalizeDataSearchResponses = <RawResponse, Response, InitialResponse>(
-  initialResponse: InitialResponse,
-  parseRawResponse: RawResponseParser<RawResponse, Response>
-) => (
-  response$: Observable<IKibanaSearchResponse<RawResponse>>
-): Observable<ParsedKibanaSearchResponse<Response | InitialResponse>> =>
-  response$.pipe(
-    map((response) => {
-      const { data, errors = [] } = parseRawResponse(response.rawResponse);
-      return {
-        data,
-        errors,
-        isPartial: response.isPartial ?? false,
-        isRunning: response.isRunning ?? false,
-        loaded: response.loaded,
-        total: response.total,
-      };
-    }),
-    startWith({
-      data: initialResponse,
-      errors: [],
-      isPartial: true,
-      isRunning: true,
-      loaded: 0,
-      total: undefined,
-    }),
-    catchError((error) =>
-      of({
+export const normalizeDataSearchResponses =
+  <RawResponse, Response, InitialResponse>(
+    initialResponse: InitialResponse,
+    parseRawResponse: RawResponseParser<RawResponse, Response>
+  ) =>
+  (
+    response$: Observable<IKibanaSearchResponse<RawResponse>>
+  ): Observable<ParsedKibanaSearchResponse<Response | InitialResponse>> =>
+    response$.pipe(
+      map((response) => {
+        const { data, errors = [] } = parseRawResponse(response.rawResponse);
+        return {
+          data,
+          errors,
+          isPartial: response.isPartial ?? false,
+          isRunning: response.isRunning ?? false,
+          loaded: response.loaded,
+          total: response.total,
+        };
+      }),
+      startWith({
         data: initialResponse,
-        errors: [
-          error instanceof AbortError
-            ? {
-                type: 'aborted' as const,
-              }
-            : {
-                type: 'generic' as const,
-                message: `${error.message ?? error}`,
-              },
-        ],
+        errors: [],
         isPartial: true,
-        isRunning: false,
+        isRunning: true,
         loaded: 0,
         total: undefined,
-      })
-    )
-  );
+      }),
+      catchError((error) =>
+        of({
+          data: initialResponse,
+          errors: [
+            error instanceof AbortError
+              ? {
+                  type: 'aborted' as const,
+                }
+              : {
+                  type: 'generic' as const,
+                  message: `${error.message ?? error}`,
+                },
+          ],
+          isPartial: true,
+          isRunning: false,
+          loaded: 0,
+          total: undefined,
+        })
+      )
+    );

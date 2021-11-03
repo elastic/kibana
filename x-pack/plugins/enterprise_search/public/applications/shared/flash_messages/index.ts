@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { FlashMessages } from './flash_messages';
+export { FlashMessages, Toasts } from './flash_messages';
 export { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
 export { IFlashMessage } from './types';
 export { flashAPIErrors } from './handle_api_errors';

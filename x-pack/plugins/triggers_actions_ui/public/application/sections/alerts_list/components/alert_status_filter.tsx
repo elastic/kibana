@@ -95,14 +95,14 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
 export function getHealthColor(status: AlertExecutionStatuses) {
   switch (status) {
     case 'active':
-      return 'primary';
+      return 'success';
     case 'error':
       return 'danger';
     case 'ok':
-      return 'subdued';
+      return 'primary';
     case 'pending':
-      return 'success';
+      return 'accent';
     default:
-      return 'warning';
+      return 'subdued';
   }
 }

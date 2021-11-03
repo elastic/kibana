@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTitle,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +17,6 @@ import React from 'react';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { AnomaliesSwimlaneVisualisation } from './anomalies_swimlane_visualisation';
 import { AnomaliesTable } from './table';
-import { ManageJobsButton } from '../../../../../components/logging/log_analysis_setup/manage_jobs_button';
 import {
   ChangePaginationOptions,
   ChangeSortOptions,
@@ -36,7 +34,6 @@ export const AnomaliesResults: React.FunctionComponent<{
   isLoadingAnomaliesResults: boolean;
   anomalies: LogEntryAnomalies;
   timeRange: TimeRange;
-  onViewModuleList: () => void;
   page: Page;
   fetchNextPage?: FetchNextPage;
   fetchPreviousPage?: FetchPreviousPage;
@@ -50,7 +47,6 @@ export const AnomaliesResults: React.FunctionComponent<{
 }> = ({
   isLoadingAnomaliesResults,
   timeRange,
-  onViewModuleList,
   anomalies,
   changeSortOptions,
   sortOptions,
@@ -65,17 +61,6 @@ export const AnomaliesResults: React.FunctionComponent<{
 }) => {
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="m" aria-label={title}>
-            <h1>{title}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ManageJobsButton onClick={onViewModuleList} size="s" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <AnomaliesSwimlaneVisualisation
@@ -129,10 +114,6 @@ export const AnomaliesResults: React.FunctionComponent<{
     </>
   );
 };
-
-const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', {
-  defaultMessage: 'Anomalies',
-});
 
 const loadingAriaLabel = i18n.translate(
   'xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel',

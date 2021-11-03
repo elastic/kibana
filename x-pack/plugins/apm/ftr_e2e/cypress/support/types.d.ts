@@ -8,7 +8,7 @@
 declare namespace Cypress {
   interface Chainable {
     loginAsReadOnlyUser(): void;
-    loginAsSuperUser(): void;
+    loginAsPowerUser(): void;
     loginAs(params: { username: string; password: string }): void;
     changeTimeRange(value: string): void;
     expectAPIsToHaveBeenCalledWith(params: {

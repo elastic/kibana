@@ -14,11 +14,12 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
+  TaskManagerDoc,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createEnableAlertTests({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('enable', () => {
@@ -27,11 +28,12 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
     after(() => objectRemover.removeAll());
 
-    async function getScheduledTask(id: string) {
-      return await es.get({
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
+      return scheduledTask._source!;
     }
 
     it('should handle enable alert request appropriately', async () => {
@@ -49,7 +51,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
         .set('kbn-xsrf', 'foo')
         .expect(200);
       expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
-      const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduled_task_id);
+      const taskRecord = await getScheduledTask(updatedAlert.scheduled_task_id);
       expect(taskRecord.type).to.eql('task');
       expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
       expect(JSON.parse(taskRecord.task.params)).to.eql({
@@ -100,7 +102,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
           .set('kbn-xsrf', 'foo')
           .expect(200);
         expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
-        const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduled_task_id);
+        const taskRecord = await getScheduledTask(updatedAlert.scheduled_task_id);
         expect(taskRecord.type).to.eql('task');
         expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
         expect(JSON.parse(taskRecord.task.params)).to.eql({

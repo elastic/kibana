@@ -31,7 +31,7 @@ const customHostSettingsSchema = schema.object({
       requireTLS: schema.maybe(schema.boolean()),
     })
   ),
-  tls: schema.maybe(
+  ssl: schema.maybe(
     schema.object({
       /**
        * @deprecated in favor of `verificationMode`
@@ -57,7 +57,6 @@ const customHostSettingsSchema = schema.object({
 export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
     {
@@ -78,16 +77,16 @@ export const configSchema = schema.object({
   proxyUrl: schema.maybe(schema.string()),
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   /**
-   * @deprecated in favor of `tls.proxyVerificationMode`
+   * @deprecated in favor of `ssl.proxyVerificationMode`
    **/
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   /**
-   * @deprecated in favor of `tls.verificationMode`
+   * @deprecated in favor of `ssl.verificationMode`
    **/
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
-  tls: schema.maybe(
+  ssl: schema.maybe(
     schema.object({
       verificationMode: schema.maybe(
         schema.oneOf(
@@ -112,6 +111,7 @@ export const configSchema = schema.object({
     idleInterval: schema.duration({ defaultValue: '1h' }),
     pageSize: schema.number({ defaultValue: 100 }),
   }),
+  microsoftGraphApiUrl: schema.maybe(schema.string()),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

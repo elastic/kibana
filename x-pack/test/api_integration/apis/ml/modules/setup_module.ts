@@ -963,18 +963,18 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testDataListNegative = [
     {
-      testTitleSuffix: 'for non existent index pattern',
+      testTitleSuffix: 'for non existent data view',
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
       requestBody: {
-        indexPatternName: 'non-existent-index-pattern',
+        indexPatternName: 'non-existent-data-view',
         startDatafeed: false,
       },
       expected: {
         responseCode: 400,
         error: 'Bad Request',
         message:
-          "Module's jobs contain custom URLs which require a kibana index pattern (non-existent-index-pattern) which cannot be found.",
+          "Module's jobs contain custom URLs which require a Kibana data view (non-existent-data-view) which cannot be found.",
       },
     },
     {
@@ -1047,6 +1047,9 @@ export default ({ getService }: FtrProviderContext) => {
           }
           for (const dashboard of testData.expected.dashboards) {
             await ml.testResources.deleteDashboardById(dashboard);
+          }
+          for (const job of testData.expected.jobs) {
+            await ml.api.deleteAnomalyDetectionJobES(job.jobId);
           }
           await ml.api.cleanMlIndices();
         });
@@ -1146,8 +1149,8 @@ export default ({ getService }: FtrProviderContext) => {
             if (testData.requestBody.startDatafeed === true) {
               await ml.api.waitForADJobRecordCountToBePositive(job.jobId);
             }
-            await ml.api.waitForJobState(job.jobId, job.jobState);
-            await ml.api.waitForDatafeedState(datafeedId, job.datafeedState);
+            await ml.api.waitForDatafeedState(datafeedId, job.datafeedState, 4 * 60 * 1000);
+            await ml.api.waitForJobState(job.jobId, job.jobState, 4 * 60 * 1000);
 
             // model memory limit should be <= 99mb
             const {

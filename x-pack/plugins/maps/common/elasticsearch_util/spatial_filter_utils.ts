@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import { FilterMeta, FILTERS } from '../../../../../src/plugins/data/common';
+import { FilterMeta, FILTERS } from '@kbn/es-query';
 import { MapExtent } from '../descriptor_types';
 import { ES_SPATIAL_RELATIONS } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
@@ -31,13 +31,23 @@ function createMultiGeoFieldFilter(
   }
 
   if (geoFieldNames.length === 1) {
-    const geoFilter = createGeoFilter(geoFieldNames[0]);
     return {
       meta: {
         ...meta,
         key: geoFieldNames[0],
       },
-      ...geoFilter,
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: geoFieldNames[0],
+              },
+            },
+            createGeoFilter(geoFieldNames[0]),
+          ],
+        },
+      },
     };
   }
 
@@ -201,8 +211,9 @@ export function extractFeaturesFromFilters(filters: GeoFilter[]): Feature[] {
         }
       } else {
         const geoFieldName = filter.meta.key;
-        if (geoFieldName) {
-          geometry = extractGeometryFromFilter(geoFieldName, filter);
+        const spatialClause = filter?.query?.bool?.must?.[1];
+        if (geoFieldName && spatialClause) {
+          geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
         }
       }
 

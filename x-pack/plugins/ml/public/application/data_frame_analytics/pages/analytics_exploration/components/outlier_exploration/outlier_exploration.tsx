@@ -41,12 +41,8 @@ interface ExplorationProps {
 }
 
 export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
-  const {
-    indexPattern,
-    indexPatternErrorMessage,
-    jobConfig,
-    needsDestIndexPattern,
-  } = useResultsViewConfig(jobId);
+  const { indexPattern, indexPatternErrorMessage, jobConfig, needsDestIndexPattern } =
+    useResultsViewConfig(jobId);
   const [pageUrlState, setPageUrlState] = useExplorationUrlState();
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
@@ -92,8 +88,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   const scatterplotFieldOptions = useScatterplotFieldOptions(
     indexPattern,
-    jobConfig?.analyzed_fields.includes,
-    jobConfig?.analyzed_fields.excludes,
+    jobConfig?.analyzed_fields?.includes,
+    jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
 

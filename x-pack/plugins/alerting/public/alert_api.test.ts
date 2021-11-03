@@ -24,6 +24,7 @@ describe('loadAlertTypes', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         producer: 'alerts',
       },
@@ -49,6 +50,7 @@ describe('loadAlertType', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
       producer: 'alerts',
     };
@@ -71,6 +73,7 @@ describe('loadAlertType', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
       producer: 'alerts',
     };

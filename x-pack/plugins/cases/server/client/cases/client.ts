@@ -12,11 +12,13 @@ import {
   User,
   AllTagsFindRequest,
   AllReportersFindRequest,
-} from '../../../common/api';
+  CasesByAlertId,
+} from '../../../common';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
 import {
   ICasePostRequest,
+  ICaseResolveResponse,
   ICaseResponse,
   ICasesFindRequest,
   ICasesFindResponse,
@@ -28,9 +30,10 @@ import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
 import {
-  CaseIDsByAlertIDParams,
+  CasesByAlertIDParams,
   get,
-  getCaseIDsByAlertID,
+  resolve,
+  getCasesByAlertID,
   GetParams,
   getReporters,
   getTags,
@@ -57,6 +60,11 @@ export interface CasesSubClient {
    */
   get(params: GetParams): Promise<ICaseResponse>;
   /**
+   * @experimental
+   * Retrieves a single case resolving the specified ID.
+   */
+  resolve(params: GetParams): Promise<ICaseResolveResponse>;
+  /**
    * Pushes a specific case to an external system.
    */
   push(args: PushParams): Promise<ICaseResponse>;
@@ -79,9 +87,9 @@ export interface CasesSubClient {
    */
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
   /**
-   * Retrieves the case IDs given a single alert ID
+   * Retrieves the cases ID and title that have the requested alert attached to them
    */
-  getCaseIDsByAlertID(params: CaseIDsByAlertIDParams): Promise<string[]>;
+  getCasesByAlertID(params: CasesByAlertIDParams): Promise<CasesByAlertId>;
 }
 
 /**
@@ -98,13 +106,13 @@ export const createCasesSubClient = (
     create: (data: CasePostRequest) => create(data, clientArgs),
     find: (params: CasesFindRequest) => find(params, clientArgs),
     get: (params: GetParams) => get(params, clientArgs),
+    resolve: (params: GetParams) => resolve(params, clientArgs),
     push: (params: PushParams) => push(params, clientArgs, casesClient, casesClientInternal),
     update: (cases: CasesPatchRequest) => update(cases, clientArgs, casesClientInternal),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
-    getCaseIDsByAlertID: (params: CaseIDsByAlertIDParams) =>
-      getCaseIDsByAlertID(params, clientArgs),
+    getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

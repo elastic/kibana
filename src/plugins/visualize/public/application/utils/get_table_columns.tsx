@@ -7,7 +7,16 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiBadge } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiLink,
+  EuiBadge,
+  EuiBasicTableColumn,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
@@ -16,6 +25,16 @@ import { VisualizationListItem } from 'src/plugins/visualizations/public';
 import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
+import { getUsageCollector } from '../../services';
+import { APP_NAME } from '../visualize_constants';
+
+const doTelemetryForAddEvent = (visType?: string) => {
+  const usageCollection = getUsageCollector();
+
+  if (usageCollection && visType) {
+    usageCollection.reportUiCounter(APP_NAME, METRIC_TYPE.CLICK, `${visType}:add`);
+  }
+};
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -75,57 +94,62 @@ export const getTableColumns = (
   application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   taggingApi?: SavedObjectsTaggingApi
-) => [
-  {
-    field: 'title',
-    name: i18n.translate('visualize.listing.table.titleColumnName', {
-      defaultMessage: 'Title',
-    }),
-    sortable: true,
-    render: (field: string, { editApp, editUrl, title, error }: VisualizationListItem) =>
-      // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
-      !error ? (
-        <RedirectAppLinks application={application} className="visListingTable__titleLink">
-          <EuiLink
-            href={getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl)}
-            data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
-          >
-            {field}
-          </EuiLink>
-        </RedirectAppLinks>
-      ) : (
-        field
-      ),
-  },
-  {
-    field: 'typeTitle',
-    name: i18n.translate('visualize.listing.table.typeColumnName', {
-      defaultMessage: 'Type',
-    }),
-    sortable: true,
-    render: (field: string, record: VisualizationListItem) =>
-      !record.error ? (
-        <span>
-          {renderItemTypeIcon(record)}
-          {record.typeTitle}
-          {getBadge(record)}
-        </span>
-      ) : (
-        <EuiBadge iconType="alert" color="warning">
-          {record.error}
-        </EuiBadge>
-      ),
-  },
-  {
-    field: 'description',
-    name: i18n.translate('visualize.listing.table.descriptionColumnName', {
-      defaultMessage: 'Description',
-    }),
-    sortable: true,
-    render: (field: string, record: VisualizationListItem) => <span>{record.description}</span>,
-  },
-  ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
-];
+) =>
+  [
+    {
+      field: 'title',
+      name: i18n.translate('visualize.listing.table.titleColumnName', {
+        defaultMessage: 'Title',
+      }),
+      sortable: true,
+      render: (field: string, { editApp, editUrl, title, error, type }: VisualizationListItem) =>
+        // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
+        !error ? (
+          <RedirectAppLinks application={application} className="visListingTable__titleLink">
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink
+              href={getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl)}
+              onClick={() => {
+                doTelemetryForAddEvent(typeof type === 'string' ? type : type?.name);
+              }}
+              data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
+            >
+              {field}
+            </EuiLink>
+          </RedirectAppLinks>
+        ) : (
+          field
+        ),
+    },
+    {
+      field: 'typeTitle',
+      name: i18n.translate('visualize.listing.table.typeColumnName', {
+        defaultMessage: 'Type',
+      }),
+      sortable: true,
+      render: (field: string, record: VisualizationListItem) =>
+        !record.error ? (
+          <span>
+            {renderItemTypeIcon(record)}
+            {record.typeTitle}
+            {getBadge(record)}
+          </span>
+        ) : (
+          <EuiBadge iconType="alert" color="warning">
+            {record.error}
+          </EuiBadge>
+        ),
+    },
+    {
+      field: 'description',
+      name: i18n.translate('visualize.listing.table.descriptionColumnName', {
+        defaultMessage: 'Description',
+      }),
+      sortable: true,
+      render: (field: string, record: VisualizationListItem) => <span>{record.description}</span>,
+    },
+    ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
+  ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 
 export const getNoItemsMessage = (createItem: () => void) => (
   <EuiEmptyPrompt

@@ -19,7 +19,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiOverlayMask,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -31,7 +30,6 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 import { useToastNotifications } from '../../../../app_dependencies';
-
 import { useApi } from '../../../../hooks/use_api';
 
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
@@ -44,9 +42,14 @@ import {
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
   config: TransformConfigUnion;
+  indexPatternId?: string;
 }
 
-export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout, config }) => {
+export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
+  closeFlyout,
+  config,
+  indexPatternId,
+}) => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
 
@@ -78,70 +81,71 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
   const isUpdateButtonDisabled = !state.isFormValid || !state.isFormTouched;
 
   return (
-    <EuiOverlayMask>
-      <EuiFlyout
-        onClose={closeFlyout}
-        hideCloseButton
-        aria-labelledby="transformEditFlyoutTitle"
-        data-test-subj="transformEditFlyout"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id="transformEditFlyoutTitle">
-              {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
-                defaultMessage: 'Edit {transformId}',
-                values: {
-                  transformId: config.id,
-                },
+    <EuiFlyout
+      onClose={closeFlyout}
+      hideCloseButton
+      aria-labelledby="transformEditFlyoutTitle"
+      data-test-subj="transformEditFlyout"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="transformEditFlyoutTitle">
+            {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
+              defaultMessage: 'Edit {transformId}',
+              values: {
+                transformId: config.id,
+              },
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
+        <EditTransformFlyoutForm
+          editTransformFlyout={[state, dispatch]}
+          indexPatternId={indexPatternId}
+        />
+        {errorMessage !== undefined && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.transform.transformList.editTransformGenericErrorMessage',
+                {
+                  defaultMessage:
+                    'An error occurred calling the API endpoint to update transforms.',
+                }
+              )}
+              color="danger"
+              iconType="alert"
+            >
+              <p>{errorMessage}</p>
+            </EuiCallOut>
+          </>
+        )}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
+                defaultMessage: 'Cancel',
               })}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-          <EditTransformFlyoutForm editTransformFlyout={[state, dispatch]} />
-          {errorMessage !== undefined && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.transform.transformList.editTransformGenericErrorMessage',
-                  {
-                    defaultMessage:
-                      'An error occurred calling the API endpoint to update transforms.',
-                  }
-                )}
-                color="danger"
-                iconType="alert"
-              >
-                <p>{errorMessage}</p>
-              </EuiCallOut>
-            </>
-          )}
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="transformEditFlyoutUpdateButton"
-                onClick={submitFormHandler}
-                fill
-                isDisabled={isUpdateButtonDisabled}
-              >
-                {i18n.translate('xpack.transform.transformList.editFlyoutUpdateButtonText', {
-                  defaultMessage: 'Update',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    </EuiOverlayMask>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="transformEditFlyoutUpdateButton"
+              onClick={submitFormHandler}
+              fill
+              isDisabled={isUpdateButtonDisabled}
+            >
+              {i18n.translate('xpack.transform.transformList.editFlyoutUpdateButtonText', {
+                defaultMessage: 'Update',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };

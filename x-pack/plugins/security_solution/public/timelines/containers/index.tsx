@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 import { ESQuery } from '../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { inputsModel, KueryFilterQueryKind } from '../../common/store';
+import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../../timelines/store/timeline';
@@ -33,7 +33,7 @@ import {
 } from '../../../common/search_strategy';
 import { InspectResponse } from '../../types';
 import * as i18n from './translations';
-import { TimelineId } from '../../../common/types/timeline';
+import { KueryFilterQueryKind, TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
 import {
@@ -180,6 +180,13 @@ export const useTimelineEvents = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
+  const setUpdated = useCallback(
+    (updatedAt: number) => {
+      dispatch(timelineActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+    },
+    [dispatch, id]
+  );
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {
@@ -214,9 +221,7 @@ export const useTimelineEvents = ({
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
             strategy:
-              request.language === 'eql'
-                ? 'securitySolutionTimelineEqlSearchStrategy'
-                : 'securitySolutionTimelineSearchStrategy',
+              request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
@@ -232,6 +237,7 @@ export const useTimelineEvents = ({
                     totalCount: response.totalCount,
                     updatedAt: Date.now(),
                   };
+                  setUpdated(newTimelineResponse.updatedAt);
                   if (id === TimelineId.active) {
                     activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
@@ -239,6 +245,7 @@ export const useTimelineEvents = ({
                       activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
                       activeTimeline.setEqlResponse(newTimelineResponse);
                     } else {
+                      // @ts-expect-error EqlSearchRequest.query is not compatible with QueryDslQueryContainer
                       activeTimeline.setRequest(request);
                       activeTimeline.setResponse(newTimelineResponse);
                     }
@@ -305,7 +312,17 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, id, addWarning, addError, pageName, refetchGrid, skip, wrappedLoadPage]
+    [
+      pageName,
+      skip,
+      id,
+      data.search,
+      setUpdated,
+      addWarning,
+      addError,
+      refetchGrid,
+      wrappedLoadPage,
+    ]
   );
 
   useEffect(() => {

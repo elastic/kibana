@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiSupertest = createApmApiSupertest(getService('supertest'));
+  const apmApiClient = getService('apmApiClient');
   const archiveName = 'apm_8.0.0';
   const { end } = archives[archiveName];
   const start = new Date(Date.parse(end) - 600000).toISOString();
@@ -24,6 +23,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         end,
         serviceName: 'opbeans-java',
         transactionType: 'request' as string | undefined,
+        environment: 'ENVIRONMENT_ALL',
+        interval: '5m',
       },
     },
   });
@@ -31,8 +32,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(`without data loaded`, { config: 'basic', archives: [] }, () => {
     it('transaction_error_rate (without data)', async () => {
       const options = getOptions();
-      const response = await apmApiSupertest({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
         ...options,
       });
 
@@ -44,8 +45,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const options = getOptions();
       options.params.query.transactionType = undefined;
 
-      const response = await apmApiSupertest({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
         ...options,
       });
 
@@ -56,8 +57,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('transaction_duration (without data)', async () => {
       const options = getOptions();
 
-      const response = await apmApiSupertest({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
         ...options,
       });
 
@@ -69,8 +70,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(`with data loaded`, { config: 'basic', archives: [archiveName] }, () => {
     it('transaction_error_rate (with data)', async () => {
       const options = getOptions();
-      const response = await apmApiSupertest({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
         ...options,
       });
 
@@ -86,8 +87,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const options = getOptions();
       options.params.query.transactionType = undefined;
 
-      const response = await apmApiSupertest({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
         ...options,
       });
 
@@ -101,9 +102,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('transaction_duration (with data)', async () => {
       const options = getOptions();
-      const response = await apmApiSupertest({
+      const response = await apmApiClient.readUser({
         ...options,
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+        endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
       });
 
       expect(response.status).to.be(200);

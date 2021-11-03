@@ -31,7 +31,6 @@ import {
   addCombinedFieldsToMappings,
   getDefaultCombinedFields,
 } from '../../../common/components/combined_fields';
-import { ExperimentalBadge } from '../../../common/components/experimental_badge';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
@@ -434,7 +433,7 @@ export class ImportView extends Component {
 
       this.setState({ indexPatternNames });
     } catch (error) {
-      console.error('failed to load index patterns', error);
+      console.error('failed to load data views', error);
     }
   }
 
@@ -509,15 +508,6 @@ export class ImportView extends Component {
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.importView.importDataTitle"
                   defaultMessage="Import data"
-                />
-                &nbsp;
-                <ExperimentalBadge
-                  tooltipContent={
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.experimentalFeatureTooltip"
-                      defaultMessage="Experimental feature. We'd love to hear your feedback."
-                    />
-                  }
                 />
               </h2>
             </EuiTitle>
@@ -601,6 +591,7 @@ export class ImportView extends Component {
                       timeFieldName={timeFieldName}
                       createIndexPattern={createIndexPattern}
                       showFilebeatFlyout={this.showFilebeatFlyout}
+                      additionalLinks={this.props.resultsLinks ?? []}
                     />
 
                     {isFilebeatFlyoutVisible && (
@@ -713,8 +704,8 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   if (indexPatternNames.find((i) => i === name)) {
     return (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.importView.indexPatternNameAlreadyExistsErrorMessage"
-        defaultMessage="Index pattern name already exists"
+        id="xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage"
+        defaultMessage="Data view name already exists"
       />
     );
   }
@@ -729,8 +720,8 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
     // name should match index
     return (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchIndexNameErrorMessage"
-        defaultMessage="Index pattern does not match index name"
+        id="xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchDataViewErrorMessage"
+        defaultMessage="Data view does not match index name"
       />
     );
   }

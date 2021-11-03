@@ -8,9 +8,9 @@
 import { isEqual } from 'lodash';
 import React, { memo, FC } from 'react';
 
-import { EuiCodeEditor } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+
+import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 import { isRuntimeMappings } from '../../../../../../common/shared_imports';
 
@@ -26,42 +26,50 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
     state: { advancedEditorRuntimeMappingsLastApplied, advancedRuntimeMappingsConfig, xJsonMode },
   }) => {
     return (
-      <EuiCodeEditor
-        data-test-subj="transformAdvancedRuntimeMappingsEditor"
-        style={{ border: '1px solid #e3e6ef' }}
-        height="250px"
-        width="100%"
-        mode={xJsonMode}
-        value={advancedRuntimeMappingsConfig}
-        onChange={(d: string) => {
-          setAdvancedRuntimeMappingsConfig(d);
+      <div data-test-subj="transformAdvancedRuntimeMappingsEditor">
+        <CodeEditor
+          height={250}
+          languageId={'json'}
+          onChange={(d: string) => {
+            setAdvancedRuntimeMappingsConfig(d);
 
-          // Disable the "Apply"-Button if the config hasn't changed.
-          if (advancedEditorRuntimeMappingsLastApplied === d) {
-            setRuntimeMappingsEditorApplyButtonEnabled(false);
-            return;
-          }
+            // Disable the "Apply"-Button if the config hasn't changed.
+            if (advancedEditorRuntimeMappingsLastApplied === d) {
+              setRuntimeMappingsEditorApplyButtonEnabled(false);
+              return;
+            }
 
-          // Try to parse the string passed on from the editor.
-          // If parsing fails, the "Apply"-Button will be disabled
-          try {
-            // if the user deletes the json in the editor
-            // they should still be able to apply changes
-            const isEmptyStr = d === '';
-            const parsedJson = isEmptyStr ? {} : JSON.parse(convertToJson(d));
-            setRuntimeMappingsEditorApplyButtonEnabled(isEmptyStr || isRuntimeMappings(parsedJson));
-          } catch (e) {
-            setRuntimeMappingsEditorApplyButtonEnabled(false);
-          }
-        }}
-        setOptions={{
-          fontSize: '12px',
-        }}
-        theme="textmate"
-        aria-label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
-          defaultMessage: 'Advanced pivot editor',
-        })}
-      />
+            // Try to parse the string passed on from the editor.
+            // If parsing fails, the "Apply"-Button will be disabled
+            try {
+              // if the user deletes the json in the editor
+              // they should still be able to apply changes
+              const isEmptyStr = d === '';
+              const parsedJson = isEmptyStr ? {} : JSON.parse(convertToJson(d));
+              setRuntimeMappingsEditorApplyButtonEnabled(
+                isEmptyStr || isRuntimeMappings(parsedJson)
+              );
+            } catch (e) {
+              setRuntimeMappingsEditorApplyButtonEnabled(false);
+            }
+          }}
+          options={{
+            ariaLabel: i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
+              defaultMessage: 'Advanced pivot editor',
+            }),
+            automaticLayout: true,
+            fontSize: 12,
+            scrollBeyondLastLine: false,
+            quickSuggestions: true,
+            minimap: {
+              enabled: false,
+            },
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+          }}
+          value={advancedRuntimeMappingsConfig}
+        />
+      </div>
     );
   },
   (prevProps, nextProps) => isEqual(pickProps(prevProps), pickProps(nextProps))

@@ -52,11 +52,11 @@ describe('<PipelinesList />', () => {
 
       // Verify app title
       expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Ingest Node Pipelines');
+      expect(find('appTitle').text()).toEqual('Ingest Pipelines');
 
       // Verify documentation link
       expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Ingest Node Pipelines docs');
+      expect(find('documentationLink').text()).toBe('Ingest Pipelines docs');
 
       // Verify create button exists
       expect(exists('createPipelineButton')).toBe(true);
@@ -162,7 +162,7 @@ describe('<PipelinesList />', () => {
       const { exists, find } = testBed;
 
       expect(exists('pipelineLoadError')).toBe(true);
-      expect(find('pipelineLoadError').text()).toContain('Unable to load pipelines.');
+      expect(find('pipelineLoadError').text()).toContain('Unable to load pipelines');
     });
   });
 });

@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import {
   Embeddable,
   IContainer,
@@ -43,6 +44,7 @@ import {
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
+  areLayersLoaded,
   getGeoFieldNames,
   getMapCenter,
   getMapBuffer,
@@ -54,9 +56,9 @@ import {
 } from '../selectors/map_selectors';
 import {
   APP_ID,
-  getExistingMapPath,
+  getEditPath,
+  getFullPath,
   MAP_SAVED_OBJECT_TYPE,
-  MAP_PATH,
   RawValue,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
@@ -65,6 +67,7 @@ import {
   getCoreI18n,
   getHttp,
   getChartsPaletteServiceGetColor,
+  getSpacesApi,
   getSearchService,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
@@ -73,6 +76,7 @@ import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
+import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 
 import {
   MapByValueInput,
@@ -92,8 +96,10 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+{
   type = MAP_SAVED_OBJECT_TYPE;
+  deferEmbeddableLoad = true;
 
   private _isActive: boolean;
   private _savedMap: SavedMap;
@@ -111,6 +117,9 @@ export class MapEmbeddable
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
+  private _onInitialRenderComplete?: () => void = undefined;
+  private _hasInitialRenderCompleteFired = false;
+  private _isSharable = true;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -147,6 +156,9 @@ export class MapEmbeddable
       return;
     }
 
+    // deferred loading of this embeddable is complete
+    this.setInitializationFinished();
+
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
@@ -180,13 +192,13 @@ export class MapEmbeddable
       : '';
     const input = this.getInput();
     const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
-    const savedObjectId = (input as MapByReferenceInput).savedObjectId;
+    const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
       defaultTitle: savedMapTitle,
       title,
-      editPath: `/${MAP_PATH}/${savedObjectId}`,
-      editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
+      editPath: getEditPath(savedObjectId),
+      editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
       indexPatterns: await this._getIndexPatterns(),
     });
   }
@@ -225,6 +237,17 @@ export class MapEmbeddable
   setEventHandlers = (eventHandlers: EventHandlers) => {
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
+
+  public setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void {
+    this._onInitialRenderComplete = onInitialRenderComplete;
+  }
+
+  /*
+   * Set to false to exclude sharing attributes 'data-*'.
+   */
+  public setIsSharable(isSharable: boolean): void {
+    this._isSharable = isSharable;
+  }
 
   getInspectorAdapters() {
     return getInspectorAdapters(this._savedMap.getStore().getState());
@@ -332,21 +355,39 @@ export class MapEmbeddable
       return;
     }
 
-    const I18nContext = getCoreI18n().Context;
+    const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    const content =
+      sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
+        <div className="mapEmbeddedError">
+          <EuiEmptyPrompt
+            iconType="alert"
+            iconColor="danger"
+            data-test-subj="embeddable-maps-failure"
+            body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
+              targetType: MAP_SAVED_OBJECT_TYPE,
+              sourceId: sharingSavedObjectProps.sourceId!,
+            })}
+          />
+        </div>
+      ) : (
+        <MapContainer
+          onSingleValueTrigger={this.onSingleValueTrigger}
+          addFilters={this.input.hideFilterActions ? null : this.addFilters}
+          getFilterActions={this.getFilterActions}
+          getActionContext={this.getActionContext}
+          renderTooltipContent={this._renderTooltipContent}
+          title={this.getTitle()}
+          description={this.getDescription()}
+          waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
+          isSharable={this._isSharable}
+        />
+      );
 
+    const I18nContext = getCoreI18n().Context;
     render(
       <Provider store={this._savedMap.getStore()}>
-        <I18nContext>
-          <MapContainer
-            onSingleValueTrigger={this.onSingleValueTrigger}
-            addFilters={this.input.hideFilterActions ? null : this.addFilters}
-            getFilterActions={this.getFilterActions}
-            getActionContext={this.getActionContext}
-            renderTooltipContent={this._renderTooltipContent}
-            title={this.getTitle()}
-            description={this.getDescription()}
-          />
-        </I18nContext>
+        <I18nContext>{content}</I18nContext>
       </Provider>,
       this._domNode
     );
@@ -502,6 +543,15 @@ export class MapEmbeddable
   _handleStoreChanges() {
     if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
+    }
+
+    if (
+      this._onInitialRenderComplete &&
+      !this._hasInitialRenderCompleteFired &&
+      areLayersLoaded(this._savedMap.getStore().getState())
+    ) {
+      this._hasInitialRenderCompleteFired = true;
+      this._onInitialRenderComplete();
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());

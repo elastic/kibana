@@ -7,7 +7,7 @@
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
-import { ConfigSchema, spacesConfigDeprecationProvider } from './config';
+import { ConfigSchema } from './config';
 import { SpacesPlugin } from './plugin';
 
 // These exports are part of public Spaces plugin contract, any change in signature of exported
@@ -23,14 +23,16 @@ export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 export { ISpacesClient, SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
 
-export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
-
-// re-export types from oss definition
-export type { Space } from 'src/plugins/spaces_oss/common';
+export type {
+  Space,
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+} from '../common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
-  deprecations: spacesConfigDeprecationProvider,
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SpacesPlugin(initializerContext);

@@ -7,7 +7,13 @@
 
 import type { PreconfiguredAgentPolicy } from '../types';
 
-import { defaultPackages } from './epm';
+import {
+  defaultPackages,
+  FLEET_SYSTEM_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+  autoUpdatePackages,
+  monitoringTypes,
+} from './epm';
 
 export const PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE =
   'fleet-preconfiguration-deletion-record';
@@ -27,15 +33,15 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   description: 'Default agent policy created by Kibana',
   package_policies: [
     {
-      name: `${defaultPackages.System}-1`,
+      name: `${FLEET_SYSTEM_PACKAGE}-1`,
       package: {
-        name: defaultPackages.System,
+        name: FLEET_SYSTEM_PACKAGE,
       },
     },
   ],
   is_default: true,
   is_managed: false,
-  monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
+  monitoring_enabled: monitoringTypes,
 };
 
 export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
@@ -44,25 +50,27 @@ export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefa
   description: 'Default Fleet Server agent policy created by Kibana',
   package_policies: [
     {
-      name: `${defaultPackages.FleetServer}-1`,
+      name: `${FLEET_SERVER_PACKAGE}-1`,
       package: {
-        name: defaultPackages.FleetServer,
+        name: FLEET_SERVER_PACKAGE,
       },
     },
   ],
   is_default: false,
   is_default_fleet_server: true,
   is_managed: false,
-  monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
+  monitoring_enabled: monitoringTypes,
 };
 
-export const DEFAULT_PACKAGES = Object.values(defaultPackages).map((name) => ({
+export const DEFAULT_PACKAGES = defaultPackages.map((name) => ({
   name,
   version: PRECONFIGURATION_LATEST_KEYWORD,
 }));
 
-// these are currently identical. we can separate if they later diverge
-export const REQUIRED_PACKAGES = DEFAULT_PACKAGES;
+export const AUTO_UPDATE_PACKAGES = autoUpdatePackages.map((name) => ({
+  name,
+  version: PRECONFIGURATION_LATEST_KEYWORD,
+}));
 
 export interface PreconfigurationError {
   package?: { name: string; version: string };

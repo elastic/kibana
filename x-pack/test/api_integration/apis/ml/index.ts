@@ -44,6 +44,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_apache');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_auditbeat');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_apm');
@@ -68,18 +69,22 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./modules'));
+    loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./anomaly_detectors'));
+    loadTestFile(require.resolve('./calendars'));
+    loadTestFile(require.resolve('./datafeeds'));
+    loadTestFile(require.resolve('./data_frame_analytics'));
     loadTestFile(require.resolve('./data_visualizer'));
     loadTestFile(require.resolve('./fields_service'));
-    loadTestFile(require.resolve('./job_validation'));
-    loadTestFile(require.resolve('./jobs'));
-    loadTestFile(require.resolve('./results'));
-    loadTestFile(require.resolve('./data_frame_analytics'));
     loadTestFile(require.resolve('./filters'));
-    loadTestFile(require.resolve('./calendars'));
-    loadTestFile(require.resolve('./annotations'));
+    loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./job_validation'));
+    loadTestFile(require.resolve('./job_audit_messages'));
+    loadTestFile(require.resolve('./jobs'));
+    loadTestFile(require.resolve('./modules'));
+    loadTestFile(require.resolve('./results'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./system'));
+    loadTestFile(require.resolve('./trained_models'));
   });
 }

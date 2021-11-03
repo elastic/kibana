@@ -28,7 +28,8 @@ const createAgent = (legacyConfig: ESConfigForProxy) => {
       agentOptions.rejectUnauthorized = true;
 
       // by default, NodeJS is checking the server identify
-      agentOptions.checkServerIdentity = (_.noop as unknown) as https.AgentOptions['checkServerIdentity'];
+      agentOptions.checkServerIdentity =
+        _.noop as unknown as https.AgentOptions['checkServerIdentity'];
       break;
     case 'full':
       agentOptions.rejectUnauthorized = true;

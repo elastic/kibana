@@ -23,7 +23,8 @@ describe('Observability dashboard data', () => {
       start: 'now-15m',
       end: 'now',
     },
-    bucketSize: '600s',
+    intervalString: '600s',
+    bucketSize: 600,
   };
   afterEach(() => {
     callApmApiMock.mockClear();

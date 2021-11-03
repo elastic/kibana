@@ -49,9 +49,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
 };
 
 const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
-  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = createStartContractMock(
-    typeRegistry
-  );
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> =
+    createStartContractMock(typeRegistry);
 
   return internalStartContract;
 };
@@ -61,7 +60,10 @@ const createSetupContractMock = () => {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
+    getKibanaIndex: jest.fn(),
   };
+
+  setupContract.getKibanaIndex.mockReturnValue('.kibana');
 
   return setupContract;
 };
@@ -73,6 +75,7 @@ const createInternalSetupContractMock = () => {
       level: ServiceStatusLevels.available,
       summary: `SavedObjects is available`,
     }),
+    getTypeRegistry: jest.fn(),
   };
   return internalSetupContract;
 };

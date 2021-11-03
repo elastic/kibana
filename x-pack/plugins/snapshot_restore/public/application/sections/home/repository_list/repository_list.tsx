@@ -8,13 +8,12 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageContent, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { Repository } from '../../../../../common/types';
-import { SectionError, Error } from '../../../../shared_imports';
-import { SectionLoading } from '../../../components';
+import { PageLoading, PageError, Error } from '../../../../shared_imports';
 import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useServices } from '../../../app_context';
@@ -72,16 +71,16 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryList.loadingRepositoriesDescription"
           defaultMessage="Loading repositories…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
     content = (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryList.LoadingRepositoriesErrorMessage"
@@ -93,56 +92,65 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     );
   } else if (repositories && repositories.length === 0) {
     content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.emptyPromptTitle"
-              defaultMessage="Register your first repository"
-            />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1>
               <FormattedMessage
-                id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
-                defaultMessage="Create a place where your snapshots will live."
+                id="xpack.snapshotRestore.repositoryList.emptyPromptTitle"
+                defaultMessage="Register your first repository"
               />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            {...reactRouterNavigate(history, linkToAddRepository())}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="registerRepositoryButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.addRepositoryButtonLabel"
-              defaultMessage="Register a repository"
-            />
-          </EuiButton>
-        }
-        data-test-subj="emptyPrompt"
-      />
+            </h1>
+          }
+          body={
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
+                  defaultMessage="Create a place where your snapshots will live."
+                />
+              </p>
+            </Fragment>
+          }
+          actions={
+            <EuiButton
+              {...reactRouterNavigate(history, linkToAddRepository())}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="registerRepositoryButton"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.addRepositoryButtonLabel"
+                defaultMessage="Register a repository"
+              />
+            </EuiButton>
+          }
+          data-test-subj="emptyPrompt"
+        />
+      </EuiPageContent>
     );
   } else {
     content = (
-      <RepositoryTable
-        repositories={repositories || []}
-        managedRepository={managedRepository?.name}
-        reload={reload}
-        openRepositoryDetailsUrl={openRepositoryDetailsUrl}
-        onRepositoryDeleted={onRepositoryDeleted}
-      />
+      <section data-test-subj="repositoryList">
+        <RepositoryTable
+          repositories={repositories || []}
+          managedRepository={managedRepository?.name}
+          reload={reload}
+          openRepositoryDetailsUrl={openRepositoryDetailsUrl}
+          onRepositoryDeleted={onRepositoryDeleted}
+        />
+      </section>
     );
   }
 
   return (
-    <section data-test-subj="repositoryList">
+    <>
       {repositoryName ? (
         <RepositoryDetails
           repositoryName={repositoryName}
@@ -151,6 +159,6 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         />
       ) : null}
       {content}
-    </section>
+    </>
   );
 };

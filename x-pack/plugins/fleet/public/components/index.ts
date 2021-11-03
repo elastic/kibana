@@ -6,6 +6,7 @@
  */
 export { Loading } from './loading';
 export { Error } from './error';
+export { FleetSetupLoading } from './fleet_setup_loading';
 export { PackageIcon } from './package_icon';
 export { ContextMenuActions } from './context_menu_actions';
 export { LinkedAgentCount } from './linked_agent_count';
@@ -18,6 +19,7 @@ export { AgentPolicyPackageBadges } from './agent_policy_package_badges';
 export { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 export { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export { PackagePolicyActionsMenu } from './package_policy_actions_menu';
+export { AddAgentHelpPopover } from './add_agent_help_popover';
 export * from './link_and_revision';
 export * from './settings_flyout';
 export * from './agent_enrollment_flyout';

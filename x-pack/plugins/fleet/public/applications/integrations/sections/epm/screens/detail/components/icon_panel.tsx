@@ -13,17 +13,10 @@ import type { UsePackageIconType } from '../../../../../hooks';
 import { usePackageIconType } from '../../../../../hooks';
 import { Loading } from '../../../../../components';
 
-const PanelWrapper = styled.div`
-  // NOTE: changes to the width here will impact navigation tabs page layout under integration package details
-  width: ${(props) =>
-    parseFloat(props.theme.eui.euiSize) * 6 + parseFloat(props.theme.eui.euiSizeXL) * 2}px;
-  height: 1px;
-  z-index: 1;
-`;
-
 const Panel = styled(EuiPanel)`
   padding: ${(props) => props.theme.eui.spacerSizes.xl};
-  margin-bottom: -100%;
+  width: ${(props) =>
+    parseFloat(props.theme.eui.euiSize) * 6 + parseFloat(props.theme.eui.euiSizeXL) * 2}px;
   svg,
   img {
     height: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
@@ -44,20 +37,16 @@ export function IconPanel({
   const iconType = usePackageIconType({ packageName, integrationName, version, icons });
 
   return (
-    <PanelWrapper>
-      <Panel>
-        <EuiIcon type={iconType} size="original" />
-      </Panel>
-    </PanelWrapper>
+    <Panel>
+      <EuiIcon type={iconType} size="original" />
+    </Panel>
   );
 }
 
 export function LoadingIconPanel() {
   return (
-    <PanelWrapper>
-      <Panel>
-        <Loading />
-      </Panel>
-    </PanelWrapper>
+    <Panel>
+      <Loading />
+    </Panel>
   );
 }

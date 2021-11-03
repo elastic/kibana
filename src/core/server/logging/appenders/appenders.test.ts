@@ -9,7 +9,6 @@
 import { mockCreateLayout } from './appenders.test.mocks';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
 import { Appenders } from './appenders';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
@@ -67,13 +66,6 @@ test('`create()` creates correct appender.', () => {
     fileName: 'path',
   });
   expect(fileAppender).toBeInstanceOf(FileAppender);
-
-  const legacyAppender = Appenders.create({
-    type: 'legacy-appender',
-    legacyLoggingConfig: { verbose: true },
-  });
-
-  expect(legacyAppender).toBeInstanceOf(LegacyAppender);
 
   const rollingFileAppender = Appenders.create({
     type: 'rolling-file',

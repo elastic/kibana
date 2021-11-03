@@ -7,34 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { FeatureCollection } from 'geojson';
-import * as topojson from 'topojson-client';
-import { GeometryCollection } from 'topojson-specification';
-import _ from 'lodash';
-
-import fetch from 'node-fetch';
-import {
-  GIS_API_PATH,
-  EMS_FILES_CATALOGUE_PATH,
-  EMS_TILES_CATALOGUE_PATH,
-  EMS_GLYPHS_PATH,
-  EMS_APP_NAME,
-  FONTS_API_PATH,
-  FORMAT_TYPE,
-} from '../common/constants';
-import {
-  getHttp,
-  getRegionmapLayers,
-  getTilemap,
-  getKibanaVersion,
-  getEMSSettings,
-} from './kibana_services';
+import { EMS_APP_NAME, FONTS_API_PATH } from '../common/constants';
+import { getHttp, getTilemap, getKibanaVersion, getEMSSettings } from './kibana_services';
 import { getLicenseId } from './licensed_features';
-import { LayerConfig } from '../../../../src/plugins/maps_ems/public';
-
-export function getKibanaRegionList(): LayerConfig[] {
-  return getRegionmapLayers();
-}
 
 export function getKibanaTileMap(): unknown {
   return getTilemap();
@@ -56,28 +31,14 @@ export async function getEmsTmsServices(): Promise<TMSService[]> {
   return getEMSClient().getTMSServices();
 }
 
-function relativeToAbsolute(url: string): string {
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
-
 let emsClient: EMSClient | null = null;
 let latestLicenseId: string | undefined;
 export function getEMSClient(): EMSClient {
   if (!emsClient) {
     const emsSettings = getEMSSettings();
     const proxyPath = '';
-    const tileApiUrl = emsSettings!.isProxyElasticMapsServiceInMaps()
-      ? relativeToAbsolute(
-          getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`)
-        )
-      : emsSettings!.getEMSTileApiUrl();
-    const fileApiUrl = emsSettings!.isProxyElasticMapsServiceInMaps()
-      ? relativeToAbsolute(
-          getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`)
-        )
-      : emsSettings!.getEMSFileApiUrl();
+    const tileApiUrl = emsSettings!.getEMSTileApiUrl();
+    const fileApiUrl = emsSettings!.getEMSFileApiUrl();
 
     emsClient = new EMSClient({
       language: i18n.getLocale(),
@@ -106,53 +67,9 @@ export function getGlyphUrl(): string {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
 
-  return emsSettings!.isProxyElasticMapsServiceInMaps()
-    ? relativeToAbsolute(
-        getHttp().basePath.prepend(
-          `/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`
-        )
-      ) + `/{fontstack}/{range}`
-    : emsSettings!.getEMSFontLibraryUrl();
+  return emsSettings!.getEMSFontLibraryUrl();
 }
 
 export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
-}
-
-export async function fetchGeoJson(
-  fetchUrl: string,
-  format: FORMAT_TYPE,
-  featureCollectionPath: string
-): Promise<FeatureCollection> {
-  let fetchedJson;
-  try {
-    const response = await fetch(fetchUrl);
-    if (!response.ok) {
-      throw new Error('Request failed');
-    }
-    fetchedJson = await response.json();
-  } catch (e) {
-    throw new Error(
-      i18n.translate('xpack.maps.util.requestFailedErrorMessage', {
-        defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
-        values: { fetchUrl },
-      })
-    );
-  }
-
-  if (format === FORMAT_TYPE.GEOJSON) {
-    return fetchedJson;
-  }
-
-  if (format === FORMAT_TYPE.TOPOJSON) {
-    const features = _.get(fetchedJson, `objects.${featureCollectionPath}`) as GeometryCollection;
-    return topojson.feature(fetchedJson, features);
-  }
-
-  throw new Error(
-    i18n.translate('xpack.maps.util.formatErrorMessage', {
-      defaultMessage: `Unable to fetch vector shapes from url: {format}`,
-      values: { format },
-    })
-  );
 }

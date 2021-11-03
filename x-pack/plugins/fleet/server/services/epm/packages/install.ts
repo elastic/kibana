@@ -12,7 +12,13 @@ import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } fro
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
-import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
+import type {
+  BulkInstallPackageInfo,
+  EpmPackageInstallStatus,
+  InstallablePackage,
+  InstallSource,
+} from '../../../../common';
+import { DEFAULT_PACKAGES } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
@@ -20,6 +26,7 @@ import {
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
+import { licenseService } from '../../';
 import type {
   Installation,
   AssetType,
@@ -34,10 +41,19 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 
-import { isRequiredPackage, getInstallation, getInstallationObject } from './index';
+import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
+import { removeOldAssets } from './cleanup';
+
+export async function isPackageInstalled(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<boolean> {
+  const installedPackage = await getInstallation(options);
+  return installedPackage !== undefined;
+}
 
 export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -145,9 +161,11 @@ export async function handleInstallPackageFailure({
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
     if (installType === 'install' || installType === 'reinstall') {
-      logger.error(`uninstalling ${pkgkey} after error installing`);
+      logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     }
+
+    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' });
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -248,9 +266,12 @@ async function installPackageFromRegistry({
     // get package info
     const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
+    if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
+      return { error: new Error(`Requires ${packageInfo.license} license`), installType };
+    }
+
     // try installing the package, if there was an error, call error handler and rethrow
-    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
-    // @ts-ignore
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -260,10 +281,16 @@ async function installPackageFromRegistry({
       installType,
       installSource: 'registry',
     })
-      .then((assets) => {
+      .then(async (assets) => {
+        await removeOldAssets({
+          soClient: savedObjectsClient,
+          pkgName: packageInfo.name,
+          currentVersion: packageInfo.version,
+        });
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
+        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`);
         await handleInstallPackageFailure({
           savedObjectsClient,
           error: err,
@@ -326,8 +353,7 @@ async function installPackageByUpload({
       version: packageInfo.version,
       packageInfo,
     });
-    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
-    // @ts-ignore
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -419,6 +445,21 @@ export const updateVersion = async (
     version: pkgVersion,
   });
 };
+
+export const updateInstallStatus = async ({
+  savedObjectsClient,
+  pkgName,
+  status,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  status: EpmPackageInstallStatus;
+}) => {
+  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    install_status: status,
+  });
+};
+
 export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: InstallablePackage;
@@ -426,8 +467,14 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
   const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
-  const removable = !isRequiredPackage(pkgName);
+  const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
+
+  // For default packages, default the `keep_policies_up_to_date` setting to true. For all other
+  // package, default it to false.
+  const defaultKeepPoliciesUpToDate = DEFAULT_PACKAGES.some(
+    ({ name }) => name === packageInfo.name
+  );
 
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
@@ -444,6 +491,7 @@ export async function createInstallation(options: {
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
       install_source: installSource,
+      keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     },
     { id: pkgName, overwrite: true }
   );
@@ -470,23 +518,34 @@ export const saveInstalledEsRefs = async (
 ) => {
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installedAssetsToSave = installedPkg?.attributes.installed_es.concat(installedAssets);
+
+  const deduplicatedAssets =
+    installedAssetsToSave?.reduce((acc, currentAsset) => {
+      const foundAsset = acc.find((asset: EsAssetReference) => asset.id === currentAsset.id);
+      if (!foundAsset) {
+        return acc.concat([currentAsset]);
+      } else {
+        return acc;
+      }
+    }, [] as EsAssetReference[]) || [];
+
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: installedAssetsToSave,
+    installed_es: deduplicatedAssets,
   });
   return installedAssets;
 };
 
-export const removeAssetsFromInstalledEsByType = async (
+export const removeAssetTypesFromInstalledEs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  assetType: AssetType
+  assetTypes: AssetType[]
 ) => {
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installedAssets = installedPkg?.attributes.installed_es;
   if (!installedAssets?.length) return;
-  const installedAssetsToSave = installedAssets?.filter(({ id, type }) => {
-    return type !== assetType;
-  });
+  const installedAssetsToSave = installedAssets?.filter(
+    (asset) => !assetTypes.includes(asset.type)
+  );
 
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: installedAssetsToSave,

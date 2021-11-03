@@ -17,8 +17,10 @@ import * as XJson from './xjson';
 
 export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './components/json_editor';
 
+export { PageLoading } from './components/page_loading';
 export { SectionLoading } from './components/section_loading';
 
+export { EuiCodeEditor, EuiCodeEditorProps } from './components/code_editor';
 export { Frequency, CronEditor } from './components/cron_editor';
 
 export {
@@ -40,8 +42,10 @@ export {
   Privileges,
   MissingPrivileges,
   SectionError,
+  PageError,
   Error,
   useAuthorizationContext,
+  Authorization,
 } from './authorization';
 
 export { Forms, ace, GlobalFlyout, XJson };

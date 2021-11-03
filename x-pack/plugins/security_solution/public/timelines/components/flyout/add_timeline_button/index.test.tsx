@@ -13,8 +13,8 @@ import { AddTimelineButton } from './';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { mockOpenTimelineQueryResults, TestProviders } from '../../../../common/mock';
-import { mockHistory, Router } from '../../../../cases/components/__mock__/router';
 import { getAllTimeline, useGetAllTimeline } from '../../../containers/all';
+import { mockHistory, Router } from '../../../../common/mock/router';
 
 jest.mock('../../open_timeline/use_timeline_status', () => {
   const originalModule = jest.requireActual('../../open_timeline/use_timeline_status');
@@ -175,7 +175,7 @@ describe('AddTimelineButton', () => {
         },
       });
 
-      ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
+      (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
         fetchAllTimeline: jest.fn(),
         timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
         loading: false,

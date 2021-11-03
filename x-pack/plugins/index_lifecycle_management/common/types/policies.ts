@@ -18,6 +18,7 @@ export type PhaseExceptDelete = keyof Omit<Phases, 'delete'>;
 export interface SerializedPolicy {
   name: string;
   phases: Phases;
+  _meta?: Record<string, any>;
 }
 
 export interface Phases {
@@ -29,11 +30,13 @@ export interface Phases {
 }
 
 export interface PolicyFromES {
-  modified_date: string;
+  modifiedDate: string;
   name: string;
   policy: SerializedPolicy;
   version: number;
-  linkedIndices?: string[];
+  indices?: string[];
+  dataStreams?: string[];
+  indexTemplates?: string[];
 }
 
 export interface SerializedPhase {
@@ -131,7 +134,6 @@ export interface SerializedColdPhase extends SerializedPhase {
 
 export interface SerializedFrozenPhase extends SerializedPhase {
   actions: {
-    freeze?: {};
     allocate?: AllocateAction;
     set_priority?: {
       priority: number | null;
@@ -165,7 +167,8 @@ export interface AllocateAction {
 }
 
 export interface ShrinkAction {
-  number_of_shards: number;
+  number_of_shards?: number;
+  max_primary_shard_size?: string;
 }
 
 export interface ForcemergeAction {

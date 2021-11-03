@@ -235,9 +235,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       [storage]
     );
 
-    const getAppStateFromStorage = useCallback(() => storage.get(APP_STATE_STORAGE_KEY) ?? [], [
-      storage,
-    ]);
+    const getAppStateFromStorage = useCallback(
+      () => storage.get(APP_STATE_STORAGE_KEY) ?? [],
+      [storage]
+    );
 
     useEffect(() => {
       let isSubscribed = true;
@@ -350,82 +351,84 @@ interface UpdateReduxSearchBar extends OnTimeChangeProps {
   updateTime: boolean;
 }
 
-export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
-  end,
-  filters,
-  id,
-  isQuickSelection,
-  query,
-  resetSavedQuery,
-  savedQuery,
-  start,
-  timelineId,
-  filterManager,
-  updateTime = false,
-}: UpdateReduxSearchBar): void => {
-  if (updateTime) {
-    const fromDate = formatDate(start);
-    let toDate = formatDate(end, { roundUp: true });
-    if (isQuickSelection) {
-      if (end === start) {
+export const dispatchUpdateSearch =
+  (dispatch: Dispatch) =>
+  ({
+    end,
+    filters,
+    id,
+    isQuickSelection,
+    query,
+    resetSavedQuery,
+    savedQuery,
+    start,
+    timelineId,
+    filterManager,
+    updateTime = false,
+  }: UpdateReduxSearchBar): void => {
+    if (updateTime) {
+      const fromDate = formatDate(start);
+      let toDate = formatDate(end, { roundUp: true });
+      if (isQuickSelection) {
+        if (end === start) {
+          dispatch(
+            inputsActions.setAbsoluteRangeDatePicker({
+              id,
+              fromStr: start,
+              toStr: end,
+              from: fromDate,
+              to: toDate,
+            })
+          );
+        } else {
+          dispatch(
+            inputsActions.setRelativeRangeDatePicker({
+              id,
+              fromStr: start,
+              toStr: end,
+              from: fromDate,
+              to: toDate,
+            })
+          );
+        }
+      } else {
+        toDate = formatDate(end);
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             id,
-            fromStr: start,
-            toStr: end,
-            from: fromDate,
-            to: toDate,
-          })
-        );
-      } else {
-        dispatch(
-          inputsActions.setRelativeRangeDatePicker({
-            id,
-            fromStr: start,
-            toStr: end,
-            from: fromDate,
-            to: toDate,
+            from: formatDate(start),
+            to: formatDate(end),
           })
         );
       }
-    } else {
-      toDate = formatDate(end);
+      if (timelineId != null) {
+        dispatch(
+          timelineActions.updateRange({
+            id: timelineId,
+            start: fromDate,
+            end: toDate,
+          })
+        );
+      }
+    }
+    if (query != null) {
       dispatch(
-        inputsActions.setAbsoluteRangeDatePicker({
+        inputsActions.setFilterQuery({
           id,
-          from: formatDate(start),
-          to: formatDate(end),
+          ...query,
         })
       );
     }
-    if (timelineId != null) {
-      dispatch(
-        timelineActions.updateRange({
-          id: timelineId,
-          start: fromDate,
-          end: toDate,
-        })
-      );
+    if (filters != null) {
+      filterManager.setFilters(filters);
     }
-  }
-  if (query != null) {
-    dispatch(
-      inputsActions.setFilterQuery({
-        id,
-        ...query,
-      })
-    );
-  }
-  if (filters != null) {
-    filterManager.setFilters(filters);
-  }
-  if (savedQuery != null || resetSavedQuery) {
-    dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
-  }
+    if (savedQuery != null || resetSavedQuery) {
+      dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
+    }
 
-  dispatch(hostsActions.setHostTablesActivePageToZero());
-  dispatch(networkActions.setNetworkTablesActivePageToZero());
-};
+    dispatch(hostsActions.setHostTablesActivePageToZero());
+    dispatch(networkActions.setNetworkTablesActivePageToZero());
+  };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateSearch: dispatchUpdateSearch(dispatch),

@@ -6,7 +6,7 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { getVizColorForIndex } from '../../../common/viz_colors';
 import { GenericMetricsRequest } from './fetch_and_transform_metrics';
 import { ChartBase } from './types';
@@ -19,14 +19,13 @@ export function transformDataToMetricsChart(
   result: ESSearchResponse<unknown, GenericMetricsRequest>,
   chartBase: ChartBase
 ) {
-  const { aggregations, hits } = result;
+  const { aggregations } = result;
   const timeseriesData = aggregations?.timeseriesData;
 
   return {
     title: chartBase.title,
     key: chartBase.key,
     yUnit: chartBase.yUnit,
-    noHits: hits.total.value === 0,
     series: Object.keys(chartBase.series).map((seriesKey, i) => {
       const overallValue = aggregations?.[seriesKey]?.value;
 

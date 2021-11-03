@@ -79,11 +79,11 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async clickColorPicker() {
-    await this.testSubjects.click('colorPickerAnchor');
+    await this.testSubjects.click('euiColorPickerAnchor');
   }
 
   async setColorinPicker(hexValue: string) {
-    await this.testSubjects.setValue('colorPickerAnchor', hexValue);
+    await this.testSubjects.setValue('euiColorPickerAnchor', hexValue);
   }
 
   async clickShowFeatures() {

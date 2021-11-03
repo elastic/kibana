@@ -6,14 +6,15 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { APP_ICON, getExistingMapPath } from '../../common/constants';
+import { APP_ICON, getFullPath } from '../../common/constants';
 // @ts-ignore
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export const mapSavedObjects: SavedObjectsType = {
   name: 'map',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       description: { type: 'text' },
@@ -34,7 +35,7 @@ export const mapSavedObjects: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: getExistingMapPath(obj.id),
+        path: getFullPath(obj.id),
         uiCapabilitiesPath: 'maps.show',
       };
     },

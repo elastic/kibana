@@ -7,5 +7,34 @@
  */
 
 export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
-export * from './palette';
-export * from './constants';
+export const LEGACY_TIME_AXIS = 'visualization:useLegacyTimeAxis';
+
+export {
+  CustomPaletteArguments,
+  CustomPaletteState,
+  SystemPaletteArguments,
+  PaletteOutput,
+  defaultCustomColors,
+  palette,
+  systemPalette,
+} from './palette';
+
+export { paletteIds } from './constants';
+
+export {
+  ColorSchemas,
+  ColorSchema,
+  RawColorSchema,
+  ColorMap,
+  vislibColorMaps,
+  colorSchemas,
+  getHeatmapColors,
+  truncatedColorMaps,
+  truncatedColorSchemas,
+  ColorMode,
+  LabelRotation,
+  defaultCountLabel,
+  MULTILAYER_TIME_AXIS_STYLE,
+} from './static';
+
+export { ColorSchemaParams, Labels, Style } from './types';

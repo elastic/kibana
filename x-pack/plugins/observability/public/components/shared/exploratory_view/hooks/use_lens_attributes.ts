@@ -8,82 +8,105 @@
 import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
-import { LensAttributes } from '../configurations/lens_attributes';
-import { useSeriesStorage } from './use_series_storage';
+import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import {
+  AllSeries,
+  allSeriesKey,
+  convertAllShortSeries,
+  useSeriesStorage,
+} from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
-import { DataSeries, SeriesUrl, UrlFilter } from '../types';
-import { useAppIndexPatternContext } from './use_app_index_pattern';
+import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
+import { IndexPatternState, useAppIndexPatternContext } from './use_app_index_pattern';
+import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
+import { useTheme } from '../../../../hooks/use_theme';
+import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
+import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
 
-interface Props {
-  seriesId: string;
-}
-
-export const getFiltersFromDefs = (
-  reportDefinitions: SeriesUrl['reportDefinitions'],
-  dataViewConfig: DataSeries
-) => {
-  const rdfFilters = Object.entries(reportDefinitions ?? {}).map(([field, value]) => {
-    return {
-      field,
-      values: value,
-    };
-  }) as UrlFilter[];
-
-  // let's filter out custom fields
-  return rdfFilters.filter(({ field }) => {
-    const rdf = dataViewConfig.reportDefinitions.find(({ field: fd }) => field === fd);
-    return !rdf?.custom;
-  });
+export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
+  return Object.entries(reportDefinitions ?? {})
+    .map(([field, value]) => {
+      return {
+        field,
+        values: value,
+      };
+    })
+    .filter(({ values }) => !values.includes(ALL_VALUES_SELECTED)) as UrlFilter[];
 };
 
-export const useLensAttributes = ({
-  seriesId,
-}: Props): TypedLensByValueInput['attributes'] | null => {
-  const { getSeries } = useSeriesStorage();
-  const series = getSeries(seriesId);
-  const { breakdown, seriesType, operationType, reportType, reportDefinitions = {} } = series ?? {};
+export function getLayerConfigs(
+  allSeries: AllSeries,
+  reportType: ReportViewType,
+  theme: EuiTheme,
+  indexPatterns: IndexPatternState
+) {
+  const layerConfigs: LayerConfig[] = [];
 
-  const { indexPattern } = useAppIndexPatternContext();
+  allSeries.forEach((series, seriesIndex) => {
+    const indexPattern = indexPatterns?.[series?.dataType];
+
+    if (
+      indexPattern &&
+      !isEmpty(series.reportDefinitions) &&
+      !series.hidden &&
+      series.selectedMetricField
+    ) {
+      const seriesConfig = getDefaultConfigs({
+        reportType,
+        indexPattern,
+        dataType: series.dataType,
+      });
+
+      const filters: UrlFilter[] = (series.filters ?? []).concat(
+        getFiltersFromDefs(series.reportDefinitions)
+      );
+
+      const color = `euiColorVis${seriesIndex}`;
+
+      layerConfigs.push({
+        filters,
+        indexPattern,
+        seriesConfig,
+        time: series.time,
+        name: series.name,
+        breakdown: series.breakdown === LABEL_FIELDS_BREAKDOWN ? undefined : series.breakdown,
+        seriesType: series.seriesType,
+        operationType: series.operationType,
+        reportDefinitions: series.reportDefinitions ?? {},
+        selectedMetricField: series.selectedMetricField,
+        color: series.color ?? (theme.eui as unknown as Record<string, string>)[color],
+      });
+    }
+  });
+
+  return layerConfigs;
+}
+
+export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null => {
+  const { storage, allSeries, lastRefresh, reportType } = useSeriesStorage();
+
+  const { indexPatterns } = useAppIndexPatternContext();
+
+  const theme = useTheme();
 
   return useMemo(() => {
-    if (!indexPattern || !reportType || isEmpty(reportDefinitions)) {
+    // we only use the data from url to apply, since that gets updated to apply changes
+    const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+
+    if (isEmpty(indexPatterns) || isEmpty(allSeriesT) || !reportType) {
+      return null;
+    }
+    const layerConfigs = getLayerConfigs(allSeriesT, reportType, theme, indexPatterns);
+
+    if (layerConfigs.length < 1) {
       return null;
     }
 
-    const dataViewConfig = getDefaultConfigs({
-      seriesId,
-      reportType,
-      indexPattern,
-    });
+    const lensAttributes = new LensAttributes(layerConfigs);
 
-    const filters: UrlFilter[] = (series.filters ?? []).concat(
-      getFiltersFromDefs(reportDefinitions, dataViewConfig)
-    );
-
-    const lensAttributes = new LensAttributes(
-      indexPattern,
-      dataViewConfig,
-      seriesType,
-      filters,
-      operationType,
-      reportDefinitions,
-      breakdown
-    );
-
-    if (breakdown) {
-      lensAttributes.addBreakdown(breakdown);
-    }
-
-    return lensAttributes.getJSON();
-  }, [
-    indexPattern,
-    breakdown,
-    seriesType,
-    operationType,
-    reportType,
-    reportDefinitions,
-    seriesId,
-    series.filters,
-  ]);
+    return lensAttributes.getJSON(lastRefresh);
+    // we also want to check the state on allSeries changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPatterns, reportType, storage, theme, lastRefresh, allSeries]);
 };

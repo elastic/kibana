@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiTitle, EuiText, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
@@ -54,44 +54,47 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   const isInvalid = validationErrors.length > 0;
 
   return (
-    <EuiDescribedFormGroup
-      title={
-        <h3>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.infra.analysisSetup.indicesSelectionTitle"
+              defaultMessage="Choose indices"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
           <FormattedMessage
-            id="xpack.infra.analysisSetup.indicesSelectionTitle"
-            defaultMessage="Choose indices"
+            id="xpack.infra.analysisSetup.indicesSelectionDescription"
+            defaultMessage="By default, Machine Learning analyzes log messages in all log indices configured for the source. You can choose to only analyze a subset of the index names. Every selected index name must match at least one index with log entries. You can also choose to only include a certain subset of datasets. Note that the dataset filter applies to all selected indices."
           />
-        </h3>
-      }
-      description={
-        <FormattedMessage
-          id="xpack.infra.analysisSetup.indicesSelectionDescription"
-          defaultMessage="By default, Machine Learning analyzes log messages in all log indices configured for the source. You can choose to only analyze a subset of the index names. Every selected index name must match at least one index with log entries. You can also choose to only include a certain subset of datasets. Note that the dataset filter applies to all selected indices."
-        />
-      }
-    >
-      <LoadingOverlayWrapper isLoading={isValidating}>
-        <EuiFormRow
-          fullWidth
-          isInvalid={isInvalid}
-          label={indicesSelectionLabel}
-          labelType="legend"
-        >
-          <>
-            {indices.map((index) => (
-              <IndexSetupRow
-                index={index}
-                isDisabled={disabled}
-                key={index.name}
-                onChangeIsSelected={changeIsIndexSelected}
-                onChangeDatasetFilter={changeDatasetFilter}
-                previousQualityWarnings={previousQualityWarnings}
-              />
-            ))}
-          </>
-        </EuiFormRow>
-      </LoadingOverlayWrapper>
-    </EuiDescribedFormGroup>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <LoadingOverlayWrapper isLoading={isValidating}>
+          <EuiFormRow
+            fullWidth
+            isInvalid={isInvalid}
+            label={indicesSelectionLabel}
+            labelType="legend"
+          >
+            <>
+              {indices.map((index) => (
+                <IndexSetupRow
+                  index={index}
+                  isDisabled={disabled}
+                  key={index.name}
+                  onChangeIsSelected={changeIsIndexSelected}
+                  onChangeDatasetFilter={changeDatasetFilter}
+                  previousQualityWarnings={previousQualityWarnings}
+                />
+              ))}
+            </>
+          </EuiFormRow>
+        </LoadingOverlayWrapper>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

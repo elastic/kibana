@@ -6,8 +6,8 @@
  */
 
 import { ROLES } from '../../../common/test';
-import { DETECTIONS_RULE_MANAGEMENT_URL, DETECTIONS_URL } from '../../urls/navigation';
-import { newRule } from '../../objects/rule';
+import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
+import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
 import {
@@ -37,7 +37,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.platform_engineer);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
     waitForAlertsIndexToBeCreated();
 
     // After that we can login as a soc manager.
@@ -57,7 +57,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       });
       context('On Detections home page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(DETECTIONS_URL);
+          loadPageAsPlatformEngineerUser(ALERTS_URL);
         });
 
         it('We show the need admin primary callout', () => {
@@ -77,7 +77,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(newRule);
+          createCustomRule(getNewRule());
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
@@ -107,7 +107,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       });
       context('On Detections home page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(DETECTIONS_URL);
+          loadPageAsPlatformEngineerUser(ALERTS_URL);
         });
 
         it('We show the need admin primary callout', () => {
@@ -127,7 +127,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(newRule);
+          createCustomRule(getNewRule());
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
@@ -157,7 +157,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       });
       context('On Detections home page', () => {
         beforeEach(() => {
-          loadPageAsPlatformEngineerUser(DETECTIONS_URL);
+          loadPageAsPlatformEngineerUser(ALERTS_URL);
         });
 
         it('We show the need admin primary callout', () => {
@@ -177,7 +177,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(newRule);
+          createCustomRule(getNewRule());
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();

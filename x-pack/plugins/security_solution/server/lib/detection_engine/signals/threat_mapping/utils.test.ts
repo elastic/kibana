@@ -10,6 +10,7 @@ import { sampleSignalHit } from '../__mocks__/es_results';
 import { ThreatMatchNamedQuery } from './types';
 
 import {
+  buildExecutionIntervalValidator,
   calculateAdditiveMax,
   calculateMax,
   calculateMaxLookBack,
@@ -58,6 +59,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -69,6 +71,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.success).toEqual(true);
@@ -84,6 +87,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -95,6 +99,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.success).toEqual(false);
@@ -110,6 +115,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -121,6 +127,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
@@ -136,6 +143,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -147,6 +155,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults).toEqual(
@@ -167,6 +176,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -178,6 +188,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
+        warningMessages: [],
       };
       const combinedResults = combineResults(existingResult, newResult);
       expect(combinedResults).toEqual(
@@ -289,6 +300,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -299,6 +311,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, []);
       expect(combinedResults).toEqual(expectedResult);
@@ -314,6 +327,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -324,6 +338,7 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
+        warningMessages: [],
       };
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -334,6 +349,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
@@ -350,6 +366,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -360,6 +377,7 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -370,6 +388,7 @@ describe('utils', () => {
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
@@ -381,6 +400,7 @@ describe('utils', () => {
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -397,6 +417,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -407,6 +428,7 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -417,6 +439,7 @@ describe('utils', () => {
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
@@ -428,6 +451,7 @@ describe('utils', () => {
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult2, newResult1]); // two array elements are flipped
@@ -444,6 +468,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult1: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -454,6 +479,7 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const newResult2: SearchAfterAndBulkCreateReturnType = {
         success: true,
@@ -464,6 +490,7 @@ describe('utils', () => {
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const expectedResult: SearchAfterAndBulkCreateReturnType = {
@@ -475,6 +502,7 @@ describe('utils', () => {
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -491,6 +519,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -502,6 +531,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.success).toEqual(true);
@@ -517,6 +547,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -528,6 +559,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.success).toEqual(false);
@@ -543,6 +575,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -554,6 +587,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
@@ -569,6 +603,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -580,6 +615,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults).toEqual(
@@ -600,6 +636,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'],
+        warningMessages: [],
       };
 
       const newResult: SearchAfterAndBulkCreateReturnType = {
@@ -611,6 +648,7 @@ describe('utils', () => {
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
+        warningMessages: [],
       };
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
       expect(combinedResults).toEqual(
@@ -673,6 +711,28 @@ describe('utils', () => {
           'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name"}'
         );
       });
+    });
+  });
+
+  describe('buildExecutionIntervalValidator', () => {
+    it('succeeds if the validator is called within the specified interval', () => {
+      const validator = buildExecutionIntervalValidator('1m');
+      expect(() => validator()).not.toThrowError();
+    });
+
+    it('throws an error if the validator is called after the specified interval', async () => {
+      const validator = buildExecutionIntervalValidator('1s');
+
+      await new Promise((r) => setTimeout(r, 2000));
+      expect(() => validator()).toThrowError(
+        'Current rule execution has exceeded its allotted interval (1s) and has been stopped.'
+      );
+    });
+
+    it('throws an error if the interval cannot be parsed', () => {
+      expect(() => buildExecutionIntervalValidator('badString')).toThrowError(
+        'Unable to parse rule interval (badString); stopping rule execution since allotted duration is undefined'
+      );
     });
   });
 });

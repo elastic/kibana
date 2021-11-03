@@ -8,7 +8,7 @@
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../projections/metrics';
@@ -21,6 +21,7 @@ import {
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 export async function fetchAndTransformGcMetrics({
   environment,
@@ -30,25 +31,32 @@ export async function fetchAndTransformGcMetrics({
   serviceNodeName,
   chartBase,
   fieldName,
+  operationName,
+  start,
+  end,
 }: {
-  environment?: string;
-  kuery?: string;
-  setup: Setup & SetupTimeRange;
+  environment: string;
+  kuery: string;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
+  operationName: string;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const { bucketSize } = getBucketSize({ start, end });
 
   const projection = getMetricsProjection({
     environment,
     kuery,
-    setup,
     serviceName,
     serviceNodeName,
+    start,
+    end,
   });
 
   // GC rate and time are reported by the agents as monotonically
@@ -63,7 +71,7 @@ export async function fetchAndTransformGcMetrics({
           filter: [
             ...projection.body.query.bool.filter,
             { exists: { field: fieldName } },
-            { term: { [AGENT_NAME]: 'java' } },
+            { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
           ],
         },
       },
@@ -74,11 +82,11 @@ export async function fetchAndTransformGcMetrics({
           },
           aggs: {
             timeseries: {
-              date_histogram: getMetricsDateHistogramParams(
+              date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                config['xpack.apm.metricsInterval']
-              ),
+                metricsInterval: config.metricsInterval,
+              }),
               aggs: {
                 // get the max value
                 max: {
@@ -108,14 +116,13 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(operationName, params);
 
   const { aggregations } = response;
 
   if (!aggregations) {
     return {
       ...chartBase,
-      noHits: true,
       series: [],
     };
   }
@@ -127,9 +134,16 @@ export async function fetchAndTransformGcMetrics({
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const bucketValue = bucket.value?.value;
-      const y = isFiniteNumber(bucketValue)
+
+      const unconvertedY = isFiniteNumber(bucketValue)
         ? round(bucketValue * (60 / bucketSize), 1)
         : null;
+
+      // convert to milliseconds if we're calculating time, but not for rate
+      const y =
+        unconvertedY !== null && fieldName === METRIC_JAVA_GC_TIME
+          ? unconvertedY * 1000
+          : unconvertedY;
 
       return {
         y,
@@ -155,7 +169,6 @@ export async function fetchAndTransformGcMetrics({
 
   return {
     ...chartBase,
-    noHits: response.hits.total.value === 0,
     series,
   };
 }

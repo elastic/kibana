@@ -15,9 +15,10 @@ interface Props {
   contextId: string;
   eventId: string;
   processTitle: string | null | undefined;
+  isDraggable?: boolean;
 }
 
-export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props) => {
+export const ArgsComponent = ({ args, contextId, eventId, processTitle, isDraggable }: Props) => {
   if (isNillEmptyOrNotFinite(args) && isNillEmptyOrNotFinite(processTitle)) {
     return null;
   }
@@ -31,6 +32,7 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props)
               contextId={`${contextId}-args-${i}-${arg}`}
               eventId={eventId}
               field="process.args"
+              isDraggable={isDraggable}
               value={arg}
             />
           </TokensFlexItem>
@@ -42,6 +44,7 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props)
             contextId={contextId}
             eventId={eventId}
             field="process.title"
+            isDraggable={isDraggable}
             value={processTitle}
           />
         </TokensFlexItem>

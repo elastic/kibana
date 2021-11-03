@@ -214,10 +214,6 @@
                 "version": {
                     "ignore_above": 1024,
                     "type": "keyword"
-                },
-                "namespace": {
-                    "ignore_above": 1024,
-                    "type": "keyword"
                 }
             }
         },
@@ -241,6 +237,16 @@
                     "type": "keyword",
                     "ignore_above": 1024
                 },
+                "task": {
+                    "properties": {
+                        "scheduled": {
+                            "type": "date"
+                        },
+                        "schedule_delay": {
+                            "type": "long"
+                        }
+                    }
+                },
                 "alerting": {
                     "properties": {
                         "instance_id": {
@@ -258,6 +264,42 @@
                         "status": {
                             "type": "keyword",
                             "ignore_above": 1024
+                        }
+                    }
+                },
+                "alert": {
+                    "properties": {
+                        "rule": {
+                            "properties": {
+                                "execution": {
+                                    "properties": {
+                                        "uuid": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        },
+                                        "status": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        },
+                                        "status_order": {
+                                            "type": "long"
+                                        },
+                                        "metrics": {
+                                            "properties": {
+                                                "total_indexing_duration_ms": {
+                                                    "type": "long"
+                                                },
+                                                "total_search_duration_ms": {
+                                                    "type": "long"
+                                                },
+                                                "execution_gap_duration_s": {
+                                                    "type": "long"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -285,6 +327,16 @@
                             "ignore_above": 1024
                         }
                     }
+                },
+                "space_ids": {
+                    "type": "keyword",
+                    "ignore_above": 1024,
+                    "meta": {
+                        "isArray": "true"
+                    }
+                },
+                "version": {
+                    "type": "version"
                 }
             }
         }

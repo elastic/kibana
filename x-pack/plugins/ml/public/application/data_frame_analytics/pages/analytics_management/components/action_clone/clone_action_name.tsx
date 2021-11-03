@@ -9,7 +9,6 @@ import { EuiToolTip } from '@elastic/eui';
 import React, { FC } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IIndexPattern } from 'src/plugins/data/common';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
@@ -133,6 +132,9 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               optional: true,
               formKey: 'etaGrowthRatePerTree',
             },
+            feature_processors: {
+              optional: true,
+            },
             max_optimization_rounds_per_hyperparameter: {
               optional: true,
               formKey: 'maxOptimizationRoundsPerHyperparameter',
@@ -233,6 +235,9 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               defaultValue: 'mse',
             },
             loss_function_parameter: {
+              optional: true,
+            },
+            feature_processors: {
               optional: true,
             },
             early_stopping_enabled: {
@@ -374,14 +379,14 @@ export function extractCloningConfig({
   id,
   ...configToClone
 }: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
-  return (cloneDeep({
+  return cloneDeep({
     ...configToClone,
     dest: {
       ...configToClone.dest,
       // Reset the destination index
       index: '',
     },
-  }) as unknown) as CloneDataFrameAnalyticsConfig;
+  }) as unknown as CloneDataFrameAnalyticsConfig;
 }
 
 export const cloneActionNameText = i18n.translate(
@@ -395,12 +400,10 @@ export const useNavigateToWizardWithClonedJob = () => {
   const {
     services: {
       notifications: { toasts },
-      savedObjects,
+      data: { dataViews },
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
-
-  const savedObjectsClient = savedObjects.client;
 
   return async (item: Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>) => {
     const sourceIndex = Array.isArray(item.config.source.index)
@@ -409,25 +412,15 @@ export const useNavigateToWizardWithClonedJob = () => {
     let sourceIndexId;
 
     try {
-      const response = await savedObjectsClient.find<IIndexPattern>({
-        type: 'index-pattern',
-        perPage: 10,
-        search: `"${sourceIndex}"`,
-        searchFields: ['title'],
-        fields: ['title'],
-      });
-
-      const ip = response.savedObjects.find(
-        (obj) => obj.attributes.title.toLowerCase() === sourceIndex.toLowerCase()
-      );
-      if (ip !== undefined) {
-        sourceIndexId = ip.id;
+      const dv = (await dataViews.find(sourceIndex)).find(({ title }) => title === sourceIndex);
+      if (dv !== undefined) {
+        sourceIndexId = dv.id;
       } else {
         toasts.addDanger(
-          i18n.translate('xpack.ml.dataframe.analyticsList.noSourceIndexPatternForClone', {
+          i18n.translate('xpack.ml.dataframe.analyticsList.noSourceDataViewForClone', {
             defaultMessage:
-              'Unable to clone the analytics job. No index pattern exists for index {indexPattern}.',
-            values: { indexPattern: sourceIndex },
+              'Unable to clone the analytics job. No data view exists for index {dataView}.',
+            values: { dataView: sourceIndex },
           })
         );
       }
@@ -435,14 +428,10 @@ export const useNavigateToWizardWithClonedJob = () => {
       const error = extractErrorMessage(e);
 
       toasts.addDanger(
-        i18n.translate(
-          'xpack.ml.dataframe.analyticsList.fetchSourceIndexPatternForCloneErrorMessage',
-          {
-            defaultMessage:
-              'An error occurred checking if index pattern {indexPattern} exists: {error}',
-            values: { indexPattern: sourceIndex, error },
-          }
-        )
+        i18n.translate('xpack.ml.dataframe.analyticsList.fetchSourceDataViewForCloneErrorMessage', {
+          defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+          values: { dataView: sourceIndex, error },
+        })
       );
     }
 

@@ -7,11 +7,11 @@
 
 import { merge } from 'lodash';
 import { Logger } from 'kibana/server';
-import { IndicesStats } from '@elastic/elasticsearch/api/requestParams';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../../typings/elasticsearch';
+} from '../../../../../../../src/core/types/elasticsearch';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';
@@ -22,7 +22,7 @@ type TelemetryTaskExecutor = (params: {
     params: TSearchRequest
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
-    params: IndicesStats
+    params: estypes.IndicesStatsRequest
     // promise returned by client has an abort property
     // so we cannot use its ReturnType
   ): Promise<{

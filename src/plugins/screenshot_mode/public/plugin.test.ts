@@ -21,7 +21,7 @@ describe('Screenshot mode public', () => {
     setScreenshotModeDisabled();
   });
 
-  describe('setup contract', () => {
+  describe('public contract', () => {
     it('detects screenshot mode "true"', () => {
       setScreenshotModeEnabled();
       const screenshotMode = plugin.setup(coreMock.createSetup());
@@ -32,12 +32,6 @@ describe('Screenshot mode public', () => {
       setScreenshotModeDisabled();
       const screenshotMode = plugin.setup(coreMock.createSetup());
       expect(screenshotMode.isScreenshotMode()).toBe(false);
-    });
-  });
-
-  describe('start contract', () => {
-    it('returns nothing', () => {
-      expect(plugin.start(coreMock.createStart())).toBe(undefined);
     });
   });
 });

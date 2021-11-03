@@ -21,9 +21,10 @@ interface Props {
   contextId: string;
   eventId: string;
   fileHashSha256: string | null | undefined;
+  isDraggable?: boolean;
 }
 
-export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256 }) => {
+export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256, isDraggable }) => {
   if (isNillEmptyOrNotFinite(fileHashSha256)) {
     return null;
   }
@@ -35,6 +36,7 @@ export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256 
           contextId={contextId}
           eventId={eventId}
           field="file.hash.sha256"
+          isDraggable={isDraggable}
           iconType="number"
           value={fileHashSha256}
         />

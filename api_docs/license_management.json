@@ -14,10 +14,7 @@
       "tags": [],
       "label": "LicenseManagementUIPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/license_management/public/plugin.ts",
-        "lineNumber": 28
-      },
+      "path": "x-pack/plugins/license_management/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -27,10 +24,7 @@
           "tags": [],
           "label": "enabled",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/license_management/public/plugin.ts",
-            "lineNumber": 29
-          },
+          "path": "x-pack/plugins/license_management/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -47,10 +41,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "x-pack/plugins/license_management/public/plugin.ts",
-        "lineNumber": 31
-      },
+      "path": "x-pack/plugins/license_management/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
