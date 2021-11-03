@@ -62,7 +62,7 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
       });
     },
     async displaysEmptyMessage() {
-      await testSubjects.existOrFail('uptimeCertsEmptyMessage');
+      await testSubjects.existOrFail('uptimeCertsEmptyMessage', { timeout: 5000 });
       const emptyText = await testSubjects.getVisibleText('uptimeCertsEmptyMessage');
       expect(emptyText).to.eql(
         'No Certificates found. Note: Certificates are only visible for Heartbeat 7.8+'
