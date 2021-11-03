@@ -150,7 +150,9 @@ export const TimeSeries = ({
   };
 
   const shouldUseNewTimeAxis =
-    series.some(({ stack }) => stack !== STACKED_OPTIONS.NONE) && !useLegacyTimeAxis;
+    series.every(
+      ({ stack, bars, lines }) => (bars?.show && stack !== STACKED_OPTIONS.NONE) || lines?.show
+    ) && !useLegacyTimeAxis;
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
