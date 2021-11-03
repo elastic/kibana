@@ -240,8 +240,7 @@ export const getPendingActionCounts = async (
     });
 
     const pendingActions: EndpointAction[] = recentActions.filter((action) => {
-      return isPendingActionResponsesWithAckEnabled &&
-        ackResponseActionIdList.includes(action.action_id) // if has ack
+      return ackResponseActionIdList.includes(action.action_id) // if has ack
         ? hasNoEndpointResponse({ action, agentId, indexedActionIds }) // then find responses in new index
         : hasNoFleetResponse({
             // else use the legacy way
@@ -256,11 +255,17 @@ export const getPendingActionCounts = async (
       pending_actions: pendingActions
         .map((a) => a.data.command)
         .reduce((acc, cur) => {
-          if (cur in acc) {
-            acc[cur] += 1;
+          if (!isPendingActionResponsesWithAckEnabled) {
+            acc[cur] = 0; // set pending counts to 0 when FF is disabled
           } else {
-            acc[cur] = 1;
+            // else do the usual counting
+            if (cur in acc) {
+              acc[cur] += 1;
+            } else {
+              acc[cur] = 1;
+            }
           }
+
           return acc;
         }, {} as EndpointPendingActions['pending_actions']),
     });
