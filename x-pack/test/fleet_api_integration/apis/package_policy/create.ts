@@ -68,7 +68,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-1',
+          name: 'filetest',
           description: '',
           namespace: 'default',
           policy_id: hostedPolicy.id,
@@ -85,7 +85,7 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(responseWithoutForce.statusCode).to.be(400);
       expect(responseWithoutForce.message).to.contain(
-        'Cannot add integrations to hosted agent policy'
+        'Cannot update integrations of hosted agent policy'
       );
 
       // try same request with `force: true`
@@ -122,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-1',
+          name: 'filetest-2',
           description: '',
           namespace: 'default',
           policy_id: agentPolicyId,
@@ -282,7 +282,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy',
+          name: 'Test policy 2',
           namespace: 'default',
         });
       const otherAgentPolicyId = agentPolicyResponse.item.id;
