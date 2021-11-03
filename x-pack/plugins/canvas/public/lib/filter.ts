@@ -8,6 +8,7 @@
 import { fromExpression } from '@kbn/interpreter/common';
 import { flowRight, get, groupBy } from 'lodash';
 import {
+  CanvasFilterExpression,
   Filter as FilterType,
   FilterField,
   FilterViewInstance,
@@ -65,8 +66,8 @@ export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField)
   }));
 };
 
-export const getFiltersByGroups = (filters: string[], groups: string[]) =>
-  filters.filter((filter: string) => {
+export const getFiltersByGroups = (filters: CanvasFilterExpression[], groups: string[]) =>
+  filters.filter(({ filter }) => {
     const ast = fromExpression(filter);
     const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
     return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));

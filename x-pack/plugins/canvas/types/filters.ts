@@ -33,6 +33,10 @@ export type CanvasExactlyFilter = ExpressionValueFilter & {
 
 export type CanvasFilter = CanvasTimeFilter | CanvasExactlyFilter | CanvasLuceneFilter;
 
+export interface CanvasFilterExpression {
+  id: string;
+  filter: string;
+}
 export interface Filter {
   id: string | number;
   type: keyof typeof FilterType;

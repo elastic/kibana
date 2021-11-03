@@ -110,6 +110,7 @@ export const elementsReducer = handleActions(
     [actions.setFilter]: (workpadState, { payload }) => {
       const { filter, elementId } = payload;
       const pageId = getPageWithElementId(workpadState, elementId);
+      console.log(pageId, elementId);
       return assignNodeProperties(workpadState, pageId, elementId, { filter });
     },
     [actions.setMultiplePositions]: (workpadState, { payload }) =>

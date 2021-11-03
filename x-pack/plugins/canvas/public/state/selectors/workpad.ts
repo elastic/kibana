@@ -17,6 +17,7 @@ import {
   CanvasElement,
   CanvasVariable,
   ResolvedArgType,
+  CanvasFilterExpression,
 } from '../../../types';
 import {
   ExpressionContext,
@@ -209,6 +210,17 @@ export function getGlobalFilters(state: State): string[] {
     // check that a filter is defined
     if (el.filter != null && el.filter.length) {
       return acc.concat(el.filter);
+    }
+
+    return acc;
+  }, []);
+}
+
+export function getGlobalFiltersWithIds(state: State) {
+  return getAllElements(state).reduce<CanvasFilterExpression[]>((acc, el) => {
+    // check that a filter is defined
+    if (el.filter != null && el.filter.length) {
+      return acc.concat({ id: el.id, filter: el.filter });
     }
 
     return acc;

@@ -6,29 +6,47 @@
  */
 
 import { fromExpression } from '@kbn/interpreter/common';
-import { shallowEqual, useSelector } from 'react-redux';
-import { State } from '../../../../types';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useCallback } from 'react';
+import { Filter, State } from '../../../../types';
 import { getFiltersByGroups } from '../../../lib/filter';
-import { adaptCanvasFilter } from '../../../lib/filter_adapters';
-import { getGlobalFilters } from '../../../state/selectors/workpad';
+import { adaptCanvasFilter, adaptFilterToExpression } from '../../../lib/filter_adapters';
+import { getGlobalFiltersWithIds } from '../../../state/selectors/workpad';
+// @ts-expect-error untyped local
+import { setFilter } from '../../../state/actions/elements';
 
 const extractExpressionAST = (filtersExpressions: string[]) =>
   fromExpression(filtersExpressions.join(' | '));
 
 export function useCanvasFilters(groups?: string[]) {
-  const filterExpressions = useSelector((state: State) => getGlobalFilters(state), shallowEqual);
+  const filterExpressions = useSelector(
+    (state: State) => getGlobalFiltersWithIds(state),
+    shallowEqual
+  );
+
   const filtersByGroups = groups?.length
     ? getFiltersByGroups(filterExpressions, groups)
     : filterExpressions;
 
-  const expression = extractExpressionAST(filtersByGroups);
-  const filters = expression.chain.map(adaptCanvasFilter);
+  const expression = extractExpressionAST(filtersByGroups.map(({ filter }) => filter));
+  const filters = expression.chain.map((filter, index) =>
+    adaptCanvasFilter(filter, filtersByGroups[index].id)
+  );
 
   return filters;
 }
 
 export function useCanvasFiltersActions() {
+  const dispatch = useDispatch();
+  const updateFilter = useCallback(
+    (filter) => {
+      const filterExpression = adaptFilterToExpression(filter);
+      dispatch(setFilter(filterExpression, filter.id));
+    },
+    [dispatch]
+  );
+
   return {
-    updateFilter: (val: any) => {},
+    updateFilter,
   };
 }

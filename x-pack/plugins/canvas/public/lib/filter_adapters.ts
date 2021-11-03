@@ -14,6 +14,12 @@ const functionToFilter: Record<string, FilterType> = {
   exactly: FilterType.exactly,
 };
 
+const filterToFunction: Record<FilterType, string> = {
+  [FilterType.time]: 'timefilter',
+  [FilterType.exactly]: 'exactly',
+  [FilterType.luceneQueryString]: 'lucene',
+};
+
 const defaultFormatter = (arg: ExpressionAstArgument) => arg.toString();
 
 const argToValue = (
@@ -46,4 +52,28 @@ export function adaptCanvasFilter(filter: ExpressionFunctionAST, id: string | nu
     filterGroup: argToValue(filterGroup),
     value: argToValue(valueArg) ?? collectArgs(rest),
   };
+}
+
+const tranformObjectToExpression = (obj: Record<string, unknown>) =>
+  Object.keys(obj)
+    .map((key) => {
+      const value = obj[key];
+      const strValue = typeof value === 'number' || value === null ? `${value}` : `"${value}"`;
+      return `${key}=${strValue}`;
+    })
+    .join(' ');
+
+const convertExactlyFilter = (filter: Filter) => {
+  const { type, id, value, ...rest } = filter;
+  const restOfExpression = tranformObjectToExpression({ ...rest });
+  const valueArgs =
+    value !== null && typeof value === 'object'
+      ? tranformObjectToExpression({ ...value })
+      : tranformObjectToExpression({ value });
+
+  return `${filterToFunction[type]} ${restOfExpression} ${valueArgs}`;
+};
+
+export function adaptFilterToExpression(filter: Filter) {
+  return convertExactlyFilter(filter);
 }
