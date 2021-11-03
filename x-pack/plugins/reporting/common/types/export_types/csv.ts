@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FieldSpec } from 'src/plugins/data/common';
-import { BaseParams, BasePayload } from '../../types';
+import { BaseParams, BasePayload } from '../base';
 
 export type RawValue = string | object | null | undefined;
 
@@ -56,16 +55,6 @@ export interface SearchRequestDeprecatedCSV {
       }
     | any;
 }
-
-type FormatsMapDeprecatedCSV = Map<
-  string,
-  {
-    id: string;
-    params: {
-      pattern: string;
-    };
-  }
->;
 
 export interface SavedSearchGeneratorResultDeprecatedCSV {
   maxSizeReached: boolean;
