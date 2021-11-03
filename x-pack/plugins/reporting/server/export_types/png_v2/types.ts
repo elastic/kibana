@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { JobParamsPDFV2, TaskPayloadPDFV2 } from '../../../common/types';
+export type { JobParamsPNGV2, TaskPayloadPNGV2 } from '../../../common/types';

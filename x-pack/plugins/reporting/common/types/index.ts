@@ -5,7 +5,20 @@
  * 2.0.
  */
 
-import type { Ensure, SerializableRecord } from '@kbn/utility-types';
+import type { Size, LayoutParams } from './layout';
+import type { JobId, BaseParams, BasePayload } from './base';
+
+export type { JobId, BaseParams, BasePayload };
+export type { Size, LayoutParams };
+export type {
+  DownloadReportFn,
+  IlmPolicyMigrationStatus,
+  IlmPolicyStatusResponse,
+  LocatorParams,
+  ManagementLinkFn,
+  UrlOrUrlLocatorTuple,
+} from './url';
+export * from './export_types';
 
 export interface PageSizeParams {
   pageMarginTop: number;
@@ -20,22 +33,6 @@ export interface PdfImageSize {
   width: number;
   height?: number;
 }
-
-export type Size = Ensure<
-  {
-    width: number;
-    height: number;
-  },
-  SerializableRecord
->;
-
-export type LayoutParams = Ensure<
-  {
-    id: string;
-    dimensions?: Size;
-  },
-  SerializableRecord
->;
 
 export interface ReportDocumentHead {
   _id: string;
@@ -54,24 +51,6 @@ export interface TaskRunResult {
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
-}
-
-export type BaseParams = Ensure<
-  {
-    layout?: LayoutParams;
-    objectType: string;
-    title: string;
-    browserTimezone: string; // to format dates in the user's time zone
-    version: string; // to handle any state migrations
-  },
-  SerializableRecord
->;
-
-// base params decorated with encrypted headers that come into runJob functions
-export interface BasePayload extends BaseParams {
-  headers: string;
-  spaceId?: string;
-  isDeprecated?: boolean;
 }
 
 export interface ReportSource {
@@ -118,8 +97,6 @@ export interface ReportSource {
 export interface ReportDocument extends ReportDocumentHead {
   _source: ReportSource;
 }
-
-export type JobId = string;
 
 /*
  * JobStatus:
@@ -173,28 +150,3 @@ export interface JobSummarySet {
   completed: JobSummary[];
   failed: JobSummary[];
 }
-
-type DownloadLink = string;
-export type DownloadReportFn = (jobId: JobId) => DownloadLink;
-
-type ManagementLink = string;
-export type ManagementLinkFn = () => ManagementLink;
-
-export interface LocatorParams<
-  P extends SerializableRecord = SerializableRecord & { forceNow?: string }
-> {
-  id: string;
-  version: string;
-  params: P;
-}
-
-export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
-
-export interface IlmPolicyStatusResponse {
-  status: IlmPolicyMigrationStatus;
-}
-
-type Url = string;
-type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
-
-export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;

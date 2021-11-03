@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LayoutParams } from '../../lib/layouts';
-import { BaseParams, BasePayload } from '../../types';
+import type { LayoutParams } from '../layout';
+import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsPNG {
   layout: LayoutParams;
