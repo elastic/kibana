@@ -55,7 +55,7 @@ export const Schema: React.FC = () => {
             )}
           </EuiButton>,
           <EuiButton
-            color="secondary"
+            color="success"
             iconType="plusInCircle"
             disabled={isUpdating}
             onClick={openModal}
