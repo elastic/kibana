@@ -148,8 +148,8 @@ describe('ApmSystem', () => {
         currentAppId$.next('myapp');
 
         expect(mockTransaction.addLabels).toHaveBeenCalledWith({
-          loadedResources: 0,
-          cachedResources: 0,
+          'loaded-resources': 0,
+          'cached-resources': 0,
         });
       });
     });
