@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
 import { sum, upperFirst } from 'lodash';
@@ -34,11 +33,8 @@ export function createConfig$(
       let encryptionKey = config.encryptionKey;
       if (encryptionKey === undefined) {
         logger.warn(
-          i18n.translate('xpack.reporting.serverConfig.randomEncryptionKey', {
-            defaultMessage:
-              'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on ' +
-              'restart, please set xpack.reporting.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.',
-          })
+          'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on ' +
+            'restart, please set xpack.reporting.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
         );
         encryptionKey = crypto.randomBytes(16).toString('hex');
       }
@@ -54,13 +50,9 @@ export function createConfig$(
         !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
       ) {
         logger.warn(
-          i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
-            defaultMessage:
-              `Found 'server.host: "0.0.0.0"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname.` +
-              ` To enable PNG/PDF Reporting to work, '{configKey}: localhost' is automatically set in the configuration.` +
-              ` You can prevent this message by adding '{configKey}: localhost' in kibana.yml.`,
-            values: { configKey: 'xpack.reporting.kibanaServer.hostname' },
-          })
+          `Found 'server.host: "0.0.0.0"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname.` +
+            ` To enable PNG/PDF Reporting to work, 'xpack.reporting.kibanaServer.hostname: localhost' is automatically set in the configuration.` +
+            ` You can prevent this message by adding 'xpack.reporting.kibanaServer.hostname: localhost' in kibana.yml.`
         );
         kibanaServerHostname = 'localhost';
       }
@@ -90,29 +82,17 @@ export function createConfig$(
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
       const osName = [os.os, os.dist, os.release].filter(Boolean).map(upperFirst).join(' ');
 
-      logger.debug(
-        i18n.translate('xpack.reporting.serverConfig.osDetected', {
-          defaultMessage: `Running on OS: '{osName}'`,
-          values: { osName },
-        })
-      );
+      logger.debug(`Running on OS: '{osName}'`);
 
       if (disableSandbox === true) {
         logger.warn(
-          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxDisabled', {
-            defaultMessage: `Chromium sandbox provides an additional layer of protection, but is not supported for {osName} OS. Automatically setting '{configKey}: true'.`,
-            values: {
-              configKey: 'xpack.reporting.capture.browser.chromium.disableSandbox',
-              osName,
-            },
-          })
+          `Chromium sandbox provides an additional layer of protection, but is not supported for ${osName} OS.` +
+            ` Automatically setting 'xpack.reporting.capture.browser.chromium.disableSandbox: true'.`
         );
       } else {
         logger.info(
-          i18n.translate('xpack.reporting.serverConfig.autoSet.sandboxEnabled', {
-            defaultMessage: `Chromium sandbox provides an additional layer of protection, and is supported for {osName} OS. Automatically enabling Chromium sandbox.`,
-            values: { osName },
-          })
+          `Chromium sandbox provides an additional layer of protection, and is supported for ${osName} OS.` +
+            ` Automatically enabling Chromium sandbox.`
         );
       }
 
