@@ -94,6 +94,7 @@ export function createPluginSetupContext<
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
+    theme: deps.theme,
     getStartServices: () => plugin.startDependencies,
   };
 }

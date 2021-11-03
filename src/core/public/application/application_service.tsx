@@ -34,9 +34,11 @@ import {
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
+import { ThemeServiceSetup, CoreTheme } from '../theme';
 
 interface SetupDeps {
   http: HttpSetup;
+  theme: ThemeServiceSetup;
   history?: History<any>;
   /** Used to redirect to external urls */
   redirectTo?: (path: string) => void;
@@ -101,9 +103,11 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
+  private theme$?: Observable<CoreTheme>;
 
   public setup({
     http: { basePath },
+    theme: { theme$ },
     redirectTo = (path: string) => {
       window.location.assign(path);
     },
@@ -118,6 +122,7 @@ export class ApplicationService {
           overlayPromise: this.overlayStart$.pipe(take(1)).toPromise(),
         }),
       });
+    this.theme$ = theme$;
 
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
@@ -314,6 +319,7 @@ export class ApplicationService {
         return (
           <AppRouter
             history={this.history}
+            theme$={this.theme$!}
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}

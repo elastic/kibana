@@ -11,6 +11,7 @@ import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { MountPoint } from '../types';
+import { CoreTheme } from '../theme';
 import { Capabilities } from './capabilities';
 import { PluginOpaqueId } from '../plugins';
 import { AppCategory } from '../../types';
@@ -520,6 +521,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+  /**
+   * TODO: documentation
+   */
+  theme$: Observable<CoreTheme>;
 }
 
 /**

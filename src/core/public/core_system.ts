@@ -28,6 +28,7 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
+import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
@@ -83,6 +84,7 @@ export class CoreSystem {
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
   private readonly deprecations: DeprecationsService;
+  private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -104,6 +106,7 @@ export class CoreSystem {
       this.stop();
     });
 
+    this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.savedObjects = new SavedObjectsService();
@@ -137,8 +140,9 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      const theme = this.theme.setup({ injectedMetadata });
 
-      const application = this.application.setup({ http });
+      const application = this.application.setup({ http, theme });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
@@ -147,6 +151,7 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
+        theme,
         uiSettings,
       };
 

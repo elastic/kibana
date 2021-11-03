@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { RenderingService } from './rendering_service';
-export type {
-  InjectedMetadata,
-  InternalRenderingServicePreboot,
-  InternalRenderingServiceSetup,
-  IRenderOptions,
-  RenderingMetadata,
-  RenderingPrebootDeps,
-  RenderingSetupDeps,
-} from './types';
+export { wrapWithTheme } from './wrap_with_theme';

@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
-export { RenderingService } from './rendering_service';
-export type {
-  InjectedMetadata,
-  InternalRenderingServicePreboot,
-  InternalRenderingServiceSetup,
-  IRenderOptions,
-  RenderingMetadata,
-  RenderingPrebootDeps,
-  RenderingSetupDeps,
-} from './types';
+import { Observable } from 'rxjs';
+
+/**
+ * @public
+ */
+export interface CoreTheme {
+  darkMode: boolean;
+}
+
+/**
+ * @public
+ */
+export interface ThemeServiceSetup {
+  theme$: Observable<CoreTheme>;
+}
