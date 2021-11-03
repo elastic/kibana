@@ -37,8 +37,14 @@ export function createActionsUsageCollector(
         },
       },
       count_active_by_type: byTypeSchema,
+      count_actions_executions_per_day: { type: 'long' },
+      count_actions_executions_by_type_per_day: byTypeSchema,
       count_active_email_connectors_by_service_type: byServiceProviderTypeSchema,
       count_actions_namespaces: { type: 'long' },
+      count_actions_executions_failed_per_day: { type: 'long' },
+      count_actions_executions_failed_by_type_per_day: byTypeSchema,
+      avg_execution_time_per_day: { type: 'long' },
+      avg_execution_time_by_type_per_day: byTypeSchema,
     },
     fetch: async () => {
       try {
@@ -60,6 +66,12 @@ export function createActionsUsageCollector(
           count_active_by_type: {},
           count_active_email_connectors_by_service_type: {},
           count_actions_namespaces: 0,
+          count_actions_executions_per_day: 0,
+          count_actions_executions_by_type_per_day: {},
+          count_actions_executions_failed_per_day: 0,
+          count_actions_executions_failed_by_type_per_day: {},
+          avg_execution_time_per_day: 0,
+          avg_execution_time_by_type_per_day: {},
         };
       }
     },
