@@ -84,8 +84,5 @@ export async function getBuckets({
       y: bucket.doc_count,
     })
   );
-
-  return {
-    buckets: resp.hits.total.value > 0 ? buckets : [],
-  };
+  return { buckets };
 }
