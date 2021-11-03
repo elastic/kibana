@@ -10,16 +10,16 @@ import React from 'react';
 import type { IndexPattern } from 'src/plugins/data/common';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DocViewerSource } from './source';
-import * as hooks from '../../../services/use_es_doc_search';
+import * as hooks from '../../../use_es_doc_search';
 import * as useUiSettingHook from 'src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { JsonCodeEditorCommon } from '../../../components/json_code_editor/json_code_editor_common';
+import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: jest.fn(),
 }));
 
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../../../kibana_services';
 
 const mockIndexPattern = {
   getComputedFields: () => [],

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { IndexPattern } from 'src/plugins/data/common';
-import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 
 export interface GridContext {
   expanded: ElasticSearchHit | undefined;

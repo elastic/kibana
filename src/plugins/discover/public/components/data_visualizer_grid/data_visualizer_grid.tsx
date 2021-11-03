@@ -18,7 +18,7 @@ import {
   isErrorEmbeddable,
 } from '../../../../embeddable/public';
 import { SavedSearch } from '../../services/saved_searches';
-import { GetStateReturn } from '../../apps/main/services/discover_state';
+import { GetStateReturn } from '../../application/main/services/discover_state';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: IndexPattern;

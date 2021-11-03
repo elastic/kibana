@@ -14,7 +14,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { DocViewFilterFn, ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
 import {

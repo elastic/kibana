@@ -13,11 +13,11 @@ import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,
-} from '../apps/main/services/discover_state';
+} from '../application/main/services/discover_state';
 import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
-} from '../apps/context/services/context_state';
+} from '../application/context/services/context_state';
 import { getStateColumnActions } from '../components/doc_table/actions/columns';
 
 interface UseDataGridColumnsProps {

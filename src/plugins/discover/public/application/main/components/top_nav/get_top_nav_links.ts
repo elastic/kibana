@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { IndexPattern, ISearchSource } from 'src/plugins/data/common';
 import { showOpenSearchPanel } from './show_open_search_panel';
-import { getSharingData, showPublicUrlSwitch } from '../../utils/get_sharing_data';
+import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { unhashUrl } from '../../../../../../kibana_utils/public';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../services/saved_searches';

@@ -14,7 +14,7 @@ import { createFilterManagerMock } from '../../../../../data/public/query/filter
 import { DiscoverServices } from '../../../build_services';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
-import { DocViewsRegistry } from '../../../doc_views/doc_views_registry';
+import { DocViewsRegistry } from '../../../services/doc_views/doc_views_registry';
 
 jest.mock('../lib/row_formatter', () => {
   const originalModule = jest.requireActual('../lib/row_formatter');

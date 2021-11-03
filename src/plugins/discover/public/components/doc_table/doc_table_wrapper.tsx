@@ -21,7 +21,7 @@ import {
 import { getServices } from '../../kibana_services';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
-import { DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 
 export interface DocTableProps {

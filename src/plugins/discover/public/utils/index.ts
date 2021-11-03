@@ -5,5 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { DeferredSpinner } from './common/deferred_spinner';
+/*
+ * Allows the getSharingData function to be lazy loadable
+ */
+export async function loadSharingDataHelpers() {
+  return await import('./get_sharing_data');
+}

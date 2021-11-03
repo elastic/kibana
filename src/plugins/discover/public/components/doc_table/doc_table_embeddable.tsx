@@ -14,7 +14,7 @@ import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { usePager } from './lib/use_pager';
 import { ToolBarPagination } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
-import { TotalDocuments } from '../../apps/main/components/total_documents/total_documents';
+import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { getServices } from '../../kibana_services';
 
 export interface DocTableEmbeddableProps extends DocTableProps {

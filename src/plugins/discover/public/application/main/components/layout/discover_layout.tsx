@@ -29,7 +29,7 @@ import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
-import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { DocViewFilterFn, ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../inspector/public';

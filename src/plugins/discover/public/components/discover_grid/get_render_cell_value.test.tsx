@@ -10,7 +10,7 @@ import React from 'react';
 import { ReactWrapper, shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { flattenHit } from 'src/plugins/data/common';
 
 jest.mock('../../../../kibana_react/public', () => ({

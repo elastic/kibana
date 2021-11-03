@@ -22,7 +22,7 @@ import {
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
-import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { FetchStatus } from '../../../types';
 import { DataDocuments$ } from '../../services/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';

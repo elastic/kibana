@@ -10,8 +10,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Observable } from 'rxjs';
 import { IndexPattern } from 'src/plugins/data/common';
-import { DocProps } from '../apps/doc/components/doc';
-import { ElasticRequestState } from '../apps/doc/types';
+import { DocProps } from '../application/doc/components/doc';
+import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
 
 const mockSearchResult = new Observable();

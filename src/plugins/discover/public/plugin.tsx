@@ -33,8 +33,8 @@ import { SavedObjectsStart } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
-import { DocViewInput, DocViewInputFn } from './doc_views/doc_views_types';
-import { DocViewsRegistry } from './doc_views/doc_views_registry';
+import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
+import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -69,8 +69,8 @@ declare module '../../share/public' {
   }
 }
 
-const DocViewerTable = React.lazy(() => import('./doc_views/components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./doc_views/components/doc_viewer_source'));
+const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
+const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
 
 /**
  * @public

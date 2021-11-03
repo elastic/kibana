@@ -22,7 +22,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { flattenHit, IndexPattern } from '../../../../data/common';
-import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';

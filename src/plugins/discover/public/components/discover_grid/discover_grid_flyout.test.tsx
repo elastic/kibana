@@ -14,7 +14,7 @@ import { esHits } from '../../__mocks__/es_hits';
 import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverServices } from '../../build_services';
-import { DocViewsRegistry } from '../../doc_views/doc_views_registry';
+import { DocViewsRegistry } from '../../services/doc_views/doc_views_registry';
 import { setDocViewsRegistry } from '../../kibana_services';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 

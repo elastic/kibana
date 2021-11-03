@@ -9,7 +9,7 @@
 import './doc_viewer.scss';
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import { getDocViewsRegistry } from '../../../kibana_services';
+import { getDocViewsRegistry } from '../../../../kibana_services';
 import { DocViewerTab } from './doc_viewer_tab';
 import { DocView, DocViewRenderProps } from '../../doc_views_types';
 

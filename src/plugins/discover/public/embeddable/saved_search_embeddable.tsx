@@ -26,7 +26,7 @@ import {
   Query,
   TimeRange,
 } from '../../../data/common';
-import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { ElasticSearchHit } from '../services/doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
 import { getServices } from '../kibana_services';

@@ -11,7 +11,7 @@ import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { ISearchSource } from '../../../../../data/common';
 import { GetStateReturn } from './discover_state';
-import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../../services/doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
 import { validateTimeRange } from '../utils/validate_time_range';

@@ -12,12 +12,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JSONCodeEditorCommonMemoized } from '../../../components/json_code_editor/json_code_editor_common';
-import { getServices } from '../../../kibana_services';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
-import { ElasticRequestState } from '../../../apps/doc/types';
-import { useEsDocSearch } from '../../../services/use_es_doc_search';
-import { IndexPattern } from '../../../../../data_views/common';
+import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
+import { getServices } from '../../../../kibana_services';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
+import { useEsDocSearch } from '../../../use_es_doc_search';
+import { IndexPattern } from '../../../../../../data_views/common';
+import { ElasticRequestState } from '../../../../application/doc/types';
 
 interface SourceViewerProps {
   id: string;

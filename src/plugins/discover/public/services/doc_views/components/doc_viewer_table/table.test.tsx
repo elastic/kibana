@@ -10,14 +10,14 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerTable, DocViewerTableProps } from './table';
-import { IndexPattern } from '../../../../../data/public';
+import { IndexPattern } from '../../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views_types';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: jest.fn(),
 }));
 
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../../../kibana_services';
 
 (getServices as jest.Mock).mockImplementation(() => ({
   uiSettings: {

@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
-import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
+import { SkipBottomButton } from '../../application/main/components/skip_bottom_button';
 import { shouldLoadNextDocPatch } from './lib/should_load_next_doc_patch';
 
 const FOOTER_PADDING = { padding: 0 };

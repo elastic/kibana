@@ -10,11 +10,11 @@ import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,
-} from '../../../apps/main/services/discover_state';
+} from '../../../application/main/services/discover_state';
 import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
-} from '../../../apps/context/services/context_state';
+} from '../../../application/context/services/context_state';
 import { IndexPattern, IndexPatternsContract } from '../../../../../data/public';
 import { popularizeField } from '../../../utils/popularize_field';
 

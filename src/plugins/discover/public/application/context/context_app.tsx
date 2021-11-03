@@ -25,7 +25,7 @@ import { useContextAppFetch } from './services/use_context_app_fetch';
 import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
-import { DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
