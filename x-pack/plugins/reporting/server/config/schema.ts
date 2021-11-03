@@ -6,6 +6,8 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import ipaddr from 'ipaddr.js';
+import { sum } from 'lodash';
 import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
@@ -13,7 +15,7 @@ const KibanaServerSchema = schema.object({
     schema.string({
       hostname: true,
       validate(value) {
-        if (/^0.0.0.0$/.test(value)) {
+        if (ipaddr.isValid(value) && !sum(ipaddr.parse(value).toByteArray())) {
           // prevent setting a hostname that fails in Chromium on Windows
           return `cannot use '0.0.0.0' as Kibana host name, consider using the default (localhost) instead`;
         }

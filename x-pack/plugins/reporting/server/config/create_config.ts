@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import crypto from 'crypto';
-import { upperFirst } from 'lodash';
+import ipaddr from 'ipaddr.js';
+import { sum, upperFirst } from 'lodash';
 import { Observable } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { CoreSetup } from 'src/core/server';
@@ -47,7 +48,11 @@ export function createConfig$(
       let kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
         : serverInfo.hostname;
-      if (kibanaServerHostname === '0.0.0.0') {
+
+      if (
+        ipaddr.isValid(kibanaServerHostname) &&
+        !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
+      ) {
         logger.warn(
           i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
             defaultMessage:

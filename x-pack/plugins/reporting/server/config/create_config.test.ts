@@ -106,43 +106,6 @@ describe('Reporting server createConfig$', () => {
     expect(mockLogger.warn.mock.calls.length).toBe(0);
   });
 
-  it(`apply failover logic to use "localhost" when "server.host" is "0.0.0.0"`, async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
-        kibanaServer: {
-          hostname: undefined,
-          port: undefined,
-        }, // overwrite settings added by createMockConfigSchema and apply the default settings
-      })
-    );
-
-    mockCoreSetup.http.getServerInfo = jest.fn().mockImplementation(
-      (): HttpServerInfo => ({
-        name: 'cool server',
-        hostname: '0.0.0.0',
-        port: 5601,
-        protocol: 'http',
-      })
-    );
-
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.kibanaServer).toMatchInlineSnapshot(`
-      Object {
-        "hostname": "localhost",
-        "port": 5601,
-        "protocol": "http",
-      }
-    `);
-
-    expect(mockLogger.warn.mock.calls.length).toBe(1);
-    expect(mockLogger.warn.mock.calls[0]).toMatchObject([
-      "Found 'server.host: \"0.0.0.0\"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname. To enable PNG/PDF Reporting to work, 'xpack.reporting.kibanaServer.hostname: localhost' is automatically set in the configuration. You can prevent this message by adding 'xpack.reporting.kibanaServer.hostname: localhost' in kibana.yml.",
-    ]);
-  });
-
   it('uses user-provided disableSandbox: false', async () => {
     mockInitContext = coreMock.createPluginInitializerContext(
       createMockConfigSchema({
@@ -182,5 +145,73 @@ describe('Reporting server createConfig$', () => {
 
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: expect.any(Boolean) });
     expect(mockLogger.warn.mock.calls.length).toBe(0);
+  });
+
+  describe('prevent invalid server hostnames', () => {
+    beforeEach(() => {
+      mockInitContext = coreMock.createPluginInitializerContext(
+        createMockConfigSchema({
+          encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
+          kibanaServer: {
+            hostname: undefined,
+            port: undefined,
+          }, // overwrite settings added by createMockConfigSchema and apply the default settings
+        })
+      );
+    });
+
+    it(`apply failover logic to use "localhost" when "server.host" is "0.0.0.0"`, async () => {
+      mockCoreSetup.http.getServerInfo = jest.fn().mockImplementation(
+        (): HttpServerInfo => ({
+          name: 'cool server',
+          hostname: '0.0.0.0',
+          port: 5601,
+          protocol: 'http',
+        })
+      );
+
+      const mockConfig$ = createMockConfig(mockInitContext);
+      const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
+
+      expect(result.kibanaServer).toMatchInlineSnapshot(`
+      Object {
+        "hostname": "localhost",
+        "port": 5601,
+        "protocol": "http",
+      }
+    `);
+
+      expect(mockLogger.warn.mock.calls.length).toBe(1);
+      expect(mockLogger.warn.mock.calls[0]).toMatchObject([
+        "Found 'server.host: \"0.0.0.0\"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname. To enable PNG/PDF Reporting to work, 'xpack.reporting.kibanaServer.hostname: localhost' is automatically set in the configuration. You can prevent this message by adding 'xpack.reporting.kibanaServer.hostname: localhost' in kibana.yml.",
+      ]);
+    });
+
+    it(`apply failover logic when using a variation of the "0" address`, async () => {
+      mockCoreSetup.http.getServerInfo = jest.fn().mockImplementation(
+        (): HttpServerInfo => ({
+          name: 'cool server',
+          hostname: '0.0',
+          port: 5601,
+          protocol: 'http',
+        })
+      );
+
+      const mockConfig$ = createMockConfig(mockInitContext);
+      const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
+
+      expect(result.kibanaServer).toMatchInlineSnapshot(`
+      Object {
+        "hostname": "localhost",
+        "port": 5601,
+        "protocol": "http",
+      }
+    `);
+
+      expect(mockLogger.warn.mock.calls.length).toBe(1);
+      expect(mockLogger.warn.mock.calls[0]).toMatchObject([
+        "Found 'server.host: \"0.0.0.0\"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname. To enable PNG/PDF Reporting to work, 'xpack.reporting.kibanaServer.hostname: localhost' is automatically set in the configuration. You can prevent this message by adding 'xpack.reporting.kibanaServer.hostname: localhost' in kibana.yml.",
+      ]);
+    });
   });
 });
