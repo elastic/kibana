@@ -38,7 +38,7 @@ describe('', () => {
   });
 
   test(`#create`, async () => {
-    const returnValue = Symbol() as any;
+    const returnValue: any = Symbol();
     mockRepository.create.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
@@ -52,7 +52,8 @@ describe('', () => {
   });
 
   test(`#checkConflicts`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.checkConflicts.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const objects: SavedObjectsCheckConflictsObject[] = [
@@ -67,7 +68,8 @@ describe('', () => {
   });
 
   test(`#bulkCreate`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.bulkCreate.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const objects: SavedObjectsBulkCreateObject[] = [
@@ -83,7 +85,8 @@ describe('', () => {
 
   describe(`#createPointInTimeFinder`, () => {
     test(`calls repository with options and default dependencies`, () => {
-      const returnValue = Symbol();
+      const returnValue: any = Symbol();
+      mockRepository.createPointInTimeFinder.mockReturnValue(returnValue);
       const client = new SavedObjectsClient(mockRepository);
 
       const options: SavedObjectsCreatePointInTimeFinderOptions = {
@@ -100,7 +103,8 @@ describe('', () => {
     });
 
     test(`calls repository with options and custom dependencies`, () => {
-      const returnValue = Symbol();
+      const returnValue: any = Symbol();
+      mockRepository.createPointInTimeFinder.mockReturnValue(returnValue);
       const client = new SavedObjectsClient(mockRepository);
 
       const options: SavedObjectsCreatePointInTimeFinderOptions = {
@@ -119,7 +123,8 @@ describe('', () => {
   });
 
   test(`#delete`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.delete.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const type = 'foo';
@@ -132,7 +137,8 @@ describe('', () => {
   });
 
   test(`#find`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.find.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const options: SavedObjectsFindOptions = { search: 'something', type: ['a', 'b'], perPage: 42 };
@@ -143,7 +149,8 @@ describe('', () => {
   });
 
   test(`#bulkGet`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.bulkGet.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const objects: SavedObjectsBulkGetObject[] = [
@@ -158,7 +165,8 @@ describe('', () => {
   });
 
   test(`#get`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.get.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const type = 'foo';
@@ -171,7 +179,8 @@ describe('', () => {
   });
 
   test(`#openPointInTimeForType`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.openPointInTimeForType.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const type = 'search';
@@ -186,7 +195,8 @@ describe('', () => {
   });
 
   test(`#closePointInTime`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.closePointInTime.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const id = '42';
@@ -198,7 +208,8 @@ describe('', () => {
   });
 
   test(`#bulkResolve`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.bulkResolve.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const objects: SavedObjectsBulkResolveObject[] = [
@@ -213,7 +224,8 @@ describe('', () => {
   });
 
   test(`#resolve`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.resolve.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const type = 'foo';
@@ -226,7 +238,8 @@ describe('', () => {
   });
 
   test(`#update`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.update.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const type = 'some-type';
@@ -240,7 +253,8 @@ describe('', () => {
   });
 
   test(`#bulkUpdate`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.bulkUpdate.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const type = 'some-type';
@@ -257,7 +271,8 @@ describe('', () => {
   });
 
   test(`#collectMultiNamespaceReferences`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.collectMultiNamespaceReferences.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const objects: SavedObjectsCollectMultiNamespaceReferencesObject[] = [
@@ -275,7 +290,8 @@ describe('', () => {
   });
 
   test(`#updateObjectsSpaces`, async () => {
-    const returnValue = Symbol();
+    const returnValue: any = Symbol();
+    mockRepository.updateObjectsSpaces.mockResolvedValueOnce(returnValue);
     const client = new SavedObjectsClient(mockRepository);
 
     const objects: SavedObjectsUpdateObjectsSpacesObject[] = [
