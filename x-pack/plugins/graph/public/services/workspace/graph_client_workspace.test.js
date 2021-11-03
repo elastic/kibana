@@ -29,6 +29,14 @@ describe('graphui-workspace', function () {
               name: 'field2',
             },
           ],
+          prev_vertex_fields: [
+            {
+              name: 'field1',
+            },
+            {
+              name: 'field2',
+            },
+          ],
           graphExploreProxy: callNodeProxy,
           exploreControls: {
             useSignificance: false,

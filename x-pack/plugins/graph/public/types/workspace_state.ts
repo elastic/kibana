@@ -158,6 +158,7 @@ export type GraphSearchCallback = (data: SearchResults) => void;
 export type WorkspaceOptions = Partial<{
   indexName: string;
   vertex_fields: WorkspaceField[];
+  prev_vertex_fields: WorkspaceField[];
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
   graphExploreProxy: (

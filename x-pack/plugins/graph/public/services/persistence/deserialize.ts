@@ -237,6 +237,7 @@ export function savedWorkspaceToAppState(
   );
   const selectedFields = allFields.filter((field) => field.selected);
   workspaceInstance.options.vertex_fields = selectedFields;
+  workspaceInstance.options.prev_vertex_fields = selectedFields.slice();
 
   // ================== advanced settings =============================
   const advancedSettings = Object.assign(

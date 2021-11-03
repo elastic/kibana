@@ -87,6 +87,7 @@ export const WorkspaceRoute = ({
         const options = {
           indexName: indexPattern,
           vertex_fields: [],
+          prev_vertex_fields: [],
           // Here we have the opportunity to look up labels for nodes...
           nodeLabeller() {
             // console.log(newNodes);

@@ -6,7 +6,15 @@
  */
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
-import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
+import {
+  combineReducers,
+  createStore,
+  Store,
+  AnyAction,
+  Dispatch,
+  applyMiddleware,
+  compose,
+} from 'redux';
 import { ChromeStart, I18nStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { CoreStart } from 'src/core/public';
 import { ReactElement } from 'react';
@@ -88,7 +96,11 @@ export const createGraphStore = (deps: GraphStoreDependencies) => {
 
   const rootReducer = createRootReducer(deps.addBasePath);
 
-  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+  const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+  const enhancer = composeEnhancers(applyMiddleware(sagaMiddleware));
+
+  const store = createStore(rootReducer, enhancer);
 
   registerSagas(sagaMiddleware, deps);
 

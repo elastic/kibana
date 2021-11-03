@@ -1523,6 +1523,16 @@ function GraphWorkspace(options) {
     });
   };
 
+  function needClearGraph() {
+    const currentFields = self.options.vertex_fields.filter(({ hopSize }) => hopSize !== 0);
+    const prevFields = self.options.prev_vertex_fields.filter(({ hopSize }) => hopSize !== 0);
+
+    const someFieldWasUnselected = prevFields.some(
+      (prev) => !currentFields.find((cur) => cur.name === prev.name)
+    );
+    return currentFields.length < prevFields.length || someFieldWasUnselected;
+  }
+
   // Internal utility function for calling the Graph API and handling the response
   // by merging results into existing nodes in this workspace.
   this.callElasticsearch = function (request) {
@@ -1559,6 +1569,11 @@ function GraphWorkspace(options) {
           width: Math.max(minLineSize, (edge.weight / maxEdgeWeight) * maxLineSize),
         });
       });
+
+      if (needClearGraph()) {
+        self.clearGraph();
+      }
+      self.options.prev_vertex_fields = self.options.vertex_fields.slice();
 
       self.mergeGraph(
         {
