@@ -54,8 +54,16 @@ const withRuleRegistryEnabled = (config: ConfigType, isEnabled: boolean): Config
   return isEnabled ? withExperimentalFeature(config, 'ruleRegistryEnabled') : config;
 };
 
+const withPendingActionResponsesWithAckEnabled = (
+  config: ConfigType,
+  isEnabled: boolean
+): ConfigType => {
+  return isEnabled ? withExperimentalFeature(config, 'pendingActionResponsesWithAck') : config;
+};
+
 export const configMock = {
   createDefault: createMockConfig,
   withExperimentalFeature,
   withRuleRegistryEnabled,
+  withPendingActionResponsesWithAckEnabled,
 };
