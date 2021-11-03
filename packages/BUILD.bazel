@@ -47,6 +47,7 @@ filegroup(
       "//packages/kbn-securitysolution-list-hooks:build",
       "//packages/kbn-securitysolution-list-utils:build",
       "//packages/kbn-securitysolution-rules:build",
+      "//packages/kbn-securitysolution-rule-test-generator:build",
       "//packages/kbn-securitysolution-utils:build",
       "//packages/kbn-securitysolution-es-utils:build",
       "//packages/kbn-securitysolution-t-grid:build",

@@ -95,6 +95,7 @@ const DEV_PACKAGES = [
   'kbn-dev-utils',
   'kbn-cli-dev-mode',
   'kbn-docs-utils',
+  'kbn-securitysolution-rule-test-generator',
   'kbn-es*',
   'kbn-eslint*',
   'kbn-optimizer',

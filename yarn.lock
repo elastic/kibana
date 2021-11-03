@@ -3888,6 +3888,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-rule-test-generator@link:bazel-bin/packages/kbn-securitysolution-rule-test-generator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""
