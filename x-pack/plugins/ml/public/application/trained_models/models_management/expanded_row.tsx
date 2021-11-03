@@ -143,6 +143,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           const nodeObject = Object.values(v.node)[0];
           const href = await mlLocator!.getUrl({
             page: ML_PAGES.TRAINED_MODELS_NODES,
+            pageState: {
+              nodeId: nodeObject.name,
+            },
           });
           items.push({
             label: nodeObject.name,
