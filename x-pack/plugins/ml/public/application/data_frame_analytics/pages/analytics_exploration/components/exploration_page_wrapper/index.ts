@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { EvaluatePanelProps, ExplorationPageWrapper } from './exploration_page_wrapper';
+export type { EvaluatePanelProps } from './exploration_page_wrapper';
+export { ExplorationPageWrapper } from './exploration_page_wrapper';
