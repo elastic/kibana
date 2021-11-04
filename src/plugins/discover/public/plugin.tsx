@@ -62,6 +62,8 @@ import { DeferredSpinner } from './shared';
 import { ViewSavedSearchAction } from './application/embeddable/view_saved_search_action';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import { FieldFormatsStart } from '../../field_formats/public';
+import { injectTruncateStyles } from './application/helpers/truncate_styles';
+import { TRUNCATE_MAX_HEIGHT } from '../common';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -412,6 +414,8 @@ export class DiscoverPlugin
 
     const services = buildServices(core, plugins, this.initializerContext);
     setServices(services);
+
+    injectTruncateStyles(services.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     return {
       urlGenerator: this.urlGenerator,

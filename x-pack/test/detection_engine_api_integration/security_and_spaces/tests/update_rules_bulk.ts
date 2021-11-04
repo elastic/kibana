@@ -26,20 +26,21 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('update_rules_bulk', () => {
     describe('update rules bulk', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should update a single rule property of name using a rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         const updatedRule = getSimpleRuleUpdate('rule-1');
         updatedRule.name = 'some other name';
@@ -59,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update two rule properties of name using the two rules rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // create a second simple rule
         await supertest
@@ -107,8 +108,8 @@ export default ({ getService }: FtrProviderContext) => {
                 webhookUrl: 'http://localhost:1234',
               },
             }),
-          createRule(supertest, getSimpleRule('rule-1')),
-          createRule(supertest, getSimpleRule('rule-2')),
+          createRule(supertest, log, getSimpleRule('rule-1')),
+          createRule(supertest, log, getSimpleRule('rule-2')),
         ]);
         await Promise.all([
           createLegacyRuleAction(supertest, rule1.id, connector.body.id),
@@ -154,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using an id', async () => {
-        const createRuleBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's name
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
@@ -176,8 +177,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update two rule properties of name using the two rules id', async () => {
-        const createRule1 = await createRule(supertest, getSimpleRule('rule-1'));
-        const createRule2 = await createRule(supertest, getSimpleRule('rule-2'));
+        const createRule1 = await createRule(supertest, log, getSimpleRule('rule-1'));
+        const createRule2 = await createRule(supertest, log, getSimpleRule('rule-2'));
 
         // update both rule names
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
@@ -211,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {
-        const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's name
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
@@ -233,7 +234,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change the version of a rule when it updates enabled and another property', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's enabled to false and another property
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
@@ -256,7 +257,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change other properties when it does updates and effectively delete them such as timeline_title', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's timeline_title
         const ruleUpdate = getSimpleRuleUpdate('rule-1');
@@ -329,7 +330,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update one rule property and give an error about a second fake rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         const ruleUpdate = getSimpleRuleUpdate('rule-1');
         ruleUpdate.name = 'some other name';
@@ -364,7 +365,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update one rule property and give an error about a second fake id', async () => {
-        const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update one rule name and give a fake id for the second
         const rule1 = getSimpleRuleUpdate();

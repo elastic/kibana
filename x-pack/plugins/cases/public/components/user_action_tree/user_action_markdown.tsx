@@ -26,7 +26,7 @@ interface UserActionMarkdownProps {
   onSaveContent: (content: string) => void;
 }
 
-interface UserActionMarkdownRefObject {
+export interface UserActionMarkdownRefObject {
   setComment: (newComment: string) => void;
 }
 

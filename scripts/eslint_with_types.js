@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-declare module 'react-vis';
+require('../src/setup_node_env');
+require('../src/dev/eslint').runEslintWithTypes();

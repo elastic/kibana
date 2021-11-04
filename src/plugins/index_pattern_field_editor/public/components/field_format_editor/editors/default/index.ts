@@ -9,7 +9,8 @@
 import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
 
-export { defaultState, FormatEditorState } from './default';
+export type { FormatEditorState } from './default';
+export { defaultState } from './default';
 export type { FormatEditorProps } from '../types';
 export type { DefaultFormatEditor } from './default';
 
