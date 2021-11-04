@@ -87,5 +87,8 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = React
     </OwnerProvider>
   );
 });
+
+AllCasesSelectorModal.displayName = 'AllCasesSelectorModal';
+
 // eslint-disable-next-line import/no-default-export
 export { AllCasesSelectorModal as default };

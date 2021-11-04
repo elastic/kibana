@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { wrapError } from './utils';
 import { isBoom, boomify } from '@hapi/boom';
+import { HTTPError } from '../../common';
+import { wrapError } from './utils';
 
 describe('Utils', () => {
   describe('wrapError', () => {
@@ -25,7 +26,7 @@ describe('Utils', () => {
     });
 
     it('it set statusCode to errors status code', () => {
-      const error = new Error('Something happened') as any;
+      const error = new Error('Something happened') as HTTPError;
       error.statusCode = 404;
       const res = wrapError(error);
 

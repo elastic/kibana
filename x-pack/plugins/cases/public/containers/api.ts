@@ -87,7 +87,7 @@ export const resolveCase = async (
   signal: AbortSignal
 ): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
-    getCaseDetailsUrl(caseId) + '/resolve',
+    `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
       query: {

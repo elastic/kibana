@@ -303,7 +303,10 @@ describe('AllCasesGeneric', () => {
 
     await waitFor(() => {
       result.current.map(
-        (i, key) => i.name != null && !i.hasOwnProperty('actions') && checkIt(`${i.name}`, key)
+        (i, key) =>
+          i.name != null &&
+          !Object.prototype.hasOwnProperty.call(i, 'actions') &&
+          checkIt(`${i.name}`, key)
       );
     });
   });
@@ -378,7 +381,9 @@ describe('AllCasesGeneric', () => {
       })
     );
     await waitFor(() => {
-      result.current.map((i) => i.name != null && !i.hasOwnProperty('actions'));
+      result.current.map(
+        (i) => i.name != null && !Object.prototype.hasOwnProperty.call(i, 'actions')
+      );
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
     });
   });

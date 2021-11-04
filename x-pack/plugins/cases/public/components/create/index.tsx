@@ -98,5 +98,8 @@ export const CreateCase: React.FC<CreateCaseProps> = React.memo((props) => (
     <CreateCaseComponent {...props} />
   </OwnerProvider>
 ));
+
+CreateCase.displayName = 'CreateCase';
+
 // eslint-disable-next-line import/no-default-export
 export { CreateCase as default };
