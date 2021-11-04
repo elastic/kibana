@@ -19,5 +19,6 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/apm/{common,public,server}/**/*.{js,ts,tsx}',
+    '!<rootDir>/**/*.stories.*',
   ],
 };
