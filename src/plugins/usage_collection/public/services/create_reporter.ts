@@ -22,8 +22,7 @@ export function createReporter(config: AnalyicsReporterConfig): Reporter {
     debug,
     storage: localStorage,
     async http(report) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const response = await fetch.post<any>('/api/ui_counters/_report', {
+      const response = await fetch.post('/api/ui_counters/_report', {
         body: JSON.stringify({ report }),
         asSystemRequest: true,
       });

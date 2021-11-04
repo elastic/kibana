@@ -255,9 +255,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
   listeners: ({ actions, values }) => ({
     initializeGroups: async () => {
       try {
-        const response = await HttpLogic.values.http.get<GroupsServerData>(
-          '/internal/workplace_search/groups'
-        );
+        const response = await HttpLogic.values.http.get('/internal/workplace_search/groups');
         actions.onInitializeGroups(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -290,7 +288,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       };
 
       try {
-        const response = await HttpLogic.values.http.post<GroupsSearchResponse>(
+        const response = await HttpLogic.values.http.post(
           '/internal/workplace_search/groups/search',
           {
             body: JSON.stringify({
@@ -309,7 +307,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     fetchGroupUsers: async ({ groupId }) => {
       actions.setAllGroupLoading(true);
       try {
-        const response = await HttpLogic.values.http.get<User[]>(
+        const response = await HttpLogic.values.http.get(
           `/internal/workplace_search/groups/${groupId}/group_users`
         );
         actions.setGroupUsers(response);
@@ -319,13 +317,10 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     },
     saveNewGroup: async () => {
       try {
-        const response = await HttpLogic.values.http.post<Group>(
-          '/internal/workplace_search/groups',
-          {
-            body: JSON.stringify({ group_name: values.newGroupName }),
-            headers,
-          }
-        );
+        const response = await HttpLogic.values.http.post('/internal/workplace_search/groups', {
+          body: JSON.stringify({ group_name: values.newGroupName }),
+          headers,
+        });
         actions.getSearchResults(true);
 
         const SUCCESS_MESSAGE = i18n.translate(

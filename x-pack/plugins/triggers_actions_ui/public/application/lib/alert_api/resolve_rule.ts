@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import { AsApiContract } from '../../../../../actions/common';
 import { ResolvedRule } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { transformResolvedRule } from './common_transformations';
@@ -17,7 +16,7 @@ export async function resolveRule({
   http: HttpSetup;
   ruleId: string;
 }): Promise<ResolvedRule> {
-  const res = await http.get<AsApiContract<ResolvedRule>>(
+  const res = await http.get(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/_resolve`
   );
   return transformResolvedRule(res);

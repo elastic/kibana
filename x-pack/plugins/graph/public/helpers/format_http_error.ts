@@ -6,11 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
+import { IHttpFetchError } from 'kibana/public';
 
-export function formatHttpError(
-  error: IHttpFetchError<ResponseErrorBody & { status: number; statusText: string }>
-) {
+export function formatHttpError(error: IHttpFetchError) {
   if (!error.response) {
     return i18n.translate('xpack.graph.fatalError.unavailableServerErrorMessage', {
       defaultMessage:
@@ -22,9 +20,9 @@ export function formatHttpError(
   return i18n.translate('xpack.graph.fatalError.errorStatusMessage', {
     defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',
     values: {
-      errStatus: error.body?.status,
-      errStatusText: error.body?.statusText,
-      errMessage: error.body?.message,
+      errStatus: error.body.status,
+      errStatusText: error.body.statusText,
+      errMessage: error.body.message,
     },
   });
 }
