@@ -8,7 +8,7 @@
 export * from './operations';
 export * from './layer_helpers';
 export * from './time_scale_utils';
-export {
+export type {
   OperationType,
   IndexPatternColumn,
   FieldBasedIndexPatternColumn,
