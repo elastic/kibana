@@ -12,7 +12,7 @@ import { SavedObjectsManagementPlugin } from './plugin';
 export const plugin = (context: PluginInitializerContext) =>
   new SavedObjectsManagementPlugin(context);
 
-export {
+export type {
   SavedObjectsManagementPluginSetup,
   SavedObjectsManagementPluginStart,
   SavedObjectMetadata,

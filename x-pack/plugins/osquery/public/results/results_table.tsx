@@ -291,19 +291,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       setIsLive(() => {
         if (!agentIds?.length || expired) return false;
 
-        const uniqueAgentsRepliedCount =
-          // @ts-expect-error-type
-          allResultsData?.rawResponse.aggregations?.unique_agents.value ?? 0;
-
-        return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
+        return !!(aggregations.totalResponded !== agentIds?.length);
       }),
-    [
-      agentIds?.length,
-      aggregations.failed,
-      // @ts-expect-error-type
-      allResultsData?.rawResponse.aggregations?.unique_agents.value,
-      expired,
-    ]
+    [agentIds?.length, aggregations.failed, aggregations.totalResponded, expired]
   );
 
   if (!hasActionResultsPrivileges) {
@@ -328,7 +318,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" />}
 
-      {isFetched && !allResultsData?.edges.length ? (
+      {isFetched && !allResultsData?.edges.length && !aggregations?.totalRowCount ? (
         <>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
           <EuiSpacer />

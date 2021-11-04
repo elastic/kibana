@@ -27,7 +27,7 @@ export const accessDeniedRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context } = useResolver(undefined, undefined, deps.config, {});
+  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {});
 
   return (
     <PageLoader context={context}>
