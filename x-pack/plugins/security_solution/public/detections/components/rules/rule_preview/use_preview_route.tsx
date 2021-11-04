@@ -12,6 +12,7 @@ import { FieldValueQueryBar } from '../query_bar';
 import { QUERY_PREVIEW_NOISE_WARNING } from './translations';
 import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
 import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
+import { FieldValueThreshold } from '../threshold_input';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
@@ -22,6 +23,7 @@ interface PreviewRouteParams {
   ruleType: Type;
   timeFrame: Unit;
   threatMapping: ThreatMapping;
+  threshold: FieldValueThreshold;
 }
 
 export const usePreviewRoute = ({
@@ -33,10 +35,11 @@ export const usePreviewRoute = ({
   timeFrame,
   ruleType,
   threatMapping,
+  threshold,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const { isLoading, response, rule, setRule } = usePreviewRule();
+  const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
   const [warnings, setWarnings] = useState<string[]>(response.warnings ?? []);
 
   useEffect(() => {
@@ -66,6 +69,7 @@ export const usePreviewRoute = ({
     timeFrame,
     ruleType,
     threatMapping,
+    threshold,
   ]);
 
   useEffect(() => {
@@ -79,6 +83,7 @@ export const usePreviewRoute = ({
           threatMapping,
           threatQuery,
           timeFrame,
+          threshold,
         })
       );
     }
@@ -93,6 +98,7 @@ export const usePreviewRoute = ({
     threatMapping,
     threatQuery,
     timeFrame,
+    threshold,
   ]);
 
   return {

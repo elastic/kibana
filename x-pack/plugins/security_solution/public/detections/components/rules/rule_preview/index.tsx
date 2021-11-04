@@ -35,7 +35,7 @@ export interface RulePreviewProps {
   threatIndex: string[];
   threatMapping: ThreatMapping;
   threatQuery: FieldValueQueryBar;
-  threshold?: FieldValueThreshold;
+  threshold: FieldValueThreshold;
 }
 
 const Select = styled(EuiSelect)`
@@ -81,6 +81,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     timeFrame,
     ruleType,
     threatMapping,
+    threshold,
   });
 
   return (
@@ -111,7 +112,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
               isLoading={isPreviewRequestInProgress}
               isDisabled={isDisabled}
               onClick={createPreview}
-              data-test-subj="preview-button"
+              data-test-subj="queryPreviewButton"
             >
               {i18n.QUERY_PREVIEW_BUTTON}
             </PreviewButton>
@@ -122,6 +123,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {isPreviewRequestInProgress && <LoadingHistogram />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram
+          ruleType={ruleType}
           timeFrame={timeFrame}
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}

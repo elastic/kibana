@@ -74,10 +74,6 @@ export const previewRulesRoute = async (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        if (request.body.type !== 'threat_match') {
-          return response.ok({ body: { errors: ['Not an indicator match rule'] } });
-        }
-
         let invocationCount = request.body.invocationCount;
         if (
           ![

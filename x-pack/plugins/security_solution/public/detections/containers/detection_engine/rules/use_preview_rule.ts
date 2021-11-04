@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { Unit } from '@elastic/datemath';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   PreviewResponse,
@@ -23,11 +24,18 @@ const emptyPreviewRule: PreviewResponse = {
   warnings: [],
 };
 
-export const usePreviewRule = () => {
+const invocationCounts = {
+  h: 1,
+  d: 24,
+  w: 168,
+};
+
+export const usePreviewRule = (timeframe: Unit = 'h') => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
+  const invocationCount = invocationCounts[timeframe];
 
   useEffect(() => {
     if (!rule) {
@@ -45,7 +53,7 @@ export const usePreviewRule = () => {
         try {
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
-            rule: { ...transformOutput(rule), invocationCount: 1 },
+            rule: { ...transformOutput(rule), invocationCount },
             signal: abortCtrl.signal,
           });
           if (isSubscribed) {
@@ -67,7 +75,7 @@ export const usePreviewRule = () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError]);
+  }, [rule, addError, invocationCount]);
 
   return { isLoading, response, rule, setRule };
 };

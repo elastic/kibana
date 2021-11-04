@@ -367,6 +367,7 @@ export const previewRulesSchema = t.intersection([
   createTypeSpecific,
   t.type({ invocationCount: t.number }),
 ]);
+export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;

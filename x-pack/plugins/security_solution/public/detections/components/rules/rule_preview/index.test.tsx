@@ -45,6 +45,14 @@ const defaultProps: RulePreviewProps = {
     filters: [],
     query: { query: 'threat.indicator.file.hash.md5:*', language: 'kuery' },
   },
+  threshold: {
+    field: ['agent.hostname'],
+    value: '200',
+    cardinality: {
+      field: ['user.name'],
+      value: '2',
+    },
+  },
 };
 
 describe('PreviewQuery', () => {
@@ -93,7 +101,9 @@ describe('PreviewQuery', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="preview-button"] button').props().disabled).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeTruthy();
   });
 
   test('it renders preview button enabled if "isDisabled" is false', () => {
@@ -103,7 +113,9 @@ describe('PreviewQuery', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="preview-button"] button').props().disabled).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
   });
 
   test('does not render histogram when there is no previewId', () => {
