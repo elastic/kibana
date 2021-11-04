@@ -65,7 +65,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
    */
   useEffect(() => {
     if (!prevAppState.current || fetchedState.anchor._id !== anchorId) {
-      fetchAllRows();
+      fetchAllRows(!!prevAppState.current);
     } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
       fetchSurroundingRows(SurrDocType.PREDECESSORS);
     } else if (prevAppState.current.successorCount !== appState.successorCount) {

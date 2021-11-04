@@ -161,8 +161,22 @@ export function useContextAppFetch({
   );
 
   const fetchAllRows = useCallback(
-    () => fetchAnchorRow().then((anchor) => anchor && fetchContextRows(anchor)),
-    [fetchAnchorRow, fetchContextRows]
+    (reset: boolean = false) => {
+      if (reset) {
+        const resetState = {
+          ...fetchedState,
+          predecessors: [],
+          successors: [],
+          anchorStatus: { value: LoadingStatus.LOADING },
+          predecessorsStatus: { value: LoadingStatus.LOADING },
+          successorsStatus: { value: LoadingStatus.LOADING },
+        };
+        setFetchedState(resetState);
+      }
+
+      fetchAnchorRow().then((anchor) => anchor && fetchContextRows(anchor));
+    },
+    [fetchAnchorRow, fetchContextRows, setFetchedState, fetchedState]
   );
 
   return {
