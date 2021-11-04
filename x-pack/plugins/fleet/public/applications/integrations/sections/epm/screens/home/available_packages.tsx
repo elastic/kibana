@@ -334,12 +334,7 @@ function ProxyLink() {
   const { docLinks } = useStartServices();
 
   return (
-    <EuiLink
-      href={
-        'https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html#fleet-data-visualizer-settings'
-      }
-      target="_blank"
-    >
+    <EuiLink href={docLinks.links.fleet.settingsFleetServerProxySettings} target="_blank">
       {i18n.translate('xpack.fleet.epmList.proxyLinkSnippedText', {
         defaultMessage: 'registry proxy',
       })}
@@ -351,10 +346,7 @@ function OnPremLink() {
   const { docLinks } = useStartServices();
 
   return (
-    <EuiLink
-      href={'https://www.elastic.co/guide/en/integrations-developer/current/air-gapped.html'}
-      target="_blank"
-    >
+    <EuiLink href={docLinks.links.fleet.onPremRegistry} target="_blank">
       {i18n.translate('xpack.fleet.epmList.onPremLinkSnippetText', {
         defaultMessage: 'on-prem registry',
       })}
