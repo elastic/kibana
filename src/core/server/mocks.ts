@@ -69,6 +69,9 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
       pingTimeout: duration('30s'),
+      ssl: {
+        certificateAuthorityFingerprints: [],
+      },
     },
     path: { data: '/tmp' },
     savedObjects: {
