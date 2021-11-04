@@ -92,6 +92,7 @@ export const RuleSchema = t.intersection([
     enabled: t.boolean,
     false_positives: t.array(t.string),
     from: t.string,
+    id: t.string,
     uuid: t.string,
     interval: t.string,
     immutable: t.boolean,
