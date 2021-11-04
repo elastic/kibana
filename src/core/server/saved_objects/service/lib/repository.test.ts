@@ -19,14 +19,25 @@ import {
   mockDeleteLegacyUrlAliases,
 } from './repository.test.mock';
 
-import { SavedObjectsType, SavedObject, SavedObjectReference } from '../../types';
-import { SavedObjectsRepository } from './repository';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  SavedObjectsType,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+} from '../../types';
+import {
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
+  SavedObjectsRepository,
+} from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { ALL_NAMESPACES_STRING } from './utils';
 import { loggerMock } from '../../../logging/logger.mock';
-import { SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectsSerializer, SavedObjectUnsanitizedDoc } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
@@ -35,7 +46,14 @@ import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { SavedObjectsCreateOptions, SavedObjectsUpdateOptions } from '../saved_objects_client';
+import {
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsUpdateOptions,
+} from '../saved_objects_client';
+import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
 
 const { nodeTypes } = esKuery;
 
@@ -97,11 +115,13 @@ describe('SavedObjectsRepository', () => {
   const MULTI_NAMESPACE_CUSTOM_INDEX_TYPE = 'multiNamespaceTypeCustomIndex';
   const HIDDEN_TYPE = 'hiddenType';
 
-  const mappings = {
+  const mappings: SavedObjectsTypeMappingDefinition = {
     properties: {
       config: {
         properties: {
-          type: 'keyword',
+          otherField: {
+            type: 'keyword',
+          },
         },
       },
       'index-pattern': {
@@ -120,7 +140,9 @@ describe('SavedObjectsRepository', () => {
       },
       [CUSTOM_INDEX_TYPE]: {
         properties: {
-          type: 'keyword',
+          otherField: {
+            type: 'keyword',
+          },
         },
       },
       [NAMESPACE_AGNOSTIC_TYPE]: {
@@ -165,7 +187,9 @@ describe('SavedObjectsRepository', () => {
     name: type,
     hidden: false,
     namespaceType: 'single',
-    mappings: { properties: mappings.properties[type].properties },
+    mappings: {
+      properties: mappings.properties[type].properties! as SavedObjectsMappingProperties,
+    },
     migrations: { '1.1.1': (doc) => doc },
     ...parts,
   });
@@ -242,7 +266,7 @@ describe('SavedObjectsRepository', () => {
         specialProperty: 'specialValue',
         ...mockTimestampFields,
       },
-    };
+    } as estypes.GetResponse;
   };
 
   const getMockMgetResponse = (objects, namespace?: string) => ({
@@ -270,22 +294,39 @@ describe('SavedObjectsRepository', () => {
   const expectErrorResult = (
     { type, id }: TypeIdTuple,
     error: Record<string, any>,
-    overrides = {}
+    overrides: Record<string, unknown> = {}
   ) => ({
     type,
     id,
     error: { ...error, ...overrides },
   });
-  const expectErrorNotFound = (obj: TypeIdTuple, overrides) =>
+  const expectErrorNotFound = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
     expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id), overrides);
-  const expectErrorConflict = (obj: TypeIdTuple, overrides) =>
+  const expectErrorConflict = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
     expectErrorResult(obj, createConflictError(obj.type, obj.id), overrides);
-  const expectErrorInvalidType = (obj: TypeIdTuple, overrides) =>
-    expectErrorResult(obj, createUnsupportedTypeError(obj.type, obj.id), overrides);
+  const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
+    expectErrorResult(obj, createUnsupportedTypeError(obj.type), overrides);
 
-  const expectMigrationArgs = (args, contains = true, n = 1) => {
+  const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
     const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
     expect(migrator.migrateDocument).toHaveBeenNthCalledWith(n, obj);
+  };
+
+  const createSpySerializer = () => {
+    const spyInstance = {
+      isRawSavedObject: jest.fn(),
+      rawToSavedObject: jest.fn(),
+      savedObjectToRaw: jest.fn(),
+      generateRawId: jest.fn(),
+      generateRawLegacyUrlAliasId: jest.fn(),
+      trimIdPrefix: jest.fn(),
+    };
+    const realInstance = new SavedObjectsSerializer(registry);
+    Object.keys(spyInstance).forEach((key) => {
+      spyInstance[key].mockImplementation((...args) => realInstance[key](...args));
+    });
+
+    return spyInstance as unknown as jest.Mocked<SavedObjectsSerializer>;
   };
 
   beforeEach(() => {
@@ -294,22 +335,11 @@ describe('SavedObjectsRepository', () => {
     migrator = mockKibanaMigrator.create();
     documentMigrator.prepareMigrations();
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = async () => ({ status: 'skipped' });
+    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
-    serializer = {
-      isRawSavedObject: jest.fn(),
-      rawToSavedObject: jest.fn(),
-      savedObjectToRaw: jest.fn(),
-      generateRawId: jest.fn(),
-      generateRawLegacyUrlAliasId: jest.fn(),
-      trimIdPrefix: jest.fn(),
-    };
-    const _serializer = new SavedObjectsSerializer(registry);
-    Object.keys(serializer).forEach((key) => {
-      serializer[key].mockImplementation((...args) => _serializer[key](...args));
-    });
+    serializer = createSpySerializer();
 
     const allTypes = registry.getAllTypes().map((type) => type.name);
     const allowedTypes = [...new Set(allTypes.filter((type) => !registry.isHidden(type)))];
@@ -330,7 +360,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   const mockMigrationVersion = { foo: '2.3.4' };
-  const mockMigrateDocument = (doc) => ({
+  const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => ({
     ...doc,
     attributes: {
       ...doc.attributes,
@@ -344,7 +374,7 @@ describe('SavedObjectsRepository', () => {
     beforeEach(() => {
       mockPreflightCheckForCreate.mockReset();
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
-        return objects.map(({ type, id }) => ({ type, id })); // respond with no errors by default
+        return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
       });
     });
 
@@ -363,7 +393,7 @@ describe('SavedObjectsRepository', () => {
     };
     const namespace = 'foo-namespace';
 
-    const getMockBulkCreateResponse = (objects, namespace) => {
+    const getMockBulkCreateResponse = (objects: SavedObject[], namespace?: string) => {
       return {
         items: objects.map(({ type, id, originId, attributes, references, migrationVersion }) => ({
           create: {
@@ -395,7 +425,11 @@ describe('SavedObjectsRepository', () => {
     // bulk create calls have two objects for each source -- the action, and the source
     const expectClientCallArgsAction = (
       objects,
-      { method, _index = expect.any(String), getId = () => expect.any(String) }
+      {
+        method,
+        _index = expect.any(String),
+        getId = () => expect.any(String),
+      }: { method: string; _index?: string; getId?: (type: string, id: string) => string }
     ) => {
       const body = [];
       for (const { type, id, if_primary_term: ifPrimaryTerm, if_seq_no: ifSeqNo } of objects) {
@@ -434,7 +468,7 @@ describe('SavedObjectsRepository', () => {
       }),
     ];
 
-    const expectSuccessResult = (obj) => ({
+    const expectSuccessResult = (obj: SavedObjectUnsanitizedDoc) => ({
       ...obj,
       migrationVersion: { [obj.type]: '1.1.1' },
       coreMigrationVersion: KIBANA_VERSION,
@@ -582,7 +616,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`adds initialNamespaces instead of namespace`, async () => {
-        const test = async (namespace) => {
+        const test = async (namespace?: string) => {
           const ns2 = 'bar-namespace';
           const ns3 = 'baz-namespace';
           const objects = [
@@ -636,7 +670,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`normalizes initialNamespaces from 'default' to undefined`, async () => {
-        const test = async (namespace) => {
+        const test = async (namespace?: string) => {
           const objects = [{ ...obj1, type: 'dashboard', initialNamespaces: ['default'] }];
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const body = [
@@ -694,19 +728,19 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
+        const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkCreateSuccess([obj1, obj2], { namespace });
         expectClientCallArgsAction([obj1, obj2], { method: 'create', getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkCreateSuccess([obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], { method: 'create', getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         const objects = [
           { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE },
           { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE },
@@ -1039,12 +1073,12 @@ describe('SavedObjectsRepository', () => {
     };
     const namespace = 'foo-namespace';
 
-    const bulkGet = async (objects, options) =>
+    const bulkGet = async (objects, options?: SavedObjectsBaseOptions) =>
       savedObjectsRepository.bulkGet(
         objects.map(({ type, id, namespaces }) => ({ type, id, namespaces })), // bulkGet only uses type, id, and optionally namespaces
         options
       );
-    const bulkGetSuccess = async (objects, options) => {
+    const bulkGetSuccess = async (objects, options?: SavedObjectsBaseOptions) => {
       const response = getMockMgetResponse(objects, options?.namespace);
       client.mget.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(response)
@@ -1055,8 +1089,11 @@ describe('SavedObjectsRepository', () => {
     };
 
     const _expectClientCallArgs = (
-      objects,
-      { _index = expect.any(String), getId = () => expect.any(String) }
+      objects: TypeIdTuple[],
+      {
+        _index = expect.any(String),
+        getId = () => expect.any(String),
+      }: { _index?: string; getId?: (type: string, id: string) => string }
     ) => {
       expect(client.mget).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1075,32 +1112,32 @@ describe('SavedObjectsRepository', () => {
 
     describe('client calls', () => {
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
+        const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkGetSuccess([obj1, obj2], { namespace });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`prepends namespace to the id when providing namespaces for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
+        const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         const objects = [obj1, obj2].map((obj) => ({ ...obj, namespaces: [namespace] }));
         await bulkGetSuccess(objects, { namespace: 'some-other-ns' });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkGetSuccess([obj1, obj2]);
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkGetSuccess([obj1, obj2], { namespace: 'default' });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         let objects = [obj1, obj2].map((obj) => ({ ...obj, type: NAMESPACE_AGNOSTIC_TYPE }));
         await bulkGetSuccess(objects, { namespace });
         _expectClientCallArgs(objects, { getId });
@@ -1116,7 +1153,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const bulkGetError = async (obj, isBulkError, expectedErrorResult) => {
+      const bulkGetError = async (obj, isBulkError: boolean, expectedErrorResult) => {
         let response;
         if (isBulkError) {
           // mock the bulk error for only the second object
@@ -1208,7 +1245,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      const expectSuccessResult = ({ type, id }, doc) => ({
+      const expectSuccessResult = ({ type, id }: TypeIdTuple, doc) => ({
         type,
         id,
         namespaces: doc._source.namespaces ?? ['default'],
@@ -1339,7 +1376,11 @@ describe('SavedObjectsRepository', () => {
     const originId = 'some-origin-id';
     const namespace = 'foo-namespace';
 
-    const getMockBulkUpdateResponse = (objects, options, includeOriginId) => ({
+    const getMockBulkUpdateResponse = (
+      objects: TypeIdTuple[],
+      options?: SavedObjectsBulkUpdateOptions,
+      includeOriginId?: boolean
+    ) => ({
       items: objects.map(({ type, id }) => ({
         update: {
           _id: `${
@@ -1358,7 +1399,11 @@ describe('SavedObjectsRepository', () => {
       })),
     });
 
-    const bulkUpdateSuccess = async (objects, options, includeOriginId) => {
+    const bulkUpdateSuccess = async (
+      objects,
+      options?: SavedObjectsBulkUpdateOptions,
+      includeOriginId?: boolean
+    ) => {
       const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
       if (multiNamespaceObjects?.length) {
         const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
@@ -1366,7 +1411,7 @@ describe('SavedObjectsRepository', () => {
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
       }
-      const response = getMockBulkUpdateResponse(objects, options?.namespace, includeOriginId);
+      const response = getMockBulkUpdateResponse(objects, options, includeOriginId);
       client.bulk.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(response)
       );
@@ -1377,8 +1422,18 @@ describe('SavedObjectsRepository', () => {
 
     // bulk create calls have two objects for each source -- the action, and the source
     const expectClientCallArgsAction = (
-      objects,
-      { method, _index = expect.any(String), getId = () => expect.any(String), overrides }
+      objects: TypeIdTuple[],
+      {
+        method,
+        _index = expect.any(String),
+        getId = () => expect.any(String),
+        overrides = {},
+      }: {
+        method: string;
+        _index?: string;
+        getId?: (type: string, id: string) => string;
+        overrides?: Record<string, unknown>;
+      }
     ) => {
       const body = [];
       for (const { type, id } of objects) {
@@ -1481,7 +1536,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        const test = async (references) => {
+        const test = async (references: unknown) => {
           const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
           await bulkUpdateSuccess(objects);
           const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
@@ -1553,7 +1608,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkUpdateSuccess([obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
 
@@ -1570,13 +1625,13 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        const getId = (type, id) => `${type}:${id}`;
+        const getId = (type: string, id: string) => `${type}:${id}`;
         await bulkUpdateSuccess([obj1, obj2], { namespace: 'default' });
         expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         const overrides = {
           // bulkUpdate uses a preflight `get` request for multi-namespace saved objects, and specifies that version on `update`
           // we aren't testing for this here, but we need to include Jest assertions so this test doesn't fail
@@ -1791,12 +1846,15 @@ describe('SavedObjectsRepository', () => {
     const obj7 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'seven' };
     const namespace = 'foo-namespace';
 
-    const checkConflicts = async (objects, options) =>
+    const checkConflicts = async (objects: TypeIdTuple[], options?: SavedObjectsBaseOptions) =>
       savedObjectsRepository.checkConflicts(
         objects.map(({ type, id }) => ({ type, id })), // checkConflicts only uses type and id
         options
       );
-    const checkConflictsSuccess = async (objects, options) => {
+    const checkConflictsSuccess = async (
+      objects: TypeIdTuple[],
+      options?: SavedObjectsBaseOptions
+    ) => {
       const response = getMockMgetResponse(objects, options?.namespace);
       client.mget.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(response)
@@ -1808,7 +1866,10 @@ describe('SavedObjectsRepository', () => {
 
     const _expectClientCallArgs = (
       objects,
-      { _index = expect.any(String), getId = () => expect.any(String) }
+      {
+        _index = expect.any(String),
+        getId = () => expect.any(String),
+      }: { _index?: string; getId?: (type: string, id: string) => string }
     ) => {
       expect(client.mget).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1832,25 +1893,25 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
+        const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await checkConflictsSuccess([obj1, obj2], { namespace });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await checkConflictsSuccess([obj1, obj2]);
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await checkConflictsSuccess([obj1, obj2], { namespace: 'default' });
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         // obj3 is multi-namespace, and obj6 is namespace-agnostic
         await checkConflictsSuccess([obj3, obj6], { namespace });
         _expectClientCallArgs([obj3, obj6], { getId });
@@ -2430,7 +2491,12 @@ describe('SavedObjectsRepository', () => {
     const id = 'logstash-*';
     const namespace = 'foo-namespace';
 
-    const deleteSuccess = async (type, id, options, internalOptions = {}) => {
+    const deleteSuccess = async (
+      type: string,
+      id: string,
+      options?: SavedObjectsDeleteOptions,
+      internalOptions = {}
+    ) => {
       const { mockGetResponseValue } = internalOptions;
       if (registry.isMultiNamespace(type)) {
         const mockGetResponse =
@@ -2584,7 +2650,11 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const expectNotFoundError = async (type, id, options) => {
+      const expectNotFoundError = async (
+        type: string,
+        id: string,
+        options?: SavedObjectsDeleteOptions
+      ) => {
         await expect(savedObjectsRepository.delete(type, id, options)).rejects.toThrowError(
           createGenericNotFoundError(type, id)
         );
@@ -2718,7 +2788,10 @@ describe('SavedObjectsRepository', () => {
       failures: [],
     };
 
-    const deleteByNamespaceSuccess = async (namespace, options) => {
+    const deleteByNamespaceSuccess = async (
+      namespace: string,
+      options?: SavedObjectsDeleteByNamespaceOptions
+    ) => {
       client.updateByQuery.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(mockUpdateResults)
       );
@@ -2940,7 +3013,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#find', () => {
-    const generateSearchResults = (namespace) => {
+    const generateSearchResults = (namespace?: string) => {
       return {
         hits: {
           total: 4,
@@ -3008,13 +3081,13 @@ describe('SavedObjectsRepository', () => {
             },
           ],
         },
-      };
+      } as estypes.SearchResponse;
     };
 
     const type = 'index-pattern';
     const namespace = 'foo-namespace';
 
-    const findSuccess = async (options, namespace) => {
+    const findSuccess = async (options?: SavedObjectsFindOptions, namespace?: string) => {
       client.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateSearchResults(namespace)
@@ -3100,7 +3173,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`should not make a client call when attempting to find only invalid or hidden types`, async () => {
-        const test = async (types) => {
+        const test = async (types: string | string[]) => {
           await savedObjectsRepository.find({ type: types });
           expect(client.search).not.toHaveBeenCalled();
         };
@@ -3148,12 +3221,14 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when searchFields is defined but not an array`, async () => {
         await expect(
+          // @ts-expect-error searchFields is an array
           savedObjectsRepository.find({ type, searchFields: 'string' })
         ).rejects.toThrowError('options.searchFields must be an array');
         expect(client.search).not.toHaveBeenCalled();
       });
 
       it(`throws when fields is defined but not an array`, async () => {
+        // @ts-expect-error fields is an array
         await expect(savedObjectsRepository.find({ type, fields: 'string' })).rejects.toThrowError(
           'options.fields must be an array'
         );
@@ -3279,7 +3354,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('search dsl', () => {
-      const commonOptions = {
+      const commonOptions: SavedObjectsFindOptions = {
         type: [type], // cannot be used when `typeToNamespacesMap` is present
         namespaces: [namespace], // cannot be used when `typeToNamespacesMap` is present
         search: 'foo*',
@@ -3291,7 +3366,6 @@ describe('SavedObjectsRepository', () => {
           type: 'foo',
           id: '1',
         },
-        kueryNode: undefined,
       };
 
       it(`passes mappings, registry, and search options to getSearchDsl`, async () => {
@@ -3315,7 +3389,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts hasReferenceOperator`, async () => {
-        const relevantOpts = {
+        const relevantOpts: SavedObjectsFindOptions = {
           ...commonOptions,
           hasReferenceOperator: 'AND',
         };
@@ -3328,20 +3402,20 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts searchAfter`, async () => {
-        const relevantOpts = {
+        const relevantOpts: SavedObjectsFindOptions = {
           ...commonOptions,
-          searchAfter: [1, 'a'],
+          searchAfter: ['1', 'a'],
         };
 
         await findSuccess(relevantOpts, namespace);
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           ...relevantOpts,
-          searchAfter: [1, 'a'],
+          searchAfter: ['1', 'a'],
         });
       });
 
       it(`accepts pit`, async () => {
-        const relevantOpts = {
+        const relevantOpts: SavedObjectsFindOptions = {
           ...commonOptions,
           pit: { id: 'abc123', keepAlive: '2m' },
         };
@@ -3354,7 +3428,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts KQL expression filter and passes KueryNode to getSearchDsl`, async () => {
-        const findOpts = {
+        const findOpts: SavedObjectsFindOptions = {
           namespaces: [namespace],
           search: 'foo*',
           searchFields: ['foo'],
@@ -3366,7 +3440,6 @@ describe('SavedObjectsRepository', () => {
             type: 'foo',
             id: '1',
           },
-          indexPattern: undefined,
           filter: 'dashboard.attributes.otherField: *',
         };
 
@@ -3395,7 +3468,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts KQL KueryNode filter and passes KueryNode to getSearchDsl`, async () => {
-        const findOpts = {
+        const findOpts: SavedObjectsFindOptions = {
           namespaces: [namespace],
           search: 'foo*',
           searchFields: ['foo'],
@@ -3407,7 +3480,6 @@ describe('SavedObjectsRepository', () => {
             type: 'foo',
             id: '1',
           },
-          indexPattern: undefined,
           filter: nodeTypes.function.buildNode('is', `dashboard.attributes.otherField`, '*'),
         };
 
@@ -3482,7 +3554,12 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
     const originId = 'some-origin-id';
 
-    const getSuccess = async (type, id, options, includeOriginId) => {
+    const getSuccess = async (
+      type: string,
+      id: string,
+      options?: SavedObjectsBaseOptions,
+      includeOriginId?: boolean
+    ) => {
       const response = getMockGetResponse(
         {
           type,
@@ -3558,7 +3635,11 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const expectNotFoundError = async (type, id, options) => {
+      const expectNotFoundError = async (
+        type: string,
+        id: string,
+        options?: SavedObjectsBaseOptions
+      ) => {
         await expect(savedObjectsRepository.get(type, id, options)).rejects.toThrowError(
           createGenericNotFoundError(type, id)
         );
@@ -3582,7 +3663,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
         );
         await expectNotFoundError(type, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -3668,14 +3749,14 @@ describe('SavedObjectsRepository', () => {
       const expectedResult = { type: 'obj-type', id: 'obj-id', error };
       mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
 
-      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
+      await expect(savedObjectsRepository.resolve('foo', '2')).rejects.toEqual(error);
     });
 
     it('throws when internalBulkResolve throws', async () => {
       const error = new Error('Oh no!');
       mockInternalBulkResolve.mockRejectedValue(error);
 
-      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
+      await expect(savedObjectsRepository.resolve('foo', '2')).rejects.toEqual(error);
     });
   });
 
@@ -3686,7 +3767,13 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
     const originId = 'some-origin-id';
 
-    const incrementCounterSuccess = async (type, id, fields, options, internalOptions = {}) => {
+    const incrementCounterSuccess = async (
+      type: string,
+      id: string,
+      fields: string[],
+      options?: SavedObjectsIncrementCounterOptions,
+      internalOptions = {}
+    ) => {
       const { mockGetResponseValue } = internalOptions;
       const isMultiNamespace = registry.isMultiNamespace(type);
       if (isMultiNamespace) {
@@ -3879,8 +3966,9 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when counterField is not CounterField type`, async () => {
-        const test = async (field) => {
+        const test = async (field: unknown[]) => {
           await expect(
+            // @ts-expect-error field is of wrong type
             savedObjectsRepository.incrementCounter(type, id, field)
           ).rejects.toThrowError(
             `"counterFields" argument must be of type Array<string | { incrementBy?: number; fieldName: string }>`
@@ -4364,8 +4452,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const expectNotFoundError = async (type, id) => {
-        await expect(savedObjectsRepository.update(type, id)).rejects.toThrowError(
+      const expectNotFoundError = async (type: string, id: string) => {
+        await expect(savedObjectsRepository.update(type, id, {})).rejects.toThrowError(
           createGenericNotFoundError(type, id)
         );
       };
@@ -4407,9 +4495,7 @@ describe('SavedObjectsRepository', () => {
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
-        await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id, {
-          namespace: 'bar-namespace',
-        });
+        await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
       });
 
@@ -4496,8 +4582,8 @@ describe('SavedObjectsRepository', () => {
   describe('#openPointInTimeForType', () => {
     const type = 'index-pattern';
 
-    const generateResults = (id) => ({ id: id || null });
-    const successResponse = async (type, options) => {
+    const generateResults = (id?: string) => ({ id: id || null });
+    const successResponse = async (type: string, options?: SavedObjectsOpenPointInTimeOptions) => {
       client.openPointInTime.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
       );
@@ -4544,7 +4630,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const expectNotFoundError = async (types) => {
+      const expectNotFoundError = async (types: string | string[]) => {
         await expect(savedObjectsRepository.openPointInTimeForType(types)).rejects.toThrowError(
           createGenericNotFoundError()
         );
@@ -4559,7 +4645,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`should return generic not found error when attempting to find only invalid or hidden types`, async () => {
-        const test = async (types) => {
+        const test = async (types: string | string[]) => {
           await expectNotFoundError(types);
           expect(client.openPointInTime).not.toHaveBeenCalled();
         };
@@ -4585,7 +4671,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('#closePointInTime', () => {
     const generateResults = () => ({ succeeded: true, num_freed: 3 });
-    const successResponse = async (id) => {
+    const successResponse = async (id: string) => {
       client.closePointInTime.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
       );
@@ -4615,7 +4701,7 @@ describe('SavedObjectsRepository', () => {
 
     describe('returns', () => {
       it(`returns response body from ES`, async () => {
-        const results = generateResults('abc123');
+        const results = generateResults();
         client.closePointInTime.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(results)
         );
