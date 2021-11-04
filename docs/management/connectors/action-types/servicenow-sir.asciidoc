@@ -10,7 +10,7 @@ The ServiceNow SecOps connector uses the https://docs.servicenow.com/bundle/orla
 [float]
 [[servicenow-sir-connector-prerequisites]]
 === Prerequisites
-After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow SecOps connector:
+After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow SecOps connector or <<updating an existing one, servicenow-sir-connector-update>>:
 
 * Install Elastic for Security Operations (SecOps) from the https://store.servicenow.com/sn_appstore_store.do#!/store/home[ServiceNow Store].
 * Create a ServiceNow integration user and assign it the appropriate roles.
@@ -42,6 +42,25 @@ To create a ServiceNow CORS rule:
 * *Domain*: Enter the Kibana URL.
 . Go to the *HTTP methods* tab and choose the GET HTTP method by selecting *GET*.
 . Click *Submit* to create the rule.
+
+[float]
+[[servicenow-sir-connector-update]]
+=== Update a deprecated ServiceNow SecOps connector
+
+ServiceNow SecOps connectors created in 7.15, or an earlier version, will be marked as deprecated after you upgrade to 7.16. Deprecated connectors have a yellow icon at the end of their name and display a warning message if you select them.
+
+[role="screenshot"]
+image::images/management/connectors/images/servicenow-sir-update-connector.png[]
+
+IMPORTANT: Deprecated connectors will continue to function with the rules and cases they were added to, but you cannot assign a deprecated connector to a new rule or case. If you try to do so, you will be prompted to update the connector or create a new one.
+
+To update a deprecated connector:
+
+. Open the main menu and go to *Stack Management -> Rules and connectors*.
+. Select the deprecated connector and click *Update*.
+. Enter the URL to your ServiceNow instance.
+. Enter the username and password of your ServiceNow instance.
+. Click *Save* to finish updating the connector.
 
 [float]
 [[servicenow-sir-connector-configuration]]
