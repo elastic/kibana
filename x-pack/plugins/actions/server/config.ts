@@ -37,9 +37,6 @@ export const configSchema = schema.object({
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
-  refreshExpiredTokensTask: schema.object({
-    interval: schema.string({ defaultValue: '25m' }),
-  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

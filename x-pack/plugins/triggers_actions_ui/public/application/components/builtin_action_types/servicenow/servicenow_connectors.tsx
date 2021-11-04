@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   EuiSwitch,
+  EuiTextArea,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,17 +33,20 @@ const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
 > = ({ action, editActionSecrets, editActionConfig, errors, readOnly }) => {
   const { docLinks } = useKibana().services;
-  const { apiUrl, isOAuth } = action.config;
+  const { apiUrl, isOAuth, clientId, userEmail, keyId } = action.config;
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
 
-  const { username, password, clientId, clientSecret } = action.secrets;
+  const { username, password, clientSecret, privateKey } = action.secrets;
 
   const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
   const isClientIdInvalid: boolean = errors.clientId.length > 0 && clientId !== undefined;
+  const isUserEmailInvalid: boolean = errors.userEmail.length > 0 && userEmail !== undefined;
+  const isKeyIdInvalid: boolean = errors.keyId.length > 0 && keyId !== undefined;
   const isClientSecretInvalid: boolean =
     errors.clientSecret.length > 0 && clientSecret !== undefined;
+  const isPrivateKeyInvalid: boolean = errors.privateKey.length > 0 && privateKey !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
@@ -119,60 +123,6 @@ const ServiceNowConnectorFields: React.FC<
           <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id, isOAuth)}</EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="connector-servicenow-username"
-            fullWidth
-            error={errors.username}
-            isInvalid={isUsernameInvalid}
-            label={i18n.USERNAME_LABEL}
-          >
-            <EuiFieldText
-              fullWidth
-              isInvalid={isUsernameInvalid}
-              readOnly={readOnly}
-              name="connector-servicenow-username"
-              value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-servicenow-username-form-input"
-              onChange={(evt) => handleOnChangeSecretConfig('username', evt.target.value)}
-              onBlur={() => {
-                if (!username) {
-                  editActionSecrets('username', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="connector-servicenow-password"
-            fullWidth
-            error={errors.password}
-            isInvalid={isPasswordInvalid}
-            label={i18n.PASSWORD_LABEL}
-          >
-            <EuiFieldPassword
-              fullWidth
-              readOnly={readOnly}
-              isInvalid={isPasswordInvalid}
-              name="connector-servicenow-password"
-              value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-servicenow-password-form-input"
-              onChange={(evt) => handleOnChangeSecretConfig('password', evt.target.value)}
-              onBlur={() => {
-                if (!password) {
-                  editActionSecrets('password', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       {isOAuth ? (
         <>
           <EuiSpacer size="m" />
@@ -192,10 +142,10 @@ const ServiceNowConnectorFields: React.FC<
                   name="connector-servicenow-client-id"
                   value={clientId || ''}
                   data-test-subj="connector-servicenow-clientid-form-input"
-                  onChange={(evt) => handleOnChangeSecretConfig('clientId', evt.target.value)}
+                  onChange={(evt) => handleOnChangeActionConfig('clientId', evt.target.value)}
                   onBlur={() => {
                     if (!clientId) {
-                      editActionSecrets('clientId', '');
+                      editActionConfig('clientId', '');
                     }
                   }}
                 />
@@ -229,8 +179,146 @@ const ServiceNowConnectorFields: React.FC<
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="connector-servicenow-useremail"
+                fullWidth
+                error={errors.userEmail}
+                isInvalid={isUserEmailInvalid}
+                label={i18n.USER_EMAIL_LABEL}
+              >
+                <EuiFieldText
+                  fullWidth
+                  isInvalid={isUserEmailInvalid}
+                  readOnly={readOnly}
+                  name="connector-servicenow-useremail"
+                  value={userEmail || ''} // Needed to prevent uncontrolled input error when value is undefined
+                  data-test-subj="connector-servicenow-useremail-form-input"
+                  onChange={(evt) => handleOnChangeActionConfig('userEmail', evt.target.value)}
+                  onBlur={() => {
+                    if (!userEmail) {
+                      editActionConfig('userEmail', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="connector-servicenow-keyid"
+                fullWidth
+                error={errors.keyId}
+                isInvalid={isKeyIdInvalid}
+                label={i18n.KEY_ID_LABEL}
+              >
+                <EuiFieldText
+                  fullWidth
+                  readOnly={readOnly}
+                  isInvalid={isKeyIdInvalid}
+                  name="connector-servicenow-keyid"
+                  value={keyId || ''} // Needed to prevent uncontrolled input error when value is undefined
+                  data-test-subj="connector-servicenow-keyid-form-input"
+                  onChange={(evt) => handleOnChangeActionConfig('keyId', evt.target.value)}
+                  onBlur={() => {
+                    if (!keyId) {
+                      editActionConfig('keyId', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="connector-servicenow-keyid"
+                fullWidth
+                error={errors.privateKey}
+                isInvalid={isPrivateKeyInvalid}
+                label={i18n.PRIVATE_KEY_LABEL}
+              >
+                <EuiTextArea
+                  fullWidth
+                  readOnly={readOnly}
+                  isInvalid={isPrivateKeyInvalid}
+                  name="connector-servicenow-public-certificate"
+                  value={privateKey || ''} // Needed to prevent uncontrolled input error when value is undefined
+                  data-test-subj="connector-servicenow-public-certificate-form-input"
+                  onChange={(evt) => handleOnChangeSecretConfig('privateKey', evt.target.value)}
+                  onBlur={() => {
+                    if (!privateKey) {
+                      editActionSecrets('privateKey', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
-      ) : null}
+      ) : (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="connector-servicenow-username"
+                fullWidth
+                error={errors.username}
+                isInvalid={isUsernameInvalid}
+                label={i18n.USERNAME_LABEL}
+              >
+                <EuiFieldText
+                  fullWidth
+                  isInvalid={isUsernameInvalid}
+                  readOnly={readOnly}
+                  name="connector-servicenow-username"
+                  value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
+                  data-test-subj="connector-servicenow-username-form-input"
+                  onChange={(evt) => handleOnChangeSecretConfig('username', evt.target.value)}
+                  onBlur={() => {
+                    if (!username) {
+                      editActionSecrets('username', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="connector-servicenow-password"
+                fullWidth
+                error={errors.password}
+                isInvalid={isPasswordInvalid}
+                label={i18n.PASSWORD_LABEL}
+              >
+                <EuiFieldPassword
+                  fullWidth
+                  readOnly={readOnly}
+                  isInvalid={isPasswordInvalid}
+                  name="connector-servicenow-password"
+                  value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
+                  data-test-subj="connector-servicenow-password-form-input"
+                  onChange={(evt) => handleOnChangeSecretConfig('password', evt.target.value)}
+                  onBlur={() => {
+                    if (!password) {
+                      editActionSecrets('password', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };

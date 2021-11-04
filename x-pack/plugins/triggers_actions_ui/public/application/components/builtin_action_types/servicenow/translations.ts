@@ -100,6 +100,13 @@ export const USERNAME_LABEL = i18n.translate(
   }
 );
 
+export const USER_EMAIL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.userEmailTextFieldLabel',
+  {
+    defaultMessage: 'User Email',
+  }
+);
+
 export const CLIENTID_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientIdTextFieldLabel',
   {
@@ -128,6 +135,20 @@ export const CLIENTID_REQUIRED = i18n.translate(
   }
 );
 
+export const USER_EMAIL_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUserEmailTextField',
+  {
+    defaultMessage: 'User Email is required.',
+  }
+);
+
+export const KEYID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredKeyIdTextField',
+  {
+    defaultMessage: 'Key ID is required.',
+  }
+);
+
 export const CLIENTSECRET_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientSecretTextField',
   {
@@ -135,10 +156,31 @@ export const CLIENTSECRET_REQUIRED = i18n.translate(
   }
 );
 
+export const PRIVATE_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyTextField',
+  {
+    defaultMessage: 'Private Key is required.',
+  }
+);
+
 export const PASSWORD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.passwordTextFieldLabel',
   {
     defaultMessage: 'Password',
+  }
+);
+
+export const KEY_ID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.keyIdTextFieldLabel',
+  {
+    defaultMessage: 'Key ID',
+  }
+);
+
+export const PRIVATE_KEY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyTextFieldLabel',
+  {
+    defaultMessage: 'Private Key',
   }
 );
 

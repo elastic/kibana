@@ -27,12 +27,15 @@ const validateConnector = (
 ): ConnectorValidationResult<Pick<ServiceNowConfig, 'apiUrl'>, ServiceNowSecrets> => {
   const configErrors = {
     apiUrl: new Array<string>(),
+    clientId: new Array<string>(),
+    userEmail: new Array<string>(),
+    keyId: new Array<string>(),
   };
   const secretsErrors = {
     username: new Array<string>(),
     password: new Array<string>(),
-    clientId: new Array<string>(),
     clientSecret: new Array<string>(),
+    privateKey: new Array<string>(),
   };
 
   const validationResult = {
@@ -52,20 +55,32 @@ const validateConnector = (
     }
   }
 
-  if (!action.secrets.username) {
+  if (!action.config.isOAuth && !action.secrets.username) {
     secretsErrors.username = [...secretsErrors.username, i18n.USERNAME_REQUIRED];
   }
 
-  if (!action.secrets.password) {
+  if (!action.config.isOAuth && !action.secrets.password) {
     secretsErrors.password = [...secretsErrors.password, i18n.PASSWORD_REQUIRED];
   }
 
-  if (action.config.isOAuth && !action.secrets.clientId) {
-    secretsErrors.clientId = [...secretsErrors.clientId, i18n.CLIENTID_REQUIRED];
+  if (action.config.isOAuth && !action.config.clientId) {
+    configErrors.clientId = [...configErrors.clientId, i18n.CLIENTID_REQUIRED];
   }
 
   if (action.config.isOAuth && !action.secrets.clientSecret) {
     secretsErrors.clientSecret = [...secretsErrors.clientSecret, i18n.CLIENTSECRET_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.secrets.privateKey) {
+    secretsErrors.privateKey = [...secretsErrors.privateKey, i18n.PRIVATE_KEY_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.config.userEmail) {
+    configErrors.userEmail = [...configErrors.userEmail, i18n.USER_EMAIL_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.config.keyId) {
+    configErrors.keyId = [...configErrors.keyId, i18n.KEYID_REQUIRED];
   }
 
   return validationResult;
