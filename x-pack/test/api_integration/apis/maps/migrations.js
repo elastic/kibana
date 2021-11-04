@@ -48,14 +48,14 @@ export default function ({ getService }) {
         expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
       });
 
-      it('should not apply saved object reference migration when importing map saved objects prior to 7.2.0', async () => {
+      it('should not fail migration with invalid attributes', async () => {
         const resp = await supertest
           .post(`/api/saved_objects/map`)
           .set('kbn-xsrf', 'kibana')
           .send({
             attributes: {
               title: '[Logs] Total Requests and Bytes',
-              layerListJSON: 'not valid JSON string'
+              layerListJSON: 'not valid layerListJSON'
             },
             migrationVersion: {},
           })
