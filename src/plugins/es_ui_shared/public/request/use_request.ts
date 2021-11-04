@@ -151,8 +151,6 @@ export const useRequest = <D = any, E = Error>(
     return resendRequest();
   }, [resendRequest]);
 
-  console.log('error!!!!', error);
-
   return {
     isInitialRequest: isInitialRequestRef.current,
     isLoading,

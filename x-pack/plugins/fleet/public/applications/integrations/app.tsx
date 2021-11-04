@@ -57,7 +57,6 @@ export const IntegrationsAppContext: React.FC<{
     extensions,
     setHeaderActionMenu,
   }) => {
-    console.log('integrationsappcontext');
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
     return (
@@ -94,7 +93,6 @@ export const IntegrationsAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
-  console.log('Approutes');
   const { modal, setModal } = useUrlModal();
   return (
     <>

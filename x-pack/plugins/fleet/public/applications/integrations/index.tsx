@@ -48,7 +48,6 @@ const IntegrationsApp = ({
   extensions,
   setHeaderActionMenu,
 }: IntegrationsAppProps) => {
-  console.log('integrationsapp');
   return (
     <IntegrationsAppContext
       basepath={basepath}
