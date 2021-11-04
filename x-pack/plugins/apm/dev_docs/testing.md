@@ -27,7 +27,7 @@ API tests are separated in two suites:
 node scripts/test/api [--trial] [--help]
 ```
 
-The API tests are located in `x-pack/test/apm_api_integration/`.
+The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/apm_api_integration/).
 
 **API Test tips**
 
@@ -43,11 +43,12 @@ The API tests are located in `x-pack/test/apm_api_integration/`.
 node scripts/test/e2e [--trial] [--help]
 ```
 
-The E2E tests are located [here](../ftr_e2e)
+The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e)
 
 ---
 
 ## Functional tests (Security and Correlations tests)
+
 TODO: We could try moving this tests to the new e2e tests located at `x-pack/plugins/apm/ftr_e2e`.
 
 **Start server**
@@ -66,10 +67,10 @@ APM tests are located in `x-pack/test/functional/apps/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 diff --git a/x-pack/plugins/apm/scripts/test/README.md b/x-pack/plugins/apm/scripts/test/README.md
 
-
 ## Storybook
 
 ### Start
+
 ```
 yarn storybook apm
 ```
@@ -77,6 +78,7 @@ yarn storybook apm
 All files with a .stories.tsx extension will be loaded. You can access the development environment at http://localhost:9001.
 
 ## Data generation
+
 For end-to-end (e.g. agent -> apm server -> elasticsearch <- kibana) development and testing of Elastic APM please check the the [APM Integration Testing repository](https://github.com/elastic/apm-integration-testing).
 
 Data can also be generated using the [elastic-apm-synthtrace](../../../../packages/elastic-apm-synthtrace/README.md) CLI.
