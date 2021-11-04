@@ -141,7 +141,7 @@ export function ContextAppContent({
           dataTestSubj="contextDocTable"
         />
       )}
-      {!isLegacy && rows && rows.length && (
+      {!isLegacy && (
         <div className="dscDocsGrid">
           <DiscoverGridMemoized
             ariaLabelledBy="surDocumentsAriaLabel"
