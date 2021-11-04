@@ -6,9 +6,7 @@
  */
 
 import type { SearchSourceFields } from 'src/plugins/data/common';
-import type { BaseParams, BasePayload } from '../../types';
-
-export type RawValue = string | object | null | undefined;
+import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsCSV {
   searchSource: SearchSourceFields;
