@@ -21,9 +21,7 @@ export function setDefaultAutoFitToBounds({
   try {
     mapState = JSON.parse(attributes.mapStateJSON);
   } catch (e) {
-    // Do not fail migration for invalid mapStateJSON
-    // Maps application can display invalid mapStateJSON error when saved object is viewed
-    return attributes;
+    throw new Error('Unable to parse attribute mapStateJSON');
   }
 
   if ('settings' in mapState) {

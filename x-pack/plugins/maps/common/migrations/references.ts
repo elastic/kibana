@@ -33,9 +33,7 @@ export function extractReferences({
   try {
     layerList = JSON.parse(attributes.layerListJSON);
   } catch (e) {
-    // Do not fail migration for invalid layerListJSON
-    // Maps application can display invalid layerListJSON error when saved object is viewed
-    return { attributes, references };
+    throw new Error('Unable to parse attribute layerListJSON');
   }
 
   layerList.forEach((layer, layerIndex) => {
@@ -104,9 +102,7 @@ export function injectReferences({
   try {
     layerList = JSON.parse(attributes.layerListJSON);
   } catch (e) {
-    // Do not fail migration for invalid layerListJSON
-    // Maps application can display invalid layerListJSON error when saved object is viewed
-    return { attributes };
+    throw new Error('Unable to parse attribute layerListJSON');
   }
 
   layerList.forEach((layer) => {
