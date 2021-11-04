@@ -63,7 +63,7 @@ export const createKbnUrlStateStorage = (
     onGetError,
     onSetError,
   }: {
-    useHash?: boolean;
+    useHash: boolean;
     useHashQuery?: boolean;
     history?: History;
     onGetError?: (error: Error) => void;
