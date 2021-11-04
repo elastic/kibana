@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Dependencies throughput value',
-    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       describe('when data is loaded', () => {
         const GO_PROD_RATE = 75;

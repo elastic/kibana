@@ -13,4 +13,5 @@ export function isErrorThatHandlesItsOwnResponse(
   return typeof (e as ErrorThatHandlesItsOwnResponse).sendResponse === 'function';
 }
 
-export { ActionTypeDisabledError, ActionTypeDisabledReason } from './action_type_disabled';
+export type { ActionTypeDisabledReason } from './action_type_disabled';
+export { ActionTypeDisabledError } from './action_type_disabled';
