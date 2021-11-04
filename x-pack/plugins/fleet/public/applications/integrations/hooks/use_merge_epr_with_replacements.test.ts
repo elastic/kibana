@@ -120,6 +120,17 @@ describe('useMergeEprWithReplacements', () => {
     ]);
   });
 
+  test('should filter out apm from package list', () => {
+    const eprPackages: PackageListItem[] = mockEprPackages([
+      {
+        name: 'apm',
+        release: 'beta',
+      },
+    ]);
+
+    expect(useMergeEprPackagesWithReplacements(eprPackages, [])).toEqual([]);
+  });
+
   test('should consists of all 3 types (ga eprs, replacements for non-ga eprs, replacements without epr equivalent', () => {
     const eprPackages: PackageListItem[] = mockEprPackages([
       {
@@ -135,6 +146,10 @@ describe('useMergeEprWithReplacements', () => {
       {
         name: 'activemq',
         release: 'beta',
+      },
+      {
+        name: 'apm',
+        release: 'ga',
       },
     ]);
     const replacements: CustomIntegration[] = mockIntegrations([

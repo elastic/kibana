@@ -56,7 +56,7 @@ export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent' | '
     const [isSyncReady, setIsSyncReady] = useState<boolean>(false);
 
     useEffect(() => {
-      const stateStorage = createKbnUrlStateStorage();
+      const stateStorage = createKbnUrlStateStorage({ useHashQuery: false, useHash: false });
       const { start, stop } = syncState({
         storageKey: STATE_STORAGE_KEY,
         stateContainer: stateContainer as INullableBaseStateContainer<AgentLogsState>,
