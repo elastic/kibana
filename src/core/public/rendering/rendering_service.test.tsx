@@ -13,12 +13,14 @@ import { RenderingService } from './rendering_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
 import { BehaviorSubject } from 'rxjs';
 
 describe('RenderingService#start', () => {
   let application: ReturnType<typeof applicationServiceMock.createInternalStartContract>;
   let chrome: ReturnType<typeof chromeServiceMock.createStartContract>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
+  let theme: ReturnType<typeof themeServiceMock.createStartContract>;
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
 
@@ -32,6 +34,8 @@ describe('RenderingService#start', () => {
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
 
+    theme = themeServiceMock.createStartContract();
+
     targetDomElement = document.createElement('div');
 
     rendering = new RenderingService();
@@ -42,6 +46,7 @@ describe('RenderingService#start', () => {
       application,
       chrome,
       overlays,
+      theme,
       targetDomElement,
     });
   };

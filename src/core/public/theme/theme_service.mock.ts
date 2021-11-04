@@ -28,6 +28,6 @@ const createThemeStartMock = () => {
 };
 
 export const themeServiceMock = {
-  createSetup: createThemeSetupMock,
-  createStart: createThemeStartMock,
+  createSetupContract: createThemeSetupMock,
+  createStartContract: createThemeStartMock,
 };
