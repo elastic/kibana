@@ -37,7 +37,6 @@ import {
 } from './types';
 import { Ecs } from '../../../../common/ecs';
 import {
-  TimelineNonEcsData,
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
@@ -73,26 +72,6 @@ export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
       },
     },
   };
-};
-
-export const getFilterAndRuleBounds = (
-  data: TimelineNonEcsData[][]
-): [string[], number, number] => {
-  const stringFilter =
-    data?.[0].filter(
-      (d) => d.field === 'signal.rule.filters' || d.field === 'kibana.alert.rule.filters'
-    )?.[0]?.value ?? [];
-
-  const eventTimes = data
-    .flatMap(
-      (alert) =>
-        alert.filter(
-          (d) => d.field === 'signal.original_time' || d.field === 'kibana.alert.original_time'
-        )?.[0]?.value ?? []
-    )
-    .map((d) => moment(d));
-
-  return [stringFilter, moment.min(eventTimes).valueOf(), moment.max(eventTimes).valueOf()];
 };
 
 export const updateAlertStatusAction = async ({
@@ -176,7 +155,6 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
 
 export const getThresholdAggregationData = (
   ecsData: Ecs | Ecs[],
-  nonEcsData: TimelineNonEcsData[]
 ): ThresholdAggregationData => {
   // TODO: AAD fields
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
@@ -401,7 +379,6 @@ export const buildEqlDataProviderOrFilter = (
 export const sendAlertToTimelineAction = async ({
   createTimeline,
   ecsData: ecs,
-  nonEcsData,
   updateTimelineIsLoading,
   searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
@@ -498,10 +475,7 @@ export const sendAlertToTimelineAction = async ({
   }
 
   if (isThresholdRule(ecsData)) {
-    const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(
-      ecsData,
-      nonEcsData
-    );
+    const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
     return createTimeline({
       from: thresholdFrom,

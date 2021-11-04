@@ -6,16 +6,20 @@
  */
 
 import { SignalSourceHit } from '../../../signals/types';
+import { ALERT_THRESHOLD_RESULT } from '../../field_maps/field_names';
 import { RACAlert } from '../../types';
 
 export const filterSource = (doc: SignalSourceHit): Partial<RACAlert> => {
   const docSource = doc._source ?? {};
   const {
     event,
-    threshold_result: thresholdResult,
+    threshold_result: siemSignalsThresholdResult,
+    [ALERT_THRESHOLD_RESULT]: alertThresholdResult,
     ...filteredSource
   } = docSource || {
+    event: null,
     threshold_result: null,
+    [ALERT_THRESHOLD_RESULT]: null,
   };
 
   return filteredSource;

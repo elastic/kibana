@@ -76,7 +76,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -92,7 +91,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -248,7 +246,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -266,7 +263,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -300,7 +296,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -326,7 +321,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -356,7 +350,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -397,7 +390,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
