@@ -17,7 +17,8 @@ export {
 } from './saved_searches_utils';
 export { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
 export { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
-export { saveSavedSearch, SaveSavedSearchOptions } from './save_saved_searches';
+export type { SaveSavedSearchOptions } from './save_saved_searches';
+export { saveSavedSearch } from './save_saved_searches';
 
 export { SAVED_SEARCH_TYPE } from './constants';
 
