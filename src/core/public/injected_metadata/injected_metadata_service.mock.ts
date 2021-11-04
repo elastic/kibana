@@ -20,6 +20,7 @@ const createSetupContractMock = () => {
     getExternalUrlConfig: jest.fn(),
     getAnonymousStatusPage: jest.fn(),
     getLegacyMetadata: jest.fn(),
+    getTheme: jest.fn(),
     getPlugins: jest.fn(),
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
@@ -41,6 +42,7 @@ const createSetupContractMock = () => {
     },
   } as any);
   setupContract.getPlugins.mockReturnValue([]);
+  setupContract.getTheme.mockReturnValue({ darkMode: false, version: 'v8' });
   return setupContract;
 };
 

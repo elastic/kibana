@@ -35,6 +35,7 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -88,6 +89,7 @@ describe('PluginsService', () => {
       injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
+      theme: themeServiceMock.createSetupContract(),
     };
     mockSetupContext = {
       ...mockSetupDeps,

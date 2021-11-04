@@ -10,6 +10,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 
+import { themeServiceMock } from '../../theme/theme_service.mock';
 import { AppContainer } from './app_container';
 import { Mounter, AppMountParameters, AppStatus } from '../types';
 import { createMemoryHistory } from 'history';
@@ -20,6 +21,7 @@ describe('AppContainer', () => {
   const setAppLeaveHandler = jest.fn();
   const setAppActionMenu = jest.fn();
   const setIsMounting = jest.fn();
+  const theme$ = themeServiceMock.createStartContract().theme$;
 
   beforeEach(() => {
     setAppLeaveHandler.mockClear();
@@ -76,6 +78,7 @@ describe('AppContainer', () => {
           // Create a history using the appPath as the current location
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
         }
+        theme$={theme$}
       />
     );
 
@@ -117,6 +120,7 @@ describe('AppContainer', () => {
           // Create a history using the appPath as the current location
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
         }
+        theme$={theme$}
       />
     );
 
@@ -160,6 +164,7 @@ describe('AppContainer', () => {
           // Create a history using the appPath as the current location
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
         }
+        theme$={theme$}
       />
     );
 

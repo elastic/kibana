@@ -10,6 +10,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
+import { themeServiceMock } from '../../theme/theme_service.mock';
 import { AppRouter, AppNotFound } from '../ui';
 import { MockedMounterMap, MockedMounterTuple } from '../test_types';
 import { createRenderer, createAppMounter, getUnmounter } from './utils';
@@ -19,6 +20,7 @@ describe('AppRouter', () => {
   let mounters: MockedMounterMap;
   let globalHistory: History;
   let update: ReturnType<typeof createRenderer>;
+  let theme: ReturnType<typeof themeServiceMock.createStartContract>;
   let scopedAppHistory: History;
 
   const navigate = (path: string) => {
@@ -49,6 +51,7 @@ describe('AppRouter', () => {
         setAppLeaveHandler={noop}
         setAppActionMenu={noop}
         setIsMounting={noop}
+        theme$={theme.theme$}
       />
     );
 
@@ -87,6 +90,7 @@ describe('AppRouter', () => {
     ] as MockedMounterTuple[]);
     globalHistory = createMemoryHistory();
     update = createMountersRenderer();
+    theme = themeServiceMock.createStartContract();
   });
 
   it('calls mount handler and returned unmount function when navigating between apps', async () => {
