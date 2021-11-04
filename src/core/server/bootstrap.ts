@@ -51,7 +51,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
-  process.on('message', (msg) => {
+  process.on('message', (msg: any) => {
     if (!msg || msg.reloadConfiguration !== true) {
       return;
     }

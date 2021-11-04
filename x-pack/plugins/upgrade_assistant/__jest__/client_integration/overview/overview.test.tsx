@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { mockKibanaSemverVersion } from '../../../common/constants';
-import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../helpers';
+import { OverviewTestBed, setupOverviewPage, setupEnvironment, kibanaVersion } from '../helpers';
 
 describe('Overview Page', () => {
   let testBed: OverviewTestBed;
@@ -24,7 +23,7 @@ describe('Overview Page', () => {
   describe('Documentation links', () => {
     test('Has a whatsNew link and it references nextMajor version', () => {
       const { exists, find } = testBed;
-      const nextMajor = mockKibanaSemverVersion.major + 1;
+      const nextMajor = kibanaVersion.major + 1;
 
       expect(exists('whatsNewLink')).toBe(true);
       expect(find('whatsNewLink').text()).toContain(`${nextMajor}.0`);

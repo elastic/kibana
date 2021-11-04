@@ -33,7 +33,8 @@ export const pinnedEventSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const pinnedEventType: SavedObjectsType = {
   name: pinnedEventSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: pinnedEventSavedObjectMappings,
   migrations: pinnedEventsMigrations,
 };

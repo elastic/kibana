@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/metadata/details`,
+            pathname: `/internal/apm/services/opbeans-java/metadata/details`,
             query: { start, end },
           })
         );
@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns java service details', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/metadata/details`,
+            pathname: `/internal/apm/services/opbeans-java/metadata/details`,
             query: { start, end },
           })
         );
@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns python service details', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-python/metadata/details`,
+            pathname: `/internal/apm/services/opbeans-python/metadata/details`,
             query: { start, end },
           })
         );

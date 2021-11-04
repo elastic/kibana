@@ -76,7 +76,7 @@ export function writeDeprecationDocByApi(
   const mdx = dedent(`
 ---
 id: kibDevDocsDeprecationsByApi
-slug: /kibana-dev-docs/deprecated-api-list-by-api
+slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
 date: 2021-07-27

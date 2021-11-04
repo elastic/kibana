@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* global jest */
-
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import * as redux from 'react-redux';

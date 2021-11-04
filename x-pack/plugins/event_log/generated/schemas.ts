@@ -116,6 +116,28 @@ export const EventSchema = schema.maybe(
             status: ecsString(),
           })
         ),
+        alert: schema.maybe(
+          schema.object({
+            rule: schema.maybe(
+              schema.object({
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                    status: ecsString(),
+                    status_order: ecsNumber(),
+                    metrics: schema.maybe(
+                      schema.object({
+                        total_indexing_duration_ms: ecsNumber(),
+                        total_search_duration_ms: ecsNumber(),
+                        execution_gap_duration_s: ecsNumber(),
+                      })
+                    ),
+                  })
+                ),
+              })
+            ),
+          })
+        ),
         saved_objects: schema.maybe(
           schema.arrayOf(
             schema.object({
@@ -127,6 +149,7 @@ export const EventSchema = schema.maybe(
             })
           )
         ),
+        space_ids: ecsStringMulti(),
         version: ecsVersion(),
       })
     ),

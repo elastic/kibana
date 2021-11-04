@@ -14,8 +14,8 @@ describe('correlations', () => {
       const query = getQueryWithParams({
         params: {
           index: 'apm-*',
-          start: '2020',
-          end: '2021',
+          start: 1577836800000,
+          end: 1609459200000,
           includeFrozen: false,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
@@ -45,8 +45,8 @@ describe('correlations', () => {
           index: 'apm-*',
           serviceName: 'actualServiceName',
           transactionName: 'actualTransactionName',
-          start: '2020',
-          end: '2021',
+          start: 1577836800000,
+          end: 1609459200000,
           environment: 'dev',
           kuery: '',
           includeFrozen: false,
@@ -93,8 +93,8 @@ describe('correlations', () => {
       const query = getQueryWithParams({
         params: {
           index: 'apm-*',
-          start: '2020',
-          end: '2021',
+          start: 1577836800000,
+          end: 1609459200000,
           includeFrozen: false,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',

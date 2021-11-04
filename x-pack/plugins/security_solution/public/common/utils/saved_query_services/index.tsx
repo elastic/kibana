@@ -15,14 +15,14 @@ import { useKibana } from '../../lib/kibana';
 
 export const useSavedQueryServices = () => {
   const kibana = useKibana();
-  const client = kibana.services.savedObjects.client;
+  const { http } = kibana.services;
 
   const [savedQueryService, setSavedQueryService] = useState<SavedQueryService>(
-    createSavedQueryService(client)
+    createSavedQueryService(http)
   );
 
   useEffect(() => {
-    setSavedQueryService(createSavedQueryService(client));
-  }, [client]);
+    setSavedQueryService(createSavedQueryService(http));
+  }, [http]);
   return savedQueryService;
 };

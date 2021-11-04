@@ -74,7 +74,6 @@ export const browserStartLogs = (
 
   const kbnArgs = args({
     userDataDir,
-    viewport: { width: 800, height: 600 },
     disableSandbox,
     proxy,
   });

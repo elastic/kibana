@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { groupBy } from 'lodash';
 
 import { Loading, Error, ExtensionWrapper } from '../../../../../components';
 
@@ -67,8 +68,26 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
             id,
             type,
           }));
-          const { savedObjects } = await savedObjectsClient.bulkGet(objectsToGet);
-          setAssetsSavedObjects(savedObjects as AssetSavedObject[]);
+
+          // We don't have an API to know which SO types a user has access to, so instead we make a request for each
+          // SO type and ignore the 403 errors
+          const objectsByType = await Promise.all(
+            Object.entries(groupBy(objectsToGet, 'type')).map(([type, objects]) =>
+              savedObjectsClient
+                .bulkGet(objects)
+                // Ignore privilege errors
+                .catch((e: any) => {
+                  if (e?.body?.statusCode === 403) {
+                    return { savedObjects: [] };
+                  } else {
+                    throw e;
+                  }
+                })
+                .then(({ savedObjects }) => savedObjects as AssetSavedObject[])
+            )
+          );
+
+          setAssetsSavedObjects(objectsByType.flat());
         } catch (e) {
           setFetchError(e);
         } finally {

@@ -23,6 +23,7 @@ describe('EngineCreationLogic', () => {
   const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
+    ingestionMethod: '',
     isLoading: false,
     name: '',
     rawName: '',
@@ -35,6 +36,17 @@ describe('EngineCreationLogic', () => {
   });
 
   describe('actions', () => {
+    describe('setIngestionMethod', () => {
+      it('sets ingestion method to the provided value', () => {
+        mount();
+        EngineCreationLogic.actions.setIngestionMethod('crawler');
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          ingestionMethod: 'crawler',
+        });
+      });
+    });
+
     describe('setLanguage', () => {
       it('sets language to the provided value', () => {
         mount();

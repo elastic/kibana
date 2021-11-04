@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { FC } from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -22,7 +22,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
   }
 
   return (
-    <Fragment>
+    <>
       <EuiCallOut
         title={
           <FormattedMessage
@@ -41,6 +41,6 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
         </div>
       </EuiCallOut>
       <EuiSpacer size="m" />
-    </Fragment>
+    </>
   );
 };

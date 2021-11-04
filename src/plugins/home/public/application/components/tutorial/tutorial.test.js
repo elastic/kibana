@@ -33,11 +33,6 @@ jest.mock('../../kibana_services', () => ({
     },
   }),
 }));
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
 
 function buildInstructionSet(type) {
   return {

@@ -13,15 +13,19 @@ import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 
 import { ADD_LABEL } from '../../../../constants';
 import { BLOCKED_EMPTY_STATE_TITLE, BLOCKED_EMPTY_STATE_DESCRIPTION } from '../../constants';
+import { SourceLogic } from '../../source_logic';
 
 import { BlockedWindowItem } from './blocked_window_item';
 import { SynchronizationLogic } from './synchronization_logic';
 
 export const BlockedWindows: React.FC = () => {
-  const { blockedWindows } = useValues(SynchronizationLogic);
-  const { addBlockedWindow } = useActions(SynchronizationLogic);
+  const { contentSource } = useValues(SourceLogic);
+  const {
+    schedule: { blockedWindows },
+  } = useValues(SynchronizationLogic({ contentSource }));
+  const { addBlockedWindow } = useActions(SynchronizationLogic({ contentSource }));
 
-  const hasBlockedWindows = blockedWindows.length > 0;
+  const hasBlockedWindows = blockedWindows && blockedWindows.length > 0;
 
   const emptyState = (
     <>
@@ -41,8 +45,8 @@ export const BlockedWindows: React.FC = () => {
 
   const blockedWindowItems = (
     <>
-      {blockedWindows.map((blockedWindow, i) => (
-        <BlockedWindowItem key={i} blockedWindow={blockedWindow} />
+      {blockedWindows?.map((blockedWindow, i) => (
+        <BlockedWindowItem key={i} index={i} blockedWindow={blockedWindow} />
       ))}
       <EuiSpacer />
       <EuiButton onClick={addBlockedWindow}>{ADD_LABEL}</EuiButton>

@@ -37,6 +37,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency'));
     });
 
+    describe('event_metadata/event_metadata', function () {
+      loadTestFile(require.resolve('./event_metadata/event_metadata'));
+    });
+
     describe('metrics_charts/metrics_charts', function () {
       loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
     });
@@ -92,6 +96,14 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./services/throughput'));
     });
 
+    describe('service apis throughput', function () {
+      loadTestFile(require.resolve('./throughput/service_apis'));
+    });
+
+    describe('dependencies throughput', function () {
+      loadTestFile(require.resolve('./throughput/dependencies_apis'));
+    });
+
     describe('services/top_services', function () {
       loadTestFile(require.resolve('./services/top_services'));
     });
@@ -101,11 +113,11 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     describe('services/error_groups_main_statistics', function () {
-      loadTestFile(require.resolve('./services/error_groups_main_statistics'));
+      loadTestFile(require.resolve('./services/error_groups/error_groups_main_statistics'));
     });
 
     describe('services/error_groups_detailed_statistics', function () {
-      loadTestFile(require.resolve('./services/error_groups_detailed_statistics'));
+      loadTestFile(require.resolve('./services/error_groups/error_groups_detailed_statistics'));
     });
 
     describe('services/detailed_statistics', function () {
@@ -146,7 +158,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     describe('traces/top_traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));
     });
-    describe('/api/apm/traces/{traceId}', function () {
+    describe('/internal/apm/traces/{traceId}', function () {
       loadTestFile(require.resolve('./traces/trace_by_id'));
     });
 
@@ -161,6 +173,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('transactions/error_rate', function () {
       loadTestFile(require.resolve('./transactions/error_rate'));
+    });
+
+    describe('transactions/latency_overall_distribution', function () {
+      loadTestFile(require.resolve('./transactions/latency_overall_distribution'));
     });
 
     describe('transactions/latency', function () {
@@ -215,6 +231,36 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('historical_data/has_data', function () {
       loadTestFile(require.resolve('./historical_data/has_data'));
+    });
+
+    describe('error_rate/service_apis', function () {
+      loadTestFile(require.resolve('./error_rate/service_apis'));
+    });
+
+    describe('latency/service_apis', function () {
+      loadTestFile(require.resolve('./latency/service_apis'));
+    });
+
+    // Errors
+    describe('errors/group_id', function () {
+      loadTestFile(require.resolve('./errors/group_id'));
+    });
+
+    describe('errors/distribution', function () {
+      loadTestFile(require.resolve('./errors/distribution'));
+    });
+
+    describe('errors/error_group_list', function () {
+      loadTestFile(require.resolve('./errors/error_group_list'));
+    });
+
+    // Dependencies
+    describe('dependencies/metadata', function () {
+      loadTestFile(require.resolve('./dependencies/metadata'));
+    });
+
+    describe('dependencies/top_dependencies', function () {
+      loadTestFile(require.resolve('./dependencies/top_dependencies'));
     });
 
     registry.run(providerContext);

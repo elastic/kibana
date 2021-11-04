@@ -18,15 +18,26 @@ export function TrainedModelsProvider(
   mlCommonUI: MlCommonUI
 ) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
-    async createdTestTrainedModels(modelType: ModelType, count: number = 10) {
-      await mlApi.createdTestTrainedModels(modelType, count);
+    async createTestTrainedModels(
+      modelType: ModelType,
+      count: number = 10,
+      withIngestPipelines = false
+    ) {
+      await mlApi.createTestTrainedModels(modelType, count, withIngestPipelines);
     },
 
     async assertStats(expectedTotalCount: number) {
-      const actualStats = await testSubjects.getVisibleText('mlInferenceModelsStatsBar');
-      expect(actualStats).to.eql(`Total trained models: ${expectedTotalCount}`);
+      await retry.tryForTime(5 * 1000, async () => {
+        const actualStats = await testSubjects.getVisibleText('mlInferenceModelsStatsBar');
+        expect(actualStats).to.eql(`Total trained models: ${expectedTotalCount}`);
+      });
+    },
+
+    async assertTableExists() {
+      await testSubjects.existOrFail('~mlModelsTable');
     },
 
     async assertRowsNumberPerPage(rowsNumber: 10 | 25 | 100) {

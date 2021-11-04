@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPageHeaderProps } from '@elastic/eui';
-import { OVERVIEW_ROUTE } from '../../common/constants';
+import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsStart } from './plugin';
 import { useNoDataConfig } from './use_no_data_config';
 import { EmptyStateLoading } from '../components/overview/empty_state/empty_state_loading';
 import { EmptyStateError } from '../components/overview/empty_state/empty_state_error';
 import { useHasData } from '../components/overview/empty_state/use_has_data';
+import { useInspectorContext } from '../../../observability/public';
 
 interface Props {
   path: string;
@@ -39,19 +40,26 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
   const noDataConfig = useNoDataConfig();
 
   const { loading, error, data } = useHasData();
+  const { inspectorAdapters } = useInspectorContext();
+
+  useEffect(() => {
+    inspectorAdapters.requests.reset();
+  }, [inspectorAdapters.requests]);
 
   if (error) {
     return <EmptyStateError errors={[error]} />;
   }
 
-  const showLoading = loading && path === OVERVIEW_ROUTE && !data;
+  const isMainRoute = path === OVERVIEW_ROUTE || path === CERTIFICATES_ROUTE;
+
+  const showLoading = loading && isMainRoute && !data;
 
   return (
     <>
-      <div data-test-subj={noDataConfig ? 'data-missing' : undefined} />
       <StyledPageTemplateComponent
         pageHeader={pageHeader}
-        noDataConfig={path === OVERVIEW_ROUTE && !loading ? noDataConfig : undefined}
+        data-test-subj={noDataConfig ? 'data-missing' : undefined}
+        noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
       >
         {showLoading && <EmptyStateLoading />}
         <div

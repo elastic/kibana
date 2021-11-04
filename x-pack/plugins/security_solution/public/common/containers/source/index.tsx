@@ -28,7 +28,7 @@ import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
-export { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields, DocValueFields };
 
 export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
   Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
@@ -254,7 +254,12 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       errorMessage: null,
                       id: sourcererScopeName,
                       indexPattern: getIndexFields(stringifyIndices, response.indexFields),
-                      indicesExist: response.indicesExist.length > 0,
+                      // If checking for DE signals index, lie and say the index is created (it's
+                      // no longer created on startup, but is created lazily before writing).
+                      indicesExist:
+                        sourcererScopeName === SourcererScopeName.detections
+                          ? true
+                          : response.indicesExist.length > 0,
                       loading: false,
                     },
                   })

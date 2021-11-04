@@ -81,7 +81,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const browser = getService('browser');
 
-  describe('custom urls', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/106053
+  describe.skip('custom urls', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

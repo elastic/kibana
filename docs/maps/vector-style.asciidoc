@@ -10,7 +10,7 @@ For each property, you can specify whether to use a constant or data driven valu
 [[maps-vector-style-static]]
 ==== Static styling
 
-Use static styling to specificy a constant value for a style property.
+Use static styling to specify a constant value for a style property.
 
 This image shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses static styling for all properties.

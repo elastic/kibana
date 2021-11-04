@@ -22,6 +22,7 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormErrorText,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
@@ -185,7 +186,7 @@ export const FleetServerCommandStep = ({
                 >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                    defaultMessage="Fleet User Guide"
+                    defaultMessage="Fleet and Elastic Agent Guide"
                   />
                 </EuiLink>
               ),
@@ -193,19 +194,11 @@ export const FleetServerCommandStep = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiSelect
-          prepend={
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.platformSelectLabel"
-                defaultMessage="Platform"
-              />
-            </EuiText>
-          }
+        <EuiButtonGroup
           options={PLATFORM_OPTIONS}
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value as PLATFORM_TYPE)}
-          aria-label={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
+          idSelected={platform}
+          onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
+          legend={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
             defaultMessage: 'Platform',
           })}
         />
@@ -755,7 +748,7 @@ export const OnPremInstructions: React.FC = () => {
               >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                  defaultMessage="Fleet User Guide"
+                  defaultMessage="Fleet and Elastic Agent Guide"
                 />
               </EuiLink>
             ),

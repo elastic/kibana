@@ -10,6 +10,5 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../security_oss/tsconfig.json" }
   ]
 }

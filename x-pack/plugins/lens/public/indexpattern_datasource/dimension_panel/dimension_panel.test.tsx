@@ -513,7 +513,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...initialState,
       layers: {
@@ -545,7 +548,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -1037,7 +1043,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
 
       expect(setState.mock.calls.length).toEqual(2);
-      expect(setState.mock.calls[1]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+      expect(setState.mock.calls[1]).toEqual([
+        expect.any(Function),
+        { isDimensionComplete: true, forceRender: false },
+      ]);
       expect(setState.mock.calls[1][0](state)).toEqual({
         ...state,
         layers: {
@@ -1921,7 +1930,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {

@@ -62,6 +62,7 @@ export function MochaReporterProvider({ getService }) {
         log.setWriters([
           new ToolingLogTextWriter({
             level: 'error',
+            ignoreSources: ['ProcRunner', '@kbn/es Cluster'],
             writeTo: process.stdout,
           }),
           new ToolingLogTextWriter({
@@ -136,7 +137,7 @@ export function MochaReporterProvider({ getService }) {
     onPass = (test) => {
       const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
-      log.write(`- ${pass} ${time} "${test.fullTitle()}"`);
+      log.write(`- ${pass} ${time}`);
     };
 
     onFail = (runnable) => {

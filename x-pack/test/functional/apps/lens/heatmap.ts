@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/117404
   // FLAKY: https://github.com/elastic/kibana/issues/113043
   describe.skip('lens heatmap', () => {
     before(async () => {
@@ -74,8 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
         clearWithKeyboard: true,
+        typeCharByChar: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 

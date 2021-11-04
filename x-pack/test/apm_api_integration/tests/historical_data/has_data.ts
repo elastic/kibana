@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(`/api/apm/has_data`);
+        const response = await supertest.get(`/internal/apm/has_data`);
 
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.be(false);
@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns hasData: true', async () => {
-        const response = await supertest.get(`/api/apm/has_data`);
+        const response = await supertest.get(`/internal/apm/has_data`);
 
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.be(true);

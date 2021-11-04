@@ -26,14 +26,14 @@ describe('Color Format', () => {
         jest.fn()
       );
 
-      expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>99</span>');
+      expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
       expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color:blue;background-color:yellow">100</span></span>'
+        '<span style="color:blue;background-color:yellow">100</span>'
       );
       expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color:blue;background-color:yellow">150</span></span>'
+        '<span style="color:blue;background-color:yellow">150</span>'
       );
-      expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>151</span>');
+      expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('151');
     });
 
     test('should not convert invalid ranges', () => {
@@ -51,7 +51,7 @@ describe('Color Format', () => {
         jest.fn()
       );
 
-      expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>99</span>');
+      expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
     });
   });
 
@@ -72,26 +72,26 @@ describe('Color Format', () => {
       );
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('B', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>B</span>');
+      expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
       expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AAA</span></span>'
+        '<span style="color:blue;background-color:yellow">AAA</span>'
       );
       expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AB</span></span>'
+        '<span style="color:blue;background-color:yellow">AB</span>'
       );
-      expect(converter('a', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>a</span>');
+      expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
 
-      expect(converter('B', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>B</span>');
+      expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
       expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AAA</span></span>'
+        '<span style="color:blue;background-color:yellow">AAA</span>'
       );
       expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AB</span></span>'
+        '<span style="color:blue;background-color:yellow">AB</span>'
       );
       expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><span style="color:blue;background-color:yellow">AB &lt;</span></span>'
+        '<span style="color:blue;background-color:yellow">AB &lt;</span>'
       );
-      expect(converter('a', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>a</span>');
+      expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
     });
 
     test('returns original value (escaped) when regex is invalid', () => {
@@ -110,7 +110,7 @@ describe('Color Format', () => {
       );
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('<', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>&lt;</span>');
+      expect(converter('<', HTML_CONTEXT_TYPE)).toBe('&lt;');
     });
   });
 });

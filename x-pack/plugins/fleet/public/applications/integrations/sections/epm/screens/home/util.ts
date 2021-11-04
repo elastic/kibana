@@ -5,46 +5,57 @@
  * 2.0.
  */
 
-import type {
-  CustomIntegration,
-  IntegrationCategory,
-} from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import { INTEGRATION_CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+
+import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
 import type { CategoryFacet } from './category_facets';
 
-export function mergeAndReplaceCategoryCounts(
-  eprCounts: CategoryFacet[],
-  addableIntegrations: CustomIntegration[]
+export function mergeCategoriesAndCount(
+  eprCategoryList: Array<{ id: string; title: string; count: number }>, // EPR-categories from backend call to EPR
+  cards: IntegrationCardItem[]
 ): CategoryFacet[] {
-  const merged: CategoryFacet[] = [];
+  const facets: CategoryFacet[] = [];
 
-  const addIfMissing = (category: string, count: number) => {
-    const match = merged.find((c) => {
+  const addIfMissing = (category: string, count: number, title: string) => {
+    const match = facets.find((c) => {
       return c.id === category;
     });
 
     if (match) {
       match.count += count;
     } else {
-      merged.push({
-        id: category as IntegrationCategory,
+      facets.push({
+        id: category,
         count,
+        title,
       });
     }
   };
 
-  eprCounts.forEach((facet) => {
-    addIfMissing(facet.id, facet.count);
+  // Seed the list with the dynamic categories
+  eprCategoryList.forEach((facet) => {
+    addIfMissing(facet.id, 0, facet.title);
   });
-  addableIntegrations.forEach((integration) => {
-    integration.categories.forEach((cat) => {
-      addIfMissing(cat, 1);
+
+  // Count all the categories
+  cards.forEach((integration) => {
+    integration.categories.forEach((cat: string) => {
+      const title = INTEGRATION_CATEGORY_DISPLAY[cat as IntegrationCategory]
+        ? INTEGRATION_CATEGORY_DISPLAY[cat as IntegrationCategory]
+        : cat;
+      addIfMissing(cat, 1, title);
     });
   });
 
-  merged.sort((a, b) => {
+  const filledFacets = facets.filter((facet) => {
+    return facet.count > 0;
+  });
+
+  filledFacets.sort((a, b) => {
     return a.id.localeCompare(b.id);
   });
 
-  return merged;
+  return filledFacets;
 }

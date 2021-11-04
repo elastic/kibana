@@ -14,7 +14,16 @@ export {
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
 } from './constants';
 export type { IFieldType, IIndexPatternFieldList } from './fields';
-export { isFilterable, isNestedField, fieldList, DataViewField, IndexPatternField } from './fields';
+export {
+  isFilterable,
+  fieldList,
+  DataViewField,
+  IndexPatternField,
+  isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
+} from './fields';
 export type {
   FieldFormatMap,
   RuntimeType,
@@ -46,13 +55,10 @@ export type {
   SourceFilter,
 } from './types';
 export { DataViewType, IndexPatternType } from './types';
-export {
-  IndexPatternsService,
-  IndexPatternsContract,
-  DataViewsService,
-  DataViewsContract,
-} from './data_views';
-export { IndexPattern, IndexPatternListItem, DataView, DataViewListItem } from './data_views';
+export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export { IndexPatternsService, DataViewsService } from './data_views';
+export type { IndexPatternListItem, DataViewListItem } from './data_views';
+export { IndexPattern, DataView } from './data_views';
 export { DuplicateDataViewError, DataViewSavedObjectConflictError } from './errors';
 export type {
   IndexPatternExpressionType,

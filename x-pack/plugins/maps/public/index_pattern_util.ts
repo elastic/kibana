@@ -98,7 +98,6 @@ export function supportsGeoTileAgg(field?: IndexPatternField): boolean {
 export function getSourceFields(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.
-    const isMultiField = field.subType && field.subType.multi;
-    return !isMultiField && !indexPatterns.isNestedField(field);
+    return !field.isSubtypeMulti() && !field.isSubtypeNested();
   });
 }

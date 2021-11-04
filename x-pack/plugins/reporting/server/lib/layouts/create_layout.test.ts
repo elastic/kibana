@@ -32,6 +32,8 @@ describe('Create Layout', () => {
         "selectors": Object {
           "itemsCountAttribute": "data-shared-items-count",
           "renderComplete": "[data-shared-item]",
+          "renderError": "[data-render-error]",
+          "renderErrorAttribute": "data-render-error",
           "screenshot": "[data-shared-items-container]",
           "timefilterDurationAttribute": "data-shared-timefilter-duration",
         },
@@ -63,10 +65,16 @@ describe('Create Layout', () => {
         "selectors": Object {
           "itemsCountAttribute": "data-shared-items-count",
           "renderComplete": "[data-shared-item]",
+          "renderError": "[data-render-error]",
+          "renderErrorAttribute": "data-render-error",
           "screenshot": "[data-shared-item]",
           "timefilterDurationAttribute": "data-shared-timefilter-duration",
         },
         "useReportingBranding": true,
+        "viewport": Object {
+          "height": 1200,
+          "width": 1950,
+        },
       }
     `);
   });
@@ -87,6 +95,8 @@ describe('Create Layout', () => {
         "selectors": Object {
           "itemsCountAttribute": "data-shared-items-count",
           "renderComplete": "[data-shared-item]",
+          "renderError": "[data-render-error]",
+          "renderErrorAttribute": "data-render-error",
           "screenshot": "[data-shared-items-container]",
           "timefilterDurationAttribute": "data-shared-timefilter-duration",
         },

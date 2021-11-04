@@ -36,6 +36,11 @@ describe('TelemetryEventsSender', () => {
           event: {
             kind: 'alert',
           },
+          dns: {
+            question: {
+              name: 'test-dns',
+            },
+          },
           agent: {
             name: 'test',
           },
@@ -79,6 +84,7 @@ describe('TelemetryEventsSender', () => {
             nope: 'nope',
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
+            entity_id: 'some_entity_id',
           },
           Responses: '{ "result": 0 }', // >= 7.15
           Target: {
@@ -101,6 +107,11 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+          },
+          dns: {
+            question: {
+              name: 'test-dns',
+            },
           },
           agent: {
             name: 'test',
@@ -139,6 +150,7 @@ describe('TelemetryEventsSender', () => {
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
+            entity_id: 'some_entity_id',
           },
           Responses: '{ "result": 0 }',
           Target: {

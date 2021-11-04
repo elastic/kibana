@@ -26,9 +26,9 @@
             "signature": [
               "(indexPattern: ",
               {
-                "pluginId": "data",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibDataDataViewsPluginApi",
+                "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPattern",
                 "text": "IndexPattern"
               },
@@ -48,9 +48,9 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "dataViews",
                     "scope": "common",
-                    "docId": "kibDataDataViewsPluginApi",
+                    "docId": "kibDataViewsPluginApi",
                     "section": "def-common.IndexPattern",
                     "text": "IndexPattern"
                   }

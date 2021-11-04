@@ -491,6 +491,52 @@ describe('#rawToSavedObject', () => {
       expect(actual).toHaveProperty('namespaces', ['baz']);
     });
   });
+
+  describe('throws if provided invalid type', () => {
+    expect(() =>
+      singleNamespaceSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          // @ts-expect-error expects a string
+          // eslint-disable-next-line
+          type: new String('foo'),
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Expected saved object type to be a string but given [String] with [foo] value."`
+    );
+
+    expect(() =>
+      singleNamespaceSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          // @ts-expect-error expects astring
+          type: {
+            toString() {
+              return 'foo';
+            },
+          },
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Expected saved object type to be a string but given [Object] with [foo] value."`
+    );
+  });
+
+  describe('throws if provided invalid id', () => {
+    expect(() =>
+      singleNamespaceSerializer.rawToSavedObject({
+        // @ts-expect-error expects a string
+        // eslint-disable-next-line
+        _id: new String('foo:bar'),
+        _source: {
+          type: 'foo',
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Expected document id to be a string but given [String] with [foo:bar] value."`
+    );
+  });
 });
 
 describe('#savedObjectToRaw', () => {

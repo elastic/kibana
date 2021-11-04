@@ -19,6 +19,7 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getSessionStorage } from './lib/storage';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
@@ -36,7 +37,7 @@ import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { pluginServiceRegistry } from './services/kibana';
 
-export { CoreStart, CoreSetup };
+export type { CoreStart, CoreSetup };
 
 /**
  * These are the private interfaces for the services your plugin depends on.
@@ -62,6 +63,7 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**

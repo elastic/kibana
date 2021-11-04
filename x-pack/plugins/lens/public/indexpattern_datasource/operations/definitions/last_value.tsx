@@ -206,7 +206,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       newField &&
         newField.type === column.dataType &&
         !newField.aggregationRestrictions &&
-        newTimeField?.type === 'date'
+        newTimeField?.type === 'date' &&
+        supportedTypes.has(newField.type)
     );
   },
 
