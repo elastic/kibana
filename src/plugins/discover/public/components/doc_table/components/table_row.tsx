@@ -88,7 +88,7 @@ export const TableRow = ({
     return (
       // formatFieldValue always returns sanitized HTML
       // eslint-disable-next-line react/no-danger
-      <div className="truncate-by-height" dangerouslySetInnerHTML={{ __html: formattedField }} />
+      <div className="dscTruncateByHeight" dangerouslySetInnerHTML={{ __html: formattedField }} />
     );
   };
   const inlineFilter = useCallback(
