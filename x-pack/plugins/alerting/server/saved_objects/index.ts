@@ -24,7 +24,6 @@ export { partiallyUpdateAlert } from './partially_update_alert';
 
 export const AlertAttributesExcludedFromAAD = [
   'scheduledTaskId',
-  'taskId',
   'muteAll',
   'mutedInstanceIds',
   'updatedBy',
@@ -38,7 +37,6 @@ export const AlertAttributesExcludedFromAAD = [
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
 export type AlertAttributesExcludedFromAADType =
   | 'scheduledTaskId'
-  | 'taskId'
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'updatedBy'

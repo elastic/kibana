@@ -66,7 +66,6 @@ export interface Alert<Params extends AlertTypeParams = never> {
   schedule: IntervalSchedule;
   actions: AlertAction[];
   params: Params;
-  taskId?: string;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
@@ -81,10 +80,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   executionStatus: AlertExecutionStatus;
 }
 
-export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<
-  Alert<Params>,
-  'apiKey' | 'taskId'
->;
+export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
 export type ResolvedSanitizedRule<Params extends AlertTypeParams = never> = SanitizedAlert<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 

@@ -7,10 +7,10 @@
 
 import Semver from 'semver';
 import Boom from '@hapi/boom';
+import uuidv5 from 'uuid/v5';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import uuid from 'uuid';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -332,10 +332,14 @@ export class RulesClient {
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
+    // Create a taskId and assign it to this rule
+    const taskId = generateTaskId(this.namespace, id);
+
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       legacyId,
+      taskId,
       actions,
       createdBy: username,
       updatedBy: username,
@@ -376,8 +380,6 @@ export class RulesClient {
       );
       throw e;
     }
-    // Create a taskId and assign it to this rule
-    createdAlert.attributes.taskId = uuid.v4();
     if (data.enabled) {
       let scheduledTask;
       try {
@@ -385,7 +387,7 @@ export class RulesClient {
           createdAlert.id,
           rawAlert.alertTypeId,
           data.schedule,
-          createdAlert.attributes.taskId
+          taskId
         );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
@@ -401,10 +403,8 @@ export class RulesClient {
       }
       await this.unsecuredSavedObjectsClient.update<RawAlert>('alert', createdAlert.id, {
         scheduledTaskId: scheduledTask.id,
-        taskId: scheduledTask.id,
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
-      createdAlert.attributes.taskId = scheduledTask.id;
     }
     return this.getAlertFromRaw<Params>(
       createdAlert.id,
@@ -1678,7 +1678,7 @@ export class RulesClient {
       notifyWhen,
       legacyId,
       scheduledTaskId,
-      taskId,
+      taskId, // exclude from result because it is an internal variable
       params,
       executionStatus,
       schedule,
@@ -1911,4 +1911,9 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   }
 
   return parsedDate;
+}
+
+function generateTaskId(namespace: string | undefined, id: string) {
+  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+  return uuidv5(`${namespaceString}:alert:${id}`, uuidv5.DNS); // The uuidv5 namespace constant (uuidv5.DNS) is arbitrary.
 }
