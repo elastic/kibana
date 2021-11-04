@@ -9,7 +9,7 @@
 /*
 @TODO
 
-The brace/mode/json import below is loaded eagerly - before this plugin is explicitly loaded by users. This makes
+The react-ace and brace/mode/json imports below are loaded eagerly - before this plugin is explicitly loaded by users. This makes
 the brace JSON mode, used for JSON syntax highlighting and grammar checking, available across all of Kibana plugins.
 
 This is not ideal because we are loading JS that is not necessary for Kibana to start, but the alternative
@@ -19,6 +19,7 @@ EuiCodeEditor (for instance, explicitly).
 Importing here is a way of preventing a more sophisticated solution to this problem since we want to, eventually,
 migrate all code editors over to Monaco. Once that is done, we should remove this import.
  */
+import 'react-ace';
 import 'brace/mode/json';
 
 export * from './field';
