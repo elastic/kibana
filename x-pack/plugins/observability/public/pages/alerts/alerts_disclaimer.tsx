@@ -29,10 +29,9 @@ export function AlertsDisclaimer() {
     !experimentalMsgAck && (
       <EuiCallOut
         title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-          defaultMessage: 'Alert history is currently an experimental feature within observability',
+          defaultMessage: 'Alert history is currently an experimental feature within Observability',
         })}
         color="warning"
-        iconType="beaker"
       >
         <FormattedMessage
           id="xpack.observability.alertsDisclaimerText"
@@ -49,7 +48,7 @@ export function AlertsDisclaimer() {
         />
 
         <EuiSpacer size="l" />
-        <EuiButton fill color="warning" onClick={dismissMessage} tabIndex={0}>
+        <EuiButton color="warning" onClick={dismissMessage} tabIndex={0}>
           {i18n.translate('xpack.observability.alertsDisclaimerDismissMessage', {
             defaultMessage: 'Dismiss message',
           })}
