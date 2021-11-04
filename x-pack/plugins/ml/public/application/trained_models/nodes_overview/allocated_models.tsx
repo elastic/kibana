@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { FC } from 'react';
-import { EuiInMemoryTable } from '@elastic/eui';
+import { EuiBadge, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import type {
@@ -101,7 +101,13 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({ models }) => {
       width: '100px',
       'data-test-subj': 'mlAllocatedModelsTableRoutingState',
       render: (v: AllocatedModel) => {
-        return v.node.routing_state.routing_state;
+        const { routing_state: routingState, reason } = v.node.routing_state;
+
+        return (
+          <EuiToolTip content={reason ? reason : ''}>
+            <EuiBadge color={reason ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
+          </EuiToolTip>
+        );
       },
     },
   ];
