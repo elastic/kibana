@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+export type { Props as ComponentTemplateDetailsProps } from './component_template_details';
 export {
   ComponentTemplateDetailsFlyoutContent,
   defaultFlyoutProps,
-  Props as ComponentTemplateDetailsProps,
 } from './component_template_details';

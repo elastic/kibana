@@ -68,7 +68,7 @@ describe('When migrating artifacts to fleet', () => {
         }),
         _index: '.fleet-artifacts-7',
         _id: `endpoint:endpoint-exceptionlist-macos-v1-${
-          // @ts-ignore
+          // @ts-expect-error TS2339
           props?.body?.decodedSha256 ?? 'UNKNOWN?'
         }`,
         _version: 1,
