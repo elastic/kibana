@@ -14,6 +14,7 @@ import { pairwise, startWith } from 'rxjs/operators';
 import { InternalChromeStart } from '../chrome';
 import { InternalApplicationStart } from '../application';
 import { OverlayStart } from '../overlays';
+import { ThemeServiceStart, CoreThemeProvider } from '../theme';
 import { AppWrapper } from './app_containers';
 
 interface StartDeps {
@@ -21,6 +22,7 @@ interface StartDeps {
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
+  theme: ThemeServiceStart;
 }
 
 /**
@@ -32,7 +34,7 @@ interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, overlays, targetDomElement }: StartDeps) {
+  start({ application, chrome, overlays, theme, targetDomElement }: StartDeps) {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
@@ -48,22 +50,24 @@ export class RenderingService {
 
     ReactDOM.render(
       <I18nProvider>
-        <>
-          {/* Fixed headers */}
-          {chromeHeader}
+        <CoreThemeProvider theme$={theme.theme$}>
+          <>
+            {/* Fixed headers */}
+            {chromeHeader}
 
-          {/* banners$.subscribe() for things like the No data banner */}
-          <div id="globalBannerList">{bannerComponent}</div>
+            {/* banners$.subscribe() for things like the No data banner */}
+            <div id="globalBannerList">{bannerComponent}</div>
 
-          {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
-            {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-            <div id="app-fixed-viewport" />
+            {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
+            <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
+              {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
+              <div id="app-fixed-viewport" />
 
-            {/* The actual plugin/app */}
-            {appComponent}
-          </AppWrapper>
-        </>
+              {/* The actual plugin/app */}
+              {appComponent}
+            </AppWrapper>
+          </>
+        </CoreThemeProvider>
       </I18nProvider>,
       targetDomElement
     );

@@ -179,6 +179,7 @@ export class CoreSystem {
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
+      const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
@@ -237,6 +238,7 @@ export class CoreSystem {
         application,
         chrome,
         overlays,
+        theme,
         targetDomElement: coreUiTargetDomElement,
       });
 

@@ -8,3 +8,4 @@
 
 export { wrapWithTheme } from './wrap_with_theme';
 export { KibanaThemeProvider } from './kibana_theme_provider';
+export type { EuiTheme } from './types';

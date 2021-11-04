@@ -21,3 +21,10 @@ export interface CoreTheme {
 export interface ThemeServiceSetup {
   theme$: Observable<CoreTheme>;
 }
+
+/**
+ * @public
+ */
+export interface ThemeServiceStart {
+  theme$: Observable<CoreTheme>;
+}
