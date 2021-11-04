@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { SignalSourceHit } from '../../../signals/types';
-import { ALERT_THRESHOLD_RESULT } from '../../field_maps/field_names';
 import { RACAlert } from '../../types';
 
 export const filterSource = (doc: SignalSourceHit): Partial<RACAlert> => {
