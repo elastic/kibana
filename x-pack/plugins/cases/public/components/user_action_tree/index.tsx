@@ -672,7 +672,7 @@ export const UserActionTree = React.memo(
           return prevManageMarkdownEditIds;
         });
 
-        const ref = commentRefs?.current[draftComment.commentId];
+        const ref = commentRefs?.current?.[draftComment.commentId];
 
         if (isAddCommentRef(ref) && ref.editor?.textarea) {
           ref.setComment(draftComment.comment);
