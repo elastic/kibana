@@ -13,6 +13,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings']);
   const config = getService('config');
   const log = getService('log');
+  const retry = getService('retry');
+  const toasts = getService('toasts');
+  const browser = getService('browser');
 
   describe('users', function () {
     before(async () => {
@@ -114,6 +117,105 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(roles.monitoring_user.reserved).to.be(true);
       expect(roles.monitoring_user.deprecated).to.be(false);
+    });
+
+    describe('edit', function () {
+      before(async () => {
+        await PageObjects.security.clickElasticsearchUsers();
+      });
+
+      describe('update user profile', () => {
+        it('when submitting form and redirects back', async () => {
+          const user = {
+            username: 'OptionalUser',
+            full_name: 'Optional User',
+            email: 'optionalUser@elastic.co',
+            roles: [],
+          };
+          await PageObjects.security.updateUser(user);
+          const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+
+          expect(users.OptionalUser.roles).to.eql(['']);
+          expect(users.OptionalUser.fullname).to.eql(user.full_name);
+          expect(users.OptionalUser.email).to.eql(user.email);
+          expect(users.OptionalUser.reserved).to.be(false);
+          expect(await browser.getCurrentUrl()).to.contain('app/management/security/users');
+        });
+      });
+
+      describe('change password', () => {
+        before(async () => {
+          await toasts.dismissAllToasts();
+        });
+        afterEach(async () => {
+          await PageObjects.security.submitUpdateUserForm();
+          await toasts.dismissAllToasts();
+        });
+        it('of other user when submitting form', async () => {
+          const user = {
+            username: 'OptionalUser',
+            new_password: 'NewOptionalUserPwd',
+            confirm_password: 'NewOptionalUserPwd',
+            roles: [],
+          };
+          await PageObjects.security.updateUserPassword(user);
+          await retry.waitFor('', async () => {
+            const toastCount = await toasts.getToastCount();
+            return toastCount >= 1;
+          });
+          const succesToast = await toasts.getToastElement(1);
+          expect(await succesToast.getVisibleText()).to.be("Password changed for 'OptionalUser'.");
+        });
+
+        it('of current user when submitting form', async () => {
+          const user = {
+            username: 'test_user',
+            password: 'changeme',
+            new_password: 'changeme',
+            confirm_password: 'changeme',
+            roles: [],
+          };
+          await PageObjects.security.updateUserPassword(user, true);
+          await retry.waitFor('', async () => {
+            const toastCount = await toasts.getToastCount();
+            return toastCount >= 1;
+          });
+          const succesToast = await toasts.getToastElement(1);
+          expect(await succesToast.getVisibleText()).to.be("Password changed for 'test_user'.");
+        });
+      });
+
+      describe('Deactivate/Activate user', () => {
+        const user = {
+          username: 'OptionalUser',
+          roles: [],
+        };
+
+        it('deactivates user when confirming', async () => {
+          await PageObjects.security.deactivatesUser(user);
+          const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+          expect(users.OptionalUser.enabled).to.be(false);
+        });
+
+        it('activates user when confirming', async () => {
+          await PageObjects.security.activatesUser(user);
+          const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+          expect(users.OptionalUser.enabled).to.be(true);
+        });
+      });
+
+      describe('Delete user', () => {
+        const user = {
+          username: 'OptionalUser',
+          roles: [],
+        };
+        it('when confirming and closes dialog', async () => {
+          await PageObjects.security.deleteUser(user.username);
+          const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+          expect(users).to.not.have.key(user.username);
+          expect(await browser.getCurrentUrl()).to.contain('app/management/security/users');
+        });
+      });
     });
   });
 }

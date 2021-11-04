@@ -246,7 +246,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               </EuiDescriptionList>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setAction('enableUser')} size="s">
+              <EuiButton
+                onClick={() => setAction('enableUser')}
+                size="s"
+                data-test-subj="editUserEnableUserButton"
+              >
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.enableUserButton"
                   defaultMessage="Activate user"
@@ -275,7 +279,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               </EuiDescriptionList>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setAction('disableUser')} size="s">
+              <EuiButton
+                onClick={() => setAction('disableUser')}
+                size="s"
+                data-test-subj="editUserDisableUserButton"
+              >
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.disableUserButton"
                   defaultMessage="Deactivate user"
@@ -308,7 +316,12 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 </EuiDescriptionList>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => setAction('deleteUser')} size="s" color="danger">
+                <EuiButton
+                  onClick={() => setAction('deleteUser')}
+                  size="s"
+                  color="danger"
+                  data-test-subj="editUserDeleteUserButton"
+                >
                   <FormattedMessage
                     id="xpack.security.management.users.editUserPage.deleteUserButton"
                     defaultMessage="Delete user"

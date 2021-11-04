@@ -43,6 +43,7 @@ export interface UserFormValues {
   username?: string;
   full_name?: string;
   email?: string;
+  new_password?: string;
   password?: string;
   confirm_password?: string;
   roles: readonly string[];
