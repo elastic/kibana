@@ -196,6 +196,7 @@ export class CoreSystem {
       const notifications = await this.notifications.start({
         i18n,
         overlays,
+        theme,
         targetDomElement: notificationsTargetDomElement,
       });
       const application = await this.application.start({ http, overlays });

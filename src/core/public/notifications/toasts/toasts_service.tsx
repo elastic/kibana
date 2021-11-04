@@ -14,6 +14,7 @@ import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi, IToasts } from './toasts_api';
 import { OverlayStart } from '../../overlays';
+import { ThemeServiceStart, CoreThemeProvider } from '../../theme';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;
@@ -22,6 +23,7 @@ interface SetupDeps {
 interface StartDeps {
   i18n: I18nStart;
   overlays: OverlayStart;
+  theme: ThemeServiceStart;
   targetDomElement: HTMLElement;
 }
 
@@ -46,16 +48,18 @@ export class ToastsService {
     return this.api!;
   }
 
-  public start({ i18n, overlays, targetDomElement }: StartDeps) {
+  public start({ i18n, overlays, theme, targetDomElement }: StartDeps) {
     this.api!.start({ overlays, i18n });
     this.targetDomElement = targetDomElement;
 
     render(
       <i18n.Context>
-        <GlobalToastList
-          dismissToast={(toastId: string) => this.api!.remove(toastId)}
-          toasts$={this.api!.get$()}
-        />
+        <CoreThemeProvider theme$={theme.theme$}>
+          <GlobalToastList
+            dismissToast={(toastId: string) => this.api!.remove(toastId)}
+            toasts$={this.api!.get$()}
+          />
+        </CoreThemeProvider>
       </i18n.Context>,
       targetDomElement
     );
