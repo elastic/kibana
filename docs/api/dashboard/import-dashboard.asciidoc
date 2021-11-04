@@ -6,7 +6,7 @@
 
 deprecated::[7.15.0,Use <<saved-objects-api-import>> instead.]
 
-experimental[] Import dashboards and corresponding saved objects.
+Import dashboards and corresponding saved objects.
 
 [[dashboard-api-import-request]]
 ==== Request
