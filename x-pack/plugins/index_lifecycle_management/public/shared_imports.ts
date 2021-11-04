@@ -8,10 +8,7 @@
 import { AppServicesContext } from './types';
 import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
 
-export {
-  useForm,
-  useFormData,
-  Form,
+export type {
   FormHook,
   FieldHook,
   FormData,
@@ -19,11 +16,16 @@ export {
   FieldConfig,
   OnFormUpdateArg,
   ValidationFunc,
-  getFieldValidityAndErrorMessage,
-  useFormContext,
   FormSchema,
   ValidationConfig,
   ValidationError,
+} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+export {
+  useForm,
+  useFormData,
+  Form,
+  getFieldValidityAndErrorMessage,
+  useFormContext,
   UseMultiFields,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
