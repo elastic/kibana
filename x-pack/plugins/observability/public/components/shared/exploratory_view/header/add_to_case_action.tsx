@@ -32,8 +32,8 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
     [http.basePath]
   );
 
-  const absoluteFromDate = parseRelativeDate(timeRange.from)!;
-  const absoluteToDate = parseRelativeDate(timeRange.to, { roundUp: true })!;
+  const absoluteFromDate = parseRelativeDate(timeRange.from);
+  const absoluteToDate = parseRelativeDate(timeRange.to, { roundUp: true });
 
   const { createCaseUrl, goToCreateCase, onCaseClicked, isCasesOpen, setIsCasesOpen, isSaving } =
     useAddToCase({
