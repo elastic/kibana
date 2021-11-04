@@ -35,24 +35,22 @@ describe('Errors table', () => {
     cy.loginAsReadOnlyUser();
   });
 
-  describe('when navigating to the service overview', () => {
-    it('errors table is populated', () => {
-      cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-java');
-      cy.contains('[MockError] Foo');
-    });
+  it('errors table is populated', () => {
+    cy.visit(serviceOverviewHref);
+    cy.contains('opbeans-java');
+    cy.contains('[MockError] Foo');
+  });
 
-    it('navigates to the errors page', () => {
-      cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-java');
-      cy.contains('a', 'View errors').click();
-      cy.url().should('include', '/opbeans-java/errors');
-    });
+  it('navigates to the errors page', () => {
+    cy.visit(serviceOverviewHref);
+    cy.contains('opbeans-java');
+    cy.contains('a', 'View errors').click();
+    cy.url().should('include', '/opbeans-java/errors');
+  });
 
-    it('navigates to error detail page', () => {
-      cy.visit(serviceOverviewHref);
-      cy.contains('a', '[MockError] Foo').click();
-      cy.contains('div', 'Exception message');
-    });
+  it('navigates to error detail page', () => {
+    cy.visit(serviceOverviewHref);
+    cy.contains('a', '[MockError] Foo').click();
+    cy.contains('div', 'Exception message');
   });
 });
