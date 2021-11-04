@@ -27,7 +27,6 @@ interface FleetStatus extends FleetStatusState {
 const FleetStatusContext = React.createContext<FleetStatus | undefined>(undefined);
 
 export const FleetStatusProvider: React.FC = ({ children }) => {
-  console.log('Fleet status provider');
   const config = useConfig();
   const [state, setState] = useState<FleetStatusState>({
     enabled: config.agents.enabled,
@@ -38,11 +37,8 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
     async function sendGetStatus() {
       try {
         setState((s) => ({ ...s, isLoading: true }));
-        console.log('try to get status');
         const res = await sendGetFleetStatus();
-        console.log('got status', res);
         if (res.error) {
-          console.log('THROW', res.error);
           throw res.error;
         }
 
@@ -53,7 +49,6 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
           missingRequirements: res.data?.missing_requirements,
         }));
       } catch (error) {
-        console.log('foobar error', error);
         setState((s) => ({ ...s, isLoading: false, error }));
       }
     },

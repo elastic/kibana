@@ -100,7 +100,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
-    console.log('FLEET CONFIG!!!', this.config);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 

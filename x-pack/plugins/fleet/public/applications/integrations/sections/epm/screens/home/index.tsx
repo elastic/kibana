@@ -88,7 +88,6 @@ export const mapToCard = (
 };
 
 export const EPMHomePage: React.FC = memo(() => {
-  console.log('EPM home page');
   return (
     <Switch>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
