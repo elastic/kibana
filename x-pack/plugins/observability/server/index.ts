@@ -32,8 +32,8 @@ export const config: PluginConfigDescriptor = {
       index: schema.string({ defaultValue: 'observability-annotations' }),
     }),
     unsafe: schema.object({
-      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-      cases: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+      cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
     }),
   }),
 };
@@ -43,11 +43,5 @@ export type ObservabilityConfig = TypeOf<typeof config.schema>;
 export const plugin = (initContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initContext);
 
-export {
-  createOrUpdateIndex,
-  Mappings,
-  ObservabilityPluginSetup,
-  ScopedAnnotationsClient,
-  unwrapEsResponse,
-  WrappedElasticsearchClientError,
-};
+export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
+export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };

@@ -11,7 +11,7 @@ export const pretty = (x) => JSON.stringify(x, null, 2);
 export const buildUrl = ({ protocol, auth, hostname, port }) =>
   new URL(`${protocol}://${auth}@${hostname}:${port}`);
 export const putWatcher = async (watch, id, body, client, log) => {
-  const putWatchResponse = await client.watcher.putWatch({ ...watch, body });
+  const putWatchResponse = await client.watcher.putWatch({ ...watch, body }, { meta: true });
   log.debug(`# putWatchResponse \n${pretty(putWatchResponse)}`);
   expect(putWatchResponse.body._id).to.eql(id);
   expect(putWatchResponse.statusCode).to.eql('201');
@@ -26,7 +26,7 @@ export const getWatcher = async (watch, id, client, log, common, tryForTime) => 
 
       await watcherHistory(id, client, log);
 
-      const getWatchResponse = await client.watcher.getWatch(watch);
+      const getWatchResponse = await client.watcher.getWatch(watch, { meta: true });
       log.debug(`\n getWatchResponse: ${JSON.stringify(getWatchResponse)}`);
       expect(getWatchResponse.body._id).to.eql(id);
       expect(getWatchResponse.body._version).to.be.above(1);
@@ -44,14 +44,14 @@ export const getWatcher = async (watch, id, client, log, common, tryForTime) => 
   );
 };
 export const deleteWatcher = async (watch, id, client, log) => {
-  const deleteResponse = await client.watcher.deleteWatch(watch);
+  const deleteResponse = await client.watcher.deleteWatch(watch, { meta: true });
   log.debug('\nDelete Response=' + pretty(deleteResponse) + '\n');
   expect(deleteResponse.body._id).to.eql(id);
   expect(deleteResponse.body.found).to.eql(true);
   expect(deleteResponse.statusCode).to.eql('200');
 };
 async function watcherHistory(watchId, client, log) {
-  const { body } = await client.search({
+  const body = await client.search({
     index: '.watcher-history*',
     body: {
       query: {

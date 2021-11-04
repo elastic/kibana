@@ -63,7 +63,7 @@ import { INITIAL_LOCATION } from '../../common/constants';
 import { updateTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
-import { expandToTileBoundaries } from '../../common/geo_tile_utils';
+import { expandToTileBoundaries } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
 
 export function setMapInitError(errorMessage: string) {
@@ -171,7 +171,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
     if (prevZoom !== nextZoom) {
       getLayerList(getState()).map((layer) => {
         if (!layer.showAtZoomLevel(nextZoom)) {
-          dispatch(updateTooltipStateForLayer(layer.getId()));
+          dispatch(updateTooltipStateForLayer(layer));
         }
       });
     }

@@ -531,6 +531,7 @@ describe('xy_expression', () => {
         onClickValue,
         onSelectRange,
         syncColors: false,
+        useLegacyTimeAxis: false,
       };
     });
 
@@ -1443,6 +1444,40 @@ describe('xy_expression', () => {
           },
         ],
       });
+    });
+
+    test('sets up correct yScaleType equal to binary_linear for bytes formatting', () => {
+      const { args, data } = sampleArgs();
+      data.tables.first.columns[0].meta = {
+        type: 'number',
+        params: { id: 'bytes', params: { pattern: '0,0.00b' } },
+      };
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'line',
+                xAccessor: 'd',
+                accessors: ['a', 'b'],
+                columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+                xScaleType: 'ordinal',
+                yScaleType: 'linear',
+                isHistogram: false,
+                palette: mockPaletteOutput,
+              },
+            ],
+          }}
+        />
+      );
+
+      expect(wrapper.find(LineSeries).at(0).prop('yScaleType')).toEqual('linear_binary');
     });
 
     test('allowBrushingLastHistogramBin should be fakse for ordinal data', () => {
