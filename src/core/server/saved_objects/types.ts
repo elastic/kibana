@@ -12,6 +12,7 @@ import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { SavedObjectsExportTransform } from './export';
 import { SavedObjectsImportHook } from './import/types';
+import { SavedObjectsValidationMap } from './validation';
 
 export type {
   SavedObjectsImportResponse,
@@ -28,7 +29,7 @@ export type {
   SavedObjectsImportWarning,
 } from './import/types';
 
-import { SavedObject } from '../../types';
+import { SavedObject, SavedObjectAttributes } from '../../types';
 import { ElasticsearchClient } from '../elasticsearch';
 
 type KueryNode = any;
@@ -250,11 +251,9 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 /**
- * @remarks This is only internal for now, and will only be public when we expose the registerType API
- *
  * @public
  */
-export interface SavedObjectsType<Attributes = any> {
+export interface SavedObjectsType<Attributes extends SavedObjectAttributes = any> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -291,6 +290,14 @@ export interface SavedObjectsType<Attributes = any> {
    * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
    */
   migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
+  /**
+   * An optional schema that can be used to validate the attributes of the type.
+   *
+   * When provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.
+   *
+   * See {@link SavedObjectsValidationMap} for more details.
+   */
+  schemas?: SavedObjectsValidationMap<Attributes> | (() => SavedObjectsValidationMap<Attributes>);
   /**
    * If defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this
    * version.

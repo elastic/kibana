@@ -63,6 +63,7 @@ import {
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
+import { SavedObjectsTypeValidator } from '../../validation';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
@@ -363,7 +364,15 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     });
 
-    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
+    /**
+     * If a validation has been registered for this type, we run it against the migrated attributes.
+     * This is an imperfect solution because malformed attributes could have already caused the
+     * migration to fail, but it's the best we can do without devising a way to run validations
+     * inside the migration algorithm itself.
+     */
+    this.validateObjectAttributes<T>(type, migrated as SavedObjectSanitizedDoc<T>);
+
+    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
     const requestParams = {
       id: raw._id,
@@ -514,22 +523,41 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      const migrated = this._migrator.migrateDocument({
+        id: object.id,
+        type: object.type,
+        attributes: object.attributes,
+        migrationVersion: object.migrationVersion,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+        updated_at: time,
+        references: object.references || [],
+        originId: object.originId,
+      }) as SavedObjectSanitizedDoc<T>;
+
+      /**
+       * If a validation has been registered for this type, we run it against the migrated attributes.
+       * This is an imperfect solution because malformed attributes could have already caused the
+       * migration to fail, but it's the best we can do without devising a way to run validations
+       * inside the migration algorithm itself.
+       */
+      try {
+        this.validateObjectAttributes<T>(object.type, migrated);
+      } catch (error) {
+        return {
+          tag: 'Left',
+          value: {
+            id: object.id,
+            type: object.type,
+            error,
+          },
+        };
+      }
+
       const expectedResult = {
         esRequestIndex: bulkRequestIndexCounter++,
         requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(
-          this._migrator.migrateDocument({
-            id: object.id,
-            type: object.type,
-            attributes: object.attributes,
-            migrationVersion: object.migrationVersion,
-            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-            updated_at: time,
-            references: object.references || [],
-            originId: object.originId,
-          }) as SavedObjectSanitizedDoc
-        ),
+        rawMigratedDoc: this._serializer.savedObjectToRaw(migrated),
       };
 
       bulkCreateParams.push(
@@ -2194,6 +2222,25 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"namespaces" can only specify a single space when used with space-isolated types'
       );
+    }
+  }
+
+  /** Validate a migrated doc against the registered saved object type's schema. */
+  private validateObjectAttributes<T>(type: string, doc: SavedObjectSanitizedDoc<T>) {
+    const savedObjectType = this._registry.getType(type);
+    if (!savedObjectType?.schemas) {
+      return;
+    }
+
+    const validator = new SavedObjectsTypeValidator({
+      type,
+      validationMap: savedObjectType.schemas,
+    });
+
+    try {
+      validator.validate(this._migrator.kibanaVersion, doc.attributes);
+    } catch (error) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
   }
 }
