@@ -45,6 +45,16 @@ export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) =>
   throw createError(formatErrors(errors).join('\n'));
 };
 
+export class CustomBadRequestError extends Error {
+  readonly statusCode: number = 400;
+  constructor(message: string) {
+    super(message);
+    this.name = 'CustomBadRequestError';
+    this.message = message;
+  }
+  public get = () => this;
+}
+
 export const getReadables = (dataPath: string): Promise<Readable> =>
   new Promise((resolved, reject) => {
     const contents: string[] = [];

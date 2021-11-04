@@ -19,6 +19,7 @@ import { RulesClient } from '../../../../../alerting/server';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 import { RuleParams } from '../schemas/rule_schemas';
+import { CustomBadRequestError } from '../../timeline/utils/common';
 
 export interface OutputError {
   message: string;
@@ -104,10 +105,10 @@ export const transformBulkError = (
   ruleId: string,
   err: Error & { statusCode?: number }
 ): BulkError => {
-  if (Boom.isBoom(err)) {
+  if (err instanceof CustomBadRequestError) {
     return createBulkErrorObject({
       ruleId,
-      statusCode: err.output.statusCode,
+      statusCode: err.statusCode,
       message: err.message,
     });
   } else if (err instanceof BadRequestError) {
