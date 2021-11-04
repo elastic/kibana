@@ -38,7 +38,6 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -66,6 +65,7 @@ import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
+import { translates } from "./translates"
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
@@ -89,7 +89,7 @@ interface ObservabilityActionsProps extends ActionProps {
 
 const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thContent ${className}`,
-}))<{ textAlign?: string; width?: number }>`
+})) <{ textAlign?: string; width?: number }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
@@ -113,39 +113,31 @@ const EventsThContent = styled.div.attrs(({ className = '' }) => ({
 export const columns: Array<
   Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
 > = [
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
-      defaultMessage: 'Alert Status',
-    }),
-    id: ALERT_STATUS,
-    initialWidth: 110,
-  },
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.lastUpdatedColumnDescription', {
-      defaultMessage: 'Last updated',
-    }),
-    id: TIMESTAMP,
-    initialWidth: 230,
-  },
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.durationColumnDescription', {
-      defaultMessage: 'Duration',
-    }),
-    id: ALERT_DURATION,
-    initialWidth: 116,
-  },
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.reasonColumnDescription', {
-      defaultMessage: 'Reason',
-    }),
-    id: ALERT_REASON,
-    linkField: '*',
-  },
-];
+    {
+      columnHeaderType: 'not-filtered',
+      displayAsText: translates.statusColumnDescription,
+      id: ALERT_STATUS,
+      initialWidth: 110,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      displayAsText: translates.lastUpdatedColumnDescription,
+      id: TIMESTAMP,
+      initialWidth: 230,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      displayAsText: translates.durationColumnDescription,
+      id: ALERT_DURATION,
+      initialWidth: 116,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      displayAsText: translates.reasonColumnDescription,
+      id: ALERT_REASON,
+      linkField: '*',
+    },
+  ];
 
 const NO_ROW_RENDER: RowRenderer[] = [];
 
@@ -231,91 +223,76 @@ function ObservabilityActions({
     return [
       ...(casePermissions?.crud
         ? [
-            timelines.getAddToExistingCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            }),
-            timelines.getAddToNewCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            }),
-          ]
+          timelines.getAddToExistingCaseButton({
+            event,
+            casePermissions,
+            appId: observabilityFeatureId,
+            onClose: afterCaseSelection,
+          }),
+          timelines.getAddToNewCaseButton({
+            event,
+            casePermissions,
+            appId: observabilityFeatureId,
+            onClose: afterCaseSelection,
+          }),
+        ]
         : []),
       ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
-  const viewDetailsTextLabel = i18n.translate(
-    'xpack.observability.alertsTable.viewDetailsTextLabel',
-    {
-      defaultMessage: 'View details',
-    }
-  );
-  const viewInAppTextLabel = i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
-    defaultMessage: 'View in app',
-  });
-  const moreActionsTextLabel = i18n.translate(
-    'xpack.observability.alertsTable.moreActionsTextLabel',
-    {
-      defaultMessage: 'More actions',
-    }
-  );
+  const actionsToolTip = actionsMenuItems.length <= 0 ? translates.notEnoughPermissions : translates.moreActionsTextLabel
 
   return (
     <>
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
-          <EuiToolTip content={viewDetailsTextLabel}>
+          <EuiToolTip content={translates.viewDetailsTextLabel}>
             <EuiButtonIcon
               size="s"
               iconType="expand"
               color="text"
               onClick={() => setFlyoutAlert(alert)}
               data-test-subj="openFlyoutButton"
-              aria-label={viewDetailsTextLabel}
+              aria-label={translates.viewDetailsTextLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiToolTip content={viewInAppTextLabel}>
+          <EuiToolTip content={translates.viewInAppTextLabel}>
             <EuiButtonIcon
               size="s"
               href={prepend(alert.link ?? '')}
               iconType="eye"
               color="text"
-              aria-label={viewInAppTextLabel}
+              aria-label={translates.viewInAppTextLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
-        {actionsMenuItems.length > 0 && (
-          <EuiFlexItem>
-            <EuiPopover
-              button={
-                <EuiToolTip content={moreActionsTextLabel}>
-                  <EuiButtonIcon
-                    display="empty"
-                    size="s"
-                    color="text"
-                    iconType="boxesHorizontal"
-                    aria-label={moreActionsTextLabel}
-                    onClick={() => toggleActionsPopover(eventId)}
-                    data-test-subj="alerts-table-row-action-more"
-                  />
-                </EuiToolTip>
-              }
-              isOpen={openActionsPopoverId === eventId}
-              closePopover={closeActionsPopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenuPanel size="s" items={actionsMenuItems} />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <EuiPopover
+            button={
+              <EuiToolTip content={actionsToolTip}>
+                <EuiButtonIcon
+                  display="empty"
+                  disabled={actionsMenuItems.length <= 0}
+                  size="s"
+                  color="text"
+                  iconType="boxesHorizontal"
+                  aria-label={actionsToolTip}
+                  onClick={() => toggleActionsPopover(eventId)}
+                  data-test-subj="alerts-table-row-action-more"
+                />
+              </EuiToolTip>
+            }
+            isOpen={openActionsPopoverId === eventId}
+            closePopover={closeActionsPopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+          </EuiPopover>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
@@ -365,9 +342,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         headerCellRender: () => {
           return (
             <EventsThContent>
-              {i18n.translate('xpack.observability.alertsTable.actionsTextLabel', {
-                defaultMessage: 'Actions',
-              })}
+              {translates.actionsTextLabel}
             </EventsThContent>
           );
         },
@@ -400,12 +375,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       hasAlertsCrudPermissions,
       indexNames,
       itemsPerPageOptions: [10, 25, 50],
-      loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
-        defaultMessage: 'loading alerts',
-      }),
-      footerText: i18n.translate('xpack.observability.alertsTable.footerTextLabel', {
-        defaultMessage: 'alerts',
-      }),
+      loadingText: translates.loadingTextLabel,
+      footerText: translates.footerTextLabel,
       query: {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
@@ -424,11 +395,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filterStatus: workflowStatus as AlertWorkflowStatus,
       leadingControlColumns,
       trailingControlColumns,
-      unit: (totalAlerts: number) =>
-        i18n.translate('xpack.observability.alertsTable.showingAlertsTitle', {
-          values: { totalAlerts },
-          defaultMessage: '{totalAlerts, plural, =1 {alert} other {alerts}}',
-        }),
+      unit: (totalAlerts: number) => translates.showingAlertsTitle(totalAlerts)
+      ,
     };
   }, [
     casePermissions,
@@ -443,6 +411,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     leadingControlColumns,
     deletedEventIds,
   ]);
+
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
