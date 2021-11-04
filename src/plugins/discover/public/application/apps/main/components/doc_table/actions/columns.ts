@@ -102,12 +102,13 @@ export function getStateColumnActions({
     setAppState({ columns });
   }
 
-  function onSetColumns(columns: string[]) {
-    // remove first element of columns if it's the configured timeFieldName, which is prepended automatically
+  function onSetColumns(columns: string[], hideTimeColumn: boolean) {
+    // The next line should gone when classic table will be removed
     const actualColumns =
-      indexPattern.timeFieldName && indexPattern.timeFieldName === columns[0]
+      !hideTimeColumn && indexPattern.timeFieldName && indexPattern.timeFieldName === columns[0]
         ? columns.slice(1)
         : columns;
+
     setAppState({ columns: actualColumns });
   }
   return {

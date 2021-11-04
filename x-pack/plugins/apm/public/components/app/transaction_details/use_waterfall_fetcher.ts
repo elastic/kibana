@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -19,7 +19,7 @@ const INITIAL_DATA = {
 };
 
 export function useWaterfallFetcher() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { traceId, transactionId } = urlParams;
 
   const {

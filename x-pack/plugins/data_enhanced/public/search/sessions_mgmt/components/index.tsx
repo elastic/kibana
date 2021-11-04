@@ -9,7 +9,8 @@ import { EuiLinkProps, EuiText, EuiTextProps } from '@elastic/eui';
 import React from 'react';
 import extendSessionIcon from '../icons/extend_session.svg';
 
-export { OnActionComplete, PopoverActionsMenu } from './actions';
+export type { OnActionComplete } from './actions';
+export { PopoverActionsMenu } from './actions';
 
 export const TableText = ({ children, ...props }: EuiTextProps) => {
   return (

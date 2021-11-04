@@ -37,7 +37,7 @@ changes to Upgrade Assistant itself, please tag Team:Elasticsearch UI.
 
 **Are there any edge cases?**
 
-**[For Kibana deprecations] Can the change be registered with the [Kibana deprecation service](https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.deprecationsservicesetup.md)?**
+**[For Kibana deprecations] Can the change be registered with the [Kibana deprecation service](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.deprecationsservicesetup.md)?**
 
 <!-- The deprecation service is consumed by the Upgrade Assistant to surface Kibana deprecations.
   It provides a way for Kibana deprecations to be resolved automatically via an API
