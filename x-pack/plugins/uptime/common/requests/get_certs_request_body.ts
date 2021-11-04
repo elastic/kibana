@@ -42,6 +42,7 @@ export const getCertsRequestBody = ({
     body: {
       from: pageIndex * size,
       size,
+      // @ts-expect-error direction is not a string, but a union of literals
       sort: asMutableArray([
         {
           [sort]: {
@@ -178,6 +179,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       common_name: commonName,
     };
   });
+  // @ts-expect-error aggregations is unknown
   const total = result.aggregations?.total?.value ?? 0;
   return { certs, total };
 };

@@ -41,6 +41,7 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
       const {
         body: { has_all_requested: hasAllPrivileges, cluster },
       } = await clusterClient.asCurrentUser.security.hasPrivileges({
+        // @ts-expect-error SecurityClusterPrivilege doesn't contain all possible priviledges
         body: { cluster: APP_CLUSTER_REQUIRED_PRIVILEGES },
       });
 
