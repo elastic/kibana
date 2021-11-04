@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @typescript-eslint/no-shadow */
+
 import {
   pointInTimeFinderMock,
   mockCollectMultiNamespaceReferences,
@@ -17,6 +19,7 @@ import {
   mockDeleteLegacyUrlAliases,
 } from './repository.test.mock';
 
+import { SavedObjectsType, SavedObject, SavedObjectReference } from '../../types';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -32,6 +35,7 @@ import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { SavedObjectsCreateOptions, SavedObjectsUpdateOptions } from '../saved_objects_client';
 
 const { nodeTypes } = esKuery;
 
@@ -40,22 +44,27 @@ jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-const createBadRequestError = (...args) =>
-  SavedObjectsErrorHelpers.createBadRequestError(...args).output.payload;
-const createConflictError = (...args) =>
-  SavedObjectsErrorHelpers.createConflictError(...args).output.payload;
-const createGenericNotFoundError = (...args) =>
-  SavedObjectsErrorHelpers.createGenericNotFoundError(...args).output.payload;
-const createUnsupportedTypeError = (...args) =>
-  SavedObjectsErrorHelpers.createUnsupportedTypeError(...args).output.payload;
+interface TypeIdTuple {
+  id: string;
+  type: string;
+}
+
+const createBadRequestError = (reason?: string) =>
+  SavedObjectsErrorHelpers.createBadRequestError(reason).output.payload;
+const createConflictError = (type: string, id: string, reason?: string) =>
+  SavedObjectsErrorHelpers.createConflictError(type, id, reason).output.payload;
+const createGenericNotFoundError = (type: string | null = null, id: string | null = null) =>
+  SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload;
+const createUnsupportedTypeError = (type: string) =>
+  SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload;
 
 describe('SavedObjectsRepository', () => {
-  let client;
-  let savedObjectsRepository;
-  let migrator;
-  let logger;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  let savedObjectsRepository: SavedObjectsRepository;
+  let migrator: ReturnType<typeof mockKibanaMigrator.create>;
+  let logger: ReturnType<typeof loggerMock.create>;
+  let serializer: jest.Mocked<SavedObjectsSerializer>;
 
-  let serializer;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
   const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
@@ -152,52 +161,59 @@ describe('SavedObjectsRepository', () => {
     },
   };
 
-  const createType = (type) => ({
+  const createType = (type: string, parts: Partial<SavedObjectsType> = {}): SavedObjectsType => ({
     name: type,
+    hidden: false,
+    namespaceType: 'single',
     mappings: { properties: mappings.properties[type].properties },
     migrations: { '1.1.1': (doc) => doc },
+    ...parts,
   });
 
   const registry = new SavedObjectTypeRegistry();
   registry.registerType(createType('config'));
   registry.registerType(createType('index-pattern'));
   registry.registerType(createType('dashboard'));
-  registry.registerType({
-    ...createType(CUSTOM_INDEX_TYPE),
-    indexPattern: 'custom',
-  });
-  registry.registerType({
-    ...createType(NAMESPACE_AGNOSTIC_TYPE),
-    namespaceType: 'agnostic',
-  });
-  registry.registerType({
-    ...createType(MULTI_NAMESPACE_TYPE),
-    namespaceType: 'multiple',
-  });
-  registry.registerType({
-    ...createType(MULTI_NAMESPACE_ISOLATED_TYPE),
-    namespaceType: 'multiple-isolated',
-  });
-  registry.registerType({
-    ...createType(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE),
-    namespaceType: 'multiple',
-    indexPattern: 'custom',
-  });
-  registry.registerType({
-    ...createType(HIDDEN_TYPE),
-    hidden: true,
-    namespaceType: 'agnostic',
-  });
+  registry.registerType(createType(CUSTOM_INDEX_TYPE, { indexPattern: 'custom' }));
+  registry.registerType(createType(NAMESPACE_AGNOSTIC_TYPE, { namespaceType: 'agnostic' }));
+  registry.registerType(createType(MULTI_NAMESPACE_TYPE, { namespaceType: 'multiple' }));
+  registry.registerType(
+    createType(MULTI_NAMESPACE_ISOLATED_TYPE, { namespaceType: 'multiple-isolated' })
+  );
+  registry.registerType(
+    createType(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, {
+      namespaceType: 'multiple',
+      indexPattern: 'custom',
+    })
+  );
+  registry.registerType(
+    createType(HIDDEN_TYPE, {
+      hidden: true,
+      namespaceType: 'agnostic',
+    })
+  );
 
   const documentMigrator = new DocumentMigrator({
     typeRegistry: registry,
     kibanaVersion: KIBANA_VERSION,
-    log: {},
+    log: loggerMock.create(),
   });
 
   const getMockGetResponse = (
-    { type, id, references, namespace: objectNamespace, originId },
-    namespace
+    {
+      type,
+      id,
+      references,
+      namespace: objectNamespace,
+      originId,
+    }: {
+      type: string;
+      id: string;
+      namespace?: string;
+      originId?: string;
+      references?: SavedObjectReference[];
+    },
+    namespace?: string | string[]
   ) => {
     let namespaces;
     if (objectNamespace) {
@@ -229,7 +245,7 @@ describe('SavedObjectsRepository', () => {
     };
   };
 
-  const getMockMgetResponse = (objects, namespace) => ({
+  const getMockMgetResponse = (objects, namespace?: string) => ({
     docs: objects.map((obj) =>
       obj.found === false ? obj : getMockGetResponse(obj, obj.initialNamespaces ?? namespace)
     ),
@@ -244,18 +260,27 @@ describe('SavedObjectsRepository', () => {
       }
     },
   });
-  const expectSuccess = ({ type, id }) => expect.toBeDocumentWithoutError(type, id);
-  const expectError = ({ type, id }) => ({ type, id, error: expect.any(Object) });
-  const expectErrorResult = ({ type, id }, error, overrides = {}) => ({
+  const expectSuccess = ({ type, id }: { type: string; id: string }) =>
+    expect.toBeDocumentWithoutError(type, id);
+  const expectError = ({ type, id }: { type: string; id: string }) => ({
+    type,
+    id,
+    error: expect.any(Object),
+  });
+  const expectErrorResult = (
+    { type, id }: TypeIdTuple,
+    error: Record<string, any>,
+    overrides = {}
+  ) => ({
     type,
     id,
     error: { ...error, ...overrides },
   });
-  const expectErrorNotFound = (obj, overrides) =>
+  const expectErrorNotFound = (obj: TypeIdTuple, overrides) =>
     expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id), overrides);
-  const expectErrorConflict = (obj, overrides) =>
+  const expectErrorConflict = (obj: TypeIdTuple, overrides) =>
     expectErrorResult(obj, createConflictError(obj.type, obj.id), overrides);
-  const expectErrorInvalidType = (obj, overrides) =>
+  const expectErrorInvalidType = (obj: TypeIdTuple, overrides) =>
     expectErrorResult(obj, createUnsupportedTypeError(obj.type, obj.id), overrides);
 
   const expectMigrationArgs = (args, contains = true, n = 1) => {
@@ -358,7 +383,7 @@ describe('SavedObjectsRepository', () => {
       };
     };
 
-    const bulkCreateSuccess = async (objects, options) => {
+    const bulkCreateSuccess = async (objects, options?: SavedObjectsCreateOptions) => {
       const response = getMockBulkCreateResponse(objects, options?.namespace);
       client.bulk.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(response)
@@ -391,7 +416,14 @@ describe('SavedObjectsRepository', () => {
       );
     };
 
-    const expectObjArgs = ({ type, attributes, references }, overrides) => [
+    const expectObjArgs = (
+      {
+        type,
+        attributes,
+        references,
+      }: { type: string; attributes: unknown; references?: SavedObjectReference[] },
+      overrides
+    ) => [
       expect.any(Object),
       expect.objectContaining({
         [type]: attributes,
@@ -622,7 +654,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't add namespaces to request body for any types that are not multi-namespace`, async () => {
-        const test = async (namespace) => {
+        const test = async (namespace?: string) => {
           const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const expected = expect.not.objectContaining({ namespaces: expect.anything() });
@@ -755,7 +787,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`returns error when initialNamespaces is used with a space-isolated object and does not specify a single space`, async () => {
-        const doTest = async (objType, initialNamespaces) => {
+        const doTest = async (objType: string, initialNamespaces: string[]) => {
           const obj = { ...obj3, type: objType, initialNamespaces };
           await bulkCreateError(
             obj,
@@ -1906,9 +1938,12 @@ describe('SavedObjectsRepository', () => {
       },
     ];
 
-    const createSuccess = async (type, attributes, options) => {
-      const result = await savedObjectsRepository.create(type, attributes, options);
-      return result;
+    const createSuccess = async <T>(
+      type: string,
+      attributes: T,
+      options?: SavedObjectsCreateOptions
+    ) => {
+      return await savedObjectsRepository.create(type, attributes, options);
     };
 
     describe('client calls', () => {
@@ -4072,7 +4107,13 @@ describe('SavedObjectsRepository', () => {
       );
     };
 
-    const updateSuccess = async (type, id, attributes, options, internalOptions = {}) => {
+    const updateSuccess = async <T>(
+      type: string,
+      id: string,
+      attributes: T,
+      options?: SavedObjectsUpdateOptions,
+      internalOptions = {}
+    ) => {
       const { mockGetResponseValue, includeOriginId } = internalOptions;
       if (registry.isMultiNamespace(type)) {
         const mockGetResponse =
