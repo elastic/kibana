@@ -65,12 +65,13 @@ function getColorStyling(
     return {};
   }
 
-  const { continuity = 'above', rangeMin, rangeMax, stops, colors } = palette.params;
+  const { continuity = 'above', rangeMin, stops, colors } = palette.params;
+  const penultimateStop = stops[stops.length - 2];
 
-  if (continuity === 'none' && (value < rangeMin || value > rangeMax)) {
+  if (continuity === 'none' && (value < rangeMin || value > penultimateStop)) {
     return {};
   }
-  if (continuity === 'below' && value > rangeMax) {
+  if (continuity === 'below' && value > penultimateStop) {
     return {};
   }
   if (continuity === 'above' && value < rangeMin) {
@@ -83,7 +84,7 @@ function getColorStyling(
   if (['all', 'below'].includes(continuity) && value < rangeMin) {
     colorIndex = 0;
   }
-  if (['all', 'above'].includes(continuity) && value > rangeMax) {
+  if (['all', 'above'].includes(continuity) && value > penultimateStop) {
     colorIndex = stops.length - 1;
   }
 

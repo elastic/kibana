@@ -12,10 +12,10 @@ import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { ColorMode, PaletteRegistry } from 'src/plugins/charts/public';
+import { ColorMode, PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { act } from 'react-dom/test-utils';
 import { CustomizablePalette, PalettePanelContainer } from '../shared_components';
-import { layerTypes } from '../../common';
+import { CustomPaletteParams, layerTypes } from '../../common';
 import { MetricState } from '../../common/expressions';
 
 // mocking random id generator function
@@ -30,6 +30,14 @@ jest.mock('@elastic/eui', () => {
     },
   };
 });
+
+function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParams>['params']) {
+  return expect.objectContaining({
+    palette: expect.objectContaining({
+      params: expect.objectContaining(paramsToCheck),
+    }),
+  });
+}
 
 describe('metric dimension editor', () => {
   let frame: FramePublicAPI;
@@ -137,12 +145,8 @@ describe('metric dimension editor', () => {
     instance.update();
 
     expect(props.setState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        palette: expect.objectContaining({
-          params: expect.objectContaining({
-            stops: expect.any(Array), // shallow check it's ok
-          }),
-        }),
+      paletteParamsContaining({
+        stops: expect.any(Array), // shallow check it's ok
       })
     );
   });
@@ -197,32 +201,24 @@ describe('metric dimension editor', () => {
     expect(instance.find(CustomizablePalette).prop('dataBounds')).toEqual({ min: -2, max: 0 });
   });
 
-  it('should preserve custom stops when computing data range', () => {
+  it('should apply an initial range with shifted stops (first stop === rangeMin)', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     frame.activeData!.first.rows[0].foo = 5;
-    state.colorMode = ColorMode.Background;
-    state.palette = {
-      type: 'palette',
-      name: 'custom',
-      params: {
-        steps: 2,
-        stops: undefined,
-        colorStops: [
-          { stop: -1, color: 'blue' },
-          { stop: 100, color: 'red' },
-        ],
-      },
-    };
+    state.colorMode = ColorMode.None;
+    state.palette = undefined;
     const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
 
     act(() => {
       instance
-        .find('[data-test-subj="lnsMetric_dynamicColoring_trigger"]')
-        .first()
-        .simulate('click');
+        .find('[data-test-subj="lnsMetric_dynamicColoring_groups"]')
+        .find(EuiButtonGroup)
+        .prop('onChange')!(ColorMode.Background);
     });
-    instance.update();
 
-    expect(instance.find(CustomizablePalette).prop('dataBounds')).toEqual({ min: -1, max: 100 });
+    expect(setState).toHaveBeenCalledWith(
+      paletteParamsContaining({
+        stops: expect.arrayContaining([]),
+      })
+    );
   });
 });

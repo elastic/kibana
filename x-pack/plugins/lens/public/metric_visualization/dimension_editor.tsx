@@ -22,7 +22,6 @@ import {
   applyPaletteParams,
   CustomizablePalette,
   FIXED_PROGRESSION,
-  getStopsForFixedMode,
   PalettePanelContainer,
 } from '../shared_components';
 import type { VisualizationDimensionEditorProps } from '../types';
@@ -67,16 +66,6 @@ export function MetricDimensionEditor(
     },
   };
 
-  // overwrite the artifical computed min/max with the custom stops if provided
-  if (activePalette?.params?.colorStops) {
-    const customStops = activePalette.params.colorStops;
-    if (customStops[0].stop != null) {
-      currentMinMax.min = customStops[0].stop;
-    }
-    if (customStops[customStops.length - 1].stop != null) {
-      currentMinMax.max = customStops[customStops.length - 1].stop;
-    }
-  }
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
@@ -131,7 +120,13 @@ export function MetricDimensionEditor(
                 ...activePalette,
                 params: {
                   ...activePalette.params,
-                  stops: displayStops,
+                  // align this initial computation with same format for default
+                  // palettes in the panel. This to avoid custom computation issue with metric
+                  // fake data range
+                  stops: displayStops.map((v, i, array) => ({
+                    ...v,
+                    stop: i === 0 ? currentMinMax.min : array[i - 1].stop,
+                  })),
                 },
               };
             }
@@ -164,10 +159,7 @@ export function MetricDimensionEditor(
             <EuiFlexItem>
               <EuiColorPaletteDisplay
                 data-test-subj="lnsMetric_dynamicColoring_palette"
-                palette={getStopsForFixedMode(
-                  activePalette.params?.stops || displayStops,
-                  activePalette.params?.colorStops
-                )}
+                palette={(activePalette.params?.stops || displayStops).map(({ color }) => color)}
                 type={FIXED_PROGRESSION}
                 onClick={() => {
                   setIsPaletteOpen(!isPaletteOpen);

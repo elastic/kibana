@@ -17,7 +17,7 @@ import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import type { MetricConfig, MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
-import { CUSTOM_PALETTE } from '../shared_components';
+import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 
 const toExpression = (
@@ -34,11 +34,15 @@ const toExpression = (
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
   const stops = state.palette?.params?.stops || [];
+  const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
 
   const paletteParams = {
     ...state.palette?.params,
     colors: stops.map(({ color }) => color),
-    stops: stops.map(({ stop }) => stop),
+    stops:
+      isCustomPalette || state.palette?.params?.rangeMax == null
+        ? stops.map(({ stop }) => stop)
+        : shiftPalette(stops, state.palette?.params?.rangeMax).map(({ stop }) => stop),
     reverse: false,
   };
 

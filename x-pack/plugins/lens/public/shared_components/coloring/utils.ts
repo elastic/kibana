@@ -54,7 +54,7 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
 }
 
 // Need to shift the Custom palette in order to correctly visualize it when in display mode
-function shiftPalette(stops: ColorStop[], max: number) {
+export function shiftPalette(stops: ColorStop[], max: number) {
   // shift everything right and add an additional stop at the end
   const result = stops.map((entry, i, array) => ({
     ...entry,

@@ -27,7 +27,10 @@ function getCustomPaletteConfig(
   if (activePalette && activePalette.name !== CUSTOM_PALETTE) {
     const currentPalette = palettes.get(activePalette.name);
     if (currentPalette) {
-      const stops = currentPalette.getCategoricalColors(DEFAULT_COLOR_STEPS, activePalette?.params);
+      const stops = currentPalette.getCategoricalColors(
+        activePalette?.params?.steps || DEFAULT_COLOR_STEPS,
+        activePalette?.params
+      );
       const palette = activePalette.params?.reverse ? stops.reverse() : stops;
       return {
         value: id,
