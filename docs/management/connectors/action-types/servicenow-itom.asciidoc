@@ -10,7 +10,7 @@ The ServiceNow ITOM connector uses the https://docs.servicenow.com/bundle/rome-i
 [float]
 [[servicenow-itom-connector-prerequisites]]
 === Prerequisites
-After upgrading to 7.16, you must create an integration user in ServiceNow and assign it the `personalize_choices` and `evt_mgmt_integration` roles before creating a new ServiceNow ITOM connector.
+After upgrading to 7.16, you must create an integration user in ServiceNow and assign it the `personalize_choices` and `evt_mgmt_integration` roles.
 
 [float]
 [[servicenow-itom-connector-configuration]]
