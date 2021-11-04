@@ -89,7 +89,7 @@ export const REENTER_OAUTH_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterOAuthValuesLabel',
   {
     defaultMessage:
-      'Username, password, client ID and client secret are encrypted. Please reenter values for these fields.',
+      'Private key, private key password and client secret are encrypted. Please reenter values for these fields.',
   }
 );
 
@@ -118,6 +118,13 @@ export const CLIENTSECRET_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientSecretTextFieldLabel',
   {
     defaultMessage: 'Client Secret',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyPassTextFieldLabel',
+  {
+    defaultMessage: 'Private Key Password',
   }
 );
 
@@ -160,6 +167,13 @@ export const PRIVATE_KEY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyTextField',
   {
     defaultMessage: 'Private Key is required.',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyPasswordTextField',
+  {
+    defaultMessage: 'Private Key Password is required.',
   }
 );
 

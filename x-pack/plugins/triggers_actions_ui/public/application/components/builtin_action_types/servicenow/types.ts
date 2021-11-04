@@ -40,6 +40,7 @@ export interface ServiceNowSecrets {
   password?: string;
   clientSecret?: string;
   privateKey?: string;
+  privateKeyPassword?: string;
 }
 
 export interface Choice {

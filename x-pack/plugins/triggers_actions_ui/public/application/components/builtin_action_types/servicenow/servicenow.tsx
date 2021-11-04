@@ -36,6 +36,7 @@ const validateConnector = (
     password: new Array<string>(),
     clientSecret: new Array<string>(),
     privateKey: new Array<string>(),
+    privateKeyPassword: new Array<string>(),
   };
 
   const validationResult = {
@@ -73,6 +74,13 @@ const validateConnector = (
 
   if (action.config.isOAuth && !action.secrets.privateKey) {
     secretsErrors.privateKey = [...secretsErrors.privateKey, i18n.PRIVATE_KEY_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.secrets.privateKeyPassword) {
+    secretsErrors.privateKeyPassword = [
+      ...secretsErrors.privateKeyPassword,
+      i18n.PRIVATE_KEY_PASSWORD_REQUIRED,
+    ];
   }
 
   if (action.config.isOAuth && !action.config.userEmail) {

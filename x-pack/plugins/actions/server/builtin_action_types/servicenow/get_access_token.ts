@@ -27,12 +27,20 @@ export async function getAccessToken(
   keyId: string,
   privateKey: string,
   userEmail: string,
+  privateKeyPassword: string,
   serviceNowBaseUrl: string
 ): Promise<OAuthJWTTokenResponse> {
   const oauthTokenUrl = `${serviceNowBaseUrl}/oauth_token.do`;
   const axiosInstance = axios.create();
 
-  const assertion = await createJWTToken(logger, clientId, privateKey, userEmail, keyId);
+  const assertion = await createJWTToken(
+    logger,
+    clientId,
+    privateKey,
+    userEmail,
+    keyId,
+    privateKeyPassword
+  );
   try {
     const res = await request({
       headers: {
@@ -66,7 +74,8 @@ export async function createJWTToken(
   clientId: string,
   privateKey: string,
   userEmail: string,
-  keyId: string
+  keyId: string,
+  privateKeyPassword: string
 ): Promise<string> {
   const iat = Math.floor(Date.now() / 1000);
 
@@ -85,7 +94,7 @@ export async function createJWTToken(
       JSON.stringify(payloadObj),
       {
         key: privateKey,
-        passphrase: '123456',
+        passphrase: privateKeyPassword,
       },
       headerObj
     );

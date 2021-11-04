@@ -37,7 +37,7 @@ const ServiceNowConnectorFields: React.FC<
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
 
-  const { username, password, clientSecret, privateKey } = action.secrets;
+  const { username, password, clientSecret, privateKey, privateKeyPassword } = action.secrets;
 
   const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
@@ -47,6 +47,8 @@ const ServiceNowConnectorFields: React.FC<
   const isClientSecretInvalid: boolean =
     errors.clientSecret.length > 0 && clientSecret !== undefined;
   const isPrivateKeyInvalid: boolean = errors.privateKey.length > 0 && privateKey !== undefined;
+  const isPrivateKeyPasswordInvalid: boolean =
+    errors.privateKeyPassword.length > 0 && privateKeyPassword !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
@@ -110,8 +112,15 @@ const ServiceNowConnectorFields: React.FC<
             onChange={(e) => {
               editActionConfig('isOAuth', e.target.checked);
               if (!e.target.checked) {
-                editActionSecrets('clientId', null);
+                editActionConfig('clientId', null);
+                editActionConfig('userEmail', null);
+                editActionConfig('keyId', null);
                 editActionSecrets('clientSecret', null);
+                editActionSecrets('privateKey', null);
+                editActionSecrets('privateKeyPassword', null);
+              } else {
+                editActionSecrets('username', null);
+                editActionSecrets('password', null);
               }
             }}
           />
@@ -162,7 +171,7 @@ const ServiceNowConnectorFields: React.FC<
                 isInvalid={isClientSecretInvalid}
                 label={i18n.CLIENTSECRET_LABEL}
               >
-                <EuiFieldText
+                <EuiFieldPassword
                   fullWidth
                   isInvalid={isClientSecretInvalid}
                   readOnly={readOnly}
@@ -254,6 +263,35 @@ const ServiceNowConnectorFields: React.FC<
                   onBlur={() => {
                     if (!privateKey) {
                       editActionSecrets('privateKey', '');
+                    }
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="connector-servicenow-private-key-password"
+                fullWidth
+                error={errors.privateKeyPassword}
+                isInvalid={isPrivateKeyPasswordInvalid}
+                label={i18n.PRIVATE_KEY_PASSWORD_LABEL}
+              >
+                <EuiFieldPassword
+                  fullWidth
+                  isInvalid={isPrivateKeyPasswordInvalid}
+                  readOnly={readOnly}
+                  name="connector-servicenow-private-key-password"
+                  value={privateKeyPassword || ''}
+                  data-test-subj="connector-servicenow-private-key-password-form-input"
+                  onChange={(evt) =>
+                    handleOnChangeSecretConfig('privateKeyPassword', evt.target.value)
+                  }
+                  onBlur={() => {
+                    if (!privateKeyPassword) {
+                      editActionSecrets('privateKeyPassword', '');
                     }
                   }}
                 />

@@ -41,13 +41,18 @@ export const createExternalService = (
     privateKey,
     username,
     password,
+    privateKeyPassword,
   } = secrets as ServiceNowSecretConfigurationType;
 
   if (!isOAuth && (!url || !username || !password)) {
     throw Error(`[Action]${i18n.SERVICENOW}: Wrong Basic Auth configuration.`);
   }
 
-  if (isOAuth && (!clientId || !clientSecret || !privateKey || !userEmail || !keyId)) {
+  if (
+    isOAuth &&
+    (!clientId || !clientSecret || !privateKey || !userEmail || !keyId || !privateKeyPassword)
+  ) {
+    // TODO: Provide the list of missing fields
     throw Error(`[Action]${i18n.SERVICENOW}: Wrong OAuth JWT configuration.`);
   }
 
@@ -63,7 +68,15 @@ export const createExternalService = (
     });
   }
 
-  if (isOAuth && clientId && clientSecret && keyId && privateKey && userEmail) {
+  if (
+    isOAuth &&
+    clientId &&
+    clientSecret &&
+    keyId &&
+    privateKey &&
+    userEmail &&
+    privateKeyPassword
+  ) {
     axiosInstance.interceptors.request.use(
       // eslint-disable-next-line @typescript-eslint/no-shadow
       async (config: AxiosRequestConfig) => {
@@ -75,6 +88,7 @@ export const createExternalService = (
           keyId,
           privateKey,
           userEmail,
+          privateKeyPassword,
           urlWithoutTrailingSlash
         );
         config.headers.Authorization = `${tokenResponse.token_type} ${tokenResponse.access_token}`;

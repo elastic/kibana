@@ -24,6 +24,7 @@ export const ExternalIncidentServiceSecretConfiguration = {
   username: schema.maybe(schema.string()),
   privateKey: schema.maybe(schema.string()),
   clientSecret: schema.maybe(schema.string()),
+  privateKeyPassword: schema.maybe(schema.string()),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
