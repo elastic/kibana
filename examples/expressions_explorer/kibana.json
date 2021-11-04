@@ -10,5 +10,5 @@
   },
   "requiredPlugins": ["expressions", "inspector", "uiActions", "developerExamples"],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": ["kibanaReact"]
 }
