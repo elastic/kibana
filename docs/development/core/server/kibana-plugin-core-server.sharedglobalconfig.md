@@ -9,7 +9,7 @@
 
 ```typescript
 export declare type SharedGlobalConfig = RecursiveReadonly<{
-    elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
+    elasticsearch: SharedElasticsearchConfig;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
     savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;

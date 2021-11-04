@@ -224,6 +224,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorageFactory](./kibana-plugin-core-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
 |  [ShardsInfo](./kibana-plugin-core-server.shardsinfo.md) |  |
 |  [ShardsResponse](./kibana-plugin-core-server.shardsresponse.md) |  |
+|  [SharedElasticsearchConfig](./kibana-plugin-core-server.sharedelasticsearchconfig.md) |  |
 |  [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) | API for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status. |
 |  [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |  |

@@ -128,6 +128,9 @@ describe('createPluginInitializerContext', () => {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),
           pingTimeout: duration(30, 's'),
+          ssl: {
+            certificateAuthorityFingerprints: [],
+          },
         },
         path: { data: fromRoot('data') },
         savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },

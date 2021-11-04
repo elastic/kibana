@@ -368,11 +368,20 @@ export const SharedGlobalConfigKeys = {
   savedObjects: ['maxImportPayloadBytes'] as const,
 };
 
+/** @public */
+export interface SharedElasticsearchConfig
+  extends Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]> {
+  ssl: {
+    /** The SHA-256 fingerprints for all configured certificate authorities */
+    certificateAuthorityFingerprints: string[];
+  };
+}
+
 /**
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
-  elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
+  elasticsearch: SharedElasticsearchConfig;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
   savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;

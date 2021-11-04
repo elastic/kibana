@@ -257,6 +257,7 @@ export type {
   PluginManifest,
   PluginName,
   SharedGlobalConfig,
+  SharedElasticsearchConfig,
   MakeUsageFromSchema,
 } from './plugins';
 
