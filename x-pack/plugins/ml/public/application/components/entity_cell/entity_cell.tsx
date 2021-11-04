@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,7 +41,10 @@ function getAddFilter({ entityName, entityValue, filter }: EntityCellProps) {
         <EuiButtonIcon
           size="s"
           className="filter-button"
-          onClick={() => filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.ADD)}
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            (event.target as HTMLButtonElement).blur(); // Remove focus from button so tooltip is hidden on click
+            filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.ADD);
+          }}
           iconType="plusInCircle"
           aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
             defaultMessage: 'Add filter',
@@ -66,7 +69,10 @@ function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
         <EuiButtonIcon
           size="s"
           className="filter-button"
-          onClick={() => filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.REMOVE)}
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            (event.target as HTMLButtonElement).blur(); // Remove focus from button so tooltip is hidden on click
+            filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.REMOVE);
+          }}
           iconType="minusInCircle"
           aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
             defaultMessage: 'Remove filter',

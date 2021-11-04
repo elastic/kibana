@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -41,13 +41,14 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         <EuiButtonIcon
           size="s"
           className="filter-button"
-          onClick={() =>
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            (event.target as HTMLButtonElement).blur(); // Remove focus from button so tooltip is hidden on click
             onFilter({
               influencerFieldName,
               influencerFieldValue,
               action: ENTITY_FIELD_OPERATIONS.ADD,
-            })
-          }
+            });
+          }}
           iconType="plusInCircle"
           aria-label={i18n.translate('xpack.ml.entityFilter.addFilterAriaLabel', {
             defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
@@ -66,13 +67,14 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         <EuiButtonIcon
           size="s"
           className="filter-button"
-          onClick={() =>
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            (event.target as HTMLButtonElement).blur(); // Remove focus from button so tooltip is hidden on click
             onFilter({
               influencerFieldName,
               influencerFieldValue,
               action: ENTITY_FIELD_OPERATIONS.REMOVE,
-            })
-          }
+            });
+          }}
           iconType="minusInCircle"
           aria-label={i18n.translate('xpack.ml.entityFilter.removeFilterAriaLabel', {
             defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',

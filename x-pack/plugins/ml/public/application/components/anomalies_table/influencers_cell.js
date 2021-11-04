@@ -59,13 +59,14 @@ export class InfluencersCell extends Component {
               <EuiButtonIcon
                 size="s"
                 className="filter-button"
-                onClick={() =>
+                onClick={(e) => {
+                  e.target.blur(); // Remove focus from button so tooltip is hidden on click
                   influencerFilter(
                     influencer.influencerFieldName,
                     influencer.influencerFieldValue,
                     '+'
-                  )
-                }
+                  );
+                }}
                 iconType="plusInCircle"
                 aria-label={i18n.translate(
                   'xpack.ml.anomaliesTable.influencersCell.addFilterAriaLabel',
@@ -86,13 +87,14 @@ export class InfluencersCell extends Component {
               <EuiButtonIcon
                 size="s"
                 className="filter-button"
-                onClick={() =>
+                onClick={(e) => {
+                  e.target.blur(); // Remove focus from button so tooltip is hidden on click
                   influencerFilter(
                     influencer.influencerFieldName,
                     influencer.influencerFieldValue,
                     '-'
-                  )
-                }
+                  );
+                }}
                 iconType="minusInCircle"
                 aria-label={i18n.translate(
                   'xpack.ml.anomaliesTable.influencersCell.removeFilterAriaLabel',
