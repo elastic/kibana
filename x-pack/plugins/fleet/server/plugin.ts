@@ -6,7 +6,6 @@
  */
 
 import type { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import type {
   CoreSetup,
   CoreStart,
