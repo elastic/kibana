@@ -7,6 +7,7 @@
  */
 
 import type * as InternalUtils from './internal_utils';
+import type { deleteLegacyUrlAliases } from './legacy_url_aliases';
 
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getBulkOperationError']
@@ -27,3 +28,10 @@ jest.mock('./internal_utils', () => {
     rawDocExistsInNamespace: mockRawDocExistsInNamespace,
   };
 });
+
+export const mockDeleteLegacyUrlAliases = jest.fn() as jest.MockedFunction<
+  typeof deleteLegacyUrlAliases
+>;
+jest.mock('./legacy_url_aliases', () => ({
+  deleteLegacyUrlAliases: mockDeleteLegacyUrlAliases,
+}));
