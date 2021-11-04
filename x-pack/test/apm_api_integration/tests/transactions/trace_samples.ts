@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import qs from 'querystring';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -31,11 +32,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
-        const response = await supertest.get(url);
+        const response: {
+          body: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/traces/samples'>;
+          status: number;
+        } = await supertest.get(url);
 
         expect(response.status).to.be(200);
 
-        expect(response.body.noHits).to.be(true);
         expect(response.body.traceSamples.length).to.be(0);
       });
     }
@@ -45,14 +48,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Transaction trace samples response structure when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      let response: any;
+      let response: {
+        body: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/traces/samples'>;
+        status: number;
+      };
+
       before(async () => {
         response = await supertest.get(url);
       });
 
       it('returns the correct metadata', () => {
         expect(response.status).to.be(200);
-        expect(response.body.noHits).to.be(false);
         expect(response.body.traceSamples.length).to.be.greaterThan(0);
       });
 
