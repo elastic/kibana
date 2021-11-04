@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import type {
   CoreSetup,
   CoreStart,
@@ -20,7 +21,7 @@ import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -86,6 +87,7 @@ import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
+import { setupFleet } from './services/setup';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -335,14 +337,22 @@ export class FleetPlugin
     });
     licenseService.start(this.licensing$);
 
-    const fleetServerSetup = startFleetServerSetup();
-
     this.telemetryEventsSender.start(plugins.telemetry, core);
 
     return {
       fleetSetupCompleted: () =>
-        new Promise<void>((resolve) => {
-          Promise.all([fleetServerSetup]).finally(() => resolve());
+        new Promise<void>(async (resolve, reject) => {
+          try {
+            await startFleetServerSetup();
+            await setupFleet(
+              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.elasticsearch.client.asInternalUser
+            );
+
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
         }),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
