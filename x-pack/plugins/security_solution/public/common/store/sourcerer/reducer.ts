@@ -15,7 +15,7 @@ import {
   setDataView,
   setDataViewLoading,
 } from './actions';
-import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
+import { initDataView, initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
 
 export type SourcererState = SourcererModel;
@@ -41,7 +41,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...defaultDataView,
     },
     kibanaDataViews: kibanaDataViews.map((dataView) => ({
-      ...(kibanaDataViews.find(({ id }) => id === dataView.id) ?? {}),
+      ...(state.kibanaDataViews.find(({ id }) => id === dataView.id) ?? initDataView),
       ...dataView,
     })),
   }))

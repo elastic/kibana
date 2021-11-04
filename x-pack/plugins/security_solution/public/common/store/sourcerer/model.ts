@@ -36,20 +36,10 @@ export interface SourcererScope {
 }
 
 export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
-/**
- * DataView from Kibana + timelines/index_fields enhanced field data
- */
-export interface SourcererDataView {
-  /** we need this for @timestamp data */
-  browserFields: BrowserFields;
-  /** we need this for @timestamp data */
-  docValueFields: DocValueFields[];
+
+export interface KibanaDataView {
   /** Uniquely identifies a Kibana Data View */
   id: string;
-  /** comes from dataView.fields.toSpec() */
-  indexFields: SecuritySolutionDataViewBase['fields'];
-  /** set when data view fields are fetched */
-  loading: boolean;
   /**  list of active patterns that return data  */
   patternList: string[];
   /**
@@ -58,6 +48,20 @@ export interface SourcererDataView {
    * comma separated string
    */
   title: string;
+}
+
+/**
+ * DataView from Kibana + timelines/index_fields enhanced field data
+ */
+export interface SourcererDataView extends KibanaDataView {
+  /** we need this for @timestamp data */
+  browserFields: BrowserFields;
+  /** we need this for @timestamp data */
+  docValueFields: DocValueFields[];
+  /** comes from dataView.fields.toSpec() */
+  indexFields: SecuritySolutionDataViewBase['fields'];
+  /** set when data view fields are fetched */
+  loading: boolean;
   /**
    * Needed to pass to search strategy
    * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
