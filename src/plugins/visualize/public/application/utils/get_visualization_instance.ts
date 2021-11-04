@@ -42,6 +42,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
     searchSessionId: data.search.session.getSessionId(),
+    renderMode: 'edit',
   })) as VisualizeEmbeddableContract;
 
   embeddableHandler.getOutput$().subscribe((output) => {
