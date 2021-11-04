@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import {
   Axis,
-  BarSeries,
+  HistogramBarSeries,
   Chart,
   niceTimeFormatter,
   Position,
@@ -165,7 +165,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
+      .post<FieldStatsResponse<string | number>>(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
             indexPattern,
@@ -178,7 +178,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           fieldName: field.name,
         }),
       })
-      .then((results: FieldStatsResponse<string | number>) => {
+      .then((results) => {
         setState((s) => ({
           ...s,
           isLoading: false,
@@ -636,7 +636,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             showOverlappingTicks={true}
           />
 
-          <BarSeries
+          <HistogramBarSeries
             data={histogram.buckets}
             id={specId}
             xAccessor={'key'}
@@ -664,7 +664,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             tickFormat={(d) => formatter.convert(d)}
           />
 
-          <BarSeries
+          <HistogramBarSeries
             data={histogram.buckets}
             id={specId}
             xAccessor={'key'}

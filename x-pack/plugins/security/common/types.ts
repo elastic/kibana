@@ -19,3 +19,7 @@ export enum LogoutReason {
   'LOGGED_OUT' = 'LOGGED_OUT',
   'UNAUTHENTICATED' = 'UNAUTHENTICATED',
 }
+
+export interface SecurityCheckupState {
+  displayAlert: boolean;
+}

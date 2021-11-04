@@ -641,7 +641,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/index_management/server/config.ts",
         "deprecated": false,
@@ -2313,6 +2313,20 @@
           "\"green\" | \"yellow\" | \"red\""
         ],
         "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.MAJOR_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "MAJOR_VERSION",
+        "description": [],
+        "signature": [
+          "\"8.1.0\""
+        ],
+        "path": "x-pack/plugins/index_management/common/constants/plugin.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

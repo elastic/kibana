@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
@@ -20,7 +20,7 @@ export class CategorizationExamplesLoader {
   private _timeFieldName: string = '';
   private _query: object = {};
 
-  constructor(jobCreator: CategorizationJobCreator, indexPattern: IndexPattern, query: object) {
+  constructor(jobCreator: CategorizationJobCreator, indexPattern: DataView, query: object) {
     this._jobCreator = jobCreator;
     this._indexPatternTitle = indexPattern.title;
     this._query = query;

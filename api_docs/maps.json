@@ -83,11 +83,23 @@
               "() => Partial<",
               "DataFilters",
               " & { applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; fieldNames: string[]; geogridPrecision?: number | undefined; timesliceMaskField?: string | undefined; sourceQuery?: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined; sourceMeta: object | null; isForceRefresh: boolean; } & Pick<",
               "VectorSourceRequestMeta",
               ", \"filters\" | \"query\" | \"searchSessionId\" | \"buffer\" | \"extent\" | \"timeFilters\" | \"timeslice\" | \"zoom\" | \"isReadOnly\" | \"applyGlobalQuery\" | \"applyGlobalTime\" | \"applyForceRefresh\" | \"fieldNames\" | \"timesliceMaskField\" | \"sourceQuery\" | \"sourceMeta\" | \"isForceRefresh\"> & { dynamicStyleFields: string[]; isTimeAware: boolean; sourceQuery: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               "; timeFilters: ",
               {
                 "pluginId": "data",
@@ -614,7 +626,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -851,7 +869,13 @@
             "description": [],
             "signature": [
               "(filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[], actionId?: string) => Promise<void>"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -865,7 +889,13 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "Filter",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
                   "[]"
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -1054,7 +1084,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -1068,7 +1104,13 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -1082,7 +1124,13 @@
             "label": "sourceQuery",
             "description": [],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -1207,6 +1255,21 @@
             "type": "Function",
             "tags": [],
             "label": "getName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IField.getMbFieldName",
+            "type": "Function",
+            "tags": [],
+            "label": "getMbFieldName",
             "description": [],
             "signature": [
               "() => string"
@@ -1450,10 +1513,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IField.supportsAutoDomain",
+            "id": "def-public.IField.supportsFieldMetaFromLocalData",
             "type": "Function",
             "tags": [],
-            "label": "supportsAutoDomain",
+            "label": "supportsFieldMetaFromLocalData",
             "description": [],
             "signature": [
               "() => boolean"
@@ -1465,25 +1528,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IField.supportsFieldMeta",
+            "id": "def-public.IField.supportsFieldMetaFromEs",
             "type": "Function",
             "tags": [],
-            "label": "supportsFieldMeta",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.IField.canReadFromGeoJson",
-            "type": "Function",
-            "tags": [],
-            "label": "canReadFromGeoJson",
+            "label": "supportsFieldMetaFromEs",
             "description": [],
             "signature": [
               "() => boolean"
@@ -1634,7 +1682,13 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]>"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
@@ -1666,6 +1720,21 @@
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.isMvt",
+            "type": "Function",
+            "tags": [],
+            "label": "isMvt",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
           {
             "parentPluginId": "maps",
             "id": "def-public.IVectorSource.getTooltipProperties",
@@ -2321,7 +2390,13 @@
             "description": [],
             "signature": [
               "((filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[], actionId: string) => Promise<void>) | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
@@ -2824,9 +2899,9 @@
           },
           " & { indexPatterns: ",
           {
-            "pluginId": "data",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibDataDataViewsPluginApi",
+            "docId": "kibDataViewsPluginApi",
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
@@ -2866,9 +2941,9 @@
         "label": "SourceEditorArgs",
         "description": [],
         "signature": [
-          "{ onChange: (...args: ",
+          "{ clearJoins: () => void; currentLayerType: string; hasJoins: boolean; onChange: (...args: ",
           "OnSourceChangeArgs",
-          "[]) => void; currentLayerType?: string | undefined; }"
+          "[]) => Promise<void>; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
         "deprecated": false,
@@ -2902,7 +2977,7 @@
               "section": "def-public.LayerWizard",
               "text": "LayerWizard"
             },
-            ") => Promise<void>"
+            ") => void"
           ],
           "path": "x-pack/plugins/maps/public/api/setup_api.ts",
           "deprecated": false,
@@ -2940,7 +3015,7 @@
           "signature": [
             "(entry: ",
             "SourceRegistryEntry",
-            ") => Promise<void>"
+            ") => void"
           ],
           "path": "x-pack/plugins/maps/public/api/setup_api.ts",
           "deprecated": false,
@@ -3224,7 +3299,13 @@
           " & { id: string; indexPatternId: string; geoField?: string | undefined; applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; } & { metrics: ",
           "AggDescriptor",
           "[]; } & { indexPatternTitle?: string | undefined; term: string; whereQuery?: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           " | undefined; size?: number | undefined; type: ",
           {
             "pluginId": "maps",
@@ -3266,7 +3347,13 @@
           " | null; type?: string | undefined; visible?: boolean | undefined; style?: ",
           "StyleDescriptor",
           " | null | undefined; query?: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           " | undefined; includeInFitToBounds?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",

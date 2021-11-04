@@ -24,12 +24,12 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'osqueryLogs',
     name: i18n.translate('home.tutorials.osqueryLogs.nameTitle', {
-      defaultMessage: 'Osquery logs',
+      defaultMessage: 'Osquery Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.osqueryLogs.shortDescription', {
-      defaultMessage: 'Collect osquery logs in JSON format.',
+      defaultMessage: 'Collect and parse logs from Osquery with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.osqueryLogs.longDescription', {
       defaultMessage:

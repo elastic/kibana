@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '../../../../../kibana_react/public';
 import { getFieldTypeName } from './field_type_name';
 import { IndexPatternField } from '../../../../../data/public';
+import { getFieldSubtypeMulti } from '../../../../../data/common';
 
 interface Props {
   fieldName: string;
@@ -34,7 +35,8 @@ export function FieldName({
   const displayName =
     fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
   const tooltip = displayName !== fieldName ? `${fieldName} (${displayName})` : fieldName;
-  const isMultiField = !!fieldMapping?.spec?.subType?.multi;
+  const subTypeMulti = fieldMapping && getFieldSubtypeMulti(fieldMapping.spec);
+  const isMultiField = !!subTypeMulti?.multi;
 
   return (
     <Fragment>

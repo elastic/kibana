@@ -17,11 +17,6 @@ const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
  */
 export interface ICspConfig {
   /**
-   * The CSP rules used for Kibana.
-   */
-  readonly rules: string[];
-
-  /**
    * Specify whether browsers that do not support CSP should be
    * able to use Kibana. Use `true` to block and `false` to allow.
    */
@@ -34,8 +29,7 @@ export interface ICspConfig {
   readonly warnLegacyBrowsers: boolean;
 
   /**
-   * Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled *and* no custom rules have been
-   * defined, a restrictive 'frame-ancestors' rule will be added to the default CSP rules.
+   * Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled, a restrictive 'frame-ancestors' rule will be added to the default CSP rules.
    */
   readonly disableEmbedding: boolean;
 
@@ -54,7 +48,6 @@ export class CspConfig implements ICspConfig {
   static readonly DEFAULT = new CspConfig(DEFAULT_CONFIG);
 
   readonly #directives: CspDirectives;
-  public readonly rules: string[];
   public readonly strict: boolean;
   public readonly warnLegacyBrowsers: boolean;
   public readonly disableEmbedding: boolean;
@@ -66,14 +59,11 @@ export class CspConfig implements ICspConfig {
    */
   constructor(rawCspConfig: CspConfigType) {
     this.#directives = CspDirectives.fromConfig(rawCspConfig);
-    if (!rawCspConfig.rules?.length && rawCspConfig.disableEmbedding) {
+    if (rawCspConfig.disableEmbedding) {
       this.#directives.clearDirectiveValues('frame-ancestors');
       this.#directives.addDirectiveValue('frame-ancestors', `'self'`);
     }
-
-    this.rules = this.#directives.getRules();
     this.header = this.#directives.getCspHeader();
-
     this.strict = rawCspConfig.strict;
     this.warnLegacyBrowsers = rawCspConfig.warnLegacyBrowsers;
     this.disableEmbedding = rawCspConfig.disableEmbedding;

@@ -16,6 +16,8 @@ import {
   CrawlerDomainValidationStep,
   CrawlRequestFromServer,
   CrawlRequest,
+  CrawlRule,
+  CrawlerRules,
   CrawlEventFromServer,
   CrawlEvent,
 } from './types';
@@ -156,6 +158,26 @@ export const getDeleteDomainSuccessMessage = (domainUrl: string) => {
       values: {
         domainUrl,
       },
+    }
+  );
+};
+
+export const getCrawlRulePathPatternTooltip = (crawlRule: CrawlRule) => {
+  if (crawlRule.rule === CrawlerRules.regex) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.regexPathPatternTooltip',
+      {
+        defaultMessage:
+          'The path pattern is a regular expression compatible with the Ruby language regular expression engine.',
+      }
+    );
+  }
+
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.pathPatternTooltip',
+    {
+      defaultMessage:
+        'The path pattern is a literal string except for the asterisk (*) character, which is a meta character that will match anything.',
     }
   );
 };

@@ -20,7 +20,7 @@ export function SpanMetadata({ span }: Props) {
   const { data: spanEvent, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/event_metadata/{processorEvent}/{id}',
+        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
         params: {
           path: {
             processorEvent: ProcessorEvent.span,

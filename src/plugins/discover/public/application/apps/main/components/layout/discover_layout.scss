@@ -4,6 +4,10 @@ discover-app {
   flex-grow: 1;
 }
 
+.dscAppWrapper {
+  overflow-y: hidden;
+}
+
 .dscPage {
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
@@ -78,8 +82,8 @@ discover-app {
 }
 
 .dscHistogram {
-  height: $euiSize * 8;
-  padding: $euiSizeS $euiSizeS $euiSizeS $euiSizeS;
+  height: $euiSize * 7;
+  padding: 0 $euiSizeS $euiSizeS * 2 $euiSizeS;
 }
 
 .dscHistogramTimeRange {

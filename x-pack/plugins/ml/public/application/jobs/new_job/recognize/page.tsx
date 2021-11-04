@@ -92,7 +92,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
   const {
     currentSavedSearch: savedSearch,
-    currentIndexPattern: indexPattern,
+    currentDataView: dataView,
     combinedQuery,
   } = useMlContext();
   const pageTitle =
@@ -101,9 +101,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           defaultMessage: 'saved search {savedSearchTitle}',
           values: { savedSearchTitle: savedSearch.attributes.title as string },
         })
-      : i18n.translate('xpack.ml.newJob.recognize.indexPatternPageTitle', {
-          defaultMessage: 'index pattern {indexPatternTitle}',
-          values: { indexPatternTitle: indexPattern.title },
+      : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
+          defaultMessage: 'data view {dataViewName}',
+          values: { dataViewName: dataView.title },
         });
   const displayQueryWarning = savedSearch !== null;
   const tempQuery = savedSearch === null ? undefined : combinedQuery;
@@ -135,10 +135,10 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     timeRange: TimeRange
   ): Promise<TimeRange> => {
     if (useFullIndexData) {
-      const runtimeMappings = indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
+      const runtimeMappings = dataView.getComputedFields().runtimeFields as RuntimeMappings;
       const { start, end } = await ml.getTimeFieldRange({
-        index: indexPattern.title,
-        timeFieldName: indexPattern.timeFieldName,
+        index: dataView.title,
+        timeFieldName: dataView.timeFieldName,
         query: combinedQuery,
         ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
       });
@@ -178,7 +178,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         moduleId,
         prefix: resultJobPrefix,
         query: tempQuery,
-        indexPatternName: indexPattern.title,
+        indexPatternName: dataView.title,
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
         ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),

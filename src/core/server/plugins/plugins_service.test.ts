@@ -1066,32 +1066,46 @@ describe('PluginsService', () => {
 
   describe('plugin initialization', () => {
     beforeEach(() => {
+      const prebootPlugins = [
+        createPlugin('plugin-1-preboot', {
+          type: PluginType.preboot,
+          path: 'path-1-preboot',
+          version: 'version-1',
+        }),
+        createPlugin('plugin-2-preboot', {
+          type: PluginType.preboot,
+          path: 'path-2-preboot',
+          version: 'version-2',
+        }),
+      ];
+      const standardPlugins = [
+        createPlugin('plugin-1-standard', {
+          path: 'path-1-standard',
+          version: 'version-1',
+        }),
+        createPlugin('plugin-2-standard', {
+          path: 'path-2-standard',
+          version: 'version-2',
+        }),
+      ];
+
+      for (const plugin of [...prebootPlugins, ...standardPlugins]) {
+        jest.doMock(
+          join(plugin.path, 'server'),
+          () => ({
+            config: {
+              schema: schema.object({
+                enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+              }),
+            },
+          }),
+          { virtual: true }
+        );
+      }
+
       mockDiscover.mockReturnValue({
         error$: from([]),
-        plugin$: from([
-          createPlugin('plugin-1-preboot', {
-            type: PluginType.preboot,
-            path: 'path-1-preboot',
-            version: 'version-1',
-            configPath: 'plugin1_preboot',
-          }),
-          createPlugin('plugin-1-standard', {
-            path: 'path-1-standard',
-            version: 'version-1',
-            configPath: 'plugin1_standard',
-          }),
-          createPlugin('plugin-2-preboot', {
-            type: PluginType.preboot,
-            path: 'path-2-preboot',
-            version: 'version-2',
-            configPath: 'plugin2_preboot',
-          }),
-          createPlugin('plugin-2-standard', {
-            path: 'path-2-standard',
-            version: 'version-2',
-            configPath: 'plugin2_standard',
-          }),
-        ]),
+        plugin$: from([...prebootPlugins, ...standardPlugins]),
       });
 
       prebootMockPluginSystem.uiPlugins.mockReturnValue(new Map());

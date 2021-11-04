@@ -21,14 +21,14 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('ClusterConfigurationForm', () => {
   jest.setTimeout(20_000);
 
-  it('calls enrollment API when submitting form', async () => {
+  it('calls enrollment API for https addresses when submitting form', async () => {
     const coreStart = coreMock.createStart();
     coreStart.http.post.mockResolvedValue({});
 
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <ClusterConfigurationForm
           host="https://localhost:9200"
           authRequired
@@ -53,7 +53,7 @@ describe('ClusterConfigurationForm', () => {
       target: { value: 'changeme' },
     });
     fireEvent.click(await findByLabelText('Certificate authority'));
-    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
 
     await waitFor(() => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith(
@@ -71,12 +71,43 @@ describe('ClusterConfigurationForm', () => {
     });
   });
 
+  it('calls enrollment API for http addresses when submitting form', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.http.post.mockResolvedValue({});
+
+    const onSuccess = jest.fn();
+
+    const { findByRole } = render(
+      <Providers services={coreStart}>
+        <ClusterConfigurationForm
+          host="http://localhost:9200"
+          authRequired={false}
+          certificateChain={[]}
+          onSuccess={onSuccess}
+        />
+      </Providers>
+    );
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
+
+    await waitFor(() => {
+      expect(coreStart.http.post).toHaveBeenLastCalledWith(
+        '/internal/interactive_setup/configure',
+        {
+          body: JSON.stringify({
+            host: 'http://localhost:9200',
+          }),
+        }
+      );
+      expect(onSuccess).toHaveBeenCalled();
+    });
+  });
+
   it('validates form', async () => {
     const coreStart = coreMock.createStart();
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <ClusterConfigurationForm
           host="https://localhost:9200"
           authRequired
@@ -95,7 +126,7 @@ describe('ClusterConfigurationForm', () => {
       </Providers>
     );
 
-    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
 
     await findAllByText(/Enter a password/i);
     await findAllByText(/Confirm that you recognize and trust this certificate/i);
@@ -104,7 +135,7 @@ describe('ClusterConfigurationForm', () => {
       target: { value: 'elastic' },
     });
 
-    await findAllByText(/User 'elastic' can't be used as Kibana system user/i);
+    await findAllByText(/User 'elastic' can't be used as the Kibana system user/i);
 
     expect(coreStart.http.post).not.toHaveBeenCalled();
   });

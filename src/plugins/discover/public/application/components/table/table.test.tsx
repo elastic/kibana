@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerTable, DocViewerTableProps } from './table';
-import { indexPatterns, IndexPattern } from '../../../../../data/public';
+import { IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 jest.mock('../../../kibana_services', () => ({
@@ -26,6 +26,10 @@ import { getServices } from '../../../kibana_services';
         return true;
       }
     },
+  },
+  fieldFormats: {
+    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
   },
 }));
 
@@ -65,15 +69,12 @@ const indexPattern = {
     ],
   },
   metaFields: ['_index', '_score'],
-  flattenHit: undefined,
-  formatHit: jest.fn((hit) => hit._source),
+  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
 } as unknown as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
 };
-
-indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 
 const mountComponent = (props: DocViewerTableProps) => {
   return mountWithIntl(<DocViewerTable {...props} />);
@@ -361,32 +362,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       ],
     },
     metaFields: ['_index', '_type', '_score', '_id'],
-    flattenHit: jest.fn((hit) => {
-      const result = {} as Record<string, unknown>;
-      Object.keys(hit).forEach((key) => {
-        if (key !== 'fields') {
-          result[key] = hit[key];
-        } else {
-          Object.keys(hit.fields).forEach((field) => {
-            result[field] = hit.fields[field];
-          });
-        }
-      });
-      return result;
-    }),
-    formatHit: jest.fn((hit) => {
-      const result = {} as Record<string, unknown>;
-      Object.keys(hit).forEach((key) => {
-        if (key !== 'fields') {
-          result[key] = hit[key];
-        } else {
-          Object.keys(hit.fields).forEach((field) => {
-            result[field] = hit.fields[field];
-          });
-        }
-      });
-      return result;
-    }),
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
   } as unknown as IndexPattern;
 
   indexPatterneCommerce.fields.getByName = (name: string) => {

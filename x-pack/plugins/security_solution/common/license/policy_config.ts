@@ -87,7 +87,9 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
     const defaults = policyFactoryWithSupportedFeatures();
     // only platinum or higher may enable memory protection
     if (
-      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported
+      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported ||
+      policy.mac.memory_protection.supported !== defaults.mac.memory_protection.supported ||
+      policy.linux.memory_protection.supported !== defaults.linux.memory_protection.supported
     ) {
       return false;
     }
@@ -101,25 +103,39 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
   // only platinum or higher may enable memory_protection
   const defaults = policyFactoryWithoutPaidFeatures();
 
-  if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
+  if (
+    policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode ||
+    policy.mac.memory_protection.mode !== defaults.mac.memory_protection.mode ||
+    policy.linux.memory_protection.mode !== defaults.linux.memory_protection.mode
+  ) {
     return false;
   }
 
   if (
     policy.windows.popup.memory_protection.enabled !==
-    defaults.windows.popup.memory_protection.enabled
+      defaults.windows.popup.memory_protection.enabled ||
+    policy.mac.popup.memory_protection.enabled !== defaults.mac.popup.memory_protection.enabled ||
+    policy.linux.popup.memory_protection.enabled !== defaults.linux.popup.memory_protection.enabled
   ) {
     return false;
   }
 
   if (
-    policy.windows.popup.memory_protection.message !== '' &&
-    policy.windows.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage
+    (policy.windows.popup.memory_protection.message !== '' &&
+      policy.windows.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage) ||
+    (policy.mac.popup.memory_protection.message !== '' &&
+      policy.mac.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage) ||
+    (policy.linux.popup.memory_protection.message !== '' &&
+      policy.linux.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage)
   ) {
     return false;
   }
 
-  if (policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported) {
+  if (
+    policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported ||
+    policy.mac.memory_protection.supported !== defaults.mac.memory_protection.supported ||
+    policy.linux.memory_protection.supported !== defaults.linux.memory_protection.supported
+  ) {
     return false;
   }
   return true;

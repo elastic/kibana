@@ -41,6 +41,10 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     interval: {
       type: 'keyword',
     },
+    ecs_mapping: {
+      type: 'object',
+      enabled: false,
+    },
   },
 };
 
@@ -49,6 +53,11 @@ export const savedQueryType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
+  management: {
+    defaultSearchField: 'id',
+    importableAndExportable: true,
+    getTitle: (savedObject) => savedObject.attributes.id,
+  },
 };
 
 export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
@@ -63,21 +72,37 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'date',
     },
     created_by: {
-      type: 'text',
+      type: 'keyword',
     },
     updated_at: {
       type: 'date',
     },
     updated_by: {
-      type: 'text',
+      type: 'keyword',
+    },
+    enabled: {
+      type: 'boolean',
     },
     queries: {
       properties: {
-        name: {
+        id: {
           type: 'keyword',
+        },
+        query: {
+          type: 'text',
         },
         interval: {
           type: 'text',
+        },
+        platform: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        ecs_mapping: {
+          type: 'object',
+          enabled: false,
         },
       },
     },
@@ -89,4 +114,9 @@ export const packType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
+  management: {
+    defaultSearchField: 'name',
+    importableAndExportable: true,
+    getTitle: (savedObject) => savedObject.attributes.name,
+  },
 };

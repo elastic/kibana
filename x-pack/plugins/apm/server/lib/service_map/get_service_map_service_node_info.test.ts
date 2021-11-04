@@ -49,8 +49,7 @@ describe('getServiceMapServiceNodeInfo', () => {
     it('returns data', async () => {
       jest.spyOn(getErrorRateModule, 'getErrorRate').mockResolvedValueOnce({
         average: 0.5,
-        transactionErrorRate: [],
-        noHits: false,
+        timeseries: [{ x: 1634808240000, y: 0 }],
       });
 
       const setup = {
@@ -70,9 +69,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         indices: {},
         start: 1593460053026000,
         end: 1593497863217000,
-        config: {
-          'xpack.apm.metricsInterval': 30,
-        },
+        config: { metricsInterval: 30 },
         uiFilters: { environment: 'test environment' },
       } as unknown as Setup;
       const serviceName = 'test service name';

@@ -93,7 +93,7 @@ export type TestSubjects =
   | 'toEmailAddressInput'
   | 'triggerIntervalSizeInput'
   | 'watchActionAccordion'
-  | 'watchActionAccordion.mockComboBox'
+  | 'watchActionAccordion.toEmailAddressInput'
   | 'watchActionsPanel'
   | 'watchThresholdButton'
   | 'watchThresholdInput'

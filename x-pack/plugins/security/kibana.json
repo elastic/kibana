@@ -8,8 +8,8 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "security"],
-  "requiredPlugins": ["data", "features", "licensing", "taskManager", "securityOss"],
-  "optionalPlugins": ["home", "management", "usageCollection", "spaces"],
+  "requiredPlugins": ["data", "features", "licensing", "taskManager"],
+  "optionalPlugins": ["home", "management", "usageCollection", "spaces", "share"],
   "server": true,
   "ui": true,
   "requiredBundles": [

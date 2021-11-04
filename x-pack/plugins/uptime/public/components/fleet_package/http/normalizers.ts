@@ -31,6 +31,7 @@ export const getHTTPJsonToJavascriptNormalizer = (key: ConfigKeys) => {
 };
 
 export const httpNormalizers: HTTPNormalizerMap = {
+  [ConfigKeys.METADATA]: getHTTPJsonToJavascriptNormalizer(ConfigKeys.METADATA),
   [ConfigKeys.URLS]: getHTTPNormalizer(ConfigKeys.URLS),
   [ConfigKeys.MAX_REDIRECTS]: getHTTPNormalizer(ConfigKeys.MAX_REDIRECTS),
   [ConfigKeys.USERNAME]: getHTTPNormalizer(ConfigKeys.USERNAME),

@@ -78,6 +78,9 @@ mockBrowserEvaluate.mockImplementation(() => {
   if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
     return Promise.resolve(getMockElementsPositionAndAttributes('Default Mock Title', 'Default '));
   }
+  if (mockCall === contexts.CONTEXT_GETRENDERERRORS) {
+    return Promise.resolve();
+  }
   throw new Error(mockCall);
 });
 const mockScreenshot = jest.fn(async () => Buffer.from('screenshot'));
@@ -114,7 +117,6 @@ export const createMockBrowserDriverFactory = async (
       autoDownload: false,
     },
     networkPolicy: { enabled: true, rules: [] },
-    viewport: { width: 800, height: 600 },
     loadDelay: moment.duration(2, 's'),
     zoom: 2,
     maxAttempts: 1,

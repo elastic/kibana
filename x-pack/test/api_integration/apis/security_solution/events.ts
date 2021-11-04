@@ -11,13 +11,13 @@ import { JsonObject } from '@kbn/utility-types';
 import {
   Direction,
   TimelineEventsQueries,
+  TimelineEventsAllStrategyResponse,
 } from '../../../../plugins/security_solution/common/search_strategy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getDocValueFields, getFieldsToRequest, getFilterValue } from './utils';
 
 const TO = '3000-01-01T00:00:00.000Z';
 const FROM = '2000-01-01T00:00:00.000Z';
-const TEST_URL = '/internal/search/timelineSearchStrategy/';
 // typical values that have to change after an update from "scripts/es_archiver"
 const DATA_COUNT = 7;
 const HOST_NAME = 'suricata-sensor-amsterdam';
@@ -30,6 +30,8 @@ const LIMITED_PAGE_SIZE = 2;
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
+
   const getPostBody = (): JsonObject => ({
     defaultIndex: ['auditbeat-*'],
     docValueFields: getDocValueFields(),
@@ -66,14 +68,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns Timeline data', async () => {
-      const resp = await supertest
-        .post(TEST_URL)
-        .set('kbn-xsrf', 'true')
-        .set('Content-Type', 'application/json')
-        .send(getPostBody())
-        .expect(200);
+      const timeline = await bsearch.send<TimelineEventsAllStrategyResponse>({
+        supertest,
+        options: {
+          ...getPostBody(),
+        },
+        strategy: 'timelineSearchStrategy',
+      });
 
-      const timeline = resp.body;
       expect(timeline.edges.length).to.be(EDGE_LENGTH);
       expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
       expect(timeline.totalCount).to.be(TOTAL_COUNT);
@@ -82,20 +84,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns paginated Timeline query', async () => {
-      const resp = await supertest
-        .post(TEST_URL)
-        .set('kbn-xsrf', 'true')
-        .set('Content-Type', 'application/json')
-        .send({
+      const timeline = await bsearch.send<TimelineEventsAllStrategyResponse>({
+        supertest,
+        options: {
           ...getPostBody(),
           pagination: {
             activePage: 0,
             querySize: LIMITED_PAGE_SIZE,
           },
-        })
-        .expect(200);
-
-      const timeline = resp.body;
+        },
+        strategy: 'timelineSearchStrategy',
+      });
       expect(timeline.edges.length).to.be(LIMITED_PAGE_SIZE);
       expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
       expect(timeline.totalCount).to.be(TOTAL_COUNT);

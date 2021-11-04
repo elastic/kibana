@@ -207,6 +207,7 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.ISSUES,
       SOURCE_OBJ_TYPES.PULL_REQUESTS,
       SOURCE_OBJ_TYPES.REPOSITORY_LIST,
+      SOURCE_OBJ_TYPES.FILES,
     ],
     features: {
       basicOrgContext: [
@@ -247,6 +248,7 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.ISSUES,
       SOURCE_OBJ_TYPES.PULL_REQUESTS,
       SOURCE_OBJ_TYPES.REPOSITORY_LIST,
+      SOURCE_OBJ_TYPES.FILES,
     ],
     features: {
       basicOrgContext: [
@@ -431,7 +433,9 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.OPPORTUNITIES,
       SOURCE_OBJ_TYPES.LEADS,
       SOURCE_OBJ_TYPES.ACCOUNTS,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
       SOURCE_OBJ_TYPES.CAMPAIGNS,
+      SOURCE_OBJ_TYPES.CASES,
     ],
     features: {
       basicOrgContext: [
@@ -465,7 +469,9 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.OPPORTUNITIES,
       SOURCE_OBJ_TYPES.LEADS,
       SOURCE_OBJ_TYPES.ACCOUNTS,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
       SOURCE_OBJ_TYPES.CAMPAIGNS,
+      SOURCE_OBJ_TYPES.CASES,
     ],
     features: {
       basicOrgContext: [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lazyLoadModules } from '../../../lazy_load_bundle';
 import type { DocumentCounts, FieldRequestConfig, FieldVisStats } from '../../../../common/types';
 import { OverallStats } from '../types/overall_stats';

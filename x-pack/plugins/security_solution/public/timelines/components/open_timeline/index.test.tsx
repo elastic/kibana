@@ -318,7 +318,7 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         expect(
           wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
-            document.activeElement!.id
+            document.activeElement?.id
         ).toBe(true);
       });
     });

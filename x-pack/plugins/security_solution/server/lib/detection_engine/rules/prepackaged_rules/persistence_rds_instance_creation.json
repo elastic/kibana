@@ -1,6 +1,7 @@
 {
   "author": [
-    "Elastic"
+    "Elastic",
+    "Austin Songer"
   ],
   "description": "Identifies the creation of an Amazon Relational Database Service (RDS) Aurora database instance.",
   "false_positives": [
@@ -44,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

@@ -23,6 +23,7 @@ export const BeatsTemplate: React.FC<BeatsTemplateProps> = ({ instance, ...props
         defaultMessage: 'Overview',
       }),
       route: '/beats',
+      testSubj: 'beatsOverviewPage',
     });
     tabs.push({
       id: 'instances',
@@ -30,6 +31,7 @@ export const BeatsTemplate: React.FC<BeatsTemplateProps> = ({ instance, ...props
         defaultMessage: 'Instances',
       }),
       route: '/beats/beats',
+      testSubj: 'beatsListingPage',
     });
   } else {
     tabs.push({
