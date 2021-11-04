@@ -269,6 +269,7 @@ export class CoreSystem {
     this.i18n.stop();
     this.application.stop();
     this.deprecations.stop();
+    this.theme.stop();
     this.rootDomElement.textContent = '';
   }
 }

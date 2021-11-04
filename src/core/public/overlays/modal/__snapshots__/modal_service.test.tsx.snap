@@ -12,17 +12,26 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 1`] = `
 Array [
   Array [
     <mockConstructor>
-      <EuiConfirmModal
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-        onCancel={[Function]}
-        onConfirm={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
-          mount={[Function]}
-        />
-      </EuiConfirmModal>
+        <EuiConfirmModal
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+          onCancel={[Function]}
+          onConfirm={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiConfirmModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
@@ -35,14 +44,23 @@ exports[`ModalService openConfirm() renders a string confirm message 1`] = `
 Array [
   Array [
     <mockConstructor>
-      <EuiConfirmModal
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-        onCancel={[Function]}
-        onConfirm={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        Some message
-      </EuiConfirmModal>
+        <EuiConfirmModal
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+          onCancel={[Function]}
+          onConfirm={[Function]}
+        >
+          Some message
+        </EuiConfirmModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
@@ -55,27 +73,45 @@ exports[`ModalService openConfirm() with a currently active confirm replaces the
 Array [
   Array [
     <mockConstructor>
-      <EuiConfirmModal
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-        onCancel={[Function]}
-        onConfirm={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        confirm 1
-      </EuiConfirmModal>
+        <EuiConfirmModal
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+          onCancel={[Function]}
+          onConfirm={[Function]}
+        >
+          confirm 1
+        </EuiConfirmModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
   Array [
     <mockConstructor>
-      <EuiConfirmModal
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-        onCancel={[Function]}
-        onConfirm={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        some confirm
-      </EuiConfirmModal>
+        <EuiConfirmModal
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+          onCancel={[Function]}
+          onConfirm={[Function]}
+        >
+          some confirm
+        </EuiConfirmModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
@@ -86,27 +122,45 @@ exports[`ModalService openConfirm() with a currently active modal replaces the c
 Array [
   Array [
     <mockConstructor>
-      <EuiModal
-        onClose={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
-          mount={[Function]}
-        />
-      </EuiModal>
+        <EuiModal
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
   Array [
     <mockConstructor>
-      <EuiConfirmModal
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-        onCancel={[Function]}
-        onConfirm={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        some confirm
-      </EuiConfirmModal>
+        <EuiConfirmModal
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+          onCancel={[Function]}
+          onConfirm={[Function]}
+        >
+          some confirm
+        </EuiConfirmModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
@@ -117,14 +171,23 @@ exports[`ModalService openModal() renders a modal to the DOM 1`] = `
 Array [
   Array [
     <mockConstructor>
-      <EuiModal
-        onClose={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
-          mount={[Function]}
-        />
-      </EuiModal>
+        <EuiModal
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
@@ -137,27 +200,45 @@ exports[`ModalService openModal() with a currently active confirm replaces the c
 Array [
   Array [
     <mockConstructor>
-      <EuiConfirmModal
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-        onCancel={[Function]}
-        onConfirm={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        confirm 1
-      </EuiConfirmModal>
+        <EuiConfirmModal
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+          onCancel={[Function]}
+          onConfirm={[Function]}
+        >
+          confirm 1
+        </EuiConfirmModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
   Array [
     <mockConstructor>
-      <EuiConfirmModal
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-        onCancel={[Function]}
-        onConfirm={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        some confirm
-      </EuiConfirmModal>
+        <EuiConfirmModal
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+          onCancel={[Function]}
+          onConfirm={[Function]}
+        >
+          some confirm
+        </EuiConfirmModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
@@ -168,27 +249,45 @@ exports[`ModalService openModal() with a currently active modal replaces the cur
 Array [
   Array [
     <mockConstructor>
-      <EuiModal
-        onClose={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
-          mount={[Function]}
-        />
-      </EuiModal>
+        <EuiModal
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
   Array [
     <mockConstructor>
-      <EuiModal
-        onClose={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
-          mount={[Function]}
-        />
-      </EuiModal>
+        <EuiModal
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiModal>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],

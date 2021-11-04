@@ -7,7 +7,9 @@
  */
 
 import { of } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from './types';
+import type { ThemeService } from './theme_service';
 
 const mockTheme: CoreTheme = {
   darkMode: false,
@@ -27,7 +29,23 @@ const createThemeStartMock = () => {
   return startMock;
 };
 
+type ThemeServiceContract = PublicMethodsOf<ThemeService>;
+
+const createServiceMock = () => {
+  const mocked: jest.Mocked<ThemeServiceContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  mocked.setup.mockReturnValue(createThemeSetupMock());
+  mocked.start.mockReturnValue(createThemeStartMock());
+
+  return mocked;
+};
+
 export const themeServiceMock = {
+  create: createServiceMock,
   createSetupContract: createThemeSetupMock,
   createStartContract: createThemeStartMock,
 };

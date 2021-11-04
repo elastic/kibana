@@ -12,14 +12,23 @@ exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
 Array [
   Array [
     <mockConstructor>
-      <EuiFlyout
-        onClose={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
-          mount={[Function]}
-        />
-      </EuiFlyout>
+        <EuiFlyout
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiFlyout>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
@@ -32,27 +41,45 @@ exports[`FlyoutService openFlyout() with a currently active flyout replaces the 
 Array [
   Array [
     <mockConstructor>
-      <EuiFlyout
-        onClose={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
-          mount={[Function]}
-        />
-      </EuiFlyout>
+        <EuiFlyout
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiFlyout>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],
   Array [
     <mockConstructor>
-      <EuiFlyout
-        onClose={[Function]}
+      <CoreThemeProvider
+        theme$={
+          Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          }
+        }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
-          mount={[Function]}
-        />
-      </EuiFlyout>
+        <EuiFlyout
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiFlyout>
+      </CoreThemeProvider>
     </mockConstructor>,
     <div />,
   ],

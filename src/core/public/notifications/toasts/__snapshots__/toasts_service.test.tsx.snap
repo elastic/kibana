@@ -4,23 +4,32 @@ exports[`#start() renders the GlobalToastList into the targetDomElement param 1`
 Array [
   Array [
     <I18nContext>
-      <GlobalToastList
-        dismissToast={[Function]}
-        toasts$={
+      <CoreThemeProvider
+        theme$={
           Observable {
             "_isScalar": false,
-            "source": BehaviorSubject {
-              "_isScalar": false,
-              "_value": Array [],
-              "closed": false,
-              "hasError": false,
-              "isStopped": false,
-              "observers": Array [],
-              "thrownError": null,
-            },
+            "_subscribe": [Function],
           }
         }
-      />
+      >
+        <GlobalToastList
+          dismissToast={[Function]}
+          toasts$={
+            Observable {
+              "_isScalar": false,
+              "source": BehaviorSubject {
+                "_isScalar": false,
+                "_value": Array [],
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+            }
+          }
+        />
+      </CoreThemeProvider>
     </I18nContext>,
     <div
       test="target-dom-element"
