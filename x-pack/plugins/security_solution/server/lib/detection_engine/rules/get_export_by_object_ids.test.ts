@@ -15,6 +15,10 @@ import {
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
+import {
+  getSampleDetailsAsNdjson,
+  getOutputDetailsSampleWithExceptions,
+} from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 
@@ -100,6 +104,7 @@ describe.each([
         exportDetails: {
           exported_exception_list_count: 0,
           exported_exception_list_item_count: 0,
+          exported_count: 1,
           exported_rules_count: 1,
           missing_exception_list_item_count: 0,
           missing_exception_list_items: [],
@@ -135,10 +140,13 @@ describe.each([
         logger,
         isRuleRegistryEnabled
       );
+      const details = getOutputDetailsSampleWithExceptions({
+        missingRules: [{ rule_id: 'rule-1' }],
+        missingCount: 1,
+      });
       expect(exports).toEqual({
         rulesNdjson: '',
-        exportDetails:
-          '{"exported_rules_count":0,"missing_rules":[{"rule_id":"rule-1"}],"missing_rules_count":1,"exported_exception_list_count":0,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n',
+        exportDetails: getSampleDetailsAsNdjson(details),
         exceptionLists: '',
       });
     });
