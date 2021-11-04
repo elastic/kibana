@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-export { RuntimeFieldForm, FormState as RuntimeFieldFormState } from './runtime_field_form';
+export type { FormState as RuntimeFieldFormState } from './runtime_field_form';
+export { RuntimeFieldForm } from './runtime_field_form';
 
 export { RuntimeFieldEditor } from './runtime_field_editor';
 
-export {
-  RuntimeFieldEditorFlyoutContent,
-  RuntimeFieldEditorFlyoutContentProps,
-} from './runtime_field_editor_flyout_content';
+export type { RuntimeFieldEditorFlyoutContentProps } from './runtime_field_editor_flyout_content';
+export { RuntimeFieldEditorFlyoutContent } from './runtime_field_editor_flyout_content';
