@@ -28,8 +28,10 @@ interface AlertHit {
   _index: string;
   _source: {
     '@timestamp': string;
-    signal: {
-      rule: Rule;
+    kibana: {
+      alert: {
+        rule: Rule;
+      };
     };
   };
 }
@@ -77,7 +79,7 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   }, [addError, error]);
 
   const rule = useMemo<Rule | undefined>(() => {
-    const result = isExistingRule ? ruleData : alertsData?.hits.hits[0]?._source.signal.rule;
+    const result = isExistingRule ? ruleData : alertsData?.hits.hits[0]?._source.kibana.alert.rule;
     if (result) {
       return transformInput(result);
     }
