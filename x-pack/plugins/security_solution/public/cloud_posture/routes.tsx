@@ -13,7 +13,7 @@ import { Rules } from './pages/rules';
 import { Findings } from './pages/findings';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { SecurityPageName } from '../app/types';
-
+import { EuiErrorBoundary } from '@elastic/eui';
 const innerRoutes: RouteProps[] = [
   { path: '/csp/dashboard', render: Dashboard },
   { path: '/csp/rules', render: Rules },
@@ -23,15 +23,18 @@ const innerRoutes: RouteProps[] = [
 
 const pages = innerRoutes.map((v) => <Route key={v.path as string} {...v} />);
 
-const Routes = (props: RouteComponentProps<{}>) => (
-  <>
-    <Switch>
-      <Route path="/csp" exact render={() => <Redirect to="/csp/dashboard" />} />
-      {pages}
-      <Route path="*">{`Not Found`}</Route>
-    </Switch>
-    <SpyRoute pageName={SecurityPageName.cloud_posture} />
-  </>
-);
+const Routes = (props: RouteComponentProps<{}>) => {
+  console.log({ props });
+  return (
+    <EuiErrorBoundary>
+      <Switch>
+        <Route path="/csp" exact render={() => <Redirect to="/csp/dashboard" />} />
+        {pages}
+        <Route path="*">{`Not Found`}</Route>
+      </Switch>
+      <SpyRoute pageName={SecurityPageName.cloud_posture} />
+    </EuiErrorBoundary>
+  );
+};
 
 export const routes: RouteProps[] = [{ path: '/csp', render: Routes }];
