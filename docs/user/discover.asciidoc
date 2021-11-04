@@ -28,7 +28,7 @@ You’ll learn to:
 search it with the {kib} Query Language, and filter the results.
 - **Explore** the details of your data, view individual documents, and create tables
 that summarize the contents of the data.
-- **Present** your findings in a chart and map.
+- **Present** your findings in a visualization.
 
 At the end of this tutorial, you’ll be ready to start exploring with your own
 data in *Discover*.
