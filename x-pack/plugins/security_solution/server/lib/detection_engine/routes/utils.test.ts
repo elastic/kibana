@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
@@ -34,12 +32,17 @@ describe.each([
   ['RAC', true],
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
   describe('transformBulkError', () => {
-    test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
-      const transformed = transformBulkError('rule-1', boom);
+    test('returns transformed object if it is a custom error object', () => {
+      const err = new Error('some custom error message');
+      const customError: Error & { statusCode?: number } = {
+        name: err.name,
+        message: err.message,
+        statusCode: 400,
+      };
+      const transformed = transformBulkError('rule-1', customError);
       const expected: BulkError = {
         rule_id: 'rule-1',
-        error: { message: 'some boom message', status_code: 400 },
+        error: { message: 'some custom error message', status_code: 400 },
       };
       expect(transformed).toEqual(expected);
     });
