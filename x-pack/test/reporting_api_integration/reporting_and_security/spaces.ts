@@ -72,10 +72,12 @@ export default function ({ getService }: FtrProviderContext) {
         const csv = await getCompleted$(path).toPromise();
 
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
-          "\\"order_date\\",category,\\"customer_first_name\\",\\"customer_full_name\\",\\"total_quantity\\",\\"total_unique_products\\",\\"taxless_total_price\\",\\"taxful_total_price\\",currency
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",4,4,174,174,EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",Pia,\\"Pia Richards\\",2,2,\\"41.969\\",\\"41.969\\",EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",Brigitte,\\"Brigitte Meyer\\",2,2,\\"40.969\\""
+          "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Pia Richards\\",\\"41.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Brigitte Meyer\\",\\"40.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"Abd Mccarthy\\",\\"41.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"Robert "
         `);
       });
 
