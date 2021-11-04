@@ -12,8 +12,6 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
-  const log = getService('log');
 
   describe('mvt scaling', () => {
     before(async () => {
