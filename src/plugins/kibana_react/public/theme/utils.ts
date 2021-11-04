@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { wrapWithTheme } from './wrap_with_theme';
-export { KibanaThemeProvider } from './kibana_theme_provider';
+import type { EuiThemeColorMode } from '@elastic/eui/src/services/theme/types';
+import type { CoreTheme } from '../../../../core/public';
+
+export const getColorMode = (theme: CoreTheme): EuiThemeColorMode => {
+  // COLOR_MODES_STANDARD is not exported from eui
+  return theme.darkMode ? 'DARK' : 'LIGHT';
+};
