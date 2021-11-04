@@ -10,14 +10,14 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererModel } from '../../store/sourcerer';
 import { getPatternListWithoutSignals } from './helpers';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererModel, SourcererScopeName } from '../../store/sourcerer/model';
 
 interface UsePickIndexPatternsProps {
   alertsOptions: Array<EuiComboBoxOptionOption<string>>;
   dataViewId: string;
   defaultDataViewId: string;
   isOnlyDetectionAlerts: boolean;
-  kibanaDataViews: sourcererModel.KibanaDataView[];
+  kibanaDataViews: sourcererModel.SourcererModel['kibanaDataViews'];
   scopeId: sourcererModel.SourcererScopeName;
   selectedPatterns: string[];
   signalIndexName: string | null;
