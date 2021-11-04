@@ -174,7 +174,6 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
-    | 'taskId'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -1913,7 +1912,7 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   return parsedDate;
 }
 
-function generateTaskId(namespace: string | undefined, id: string) {
-  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-  return uuidv5(`${namespaceString}:alert:${id}`, uuidv5.DNS); // The uuidv5 namespace constant (uuidv5.DNS) is arbitrary.
+export function generateTaskId(namespace: string | undefined, id: string) {
+  namespace = namespace ?? 'default';
+  return uuidv5(`${namespace}:alert:${id}`, uuidv5.DNS); // The uuidv5 namespace constant (uuidv5.DNS) is arbitrary.
 }

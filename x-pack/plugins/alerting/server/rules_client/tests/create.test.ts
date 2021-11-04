@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions, CreateOptions, generateTaskId } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -25,10 +25,6 @@ jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', (
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
-}));
-
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
 
 const taskManager = taskManagerMock.createStart();
@@ -424,6 +420,7 @@ describe('create()', () => {
         "tags": Array [
           "foo",
         ],
+        "taskId": "53b4aba7-4e40-56af-88cf-b38c57083ea3",
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
@@ -445,6 +442,7 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
+                                                                            "id": "53b4aba7-4e40-56af-88cf-b38c57083ea3",
                                                                             "params": Object {
                                                                               "alertId": "1",
                                                                               "spaceId": "default",
@@ -471,7 +469,6 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
         "scheduledTaskId": "task-123",
-        "taskId": "task-123",
       }
     `);
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
@@ -617,6 +614,7 @@ describe('create()', () => {
         "tags": Array [
           "foo",
         ],
+        "taskId": "4850d41f-2b26-57c2-a5e9-c08a19a1906a",
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
@@ -1013,6 +1011,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         enabled: true,
         legacyId: null,
+        taskId: generateTaskId('default', 'mock-saved-object-id'),
         executionStatus: {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1209,6 +1208,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         enabled: true,
         legacyId: null,
+        taskId: generateTaskId('default', 'mock-saved-object-id'),
         executionStatus: {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1370,6 +1370,7 @@ describe('create()', () => {
         apiKey: null,
         apiKeyOwner: null,
         legacyId: null,
+        taskId: generateTaskId('default', 'mock-saved-object-id'),
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1530,6 +1531,7 @@ describe('create()', () => {
         consumer: 'bar',
         name: 'abc',
         legacyId: null,
+        taskId: generateTaskId('default', 'mock-saved-object-id'),
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
@@ -1655,6 +1657,7 @@ describe('create()', () => {
           },
         ],
         legacyId: null,
+        taskId: generateTaskId('default', 'mock-saved-object-id'),
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
@@ -1783,6 +1786,7 @@ describe('create()', () => {
           },
         ],
         legacyId: null,
+        taskId: generateTaskId('default', 'mock-saved-object-id'),
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
@@ -2091,6 +2095,7 @@ describe('create()', () => {
         consumer: 'bar',
         name: 'abc',
         legacyId: null,
+        taskId: generateTaskId('default', 'mock-saved-object-id'),
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
@@ -2187,6 +2192,7 @@ describe('create()', () => {
           },
         ],
         legacyId: null,
+        taskId: generateTaskId('default', 'mock-saved-object-id'),
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
