@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -103,8 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  // FLAKY https://github.com/elastic/kibana/issues/112749
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -154,14 +154,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Index threshold`,
+        tags: '',
+        interval: '1 min',
+      });
+      expect(searchResultAfterSave.duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -205,14 +204,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Always Firing',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Always Firing`,
+        tags: '',
+        interval: '1 min',
+      });
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -239,14 +236,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Always Firing',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Always Firing`,
+        tags: '',
+        interval: '1 min',
+      });
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -277,6 +272,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
+
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.existOrFail('confirmAlertCloseModal');
+      await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
+    });
+
+    it('should show error when es_query is invalid', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
 
       // Invalid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
