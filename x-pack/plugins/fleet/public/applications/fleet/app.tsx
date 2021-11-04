@@ -32,6 +32,7 @@ import {
   FleetStatusProvider,
   KibanaVersionContext,
   sendGetPermissionsCheck,
+  sendSetup,
   useBreadcrumbs,
   useStartServices,
   UIExtensionsContext,
@@ -140,6 +141,21 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         const permissionsResponse = await sendGetPermissionsCheck();
         setIsPermissionsLoading(false);
         if (permissionsResponse.data?.success) {
+          try {
+            const setupResponse = await sendSetup();
+            if (setupResponse.error) {
+              setInitializationError(setupResponse.error);
+            }
+            if (setupResponse.data?.nonFatalErrors?.length) {
+              notifications.toasts.addError(setupResponse.data.nonFatalErrors[0], {
+                title: i18n.translate('xpack.fleet.setup.uiPreconfigurationErrorTitle', {
+                  defaultMessage: 'Configuration error',
+                }),
+              });
+            }
+          } catch (err) {
+            setInitializationError(err);
+          }
           setIsInitialized(true);
         } else {
           setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
