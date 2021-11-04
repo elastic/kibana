@@ -11,7 +11,7 @@ import {
   AnalyticsMapNodeElement,
   AnalyticsMapEdgeElement,
 } from '../../../common/types/data_frame_analytics';
-export {
+export type {
   MapElements,
   AnalyticsMapReturnType,
   AnalyticsMapNodeElement,
