@@ -27,6 +27,10 @@ jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', (
   },
 }));
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+}));
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -467,6 +471,7 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
         "scheduledTaskId": "task-123",
+        "taskId": "task-123",
       }
     `);
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
