@@ -18,6 +18,21 @@ const serviceInventoryHref = url.format({
   query: timeRange,
 });
 
+const apiRequestsToIntercept = [
+  {
+    endpoint: '/internal/apm/services?*',
+    aliasName: 'servicesRequest',
+  },
+  {
+    endpoint: '/internal/apm/services/detailed_statistics?*',
+    aliasName: 'detailedStatisticsRequest',
+  },
+];
+
+const aliasNames = apiRequestsToIntercept.map(
+  ({ aliasName }) => `@${aliasName}`
+);
+
 describe('When navigating to the service inventory', () => {
   before(async () => {
     const { rangeFrom, rangeTo } = timeRange;
@@ -35,54 +50,57 @@ describe('When navigating to the service inventory', () => {
 
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
+    cy.visit(serviceInventoryHref);
   });
 
   it('has a list of services', () => {
-    cy.visit(serviceInventoryHref);
     cy.contains('opbeans-node');
     cy.contains('opbeans-java');
     cy.contains('opbeans-rum');
   });
 
   it('has a list of environments', () => {
-    cy.visit(serviceInventoryHref);
     cy.get('td:contains(production)').should('have.length', 3);
   });
 
-  it('calls APIs with the correct environment', () => {
-    const apiRequestsToIntercept = [
-      {
-        endpoint: '/internal/apm/services?*',
-        aliasName: 'servicesRequest',
-      },
-      {
-        endpoint: '/internal/apm/services/detailed_statistics?*',
-        aliasName: 'detailedStatisticsRequest',
-      },
-    ];
-
-    apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
-      cy.intercept('GET', endpoint).as(aliasName);
-    });
-
-    cy.visit(serviceInventoryHref);
-
-    apiRequestsToIntercept.forEach(({ aliasName }) => cy.wait(`@${aliasName}`));
-
-    cy.get('[data-test-subj="environmentFilter"]').select('production');
-
-    cy.expectAPIsToHaveBeenCalledWith({
-      apisIntercepted: apiRequestsToIntercept.map(
-        ({ aliasName }) => `@${aliasName}`
-      ),
-      value: 'environment=production',
-    });
-  });
-
   it('when clicking on a service it loads the service overview for that service', () => {
-    cy.visit(serviceInventoryHref);
     cy.contains('opbeans-node').click({ force: true });
     cy.url().should('include', '/apm/services/opbeans-node/overview');
     cy.contains('h1', 'opbeans-node');
+  });
+
+  describe('Calls APIs', () => {
+    beforeEach(() => {
+      apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
+        cy.intercept('GET', endpoint).as(aliasName);
+      });
+    });
+
+    it('with the correct environment when changing the environment', () => {
+      cy.wait(aliasNames);
+
+      cy.get('[data-test-subj="environmentFilter"]').select('production');
+
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: aliasNames,
+        value: 'environment=production',
+      });
+    });
+
+    it('when clicking the refresh button', () => {
+      cy.wait(aliasNames);
+      cy.contains('Refresh').click();
+      cy.wait(aliasNames);
+    });
+
+    it('when selecting a different time range and clicking the refresh button', () => {
+      cy.wait(aliasNames);
+
+      cy.changeTimeRange('Last 30 days');
+      cy.wait(aliasNames);
+
+      cy.contains('Refresh').click();
+      cy.wait(aliasNames);
+    });
   });
 });
