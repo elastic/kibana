@@ -8,12 +8,12 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
+import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
+import { savedObjectsPointInTimeFinderMock } from '../point_in_time_finder.mock';
+import type { ISavedObjectsRepository } from '../repository';
+import { savedObjectsRepositoryMock } from '../repository.mock';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
-import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
-import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
-import type { ISavedObjectsRepository } from './repository';
-import { savedObjectsRepositoryMock } from './repository.mock';
 
 describe('findLegacyUrlAliases', () => {
   let savedObjectsMock: jest.Mocked<ISavedObjectsRepository>;
