@@ -227,7 +227,7 @@ export function DiscoverHistogram({
       </EuiFlexGroup>
     );
   }
-  
+
   return (
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
