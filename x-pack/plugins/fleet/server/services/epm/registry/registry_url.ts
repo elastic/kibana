@@ -13,7 +13,8 @@ import { appContextService } from '../../';
 
 const PRODUCTION_REGISTRY_URL_CDN = 'https://epr.elastic.co.foobar';
 const STAGING_REGISTRY_URL_CDN = 'https://epr-staging.elastic.co.foobar';
-const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
+const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co.foobar';
+// const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
 
 // const PRODUCTION_REGISTRY_URL_NO_CDN = 'https://epr.ea-web.elastic.dev';
 // const STAGING_REGISTRY_URL_NO_CDN = 'https://epr-staging.ea-web.elastic.dev';
@@ -22,7 +23,6 @@ const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
 const getDefaultRegistryUrl = (): string => {
   const branch = appContextService.getKibanaBranch();
   if (branch === 'main') {
-    console.log('epr ', SNAPSHOT_REGISTRY_URL_CDN);
     return SNAPSHOT_REGISTRY_URL_CDN;
   } else if (appContextService.getKibanaVersion().includes('-SNAPSHOT')) {
     return STAGING_REGISTRY_URL_CDN;

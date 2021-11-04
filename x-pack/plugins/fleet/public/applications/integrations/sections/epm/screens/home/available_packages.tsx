@@ -9,6 +9,7 @@ import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiHorizontalRule,
   EuiFlexItem,
@@ -16,6 +17,8 @@ import {
   EuiSpacer,
   EuiCard,
   EuiIcon,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
@@ -106,9 +109,6 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const AvailablePackages: React.FC = memo(() => {
-
-  console.log('render available pacakges');
-
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
   useBreadcrumbs('integrations_all');
 
@@ -136,10 +136,13 @@ export const AvailablePackages: React.FC = memo(() => {
     history.replace(pagePathGetters.integrations_all({ searchTerm: search })[1]);
   }
 
-  const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackages({
+  const {
+    data: eprPackages,
+    isLoading: isLoadingAllPackages,
+    error: eprPackageLoadingError,
+  } = useGetPackages({
     category: '',
   });
-
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.response || []),
     [eprPackages]
@@ -169,18 +172,23 @@ export const AvailablePackages: React.FC = memo(() => {
     return a.title.localeCompare(b.title);
   });
 
-  const { data: eprCategories, isLoading: isLoadingCategories } = useGetCategories({
+  const {
+    data: eprCategories,
+    isLoading: isLoadingCategories,
+    error: eprCategoryLoadingError,
+  } = useGetCategories({
     include_policy_templates: true,
   });
 
   const categories = useMemo(() => {
-    const eprAndCustomCategories: CategoryFacet[] =
-      isLoadingCategories || !eprCategories
-        ? []
-        : mergeCategoriesAndCount(
-            eprCategories.response as Array<{ id: string; title: string; count: number }>,
-            cards
-          );
+    const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
+      ? []
+      : mergeCategoriesAndCount(
+          eprCategories
+            ? (eprCategories.response as Array<{ id: string; title: string; count: number }>)
+            : [],
+          cards
+        );
     return [
       {
         ...ALL_CATEGORY,
@@ -294,6 +302,62 @@ export const AvailablePackages: React.FC = memo(() => {
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage
+      callout={eprPackageLoadingError || eprCategoryLoadingError ? <NoEprCallout /> : undefined}
     />
   );
 });
+
+function NoEprCallout() {
+  return (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.epmList.eprUnavailableCalloutTitle', {
+        defaultMessage: 'Update your package registry setting to view more integrations\n',
+      })}
+      iconType="iInCircle"
+      color={'warning'}
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.epmList.eprUnavailableCalloutTitleMessage"
+          defaultMessage="Kibana cannot reach the Elastic Package Registry, which provides Elastic Agent integrations. To view these integrations, set the URL for a {registryproxy} or an {onpremregistry}."
+          values={{
+            registryproxy: <ProxyLink />,
+            onpremregistry: <OnPremLink />,
+          }}
+        />
+      </p>
+    </EuiCallOut>
+  );
+}
+
+function ProxyLink() {
+  const { docLinks } = useStartServices();
+
+  return (
+    <EuiLink
+      href={
+        'https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html#fleet-data-visualizer-settings'
+      }
+      target="_blank"
+    >
+      {i18n.translate('xpack.fleet.epmList.proxyLinkSnippedText', {
+        defaultMessage: 'registry proxy',
+      })}
+    </EuiLink>
+  );
+}
+
+function OnPremLink() {
+  const { docLinks } = useStartServices();
+
+  return (
+    <EuiLink
+      href={'https://www.elastic.co/guide/en/integrations-developer/current/air-gapped.html'}
+      target="_blank"
+    >
+      {i18n.translate('xpack.fleet.epmList.onPremLinkSnippetText', {
+        defaultMessage: 'on-prem registry',
+      })}
+    </EuiLink>
+  );
+}
