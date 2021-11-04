@@ -66,16 +66,21 @@ export async function getSearchAggregatedTransactions({
   const searchAggregatedTransactions =
     config['xpack.apm.searchAggregatedTransactions'];
 
-  if (
-    kuery ||
-    searchAggregatedTransactions === SearchAggregatedTransactionSetting.auto
-  ) {
-    return getHasAggregatedTransactions({ start, end, apmEventClient, kuery });
+  switch (searchAggregatedTransactions) {
+    case SearchAggregatedTransactionSetting.always:
+      return kuery
+        ? getHasAggregatedTransactions({ start, end, apmEventClient, kuery })
+        : true;
+    case SearchAggregatedTransactionSetting.auto:
+      return getHasAggregatedTransactions({
+        start,
+        end,
+        apmEventClient,
+        kuery,
+      });
+    case SearchAggregatedTransactionSetting.never:
+      return false;
   }
-
-  return (
-    searchAggregatedTransactions === SearchAggregatedTransactionSetting.always
-  );
 }
 
 export function getTransactionDurationFieldForAggregatedTransactions(

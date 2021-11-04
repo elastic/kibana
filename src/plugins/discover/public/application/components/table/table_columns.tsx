@@ -51,6 +51,7 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
     field: 'field',
     className: 'kbnDocViewer__tableFieldNameCell',
     mobileOptions: { header: false },
+    width: '30%',
     name: (
       <EuiText size="xs">
         <strong>
