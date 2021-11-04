@@ -90,7 +90,7 @@ import type {
   PluginInitializerContext,
 } from './plugin_contract';
 
-export { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
+export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
