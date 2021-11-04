@@ -14,12 +14,10 @@ import {
   CommentRequestAlertType,
   SubCase,
 } from '../../../../common';
-import { CasesNavigation } from '../../links';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
 export interface AllCasesSelectorModalProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  createCaseNavigation: CasesNavigation;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   onRowClick: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
@@ -34,7 +32,7 @@ const Modal = styled(EuiModal)`
 `;
 
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
-  ({ alertData, createCaseNavigation, hiddenStatuses, onRowClick, updateCase, onClose }) => {
+  ({ alertData, hiddenStatuses, onRowClick, updateCase, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const closeModal = useCallback(() => {
       if (onClose) {
@@ -57,7 +55,6 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
         <EuiModalBody>
           <AllCasesList
             alertData={alertData}
-            createCaseNavigation={createCaseNavigation}
             hiddenStatuses={hiddenStatuses}
             isSelectorView={true}
             onRowClick={onClick}

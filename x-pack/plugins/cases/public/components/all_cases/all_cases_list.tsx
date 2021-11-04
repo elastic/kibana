@@ -26,7 +26,6 @@ import {
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
-import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
 
 import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
@@ -55,14 +54,10 @@ const getSortField = (field: string): SortFieldCase =>
 
 interface AllCasesListProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelectorView)
-  configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelectorView)
-  createCaseNavigation: CasesNavigation;
   disableAlerts?: boolean;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
-  showTitle?: boolean;
   updateCase?: (newCase: Case) => void;
   doRefresh?: () => void;
 }
@@ -70,13 +65,10 @@ interface AllCasesListProps {
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({
     alertData, // only modal
-    caseDetailsNavigation,
-    createCaseNavigation,
     disableAlerts,
     hiddenStatuses = [], // only modal
     isSelectorView = false, // only modal
     onRowClick, // only modal
-    showTitle,
     updateCase, // only modal
     doRefresh,
   }) => {
@@ -130,19 +122,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [doRefresh, filterRefetch, refetchCases, setSelectedCases]
     );
 
-    const { onClick: onCreateCaseNavClick } = createCaseNavigation;
-    const goToCreateCase = useCallback(
-      (ev) => {
-        ev.preventDefault();
-        if (isSelectorView && onRowClick != null) {
-          onRowClick();
-        } else if (onCreateCaseNavClick) {
-          onCreateCaseNavClick(ev);
-        }
-      },
-      [isSelectorView, onCreateCaseNavClick, onRowClick]
-    );
-
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
         let newQueryParams = queryParams;
@@ -190,7 +169,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const showActions = userCanCrud && !isSelectorView;
 
     const columns = useCasesColumns({
-      caseDetailsNavigation,
       disableAlerts,
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
@@ -286,10 +264,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         />
         <CasesTable
           columns={columns}
-          createCaseNavigation={createCaseNavigation}
           data={data}
           filterOptions={filterOptions}
-          goToCreateCase={goToCreateCase}
+          goToCreateCase={onRowClick}
           handleIsLoading={handleIsLoading}
           isCasesLoading={isCasesLoading}
           isCommentUpdating={isCommentUpdating}

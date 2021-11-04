@@ -11,14 +11,11 @@ import styled, { css } from 'styled-components';
 import { HeaderPage } from '../header_page';
 import * as i18n from './translations';
 import { Count } from './count';
-import { CasesNavigation } from '../links';
 import { ErrorMessage } from '../use_push_to_service/callout/types';
 import { NavButtons } from './nav_buttons';
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];
-  configureCasesNavigation: CasesNavigation;
-  createCaseNavigation: CasesNavigation;
   refresh: number;
   showTitle?: boolean;
   userCanCrud: boolean;
@@ -43,8 +40,6 @@ const FlexItemDivider = styled(EuiFlexItem)`
 
 export const CasesTableHeader: FunctionComponent<Props> = ({
   actionsErrors,
-  configureCasesNavigation,
-  createCaseNavigation,
   refresh,
   showTitle = true,
   userCanCrud,
@@ -58,11 +53,7 @@ export const CasesTableHeader: FunctionComponent<Props> = ({
           </FlexItemDivider>
 
           <EuiFlexItem>
-            <NavButtons
-              actionsErrors={actionsErrors}
-              configureCasesNavigation={configureCasesNavigation}
-              createCaseNavigation={createCaseNavigation}
-            />
+            <NavButtons actionsErrors={actionsErrors} />
           </EuiFlexItem>
         </>
       ) : (

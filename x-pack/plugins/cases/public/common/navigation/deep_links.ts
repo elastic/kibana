@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AppDeepLink } from '../../../../../../src/core/public';
-import { getCasesCreatePath, getCasesConfigurePath } from './paths';
+import { getCreateCasePath, getCasesConfigurePath } from './paths';
 
 export const casesDeepLinkIds = {
   cases: 'cases',
@@ -42,7 +42,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
       }),
       ...(extend[casesDeepLinkIds.casesCreate] ?? {}),
       id: casesDeepLinkIds.casesCreate,
-      path: getCasesCreatePath(path),
+      path: getCreateCasePath(path),
     },
     {
       title: i18n.translate('xpack.cases.navigation.configure', {

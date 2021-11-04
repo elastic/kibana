@@ -28,9 +28,9 @@ import { ClosureOptions } from './closure_options';
 import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
 import * as i18n from './translations';
 import { getConnectorById } from '../utils';
-import { HeaderPage } from '../header_page';
-import { CasesNavigation } from '../links';
+import { HeaderPage, BackOptions } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useAllCasesNavigation } from '../../common/navigation/hooks';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -50,13 +50,10 @@ const FormWrapper = styled.div`
   `}
 `;
 
-export interface ConfigureCaseProps {
-  allCasesNavigation: CasesNavigation;
-}
-
-export const ConfigureCase: React.FC<ConfigureCaseProps> = React.memo(({ allCasesNavigation }) => {
+export const ConfigureCase: React.FC = React.memo(() => {
   const { userCanCrud } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
+  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -186,14 +183,19 @@ export const ConfigureCase: React.FC<ConfigureCaseProps> = React.memo(({ allCase
     [connector.id, editFlyoutVisible]
   );
 
-  const backOptions = useMemo(
+  const backOptions = useMemo<BackOptions>(
     () => ({
-      href: allCasesNavigation.href,
+      href: getAllCasesUrl(),
       text: i18n.BACK_TO_ALL,
       dataTestSubj: 'backToCases',
-      onClick: allCasesNavigation.onClick,
+      onClick: (e) => {
+        if (e) {
+          e.preventDefault();
+        }
+        navigateToAllCases();
+      },
     }),
-    [allCasesNavigation]
+    [getAllCasesUrl, navigateToAllCases]
   );
 
   return (

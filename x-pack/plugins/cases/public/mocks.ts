@@ -9,11 +9,8 @@ import { CasesUiStart } from './types';
 
 const createStartContract = (): jest.Mocked<CasesUiStart> => ({
   getCases: jest.fn(),
-  getAllCases: jest.fn(),
   getAllCasesSelectorModal: jest.fn(),
-  getCaseView: jest.fn(),
-  getConfigureCases: jest.fn(),
-  getCreateCase: jest.fn(),
+  getCreateCaseFlyout: jest.fn(),
   getRecentCases: jest.fn(),
 });
 

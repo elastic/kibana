@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObj
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 
-import { useParams } from 'react-router-dom';
 import {
   CaseStatuses,
   CaseAttributes,
@@ -19,7 +18,7 @@ import {
   Ecs,
   CaseViewRefreshPropInterface,
 } from '../../../common';
-import { HeaderPage } from '../header_page';
+import { HeaderPage, BackOptions } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
@@ -42,17 +41,19 @@ import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import {
+  useAllCasesNavigation,
+  useCaseViewNavigation,
+  useCaseViewParams,
+} from '../../common/navigation/hooks';
 
 export interface CaseViewComponentProps {
-  allCasesNavigation: CasesNavigation;
-  caseDetailsNavigation: CasesNavigation;
   caseId: string;
-  configureCasesNavigation: CasesNavigation;
+  subCaseId?: string;
   onComponentInitialized?: () => void;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
-  subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   /**
    * A React `Ref` that Exposes data refresh callbacks.
@@ -87,11 +88,8 @@ export interface CaseComponentProps extends CaseViewComponentProps {
 
 export const CaseComponent = React.memo<CaseComponentProps>(
   ({
-    allCasesNavigation,
     caseData,
-    caseDetailsNavigation,
     caseId,
-    configureCasesNavigation,
     fetchCase,
     onCaseDataSuccess,
     onComponentInitialized,
@@ -105,6 +103,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     hideSyncAlerts = false,
   }) => {
     const { userCanCrud } = useCasesContext();
+    const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
+    const { getCaseViewUrl } = useCaseViewNavigation();
+
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
@@ -345,9 +346,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
-        body: i18n.EMAIL_BODY(caseDetailsNavigation.href),
+        body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseId, subCaseId })),
       }),
-      [caseDetailsNavigation.href, caseData.title]
+      [caseData.title, getCaseViewUrl, caseId, subCaseId]
     );
 
     useEffect(() => {
@@ -356,14 +357,19 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       }
     }, [initLoadingData, isLoadingUserActions]);
 
-    const backOptions = useMemo(
+    const backOptions = useMemo<BackOptions>(
       () => ({
-        href: allCasesNavigation.href,
+        href: getAllCasesUrl(),
         text: i18n.BACK_TO_ALL,
         dataTestSubj: 'backToCases',
-        onClick: allCasesNavigation.onClick,
+        onClick: (e) => {
+          if (e) {
+            e.preventDefault();
+          }
+          navigateToAllCases();
+        },
       }),
-      [allCasesNavigation]
+      [getAllCasesUrl, navigateToAllCases]
     );
 
     const onShowAlertDetails = useCallback(
@@ -402,7 +408,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             title={caseData.title}
           >
             <CaseActionBar
-              allCasesNavigation={allCasesNavigation}
               caseData={caseData}
               currentExternalIncident={currentExternalIncident}
               userCanCrud={userCanCrud}
@@ -483,7 +488,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 <EditConnector
                   caseData={caseData}
                   caseServices={caseServices}
-                  configureCasesNavigation={configureCasesNavigation}
                   connectorName={connectorName}
                   connectors={connectors}
                   hasDataToPush={hasDataToPush && userCanCrud}
@@ -518,9 +522,6 @@ export const CaseViewLoading = () => (
 
 export const CaseView = React.memo(
   ({
-    allCasesNavigation,
-    caseDetailsNavigation,
-    configureCasesNavigation,
     onCaseDataSuccess,
     onComponentInitialized,
     actionsNavigation,
@@ -532,10 +533,7 @@ export const CaseView = React.memo(
     hideSyncAlerts,
   }: CaseViewProps) => {
     const { spaces: spacesApi, http } = useKibana().services;
-    const { detailName: caseId, subCaseId } = useParams<{
-      detailName: string;
-      subCaseId?: string;
-    }>();
+    const { detailName: caseId, subCaseId } = useCaseViewParams();
     const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
       useGetCase(caseId, subCaseId);
 
@@ -580,7 +578,7 @@ export const CaseView = React.memo(
     }, [data, resolveAliasId, resolveOutcome, spacesApi, http.basePath]);
 
     return isError ? (
-      <DoesNotExist allCasesNavigation={allCasesNavigation} caseId={caseId} />
+      <DoesNotExist caseId={caseId} />
     ) : isLoading ? (
       <CaseViewLoading />
     ) : (
@@ -588,11 +586,8 @@ export const CaseView = React.memo(
         <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
           {getLegacyUrlConflictCallout()}
           <CaseComponent
-            allCasesNavigation={allCasesNavigation}
             caseData={data}
-            caseDetailsNavigation={caseDetailsNavigation}
             caseId={caseId}
-            configureCasesNavigation={configureCasesNavigation}
             fetchCase={fetchCase}
             onCaseDataSuccess={onCaseDataSuccess}
             onComponentInitialized={onComponentInitialized}

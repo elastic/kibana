@@ -5,188 +5,69 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { useNavigation } from '../../common/lib/kibana';
-import { AllCases, AllCasesProps } from '../all_cases';
-
-import { CaseView, CaseViewProps } from '../case_view';
-import { CreateCase, CreateCaseProps } from '../create';
-import { ConfigureCase, ConfigureCaseProps } from '../configure_cases';
-import {
-  casesDeepLinkIds,
-  getCasesConfigurePath,
-  getCasesCreatePath,
-  getCasesDetailPath,
-  getCasesDetailWithCommentPath,
-  getCasesSubCaseDetailPath,
-  getCasesSubCaseDetailWithCommentPath,
-} from '../../common/navigation';
+import { AllCases } from '../all_cases';
+import { CaseView } from '../case_view';
+import { CreateCase } from '../create';
+import { ConfigureCase } from '../configure_cases';
 import { CasesRoutesProps } from './types';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useAllCasesNavigation, useCaseViewNavigation } from '../../common/navigation/hooks';
+import {
+  getCasesConfigurePath,
+  getCreateCasePath,
+  getCaseViewPath,
+  getCaseViewWithCommentPath,
+  getSubCaseViewPath,
+  getSubCaseViewWithCommentPath,
+} from '../../common/navigation';
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, ...props }) => {
-  const { userCanCrud, appId } = useCasesContext();
-  const { getAppUrl, navigateTo } = useNavigation(appId);
+  const { timelineIntegration } = props;
+  const { userCanCrud } = useCasesContext();
+  const { navigateToAllCases } = useAllCasesNavigation();
+  const { navigateToCaseView } = useCaseViewNavigation();
 
-  const viewProps = useMemo(
-    (): Omit<CaseViewProps, 'caseId' | 'subCaseId'> => ({
-      ...props,
-      allCasesNavigation: {
-        href: getAppUrl({
-          deepLinkId: casesDeepLinkIds.cases,
-        }),
-        onClick: async (e) => {
-          if (e) {
-            e.preventDefault();
-          }
-          navigateTo({
-            deepLinkId: casesDeepLinkIds.cases,
-          });
-        },
-      },
-      caseDetailsNavigation: {
-        href: getAppUrl({
-          deepLinkId: casesDeepLinkIds.cases,
-        }),
-        onClick: async (e) => {
-          if (e) {
-            e.preventDefault();
-          }
-          navigateTo({
-            deepLinkId: casesDeepLinkIds.cases,
-          });
-        },
-      },
-      configureCasesNavigation: {
-        href: getAppUrl({
-          deepLinkId: casesDeepLinkIds.casesConfigure,
-        }),
-        onClick: async (e) => {
-          if (e) {
-            e.preventDefault();
-          }
-          navigateTo({
-            deepLinkId: casesDeepLinkIds.casesConfigure,
-          });
-        },
-      },
-    }),
-    [props, getAppUrl, navigateTo]
-  );
-
-  const allCasesProps = useMemo(
-    (): AllCasesProps => ({
-      ...props,
-      createCaseNavigation: {
-        href: getAppUrl({
-          deepLinkId: casesDeepLinkIds.casesCreate,
-        }),
-        onClick: async (e) => {
-          if (e) {
-            e.preventDefault();
-          }
-          navigateTo({
-            deepLinkId: casesDeepLinkIds.casesCreate,
-          });
-        },
-      },
-      caseDetailsNavigation: {
-        href: ({ detailName, subCaseId }) =>
-          getAppUrl({
-            deepLinkId: casesDeepLinkIds.cases,
-            path: `/${detailName}${subCaseId ? `/sub-cases/${subCaseId}` : ''}`,
-          }),
-        onClick: async ({ detailName, subCaseId }, e) => {
-          if (e) {
-            e.preventDefault();
-          }
-          navigateTo({
-            deepLinkId: casesDeepLinkIds.cases,
-            path: `/${detailName}${subCaseId ? `/sub-cases/${subCaseId}` : ''}`,
-          });
-        },
-      },
-      configureCasesNavigation: {
-        href: getAppUrl({
-          deepLinkId: casesDeepLinkIds.casesConfigure,
-        }),
-        onClick: async (e) => {
-          if (e) {
-            e.preventDefault();
-          }
-          navigateTo({
-            deepLinkId: casesDeepLinkIds.casesConfigure,
-          });
-        },
-      },
-    }),
-    [props, getAppUrl, navigateTo]
-  );
-
-  const createCaseProps = useMemo(
-    (): CreateCaseProps => ({
-      onCancel: async () =>
-        navigateTo({
-          deepLinkId: casesDeepLinkIds.cases,
-        }),
-      onSuccess: async ({ id }) =>
-        navigateTo({
-          deepLinkId: casesDeepLinkIds.cases,
-          path: `/${id}`,
-        }),
-      timelineIntegration: props.timelineIntegration,
-    }),
-    [props, navigateTo]
-  );
-
-  const configureCaseProps = useMemo(
-    (): ConfigureCaseProps => ({
-      allCasesNavigation: {
-        href: getAppUrl({
-          deepLinkId: casesDeepLinkIds.cases,
-        }),
-        onClick: async (e) => {
-          if (e) {
-            e.preventDefault();
-          }
-          navigateTo({
-            deepLinkId: casesDeepLinkIds.cases,
-          });
-        },
-      },
-    }),
-    [getAppUrl, navigateTo]
+  const onCreateCaseSuccess = useCallback(
+    async ({ id }) => navigateToCaseView({ detailName: id }),
+    [navigateToCaseView]
   );
 
   return (
     <Switch>
       <Route strict exact path={path}>
-        <AllCases {...allCasesProps} />
+        <AllCases {...props} />
       </Route>
 
-      {/* Using individual conditionals since Switch do not work with Fragment wrapped Routes */}
+      {/* Using individual "userCanCrud" conditionals since Switch do not work with Fragment wrapped Routes */}
       {userCanCrud && (
-        <Route path={getCasesCreatePath(path)}>
-          <CreateCase {...createCaseProps} />
+        <Route path={getCreateCasePath(path)}>
+          <CreateCase
+            onSuccess={onCreateCaseSuccess}
+            onCancel={navigateToAllCases}
+            timelineIntegration={timelineIntegration}
+          />
         </Route>
       )}
+
       {userCanCrud && (
         <Route path={getCasesConfigurePath(path)}>
-          <ConfigureCase {...configureCaseProps} />
+          <ConfigureCase />
         </Route>
       )}
+
       {userCanCrud && (
         <Route
           exact
           path={[
-            getCasesSubCaseDetailWithCommentPath(path),
-            getCasesDetailWithCommentPath(path),
-            getCasesSubCaseDetailPath(path),
-            getCasesDetailPath(path),
+            getSubCaseViewWithCommentPath(path),
+            getCaseViewWithCommentPath(path),
+            getSubCaseViewPath(path),
+            getCaseViewPath(path),
           ]}
         >
-          <CaseView {...viewProps} />
+          <CaseView {...props} />
         </Route>
       )}
 

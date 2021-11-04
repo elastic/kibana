@@ -57,7 +57,7 @@ const Badge = styled(EuiBadge)`
 ` as unknown as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
-interface BackOptions {
+export interface BackOptions {
   href: LinkIconProps['href'];
   onClick?: (ev: MouseEvent) => void;
   text: LinkIconProps['children'];

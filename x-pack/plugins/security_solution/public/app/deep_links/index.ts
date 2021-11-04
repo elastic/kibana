@@ -299,7 +299,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           },
           [SecurityPageName.caseConfigure]: {
             features: [FEATURE.casesCrud],
-            // isPremium: true,
+            isPremium: true,
           },
           [SecurityPageName.caseCreate]: {
             features: [FEATURE.casesCrud],
@@ -358,12 +358,10 @@ export function getDeepLinks(
   licenseType?: LicenseType,
   capabilities?: Capabilities
 ): AppDeepLink[] {
-  const hasPremium = isPremiumLicense(licenseType);
-
   const filterDeepLinks = (securityDeepLinks: SecuritySolutionDeepLink[]): AppDeepLink[] =>
     securityDeepLinks.reduce(
       (deepLinks: AppDeepLink[], { isPremium, features, experimentalKey, ...deepLink }) => {
-        if (isPremium && !hasPremium) {
+        if (licenseType && isPremium && !isPremiumLicense(licenseType)) {
           return deepLinks;
         }
         if (experimentalKey && !enableExperimental[experimentalKey]) {
