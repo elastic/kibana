@@ -8,62 +8,145 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 7.x releases.
+Review important information about the {kib} 7.16.x releases.
 
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
-* <<release-notes-7.15.1>>
-* <<release-notes-7.15.0>>
-* <<release-notes-7.14.2>>
-* <<release-notes-7.14.1>>
-* <<release-notes-7.14.0>>
-* <<release-notes-7.13.4>>
-* <<release-notes-7.13.3>>
-* <<release-notes-7.13.2>>
-* <<release-notes-7.13.1>>
-* <<release-notes-7.13.0>>
-* <<release-notes-7.12.1>>
-* <<release-notes-7.12.0>>
-* <<release-notes-7.11.2>>
-* <<release-notes-7.11.1>>
-* <<release-notes-7.11.0>>
-* <<release-notes-7.10.2>>
-* <<release-notes-7.10.1>>
-* <<release-notes-7.10.0>>
-* <<release-notes-7.9.3>>
-* <<release-notes-7.9.2>>
-* <<release-notes-7.9.1>>
-* <<release-notes-7.9.0>>
-* <<release-notes-7.8.1>>
-* <<release-notes-7.8.0>>
-* <<release-notes-7.7.1>>
-* <<release-notes-7.7.0>>
-* <<release-notes-7.6.2>>
-* <<release-notes-7.6.1>>
-* <<release-notes-7.6.0>>
-* <<release-notes-7.5.2>>
-* <<release-notes-7.5.1>>
-* <<release-notes-7.5.0>>
-* <<release-notes-7.4.2>>
-* <<release-notes-7.4.1>>
-* <<release-notes-7.4.0>>
-* <<release-notes-7.3.2>>
-* <<release-notes-7.3.1>>
-* <<release-notes-7.3.0>>
-* <<release-notes-7.2.1>>
-* <<release-notes-7.2.0>>
-* <<release-notes-7.1.1>>
-* <<release-notes-7.1.0>>
-* <<release-notes-7.0.1>>
-* <<release-notes-7.0.0>>
-* <<release-notes-7.0.0-rc2>>
-* <<release-notes-7.0.0-rc1>>
-* <<release-notes-7.0.0-beta1>>
-* <<release-notes-7.0.0-alpha2>>
-* <<release-notes-7.0.0-alpha1>>
+* <<release-notes-7.16.0>>
+//* <<release-notes-7.15.2>>
+//* <<release-notes-7.15.1>>
+//* <<release-notes-7.15.0>>
+//* <<release-notes-7.14.2>>
+//* <<release-notes-7.14.1>>
+//* <<release-notes-7.14.0>>
+//* <<release-notes-7.13.4>>
+//* <<release-notes-7.13.3>>
+//* <<release-notes-7.13.2>>
+//* <<release-notes-7.13.1>>
+//* <<release-notes-7.13.0>>
+//* <<release-notes-7.12.1>>
+//* <<release-notes-7.12.0>>
+//* <<release-notes-7.11.2>>
+//* <<release-notes-7.11.1>>
+//* <<release-notes-7.11.0>>
+//* <<release-notes-7.10.2>>
+//* <<release-notes-7.10.1>>
+//* <<release-notes-7.10.0>>
+//* <<release-notes-7.9.3>>
+//* <<release-notes-7.9.2>>
+//* <<release-notes-7.9.1>>
+//* <<release-notes-7.9.0>>
+//* <<release-notes-7.8.1>>
+//* <<release-notes-7.8.0>>
+//* <<release-notes-7.7.1>>
+//* <<release-notes-7.7.0>>
+//* <<release-notes-7.6.2>>
+//* <<release-notes-7.6.1>>
+//* <<release-notes-7.6.0>>
+//* <<release-notes-7.5.2>>
+//* <<release-notes-7.5.1>>
+//* <<release-notes-7.5.0>>
+//* <<release-notes-7.4.2>>
+//* <<release-notes-7.4.1>>
+//* <<release-notes-7.4.0>>
+//* <<release-notes-7.3.2>>
+//* <<release-notes-7.3.1>>
+//* <<release-notes-7.3.0>>
+//* <<release-notes-7.2.1>>
+//* <<release-notes-7.2.0>>
+//* <<release-notes-7.1.1>>
+//* <<release-notes-7.1.0>>
+//* <<release-notes-7.0.1>>
+//* <<release-notes-7.0.0>>
+//* <<release-notes-7.0.0-rc2>>
+//* <<release-notes-7.0.0-rc1>>
+//* <<release-notes-7.0.0-beta1>>
+//* <<release-notes-7.0.0-alpha2>>
+//* <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.16.0]]
+== {kib} 7.16.0
+
+coming::[7.16.0]
+
+/////
+[[release-notes-7.15.2]]
+== {kib} 7.15.2
+
+Review the following information about the 7.15.2 release.
+
+[float]
+[[security-updates-v7.15.2]]
+=== Security updates
+
+Review the security updates that were found in previous versions of {kib}.
+
+[discrete]
+[[path-traversal-issue]]
+.Path traversal issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.9.0 to 7.15.1, {kib} is unable to validate .pbf file paths on Microsoft Windows operating systems, which allows malicious users to arbitrarily traverse the {kib} host to load internal .pbf files. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37938[CVE-2021-37938]
+Thank you Dominic Couture for finding this issue.
+*Solution* +
+Upgrade to {kib} 7.15.2.
+====
+
+[discrete]
+[[information-disclosure-issue]]
+.Information disclosure issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.8.0 to 7.15.1, the {kib} JIRA and IBM Resilient connectors could be used to return HTTP response data on internal hosts, which can be hidden from public view. Malicious users with privileges to create connectors can use the JIRA and IBM Resilient connectors to view limited HTTP response data on hosts accessible to the cluster. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37939[CVE-2021-37939]
+*Solution* +
+Upgrade to {kib} 7.15.2.
+====
+
+[float]
+[[breaking-changes-v7.15.2]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.15.2, review the <<breaking-changes-7.15.0,7.15.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.15.2]]
+=== Enhancements
+Operations::
+* Adds ability to create multiple processes on production by splitting no_transpilation when setting up node env {kibana-pull}114940[#114940]
+
+[float]
+[[fixes-v7.15.2]]
+=== Bug Fixes
+APM::
+* Filter on tx metrics for instance stats {kibana-pull}114758[#114758]
+Elastic Security::
+For the Elastic Security 7.15.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Fixes single percentile case on index with many docs {kibana-pull}115214[#115214]
+* Fixes filters not being cleaned when navigating to another visualisation in *Lens* {kibana-pull}115162[#115162]
+Machine Learning::
+* APM Correlations: Get trace samples tab overall distribution via APM endpoint {kibana-pull}114615[#114615]
+* APM Correlations: Show trace samples even when overall histogram chart fails to load {kibana-pull}114247[#114247]
+Management::
+* Fixes memory leak in a browser when doing a search {kibana-pull}113756[#113756]
+Metrics::
+* Adds track_total_hits to Metric Threshold query to support alerts with over 10K documents {kibana-pull}115465[#115465]
+Uptime::
+* TLS and TLS legacy alert translation mismatch {kibana-pull}116113[#116113]
+
 [[release-notes-7.15.1]]
 == {kib} 7.15.1
 
@@ -14591,3 +14674,4 @@ if the field is switched, and then switched back to the previous field {kib-pull
 * Stops creation of nested search source per postflightrequest {kib-pull}20373[#20373]
 * Moves inspector code from Vis to embeddable visualize handler {kib-pull}24112[#24112]
 * Removes inspector from Vis {kib-pull}24112[#24112]
+/////
