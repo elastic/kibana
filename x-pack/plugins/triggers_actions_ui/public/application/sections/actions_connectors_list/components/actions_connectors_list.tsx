@@ -207,8 +207,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
          * Issue: https://github.com/elastic/kibana/issues/114507
          */
         const hasSNApplication =
-          itemConfig?.actionTypeId === '.servicenow' ||
-          itemConfig?.actionTypeId === '.servicenow-sir';
+          item?.actionTypeId === '.servicenow' || item?.actionTypeId === '.servicenow-sir';
 
         const showDeprecatedTooltip = hasSNApplication && itemConfig?.usesTableApi;
 
