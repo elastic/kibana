@@ -315,11 +315,11 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
+    // @ts-expect-error ErrorCause is not assignable to Error
+    items: res.body.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
-      // @ts-expect-error ErrorCause is not assignable to Error
-      error: item.update!.error as Error,
+      error: item.update!.error,
     })),
   };
 }

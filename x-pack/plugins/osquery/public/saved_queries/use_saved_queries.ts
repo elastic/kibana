@@ -36,6 +36,7 @@ export const useSavedQueries = ({
           toastMessage: error.body.message,
         });
       },
+      refetchOnWindowFocus: !!isLive,
     }
   );
 };

@@ -1,7 +1,7 @@
 [[embeddable-plugin]]
 == Embeddables plugin
 
-Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable _containers_.
+Embeddables are re-usable widgets that can be rendered on dashboard, but also in other apps. Developers can embed them directly in their plugin. End users can dynamically add them to embeddable _containers_.
 
 === Embeddable containers
 

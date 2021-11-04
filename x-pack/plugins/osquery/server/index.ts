@@ -23,4 +23,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new OsqueryPlugin(initializerContext);
 }
 
-export { OsqueryPluginSetup, OsqueryPluginStart } from './types';
+export type { OsqueryPluginSetup, OsqueryPluginStart } from './types';
