@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { omit } from 'lodash';
 import {
   EuiBadge,
@@ -52,6 +52,7 @@ import { useTableSettings } from '../../data_frame_analytics/pages/analytics_man
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
+import { useRefresh } from '../../routing/use_refresh';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -89,6 +90,8 @@ export const ModelsList: FC = () => {
     ML_PAGES.TRAINED_MODELS_MANAGE,
     getDefaultModelsListState()
   );
+
+  const refresh = useRefresh();
 
   const searchQueryText = pageState.queryText ?? '';
 
@@ -180,6 +183,13 @@ export const ModelsList: FC = () => {
     isLoading: setIsLoading,
     onRefresh: fetchModelsData,
   });
+
+  useEffect(
+    function updateOnTimerRefresh() {
+      fetchModelsData();
+    },
+    [refresh]
+  );
 
   const modelsStats: ModelsBarStats = useMemo(() => {
     return {

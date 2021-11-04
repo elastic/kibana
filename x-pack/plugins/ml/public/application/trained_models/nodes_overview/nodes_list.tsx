@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -32,6 +32,7 @@ import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
+import { useRefresh } from '../../routing/use_refresh';
 
 export type NodeItem = NodeDeploymentStatsResponse;
 
@@ -48,6 +49,9 @@ export const getDefaultNodesListState = (): ListingPageUrlState => ({
 
 export const NodesList: FC = () => {
   const trainedModelsApiService = useTrainedModelsApiService();
+
+  const refresh = useRefresh();
+
   const { displayErrorToast } = useToastNotificationService();
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const [items, setItems] = useState<NodeItem[]>([]);
@@ -179,6 +183,13 @@ export const NodesList: FC = () => {
     isLoading: setIsLoading,
     onRefresh: fetchNodesData,
   });
+
+  useEffect(
+    function updateOnTimerRefresh() {
+      fetchNodesData();
+    },
+    [refresh]
+  );
 
   return (
     <>
