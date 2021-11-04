@@ -786,20 +786,22 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      let { instance, lensStore } = (await mountWithProvider(<EditorFrame {...props} />));
+      let { instance: editorFrameInstance, lensStore } = await mountWithProvider(
+        <EditorFrame {...props} />
+      );
 
       act(() => {
         lensStore.dispatch(
           setState({
-            activeData: {}
+            activeData: {},
           })
         );
       });
 
-      instance.update();
+      editorFrameInstance.update();
 
       expect(
-        instance
+        editorFrameInstance
           .find('[data-test-subj="lnsSuggestion"]')
           .find(EuiPanel)
           .map((el) => el.parents(EuiToolTip).prop('content'))
@@ -843,20 +845,22 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      let { instance, lensStore } = (await mountWithProvider(<EditorFrame {...props} />));
+      let { instance: editorFrameInstance, lensStore } = await mountWithProvider(
+        <EditorFrame {...props} />
+      );
 
       act(() => {
         lensStore.dispatch(
           setState({
-            activeData: {}
+            activeData: {},
           })
         );
       });
 
-      instance.update();
+      editorFrameInstance.update();
 
       act(() => {
-        instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
+        editorFrameInstance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
       // validation requires to calls this getConfiguration API
