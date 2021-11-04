@@ -19,12 +19,12 @@ interface Props {
 
 export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName }) => {
   const filters = [
-    `appsearch.search_relevance_suggestions.query: ${query}`,
+    `appsearch.adaptive_relevance.query: ${query}`,
     'event.kind: event',
     'event.dataset: search-relevance-suggestions',
-    `appsearch.search_relevance_suggestions.engine: ${engineName}`,
+    `appsearch.adaptive_relevance.engine: ${engineName}`,
     'event.action: curation_suggestion',
-    'appsearch.search_relevance_suggestions.suggestion.new_status: automated',
+    'appsearch.adaptive_relevance.suggestion.new_status: automated',
   ];
 
   return (
