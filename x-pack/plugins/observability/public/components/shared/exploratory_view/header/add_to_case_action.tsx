@@ -15,6 +15,7 @@ import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { Case, SubCase } from '../../../../../../cases/common';
 import { observabilityFeatureId } from '../../../../../common';
+import { parseRelativeDate } from '../components/date_range_picker';
 
 export interface AddToCaseProps {
   timeRange?: { from: string; to: string };
@@ -31,11 +32,14 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
     [http.basePath]
   );
 
+  const absoluteFromDate = parseRelativeDate(timeRange!.from)!;
+  const absoluteToDate = parseRelativeDate(timeRange!.to, { roundUp: true })!;
+
   const { createCaseUrl, goToCreateCase, onCaseClicked, isCasesOpen, setIsCasesOpen, isSaving } =
     useAddToCase({
       lensAttributes,
       getToastText,
-      timeRange,
+      timeRange: { from: absoluteFromDate, to: absoluteToDate },
     });
 
   const getAllCasesSelectorModalProps: AllCasesSelectorModalProps = {
