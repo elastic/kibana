@@ -115,7 +115,7 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         },
       });
 
-      const aggResponse = result.body.aggregations as {
+      const aggResponse = result.body.aggregations as unknown as {
         count_by_result_type: {
           buckets: Array<{
             key: AnomalyResultType;

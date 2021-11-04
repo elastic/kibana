@@ -555,7 +555,6 @@ const previewTransformHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      // @ts-expect-error max_page_search_size is required in TransformPivot
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {

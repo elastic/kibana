@@ -60,6 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       `);
       expectSnapshot(
         response.body.traceDocs.map((doc) =>
+          // @ts-expect-error processor doesn't exist on Profile
           doc.processor.event === 'transaction'
             ? // @ts-expect-error
               `${doc.transaction.name} (transaction)`

@@ -69,7 +69,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       if (
         !(
           isEsSearchResponseWithAggregations(response) &&
-          isMultiBucketAggregate<estypes.AggregationsKeyedBucketKeys>(
+          isMultiBucketAggregate<estypes.AggregationsKeyedBucket>(
             response.aggregations.field_values
           )
         )
