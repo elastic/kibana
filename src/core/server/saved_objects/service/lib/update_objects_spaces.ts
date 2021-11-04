@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
+import pMap from 'p-map';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
+import type { Logger } from '../../../logging';
+import type { IndexMapping } from '../../mappings';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
 import type {
@@ -28,6 +31,9 @@ import {
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
+import { ALL_NAMESPACES_STRING } from './utils';
+import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
+import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 
 /**
  * An object that should have its spaces updated.
@@ -94,10 +100,12 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
  * @internal
  */
 export interface UpdateObjectsSpacesParams {
+  mappings: IndexMapping;
   registry: ISavedObjectTypeRegistry;
   allowedTypes: string[];
   client: RepositoryEsClient;
   serializer: SavedObjectsSerializer;
+  logger: Logger;
   getIndexForType: (type: string) => string;
   objects: SavedObjectsUpdateObjectsSpacesObject[];
   spacesToAdd: string[];
@@ -105,15 +113,24 @@ export interface UpdateObjectsSpacesParams {
   options?: SavedObjectsUpdateObjectsSpacesOptions;
 }
 
+type ObjectToDeleteAliasesFor = Pick<
+  DeleteLegacyUrlAliasesParams,
+  'type' | 'id' | 'namespaces' | 'deleteBehavior'
+>;
+
+const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
+
 /**
  * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
  * type.
  */
 export async function updateObjectsSpaces({
+  mappings,
   registry,
   allowedTypes,
   client,
   serializer,
+  logger,
   getIndexForType,
   objects,
   spacesToAdd,
@@ -190,8 +207,12 @@ export async function updateObjectsSpaces({
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];
+  const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
   const expectedBulkOperationResults: Array<
-    Either<SavedObjectsUpdateObjectsSpacesResponseObject, Record<string, any>>
+    Either<
+      SavedObjectsUpdateObjectsSpacesResponseObject,
+      { type: string; id: string; updatedSpaces: string[]; esRequestIndex?: number }
+    >
   > = expectedBulkGetResults.map((expectedBulkGetResult) => {
     if (isLeft(expectedBulkGetResult)) {
       return expectedBulkGetResult;
@@ -225,7 +246,7 @@ export async function updateObjectsSpaces({
       versionProperties = getExpectedVersionProperties(version);
     }
 
-    const { newSpaces, isUpdateRequired } = getNewSpacesArray(
+    const { updatedSpaces, removedSpaces, isUpdateRequired } = analyzeSpaceChanges(
       currentSpaces,
       spacesToAdd,
       spacesToRemove
@@ -233,7 +254,7 @@ export async function updateObjectsSpaces({
     const expectedResult = {
       type,
       id,
-      newSpaces,
+      updatedSpaces,
       ...(isUpdateRequired && { esRequestIndex: bulkOperationRequestIndexCounter++ }),
     };
 
@@ -243,12 +264,23 @@ export async function updateObjectsSpaces({
         _index: getIndexForType(type),
         ...versionProperties,
       };
-      if (newSpaces.length) {
-        const documentToSave = { updated_at: time, namespaces: newSpaces };
+      if (updatedSpaces.length) {
+        const documentToSave = { updated_at: time, namespaces: updatedSpaces };
         // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
         bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
       } else {
         bulkOperationParams.push({ delete: documentMetadata });
+      }
+
+      if (removedSpaces.length && !updatedSpaces.includes(ALL_NAMESPACES_STRING)) {
+        // The object is being removed from at least one space; make sure to delete aliases appropriately
+        objectsToDeleteAliasesFor.push({
+          type,
+          id,
+          ...(removedSpaces.includes(ALL_NAMESPACES_STRING)
+            ? { namespaces: updatedSpaces, deleteBehavior: 'exclusive' }
+            : { namespaces: removedSpaces, deleteBehavior: 'inclusive' }),
+        });
       }
     }
 
@@ -260,6 +292,24 @@ export async function updateObjectsSpaces({
     ? await client.bulk({ refresh, body: bulkOperationParams, require_alias: true })
     : undefined;
 
+  // Delete aliases if necessary, ensuring we don't have too many concurrent operations running.
+  const mapper = async ({ type, id, namespaces, deleteBehavior }: ObjectToDeleteAliasesFor) =>
+    deleteLegacyUrlAliases({
+      mappings,
+      registry,
+      client,
+      getIndexForType,
+      type,
+      id,
+      namespaces,
+      deleteBehavior,
+    }).catch((err) => {
+      // The object has already been unshared, but we caught an error when attempting to delete aliases.
+      // A consumer cannot attempt to unshare the object again, so just log the error and swallow it.
+      logger.error(`Unable to delete aliases when unsharing an object: ${err.message}`);
+    });
+  await pMap(objectsToDeleteAliasesFor, mapper, { concurrency: MAX_CONCURRENT_ALIAS_DELETIONS });
+
   return {
     objects: expectedBulkOperationResults.map<SavedObjectsUpdateObjectsSpacesResponseObject>(
       (expectedResult) => {
@@ -267,7 +317,7 @@ export async function updateObjectsSpaces({
           return expectedResult.value;
         }
 
-        const { type, id, newSpaces, esRequestIndex } = expectedResult.value;
+        const { type, id, updatedSpaces, esRequestIndex } = expectedResult.value;
         if (esRequestIndex !== undefined) {
           const response = bulkOperationResponse?.body.items[esRequestIndex] ?? {};
           const rawResponse = Object.values(response)[0] as any;
@@ -277,7 +327,7 @@ export async function updateObjectsSpaces({
           }
         }
 
-        return { id, type, spaces: newSpaces };
+        return { id, type, spaces: updatedSpaces };
       }
     ),
   };
@@ -289,17 +339,22 @@ function errorContent(error: DecoratedError) {
 }
 
 /** Gets the remaining spaces for an object after adding new ones and removing old ones. */
-function getNewSpacesArray(
+function analyzeSpaceChanges(
   existingSpaces: string[],
   spacesToAdd: string[],
   spacesToRemove: string[]
 ) {
   const addSet = new Set(spacesToAdd);
   const removeSet = new Set(spacesToRemove);
-  const newSpaces = existingSpaces
+  const removedSpaces: string[] = [];
+  const updatedSpaces = existingSpaces
     .filter((x) => {
       addSet.delete(x);
-      return !removeSet.delete(x);
+      const removed = removeSet.delete(x);
+      if (removed) {
+        removedSpaces.push(x);
+      }
+      return !removed;
     })
     .concat(Array.from(addSet));
 
@@ -307,5 +362,5 @@ function getNewSpacesArray(
   const isAnySpaceRemoved = removeSet.size < spacesToRemove.length;
   const isUpdateRequired = isAnySpaceAdded || isAnySpaceRemoved;
 
-  return { newSpaces, isUpdateRequired };
+  return { updatedSpaces, removedSpaces, isUpdateRequired };
 }

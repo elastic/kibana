@@ -585,6 +585,94 @@
 {
   "type": "doc",
   "value": {
+    "id": "sharedtype:alias_delete_inclusive",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "This is used to test that when an object is unshared from a space, inbound aliases for just those spaces are removed"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:space_1:sharedtype:doesnt-matter",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "doesnt-matter",
+        "targetNamespace": "space_1",
+        "targetType": "sharedtype",
+        "targetId": "alias_delete_inclusive"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:space_2:sharedtype:doesnt-matter",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "doesnt-matter",
+        "targetNamespace": "space_2",
+        "targetType": "sharedtype",
+        "targetId": "alias_delete_inclusive"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:alias_delete_exclusive",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "This is used to test that when an object is unshared from all space, inbound aliases for all spaces are removed"
+      },
+      "type": "sharedtype",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:other_space:sharedtype:doesnt-matter",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "doesnt-matter",
+        "targetNamespace": "other_space",
+        "targetType": "sharedtype",
+        "targetId": "alias_delete_exclusive"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "sharedtype:conflict_1_default",
     "index": ".kibana",
     "source": {

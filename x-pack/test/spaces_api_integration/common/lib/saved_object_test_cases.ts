@@ -38,6 +38,14 @@ export const MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES = Object.freeze({
     id: 'all_spaces',
     existingNamespaces: ['*'], // all current and future spaces
   }),
+  ALIAS_DELETE_INCLUSIVE: Object.freeze({
+    id: 'alias_delete_inclusive',
+    existingNamespaces: ['default', 'space_1', 'space_2'], // each individual space
+  }),
+  ALIAS_DELETE_EXCLUSIVE: Object.freeze({
+    id: 'alias_delete_exclusive',
+    existingNamespaces: ['*'], // all current and future spaces
+  }),
   DOES_NOT_EXIST: Object.freeze({
     id: 'does_not_exist',
     existingNamespaces: [] as string[],
