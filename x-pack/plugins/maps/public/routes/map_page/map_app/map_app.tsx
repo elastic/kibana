@@ -399,8 +399,7 @@ export class MapApp extends React.Component<Props, State> {
         query={this.props.query}
         onQuerySubmit={({ dateRange, query }) => {
           const isUpdate =
-            !_.isEqual(dateRange, this.props.timeFilters) ||
-            !_.isEqual(query, this.props.query);
+            !_.isEqual(dateRange, this.props.timeFilters) || !_.isEqual(query, this.props.query);
           if (isUpdate) {
             this._onQueryChange({
               query,

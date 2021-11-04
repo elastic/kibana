@@ -15,7 +15,10 @@ export default function ({ getPageObjects, getService }) {
 
   describe('mvt scaling', () => {
     before(async () => {
-      await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader', 'geoshape_data_reader'], false);
+      await security.testUser.setRoles(
+        ['global_maps_all', 'test_logstash_reader', 'geoshape_data_reader'],
+        false
+      );
     });
 
     after(async () => {
@@ -33,25 +36,31 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should request tiles from /api/maps/mvt/getTile', async () => {
-        const tileUrl = new URL(mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0], 'http://absolute_path');
+        const tileUrl = new URL(
+          mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0],
+          'http://absolute_path'
+        );
         const searchParams = Object.fromEntries(tileUrl.searchParams);
 
         expect(tileUrl.pathname).to.equal('/api/maps/mvt/getTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
-        
+
         // token is an unique id that changes between runs
-        expect(typeof  searchParams.token).to.equal('string');
+        expect(typeof searchParams.token).to.equal('string');
         delete searchParams.token;
 
         expect(searchParams).to.eql({
           geometryFieldName: 'geometry',
           index: 'geo_shapes*',
-          requestBody: '(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))',
+          requestBody:
+            '(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))',
         });
       });
 
       it('should have fill layer', async () => {
         //Should correctly load meta for style-rule (sigma is set to 1, opacity to 1)
-        const fillLayer = mapboxStyle.layers.find((layer) => layer.id === VECTOR_SOURCE_ID + '_fill');
+        const fillLayer = mapboxStyle.layers.find(
+          (layer) => layer.id === VECTOR_SOURCE_ID + '_fill'
+        );
         expect(fillLayer.paint).to.eql({
           'fill-color': [
             'interpolate',
