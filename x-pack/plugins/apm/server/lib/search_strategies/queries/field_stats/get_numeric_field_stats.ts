@@ -87,7 +87,7 @@ export const fetchNumericFieldStats = async (
   );
   const { body } = await esClient.search(request);
 
-  const aggregations = body.aggregations as {
+  const aggregations = body.aggregations as unknown as {
     sample: {
       sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
       sampled_percentiles: estypes.AggregationsHdrPercentilesAggregate;

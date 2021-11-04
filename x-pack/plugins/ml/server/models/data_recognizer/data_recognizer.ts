@@ -1127,7 +1127,7 @@ export class DataRecognizer {
           // set the fallback range for all jobs
           // as there may not be a common query, we use a match_all
           const { start: fallbackStart, end: fallbackEnd } = await this._getFallbackTimeRange(
-            firstJobTimeField,
+            firstJobTimeField!,
             { match_all: {} }
           );
           start = fallbackStart;
@@ -1139,7 +1139,7 @@ export class DataRecognizer {
           let latestMs = end;
           if (earliestMs === undefined || latestMs === undefined) {
             const timeFieldRange = await this._getFallbackTimeRange(
-              job.config.data_description.time_field,
+              job.config.data_description.time_field!,
               query
             );
             earliestMs = timeFieldRange.start;
@@ -1150,7 +1150,7 @@ export class DataRecognizer {
             job.config.analysis_config,
             this._indexPatternName,
             query,
-            job.config.data_description.time_field,
+            job.config.data_description.time_field!,
             earliestMs,
             latestMs
           );
