@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -28,11 +27,7 @@ import {
 } from '../../../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
-import {
-  getESQueryHostMetadataByID,
-  kibanaRequestToMetadataListESQuery,
-  buildUnitedIndexQuery,
-} from './query_builders';
+import { kibanaRequestToMetadataListESQuery, buildUnitedIndexQuery } from './query_builders';
 import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
@@ -41,11 +36,8 @@ import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { catchAndWrapError, fleetAgentStatusToEndpointHostStatus } from '../../utils';
-import {
-  queryResponseToHostListResult,
-  queryResponseToHostResult,
-} from './support/query_strategies';
+import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import { queryResponseToHostListResult } from './support/query_strategies';
 import { NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
 import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
@@ -72,11 +64,7 @@ export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
 };
 
-const errorHandler = <E extends Error>(
-  logger: Logger,
-  res: KibanaResponseFactory,
-  error: E
-): IKibanaResponse => {
+const errorHandler = <E extends Error>(res: KibanaResponseFactory, error: E): IKibanaResponse => {
   if (error instanceof NotFoundError) {
     return res.notFound({ body: error });
   }
@@ -146,8 +134,7 @@ export const getMetadataListRequestHandler = function (
 };
 
 export const getMetadataRequestHandler = function (
-  endpointAppContext: EndpointAppContext,
-  logger: Logger
+  endpointAppContext: EndpointAppContext
 ): RequestHandler<
   TypeOf<typeof GetMetadataRequestSchema.params>,
   unknown,
@@ -165,111 +152,10 @@ export const getMetadataRequestHandler = function (
         ),
       });
     } catch (error) {
-      return errorHandler(logger, response, error);
+      return errorHandler(response, error);
     }
   };
 };
-
-export async function getHostMetaData(
-  metadataRequestContext: MetadataRequestContext,
-  id: string
-): Promise<HostMetadata | undefined> {
-  if (
-    !metadataRequestContext.esClient &&
-    !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
-  ) {
-    throw Boom.badRequest('esClient not found');
-  }
-
-  if (
-    !metadataRequestContext.savedObjectsClient &&
-    !metadataRequestContext.requestHandlerContext?.core.savedObjects
-  ) {
-    throw Boom.badRequest('savedObjectsClient not found');
-  }
-
-  const esClient = (metadataRequestContext?.esClient ??
-    metadataRequestContext.requestHandlerContext?.core.elasticsearch
-      .client) as IScopedClusterClient;
-
-  const query = getESQueryHostMetadataByID(id);
-
-  const response = await esClient.asCurrentUser
-    .search<HostMetadata>(query)
-    .catch(catchAndWrapError);
-
-  const hostResult = queryResponseToHostResult(response.body);
-
-  const hostMetadata = hostResult.result;
-  if (!hostMetadata) {
-    return undefined;
-  }
-
-  return hostMetadata;
-}
-
-export async function getHostData(
-  metadataRequestContext: MetadataRequestContext,
-  id: string
-): Promise<HostInfo | undefined> {
-  if (!metadataRequestContext.savedObjectsClient) {
-    throw Boom.badRequest('savedObjectsClient not found');
-  }
-
-  if (
-    !metadataRequestContext.esClient &&
-    !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
-  ) {
-    throw Boom.badRequest('esClient not found');
-  }
-
-  const hostMetadata = await getHostMetaData(metadataRequestContext, id);
-
-  if (!hostMetadata) {
-    return undefined;
-  }
-
-  const agent = await findAgent(metadataRequestContext, hostMetadata);
-
-  if (agent && !agent.active) {
-    throw Boom.badRequest('the requested endpoint is unenrolled');
-  }
-
-  const metadata = await enrichHostMetadata(hostMetadata, metadataRequestContext);
-
-  return metadata;
-}
-
-async function findAgent(
-  metadataRequestContext: MetadataRequestContext,
-  hostMetadata: HostMetadata
-): Promise<Agent | undefined> {
-  try {
-    if (
-      !metadataRequestContext.esClient &&
-      !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
-    ) {
-      throw new Error('esClient not found');
-    }
-
-    const esClient = (metadataRequestContext?.esClient ??
-      metadataRequestContext.requestHandlerContext?.core.elasticsearch
-        .client) as IScopedClusterClient;
-
-    return await metadataRequestContext.endpointAppContextService
-      ?.getAgentService()
-      ?.getAgent(esClient.asCurrentUser, hostMetadata.elastic.agent.id);
-  } catch (e) {
-    if (e instanceof AgentNotFoundError) {
-      metadataRequestContext.logger.warn(
-        `agent with id ${hostMetadata.elastic.agent.id} not found`
-      );
-      return undefined;
-    } else {
-      throw e;
-    }
-  }
-}
 
 export async function mapToHostResultList(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

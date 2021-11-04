@@ -81,6 +81,6 @@ export function registerEndpointRoutes(
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataRequestHandler(endpointAppContext, logger)
+    getMetadataRequestHandler(endpointAppContext)
   );
 }
