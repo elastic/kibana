@@ -172,7 +172,8 @@ describe('EventsViewer', () => {
     mockUseSourcererScope.mockImplementation(() => defaultMocks);
   });
 
-  describe('event details', () => {
+  // https://github.com/elastic/kibana/issues/117586
+  describe.skip('event details', () => {
     useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
     beforeEach(() => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponseWithEvents]);
