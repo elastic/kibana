@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
         body: { _source },
       } = await es.get<Record<string, any>>({
         id: generateRawID(id, type),
-        type: '_doc',
         index: '.kibana',
       });
       return _source?.[type];

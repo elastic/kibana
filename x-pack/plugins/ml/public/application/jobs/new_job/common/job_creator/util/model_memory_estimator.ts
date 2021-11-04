@@ -142,7 +142,7 @@ export const useModelMemoryEstimator = (
       analysisConfig: jobCreator.jobConfig.analysis_config,
       indexPattern: jobCreator.indexPatternTitle,
       query: jobCreator.datafeedConfig.query,
-      timeFieldName: jobCreator.jobConfig.data_description.time_field,
+      timeFieldName: jobCreator.jobConfig.data_description.time_field!,
       earliestMs: jobCreator.start,
       latestMs: jobCreator.end,
     });
