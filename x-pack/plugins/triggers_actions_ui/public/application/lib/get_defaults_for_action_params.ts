@@ -42,5 +42,28 @@ export const getDefaultsForActionParams = (
           comments: [],
         },
       };
+    case '.servicenow-itom':
+      const additionalInformation = JSON.stringify({
+        alert: {
+          id: '{{alert.id}}',
+          actionGroup: '{{alert.actionGroup}}',
+          actionSubgroup: '{{alert.actionSubgroup}}',
+          actionGroupName: '{{alert.actionGroupName}}',
+        },
+        rule: {
+          id: '{{rule.id}}',
+          name: '{{rule.name}}',
+          type: '{{rule.type}}',
+        },
+        date: '{{date}}',
+      });
+
+      return {
+        subAction: 'addEvent',
+        subActionParams: {
+          additional_info: additionalInformation,
+          message_key: defaultGroupAlert,
+        },
+      };
   }
 };

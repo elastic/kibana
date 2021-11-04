@@ -47,4 +47,29 @@ describe('getDefaultsForActionParams', () => {
       },
     });
   });
+
+  test('servicenow itom defaults', async () => {
+    const additionalInformation = JSON.stringify({
+      alert: {
+        id: '{{alert.id}}',
+        actionGroup: '{{alert.actionGroup}}',
+        actionSubgroup: '{{alert.actionSubgroup}}',
+        actionGroupName: '{{alert.actionGroupName}}',
+      },
+      rule: {
+        id: '{{rule.id}}',
+        name: '{{rule.name}}',
+        type: '{{rule.type}}',
+      },
+      date: '{{date}}',
+    });
+
+    expect(getDefaultsForActionParams('.servicenow-itom', 'test', false)).toEqual({
+      subAction: 'addEvent',
+      subActionParams: {
+        additional_info: additionalInformation,
+        message_key: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      },
+    });
+  });
 });
