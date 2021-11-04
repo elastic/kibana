@@ -13,18 +13,6 @@ interface StylesDeps {
   depth: number;
 }
 
-interface StylesReturn {
-  darkText: string;
-  searchHighlight: string;
-  children: string;
-  button: string;
-  buttonArrow: string;
-  processNode: string;
-  wrapper: string;
-  workingDir: string;
-  userEnteredIcon: string;
-}
-
 export const useStyles = ({ depth }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -137,7 +125,7 @@ export const useStyles = ({ depth }: StylesDeps) => {
     margin-top: 8px;
   `;
 
-  const styles: StylesReturn = {
+  return {
     darkText,
     searchHighlight,
     children,
@@ -148,6 +136,4 @@ export const useStyles = ({ depth }: StylesDeps) => {
     workingDir,
     userEnteredIcon,
   };
-
-  return styles;
 };

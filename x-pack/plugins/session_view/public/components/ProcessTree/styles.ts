@@ -7,11 +7,6 @@
 
 import { useEuiTheme } from '@elastic/eui';
 
-interface StylesReturn {
-  scroller: string;
-  selectionArea: string;
-}
-
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   const defaultSelectionColor = euiTheme.colors.accent;
@@ -39,10 +34,8 @@ export const useStyles = () => {
     opacity: .1;
   `;
 
-  const styles: StylesReturn = {
+  return {
     scroller,
     selectionArea,
   };
-
-  return styles;
 };
