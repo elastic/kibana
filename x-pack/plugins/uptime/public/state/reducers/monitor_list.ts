@@ -6,12 +6,12 @@
  */
 
 import { handleActions, Action } from 'redux-actions';
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError } from 'src/core/public';
 import { getMonitorList, getMonitorListSuccess, getMonitorListFailure } from '../actions';
 import { MonitorSummariesResult } from '../../../common/runtime_types';
 
 export interface MonitorList {
-  error?: IHttpFetchError<ResponseErrorBody>;
+  error?: IHttpFetchError;
   loading: boolean;
   list: MonitorSummariesResult;
 }
@@ -25,7 +25,7 @@ export const initialState: MonitorList = {
   loading: false,
 };
 
-type Payload = MonitorSummariesResult & IHttpFetchError<ResponseErrorBody>;
+type Payload = MonitorSummariesResult & IHttpFetchError;
 
 export const monitorListReducer = handleActions<MonitorList, Payload>(
   {
@@ -42,10 +42,7 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
       error: undefined,
       list: { ...action.payload },
     }),
-    [String(getMonitorListFailure)]: (
-      state: MonitorList,
-      action: Action<IHttpFetchError<ResponseErrorBody>>
-    ) => ({
+    [String(getMonitorListFailure)]: (state: MonitorList, action: Action<IHttpFetchError>) => ({
       ...state,
       error: action.payload,
       loading: false,
