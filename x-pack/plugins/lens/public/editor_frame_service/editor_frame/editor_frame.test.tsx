@@ -785,7 +785,18 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+
+      let { instance, lensStore } = (await mountWithProvider(<EditorFrame {...props} />));
+
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            activeData: {}
+          })
+        );
+      });
+
+      instance.update();
 
       expect(
         instance
@@ -831,14 +842,25 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+
+      let { instance, lensStore } = (await mountWithProvider(<EditorFrame {...props} />));
+
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            activeData: {}
+          })
+        );
+      });
+
+      instance.update();
 
       act(() => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
