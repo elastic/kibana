@@ -53,9 +53,9 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
-const grepArg = grep ? `--grep ${grep}` : '';
+const grepArg = grep ? `--grep "${grep}"` : '';
+const cmd = `node ../../../../scripts/${ftrScript} ${grepArg} --config ../../../../test/apm_api_integration/${license}/config.ts`;
 
-childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} ${grepArg} --config ../../../../test/apm_api_integration/${license}/config.ts`,
-  { cwd: path.join(__dirname), stdio: 'inherit' }
-);
+console.log(`Running ${cmd}`);
+
+childProcess.execSync(cmd, { cwd: path.join(__dirname), stdio: 'inherit' });

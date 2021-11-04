@@ -59,10 +59,9 @@ if (server) {
 }
 
 const config = open ? './ftr_config_open.ts' : './ftr_config_run.ts';
-const grepArg = grep ? `--grep ${grep}` : '';
+const grepArg = grep ? `--grep "${grep}"` : '';
 const bailArg = bail ? `--bail` : '';
+const cmd = `node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`;
 
-childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`,
-  { cwd: e2eDir, stdio: 'inherit' }
-);
+console.log(`Running ${cmd}`);
+childProcess.execSync(cmd, { cwd: e2eDir, stdio: 'inherit' });
