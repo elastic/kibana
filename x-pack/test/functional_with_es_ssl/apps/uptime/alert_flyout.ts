@@ -11,7 +11,7 @@ import { delay } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  describe.only('uptime alerts', () => {
+  describe('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
@@ -177,7 +177,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton(alertName);
+        await alerts.clickSaveAlertButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });

@@ -13,7 +13,7 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe.only('Uptime app', function () {
+  describe('Uptime app', function () {
     this.tags('ciGroup6');
 
     describe('with real-world data', () => {
