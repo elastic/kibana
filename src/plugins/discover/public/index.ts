@@ -23,7 +23,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
 
-export { ISearchEmbeddable, SearchInput } from './embeddable';
+export type { ISearchEmbeddable, SearchInput } from './embeddable';
 export { SEARCH_EMBEDDABLE_TYPE } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
 
