@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -39,11 +38,17 @@ export const getTimelinesRoute = (
       },
     },
     async (context, request, response) => {
+      const customError = (message: string) => ({
+        name: new Error(message).name,
+        message: new Error(message).message,
+        statusCode: 400,
+      });
+
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const queryParams = pipe(
           getTimelinesQuerySchema.decode(request.query),
-          fold(throwErrors(Boom.badRequest), identity)
+          fold(throwErrors(customError), identity)
         );
         const onlyUserFavorite = queryParams?.only_user_favorite === 'true' ? true : false;
         const pageSize = queryParams?.page_size ? parseInt(queryParams.page_size, 10) : null;
