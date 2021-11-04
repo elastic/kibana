@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('from new jobs posted', () => {
-      it('should handle csv', async () => {
+      it('should handle csv_searchsource', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
             reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
