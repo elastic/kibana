@@ -89,9 +89,10 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
       new Set<string>()
     );
 
+    // @ts-expect-error influencers is always an array
     const normalizedInfluencers: estypes.Field[] = Array.isArray(influencers)
-      ? influencers
-      : [influencers];
+      ? influencers!
+      : [influencers!];
     const maxBucketFieldCardinalities = normalizedInfluencers.filter(
       (influencerField) =>
         !!influencerField &&
