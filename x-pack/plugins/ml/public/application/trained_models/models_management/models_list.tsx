@@ -544,6 +544,18 @@ export const ModelsList: FC = () => {
       'data-test-subj': 'mlModelsTableColumnType',
     },
     {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
+        defaultMessage: 'State',
+      }),
+      sortable: (item) => item.stats?.deployment_stats?.state,
+      align: 'left',
+      render: (model: ModelItem) => {
+        const state = model.stats?.deployment_stats?.state;
+        return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
+      },
+      'data-test-subj': 'mlModelsTableColumnDeploymentState',
+    },
+    {
       field: ModelsTableToConfigMapping.createdAt,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
         defaultMessage: 'Created at',

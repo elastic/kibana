@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { useLocation } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { NavigationMenu } from '../components/navigation_menu';
 import { ModelsList } from './models_management';
 import { TrainedModelsNavigationBar } from './navigation_bar';
@@ -30,7 +31,6 @@ import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wra
 import { useRefreshAnalyticsList } from '../data_frame_analytics/common';
 import { useRefreshInterval } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_refresh_interval';
 import { NodesList } from './nodes_overview';
-import { i18n } from '../../../../../../../../../../private/var/tmp/_bazel_darnautov/1afe62330ff0d9ae1ca2013aad33fd76/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
 
 export const Page: FC = () => {
   useRefreshInterval(() => {});
