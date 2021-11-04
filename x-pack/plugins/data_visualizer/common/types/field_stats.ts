@@ -28,6 +28,7 @@ export interface Field {
   safeFieldName: string;
 }
 
+// @todo: check
 export function isValidField(arg: unknown): arg is Field {
   return isPopulatedObject(arg, ['fieldName', 'type']) && typeof arg.fieldName === 'string';
 }
@@ -48,7 +49,8 @@ export interface Bucket {
 }
 
 export interface FieldStatsError {
-  fieldName: string;
+  fieldName?: string;
+  fields?: Field[];
   error: Error;
 }
 
