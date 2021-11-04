@@ -10,7 +10,7 @@ The ServiceNow ITSM connector uses the https://docs.servicenow.com/bundle/orland
 [float]
 [[servicenow-itsm-connector-prerequisites]]
 === Prerequisites
-After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow ITSM connector:
+After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow ITSM connector or <<updating an existing one, sservicenow-itsm-connector-update>>:
 
 * Install Elastic for ITSM from the https://store.servicenow.com/sn_appstore_store.do#!/store/home[ServiceNow Store].
 * Create a ServiceNow integration user and assign it the appropriate roles.
@@ -32,13 +32,12 @@ To ensure authenticated communication between Elastic and ServiceNow, create a S
 
 *Create a CORS rule*
 
-A CORS rule is required for communication between the Elastic and Servicenow.
-To create a ServiceNow CORS rule:
+A CORS rule is required for communication between the Elastic and Servicenow:
 
 . Go to *System Web Services -> CORS Rules*.
 . Click *New*.
 . Configure the rule settings to use the Elastic SIR API and the Kibana URL:
-* *REST API*: Choose x_elas2_sir_int/elastic_api.
+* *REST API*: Choose `x_elas2_sir_int/elastic_api`.
 * *Domain*: Enter the Kibana URL.
 . Go to the *HTTP methods* tab and choose the GET HTTP method by selecting *GET*.
 . Click *Submit* to create the rule.
@@ -50,7 +49,7 @@ To create a ServiceNow CORS rule:
 ServiceNow ITSM connectors created in 7.15, or an earlier version, will be marked as deprecated after you upgrade to 7.16. Deprecated connectors have a yellow icon at the end of their name and display a warning message if you select them.
 
 [role="screenshot"]
-image::images/management/connectors/images/servicenow-sir-update-connector.png[]
+image::management/connectors/images/servicenow-sir-update-connector.png[]
 
 IMPORTANT: Deprecated connectors will continue to function with the rules and cases they were added to, but you cannot assign a deprecated connector to a new rule or case. If you try to do so, you will be prompted to update the connector or create a new one.
 
