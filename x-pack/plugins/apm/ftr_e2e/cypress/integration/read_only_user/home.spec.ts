@@ -6,9 +6,11 @@
  */
 
 import url from 'url';
-import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
+import { synthtrace } from '../../../synthtrace';
+import { opbeans } from '../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
 const serviceInventoryHref = url.format({
   pathname: '/app/apm/services',
@@ -27,6 +29,19 @@ const apisToIntercept = [
 ];
 
 describe('Home page', () => {
+  before(async () => {
+    await synthtrace.index(
+      opbeans({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
+  });
+
+  after(async () => {
+    await synthtrace.clean();
+  });
+
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
@@ -44,7 +59,6 @@ describe('Home page', () => {
     cy.visit(
       `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
     );
-    cy.contains('opbeans-python');
     cy.contains('opbeans-java');
     cy.contains('opbeans-node');
   });

@@ -24,7 +24,8 @@ export const useSavedQueries = ({
   return useQuery(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
     () =>
-      http.get('/internal/osquery/saved_query', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      http.get<any>('/internal/osquery/saved_query', {
         query: { pageIndex, pageSize, sortField, sortDirection },
       }),
     {
@@ -36,6 +37,7 @@ export const useSavedQueries = ({
           toastMessage: error.body.message,
         });
       },
+      refetchOnWindowFocus: !!isLive,
     }
   );
 };
