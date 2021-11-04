@@ -7,11 +7,12 @@
  */
 
 import { CoreSetup, DocLinksStart, IUiSettingsClient } from 'src/core/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
+import type { VisualizationsSetup } from '../../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { DataPublicPluginStart } from '../../../data/public';
+import type { ChartsPluginSetup } from '../../../charts/public';
+import type { FieldFormatsStart } from '../../../field_formats/public';
+import type { UsageCollectionSetup } from '../../../usage_collection/public';
+import type { DataPublicPluginStart } from '../../../data/public';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 import { createHeatmapVisFn } from './heatmap_fn';
 import { getHeatmapVisRenderer } from './heatmap_renderer';
@@ -28,6 +29,7 @@ export interface VisTypeHeatmapSetupDependencies {
 /** @internal */
 export interface VisTypeHeatmapPluginStartDependencies {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /** @internal */
@@ -38,6 +40,7 @@ export interface VisTypeHeatmapDependencies {
     data: DataPublicPluginStart;
     docLinks: DocLinksStart;
     uiSettings: IUiSettingsClient;
+    fieldFormats: FieldFormatsStart;
   }>;
 }
 
@@ -53,6 +56,7 @@ export class VisTypePiePlugin {
           data: deps.data,
           docLinks: coreStart.docLinks,
           uiSettings: coreStart.uiSettings,
+          fieldFormats: deps.fieldFormats,
         };
       };
       const trackUiMetric = usageCollection?.reportUiCounter.bind(

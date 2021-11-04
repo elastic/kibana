@@ -21,9 +21,11 @@ const VERTICAL_ROTATION = 270;
 interface LabelsPanelProps {
   valueAxis: ValueAxis;
   setValue: VisEditorOptionsProps<HeatmapVisParams>['setValue'];
+  isNewLibrary?: boolean;
+  isCellLabelVisible?: boolean;
 }
 
-function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
+function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: LabelsPanelProps) {
   const rotateLabels = valueAxis.labels.rotate === VERTICAL_ROTATION;
 
   const setValueAxisLabels = useCallback(
@@ -60,17 +62,30 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.heatmapOptions.showLabelsTitle', {
-          defaultMessage: 'Show labels',
-        })}
-        paramName="show"
-        value={Boolean(valueAxis.labels.show)}
-        setValue={setValueAxisLabels}
-      />
+      {isNewLibrary && (
+        <SwitchOption
+          label={i18n.translate('visTypeVislib.controls.heatmapOptions.showLabelsTitle', {
+            defaultMessage: 'Show labels',
+          })}
+          paramName="isCellLabelVisible"
+          value={Boolean(isCellLabelVisible)}
+          setValue={setValue}
+        />
+      )}
+
+      {!isNewLibrary && (
+        <SwitchOption
+          label={i18n.translate('visTypeVislib.controls.heatmapOptions.showLabelsTitle', {
+            defaultMessage: 'Show labels',
+          })}
+          paramName="show"
+          value={Boolean(valueAxis.labels.show)}
+          setValue={setValueAxisLabels}
+        />
+      )}
 
       <SwitchOption
-        disabled={!valueAxis.labels.show}
+        disabled={!valueAxis.labels.show || isNewLibrary}
         label={i18n.translate('visTypeVislib.controls.heatmapOptions.rotateLabel', {
           defaultMessage: 'Rotate',
         })}
@@ -80,7 +95,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       />
 
       <SwitchOption
-        disabled={!valueAxis.labels.show}
+        disabled={!valueAxis.labels.show || isNewLibrary}
         label={i18n.translate(
           'visTypeVislib.controls.heatmapOptions.overwriteAutomaticColorLabel',
           {
@@ -102,7 +117,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
         <EuiColorPicker
           compressed
           fullWidth
-          disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor}
+          disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor || isNewLibrary}
           color={valueAxis.labels.color}
           onChange={setColor}
         />

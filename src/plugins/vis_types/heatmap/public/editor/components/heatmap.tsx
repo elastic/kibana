@@ -24,7 +24,6 @@ import {
 } from '../../../../../vis_default_editor/public';
 import { colorSchemas } from '../../../../../charts/public';
 import { VisEditorOptionsProps } from '../../../../../visualizations/public';
-// import { PaletteRegistry } from '../../../../../charts/public';
 import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';
@@ -34,7 +33,8 @@ export interface HeatmapOptionsProps
     HeatmapTypeProps {}
 
 const HeatmapOptions = (props: HeatmapOptionsProps) => {
-  const { stateParams, uiState, setValue, setValidity, setTouched } = props;
+  const { stateParams, uiState, setValue, setValidity, setTouched, showElasticChartsOptions } =
+    props;
   const [valueAxis] = stateParams.valueAxes;
   const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
@@ -56,14 +56,6 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
   useEffect(() => {
     setValidity(stateParams.setColorRange ? isColorRangesValid : !isColorsNumberInvalid);
   }, [stateParams.setColorRange, isColorRangesValid, isColorsNumberInvalid, setValidity]);
-
-  // useEffect(() => {
-  //   const fetchPalettes = async () => {
-  //     const palettes = await props.palettes?.getPalettes();
-  //     setPalettesRegistry(palettes);
-  //   };
-  //   fetchPalettes();
-  // }, [props.palettes]);
 
   return (
     <>
@@ -91,6 +83,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
             defaultMessage:
               'Highlight hovered range in the chart and corresponding label in the legend.',
           })}
+          disabled={showElasticChartsOptions}
         />
       </EuiPanel>
 
@@ -126,18 +119,21 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
           setValue={setValueAxisScale}
         />
 
-        <SwitchOption
-          label={i18n.translate('visTypeVislib.controls.heatmapOptions.scaleToDataBoundsLabel', {
-            defaultMessage: 'Scale to data bounds',
-          })}
-          paramName="defaultYExtents"
-          value={valueAxis.scale.defaultYExtents}
-          setValue={setValueAxisScale}
-        />
+        {!showElasticChartsOptions && (
+          <SwitchOption
+            label={i18n.translate('visTypeVislib.controls.heatmapOptions.scaleToDataBoundsLabel', {
+              defaultMessage: 'Scale to data bounds',
+            })}
+            paramName="defaultYExtents"
+            value={valueAxis.scale.defaultYExtents}
+            setValue={setValueAxisScale}
+          />
+        )}
 
         <PercentageModeOption
           data-test-subj="metricPercentageMode"
           percentageMode={stateParams.setColorRange ? false : stateParams.percentageMode}
+          disabled={stateParams.setColorRange}
           formatPattern={stateParams.percentageFormatPattern}
           setValue={setValue}
         />
@@ -180,7 +176,12 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
 
       <EuiSpacer size="s" />
 
-      <LabelsPanel valueAxis={valueAxis} setValue={setValue} />
+      <LabelsPanel
+        valueAxis={valueAxis}
+        setValue={setValue}
+        isNewLibrary={showElasticChartsOptions}
+        isCellLabelVisible={stateParams.isCellLabelVisible}
+      />
     </>
   );
 };

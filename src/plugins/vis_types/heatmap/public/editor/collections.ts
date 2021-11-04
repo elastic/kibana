@@ -39,19 +39,19 @@ export const legendPositions = [
 
 export const scaleTypes = [
   {
-    text: i18n.translate('visTypeXy.scaleTypes.linearText', {
+    text: i18n.translate('visTypeHeatmap.scaleTypes.linearText', {
       defaultMessage: 'Linear',
     }),
     value: ScaleType.Linear,
   },
   {
-    text: i18n.translate('visTypeXy.scaleTypes.logText', {
+    text: i18n.translate('visTypeHeatmap.scaleTypes.logText', {
       defaultMessage: 'Log',
     }),
     value: ScaleType.Log,
   },
   {
-    text: i18n.translate('visTypeXy.scaleTypes.squareRootText', {
+    text: i18n.translate('visTypeHeatmap.scaleTypes.squareRootText', {
       defaultMessage: 'Square root',
     }),
     value: ScaleType.SquareRoot,

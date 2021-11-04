@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { uniq } from 'lodash';
 import { ColorSchemas, getHeatmapColors } from '../../../../charts/common';
-import { Range, Datatable } from '../../../../expressions';
+import { Range } from '../../../../expressions';
+import type { FieldFormat } from '../../../../field_formats/common';
 
 export interface PaletteConfig {
   color: Array<string | undefined>;
@@ -26,19 +26,15 @@ const getColor = (
   return getHeatmapColors(value, colorSchema);
 };
 
-export const getStopsWithColorsFromColorsNumber = (
-  data: Datatable['rows'],
-  accessor: string,
+export const getStopsFromColorsNumber = (
   colorsNumber: number,
-  colorSchema: ColorSchemas,
-  invertColors: boolean = false
+  isPercentageMode: boolean = false,
+  formatter: FieldFormat,
+  min: number,
+  max: number
 ) => {
-  const values = uniq(data.map((d) => d[accessor]));
-  const sortedValues = values.sort((a, b) => a - b);
-  const [min] = sortedValues;
-  const max = sortedValues[sortedValues.length - 1];
   const stops = [];
-  const colors = [];
+  const labels = [];
   for (let i = 0; i < colorsNumber; i++) {
     let val = i / colorsNumber;
     let nextVal = (i + 1) / colorsNumber;
@@ -54,12 +50,36 @@ export const getStopsWithColorsFromColorsNumber = (
       nextVal = Math.ceil(nextVal);
     }
     stops.push(val);
-    colors.push(getColor(i, colorsNumber, colorSchema, invertColors));
+    // compute the labels because the upper limit is not included
+    if (isPercentageMode) {
+      const value = i / colorsNumber;
+      const nextValue = (i + 1) / colorsNumber;
+      const label = `${formatter.convert(value)} - ${formatter.convert(nextValue)}`;
+      labels.push(label);
+    } else {
+      const label = `${formatter.convert(val)} - ${formatter.convert(nextVal)}`;
+      labels.push(label);
+    }
   }
   return {
-    colors,
     stops,
+    labels,
   };
+};
+
+export const getColorsFromColorsNumber = (
+  colorsNumber: number | '',
+  colorSchema: ColorSchemas,
+  invertColors: boolean = false
+) => {
+  const colors = [];
+  if (!colorsNumber) {
+    return { color: [] };
+  }
+  for (let i = 0; i < colorsNumber; i++) {
+    colors.push(getColor(i, colorsNumber, colorSchema, invertColors));
+  }
+  return { color: colors ?? [] };
 };
 
 export const getStopsWithColorsFromRanges = (

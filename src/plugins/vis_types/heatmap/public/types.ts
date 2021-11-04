@@ -14,15 +14,13 @@ import type {
   Labels,
   ColorSchemas,
 } from '../../../charts/public';
-import type { ExpressionValueBoxed } from '../../../expressions/public';
-// import { RangeValues } from '../../../vis_default_editor/public';
 import { Range } from '../../../expressions/public';
 import type {
   SchemaConfig,
   FakeParams,
   HistogramParams,
   DateHistogramParams,
-  ExpressionValueXYDimension,
+  ExpressionValueVisDimension,
 } from '../../../visualizations/public';
 
 export interface HeatmapTypeProps {
@@ -37,33 +35,32 @@ interface HeatmapCommonParams {
   enableHover: boolean;
   legendPosition: Position;
   colorsNumber: number | '';
-  invertColors: boolean;
   colorsRange?: Range[];
-  colorSchema: ColorSchemas;
   setColorRange: boolean;
   percentageMode: boolean;
   percentageFormatPattern?: string;
+  isCellLabelVisible?: boolean;
 }
 
 export interface HeatmapVisConfig extends HeatmapCommonParams {
-  xDimension: ExpressionValueXYDimension | null;
-  yDimension: ExpressionValueXYDimension[];
-  zDimension?: ExpressionValueXYDimension[];
-  widthDimension?: ExpressionValueXYDimension[];
-  seriesDimension?: ExpressionValueXYDimension[];
-  splitRowDimension?: ExpressionValueXYDimension[];
-  splitColumnDimension?: ExpressionValueXYDimension[];
+  xDimension: ExpressionValueVisDimension | null;
+  yDimension: ExpressionValueVisDimension[];
+  seriesDimension?: ExpressionValueVisDimension[];
+  splitRowDimension?: ExpressionValueVisDimension[];
+  splitColumnDimension?: ExpressionValueVisDimension[];
   palette: PaletteOutput;
-  valueAxes: ExpressionValueValueAxis[];
-  categoryAxes: ExpressionValueCategoryAxis[];
 }
 
 export interface HeatmapVisParams extends HeatmapCommonParams {
-  dimensions: Dimensions;
+  xDimension: Dimension | null;
+  yDimension: Dimension[];
+  seriesDimension: Dimension[];
   palette: PaletteOutput;
   valueAxes: ValueAxis[];
-  categoryAxes: CategoryAxis[];
+  colorSchema: ColorSchemas;
+  invertColors: boolean;
 }
+
 // ToDo: move them to constants
 export enum ScaleType {
   Linear = 'linear',
@@ -92,38 +89,7 @@ export interface Scale {
   type: ScaleType;
 }
 
-type ExpressionValueCategoryAxis = ExpressionValueBoxed<
-  'category_axis',
-  {
-    id: CategoryAxis['id'];
-    show: CategoryAxis['show'];
-    position: CategoryAxis['position'];
-    axisType: CategoryAxis['type'];
-    title: {
-      text?: string;
-    };
-    labels: CategoryAxis['labels'];
-    scale: CategoryAxis['scale'];
-  }
->;
-
-type ExpressionValueValueAxis = ExpressionValueBoxed<
-  'value_axis',
-  {
-    name: string;
-    id: string;
-    show: boolean;
-    position: CategoryAxis['position'];
-    axisType: CategoryAxis['type'];
-    title: {
-      text?: string;
-    };
-    labels: CategoryAxis['labels'];
-    scale: CategoryAxis['scale'];
-  }
->;
-
-export interface CategoryAxis {
+interface CategoryAxis {
   id: string;
   labels: Labels;
   position: Position;
@@ -140,11 +106,6 @@ export interface ValueAxis extends CategoryAxis {
   name: string;
 }
 
-// export interface HeatmapContainerDimensions {
-//   width: number;
-//   height: number;
-// }
-
 export type Dimension = Omit<SchemaConfig, 'params'> & {
   params: DateHistogramParams | HistogramParams | FakeParams | {};
 };
@@ -153,7 +114,6 @@ export interface Dimensions {
   x: Dimension | null;
   y: Dimension[];
   z?: Dimension[];
-  width?: Dimension[];
   series?: Dimension[];
   splitRow?: Dimension[];
   splitColumn?: Dimension[];

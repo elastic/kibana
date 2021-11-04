@@ -12,7 +12,7 @@ import { Position } from '@elastic/charts';
 import { AggGroupNames } from '../../../../data/public';
 import { ColorSchemas } from '../../../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
-import { HeatmapTypeProps, HeatmapVisParams, ScaleType, AxisType } from '../types';
+import { HeatmapTypeProps, HeatmapVisParams } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
 
@@ -42,41 +42,23 @@ export const getHeatmapVisTypeDefinition = ({
       colorsRange: [],
       invertColors: false,
       percentageMode: false,
-      categoryAxes: [
-        {
-          id: 'CategoryAxis-1',
-          type: AxisType.Category,
-          position: Position.Bottom,
-          show: true,
-          scale: {
-            type: ScaleType.Linear,
-          },
-          labels: {
-            show: true,
-            filter: true,
-            truncate: 100,
-          },
-          title: {},
-          style: {},
-        },
-      ],
-      valueAxes: [
-        {
-          show: false,
-          id: 'ValueAxis-1',
-          type: AxisType.Value,
-          scale: {
-            type: ScaleType.Linear,
-            defaultYExtents: false,
-          },
-          labels: {
-            show: false,
-            rotate: 0,
-            overwriteColor: false,
-            color: 'black',
-          },
-        },
-      ],
+      // valueAxes: [
+      //   {
+      //     show: false,
+      //     id: 'ValueAxis-1',
+      //     type: AxisType.Value,
+      //     scale: {
+      //       type: ScaleType.Linear,
+      //       defaultYExtents: false,
+      //     },
+      //     labels: {
+      //       show: false,
+      //       rotate: 0,
+      //       overwriteColor: false,
+      //       color: 'black',
+      //     },
+      //   },
+      // ],
     },
   },
   editorConfig: {
