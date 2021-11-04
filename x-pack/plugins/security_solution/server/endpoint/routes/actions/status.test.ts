@@ -18,7 +18,7 @@ import {
 import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig, configMock } from '../../../lib/detection_engine/routes/__mocks__';
+import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
@@ -77,7 +77,6 @@ describe('Endpoint Action Status', () => {
     ) => void;
 
     beforeEach(() => {
-      const defaultConfig = createMockConfig();
       const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
       const routerMock = httpServiceMock.createRouter();
       endpointAppContextService = new EndpointAppContextService();
@@ -87,12 +86,11 @@ describe('Endpoint Action Status', () => {
       registerActionStatusRoutes(routerMock, {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
-        config: () =>
-          Promise.resolve(configMock.withPendingActionResponsesWithAckEnabled(defaultConfig, true)),
-        experimentalFeatures: parseExperimentalConfigValue(
-          configMock.withPendingActionResponsesWithAckEnabled(defaultConfig, true)
-            .enableExperimental
-        ),
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: {
+          ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
+          pendingActionResponsesWithAck: true,
+        },
       });
 
       getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
@@ -457,7 +455,7 @@ describe('Endpoint Action Status', () => {
     });
   });
 
-  describe('response with pendingActionResponsesWithAck ff off', () => {
+  describe('response (when pendingActionResponsesWithAck is FALSE)', () => {
     let endpointAppContextService: EndpointAppContextService;
 
     // convenience for calling the route and handler for action status
@@ -470,7 +468,6 @@ describe('Endpoint Action Status', () => {
     ) => void;
 
     beforeEach(() => {
-      const defaultConfig = createMockConfig();
       const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
       const routerMock = httpServiceMock.createRouter();
       endpointAppContextService = new EndpointAppContextService();
@@ -480,14 +477,11 @@ describe('Endpoint Action Status', () => {
       registerActionStatusRoutes(routerMock, {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
-        config: () =>
-          Promise.resolve(
-            configMock.withPendingActionResponsesWithAckEnabled(defaultConfig, false)
-          ),
-        experimentalFeatures: parseExperimentalConfigValue(
-          configMock.withPendingActionResponsesWithAckEnabled(defaultConfig, false)
-            .enableExperimental
-        ),
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: {
+          ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
+          pendingActionResponsesWithAck: false,
+        },
       });
 
       getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
@@ -555,7 +549,6 @@ describe('Endpoint Action Status', () => {
         0
       );
     });
-
     it('should include a total count of a pending action', async () => {
       const mockID = 'XYZABC-000';
       havingActionsAndResponses(
@@ -656,7 +649,6 @@ describe('Endpoint Action Status', () => {
         0
       );
     });
-
     it('should have accurate counts for multiple agents, bulk actions, and responses', async () => {
       const agentOne = 'XYZABC-000';
       const agentTwo = 'DEADBEEF';
@@ -701,7 +693,7 @@ describe('Endpoint Action Status', () => {
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
         agent_id: agentThree,
         pending_actions: {
-          isolate: 0, // present in all three actions, but second one has a response, therefore not pending
+          isolate: 0,
         },
       });
     });
