@@ -18,7 +18,7 @@ export const pickSavedTimeline = (
   timelineId: string | null,
   savedTimeline: SavedTimelineWithSavedObjectId,
   userInfo: AuthenticatedUser | null
-): Omit<SavedTimelineWithSavedObjectId, 'dataViewId'> => {
+): SavedTimelineWithSavedObjectId => {
   const dateNow = new Date().valueOf();
 
   if (timelineId == null) {

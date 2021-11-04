@@ -24,7 +24,7 @@ import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
-import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
@@ -156,7 +156,7 @@ export const makeMapStateToProps = () => {
     }
     const sourcerer = getSourcererScopes(state);
     const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-    const selectedPatterns: SourcererScopePatterns = activeScopes
+    const selectedPatterns: SourcererUrlState = activeScopes
       .filter((scope) => scope === SourcererScopeName.default)
       .reduce(
         (acc, scope) => ({

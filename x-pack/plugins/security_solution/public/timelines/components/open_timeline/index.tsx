@@ -8,8 +8,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { sourcererSelectors } from '../../../common/store';
-import { useShallowEqualSelector, useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SortFieldTimeline, TimelineId } from '../../../../common/types/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -46,8 +45,8 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import { Direction } from '../../../../common/search_strategy';
-import { SelectedDataView } from '../../../common/store/sourcerer/selectors';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -110,10 +109,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
-    const { dataViewId, selectedPatterns } = useDeepEqualSelector<SelectedDataView>((state) =>
-      getSelectedDataView(state, SourcererScopeName.timeline)
-    );
+    const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
     const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
     const updateIsLoading = useCallback(

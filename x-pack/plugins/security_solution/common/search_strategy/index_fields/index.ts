@@ -15,5 +15,5 @@ export {
   BrowserFields,
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
-  EMPTY_INDEX_PATTERN,
+  EMPTY_INDEX_FIELDS,
 } from '../../../../timelines/common';

@@ -21,15 +21,14 @@ import {
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import * as i18n from './translations';
-import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import { State } from '../../store';
-import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import { SecurityPageName } from '../../../../common/constants';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import {
   FormRow,
@@ -58,17 +57,19 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(false);
   const isOnlyDetectionAlerts: boolean =
     (isAlertsOrRulesDetailsPage && !isTimelineSourcerer) ||
-    (!!isTimelineSourcerer && isOnlyDetectionAlertsChecked);
+    (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
 
   const onCheckboxChanged = useCallback((e) => {
     setIsOnlyDetectionAlertsChecked(e.target.checked);
   }, []);
-  const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { defaultDataView, kibanaDataViews, signalIndexName, sourcererScope } = useSelector<
-    State,
-    SourcererScopeSelector
-  >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
-  const { selectedDataViewId, selectedPatterns, loading } = sourcererScope;
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const {
+    defaultDataView,
+    kibanaDataViews,
+    signalIndexName,
+    sourcererScope: { selectedDataViewId, selectedPatterns, loading },
+  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const defaultSelectedDataView = selectedDataViewId ?? defaultDataView.id;
   const [dataViewId, setDataViewId] = useState<string>(defaultSelectedDataView);

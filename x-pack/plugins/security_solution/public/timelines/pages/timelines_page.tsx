@@ -22,7 +22,7 @@ import { NewTemplateTimeline } from '../components/timeline/properties/new_templ
 import { NewTimeline } from '../components/timeline/properties/helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -36,7 +36,7 @@ export const TimelinesPageComponent: React.FC = () => {
   const onImportTimelineBtnClick = useCallback(() => {
     setImportDataModalToggle(true);
   }, [setImportDataModalToggle]);
-  const { indicesExist } = useSourcererScope();
+  const { indicesExist } = useSourcererDataView();
 
   const capabilitiesCanUserCRUD: boolean =
     !!useKibana().services.application.capabilities.siem.crud;

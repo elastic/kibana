@@ -821,30 +821,11 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
     const sourceId = this.getId();
+    const labelLayerId = this._getMbLabelLayerId();
     const pointLayerId = this._getMbPointLayerId();
     const symbolLayerId = this._getMbSymbolLayerId();
-    const textLayerId = this._getMbTextLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
     const symbolLayer = mbMap.getLayer(symbolLayerId);
-    const textLayer = mbMap.getLayer(textLayerId);
-
-    // Point layers require 2 mapbox layers
-
-    //
-    // Create label layer
-    // label layer - "symbol" layer type for labels. Can not use same layer label and marker layers because of conflicting styling requirements
-    //
-    if (!textLayer) {
-      const mbLayer: MbLayer = {
-        id: textLayerId,
-        type: 'symbol',
-        source: sourceId,
-      };
-      if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
-      }
-      mbMap.addLayer(mbLayer);
-    }
 
     //
     // Create marker layer
@@ -865,7 +846,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         if (mvtSourceLayer) {
           mbLayer['source-layer'] = mvtSourceLayer;
         }
-        mbMap.addLayer(mbLayer, textLayerId);
+        mbMap.addLayer(mbLayer, labelLayerId);
       }
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
@@ -881,7 +862,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         if (mvtSourceLayer) {
           mbLayer['source-layer'] = mvtSourceLayer;
         }
-        mbMap.addLayer(mbLayer, textLayerId);
+        mbMap.addLayer(mbLayer, labelLayerId);
       }
       if (pointLayer) {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
@@ -891,7 +872,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
     if (!_.isEqual(filterExpr, mbMap.getFilter(markerLayerId))) {
       mbMap.setFilter(markerLayerId, filterExpr);
-      mbMap.setFilter(textLayerId, filterExpr);
     }
 
     if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
@@ -908,16 +888,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       });
     }
 
-    this.getCurrentStyle().setMBPropertiesForLabelText({
-      alpha: this.getAlpha(),
-      mbMap,
-      textLayerId,
-    });
-
     this.syncVisibilityWithMb(mbMap, markerLayerId);
     mbMap.setLayerZoomRange(markerLayerId, this.getMinZoom(), this.getMaxZoom());
-    this.syncVisibilityWithMb(mbMap, textLayerId);
-    mbMap.setLayerZoomRange(textLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _setMbLinePolygonProperties(
@@ -926,6 +898,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
     const sourceId = this.getId();
+    const labelLayerId = this._getMbLabelLayerId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
 
@@ -940,7 +913,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       if (mvtSourceLayer) {
         mbLayer['source-layer'] = mvtSourceLayer;
       }
-      mbMap.addLayer(mbLayer);
+      mbMap.addLayer(mbLayer, labelLayerId);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       const mbLayer: MbLayer = {
@@ -952,7 +925,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       if (mvtSourceLayer) {
         mbLayer['source-layer'] = mvtSourceLayer;
       }
-      mbMap.addLayer(mbLayer);
+      mbMap.addLayer(mbLayer, labelLayerId);
     }
 
     this.getCurrentStyle().setMBPaintProperties({
@@ -1018,10 +991,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   _syncStylePropertiesWithMb(mbMap: MbMap, timeslice?: Timeslice) {
     const timesliceMaskConfig = this._getTimesliceMaskConfig(timeslice);
+    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
     this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
     this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
-    // label layers added after geometry layers to ensure they are on top
-    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
   }
 
   _getTimesliceMaskConfig(timeslice?: Timeslice): TimesliceMaskConfig | undefined {
@@ -1048,14 +1020,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('circle');
   }
 
-  _getMbTextLayerId() {
-    return this.makeMbLayerId('text');
-  }
-
-  // _getMbTextLayerId is labels for Points and MultiPoints
-  // _getMbLabelLayerId is labels for not Points and MultiPoints
-  // _getMbLabelLayerId used to be called _getMbCentroidLayerId
-  // TODO merge textLayer and labelLayer into single layer
   _getMbLabelLayerId() {
     return this.makeMbLayerId('label');
   }
@@ -1075,7 +1039,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getMbTooltipLayerIds() {
     return [
       this._getMbPointLayerId(),
-      this._getMbTextLayerId(),
       this._getMbLabelLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),

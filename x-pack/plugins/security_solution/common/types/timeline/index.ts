@@ -306,7 +306,7 @@ export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeT
  * This type represents a timeline type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
-export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'savedQueryId'>;
+export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
 
 /*
  *  Timeline IDs

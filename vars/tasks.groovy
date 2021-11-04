@@ -164,6 +164,14 @@ def functionalXpack(Map params = [:]) {
         task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
       }
     }
+    
+    whenChanged([
+      'x-pack/plugins/fleet/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-FleetCypress', './test/scripts/jenkins_fleet_cypress.sh'))
+      }
+    }
 
   }
 }

@@ -22,13 +22,6 @@ jest.mock('react-redux', () => {
   return {
     ...actual,
     useDispatch: () => mockDispatch,
-    useSelector: () => ({
-      kind: 'relative',
-      fromStr: 'now-24h',
-      toStr: 'now',
-      from: '2020-07-07T08:20:18.966Z',
-      to: '2020-07-08T08:20:18.966Z',
-    }),
   };
 });
 
