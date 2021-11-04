@@ -36,11 +36,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
-      await security.role.delete('global_all_role');
-
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       await PageObjects.security.forceLogout();
+
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await security.role.delete('global_all_role');
     });
 
     describe('monitoring_user', () => {

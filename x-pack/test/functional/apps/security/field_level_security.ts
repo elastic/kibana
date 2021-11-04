@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -18,7 +19,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/flstest/data'); //( data)
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/flstest/data'); // ( data)
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
       );
@@ -40,9 +41,6 @@ export default function ({ getService, getPageObjects }) {
             },
           ],
         },
-        kibana: {
-          global: ['all'],
-        },
       });
 
       await PageObjects.common.sleep(1000);
@@ -62,9 +60,6 @@ export default function ({ getService, getPageObjects }) {
               field_security: { grant: ['customer_name', 'customer_region', 'customer_type'] },
             },
           ],
-        },
-        kibana: {
-          global: ['all'],
         },
       });
       await PageObjects.common.sleep(1000);

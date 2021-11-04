@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'security',
     'settings',
@@ -47,9 +48,6 @@ export default function ({ getService, getPageObjects }) {
               privileges: ['read', 'view_index_metadata'],
             },
           ],
-        },
-        kibana: {
-          global: ['all'],
         },
       });
     });

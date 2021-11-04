@@ -57,10 +57,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -134,10 +134,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('default_space_all_role'),
           security.user.delete('default_space_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -213,10 +213,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
+
         await Promise.all([
           security.role.delete('nondefault_space_specific_role'),
           security.user.delete('nondefault_space_specific_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 

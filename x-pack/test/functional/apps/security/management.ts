@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -45,9 +46,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      await security.role.delete('logstash-readonly');
-      await security.user.delete('dashuser', 'new-user');
       await PageObjects.security.forceLogout();
+      await security.role.delete('logstash-readonly');
+      await security.user.delete('dashuser');
+      await security.user.delete('new-user');
     });
 
     describe('Security', () => {
