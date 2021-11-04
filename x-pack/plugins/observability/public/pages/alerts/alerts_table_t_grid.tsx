@@ -382,6 +382,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       },
       renderCellValue: getRenderCellValue({ setFlyoutAlert }),
       rowRenderers: NO_ROW_RENDER,
+      // TODO: implement Kibana data view runtime fields in observability
+      runtimeMappings: {},
       start: rangeFrom,
       setRefetch,
       sort: [
