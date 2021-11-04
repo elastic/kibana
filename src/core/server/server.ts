@@ -36,7 +36,6 @@ import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
-import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
@@ -50,7 +49,7 @@ import {
   ServiceConfigDescriptor,
 } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
-import { DeprecationsService } from './deprecations';
+import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
 import { config as executionContextConfig } from './execution_context';
@@ -203,7 +202,7 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const deprecationsSetup = this.deprecations.setup({
+    const deprecationsSetup = await this.deprecations.setup({
       http: httpSetup,
     });
 
@@ -373,7 +372,6 @@ export class Server {
       loggingConfig,
       httpConfig,
       pluginsConfig,
-      kibanaConfig,
       savedObjectsConfig,
       savedObjectsMigrationConfig,
       uiSettingsConfig,
@@ -381,6 +379,7 @@ export class Server {
       statusConfig,
       pidConfig,
       i18nConfig,
+      deprecationConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

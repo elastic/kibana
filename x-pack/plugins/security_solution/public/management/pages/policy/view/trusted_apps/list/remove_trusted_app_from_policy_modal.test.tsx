@@ -49,7 +49,7 @@ describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
     mockedApis.responseProvider.trustedAppUpdate.mockDelay.mockImplementation(
       () =>
         new Promise((resolve) => {
-          setTimeout(resolve, 20);
+          setTimeout(resolve, 100);
         })
     );
 

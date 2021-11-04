@@ -7,7 +7,7 @@
 import type {
   IndicesIndexStatePrefixedSettings,
   IndicesIndexSettings,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ILM_POLICY_NAME } from '../../../common/constants';
 import { IlmPolicyMigrationStatus } from '../../../common/types';
 import { IlmPolicyManager } from '../../lib/store/ilm_policy_manager';

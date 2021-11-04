@@ -22,7 +22,7 @@ import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererScope } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../containers/sourcerer';
 import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
@@ -117,9 +117,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     browserFields,
     docValueFields,
     indexPattern,
+    runtimeMappings,
     selectedPatterns,
+    dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
-  } = useSourcererScope(scopeId);
+  } = useSourcererDataView(scopeId);
+
   const { globalFullScreen } = useGlobalFullScreen();
   // TODO: Once we are past experimental phase this code should be removed
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
@@ -129,14 +132,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
-        id,
         columns,
+        dataViewId: selectedDataViewId,
         defaultColumns,
         excludedRowRendererIds,
+        id,
         indexNames: selectedPatterns,
-        sort,
         itemsPerPage,
         showCheckboxes,
+        sort,
       });
     }
     return () => {
@@ -181,7 +185,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               browserFields,
               bulkActions,
               columns,
-              dataProviders: dataProviders!,
+              dataProviders,
               defaultCellActions,
               deletedEventIds,
               docValueFields,
@@ -199,13 +203,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               isLive,
               isLoadingIndexPattern,
               itemsPerPage,
-              itemsPerPageOptions: itemsPerPageOptions!,
+              itemsPerPageOptions,
               kqlMode,
               leadingControlColumns,
               onRuleChange,
               query,
               renderCellValue,
               rowRenderers,
+              runtimeMappings,
               setQuery,
               sort,
               start,
@@ -220,7 +225,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               columns={columns}
               docValueFields={docValueFields}
               id={id}
-              dataProviders={dataProviders!}
+              dataProviders={dataProviders}
               deletedEventIds={deletedEventIds}
               end={end}
               isLoadingIndexPattern={isLoadingIndexPattern}
@@ -228,13 +233,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isLive={isLive}
-              itemsPerPage={itemsPerPage!}
-              itemsPerPageOptions={itemsPerPageOptions!}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
               kqlMode={kqlMode}
               query={query}
               onRuleChange={onRuleChange}
               renderCellValue={renderCellValue}
               rowRenderers={rowRenderers}
+              runtimeMappings={runtimeMappings}
               start={start}
               sort={sort}
               showTotalCount={isEmpty(graphEventId) ? true : false}
@@ -249,6 +255,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         entityType={entityType}
         docValueFields={docValueFields}
         isFlyoutView
+        runtimeMappings={runtimeMappings}
         timelineId={id}
       />
     </>

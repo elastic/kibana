@@ -6,22 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { flightFields, getEuiSelectableOptions } from './flights';
 import { OptionsListEmbeddableFactory } from '../control_types/options_list';
-import { InputControlFactory, PresentationControlsService } from '../../../services/controls';
+import { PresentationControlsService } from '../../../services/controls';
+import { ControlFactory } from '..';
 
 export const populateStorybookControlFactories = (
   controlsServiceStub: PresentationControlsService
 ) => {
-  const optionsListFactoryStub = new OptionsListEmbeddableFactory(
-    ({ field, search }) =>
-      new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field, search)), 500)),
-    () => Promise.resolve(['demo data flights']),
-    () => Promise.resolve(flightFields)
-  );
+  const optionsListFactoryStub = new OptionsListEmbeddableFactory();
 
   // cast to unknown because the stub cannot use the embeddable start contract to transform the EmbeddableFactoryDefinition into an EmbeddableFactory
-  const optionsListControlFactory = optionsListFactoryStub as unknown as InputControlFactory;
+  const optionsListControlFactory = optionsListFactoryStub as unknown as ControlFactory;
   optionsListControlFactory.getDefaultInput = () => ({});
-  controlsServiceStub.registerInputControlType(optionsListControlFactory);
+  controlsServiceStub.registerControlType(optionsListControlFactory);
 };

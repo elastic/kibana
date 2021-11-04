@@ -24,7 +24,7 @@ const OsqueryAppComponent = () => {
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
   const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
 
-  if (isFetched && osqueryIntegration.install_status !== 'installed') {
+  if (isFetched && osqueryIntegration?.install_status !== 'installed') {
     return <OsqueryAppEmptyState />;
   }
 
@@ -44,13 +44,10 @@ const OsqueryAppComponent = () => {
                     defaultMessage="Live queries"
                   />
                 </EuiTab>
-                <EuiTab
-                  isSelected={section === 'scheduled_query_groups'}
-                  {...useRouterNavigate('scheduled_query_groups')}
-                >
+                <EuiTab isSelected={section === 'packs'} {...useRouterNavigate('packs')}>
                   <FormattedMessage
-                    id="xpack.osquery.appNavigation.scheduledQueryGroupsLinkText"
-                    defaultMessage="Scheduled query groups"
+                    id="xpack.osquery.appNavigation.packsLinkText"
+                    defaultMessage="Packs"
                   />
                 </EuiTab>
                 <EuiTab

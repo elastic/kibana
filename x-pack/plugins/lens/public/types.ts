@@ -281,6 +281,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Checks if the visualization created is time based, for example date histogram
    */
   isTimeBased: (state: T) => boolean;
+  /**
+   * Given the current state layer and a columnId will verify if the column configuration has errors
+   */
+  isValidColumn: (state: T, layerId: string, columnId: string) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -772,7 +776,7 @@ export interface LensBrushEvent {
 }
 
 // Use same technique as TriggerContext
-interface LensEditContextMapping {
+export interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;

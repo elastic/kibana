@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
 
 import type { FailedTransactionsCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/failed_transactions_correlations/types';
-import type { SearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
+import type { RawSearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -23,7 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const getRequestBody = () => {
     const request: IKibanaSearchRequest<
-      FailedTransactionsCorrelationsParams & SearchStrategyClientParams
+      FailedTransactionsCorrelationsParams & RawSearchStrategyClientParams
     > = {
       params: {
         environment: 'ENVIRONMENT_ALL',
@@ -217,6 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
       expect(finalRawResponse?.errorHistogram.length).to.be(101);
       expect(finalRawResponse?.overallHistogram.length).to.be(101);
+      expect(finalRawResponse?.fieldStats.length).to.be(26);
 
       expect(finalRawResponse?.failedTransactionsCorrelations.length).to.eql(
         30,
@@ -227,6 +228,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         'Fetched 95th percentile value of 1309695.875 based on 1244 documents.',
         'Identified 68 fieldCandidates.',
         'Identified correlations for 68 fields out of 68 candidates.',
+        'Identified 26 fields to sample for field statistics.',
+        'Retrieved field statistics for 26 fields out of 26 fields.',
         'Identified 30 significant correlations relating to failed transactions.',
       ]);
 
@@ -243,6 +246,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(typeof correlation?.normalizedScore).to.be('number');
       expect(typeof correlation?.failurePercentage).to.be('number');
       expect(typeof correlation?.successPercentage).to.be('number');
+
+      const fieldStats = finalRawResponse?.fieldStats[0];
+      expect(typeof fieldStats).to.be('object');
+      expect(fieldStats.topValues.length).to.greaterThan(0);
+      expect(fieldStats.topValuesSampleSize).to.greaterThan(0);
     });
   });
 }

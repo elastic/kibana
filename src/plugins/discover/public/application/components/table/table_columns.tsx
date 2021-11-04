@@ -31,7 +31,7 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
   ),
   render: (
     { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-    { field: { field, fieldMapping } }: FieldRecord
+    { field: { field, fieldMapping }, value: { ignored } }: FieldRecord
   ) => {
     return (
       <TableActions
@@ -41,6 +41,7 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
         flattenedField={flattenedField}
         onFilter={onFilter!}
         onToggleColumn={onToggleColumn}
+        ignoredValue={!!ignored}
       />
     );
   },
@@ -51,6 +52,7 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
     field: 'field',
     className: 'kbnDocViewer__tableFieldNameCell',
     mobileOptions: { header: false },
+    width: '30%',
     name: (
       <EuiText size="xs">
         <strong>
@@ -82,8 +84,18 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
-    render: ({ formattedValue }: FieldRecord['value'], { field: { field } }: FieldRecord) => {
-      return <TableFieldValue field={field} formattedValue={formattedValue} />;
+    render: (
+      { formattedValue, ignored }: FieldRecord['value'],
+      { field: { field }, action: { flattenedField } }: FieldRecord
+    ) => {
+      return (
+        <TableFieldValue
+          field={field}
+          formattedValue={formattedValue}
+          rawValue={flattenedField}
+          ignoreReason={ignored}
+        />
+      );
     },
   },
 ];

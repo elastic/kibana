@@ -10,7 +10,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
+import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
 
 const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
   defaultMessage: 'Sample web logs',
@@ -18,8 +18,8 @@ const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
 const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
 });
-const initialAppLinks = [] as AppLinkSchema[];
 
+export const GLOBE_ICON_PATH = '/plugins/home/assets/sample_data_resources/logs/icon.svg';
 export const logsSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'logs',
@@ -28,7 +28,6 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
     previewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard_dark.png',
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
-    appLinks: initialAppLinks,
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
     savedObjects: getSavedObjects(),
     dataIndices: [
@@ -42,6 +41,6 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
       },
     ],
     status: 'not_installed',
-    iconPath: '/plugins/home/assets/sample_data_resources/logs/icon.svg',
+    iconPath: GLOBE_ICON_PATH,
   };
 };

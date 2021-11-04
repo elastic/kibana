@@ -45,7 +45,7 @@ export const API_BASE_PATH = '/api/transform/';
 // - dest index: monitor (applied to df-*)
 // - cluster: monitor
 //
-// Note that users with kibana_admin can see all Kibana index patterns and saved searches
+// Note that users with kibana_admin can see all Kibana data views and saved searches
 // in the source selection modal when creating a transform, but the wizard will trigger
 // error callouts when there are no sufficient privileges to read the actual source indices.
 

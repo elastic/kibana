@@ -3512,7 +3512,7 @@
             "label": "outcome",
             "description": [],
             "signature": [
-              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
+              "\"conflict\" | \"aliasMatch\" | \"exactMatch\""
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
@@ -5492,7 +5492,7 @@
             "section": "def-common.AssociationType",
             "text": "AssociationType"
           },
-          "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[] | undefined; }; outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; } & { alias_target_id?: string | undefined; }"
+          "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[] | undefined; }; outcome: \"conflict\" | \"aliasMatch\" | \"exactMatch\"; } & { alias_target_id?: string | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
@@ -7610,10 +7610,10 @@
       },
       {
         "parentPluginId": "cases",
-        "id": "def-common.ConnectorResillientTypeFields",
+        "id": "def-common.ConnectorResilientTypeFields",
         "type": "Type",
         "tags": [],
-        "label": "ConnectorResillientTypeFields",
+        "label": "ConnectorResilientTypeFields",
         "description": [],
         "signature": [
           "{ type: ",

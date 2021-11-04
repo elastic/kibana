@@ -14,9 +14,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, SyntheticEvent } from 'react';
-import { isNil } from 'lodash/fp';
+import { isArray, isNil } from 'lodash/fp';
 
-import { IP_REPUTATION_LINKS_SETTING, APP_ID } from '../../../../common/constants';
+import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -56,7 +56,7 @@ const UebaDetailsLinkComponent: React.FC<{
   const goToUebaDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.ueba,
         path: getUebaDetailsUrl(encodeURIComponent(hostName), search),
       });
@@ -99,7 +99,7 @@ const HostDetailsLinkComponent: React.FC<{
   const goToHostDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: getHostDetailsUrl(encodeURIComponent(hostName), search),
       });
@@ -172,7 +172,7 @@ const NetworkDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  ip: string;
+  ip: string | string[];
   flowTarget?: FlowTarget | FlowTargetSourceDest;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void | undefined;
@@ -181,39 +181,46 @@ const NetworkDetailsLinkComponent: React.FC<{
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
-    (ev) => {
+    (ev, cIp: string) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.network,
-        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
+        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget, search),
       });
     },
-    [flowTarget, ip, navigateToApp, search]
+    [flowTarget, navigateToApp, search]
   );
-  const href = useMemo(
-    () => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)))),
-    [formatUrl, ip]
+  const getHref = useCallback(
+    (cIp: string) => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)))),
+    [formatUrl]
   );
 
-  return isButton ? (
-    <GenericLinkButton
-      Component={Component}
-      dataTestSubj="data-grid-network-details"
-      onClick={onClick ?? goToNetworkDetails}
-      href={href}
-      title={title ?? ip}
-    >
-      {children}
-    </GenericLinkButton>
-  ) : (
-    <LinkAnchor
-      onClick={onClick ?? goToNetworkDetails}
-      href={href}
-      data-test-subj="network-details"
-    >
-      {children ? children : ip}
-    </LinkAnchor>
+  const getLink = useCallback(
+    (cIp: string, i: number) =>
+      isButton ? (
+        <GenericLinkButton
+          Component={Component}
+          key={`${cIp}-${i}`}
+          dataTestSubj="data-grid-network-details"
+          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
+          href={getHref(cIp)}
+          title={title ?? cIp}
+        >
+          {children}
+        </GenericLinkButton>
+      ) : (
+        <LinkAnchor
+          key={`${cIp}-${i}`}
+          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
+          href={getHref(cIp)}
+          data-test-subj="network-details"
+        >
+          {children ? children : cIp}
+        </LinkAnchor>
+      ),
+    [Component, children, getHref, goToNetworkDetails, isButton, onClick, title]
   );
+  return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
@@ -229,7 +236,7 @@ const CaseDetailsLinkComponent: React.FC<{
   const goToCaseDetails = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(APP_ID, {
+      return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
@@ -257,7 +264,7 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(APP_ID, {
+      return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCreateCaseUrl(search),
       });

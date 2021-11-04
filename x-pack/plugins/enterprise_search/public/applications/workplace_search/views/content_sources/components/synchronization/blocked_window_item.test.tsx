@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 import moment from 'moment';
 
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiDatePicker,
   EuiDatePickerRange,
   EuiSelect,
@@ -53,7 +53,7 @@ describe('BlockedWindowItem', () => {
 
   it('handles remove button click', () => {
     const wrapper = shallow(<BlockedWindowItem {...props} />);
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find(EuiButtonIcon).simulate('click');
 
     expect(removeBlockedWindow).toHaveBeenCalledWith(0);
   });

@@ -24,8 +24,8 @@ export const OsqueryManagedCustomButtonExtension = React.memo<PackageCustomExten
 
     useEffect(() => {
       const fetchStatus = () => {
-        http.get('/internal/osquery/status').then((response) => {
-          setDisabled(response.install_status !== 'installed');
+        http.get<{ install_status: string }>('/internal/osquery/status').then((response) => {
+          setDisabled(response?.install_status !== 'installed');
         });
       };
       fetchStatus();

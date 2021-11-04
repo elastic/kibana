@@ -6,54 +6,59 @@
  */
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
-import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_utils';
+import { getDataViewById, getDataViewIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
 import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;
 
-// Service for accessing FieldFormat objects configured for a Kibana index pattern
+// Service for accessing FieldFormat objects configured for a Kibana data view
 // for use in formatting the actual and typical values from anomalies.
 class FieldFormatService {
   indexPatternIdsByJob: IndexPatternIdsByJob = {};
   formatsByJob: FormatsByJobId = {};
 
   // Populate the service with the FieldFormats for the list of jobs with the
-  // specified IDs. List of Kibana index patterns is passed, with a title
-  // attribute set in each pattern which will be compared to the index pattern
+  // specified IDs. List of Kibana data views is passed, with a title
+  // attribute set in each pattern which will be compared to the indices
   // configured in the datafeed of each job.
   // Builds a map of Kibana FieldFormats (plugins/data/common/field_formats)
   // against detector index by job ID.
-  populateFormats(jobIds: string[]): Promise<FormatsByJobId> {
-    return new Promise((resolve, reject) => {
-      // Populate a map of index pattern IDs against job ID, by finding the ID of the index
-      // pattern with a title attribute which matches the index configured in the datafeed.
-      // If a Kibana index pattern has not been created
-      // for this index, then no custom field formatting will occur.
-      jobIds.forEach((jobId) => {
-        const jobObj = mlJobService.getJob(jobId);
-        const datafeedIndices = jobObj.datafeed_config.indices;
-        const id = getIndexPatternIdFromName(datafeedIndices.length ? datafeedIndices[0] : '');
-        if (id !== null) {
-          this.indexPatternIdsByJob[jobId] = id;
-        }
+  async populateFormats(jobIds: string[]): Promise<FormatsByJobId> {
+    // Populate a map of data view IDs against job ID, by finding the ID of the data
+    // view with a title attribute which matches the indices configured in the datafeed.
+    // If a Kibana data view has not been created
+    // for this index, then no custom field formatting will occur.
+    (
+      await Promise.all(
+        jobIds.map(async (jobId) => {
+          const jobObj = mlJobService.getJob(jobId);
+          return {
+            jobId,
+            dataViewId: await getDataViewIdFromName(jobObj.datafeed_config.indices.join(',')),
+          };
+        })
+      )
+    ).forEach(({ jobId, dataViewId }) => {
+      if (dataViewId !== null) {
+        this.indexPatternIdsByJob[jobId] = dataViewId;
+      }
+    });
+
+    const promises = jobIds.map((jobId) => Promise.all([this.getFormatsForJob(jobId)]));
+
+    try {
+      const fmtsByJobByDetector = await Promise.all(promises);
+      fmtsByJobByDetector.forEach((formatsByDetector, i) => {
+        this.formatsByJob[jobIds[i]] = formatsByDetector[0];
       });
 
-      const promises = jobIds.map((jobId) => Promise.all([this.getFormatsForJob(jobId)]));
-
-      Promise.all(promises)
-        .then((fmtsByJobByDetector) => {
-          fmtsByJobByDetector.forEach((formatsByDetector, i) => {
-            this.formatsByJob[jobIds[i]] = formatsByDetector[0];
-          });
-
-          resolve(this.formatsByJob);
-        })
-        .catch((err) => {
-          reject({ formats: {}, err });
-        });
-    });
+      return this.formatsByJob;
+    } catch (error) {
+      console.log('Error populating field formats:', error); // eslint-disable-line no-console
+      return { formats: {}, error };
+    }
   }
 
   // Return the FieldFormat to use for formatting values from
@@ -87,13 +92,13 @@ class FieldFormatService {
       const detectors = jobObj.analysis_config.detectors || [];
       const formatsByDetector: any[] = [];
 
-      const indexPatternId = this.indexPatternIdsByJob[jobId];
-      if (indexPatternId !== undefined) {
-        // Load the full index pattern configuration to obtain the formats of each field.
-        getIndexPatternById(indexPatternId)
-          .then((indexPatternData) => {
+      const dataViewId = this.indexPatternIdsByJob[jobId];
+      if (dataViewId !== undefined) {
+        // Load the full data view configuration to obtain the formats of each field.
+        getDataViewById(dataViewId)
+          .then((dataView) => {
             // Store the FieldFormat for each job by detector_index.
-            const fieldList = indexPatternData.fields;
+            const fieldList = dataView.fields;
             detectors.forEach((dtr) => {
               const esAgg = mlFunctionToESAggregation(dtr.function);
               // distinct_count detectors should fall back to the default
@@ -101,8 +106,7 @@ class FieldFormatService {
               if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
                 const field = fieldList.getByName(dtr.field_name);
                 if (field !== undefined) {
-                  formatsByDetector[dtr.detector_index!] =
-                    indexPatternData.getFormatterForField(field);
+                  formatsByDetector[dtr.detector_index!] = dataView.getFormatterForField(field);
                 }
               }
             });

@@ -15,12 +15,12 @@ import { ViewContentHeader } from '../../../../components/shared/view_content_he
 import { NAV } from '../../../../constants';
 import { SYNCHRONIZATION_DOCS_URL } from '../../../../routes';
 import {
+  LEARN_MORE_LINK,
   SOURCE_SYNCHRONIZATION_DESCRIPTION,
   SYNCHRONIZATION_DISABLED_TITLE,
   SYNCHRONIZATION_DISABLED_DESCRIPTION,
   SOURCE_SYNCHRONIZATION_TOGGLE_LABEL,
   SOURCE_SYNCHRONIZATION_TOGGLE_DESCRIPTION,
-  SYNCHRONIZATION_LINK_LABEL,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 import { SourceLayout } from '../source_layout';
@@ -65,11 +65,15 @@ export const Synchronization: React.FC = () => {
     >
       <ViewContentHeader
         title={NAV.SYNCHRONIZATION}
-        description={SOURCE_SYNCHRONIZATION_DESCRIPTION}
+        description={
+          <>
+            {SOURCE_SYNCHRONIZATION_DESCRIPTION}{' '}
+            <EuiLink href={SYNCHRONIZATION_DOCS_URL} external>
+              {LEARN_MORE_LINK}
+            </EuiLink>
+          </>
+        }
       />
-      <EuiLink href={SYNCHRONIZATION_DOCS_URL} external>
-        {SYNCHRONIZATION_LINK_LABEL}
-      </EuiLink>
       <EuiSpacer />
       {isSyncConfigEnabled ? syncToggle : syncDisabledCallout}
     </SourceLayout>

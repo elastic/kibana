@@ -73,7 +73,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 
     async assertTotalFeatureImportanceEvaluatePanelExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-FeatureImportanceSummary');
-      await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 5000 });
+      await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 30 * 1000 });
     },
 
     async assertFeatureImportanceDecisionPathElementsExists() {
@@ -167,17 +167,19 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     async openFeatureImportancePopover() {
       this.assertResultsTableNotEmpty();
 
-      const featureImportanceCell = await this.getFirstFeatureImportanceCell();
-      await featureImportanceCell.focus();
-      const interactionButton = await featureImportanceCell.findByTagName('button');
+      await retry.tryForTime(30 * 1000, async () => {
+        const featureImportanceCell = await this.getFirstFeatureImportanceCell();
+        await featureImportanceCell.focus();
+        const interactionButton = await featureImportanceCell.findByTagName('button');
 
-      // simulate hover and wait for button to appear
-      await featureImportanceCell.moveMouseTo();
-      await this.waitForInteractionButtonToDisplay(interactionButton);
+        // simulate hover and wait for button to appear
+        await featureImportanceCell.moveMouseTo();
+        await this.waitForInteractionButtonToDisplay(interactionButton);
 
-      // open popover
-      await interactionButton.click();
-      await testSubjects.existOrFail('mlDFAFeatureImportancePopover');
+        // open popover
+        await interactionButton.click();
+        await testSubjects.existOrFail('mlDFAFeatureImportancePopover', { timeout: 1000 });
+      });
     },
 
     async getFirstFeatureImportanceCell(): Promise<WebElementWrapper> {

@@ -150,13 +150,13 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             .filterWhere(Simulator.isDOM);
 
           expect(copyableFieldHoverArea).toHaveLength(1);
-          copyableFieldHoverArea!.simulate('mouseenter');
+          copyableFieldHoverArea?.simulate('mouseenter');
         });
         describe('and when they click the copy-to-clipboard button', () => {
           beforeEach(async () => {
             const copyButton = await simulator().resolve('resolver:panel:clipboard');
             expect(copyButton).toHaveLength(1);
-            copyButton!.simulate('click');
+            copyButton?.simulate('click');
             simulator().confirmTextWrittenToClipboard();
           });
           it(`should write ${value} to the clipboard`, async () => {
@@ -232,11 +232,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             .filterWhere(Simulator.isDOM)
         );
       });
-      cExtHoverArea!.simulate('mouseenter');
+      cExtHoverArea?.simulate('mouseenter');
     });
     describe('and when the user clicks the copy-to-clipboard button', () => {
       beforeEach(async () => {
-        (await simulator().resolve('resolver:panel:clipboard'))!.simulate('click');
+        (await simulator().resolve('resolver:panel:clipboard'))?.simulate('click');
         simulator().confirmTextWrittenToClipboard();
       });
       const expected = 'Sep 23, 2020 @ 08:25:32.316';
@@ -369,7 +369,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                 beforeEach(async () => {
                   const button = await simulator().resolve('resolver:panel:clipboard');
                   expect(button).toBeTruthy();
-                  button!.simulate('click');
+                  button?.simulate('click');
                   simulator().confirmTextWrittenToClipboard();
                 });
                 it(`should write ${expectedValue} to the clipboard`, async () => {
