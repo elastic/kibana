@@ -22,7 +22,7 @@ interface ProcessDeps {
  * Renders a node on the process tree
  * TODO: as well as sections for tty output, alerts and file redirection.
  */
-export function Process({
+export function ProcessTreeNode({
   process,
   isSessionLeader = false,
   depth = 0,
@@ -85,7 +85,7 @@ export function Process({
       <div css={childrenCSS}>
         {children.map((child: Process) => {
           return (
-            <Process
+            <ProcessTreeNode
               key={child.getEntityID()}
               process={child}
               depth={newDepth}
@@ -135,24 +135,7 @@ export function Process({
     const hoverColor = '#6B5FC6';
     const borderColor = 'transparent';
 
-    // if (props.isSummaryMatch) {
-    //   borderColor = '#8070F1'
-    //   bgColor = '#6B5FC629'
-    // }
-
-    // if (props.highlightAlert) {
-    //   bgColor = props.alertLevel > 0 ? props.theme['--color-red-500-16'] : props.theme['--color-cmdyellow-16']
-    // }
-
-    // if (props.alertLevel >= 0) {
-    //   if (props.alertLevel > 0) {
-    //     borderColor = props.theme['--color-red-500']
-    //     hoverColor = props.theme['--color-red-500-16']
-    //   } else {
-    //     borderColor = props.theme['--color-cmdyellow']
-    //     hoverColor = props.theme['--color-cmdyellow-16']
-    //   }
-    // }
+    // TODO: alerts highlight colors
 
     return { bgColor, borderColor, hoverColor };
   };
@@ -251,7 +234,7 @@ export function Process({
     );
   };
 
-  function renderProcess() {
+  const renderProcess = () => {
     const userEnteredIconCSS = `
       position: absolute;
       width: 9px;
@@ -260,15 +243,15 @@ export function Process({
       margin-top: 8px;
     `;
 
-    return (
+     return (
       <span>
         {process.isUserEntered() && <EuiIcon css={userEnteredIconCSS} type="user" />}
         <EuiIcon type="console" /> {template()}
       </span>
     );
-  }
+  };
 
-  function onProcessClicked(e: MouseEvent): void {
+  const onProcessClicked = (e: MouseEvent) => {
     e.stopPropagation();
 
     const selection = window.getSelection();
@@ -279,7 +262,7 @@ export function Process({
     }
 
     onProcessSelected(process);
-  }
+  };
 
   const id = process.getEntityID();
 

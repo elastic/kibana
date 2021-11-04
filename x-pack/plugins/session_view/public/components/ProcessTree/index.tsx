@@ -6,26 +6,26 @@
  */
 import React, { useRef, useLayoutEffect, useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { Process } from '../Process';
-import { useProcessTree, IProcessEvent, IProcess } from '../../hooks/use_process_tree';
+import { ProcessTreeNode } from '../ProcessTreeNode';
+import { useProcessTree, ProcessEvent, Process } from '../../hooks/use_process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 
-interface IProcessTreeDeps {
+interface ProcessTreeDeps {
   // process.entity_id to act as root node
   sessionId: string;
 
   // bi-directional paging support. allows us to load
   // processes before and after a particular process.entity_id
   // implementation in-complete. see use_process_tree.js
-  forward: IProcessEvent[]; // load next
-  backward?: IProcessEvent[]; // load previous
+  forward: ProcessEvent[]; // load next
+  backward?: ProcessEvent[]; // load previous
 
   // plain text search query (only searches "process.working_directory process.args.join(' ')"
   searchQuery?: string;
 
   // currently selected process
-  selectedProcess: IProcess | null;
-  onProcessSelected(process: IProcess): void;
+  selectedProcess: Process | null;
+  onProcessSelected(process: Process): void;
 }
 
 export const ProcessTree = ({
@@ -35,7 +35,7 @@ export const ProcessTree = ({
   searchQuery,
   selectedProcess,
   onProcessSelected,
-}: IProcessTreeDeps) => {
+}: ProcessTreeDeps) => {
   const { euiTheme } = useEuiTheme();
   const { sessionLeader, orphans, searchResults } = useProcessTree({
     sessionId,
@@ -65,7 +65,7 @@ export const ProcessTree = ({
    * highlights a process in the tree
    * we do it this way to avoid state changes on potentially thousands of <Process> components
    */
-  const selectProcess = useCallback((process: IProcess) => {
+  const selectProcess = useCallback((process: Process) => {
     if (!selectionAreaRef || !scrollerRef) {
       return;
     }
@@ -139,7 +139,11 @@ export const ProcessTree = ({
   return (
     <div ref={scrollerRef} css={scrollerCSS}>
       {sessionLeader && (
-        <Process isSessionLeader process={sessionLeader} onProcessSelected={onProcessSelected} />
+        <ProcessTreeNode
+          isSessionLeader
+          process={sessionLeader}
+          onProcessSelected={onProcessSelected}
+        />
       )}
       <div ref={selectionAreaRef} css={selectionAreaCSS} />
     </div>
