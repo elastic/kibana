@@ -58,16 +58,22 @@ export default function ({ getService }: FtrProviderContext) {
      * "00:00:00.000" means the time is formatted in UTC timezone
      */
     describe('CSV saved search export', () => {
-      const JOB_PARAMS_CSV =
+      const JOB_PARAMS_CSV_DEFAULT_SPACE =
         `columns:!(order_date,category,customer_full_name,taxful_total_price,currency),objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true))` +
         `,filter:!((meta:(field:order_date,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,params:()),query:(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-02T12:28:40.866Z'` +
         `,lte:'2019-07-18T20:59:57.136Z'))))),index:aac3e500-f2c7-11ea-8250-fb138aa491e7,parent:(filter:!(),highlightAll:!t,index:aac3e500-f2c7-11ea-8250-fb138aa491e7` +
-        `,query:(language:kuery,query:''),version:!t),sort:!((order_date:desc)),trackTotalHits:!t),version:'8.1.0'`;
+        `,query:(language:kuery,query:''),version:!t),sort:!((order_date:desc)),trackTotalHits:!t)`;
+
+      const JOB_PARAMS_CSV_NONDEFAULT_SPACE =
+        `columns:!(order_date,category,customer_full_name,taxful_total_price,currency),objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true))` +
+        `,filter:!((meta:(field:order_date,index:afac7364-c755-5f5c-acd5-8ed6605c5c77,params:()),query:(range:(order_date:(format:strict_date_optional_time` +
+        `,gte:'2006-11-04T19:58:58.244Z',lte:'2021-11-04T18:58:58.244Z'))))),index:afac7364-c755-5f5c-acd5-8ed6605c5c77,parent:(filter:!(),highlightAll:!t` +
+        `,index:afac7364-c755-5f5c-acd5-8ed6605c5c77,query:(language:kuery,query:''),version:!t),sort:!((order_date:desc)),trackTotalHits:!t)`;
 
       it('should use formats from the default space', async () => {
         kibanaServer.uiSettings.update({ 'csv:separator': ',', 'dateFormat:tz': 'UTC' });
         const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
-          jobParams: `(${JOB_PARAMS_CSV},title:'EC SEARCH')`,
+          jobParams: `(${JOB_PARAMS_CSV_DEFAULT_SPACE},title:'EC SEARCH')`,
         });
         const csv = await getCompleted$(path).toPromise();
 
@@ -90,16 +96,18 @@ export default function ({ getService }: FtrProviderContext) {
         const path = await reportingAPI.postJobJSON(
           `/s/non_default_space/api/reporting/generate/csv_searchsource`,
           {
-            jobParams: `(${JOB_PARAMS_CSV},title:'Ecom Search from Non-Default')`,
+            jobParams: `(${JOB_PARAMS_CSV_NONDEFAULT_SPACE},title:'Ecom Search from Non-Default')`,
           }
         );
         const csv = await getCompleted$(path).toPromise();
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
-          "order_date;category;customer_first_name;customer_full_name;total_quantity;total_unique_products;taxless_total_price;taxful_total_price;currency
-          Jul 11, 2019 @ 16:00:00.000;Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories;Sultan Al;Sultan Al Boone;4;4;174;174;EUR
-          Jul 11, 2019 @ 16:00:00.000;Women's Shoes, Women's Clothing;Pia;Pia Richards;2;2;41.969;41.969;EUR
-          Jul 11, 2019 @ 16:00:00.000;Women's Clothing;Brigitte;Brigitte Meyer;2;2;40.969;40.969;EUR
-          Jul 11, 2019 @ 16:00:00.000;"
+          "order_date;category;customer_full_name;taxful_total_price;currency
+          Jul 11, 2019 @ 16:00:00.000;Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories;Sultan Al Boone;174;EUR
+          Jul 11, 2019 @ 16:00:00.000;Women's Shoes, Women's Clothing;Pia Richards;41.969;EUR
+          Jul 11, 2019 @ 16:00:00.000;Women's Clothing;Brigitte Meyer;40.969;EUR
+          Jul 11, 2019 @ 16:00:00.000;Men's Clothing;Abd Mccarthy;41.969;EUR
+          Jul 11, 2019 @ 16:00:00.000;Men's Clothing;Robert Banks;36.969;EUR
+          Jul 11, 2019 @ 16:00:00."
         `);
       });
 
@@ -111,29 +119,33 @@ export default function ({ getService }: FtrProviderContext) {
           'dateFormat:tz': tzSettings,
         });
         const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
-          jobParams: `(browserTimezone:${tzParam},${JOB_PARAMS_CSV},title:'EC SEARCH')`,
+          jobParams: `(browserTimezone:${tzParam},${JOB_PARAMS_CSV_DEFAULT_SPACE},title:'EC SEARCH')`,
         });
 
         const csv = await getCompleted$(path).toPromise();
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
-          "\\"order_date\\",category,\\"customer_first_name\\",\\"customer_full_name\\",\\"total_quantity\\",\\"total_unique_products\\",\\"taxless_total_price\\",\\"taxful_total_price\\",currency
-          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",4,4,174,174,EUR
-          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",Pia,\\"Pia Richards\\",2,2,\\"41.969\\",\\"41.969\\",EUR
-          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Women's Clothing\\",Brigitte,\\"Brigitte Meyer\\",2,2,\\"40.969\\""
+          "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
+          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR
+          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Pia Richards\\",\\"41.969\\",EUR
+          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Women's Clothing\\",\\"Brigitte Meyer\\",\\"40.969\\",EUR
+          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Men's Clothing\\",\\"Abd Mccarthy\\",\\"41.969\\",EUR
+          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Men's Clothing\\",\\"Robert "
         `);
       });
 
       it(`should default to UTC for date formatting when timezone is not known`, async () => {
         kibanaServer.uiSettings.update({ 'csv:separator': ',', 'dateFormat:tz': 'Browser' });
         const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
-          jobParams: `(${JOB_PARAMS_CSV},title:'EC SEARCH')`,
+          jobParams: `(${JOB_PARAMS_CSV_DEFAULT_SPACE},title:'EC SEARCH')`,
         });
         const csv = await getCompleted$(path).toPromise();
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
-          "\\"order_date\\",category,\\"customer_first_name\\",\\"customer_full_name\\",\\"total_quantity\\",\\"total_unique_products\\",\\"taxless_total_price\\",\\"taxful_total_price\\",currency
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",4,4,174,174,EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",Pia,\\"Pia Richards\\",2,2,\\"41.969\\",\\"41.969\\",EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",Brigitte,\\"Brigitte Meyer\\",2,2,\\"40.969\\""
+          "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Pia Richards\\",\\"41.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Brigitte Meyer\\",\\"40.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"Abd Mccarthy\\",\\"41.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"Robert "
         `);
       });
     });
