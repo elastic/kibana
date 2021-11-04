@@ -8,12 +8,14 @@
 
 import { I18nStart } from '../i18n';
 import { IUiSettingsClient } from '../ui_settings';
+import { ThemeServiceStart } from '../theme';
 import { OverlayBannersStart, OverlayBannersService } from './banners';
 import { FlyoutService, OverlayFlyoutStart } from './flyout';
 import { ModalService, OverlayModalStart } from './modal';
 
 interface StartDeps {
   i18n: I18nStart;
+  theme: ThemeServiceStart;
   targetDomElement: HTMLElement;
   uiSettings: IUiSettingsClient;
 }
@@ -24,16 +26,16 @@ export class OverlayService {
   private modalService = new ModalService();
   private flyoutService = new FlyoutService();
 
-  public start({ i18n, targetDomElement, uiSettings }: StartDeps): OverlayStart {
+  public start({ i18n, targetDomElement, uiSettings, theme }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);
-    const flyouts = this.flyoutService.start({ i18n, targetDomElement: flyoutElement });
+    const flyouts = this.flyoutService.start({ i18n, theme, targetDomElement: flyoutElement });
 
     const banners = this.bannersService.start({ i18n, uiSettings });
 
     const modalElement = document.createElement('div');
     targetDomElement.appendChild(modalElement);
-    const modals = this.modalService.start({ i18n, targetDomElement: modalElement });
+    const modals = this.modalService.start({ i18n, theme, targetDomElement: modalElement });
 
     return {
       banners,

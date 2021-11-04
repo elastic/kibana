@@ -190,8 +190,9 @@ export class CoreSystem {
 
       const overlays = this.overlay.start({
         i18n,
-        targetDomElement: overlayTargetDomElement,
+        theme,
         uiSettings,
+        targetDomElement: overlayTargetDomElement,
       });
       const notifications = await this.notifications.start({
         i18n,

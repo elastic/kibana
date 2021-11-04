@@ -13,6 +13,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
+import { ThemeServiceStart, CoreThemeProvider } from '../../theme';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
 import { MountWrapper } from '../../utils';
@@ -95,6 +96,7 @@ export interface OverlayFlyoutOpenOptions {
 
 interface StartDeps {
   i18n: I18nStart;
+  theme: ThemeServiceStart;
   targetDomElement: Element;
 }
 
@@ -103,7 +105,7 @@ export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ i18n, targetDomElement }: StartDeps): OverlayFlyoutStart {
+  public start({ i18n, theme, targetDomElement }: StartDeps): OverlayFlyoutStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -135,9 +137,11 @@ export class FlyoutService {
 
         render(
           <i18n.Context>
-            <EuiFlyout {...options} onClose={onCloseFlyout}>
-              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
-            </EuiFlyout>
+            <CoreThemeProvider theme$={theme.theme$}>
+              <EuiFlyout {...options} onClose={onCloseFlyout}>
+                <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+              </EuiFlyout>
+            </CoreThemeProvider>
           </i18n.Context>,
           this.targetDomElement
         );
