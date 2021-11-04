@@ -6,7 +6,5 @@
  */
 
 export { SavedElementsModal } from './saved_elements_modal';
-export {
-  SavedElementsModal as SavedElementsModalComponent,
-  Props as SavedElementsModalComponentProps,
-} from './saved_elements_modal.component';
+export type { Props as SavedElementsModalComponentProps } from './saved_elements_modal.component';
+export { SavedElementsModal as SavedElementsModalComponent } from './saved_elements_modal.component';
