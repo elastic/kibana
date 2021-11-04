@@ -69,8 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 0);
+        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv_searchsource', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 0);
       });
@@ -124,9 +124,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('from new jobs posted', () => {
       it('should handle csv_searchsource', async () => {
+        const JOB_PARAMS_CSV_DEFAULT_SPACE =
+          `columns:!(order_date,category,customer_full_name,taxful_total_price,currency),objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true))` +
+          `,filter:!((meta:(field:order_date,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,params:()),query:(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-02T12:28:40.866Z'` +
+          `,lte:'2019-07-18T20:59:57.136Z'))))),index:aac3e500-f2c7-11ea-8250-fb138aa491e7,parent:(filter:!(),highlightAll:!t,index:aac3e500-f2c7-11ea-8250-fb138aa491e7` +
+          `,query:(language:kuery,query:''),version:!t),sort:!((order_date:desc)),trackTotalHits:!t)`;
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
-            reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
+            reportingAPI.postJob(
+              `/api/reporting/generate/csv?jobParams=(${JOB_PARAMS_CSV_DEFAULT_SPACE})`
+            ),
           ])
         );
 
@@ -135,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 1);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 1);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
       });
 
@@ -152,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 1);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 2);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
 
@@ -171,14 +178,14 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 1);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 2);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
 
         reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 1);
         reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 1);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 2);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv_searchsource', 0);
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
     });
