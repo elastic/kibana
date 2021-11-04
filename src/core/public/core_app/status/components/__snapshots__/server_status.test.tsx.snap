@@ -3,7 +3,7 @@
 exports[`ServerStatus renders correctly for green state 2`] = `
 <EuiBadge
   aria-label="Green"
-  color="secondary"
+  color="success"
   data-test-subj="serverStatusTitleBadge"
 >
   <EuiInnerText>
@@ -36,7 +36,7 @@ exports[`ServerStatus renders correctly for green state 2`] = `
 exports[`ServerStatus renders correctly for red state 2`] = `
 <EuiBadge
   aria-label="Red"
-  color="secondary"
+  color="success"
   data-test-subj="serverStatusTitleBadge"
 >
   <EuiInnerText>
