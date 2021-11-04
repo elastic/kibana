@@ -14,6 +14,7 @@ import {
   mockUpdateObjectsSpaces,
   mockGetCurrentTime,
   mockPreflightCheckForCreate,
+  mockDeleteLegacyUrlAliases,
 } from './repository.test.mock';
 
 import { SavedObjectsRepository } from './repository';
@@ -2394,9 +2395,11 @@ describe('SavedObjectsRepository', () => {
     const id = 'logstash-*';
     const namespace = 'foo-namespace';
 
-    const deleteSuccess = async (type, id, options) => {
+    const deleteSuccess = async (type, id, options, internalOptions = {}) => {
+      const { mockGetResponseValue } = internalOptions;
       if (registry.isMultiNamespace(type)) {
-        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
+        const mockGetResponse =
+          mockGetResponseValue ?? getMockGetResponse({ type, id }, options?.namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
         );
@@ -2408,6 +2411,11 @@ describe('SavedObjectsRepository', () => {
       expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
       return result;
     };
+
+    beforeEach(() => {
+      mockDeleteLegacyUrlAliases.mockClear();
+      mockDeleteLegacyUrlAliases.mockResolvedValue();
+    });
 
     describe('client calls', () => {
       it(`should use the ES delete action when not using a multi-namespace type`, async () => {
@@ -2478,6 +2486,64 @@ describe('SavedObjectsRepository', () => {
         expect(client.delete).toHaveBeenCalledWith(
           expect.objectContaining({ id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}` }),
           expect.anything()
+        );
+      });
+    });
+
+    describe('legacy URL aliases', () => {
+      it(`doesn't delete legacy URL aliases for single-namespace object types`, async () => {
+        await deleteSuccess(type, id, { namespace });
+        expect(mockDeleteLegacyUrlAliases).not.toHaveBeenCalled();
+      });
+
+      // We intentionally do not include a test case for a multi-namespace object with a "not found" preflight result, because that throws
+      // an error (without deleting aliases) and we already have a test case for that
+
+      it(`deletes legacy URL aliases for multi-namespace object types (all spaces)`, async () => {
+        const internalOptions = {
+          mockGetResponseValue: getMockGetResponse(
+            { type: MULTI_NAMESPACE_TYPE, id },
+            ALL_NAMESPACES_STRING
+          ),
+        };
+        await deleteSuccess(MULTI_NAMESPACE_TYPE, id, { namespace, force: true }, internalOptions);
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: MULTI_NAMESPACE_TYPE,
+            id,
+            namespaces: [],
+            deleteBehavior: 'exclusive',
+          })
+        );
+      });
+
+      it(`deletes legacy URL aliases for multi-namespace object types (specific spaces)`, async () => {
+        await deleteSuccess(MULTI_NAMESPACE_TYPE, id, { namespace }); // this function mocks a preflight response with the given namespace by default
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: MULTI_NAMESPACE_TYPE,
+            id,
+            namespaces: [namespace],
+            deleteBehavior: 'inclusive',
+          })
+        );
+      });
+
+      it(`logs a message when deleteLegacyUrlAliases returns an error`, async () => {
+        client.get.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            getMockGetResponse({ type: MULTI_NAMESPACE_ISOLATED_TYPE, id, namespace })
+          )
+        );
+        client.delete.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ result: 'deleted' })
+        );
+        mockDeleteLegacyUrlAliases.mockRejectedValueOnce(new Error('Oh no!'));
+        await savedObjectsRepository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace });
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Unable to delete aliases when deleting an object: Oh no!'
         );
       });
     });
