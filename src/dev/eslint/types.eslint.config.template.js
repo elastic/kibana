@@ -23,5 +23,6 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/consistent-type-exports': 'error',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
   },
 };
