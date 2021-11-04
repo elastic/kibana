@@ -65,7 +65,7 @@ import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
-import { translates } from './translates';
+import { translations } from './translations';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
@@ -115,25 +115,25 @@ export const columns: Array<
 > = [
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: translates.statusColumnDescription,
+    displayAsText: translations.statusColumnDescription,
     id: ALERT_STATUS,
     initialWidth: 110,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: translates.lastUpdatedColumnDescription,
+    displayAsText: translations.lastUpdatedColumnDescription,
     id: TIMESTAMP,
     initialWidth: 230,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: translates.durationColumnDescription,
+    displayAsText: translations.durationColumnDescription,
     id: ALERT_DURATION,
     initialWidth: 116,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: translates.reasonColumnDescription,
+    displayAsText: translations.reasonColumnDescription,
     id: ALERT_REASON,
     linkField: '*',
   },
@@ -243,32 +243,32 @@ function ObservabilityActions({
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
-      ? translates.notEnoughPermissions
-      : translates.moreActionsTextLabel;
+      ? translations.notEnoughPermissions
+      : translations.moreActionsTextLabel;
 
   return (
     <>
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
-          <EuiToolTip content={translates.viewDetailsTextLabel}>
+          <EuiToolTip content={translations.viewDetailsTextLabel}>
             <EuiButtonIcon
               size="s"
               iconType="expand"
               color="text"
               onClick={() => setFlyoutAlert(alert)}
               data-test-subj="openFlyoutButton"
-              aria-label={translates.viewDetailsTextLabel}
+              aria-label={translations.viewDetailsTextLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiToolTip content={translates.viewInAppTextLabel}>
+          <EuiToolTip content={translations.viewInAppTextLabel}>
             <EuiButtonIcon
               size="s"
               href={prepend(alert.link ?? '')}
               iconType="eye"
               color="text"
-              aria-label={translates.viewInAppTextLabel}
+              aria-label={translations.viewInAppTextLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -343,7 +343,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         id: 'expand',
         width: 120,
         headerCellRender: () => {
-          return <EventsThContent>{translates.actionsTextLabel}</EventsThContent>;
+          return <EventsThContent>{translations.actionsTextLabel}</EventsThContent>;
         },
         rowCellRender: (actionProps: ActionProps) => {
           return (
@@ -374,8 +374,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       hasAlertsCrudPermissions,
       indexNames,
       itemsPerPageOptions: [10, 25, 50],
-      loadingText: translates.loadingTextLabel,
-      footerText: translates.footerTextLabel,
+      loadingText: translations.loadingTextLabel,
+      footerText: translations.footerTextLabel,
       query: {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
@@ -394,7 +394,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filterStatus: workflowStatus as AlertWorkflowStatus,
       leadingControlColumns,
       trailingControlColumns,
-      unit: (totalAlerts: number) => translates.showingAlertsTitle(totalAlerts),
+      unit: (totalAlerts: number) => translations.showingAlertsTitle(totalAlerts),
     };
   }, [
     casePermissions,
