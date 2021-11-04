@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React, { useRef, useLayoutEffect, useCallback } from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { ProcessTreeNode } from '../ProcessTreeNode';
 import { useProcessTree, ProcessEvent, Process } from '../../hooks/use_process_tree';
 import { useScroll } from '../../hooks/use_scroll';
+import { useStyles } from './styles';
 
 interface ProcessTreeDeps {
   // process.entity_id to act as root node
@@ -36,7 +36,8 @@ export const ProcessTree = ({
   selectedProcess,
   onProcessSelected,
 }: ProcessTreeDeps) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
+
   const { sessionLeader, orphans, searchResults } = useProcessTree({
     sessionId,
     forward,
@@ -101,31 +102,6 @@ export const ProcessTree = ({
     }
   }, [selectedProcess, selectProcess]);
 
-  const defaultSelectionColor = euiTheme.colors.accent;
-  const padding = euiTheme.size.s;
-
-  const scrollerCSS = `
-    font-family: ${euiTheme.font.familyCode};
-    overflow: auto;
-    height: 100%;
-    background-color: ${euiTheme.colors.lightestShade};
-    padding-top: ${padding};
-    padding-left: ${padding};
-    display: flex;
-    flex-direction: column;
-  `;
-
-  const selectionAreaCSS = `
-    position: absolute;
-    display: none;
-    margin-left: -50%;
-    width: 150%;
-    height: 100%;
-    background-color: ${defaultSelectionColor};
-    pointer-events:none;
-    opacity: .1;
-  `;
-
   // TODO: processes without parents.
   // haven't decided whether to just add to session leader
   // or some other UX treatment (reparenting to init?)
@@ -137,7 +113,7 @@ export const ProcessTree = ({
   console.log(searchResults);
 
   return (
-    <div ref={scrollerRef} css={scrollerCSS}>
+    <div ref={scrollerRef} css={styles.scroller}>
       {sessionLeader && (
         <ProcessTreeNode
           isSessionLeader
@@ -145,7 +121,7 @@ export const ProcessTree = ({
           onProcessSelected={onProcessSelected}
         />
       )}
-      <div ref={selectionAreaRef} css={selectionAreaCSS} />
+      <div ref={selectionAreaRef} css={styles.selectionArea} />
     </div>
   );
 };
