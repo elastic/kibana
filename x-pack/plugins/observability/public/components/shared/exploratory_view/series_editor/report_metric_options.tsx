@@ -35,7 +35,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const metricOptions = seriesConfig?.metricOptions;
 
-  const { indexPatterns, loading } = useAppIndexPatternContext();
+  const { indexPatterns, indexPatternErrors, loading } = useAppIndexPatternContext();
 
   const onChange = (value?: string) => {
     setSeries(seriesId, {
@@ -49,6 +49,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   }
 
   const indexPattern = indexPatterns?.[series.dataType];
+  const indexPatternError = indexPatternErrors?.[series.dataType];
 
   const options = (metricOptions ?? []).map(({ label, field, id }) => {
     let disabled = false;
@@ -79,6 +80,15 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
       inputDisplay: label,
     };
   });
+
+  if (indexPatternError && !indexPattern && !loading) {
+    return (
+      <EuiText color="danger" className="eui-textNoWrap">
+        {indexPatternError.body.message},{' '}
+        {indexPatternError.body.error === 'Forbidden' && NO_PERMISSIONS}
+      </EuiText>
+    );
+  }
 
   if (!indexPattern && !loading) {
     return <EuiText>{NO_DATA_AVAILABLE}</EuiText>;
@@ -151,4 +161,8 @@ const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
 
 const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEditor.noData', {
   defaultMessage: 'No data available',
+});
+
+const NO_PERMISSIONS = i18n.translate('xpack.observability.expView.seriesEditor.noPermissions', {
+  defaultMessage: "you don't have required permissions.",
 });
