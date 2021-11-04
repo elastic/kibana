@@ -13,6 +13,7 @@ import type { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
 
 import { useGetPackages, useLink, useCapabilities } from '../../hooks';
 import { pkgKeyFromPackageInfo } from '../../services';
+import { FLEET_APM_PACKAGE } from '../../../common/constants';
 
 const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
   const { getHref } = useLink();
@@ -22,7 +23,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
   const pkgInfo =
     !isLoading &&
     packagesData?.response &&
-    packagesData.response.find((pkg) => pkg.name === moduleName);
+    packagesData.response.find((pkg) => pkg.name === moduleName && pkg.name !== FLEET_APM_PACKAGE); // APM needs special handling
 
   if (hasIngestManager && pkgInfo) {
     return (

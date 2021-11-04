@@ -103,7 +103,6 @@ It allows you to monitor the performance of thousands of applications in real ti
         }
       ),
       euiIconType: 'apmApp',
-      eprPackageOverlap: 'apm',
       integrationBrowserCategories: ['web'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
