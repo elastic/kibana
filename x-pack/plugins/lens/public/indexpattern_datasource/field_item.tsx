@@ -165,7 +165,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post<FieldStatsResponse<string | number>>(`/api/lens/index_stats/${indexPattern.id}/field`, {
+      .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
             indexPattern,
@@ -178,7 +178,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           fieldName: field.name,
         }),
       })
-      .then((results) => {
+      .then((results: FieldStatsResponse<string | number>) => {
         setState((s) => ({
           ...s,
           isLoading: false,

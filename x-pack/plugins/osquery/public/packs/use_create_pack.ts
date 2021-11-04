@@ -29,7 +29,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
 
   return useMutation(
     (payload) =>
-      http.post<any>('/internal/osquery/packs', {
+      http.post('/internal/osquery/packs', {
         body: JSON.stringify(payload),
       }),
     {

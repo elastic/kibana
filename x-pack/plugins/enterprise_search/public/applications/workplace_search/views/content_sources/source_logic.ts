@@ -159,9 +159,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
-        const response = await HttpLogic.values.http.get<
-          ContentSourceFullData & { errors?: string }
-        >(route);
+        const response = await HttpLogic.values.http.get(route);
         actions.setContentSource(response);
         if (response.isFederatedSource) {
           actions.initializeFederatedSummary(sourceId);
@@ -188,7 +186,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeFederatedSummary: async ({ sourceId }) => {
       const route = `/internal/workplace_search/account/sources/${sourceId}/federated_summary`;
       try {
-        const response = await HttpLogic.values.http.get<{ summary: DocumentSummaryItem[] }>(route);
+        const response = await HttpLogic.values.http.get(route);
         actions.onUpdateSummary(response.summary);
       } catch (e) {
         flashAPIErrors(e);
@@ -208,7 +206,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       } = values;
 
       try {
-        const response = await HttpLogic.values.http.post<SearchResultsResponse>(route, {
+        const response = await HttpLogic.values.http.post(route, {
           body: JSON.stringify({ query, page }),
         });
         actions.setSearchResults(response);
@@ -223,7 +221,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         : `/internal/workplace_search/account/sources/${sourceId}/settings`;
 
       try {
-        const response = await HttpLogic.values.http.patch<{ name: string }>(route, {
+        const response = await HttpLogic.values.http.patch(route, {
           body: JSON.stringify({ content_source: source }),
         });
         if (source.name) {
@@ -241,7 +239,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
-        const response = await HttpLogic.values.http.delete<{ name: string }>(route);
+        const response = await HttpLogic.values.http.delete(route);
         KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
         flashSuccessToast(
           i18n.translate(

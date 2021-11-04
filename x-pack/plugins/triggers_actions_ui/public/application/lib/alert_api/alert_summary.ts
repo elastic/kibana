@@ -7,7 +7,7 @@
 import { HttpSetup } from 'kibana/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { AlertInstanceSummary } from '../../../types';
-import { RewriteRequestCase, AsApiContract } from '../../../../../actions/common';
+import { RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   alerts,
@@ -38,7 +38,7 @@ export async function loadAlertInstanceSummary({
   http: HttpSetup;
   alertId: string;
 }): Promise<AlertInstanceSummary> {
-  const res = await http.get<AsApiContract<AlertInstanceSummary>>(
+  const res = await http.get(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(alertId)}/_alert_summary`
   );
   return rewriteBodyRes(res);

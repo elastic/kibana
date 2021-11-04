@@ -96,8 +96,8 @@ export async function fetchTopNodes(
     .reduce((allAggs, subAgg) => ({ ...allAggs, ...subAgg }));
   const body = createSamplerSearchBody(aggs);
 
-  const response = (
-    await post<{ resp: TopTermsAggResponse }>('../api/graph/searchProxy', {
+  const response: TopTermsAggResponse = (
+    await post('../api/graph/searchProxy', {
       body: JSON.stringify({ index, body }),
     })
   ).resp;
