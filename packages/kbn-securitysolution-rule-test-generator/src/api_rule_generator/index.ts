@@ -5,5 +5,4 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export * from './api_rule_generator';
+export * from './run_generate_tests_cli';
