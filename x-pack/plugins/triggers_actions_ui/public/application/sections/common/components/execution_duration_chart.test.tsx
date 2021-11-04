@@ -48,7 +48,18 @@ describe('padOrTruncateDurations', () => {
   });
 
   it('pads execution duration values when there are fewer than display desires', () => {
-    expect(padOrTruncateDurations([1, 2, 3], 10)).toEqual([1, 2, 3, 0, 0, 0, 0, 0, 0, 0]);
+    expect(padOrTruncateDurations([1, 2, 3], 10)).toEqual([
+      1,
+      2,
+      3,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ]);
   });
 
   it('truncates execution duration values when there are more than display desires', () => {
