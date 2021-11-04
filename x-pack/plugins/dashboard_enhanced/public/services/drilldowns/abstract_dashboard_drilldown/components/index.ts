@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  CollectConfigContainer,
-  DashboardDrilldownCollectConfigProps,
-} from './collect_config_container';
+export type { DashboardDrilldownCollectConfigProps } from './collect_config_container';
+export { CollectConfigContainer } from './collect_config_container';
