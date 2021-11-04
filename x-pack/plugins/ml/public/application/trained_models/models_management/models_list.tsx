@@ -374,7 +374,7 @@ export const ModelsList: FC = () => {
       description: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
         defaultMessage: 'Start allocation',
       }),
-      icon: 'continuityAboveBelow',
+      icon: 'play',
       type: 'icon',
       isPrimary: true,
       enabled: (item) =>
