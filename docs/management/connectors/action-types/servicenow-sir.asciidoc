@@ -10,7 +10,7 @@ The ServiceNow SecOps connector uses the https://docs.servicenow.com/bundle/orla
 [float]
 [[servicenow-sir-connector-prerequisites]]
 === Prerequisites
-After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow SecOps connector or <<updating an existing one, servicenow-sir-connector-update>>:
+After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
 
 * Install Elastic for Security Operations (SecOps) from the https://store.servicenow.com/sn_appstore_store.do#!/store/home[ServiceNow Store].
 * Create a ServiceNow integration user and assign it the appropriate roles.
