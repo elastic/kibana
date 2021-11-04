@@ -24,7 +24,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   },
   schema: configSchema,
   deprecations: ({ deprecate }) => [
-    deprecate('enabled', '8.0.0', { level: 'critical'}),
+    deprecate('enabled', '8.0.0', { level: 'critical' }),
     (
       completeConfig: Record<string, any>,
       rootPath: string,
