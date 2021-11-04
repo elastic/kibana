@@ -65,6 +65,7 @@ function createCoreSetupMock({
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
     },
+    theme: themeServiceMock.createSetupContract(),
   };
 
   return mock;
