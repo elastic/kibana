@@ -21,6 +21,7 @@ import { isNumericFieldForDatatable, MetricState } from '../../common/expression
 import {
   applyPaletteParams,
   CustomizablePalette,
+  CUSTOM_PALETTE,
   FIXED_PROGRESSION,
   PalettePanelContainer,
 } from '../shared_components';
@@ -190,6 +191,14 @@ export function MetricDimensionEditor(
                   activePalette={activePalette}
                   dataBounds={currentMinMax}
                   setPalette={(newPalette) => {
+                    // if the new palette is not custom, replace the rangeMin with the artificial one
+                    if (
+                      newPalette.name !== CUSTOM_PALETTE &&
+                      newPalette.params &&
+                      newPalette.params.rangeMin !== currentMinMax.min
+                    ) {
+                      newPalette.params.rangeMin = currentMinMax.min;
+                    }
                     setState({
                       ...state,
                       palette: newPalette,

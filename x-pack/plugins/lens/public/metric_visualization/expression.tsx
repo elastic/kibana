@@ -81,10 +81,10 @@ function getColorStyling(
   const rawIndex = stops.findIndex((v) => v > value);
 
   let colorIndex = rawIndex;
-  if (['all', 'below'].includes(continuity) && value < rangeMin) {
+  if (['all', 'below'].includes(continuity) && value < rangeMin && colorIndex < 0) {
     colorIndex = 0;
   }
-  if (['all', 'above'].includes(continuity) && value > penultimateStop) {
+  if (['all', 'above'].includes(continuity) && value > penultimateStop && colorIndex < 0) {
     colorIndex = stops.length - 1;
   }
 
