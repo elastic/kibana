@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
@@ -18,14 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
 
   describe('security feature controls', () => {
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
-    });
-
     describe('global advanced_settings all privileges', () => {
       before(async () => {
         await security.role.create('global_advanced_settings_all_role', {
