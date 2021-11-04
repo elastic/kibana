@@ -65,7 +65,7 @@ import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
-import { translates } from "./translates"
+import { translates } from './translates';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
@@ -89,7 +89,7 @@ interface ObservabilityActionsProps extends ActionProps {
 
 const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thContent ${className}`,
-})) <{ textAlign?: string; width?: number }>`
+}))<{ textAlign?: string; width?: number }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
@@ -113,31 +113,31 @@ const EventsThContent = styled.div.attrs(({ className = '' }) => ({
 export const columns: Array<
   Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
 > = [
-    {
-      columnHeaderType: 'not-filtered',
-      displayAsText: translates.statusColumnDescription,
-      id: ALERT_STATUS,
-      initialWidth: 110,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      displayAsText: translates.lastUpdatedColumnDescription,
-      id: TIMESTAMP,
-      initialWidth: 230,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      displayAsText: translates.durationColumnDescription,
-      id: ALERT_DURATION,
-      initialWidth: 116,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      displayAsText: translates.reasonColumnDescription,
-      id: ALERT_REASON,
-      linkField: '*',
-    },
-  ];
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: translates.statusColumnDescription,
+    id: ALERT_STATUS,
+    initialWidth: 110,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: translates.lastUpdatedColumnDescription,
+    id: TIMESTAMP,
+    initialWidth: 230,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: translates.durationColumnDescription,
+    id: ALERT_DURATION,
+    initialWidth: 116,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: translates.reasonColumnDescription,
+    id: ALERT_REASON,
+    linkField: '*',
+  },
+];
 
 const NO_ROW_RENDER: RowRenderer[] = [];
 
@@ -223,25 +223,28 @@ function ObservabilityActions({
     return [
       ...(casePermissions?.crud
         ? [
-          timelines.getAddToExistingCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          timelines.getAddToNewCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-        ]
+            timelines.getAddToExistingCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+            timelines.getAddToNewCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+          ]
         : []),
       ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
-  const actionsToolTip = actionsMenuItems.length <= 0 ? translates.notEnoughPermissions : translates.moreActionsTextLabel
+  const actionsToolTip =
+    actionsMenuItems.length <= 0
+      ? translates.notEnoughPermissions
+      : translates.moreActionsTextLabel;
 
   return (
     <>
@@ -340,11 +343,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         id: 'expand',
         width: 120,
         headerCellRender: () => {
-          return (
-            <EventsThContent>
-              {translates.actionsTextLabel}
-            </EventsThContent>
-          );
+          return <EventsThContent>{translates.actionsTextLabel}</EventsThContent>;
         },
         rowCellRender: (actionProps: ActionProps) => {
           return (
@@ -395,8 +394,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filterStatus: workflowStatus as AlertWorkflowStatus,
       leadingControlColumns,
       trailingControlColumns,
-      unit: (totalAlerts: number) => translates.showingAlertsTitle(totalAlerts)
-      ,
+      unit: (totalAlerts: number) => translates.showingAlertsTitle(totalAlerts),
     };
   }, [
     casePermissions,

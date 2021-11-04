@@ -208,10 +208,12 @@ export function ObservabilityAlertsCommonProvider({
     return buttonText.substring(0, buttonText.indexOf('\n'));
   };
 
-  const getActionsButtonByIndex =  async (index:number) => {
-    const actionsOverflowButtons = await find.allByCssSelector('[data-test-subj="alerts-table-row-action-more"]');
-    return actionsOverflowButtons[index] || null
-  }
+  const getActionsButtonByIndex = async (index: number) => {
+    const actionsOverflowButtons = await find.allByCssSelector(
+      '[data-test-subj="alerts-table-row-action-more"]'
+    );
+    return actionsOverflowButtons[index] || null;
+  };
 
   return {
     getQueryBar,
@@ -241,6 +243,6 @@ export function ObservabilityAlertsCommonProvider({
     typeInQueryBar,
     openActionsMenuForRow,
     getTimeRange,
-    getActionsButtonByIndex
+    getActionsButtonByIndex,
   };
 }
