@@ -23,6 +23,7 @@ export const mocksSource = {
       searchable: true,
       type: 'date',
       aggregatable: true,
+      readFromDocValues: true,
     },
     {
       category: 'agent',
@@ -331,7 +332,13 @@ export const mocksSource = {
 };
 
 export const mockIndexFields = [
-  { aggregatable: true, name: '@timestamp', searchable: true, type: 'date' },
+  {
+    aggregatable: true,
+    name: '@timestamp',
+    searchable: true,
+    type: 'date',
+    readFromDocValues: true,
+  },
   { aggregatable: true, name: 'agent.ephemeral_id', searchable: true, type: 'string' },
   { aggregatable: true, name: 'agent.hostname', searchable: true, type: 'string' },
   { aggregatable: true, name: 'agent.id', searchable: true, type: 'string' },
@@ -460,6 +467,7 @@ export const mockBrowserFields: BrowserFields = {
         name: '@timestamp',
         searchable: true,
         type: 'date',
+        readFromDocValues: true,
       },
     },
   },

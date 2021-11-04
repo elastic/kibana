@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { KibanaDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
+import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
 import { TimelineEventsType } from '../../../../common';
 import { SelectedDataViewPayload } from './actions';
 
@@ -18,7 +18,7 @@ export interface Args {
 }
 
 export const getScopePatternListSelection = (
-  theDataView: KibanaDataView | undefined,
+  theDataView: SourcererDataView | undefined,
   sourcererScope: SourcererScopeName,
   signalIndexName: SourcererModel['signalIndexName'],
   isDefaultDataView: boolean
@@ -83,7 +83,7 @@ export const validateSelectedPatterns = (
     }
   }
 
-  // TO DO: If dataView is still undefined here, create temporary dataView
+  // TO DO: Steph/sourcerer If dataView is still undefined here, create temporary dataView
   // and prompt user to go create this dataView
   // currently UI will take the undefined dataView and default to defaultDataView anyways
   // this is a "strategically merged" bug ;)

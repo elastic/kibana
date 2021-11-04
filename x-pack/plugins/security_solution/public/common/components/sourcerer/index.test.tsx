@@ -123,12 +123,14 @@ describe('Sourcerer component', () => {
         sourcerer: {
           ...state.sourcerer,
           defaultDataView: {
+            ...state.sourcerer.defaultDataView,
             id: '1234',
             title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
             patternList: ['filebeat-*', 'auditbeat-*'],
           },
           kibanaDataViews: [
             {
+              ...state.sourcerer.defaultDataView,
               id: '1234',
               title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
               patternList: ['filebeat-*', 'auditbeat-*'],
@@ -172,12 +174,14 @@ describe('Sourcerer component', () => {
         sourcerer: {
           ...state.sourcerer,
           defaultDataView: {
+            ...state.sourcerer.defaultDataView,
             id: '1234',
             title: 'filebeat-*,auditbeat-*,fakebeat-*',
             patternList: ['filebeat-*', 'auditbeat-*'],
           },
           kibanaDataViews: [
             {
+              ...state.sourcerer.defaultDataView,
               id: '1234',
               title: 'filebeat-*,auditbeat-*,fakebeat-*',
               patternList: ['filebeat-*', 'auditbeat-*'],
@@ -222,8 +226,18 @@ describe('Sourcerer component', () => {
         ...mockGlobalState.sourcerer,
         kibanaDataViews: [
           state.sourcerer.defaultDataView,
-          { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
-          { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'auditbeat-*',
+            patternList: ['auditbeat-*'],
+          },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '12347',
+            title: 'packetbeat-*',
+            patternList: ['packetbeat-*'],
+          },
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
@@ -259,8 +273,18 @@ describe('Sourcerer component', () => {
         ...mockGlobalState.sourcerer,
         kibanaDataViews: [
           state.sourcerer.defaultDataView,
-          { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
-          { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'auditbeat-*',
+            patternList: ['auditbeat-*'],
+          },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '12347',
+            title: 'packetbeat-*',
+            patternList: ['packetbeat-*'],
+          },
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
@@ -297,7 +321,12 @@ describe('Sourcerer component', () => {
           ...state.sourcerer,
           kibanaDataViews: [
             state.sourcerer.defaultDataView,
-            { id: '1234', title: 'filebeat-*', patternList: ['filebeat-*'] },
+            {
+              ...state.sourcerer.defaultDataView,
+              id: '1234',
+              title: 'filebeat-*',
+              patternList: ['filebeat-*'],
+            },
           ],
           sourcererScopes: {
             ...state.sourcerer.sourcererScopes,
@@ -383,7 +412,12 @@ describe('Sourcerer component', () => {
           ...state.sourcerer,
           kibanaDataViews: [
             state.sourcerer.defaultDataView,
-            { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
+            {
+              ...state.sourcerer.defaultDataView,
+              id: '1234',
+              title: 'auditbeat-*',
+              patternList: ['auditbeat-*'],
+            },
           ],
         },
       },
@@ -407,7 +441,12 @@ describe('Sourcerer component', () => {
         ...mockGlobalState.sourcerer,
         kibanaDataViews: [
           state.sourcerer.defaultDataView,
-          { id: '1234', title: 'fakebeat-*,neatbeat-*', patternList: ['fakebeat-*'] },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'fakebeat-*,neatbeat-*',
+            patternList: ['fakebeat-*'],
+          },
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
@@ -453,8 +492,18 @@ describe('Sourcerer component', () => {
         ...mockGlobalState.sourcerer,
         kibanaDataViews: [
           state.sourcerer.defaultDataView,
-          { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
-          { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'auditbeat-*',
+            patternList: ['auditbeat-*'],
+          },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '12347',
+            title: 'packetbeat-*',
+            patternList: ['packetbeat-*'],
+          },
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
@@ -488,8 +537,18 @@ describe('Sourcerer component', () => {
         ...mockGlobalState.sourcerer,
         kibanaDataViews: [
           state.sourcerer.defaultDataView,
-          { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
-          { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'auditbeat-*',
+            patternList: ['auditbeat-*'],
+          },
+          {
+            ...state.sourcerer.defaultDataView,
+            id: '12347',
+            title: 'packetbeat-*',
+            patternList: ['packetbeat-*'],
+          },
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,

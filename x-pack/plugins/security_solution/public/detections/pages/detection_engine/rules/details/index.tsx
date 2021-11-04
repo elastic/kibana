@@ -103,7 +103,7 @@ import {
 } from '../../../../../timelines/components/timeline/helpers';
 import { timelineActions, timelineSelectors } from '../../../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import {
   getToolTipContent,
@@ -126,6 +126,7 @@ import {
   AlertsTableFilterGroup,
   FILTER_OPEN,
 } from '../../../../components/alerts_table/alerts_filter_group';
+import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -217,6 +218,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: ruleLoading,
     isExistingRule,
   } = useRuleWithFallback(ruleId);
+  const { pollForSignalIndex } = useSignalHelpers();
   const [loadingStatus, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
   const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
     ruleStatus?.current_status ?? null
@@ -622,8 +624,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indexPattern } = useSourcererScope(SourcererScopeName.detections);
-
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];
     allowedExceptionListTypes: ExceptionListTypeEnum[];
@@ -698,7 +699,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-          <SiemSearchBar id="global" indexPattern={indexPattern} />
+          <SiemSearchBar
+            id="global"
+            pollForSignalIndex={pollForSignalIndex}
+            indexPattern={indexPattern}
+          />
         </FiltersGlobal>
 
         <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

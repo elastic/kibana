@@ -12,7 +12,8 @@ import {
   setSourcererScopeLoading,
   setSelectedDataView,
   setSignalIndexName,
-  setSource,
+  setDataView,
+  setDataViewLoading,
 } from './actions';
 import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
@@ -24,10 +25,25 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     signalIndexName,
   }))
+  .case(setDataViewLoading, (state, { id, loading }) => ({
+    ...state,
+    ...(id === state.defaultDataView.id
+      ? {
+          defaultDataView: { ...state.defaultDataView, loading },
+        }
+      : {}),
+    kibanaDataViews: state.kibanaDataViews.map((dv) => (dv.id === id ? { ...dv, loading } : dv)),
+  }))
   .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
     ...state,
-    defaultDataView,
-    kibanaDataViews,
+    defaultDataView: {
+      ...state.defaultDataView,
+      ...defaultDataView,
+    },
+    kibanaDataViews: kibanaDataViews.map((dataView) => ({
+      ...(kibanaDataViews.find(({ id }) => id === dataView.id) ?? {}),
+      ...dataView,
+    })),
   }))
   .case(setSourcererScopeLoading, (state, { id, loading }) => ({
     ...state,
@@ -63,14 +79,15 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...validateSelectedPatterns(state, payload),
     },
   }))
-  .case(setSource, (state, { id, payload }) => ({
+  .case(setDataView, (state, dataView) => ({
     ...state,
-    sourcererScopes: {
-      ...state.sourcererScopes,
-      [id]: {
-        ...state.sourcererScopes[id],
-        ...payload,
-      },
-    },
+    ...(dataView.id === state.defaultDataView.id
+      ? {
+          defaultDataView: { ...state.defaultDataView, ...dataView },
+        }
+      : {}),
+    kibanaDataViews: state.kibanaDataViews.map((dv) =>
+      dv.id === dataView.id ? { ...dv, ...dataView } : dv
+    ),
   }))
   .build();

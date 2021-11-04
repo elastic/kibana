@@ -21,7 +21,7 @@ import { SecuritySubPlugins } from '../../app/types';
 import { ManagementPluginReducer } from '../../management';
 import { State } from './types';
 import { AppAction } from './actions';
-import { KibanaDataView, SourcererScopeName } from './sourcerer/model';
+import { initDataView, SourcererModel, SourcererScopeName } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 
@@ -44,9 +44,9 @@ export const createInitialState = (
     signalIndexName,
     enableExperimental,
   }: {
-    defaultDataView: KibanaDataView;
-    kibanaDataViews: KibanaDataView[];
-    signalIndexName: string | null;
+    defaultDataView: SourcererModel['defaultDataView'];
+    kibanaDataViews: SourcererModel['kibanaDataViews'];
+    signalIndexName: SourcererModel['signalIndexName'];
     enableExperimental: ExperimentalFeatures;
   }
 ): State => {
@@ -84,26 +84,20 @@ export const createInitialState = (
           ...sourcererModel.initialSourcererState.sourcererScopes.default,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.default],
-          indicesExist: initialPatterns[SourcererScopeName.default].length > 0,
         },
         [SourcererScopeName.detections]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.detections,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.detections],
-          indicesExist: initialPatterns[SourcererScopeName.detections].length > 0,
         },
         [SourcererScopeName.timeline]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.timeline,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.timeline],
-          indicesExist: initialPatterns[SourcererScopeName.timeline].length > 0,
         },
       },
-      defaultDataView: {
-        ...sourcererModel.initialSourcererState.defaultDataView,
-        ...defaultDataView,
-      },
-      kibanaDataViews,
+      defaultDataView,
+      kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
     },
   };

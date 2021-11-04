@@ -7,28 +7,22 @@
 
 import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
 import { useKibana } from '../../lib/kibana';
 import {
   BrowserField,
   BrowserFields,
-  DELETED_SECURITY_SOLUTION_DATA_VIEW,
   DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../../../../../timelines/common';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { SelectedDataView } from '../../store/sourcerer/selectors';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -47,7 +41,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): IIndexPattern =>
+  (title: string, fields: IndexField[]): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -120,7 +114,7 @@ interface FetchIndexReturn {
   docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: IIndexPattern;
+  indexPatterns: DataViewBase;
 }
 
 /**
@@ -166,8 +160,6 @@ export const useFetchIndex = (
 
                 previousIndexesName.current = response.indicesExist;
                 setLoading(false);
-                // TODO: Steph/sourcerer all the below formatting should be happening serverside
-                // https://github.com/elastic/security-team/issues/1730
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
@@ -210,170 +202,4 @@ export const useFetchIndex = (
   }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
   return [isLoading, state];
-};
-
-/**
- * Sourcerer specific index fields hook/request
- * sets redux state, returns nothing
- */
-export const useIndexFields = (
-  sourcererScopeName: SourcererScopeName
-): { indexFieldsSearch: (selectedDataViewId: string, newSignalsIndex?: string) => void } => {
-  const { data } = useKibana().services;
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
-  const dispatch = useDispatch();
-  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
-  const { dataViewId, patternList, selectedPatterns } = useDeepEqualSelector<SelectedDataView>(
-    (state) => getSelectedDataView(state, sourcererScopeName)
-  );
-  const { addError, addWarning } = useAppToasts();
-
-  const setLoading = useCallback(
-    (loading: boolean) => {
-      dispatch(sourcererActions.setSourcererScopeLoading({ id: sourcererScopeName, loading }));
-    },
-    [dispatch, sourcererScopeName]
-  );
-
-  const getSignalIndexNameSelector = useMemo(
-    () => sourcererSelectors.signalIndexNameSelector(),
-    []
-  );
-  const signalIndexNameSelector = useDeepEqualSelector(getSignalIndexNameSelector);
-
-  const indexFieldsSearch = useCallback(
-    (selectedDataViewId: string, newSignalsIndex?: string) => {
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-        searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
-            {
-              dataViewId: selectedDataViewId,
-              onlyCheckIfIndicesExist: false,
-            },
-            {
-              abortSignal: abortCtrl.current.signal,
-              strategy: 'indexFields',
-            }
-          )
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                const signalIndexName = signalIndexNameSelector
-                  ? signalIndexNameSelector
-                  : newSignalsIndex ?? '';
-                const newSelectedPatterns = selectedPatterns.filter((pattern) =>
-                  patternList.includes(pattern)
-                );
-                const patternString = newSelectedPatterns.sort().join();
-
-                if (newSignalsIndex != null) {
-                  // if new signal index name is set, there wasn't one before so we need to update detections specifically
-                  // technically, we need to update all scopes as there can be new fields in signals index
-                  // once fields are moved to sourcerer.kibanaDataViews we only need to do this for detections scope
-                  // TODO: Steph/sourcerer https://github.com/elastic/security-team/issues/1730 to be done before 7.16 feature freeze
-                  dispatch(
-                    sourcererActions.setSource({
-                      id: SourcererScopeName.detections,
-                      payload: {
-                        browserFields: getBrowserFields(patternString, response.indexFields),
-                        docValueFields: getDocValueFields(patternString, response.indexFields),
-                        errorMessage: null,
-                        id: SourcererScopeName.detections,
-                        indexPattern: getIndexFields(patternString, response.indexFields),
-                        indicesExist: response.indicesExist.includes(signalIndexName),
-                        loading: false,
-                        runtimeMappings: response.runtimeMappings,
-                      },
-                    })
-                  );
-                } else {
-                  dispatch(
-                    sourcererActions.setSource({
-                      id: sourcererScopeName,
-                      payload: {
-                        // TODO: Steph/sourcerer all the below formatting should be happening serverside
-                        // https://github.com/elastic/security-team/issues/1730
-                        browserFields: getBrowserFields(patternString, response.indexFields),
-                        docValueFields: getDocValueFields(patternString, response.indexFields),
-                        errorMessage: null,
-                        id: sourcererScopeName,
-                        indexPattern: getIndexFields(patternString, response.indexFields),
-                        indicesExist:
-                          sourcererScopeName === SourcererScopeName.detections
-                            ? response.indicesExist.includes(signalIndexName)
-                            : sourcererScopeName === SourcererScopeName.default
-                            ? response.indicesExist.filter((i) => i !== signalIndexName).length > 0
-                            : response.indicesExist.length > 0,
-                        loading: false,
-                        runtimeMappings: response.runtimeMappings,
-                      },
-                    })
-                  );
-                }
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
-                // reload app if security solution data view is deleted
-                return location.reload();
-              }
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_BEAT_FIELDS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
-    },
-    [
-      addError,
-      addWarning,
-      data.search,
-      dispatch,
-      patternList,
-      selectedPatterns,
-      setLoading,
-      signalIndexNameSelector,
-      sourcererScopeName,
-    ]
-  );
-  const refDataViewId = useRef('');
-  const refSelectedPatterns = useRef([] as string[]);
-  const refSourcererScopeName = useRef('');
-
-  useEffect(() => {
-    if (
-      (dataViewId != null &&
-        // remove this when https://github.com/elastic/kibana/pull/114907 is merged
-        sourcererScopeName !== refSourcererScopeName.current) ||
-      (dataViewId !== refDataViewId.current && selectedPatterns.length > 0) ||
-      (selectedPatterns.length > 0 && refSelectedPatterns.current.length === 0)
-    ) {
-      indexFieldsSearch(dataViewId);
-    }
-    refSourcererScopeName.current = sourcererScopeName;
-    refSelectedPatterns.current = selectedPatterns;
-    refDataViewId.current = dataViewId;
-  }, [dataViewId, indexFieldsSearch, selectedPatterns, sourcererScopeName]);
-
-  useEffect(() => {
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, []);
-
-  return { indexFieldsSearch };
 };

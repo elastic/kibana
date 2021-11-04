@@ -63,11 +63,24 @@ export const createSourcererDataViewRoute = (
           const defaultDataView = { ...siemDataView, id: siemDataView.id ?? '' };
           const wholeDataView = await dataViewService.get(defaultDataView.id);
           wholeDataView.title = patternListAsTitle;
-          await dataViewService.updateSavedObject(wholeDataView);
+          let didUpdate = true;
+          await dataViewService.updateSavedObject(wholeDataView).catch((err) => {
+            const error = transformError(err);
+            if (error.statusCode === 403) {
+              didUpdate = false;
+              // user doesnt have permissions to update, use existing pattern
+              wholeDataView.title = defaultDataView.title;
+              return;
+            }
+            throw err;
+          });
+
           // update the data view in allDataViews
-          allDataViews = allDataViews.map((v) =>
-            v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
-          );
+          if (didUpdate) {
+            allDataViews = allDataViews.map((v) =>
+              v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
+            );
+          }
         }
 
         const patternLists: string[][] = allDataViews.map(({ title }) => title.split(','));

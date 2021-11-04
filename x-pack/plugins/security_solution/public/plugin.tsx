@@ -62,7 +62,7 @@ import {
 } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { KibanaDataView } from './common/store/sourcerer/model';
+import { initDataView, SourcererModel, SourcererDataView } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -337,15 +337,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._store) {
       let signal: { name: string | null } = { name: null };
       try {
-        // const { index_name: indexName } = await coreStart.http.fetch(
-        //   `${BASE_RAC_ALERTS_API_PATH}/index`,
-        //   {
-        //     method: 'GET',
-        //     query: { features: SERVER_APP_ID },
-        //   }
-        // );
-        // signal = { name: indexName[0] };
-        if (coreStart.application.capabilities[SERVER_APP_ID].read === true) {
+        if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
           signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
             method: 'GET',
           });
@@ -355,20 +347,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      let defaultDataView: KibanaDataView;
-      let kibanaDataViews: KibanaDataView[];
+      let defaultDataView: SourcererModel['defaultDataView'];
+      let kibanaDataViews: SourcererModel['kibanaDataViews'];
       try {
-        // check for/generate default Security Solution Kibana index pattern
-        const sourcererDataViews = await coreStart.http.fetch(SOURCERER_API_URL, {
+        // check for/generate default Security Solution Kibana data view
+        const sourcererDataViews: {
+          defaultDataView: SourcererModel['defaultDataView'];
+          kibanaDataViews: SourcererModel['kibanaDataViews'];
+        } = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({
             patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
           }),
         });
-        defaultDataView = sourcererDataViews.defaultDataView;
-        kibanaDataViews = sourcererDataViews.kibanaDataViews;
+        defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
+        kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: SourcererDataView) => ({
+          ...initDataView,
+          ...dataView,
+        }));
       } catch (error) {
-        defaultDataView = { id: null, ...error };
+        defaultDataView = { ...initDataView, error };
         kibanaDataViews = [];
       }
       const { createStore, createInitialState } = await this.lazyApplicationDependencies();
