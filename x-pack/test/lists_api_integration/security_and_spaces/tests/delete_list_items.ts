@@ -22,15 +22,16 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('delete_list_items', () => {
     describe('deleting list items', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
+        await deleteListsIndex(supertest, log);
       });
 
       it('should delete a single list item with a list item id', async () => {

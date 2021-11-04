@@ -18,6 +18,7 @@ import { getSignalStatus, createSignalsIndex, deleteSignalsIndex } from '../../u
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
@@ -39,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
         const { body } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
@@ -58,18 +59,18 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
 
-        await deleteSignalsIndex(supertest);
+        await deleteSignalsIndex(supertest, log);
       });
     });
 
     describe('backwards compatibility', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteSignalsIndex(supertest);
+        await deleteSignalsIndex(supertest, log);
       });
 
       it('should be able to filter old signals on host.os.name.caseless using runtime field', async () => {
@@ -125,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
-          await createSignalsIndex(supertest);
+          await createSignalsIndex(supertest, log);
           const { body } = await supertest
             .post(ALERTS_AS_DATA_FIND_URL)
             .set('kbn-xsrf', 'true')
@@ -144,11 +145,11 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
 
-          await deleteSignalsIndex(supertest);
+          await deleteSignalsIndex(supertest, log);
         });
 
         it('should not give errors when executing security solution histogram aggs', async () => {
-          await createSignalsIndex(supertest);
+          await createSignalsIndex(supertest, log);
           await supertest
             .post(ALERTS_AS_DATA_FIND_URL)
             .set('kbn-xsrf', 'true')
@@ -209,7 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await deleteSignalsIndex(supertest);
+          await deleteSignalsIndex(supertest, log);
         });
       });
     });

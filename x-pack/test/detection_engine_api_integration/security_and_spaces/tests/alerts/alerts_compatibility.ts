@@ -26,6 +26,7 @@ import { ThreatEcs } from '../../../../../plugins/security_solution/common/ecs/t
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('Alerts Compatibility', function () {
     describe('CTI', () => {
@@ -43,14 +44,14 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
-        await deleteSignalsIndex(supertest);
+        await deleteSignalsIndex(supertest, log);
       });
 
       it('allows querying of legacy enriched signals by threat.indicator', async () => {
@@ -103,14 +104,23 @@ export default ({ getService }: FtrProviderContext) => {
         expect(indices.length).to.eql(1);
         expect(indices[0].is_outdated).to.eql(true);
 
-        const [migration] = await startSignalsMigration({ indices: [indices[0].index], supertest });
-        await waitFor(async () => {
-          const [{ completed }] = await finalizeSignalsMigration({
-            migrationIds: [migration.migration_id],
-            supertest,
-          });
-          return completed === true;
-        }, `polling finalize_migration until complete`);
+        const [migration] = await startSignalsMigration({
+          indices: [indices[0].index],
+          supertest,
+          log,
+        });
+        await waitFor(
+          async () => {
+            const [{ completed }] = await finalizeSignalsMigration({
+              migrationIds: [migration.migration_id],
+              supertest,
+              log,
+            });
+            return completed === true;
+          },
+          `polling finalize_migration until complete`,
+          log
+        );
 
         const {
           body: {

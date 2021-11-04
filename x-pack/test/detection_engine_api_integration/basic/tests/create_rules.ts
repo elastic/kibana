@@ -27,6 +27,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('create_rules', () => {
     describe('creating rules', () => {
@@ -39,12 +40,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {

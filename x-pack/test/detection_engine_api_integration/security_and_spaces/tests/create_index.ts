@@ -19,10 +19,11 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const log = getService('log');
 
   describe('create_index', () => {
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     describe('elastic admin', () => {

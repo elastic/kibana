@@ -26,6 +26,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('add_actions', () => {
     describe('adding actions', () => {
@@ -38,12 +39,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should be able to create a new webhook action and attach it to a rule', async () => {
@@ -54,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getWebHookAction())
           .expect(200);
 
-        const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id));
+        const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
         const bodyToCompare = removeServerGeneratedProperties(rule);
         expect(bodyToCompare).to.eql(
           getSimpleRuleOutputWithWebHookAction(`${bodyToCompare?.actions?.[0].id}`)
@@ -69,8 +70,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getWebHookAction())
           .expect(200);
 
-        const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id, true));
-        await waitForRuleSuccessOrStatus(supertest, rule.id);
+        const rule = await createRule(
+          supertest,
+          log,
+          getRuleWithWebHookAction(hookAction.id, true)
+        );
+        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
 
         // expected result for status should be 'succeeded'
         const { body } = await supertest
@@ -95,8 +100,8 @@ export default ({ getService }: FtrProviderContext) => {
           meta: {},
         };
 
-        const rule = await createRule(supertest, ruleWithAction);
-        await waitForRuleSuccessOrStatus(supertest, rule.id);
+        const rule = await createRule(supertest, log, ruleWithAction);
+        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
 
         // expected result for status should be 'succeeded'
         const { body } = await supertest
