@@ -2622,7 +2622,7 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/index_pattern.ts"
+                "path": "x-pack/plugins/apm/server/routes/data_view.ts"
               },
               {
                 "plugin": "infra",
@@ -2638,7 +2638,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/plugin.ts"
+                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -3384,7 +3388,7 @@
             },
             {
               "plugin": "apm",
-              "path": "x-pack/plugins/apm/server/routes/index_pattern.ts"
+              "path": "x-pack/plugins/apm/server/routes/data_view.ts"
             },
             {
               "plugin": "infra",
@@ -3404,7 +3408,11 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/plugin.ts"
+              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
             },
             {
               "plugin": "securitySolution",

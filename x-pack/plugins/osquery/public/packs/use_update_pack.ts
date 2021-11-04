@@ -32,7 +32,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   return useMutation(
     // @ts-expect-error update types
     ({ id, ...payload }) =>
-      http.put(`/internal/osquery/packs/${id}`, {
+      http.put<any>(`/internal/osquery/packs/${id}`, {
         body: JSON.stringify(payload),
       }),
     {
