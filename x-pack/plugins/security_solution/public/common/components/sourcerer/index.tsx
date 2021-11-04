@@ -24,9 +24,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import * as i18n from './translations';
-import { SecurityPageName } from '../../../../common/constants';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { SecurityPageName } from '../../../../common/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
@@ -220,116 +220,114 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, []);
 
   return (
-    <EuiToolTip position="top" content={tooltipContent}>
-      <EuiPopover
-        data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-popover' : 'sourcerer-popover'}
-        button={buttonWithTooptip}
-        isOpen={isPopoverOpen}
-        closePopover={handleClosePopOver}
-        display="block"
-        repositionOnScroll
-        ownFocus
-      >
-        <PopoverContent>
-          <EuiPopoverTitle data-test-subj="sourcerer-title">
-            <>{i18n.SELECT_DATA_VIEW}</>
-          </EuiPopoverTitle>
-          {isOnlyDetectionAlerts && (
-            <EuiCallOut
-              data-test-subj="sourcerer-callout"
-              size="s"
-              iconType="iInCircle"
-              title={isTimelineSourcerer ? i18n.CALL_OUT_TIMELINE_TITLE : i18n.CALL_OUT_TITLE}
-            />
-          )}
-          <EuiSpacer size="s" />
-          <EuiForm component="form">
-            {showAlertsOnlyCheckbox && (
-              <StyledFormRow>
-                <EuiCheckbox
-                  id="sourcerer-alert-only-checkbox"
-                  data-test-subj="sourcerer-alert-only-checkbox"
-                  label={i18n.ALERTS_CHECKBOX_LABEL}
-                  checked={isOnlyDetectionAlertsChecked}
-                  onChange={onCheckboxChanged}
-                />
-              </StyledFormRow>
-            )}
-
-            <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
-              <EuiSuperSelect
-                data-test-subj="sourcerer-select"
-                disabled={isOnlyDetectionAlerts}
-                fullWidth
-                onChange={onChangeSuper}
-                options={dataViewSelectOptions}
-                placeholder={i18n.PICK_INDEX_PATTERNS}
-                valueOfSelected={dataViewId}
+    <EuiPopover
+      data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-popover' : 'sourcerer-popover'}
+      button={buttonWithTooptip}
+      isOpen={isPopoverOpen}
+      closePopover={handleClosePopOver}
+      display="block"
+      repositionOnScroll
+      ownFocus
+    >
+      <PopoverContent>
+        <EuiPopoverTitle data-test-subj="sourcerer-title">
+          <>{i18n.SELECT_DATA_VIEW}</>
+        </EuiPopoverTitle>
+        {isOnlyDetectionAlerts && (
+          <EuiCallOut
+            data-test-subj="sourcerer-callout"
+            size="s"
+            iconType="iInCircle"
+            title={isTimelineSourcerer ? i18n.CALL_OUT_TIMELINE_TITLE : i18n.CALL_OUT_TITLE}
+          />
+        )}
+        <EuiSpacer size="s" />
+        <EuiForm component="form">
+          {showAlertsOnlyCheckbox && (
+            <StyledFormRow>
+              <EuiCheckbox
+                id="sourcerer-alert-only-checkbox"
+                data-test-subj="sourcerer-alert-only-checkbox"
+                label={i18n.ALERTS_CHECKBOX_LABEL}
+                checked={isOnlyDetectionAlertsChecked}
+                onChange={onCheckboxChanged}
               />
             </StyledFormRow>
+          )}
 
-            <EuiSpacer size="m" />
+          <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
+            <EuiSuperSelect
+              data-test-subj="sourcerer-select"
+              disabled={isOnlyDetectionAlerts}
+              fullWidth
+              onChange={onChangeSuper}
+              options={dataViewSelectOptions}
+              placeholder={i18n.PICK_INDEX_PATTERNS}
+              valueOfSelected={dataViewId}
+            />
+          </StyledFormRow>
 
-            <StyledButton
-              color="text"
-              onClick={onExpandAdvancedOptionsClicked}
-              iconType={expandAdvancedOptions ? 'arrowDown' : 'arrowRight'}
-              data-test-subj="sourcerer-advanced-options-toggle"
-            >
-              {i18n.INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE}
-            </StyledButton>
-            {expandAdvancedOptions && <EuiSpacer size="m" />}
-            <FormRow
-              label={i18n.INDEX_PATTERNS_LABEL}
-              $expandAdvancedOptions={expandAdvancedOptions}
-              helpText={isOnlyDetectionAlerts ? undefined : i18n.INDEX_PATTERNS_DESCRIPTIONS}
-            >
-              <EuiComboBox
-                data-test-subj="sourcerer-combo-box"
-                fullWidth
-                onChange={onChangeCombo}
-                options={selectableOptions}
-                placeholder={i18n.PICK_INDEX_PATTERNS}
-                renderOption={renderOption}
-                selectedOptions={selectedOptions}
-                isDisabled={isOnlyDetectionAlerts}
-              />
-            </FormRow>
+          <EuiSpacer size="m" />
 
-            {!isOnlyDetectionAlerts && (
-              <StyledFormRow>
-                <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <ResetButton
-                      aria-label={i18n.INDEX_PATTERNS_RESET}
-                      data-test-subj="sourcerer-reset"
-                      flush="left"
-                      onClick={resetDataSources}
-                      title={i18n.INDEX_PATTERNS_RESET}
-                    >
-                      {i18n.INDEX_PATTERNS_RESET}
-                    </ResetButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={handleSaveIndices}
-                      disabled={isSavingDisabled}
-                      data-test-subj="sourcerer-save"
-                      fill
-                      fullWidth
-                      size="s"
-                    >
-                      {i18n.SAVE_INDEX_PATTERNS}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </StyledFormRow>
-            )}
-            <EuiSpacer size="s" />
-          </EuiForm>
-        </PopoverContent>
-      </EuiPopover>
-    </EuiToolTip>
+          <StyledButton
+            color="text"
+            onClick={onExpandAdvancedOptionsClicked}
+            iconType={expandAdvancedOptions ? 'arrowDown' : 'arrowRight'}
+            data-test-subj="sourcerer-advanced-options-toggle"
+          >
+            {i18n.INDEX_PATTERNS_ADVANCED_OPTIONS_TITLE}
+          </StyledButton>
+          {expandAdvancedOptions && <EuiSpacer size="m" />}
+          <FormRow
+            label={i18n.INDEX_PATTERNS_LABEL}
+            $expandAdvancedOptions={expandAdvancedOptions}
+            helpText={isOnlyDetectionAlerts ? undefined : i18n.INDEX_PATTERNS_DESCRIPTIONS}
+          >
+            <EuiComboBox
+              data-test-subj="sourcerer-combo-box"
+              fullWidth
+              onChange={onChangeCombo}
+              options={selectableOptions}
+              placeholder={i18n.PICK_INDEX_PATTERNS}
+              renderOption={renderOption}
+              selectedOptions={selectedOptions}
+              isDisabled={isOnlyDetectionAlerts}
+            />
+          </FormRow>
+
+          {!isOnlyDetectionAlerts && (
+            <StyledFormRow>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <ResetButton
+                    aria-label={i18n.INDEX_PATTERNS_RESET}
+                    data-test-subj="sourcerer-reset"
+                    flush="left"
+                    onClick={resetDataSources}
+                    title={i18n.INDEX_PATTERNS_RESET}
+                  >
+                    {i18n.INDEX_PATTERNS_RESET}
+                  </ResetButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={handleSaveIndices}
+                    disabled={isSavingDisabled}
+                    data-test-subj="sourcerer-save"
+                    fill
+                    fullWidth
+                    size="s"
+                  >
+                    {i18n.SAVE_INDEX_PATTERNS}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </StyledFormRow>
+          )}
+          <EuiSpacer size="s" />
+        </EuiForm>
+      </PopoverContent>
+    </EuiPopover>
   );
 });
 Sourcerer.displayName = 'Sourcerer';

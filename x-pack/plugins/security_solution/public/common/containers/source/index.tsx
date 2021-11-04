@@ -24,7 +24,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
-export { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields, DocValueFields };
 
 export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
   Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(

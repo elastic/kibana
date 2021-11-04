@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-// This type needs to still exist due to apollo-link-http-common hasn't yet updated
-// it's usage (https://github.com/apollographql/apollo-link/issues/1131)
-declare type GlobalFetch = WindowOrWorkerGlobalScope;
+export { findLegacyUrlAliases } from './find_legacy_url_aliases';
+
+export { deleteLegacyUrlAliases } from './delete_legacy_url_aliases';
+export type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
