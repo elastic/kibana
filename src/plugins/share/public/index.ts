@@ -12,11 +12,11 @@ export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/const
 
 export type { LocatorDefinition, LocatorPublic, KibanaLocation } from '../common/url_service';
 
-export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
+export type { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
 
-export { SharePluginSetup, SharePluginStart } from './plugin';
+export type { SharePluginSetup, SharePluginStart } from './plugin';
 
-export {
+export type {
   ShareContext,
   ShareMenuProvider,
   ShareMenuItem,
