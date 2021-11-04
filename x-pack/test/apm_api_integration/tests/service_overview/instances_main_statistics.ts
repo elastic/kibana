@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
-import { service, timerange } from '@elastic/apm-generator';
+import { service, timerange } from '@elastic/apm-synthtrace';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -21,7 +21,7 @@ import { SERVICE_NODE_NAME_MISSING } from '../../../../plugins/apm/common/servic
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -122,10 +122,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.002,
-              "errorRate": 0.092511013215859,
-              "latency": 430318.696035242,
+              "errorRate": 0.0848214285714286,
+              "latency": 411589.785714286,
               "memoryUsage": 0.786029688517253,
-              "throughput": 7.56666666666667,
+              "throughput": 7.46666666666667,
             }
           `);
         });
@@ -183,9 +183,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.001,
-              "errorRate": 0.00343642611683849,
-              "latency": 21520.4776632302,
-              "throughput": 9.7,
+              "errorRate": 0.00341296928327645,
+              "latency": 40989.5802047782,
+              "throughput": 9.76666666666667,
             }
           `);
 
@@ -272,10 +272,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.00223333333333333,
-              "errorRate": 0.0852713178294574,
-              "latency": 706173.046511628,
+              "errorRate": 0.0894308943089431,
+              "latency": 739013.634146341,
               "memoryUsage": 0.783296203613281,
-              "throughput": 8.6,
+              "throughput": 8.2,
             }
           `);
         });
@@ -285,7 +285,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Service overview instances main statistics when data is generated',
-    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       describe('for two go instances and one java instance', () => {
         const GO_A_INSTANCE_RATE_SUCCESS = 10;
@@ -320,7 +320,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             );
           }
 
-          return traceData.index([
+          return synthtraceEsClient.index([
             ...interval.rate(GO_A_INSTANCE_RATE_SUCCESS).flatMap((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
@@ -361,7 +361,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          return traceData.clean();
+          return synthtraceEsClient.clean();
         });
 
         describe('for the go service', () => {

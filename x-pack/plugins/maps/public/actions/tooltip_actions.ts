@@ -10,9 +10,11 @@ import { Dispatch } from 'redux';
 import { Feature } from 'geojson';
 import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
-import { FEATURE_ID_PROPERTY_NAME, FEATURE_VISIBLE_PROPERTY_NAME } from '../../common/constants';
+import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../common/constants';
 import { TooltipFeature, TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
+import { ILayer } from '../classes/layers/layer';
+import { IVectorLayer, isVectorLayer } from '../classes/layers/vector_layer';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
@@ -62,13 +64,17 @@ export function openOnHoverTooltip(tooltipState: TooltipState) {
   };
 }
 
-export function updateTooltipStateForLayer(layerId: string, layerFeatures: Feature[] = []) {
+export function updateTooltipStateForLayer(layer: ILayer, layerFeatures: Feature[] = []) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    if (!isVectorLayer(layer)) {
+      return;
+    }
+
     const openTooltips = getOpenTooltips(getState())
       .map((tooltipState) => {
         const nextFeatures: TooltipFeature[] = [];
         tooltipState.features.forEach((tooltipFeature) => {
-          if (tooltipFeature.layerId !== layerId) {
+          if (tooltipFeature.layerId !== layer.getId()) {
             // feature from another layer, keep it
             nextFeatures.push(tooltipFeature);
           }
@@ -79,7 +85,7 @@ export function updateTooltipStateForLayer(layerId: string, layerFeatures: Featu
                 ? layerFeature.properties![FEATURE_VISIBLE_PROPERTY_NAME]
                 : true;
             return (
-              isVisible && layerFeature.properties![FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id
+              isVisible && (layer as IVectorLayer).getFeatureId(layerFeature) === tooltipFeature.id
             );
           });
 

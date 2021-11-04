@@ -64,6 +64,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'visualization:useLegacyTimeAxis': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:regionmap:showWarnings': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -445,6 +449,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:dashboardControls': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

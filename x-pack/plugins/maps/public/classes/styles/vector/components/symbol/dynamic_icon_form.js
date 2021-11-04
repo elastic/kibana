@@ -49,7 +49,7 @@ export function DynamicIconForm({
         customIcons={customIcons}
         onChange={onIconMapChange}
         onCustomIconsChange={onCustomIconsChange}
-        isCustomOnly={!field.supportsAutoDomain()}
+        isCustomOnly={!field.supportsFieldMetaFromLocalData() && !field.supportsFieldMetaFromEs()}
       />
     );
   }

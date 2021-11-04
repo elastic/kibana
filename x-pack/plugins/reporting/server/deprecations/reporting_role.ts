@@ -8,7 +8,7 @@
 import {
   SecurityGetRoleMappingResponse,
   SecurityGetUserResponse,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type {
   DeprecationsDetails,
@@ -19,8 +19,11 @@ import { ReportingCore } from '../';
 import { deprecations } from '../lib/deprecations';
 
 const REPORTING_USER_ROLE_NAME = 'reporting_user';
-const getDocumentationUrl = (branch: string) =>
-  `https://www.elastic.co/guide/en/kibana/${branch}/kibana-privileges.html`;
+const getDocumentationUrl = (branch: string) => {
+  // TODO: remove when docs support "main"
+  const docBranch = branch === 'main' ? 'master' : branch;
+  return `https://www.elastic.co/guide/en/kibana/${docBranch}/kibana-privileges.html`;
+};
 
 interface ExtraDependencies {
   reportingCore: ReportingCore;

@@ -328,10 +328,10 @@ describe('parseClientOptions', () => {
     });
   });
 
-  describe('ssl config', () => {
-    it('does not generate ssl option is ssl config is not set', () => {
-      expect(parseClientOptions(createConfig({}), false).ssl).toBeUndefined();
-      expect(parseClientOptions(createConfig({}), true).ssl).toBeUndefined();
+  describe('tls config', () => {
+    it('does not generate tls option is ssl config is not set', () => {
+      expect(parseClientOptions(createConfig({}), false).tls).toBeUndefined();
+      expect(parseClientOptions(createConfig({}), true).tls).toBeUndefined();
     });
 
     it('handles the `certificateAuthorities` option', () => {
@@ -341,7 +341,7 @@ describe('parseClientOptions', () => {
             ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
           false
-        ).ssl!.ca
+        ).tls!.ca
       ).toEqual(['content-of-ca-path']);
       expect(
         parseClientOptions(
@@ -349,7 +349,7 @@ describe('parseClientOptions', () => {
             ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
           true
-        ).ssl!.ca
+        ).tls!.ca
       ).toEqual(['content-of-ca-path']);
     });
 
@@ -363,7 +363,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -380,7 +380,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -398,7 +398,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -416,7 +416,7 @@ describe('parseClientOptions', () => {
                 },
               }),
               false
-            ).ssl
+            ).tls
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: unknown"`);
       });
       it('throws for undefined values', () => {
@@ -429,7 +429,7 @@ describe('parseClientOptions', () => {
                 },
               }),
               false
-            ).ssl
+            ).tls
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: undefined"`);
       });
     });
@@ -446,7 +446,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -466,7 +466,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -487,7 +487,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -511,7 +511,7 @@ describe('parseClientOptions', () => {
               },
             }),
             true
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -531,7 +531,7 @@ describe('parseClientOptions', () => {
               },
             }),
             true
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,

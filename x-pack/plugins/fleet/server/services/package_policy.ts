@@ -42,7 +42,6 @@ import type {
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  HostedAgentPolicyRestrictionRelatedError,
   IngestManagerError,
   ingestErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
@@ -68,6 +67,8 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
+import type { PackagePolicyUpgradeUsage } from './upgrade_usage';
+import { sendTelemetryEvents } from './upgrade_usage';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -97,24 +98,14 @@ class PackagePolicyService {
       skipEnsureInstalled?: boolean;
     }
   ): Promise<PackagePolicy> {
-    // Check that its agent policy does not have a package policy with the same name
-    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
-    if (!parentAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-    if (parentAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot add integrations to hosted agent policy ${parentAgentPolicy.id}`
-      );
-    }
-    if (
-      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-        (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
-      )
-    ) {
-      throw new IngestManagerError(
-        'There is already a package with the same name on this agent policy'
-      );
+    const existingPoliciesWithName = await this.list(soClient, {
+      perPage: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+    });
+
+    // Check that the name does not exist already
+    if (existingPoliciesWithName.items.length > 0) {
+      throw new IngestManagerError('There is already a package with the same name');
     }
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
@@ -318,12 +309,12 @@ class PackagePolicyService {
     });
 
     return {
-      items: packagePolicies.saved_objects.map((packagePolicySO) => ({
+      items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
         id: packagePolicySO.id,
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
       })),
-      total: packagePolicies.total,
+      total: packagePolicies?.total,
       page,
       perPage,
     };
@@ -358,7 +349,8 @@ class PackagePolicyService {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser },
+    currentVersion?: string
   ): Promise<PackagePolicy> {
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
@@ -366,19 +358,15 @@ class PackagePolicyService {
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
+    // Check that the name does not exist already but exclude the current package policy
+    const existingPoliciesWithName = await this.list(soClient, {
+      perPage: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+    });
+    const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
-    // Check that its agent policy does not have a package policy with the same name
-    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
-    if (!parentAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-    if (
-      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-        (siblingPackagePolicy) =>
-          siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
-      )
-    ) {
-      throw new Error('There is already a package with the same name on this agent policy');
+    if (filtered.length > 0) {
+      throw new IngestManagerError('There is already a package with the same name');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -393,6 +381,7 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
+
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
       inputs = await this._compilePackagePolicyInputs(
         registryPkgInfo,
@@ -432,6 +421,23 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         currentVersion: packagePolicy.package.version,
       });
+
+      if (packagePolicy.package.version !== currentVersion) {
+        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
+          package_name: packagePolicy.package.name,
+          current_version: currentVersion || 'unknown',
+          new_version: packagePolicy.package.version,
+          status: 'success',
+          dryRun: false,
+        };
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          upgradeTelemetry
+        );
+        appContextService.getLogger().info(`Package policy upgraded successfully`);
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      }
     }
 
     return newPolicy;
@@ -600,7 +606,14 @@ class PackagePolicyService {
         );
         updatePackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
-        await this.update(soClient, esClient, id, updatePackagePolicy, options);
+        await this.update(
+          soClient,
+          esClient,
+          id,
+          updatePackagePolicy,
+          options,
+          packagePolicy.package.version
+        );
         result.push({
           id,
           name: packagePolicy.name,
@@ -660,6 +673,30 @@ class PackagePolicyService {
       updatedPackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
       const hasErrors = 'errors' in updatedPackagePolicy;
+
+      if (packagePolicy.package.version !== packageInfo.version) {
+        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
+          package_name: packageInfo.name,
+          current_version: packagePolicy.package.version,
+          new_version: packageInfo.version,
+          status: hasErrors ? 'failure' : 'success',
+          error: hasErrors ? updatedPackagePolicy.errors : undefined,
+          dryRun: true,
+        };
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          upgradeTelemetry
+        );
+        appContextService
+          .getLogger()
+          .info(
+            `Package policy upgrade dry run ${
+              hasErrors ? 'resulted in errors' : 'ran successfully'
+            }`
+          );
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      }
 
       return {
         name: updatedPackagePolicy.name,
@@ -1062,7 +1099,9 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      const indexOfInput = inputs.indexOf(originalInput);
+      inputs[indexOfInput] = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      originalInput = inputs[indexOfInput];
     }
 
     if (override.streams) {
@@ -1081,10 +1120,24 @@ export function overridePackageInputs(
         }
 
         if (stream.vars) {
-          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
+          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          originalInput.streams[indexOfStream] = deepMergeVars(
+            originalStream,
+            stream as InputsOverride
+          );
+          originalStream = originalInput.streams[indexOfStream];
         }
       }
     }
+
+    // Filter all stream that have been removed from the input
+    originalInput.streams = originalInput.streams.filter((originalStream) => {
+      return (
+        override.streams?.some(
+          (s) => s.data_stream.dataset === originalStream.data_stream.dataset
+        ) ?? false
+      );
+    });
   }
 
   const resultingPackagePolicy: NewPackagePolicy = {

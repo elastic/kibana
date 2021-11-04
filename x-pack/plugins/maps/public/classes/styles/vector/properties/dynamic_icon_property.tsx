@@ -112,7 +112,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
         icon.startsWith(CUSTOM_ICON_PREFIX_SDF) ? icon : getMakiIconId(icon, iconPixelSize)
       ); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
@@ -137,7 +137,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (icon && !icon.startsWith(CUSTOM_ICON_PREFIX_SDF)) {
       mbStops.push(getMakiSymbolAnchor(icon)); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _isIconDynamicConfigComplete() {
