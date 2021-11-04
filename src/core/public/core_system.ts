@@ -142,7 +142,7 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
       const theme = this.theme.setup({ injectedMetadata });
 
-      const application = this.application.setup({ http, theme });
+      const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
@@ -200,7 +200,7 @@ export class CoreSystem {
         theme,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, overlays });
+      const application = await this.application.start({ http, theme, overlays });
       const chrome = await this.chrome.start({
         application,
         docLinks,
