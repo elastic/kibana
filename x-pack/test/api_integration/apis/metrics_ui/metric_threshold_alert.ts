@@ -54,11 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
     metricsExplorerDefaultView: 'default',
     anomalyThreshold: 70,
     fields: {
-      container: 'container.id',
-      host: 'host.name',
-      pod: 'kubernetes.od.uid',
-      tiebreaker: '_doc',
-      timestamp: '@timestamp',
       message: ['message'],
     },
     logColumns: [

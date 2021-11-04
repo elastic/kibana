@@ -10,7 +10,6 @@ import { convertRequestToMetricsAPIOptions } from './convert_request_to_metrics_
 
 const BASE_REQUEST: MetricsExplorerRequestBody = {
   timerange: {
-    field: '@timestamp',
     from: new Date('2020-01-01T00:00:00Z').getTime(),
     to: new Date('2020-01-01T01:00:00Z').getTime(),
     interval: '1m',
@@ -22,7 +21,6 @@ const BASE_REQUEST: MetricsExplorerRequestBody = {
 
 const BASE_METRICS_UI_OPTIONS: MetricsAPIRequest = {
   timerange: {
-    field: '@timestamp',
     from: new Date('2020-01-01T00:00:00Z').getTime(),
     to: new Date('2020-01-01T01:00:00Z').getTime(),
     interval: '1m',

@@ -42,13 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
           return resp.then((data) => {
             expect(data).to.have.property('source');
             expect(data?.source.configuration.metricAlias).to.equal('metrics-*,metricbeat-*');
-            expect(data?.source.configuration.fields).to.eql({
-              container: 'container.id',
-              host: 'host.name',
-              pod: 'kubernetes.pod.uid',
-              tiebreaker: '_doc',
-              timestamp: '@timestamp',
-            });
             expect(data?.source).to.have.property('status');
             expect(data?.source.status?.metricIndicesExist).to.equal(true);
           });
