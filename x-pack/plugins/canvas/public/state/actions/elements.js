@@ -16,11 +16,13 @@ import {
   getNodeById,
   getNodes,
   getSelectedPageIndex,
+  getElementById,
 } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
 import { runInterpreter, interpretAst } from '../../lib/run_interpreter';
+import { syncFilterWithExpr } from '../../lib/filter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
 import { pluginServices } from '../../services';
 import { selectToplevelNodes } from './transient';
@@ -28,7 +30,9 @@ import * as args from './resolved_args';
 
 const { actionsElements: strings } = ErrorStrings;
 
-const { set, del } = immutable;
+const { set, del, assign } = immutable;
+
+export const setExpressionAction = 'setExpression';
 
 export function getSiblingContext(state, elementId, checkIndex) {
   const prevContextPath = [elementId, 'expressionContext', checkIndex];
@@ -280,10 +284,10 @@ export const setFilter = createThunk(
   }
 );
 
-export const setExpression = createThunk('setExpression', setExpressionFn);
+export const setExpression = createThunk(setExpressionAction, setExpressionFn);
 function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, doRender = true) {
   // dispatch action to update the element in state
-  const _setExpression = createAction('setExpression');
+  const _setExpression = createAction(setExpressionAction);
   dispatch(_setExpression({ expression, elementId, pageId }));
 
   // read updated element from state and fetch renderable
@@ -305,18 +309,71 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
   }
 }
 
-const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
+export const syncFilterWithExpression = createThunk(
+  'syncFilterWithExpression',
+  ({ dispatch, getState }, expression, elementId, pageId) => {
+    const element = getNodeById(getState(), elementId, pageId);
+    if (!element.filter) {
+      return;
+    }
+
+    const updatedFilter = syncFilterWithExpr(expression, element.filter);
+    dispatch(setFilter(updatedFilter, elementId));
+  }
+);
+
+const setAstPlain = (ast, element, pageId, doRender) => {
   try {
     const expression = toExpression(ast);
-    dispatch(setExpression(expression, element.id, pageId, doRender));
+    return {
+      expression,
+      elementId: element.id,
+      pageId,
+      doRender,
+    };
   } catch (err) {
     const notifyService = pluginServices.getServices().notify;
     notifyService.error(err);
 
     // TODO: remove this, may have been added just to cause a re-render, but why?
-    dispatch(setExpression(element.expression, element.id, pageId, doRender));
+    return {
+      expression: element.expression,
+      elementId: element.id,
+      pageId,
+      doRender,
+    };
   }
+};
+
+const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
+  const res = setAstPlain(ast, element, pageId, doRender);
+  dispatch(setExpression(...Object.values(res)));
 });
+
+export const updateFilterElement = createThunk(
+  'setFilterElement',
+  ({ dispatch, getState }, ast, filterExpression, elementId) => {
+    const element = getElementById(getState(), elementId);
+    if (!element) {
+      return;
+    }
+
+    const { ast: elementAst } = element;
+    const filterElementIndex = elementAst.chain?.findIndex(
+      (expr) => expr.function === ast.function
+    );
+
+    if (filterElementIndex === -1) {
+      return;
+    }
+
+    const path = `chain.${filterElementIndex}.arguments`;
+    const newAst = assign(elementAst, path, ast.arguments);
+    const _setFilterElement = createAction('setFilterElement');
+    const { expression } = setAstPlain(newAst, element);
+    dispatch(_setFilterElement({ filter: filterExpression, expression, elementId }));
+  }
+);
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
@@ -369,7 +426,6 @@ export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch 
   if (valueIndex != null) {
     selector += '.' + valueIndex;
   }
-
   const newElement = set(element, selector, value);
   const newAst = get(newElement, ['ast', 'chain', index]);
   dispatch(setAstAtIndex(index, newAst, element, pageId));

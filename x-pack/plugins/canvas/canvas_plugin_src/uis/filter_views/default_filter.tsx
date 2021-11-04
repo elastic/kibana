@@ -33,22 +33,29 @@ const strings = {
       defaultMessage: 'No group',
     }),
 };
+const NO_GROUP = 'no_group';
 
 const GroupComponent: FC<FilterFieldProps> = ({ filter, availableFilters, updateFilter }) => {
   const { filterGroup } = filter;
   const availableFilterGroups = availableFilters
     .filter(({ filterGroup: group }) => group)
-    .map(({ filterGroup: group }) => ({
-      text: group ?? undefined,
-      value: group ?? undefined,
-    }));
+    .map(({ filterGroup: group }) => group);
+
+  const uniqueGroups = [...new Set([undefined, ...availableFilterGroups])];
+  const groups = uniqueGroups.map((group) => ({
+    text: group ?? strings.getNoGroupLabel(),
+    value: group ?? NO_GROUP,
+  }));
 
   return (
     <EuiSelect
       compressed
-      options={[{ value: undefined, text: strings.getNoGroupLabel() }, ...availableFilterGroups]}
+      options={groups}
       value={filterGroup ?? undefined}
-      onChange={(e) => updateFilter?.({ ...filter, filterGroup: e.target.value })}
+      onChange={({ target: { value } }) => {
+        const selectedGroup = value === NO_GROUP ? null : value;
+        updateFilter?.({ ...filter, filterGroup: selectedGroup });
+      }}
       aria-label="Change filter group"
     />
   );

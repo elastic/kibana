@@ -12,9 +12,17 @@ import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
 import { elementStats } from './element_stats';
 import { resolvedArgs } from './resolved_args';
+import { elementsSyncMiddleware } from './elements_sync';
 
 const middlewares = [
-  applyMiddleware(thunkMiddleware, elementStats, resolvedArgs, inFlight, workpadUpdate),
+  applyMiddleware(
+    thunkMiddleware,
+    elementStats,
+    resolvedArgs,
+    inFlight,
+    workpadUpdate,
+    elementsSyncMiddleware
+  ),
 ];
 
 // compose with redux devtools, if extension is installed

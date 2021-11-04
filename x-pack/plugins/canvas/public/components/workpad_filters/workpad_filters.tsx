@@ -42,7 +42,6 @@ export const WorkpadFilters: FC<Props> = ({ element }) => {
   const groups = element ? extractGroupsFromElementsFilters(element.expression) : undefined;
 
   const canvasFilters = useCanvasFilters(groups);
-
   const filtersGroups = groupFiltersByField
     ? groupFiltersBy(canvasFilters, groupFiltersByField)
     : [];

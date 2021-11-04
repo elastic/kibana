@@ -105,13 +105,21 @@ export const elementsReducer = handleActions(
     // TODO: This takes the entire element, which is not necessary, it could just take the id.
     [actions.setExpression]: (workpadState, { payload }) => {
       const { expression, pageId, elementId } = payload;
-      return assignNodeProperties(workpadState, pageId, elementId, { expression });
+      let elementPageId = pageId;
+      if (!pageId) {
+        elementPageId = getPageWithElementId(workpadState, elementId);
+      }
+      return assignNodeProperties(workpadState, elementPageId, elementId, { expression });
     },
     [actions.setFilter]: (workpadState, { payload }) => {
       const { filter, elementId } = payload;
       const pageId = getPageWithElementId(workpadState, elementId);
-      console.log(pageId, elementId);
       return assignNodeProperties(workpadState, pageId, elementId, { filter });
+    },
+    [actions.updateFilterElement]: (workpadState, { payload }) => {
+      const { filter, expression, elementId } = payload;
+      const pageId = getPageWithElementId(workpadState, elementId);
+      return assignNodeProperties(workpadState, pageId, elementId, { filter, expression });
     },
     [actions.setMultiplePositions]: (workpadState, { payload }) =>
       payload.repositionedElements.reduce(

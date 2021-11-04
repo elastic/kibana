@@ -9,7 +9,6 @@ import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererFactory } from '../../../../types';
 import { DropdownFilter } from './component';
 import { RendererStrings } from '../../../../i18n';
@@ -50,14 +49,6 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
     if (filterExpression === undefined || !filterExpression.includes('exactly')) {
       filterExpression = '';
       handlers.setFilter(filterExpression);
-    } else if (filterExpression !== '') {
-      // NOTE: setFilter() will cause a data refresh, avoid calling unless required
-      // compare expression and filter, update filter if needed
-      const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);
-
-      if (changed) {
-        handlers.setFilter(toExpression(newAst));
-      }
     }
 
     const commit = (commitValue: string) => {

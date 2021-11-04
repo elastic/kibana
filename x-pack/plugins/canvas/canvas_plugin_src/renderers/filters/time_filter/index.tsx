@@ -7,9 +7,7 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { toExpression } from '@kbn/interpreter/common';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
-import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererStrings } from '../../../../i18n';
 import { TimeFilter } from './components';
 import { StartInitializer } from '../../../plugin';
@@ -45,17 +43,6 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
       if (filterExpression === undefined || filterExpression.indexOf('timefilter') !== 0) {
         filterExpression = defaultTimeFilterExpression;
         handlers.setFilter(filterExpression);
-      } else if (filterExpression !== '') {
-        // NOTE: setFilter() will cause a data refresh, avoid calling unless required
-        // compare expression and filter, update filter if needed
-        const { changed, newAst } = syncFilterExpression(config, filterExpression, [
-          'column',
-          'filterGroup',
-        ]);
-
-        if (changed) {
-          handlers.setFilter(toExpression(newAst));
-        }
       }
 
       ReactDOM.render(
