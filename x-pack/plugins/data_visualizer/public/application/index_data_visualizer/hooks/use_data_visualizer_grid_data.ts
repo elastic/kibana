@@ -222,13 +222,11 @@ export const useDataVisualizerGridData = (
     const existMetricFields = metricConfigs
       .map((config) => {
         if (config.existsInDocs === false) return;
-        if (config?.stats?.cardinality !== undefined) {
-          return {
-            fieldName: config.fieldName,
-            type: config.type,
-            cardinality: config.stats.cardinality,
-          };
-        }
+        return {
+          fieldName: config.fieldName,
+          type: config.type,
+          cardinality: config.stats?.cardinality ?? 0,
+        };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
 
@@ -237,13 +235,11 @@ export const useDataVisualizerGridData = (
     const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
       .map((config) => {
         if (config.existsInDocs === false) return;
-        if (config?.stats?.cardinality !== undefined) {
-          return {
-            fieldName: config.fieldName,
-            type: config.type,
-            cardinality: config.stats.cardinality,
-          };
-        }
+        return {
+          fieldName: config.fieldName,
+          type: config.type,
+          cardinality: config.stats?.cardinality ?? 0,
+        };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
 

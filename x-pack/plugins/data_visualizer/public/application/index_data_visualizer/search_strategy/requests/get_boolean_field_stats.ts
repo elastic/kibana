@@ -28,26 +28,26 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { extractErrorProperties } from '../../utils/error_utils';
 
-export const getBooleanFieldStatsRequest = (
+export const getBooleanFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
-  field: Field
+  fields: Field[]
 ) => {
   const { index, query, runtimeFieldMap, samplerShardSize } = params;
 
   const size = 0;
   const aggs: Aggs = {};
-
-  const safeFieldName = field.safeFieldName;
-  aggs[`${safeFieldName}_value_count`] = {
-    filter: { exists: { field: field.fieldName } },
-  };
-  aggs[`${safeFieldName}_values`] = {
-    terms: {
-      field: field.fieldName,
-      size: 2,
-    },
-  };
-
+  fields.forEach((field, i) => {
+    const safeFieldName = field.safeFieldName;
+    aggs[`${safeFieldName}_value_count`] = {
+      filter: { exists: { field: field.fieldName } },
+    };
+    aggs[`${safeFieldName}_values`] = {
+      terms: {
+        field: field.fieldName,
+        size: 2,
+      },
+    };
+  });
   const searchBody = {
     query,
     aggs: buildSamplerAggregation(aggs, samplerShardSize),
@@ -61,20 +61,20 @@ export const getBooleanFieldStatsRequest = (
   };
 };
 
-export const fetchBooleanFieldStats = (
+export const fetchBooleanFieldsStats = (
   data: DataPublicPluginStart,
   params: FieldStatsCommonRequestParams,
-  field: Field,
+  fields: Field[],
   options: ISearchOptions
-): Observable<BooleanFieldStats | FieldStatsError> => {
+): Observable<BooleanFieldStats[] | FieldStatsError> => {
   const { samplerShardSize } = params;
-  const request: estypes.SearchRequest = getBooleanFieldStatsRequest(params, field);
+  const request: estypes.SearchRequest = getBooleanFieldsStatsRequest(params, fields);
   return data.search
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(
       catchError((e) =>
         of({
-          fieldName: field.fieldName,
+          fields,
           error: extractErrorProperties(e),
         } as FieldStatsError)
       ),
@@ -84,23 +84,27 @@ export const fetchBooleanFieldStats = (
         const aggregations = resp.rawResponse.aggregations;
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
-        const safeFieldName = field.safeFieldName;
-        const stats: BooleanFieldStats = {
-          fieldName: field.fieldName,
-          count: get(aggregations, [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'], 0),
-          trueCount: 0,
-          falseCount: 0,
-        };
+        const batchStats: BooleanFieldStats[] = fields.map((field, i) => {
+          const safeFieldName = field.fieldName;
+          const stats: BooleanFieldStats = {
+            fieldName: field.fieldName,
+            count: get(aggregations, [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'], 0),
+            trueCount: 0,
+            falseCount: 0,
+          };
 
-        const valueBuckets: Array<{ [key: string]: number }> = get(
-          aggregations,
-          [...aggsPath, `${safeFieldName}_values`, 'buckets'],
-          []
-        );
-        valueBuckets.forEach((bucket) => {
-          stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
+          const valueBuckets: Array<{ [key: string]: number }> = get(
+            aggregations,
+            [...aggsPath, `${safeFieldName}_values`, 'buckets'],
+            []
+          );
+          valueBuckets.forEach((bucket) => {
+            stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
+          });
+          return stats;
         });
-        return stats;
+
+        return batchStats;
       })
     );
 };

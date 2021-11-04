@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
-import { Observable, of } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
@@ -59,50 +59,56 @@ export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, f
   };
 };
 
-export const fetchFieldExamples = (
+export const fetchFieldsExamples = (
   data: DataPublicPluginStart,
   params: FieldStatsCommonRequestParams,
-  field: Field,
+  fields: Field[],
   options: ISearchOptions
-): Observable<FieldExamples | FieldStatsError> => {
-  const request: estypes.SearchRequest = getFieldExamplesRequest(params, field);
+) => {
   const { maxExamples } = params;
-  return data.search
-    .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
-    .pipe(
-      catchError((e) =>
-        of({
-          fieldName: field.fieldName,
-          error: extractErrorProperties(e),
-        } as FieldStatsError)
-      ),
-      map((resp) => {
-        if (!isIKibanaSearchResponse(resp)) return resp;
-        const body = resp.rawResponse;
-        const stats = {
-          fieldName: field.fieldName,
-          examples: [] as unknown[],
-        } as FieldExamples;
+  return combineLatest(
+    fields.map((field) => {
+      const request: estypes.SearchRequest = getFieldExamplesRequest(params, field);
 
-        if (body.hits.total > 0) {
-          const hits = body.hits.hits;
-          for (let i = 0; i < hits.length; i++) {
-            // Use lodash get() to support field names containing dots.
-            const doc: object[] | undefined = get(hits[i].fields, field.fieldName);
-            // the results from fields query is always an array
-            if (Array.isArray(doc) && doc.length > 0) {
-              const example = doc[0];
-              if (example !== undefined && stats.examples.indexOf(example) === -1) {
-                stats.examples.push(example);
-                if (stats.examples.length === maxExamples) {
-                  break;
+      return data.search
+        .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
+        .pipe(
+          catchError((e) =>
+            of({
+              fieldName: field.fieldName,
+              fields,
+              error: extractErrorProperties(e),
+            } as FieldStatsError)
+          ),
+          map((resp) => {
+            if (!isIKibanaSearchResponse(resp)) return resp;
+            const body = resp.rawResponse;
+            const stats = {
+              fieldName: field.fieldName,
+              examples: [] as unknown[],
+            } as FieldExamples;
+
+            if (body.hits.total > 0) {
+              const hits = body.hits.hits;
+              for (let i = 0; i < hits.length; i++) {
+                // Use lodash get() to support field names containing dots.
+                const doc: object[] | undefined = get(hits[i].fields, field.fieldName);
+                // the results from fields query is always an array
+                if (Array.isArray(doc) && doc.length > 0) {
+                  const example = doc[0];
+                  if (example !== undefined && stats.examples.indexOf(example) === -1) {
+                    stats.examples.push(example);
+                    if (stats.examples.length === maxExamples) {
+                      break;
+                    }
+                  }
                 }
               }
             }
-          }
-        }
 
-        return stats;
-      })
-    );
+            return stats;
+          })
+        );
+    })
+  );
 };

@@ -25,21 +25,26 @@ import {
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
 
-export const getDateFieldStatsRequest = (params: FieldStatsCommonRequestParams, field: Field) => {
+export const getDateFieldsStatsRequest = (
+  params: FieldStatsCommonRequestParams,
+  fields: Field[]
+) => {
   const { index, query, runtimeFieldMap, samplerShardSize } = params;
 
   const size = 0;
 
   const aggs: Aggs = {};
-  const safeFieldName = field.safeFieldName;
-  aggs[`${safeFieldName}_field_stats`] = {
-    filter: { exists: { field: field.fieldName } },
-    aggs: {
-      actual_stats: {
-        stats: { field: field.fieldName },
+  fields.forEach((field, i) => {
+    const safeFieldName = field.safeFieldName;
+    aggs[`${safeFieldName}_field_stats`] = {
+      filter: { exists: { field: field.fieldName } },
+      aggs: {
+        actual_stats: {
+          stats: { field: field.fieldName },
+        },
       },
-    },
-  };
+    };
+  });
 
   const searchBody = {
     query,
@@ -53,21 +58,21 @@ export const getDateFieldStatsRequest = (params: FieldStatsCommonRequestParams, 
   };
 };
 
-export const fetchDateFieldStats = (
+export const fetchDateFieldsStats = (
   data: DataPublicPluginStart,
   params: FieldStatsCommonRequestParams,
-  field: Field,
+  fields: Field[],
   options: ISearchOptions
-): Observable<DateFieldStats | FieldStatsError> => {
+): Observable<DateFieldStats[] | FieldStatsError> => {
   const { samplerShardSize } = params;
 
-  const request: estypes.SearchRequest = getDateFieldStatsRequest(params, field);
+  const request: estypes.SearchRequest = getDateFieldsStatsRequest(params, fields);
   return data.search
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(
       catchError((e) =>
         of({
-          fieldName: field.fieldName,
+          fields,
           error: extractErrorProperties(e),
         } as FieldStatsError)
       ),
@@ -75,23 +80,27 @@ export const fetchDateFieldStats = (
         if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-        const safeFieldName = field.safeFieldName;
-        const docCount = get(
-          aggregations,
-          [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
-          0
-        );
-        const fieldStatsResp = get(
-          aggregations,
-          [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
-          {}
-        );
-        return {
-          fieldName: field.fieldName,
-          count: docCount,
-          earliest: get(fieldStatsResp, 'min', 0),
-          latest: get(fieldStatsResp, 'max', 0),
-        };
+
+        const batchStats: DateFieldStats[] = fields.map((field, i) => {
+          const safeFieldName = field.safeFieldName;
+          const docCount = get(
+            aggregations,
+            [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
+            0
+          );
+          const fieldStatsResp = get(
+            aggregations,
+            [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
+            {}
+          );
+          return {
+            fieldName: field.fieldName,
+            count: docCount,
+            earliest: get(fieldStatsResp, 'min', 0),
+            latest: get(fieldStatsResp, 'max', 0),
+          } as DateFieldStats;
+        });
+        return batchStats;
       })
     );
 };

@@ -158,9 +158,9 @@ export function useFieldStatsSearchStrategy(
       10
     );
 
-    const subTemp = combineLatest(
+    const fieldStatsSub = combineLatest(
       batches
-        .map((batch) => getFieldsStats(data, params, batch, searchOptions, true))
+        .map((batch) => getFieldsStats(data, params, batch, searchOptions))
         .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>
     );
 
@@ -186,7 +186,7 @@ export function useFieldStatsSearchStrategy(
     };
 
     // First, attempt to fetch field stats in batches of 10
-    searchSubscription$.current = subTemp.subscribe({
+    searchSubscription$.current = fieldStatsSub.subscribe({
       next: (resp) => {
         if (resp) {
           const statsMap = new Map<string, FieldStats>();
@@ -206,7 +206,7 @@ export function useFieldStatsSearchStrategy(
           });
 
           setFetchState({
-            loaded: (resp.length / sortedConfigs.length) * 100,
+            loaded: (statsMap.size / sortedConfigs.length) * 100,
             isRunning: true,
           });
 
@@ -227,9 +227,7 @@ export function useFieldStatsSearchStrategy(
         switchMap((failedFields) => {
           return combineLatest(
             failedFields
-              .map((failedField) =>
-                getFieldsStats(data, params, [failedField], searchOptions, false)
-              )
+              .map((failedField) => getFieldsStats(data, params, [failedField], searchOptions))
               .filter((obs) => obs !== undefined)
           );
         })
@@ -239,12 +237,18 @@ export function useFieldStatsSearchStrategy(
         const statsMap = cloneDeep(resp[0]) as Map<string, FieldStats>;
         const fieldBatches = resp[1];
 
-        fieldBatches.forEach((f) => {
-          if (Array.isArray(f) && f.length === 1) {
-            statsMap.set(f[0].fieldName, f[0]);
-          }
-        });
-        setFieldStats(statsMap);
+        if (Array.isArray(fieldBatches)) {
+          fieldBatches.forEach((f) => {
+            if (Array.isArray(f) && f.length === 1) {
+              statsMap.set(f[0].fieldName, f[0]);
+            }
+          });
+          setFieldStats(statsMap);
+          setFetchState({
+            loaded: (statsMap.size / sortedConfigs.length) * 100,
+            isRunning: true,
+          });
+        }
       },
       error: onError,
       complete: onComplete,

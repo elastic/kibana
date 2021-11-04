@@ -8,6 +8,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import {
   buildSamplerAggregation,
@@ -30,38 +31,42 @@ import {
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
 
-export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams, field: Field) => {
+export const getStringFieldStatsRequest = (
+  params: FieldStatsCommonRequestParams,
+  fields: Field[]
+) => {
   const { index, query, runtimeFieldMap, samplerShardSize } = params;
 
   const size = 0;
 
   const aggs: Aggs = {};
-
-  const safeFieldName = field.safeFieldName;
-  const top: estypes.AggregationsAggregationContainer = {
-    terms: {
-      field: field.fieldName,
-      size: 10,
-      order: {
-        _count: 'desc',
-      },
-    },
-  };
-
-  // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-  // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-  if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-    aggs[`${safeFieldName}_top`] = {
-      sampler: {
-        shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-      },
-      aggs: {
-        top,
-      },
+  fields.forEach((field, i) => {
+    const safeFieldName = field.safeFieldName;
+    const top = {
+      terms: {
+        field: field.fieldName,
+        size: 10,
+        order: {
+          _count: 'desc',
+        },
+      } as AggregationsTermsAggregation,
     };
-  } else {
-    aggs[`${safeFieldName}_top`] = top;
-  }
+
+    // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
+    // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
+    if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
+      aggs[`${safeFieldName}_top`] = {
+        sampler: {
+          shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
+        },
+        aggs: {
+          top,
+        },
+      };
+    } else {
+      aggs[`${safeFieldName}_top`] = top;
+    }
+  });
 
   const searchBody = {
     query,
@@ -76,21 +81,21 @@ export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams
   };
 };
 
-export const fetchStringFieldStats = (
+export const fetchStringFieldsStats = (
   data: DataPublicPluginStart,
   params: FieldStatsCommonRequestParams,
-  field: Field,
+  fields: Field[],
   options: ISearchOptions
-): Observable<StringFieldStats | FieldStatsError> => {
+): Observable<StringFieldStats[] | FieldStatsError> => {
   const { samplerShardSize } = params;
-  const request: estypes.SearchRequest = getStringFieldStatsRequest(params, field);
+  const request: estypes.SearchRequest = getStringFieldStatsRequest(params, fields);
 
   return data.search
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(
       catchError((e) =>
         of({
-          fieldName: field.fieldName,
+          fields,
           error: extractErrorProperties(e),
         } as FieldStatsError)
       ),
@@ -98,32 +103,37 @@ export const fetchStringFieldStats = (
         if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const batchStats: StringFieldStats[] = [];
 
-        const safeFieldName = field.safeFieldName;
+        fields.forEach((field, i) => {
+          const safeFieldName = field.safeFieldName;
 
-        const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-        if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-          topAggsPath.push('top');
-        }
+          const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
+          if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
+            topAggsPath.push('top');
+          }
 
-        const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
+          const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
 
-        const stats = {
-          fieldName: field.fieldName,
-          isTopValuesSampled:
-            field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
-          topValues,
-          topValuesSampleSize: topValues.reduce(
-            (acc, curr) => acc + curr.doc_count,
-            get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
-          ),
-          topValuesSamplerShardSize:
-            field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
-              ? SAMPLER_TOP_TERMS_SHARD_SIZE
-              : samplerShardSize,
-        };
+          const stats = {
+            fieldName: field.fieldName,
+            isTopValuesSampled:
+              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
+            topValues,
+            topValuesSampleSize: topValues.reduce(
+              (acc, curr) => acc + curr.doc_count,
+              get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
+            ),
+            topValuesSamplerShardSize:
+              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
+                ? SAMPLER_TOP_TERMS_SHARD_SIZE
+                : samplerShardSize,
+          };
 
-        return stats;
+          batchStats.push(stats);
+        });
+
+        return batchStats;
       })
     );
 };
