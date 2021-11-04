@@ -17,8 +17,8 @@ export interface IngestStats {
 }
 
 export interface TrainedModelStat {
-  model_id: string;
-  pipeline_count: number;
+  model_id?: string;
+  pipeline_count?: number;
   inference_stats?: {
     failure_count: number;
     inference_count: number;
@@ -100,6 +100,9 @@ export interface TrainedModelConfigResponse {
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
   pipelines?: Record<string, PipelineDefinition> | null;
 }
 

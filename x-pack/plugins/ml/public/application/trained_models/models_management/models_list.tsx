@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { groupBy } from 'lodash';
+import { omit } from 'lodash';
 import {
   EuiBadge,
   EuiButton,
@@ -149,7 +149,7 @@ export const ModelsList: FC = () => {
       }
 
       // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchModelsStats(newItems.filter((v) => v.model_type.includes('pytorch')));
+      await fetchDeploymentStats(newItems.filter((v) => v.model_type.includes('pytorch')));
 
       setItems(newItems);
 
@@ -197,8 +197,6 @@ export const ModelsList: FC = () => {
    * Fetches models stats and update the original object
    */
   const fetchModelsStats = useCallback(async (models: ModelItem[]) => {
-    const { true: pytorchModels } = groupBy(models, (m) => m.model_type === 'pytorch');
-
     try {
       if (models) {
         const { trained_model_stats: modelsStatsResponse } =
@@ -206,25 +204,11 @@ export const ModelsList: FC = () => {
 
         for (const { model_id: id, ...stats } of modelsStatsResponse) {
           const model = models.find((m) => m.model_id === id);
-          model!.stats = stats;
-        }
-      }
-
-      if (pytorchModels) {
-        try {
-          const { deployment_stats: deploymentStatsResponse } =
-            await trainedModelsApiService.getTrainedModelDeploymentStats(
-              pytorchModels.map((m) => m.model_id)
-            );
-
-          for (const { model_id: id, ...stats } of deploymentStatsResponse) {
-            const model = models.find((m) => m.model_id === id);
-            model!.stats!.deployment_stats = stats;
-          }
-        } catch (e) {
-          // For stopped models stats endpoint returns 404
-          if (e.body.statusCode !== 404) {
-            throw new Error(e);
+          if (model) {
+            model.stats = {
+              ...(model.stats ?? {}),
+              ...stats,
+            };
           }
         }
       }
@@ -235,6 +219,39 @@ export const ModelsList: FC = () => {
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
           defaultMessage: 'Fetch model stats failed',
+        })
+      );
+    }
+  }, []);
+
+  /**
+   * Updates model items with deployment stats;
+   *
+   * We have to fetch all deployment stats on each update,
+   * because for stopped models the API returns 404 response.
+   */
+  const fetchDeploymentStats = useCallback(async (modelItems: ModelItem[]) => {
+    try {
+      const { deployment_stats: deploymentStats } =
+        await trainedModelsApiService.getTrainedModelDeploymentStats('*');
+
+      for (const deploymentStat of deploymentStats) {
+        const deployedModel = modelItems.find(
+          (model) => model.model_id === deploymentStat.model_id
+        );
+
+        if (deployedModel) {
+          deployedModel.stats = {
+            ...(deployedModel.stats ?? {}),
+            deployment_stats: omit(deploymentStat, 'model_id'),
+          };
+        }
+      }
+    } catch (error) {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeploymentStatsErrorMessage', {
+          defaultMessage: 'Fetch deployment stats failed',
         })
       );
     }
@@ -378,10 +395,11 @@ export const ModelsList: FC = () => {
       type: 'icon',
       isPrimary: true,
       enabled: (item) =>
-        !['started', 'starting'].includes(item.stats?.deployment_stats?.state ?? ''),
+        !isLoading && !['started', 'starting'].includes(item.stats?.deployment_stats?.state ?? ''),
       available: (item) => item.model_type === 'pytorch',
       onClick: async (item) => {
         try {
+          setIsLoading(true);
           await trainedModelsApiService.startModelAllocation(item.model_id);
           displaySuccessToast(
             i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
@@ -391,8 +409,7 @@ export const ModelsList: FC = () => {
               },
             })
           );
-          // Need to fetch model state updates
-          await fetchModelsStats([item]);
+          await fetchModelsData();
         } catch (e) {
           displayErrorToast(
             e,
@@ -403,6 +420,7 @@ export const ModelsList: FC = () => {
               },
             })
           );
+          setIsLoading(false);
         }
       },
     },
@@ -418,11 +436,13 @@ export const ModelsList: FC = () => {
       isPrimary: true,
       available: (item) => item.model_type === 'pytorch',
       enabled: (item) =>
+        !isLoading &&
         !isPopulatedObject(item.pipelines) &&
         isPopulatedObject(item.stats?.deployment_stats) &&
         item.stats?.deployment_stats?.state !== 'stopped',
       onClick: async (item) => {
         try {
+          setIsLoading(true);
           await trainedModelsApiService.stopModelAllocation(item.model_id);
           displaySuccessToast(
             i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
@@ -433,7 +453,7 @@ export const ModelsList: FC = () => {
             })
           );
           // Need to fetch model state updates
-          await fetchModelsStats([item]);
+          await fetchModelsData();
         } catch (e) {
           displayErrorToast(
             e,
@@ -444,6 +464,7 @@ export const ModelsList: FC = () => {
               },
             })
           );
+          setIsLoading(false);
         }
       },
     },
