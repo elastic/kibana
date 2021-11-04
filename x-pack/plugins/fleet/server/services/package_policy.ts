@@ -404,6 +404,7 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
+
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
       inputs = await this._compilePackagePolicyInputs(
         registryPkgInfo,
@@ -1111,7 +1112,9 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      const indexOfInput = inputs.indexOf(originalInput);
+      inputs[indexOfInput] = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      originalInput = inputs[indexOfInput];
     }
 
     if (override.streams) {
@@ -1130,10 +1133,24 @@ export function overridePackageInputs(
         }
 
         if (stream.vars) {
-          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
+          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          originalInput.streams[indexOfStream] = deepMergeVars(
+            originalStream,
+            stream as InputsOverride
+          );
+          originalStream = originalInput.streams[indexOfStream];
         }
       }
     }
+
+    // Filter all stream that have been removed from the input
+    originalInput.streams = originalInput.streams.filter((originalStream) => {
+      return (
+        override.streams?.some(
+          (s) => s.data_stream.dataset === originalStream.data_stream.dataset
+        ) ?? false
+      );
+    });
   }
 
   const resultingPackagePolicy: NewPackagePolicy = {
