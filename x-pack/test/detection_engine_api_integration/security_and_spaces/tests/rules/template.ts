@@ -44,6 +44,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('{{description}}', () => {
     before(async () => {
@@ -55,12 +56,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
     });
 
     // {{#kqlQuery}}
@@ -77,10 +78,10 @@ export default ({ getService }: FtrProviderContext) => {
         query: '{{rule_query}}',
         from: '1900-01-01T00:00:00.000Z',
       };
-      const { id } = await createRule(supertest, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 1, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      const { id } = await createRule(supertest, log, rule);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 1, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       expect(signalsOpen.hits.hits.length).to.be.above(0);
     });
     // {{/kqlQuery}}
@@ -100,10 +101,10 @@ export default ({ getService }: FtrProviderContext) => {
         from: '1900-01-01T00:00:00.000Z',
       };
 
-      const { id } = await createRule(supertest, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 1, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      const { id } = await createRule(supertest, log, rule);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 1, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       expect(signalsOpen.hits.hits.length).to.be.above(0);
     });
     // {{/eqlQuery}}
@@ -126,11 +127,11 @@ export default ({ getService }: FtrProviderContext) => {
           value: 21,
         },
       };
-      const { id } = await createRule(supertest, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 1, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
-      await waitForSignalsToBePresent(supertest, 1, [id]);
+      const { id } = await createRule(supertest, log, rule);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 1, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 1, [id]);
       expect(signalsOpen.hits.hits.length).to.be.above(0);
     });
     // {{/thresholdQuery}}
