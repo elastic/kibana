@@ -7,10 +7,12 @@
 
 export { isAdvancedVar } from './is_advanced_var';
 export { hasInvalidButRequiredVar } from './has_invalid_but_required_var';
-export {
+export type {
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,
   PackagePolicyInputValidationResults,
+} from '../../../../services';
+export {
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
