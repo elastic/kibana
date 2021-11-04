@@ -9,24 +9,18 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { mount } from 'enzyme';
-import { coreMock } from 'src/core/public/mocks';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { CoreStart, DocLinksStart, HttpStart } from 'src/core/public';
+import { AppMountParameters, DocLinksStart, HttpStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
-import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
-import { mockUxAppContextValue } from '../context/apm_plugin/mock_ux_app_context.tsx';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { createObservabilityRuleTypeRegistryMock } from '../../../observability/public';
 import { renderApp as renderApmApp } from './';
 import { UXAppRoot } from './uxApp';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ApmPluginStartDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { RumHome } from '../components/app/RumDashboard/RumHome';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
-import { merge } from 'lodash';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
@@ -130,8 +124,8 @@ describe('renderApp (APM)', () => {
 
     return {
       coreStart,
-      pluginsSetup,
-      appMountParameters,
+      pluginsSetup: pluginsSetup as unknown as ApmPluginSetupDeps,
+      appMountParameters: appMountParameters as unknown as AppMountParameters,
       pluginsStart,
       config,
       observabilityRuleTypeRegistry,
@@ -156,45 +150,9 @@ describe('renderApp (APM)', () => {
 
 describe('renderUxApp', () => {
   it('has an error boundary for the UXAppRoot', async () => {
-    const coreSetup = coreMock.createSetup();
-    const [coreStart, corePlugins] = await coreSetup.getStartServices();
+    const uxMountProps = mockApmPluginContextValue;
 
-    coreStart.uiSettings.get.mockImplementation((key) => {
-      const uiSettings: Record<string, unknown> = {
-        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
-          {
-            from: 'now/d',
-            to: 'now/d',
-            display: 'Today',
-          },
-          {
-            from: 'now/w',
-            to: 'now/w',
-            display: 'This week',
-          },
-        ],
-        [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
-          from: 'now-15m',
-          to: 'now',
-        },
-        [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
-          pause: false,
-          value: 100000,
-        },
-      };
-
-      return uiSettings[key];
-    });
-
-    const uxMountProps = {
-      core: coreStart,
-      appMountParameters: coreMock.createAppMountParamters('/fake/base/path'),
-      config: {},
-      corePlugins: {},
-      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-    };
-
-    const wrapper = mount(<UXAppRoot {...uxMountProps} />);
+    const wrapper = mount(<UXAppRoot {...(uxMountProps as any)} />);
 
     wrapper
       .find(RumHome)
