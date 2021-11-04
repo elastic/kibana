@@ -318,7 +318,7 @@ describe('suggestion_panel', () => {
     expect(instance.find('[data-test-subj="lnsSuggestionsPanel"]')).toEqual({});
   });
 
-  it('should render preview expression if there is one', () => {
+  it('should render preview expression if there is one', async () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
     (getSuggestions as jest.Mock).mockReturnValue([
       {
