@@ -49,13 +49,13 @@ export default function ({ getService }) {
       });
 
       it('should not fail migration with invalid attributes', async () => {
-        const resp = await supertest
+        await supertest
           .post(`/api/saved_objects/map`)
           .set('kbn-xsrf', 'kibana')
           .send({
             attributes: {
               title: '[Logs] Total Requests and Bytes',
-              layerListJSON: 'not valid layerListJSON'
+              layerListJSON: 'not valid layerListJSON',
             },
             migrationVersion: {},
           })
