@@ -30,6 +30,7 @@ import {
 } from '../shared_components';
 import { LensIconChartHeatmap } from '../assets/chart_heatmap';
 import { DEFAULT_PALETTE_NAME } from './constants';
+import { search } from '../../../../../src/plugins/data/public';
 
 declare global {
   interface Window {
@@ -162,8 +163,20 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   // Fallback to the ordinal scale type when a single row of data is provided.
   // Related issue https://github.com/elastic/elastic-charts/issues/1184
-  const xScaleType =
-    isTimeBasedSwimLane && chartData.length > 1 ? ScaleType.Time : ScaleType.Ordinal;
+
+  let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
+  if (isTimeBasedSwimLane && chartData.length > 1) {
+    const dateInterval =
+      search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)?.interval;
+    const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
+    if (esInterval) {
+      xScale = {
+        type: ScaleType.Time,
+        interval: { type: esInterval.type, unit: esInterval.unit, value: esInterval.value },
+        timeZone,
+      };
+    }
+  }
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
@@ -341,6 +354,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
             labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
           },
         }}
+        xDomain={{
+          min: data.dateRange?.fromDate.getTime() ?? NaN,
+          max: data.dateRange?.toDate.getTime() ?? NaN,
+        }}
         onBrushEnd={onBrushEnd as BrushEndListener}
       />
       <Heatmap
@@ -355,7 +372,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         yAccessor={args.yAccessor || 'unifiedY'}
         valueAccessor={args.valueAccessor}
         valueFormatter={(v: number) => valueFormatter.convert(v)}
-        xScaleType={xScaleType}
+        xScale={xScale}
         ySortPredicate="dataIndex"
         config={config}
         xSortPredicate="dataIndex"

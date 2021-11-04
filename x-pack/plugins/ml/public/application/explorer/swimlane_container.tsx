@@ -470,7 +470,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         valueAccessor="value"
                         highlightedData={highlightedData}
                         valueFormatter={getFormattedSeverityScore}
-                        xScaleType={ScaleType.Time}
+                        // the xDomain.minInterval should always be available at rendering time, just falling back to 1m bucket just in case
+                        xScale={{
+                          type: ScaleType.Time,
+                          interval: {
+                            type: 'fixed',
+                            unit: 'ms',
+                            value: xDomain?.minInterval ?? 1000 * 60,
+                          },
+                          timeZone: 'UTC',
+                        }}
                         ySortPredicate="dataIndex"
                         config={swimLaneConfig}
                       />
