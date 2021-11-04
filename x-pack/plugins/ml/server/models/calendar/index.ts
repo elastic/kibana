@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { CalendarManager, Calendar, FormCalendar } from './calendar_manager';
+export type { Calendar, FormCalendar } from './calendar_manager';
+export { CalendarManager } from './calendar_manager';

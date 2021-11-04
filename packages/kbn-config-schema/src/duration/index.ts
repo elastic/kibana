@@ -7,7 +7,8 @@
  */
 
 import { Duration, duration as momentDuration, DurationInputArg2, isDuration } from 'moment';
-export { Duration, isDuration };
+export type { Duration };
+export { isDuration };
 
 const timeFormatRegex = /^(0|[1-9][0-9]*)(ms|s|m|h|d|w|M|Y)$/;
 

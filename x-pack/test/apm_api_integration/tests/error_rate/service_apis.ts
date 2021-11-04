@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       serviceInventoryAPIResponse.body.items[0].transactionErrorRate;
 
     const errorRateChartApiMean = meanBy(
-      transactionsErrorRateChartAPIResponse.body.currentPeriod.transactionErrorRate.filter(
+      transactionsErrorRateChartAPIResponse.body.currentPeriod.timeseries.filter(
         (item) => isFiniteNumber(item.y) && item.y > 0
       ),
       'y'
@@ -114,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let errorRateMetricValues: PromiseReturnType<typeof getErrorRateValues>;
   let errorTransactionValues: PromiseReturnType<typeof getErrorRateValues>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;
