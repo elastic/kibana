@@ -26,6 +26,7 @@ import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
+  constructMultiTermOtherFilter,
 } from './_terms_other_bucket_helper';
 import { MultiFieldKey } from './multi_field_key';
 
@@ -112,8 +113,7 @@ export const getMultiTermsBucketAgg = () => {
     ) => {
       if (!resp.aggregations) return resp;
       const nestedSearchSource = searchSource.createChild();
-      // TODO implement this
-      if (false && aggConfig.params.otherBucket) {
+      if (aggConfig.params.otherBucket) {
         const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
         if (!filterAgg) return resp;
 
@@ -140,7 +140,14 @@ export const getMultiTermsBucketAgg = () => {
           })
           .toPromise();
 
-        resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
+        resp = mergeOtherBucketAggResponse(
+          aggConfigs,
+          resp,
+          response,
+          aggConfig,
+          filterAgg(),
+          constructMultiTermOtherFilter
+        );
       }
       if (aggConfig.params.missingBucket) {
         resp = updateMissingBucket(resp, aggConfigs, aggConfig);

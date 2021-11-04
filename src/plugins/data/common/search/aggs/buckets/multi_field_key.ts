@@ -10,7 +10,7 @@ const id = Symbol('id');
 
 export class MultiFieldKey {
   [id]: string;
-  keys: string[];
+  keys: string[] | string;
 
   constructor(bucket: any) {
     this.keys = bucket.key;
@@ -18,7 +18,7 @@ export class MultiFieldKey {
     this[id] = MultiFieldKey.idBucket(bucket);
   }
   static idBucket(bucket: any) {
-    return bucket.key.join(',,,,,');
+    return Array.isArray(bucket.key) ? bucket.key.join(',,,,,') : bucket.key;
   }
 
   toString() {

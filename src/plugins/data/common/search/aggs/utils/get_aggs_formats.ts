@@ -133,13 +133,13 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'multi_terms';
       static hidden = true;
 
-      convert = (val: string, type: FieldFormatsContentType) => {
+      convert = (val: unknown, type: FieldFormatsContentType) => {
         const params = this._params;
         const formats = params.paramsPerField.map((fieldParams) =>
           getFieldFormat({ id: fieldParams.id, params: fieldParams })
         );
 
-        if (val === '__other__') {
+        if (String(val) === '__other__') {
           return params.otherBucketLabel;
         }
 

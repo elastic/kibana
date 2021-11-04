@@ -26,6 +26,7 @@ import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
+  constructSingleTermOtherFilter,
 } from './_terms_other_bucket_helper';
 
 export const termsAggFilter = [
@@ -120,7 +121,14 @@ export const getTermsBucketAgg = () =>
           })
           .toPromise();
 
-        resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
+        resp = mergeOtherBucketAggResponse(
+          aggConfigs,
+          resp,
+          response,
+          aggConfig,
+          filterAgg(),
+          constructSingleTermOtherFilter
+        );
       }
       if (aggConfig.params.missingBucket) {
         resp = updateMissingBucket(resp, aggConfigs, aggConfig);

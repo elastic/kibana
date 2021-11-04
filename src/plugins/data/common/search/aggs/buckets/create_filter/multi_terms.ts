@@ -6,32 +6,43 @@
  * Side Public License, v 1.
  */
 
-import { buildPhrasesFilter, buildExistsFilter, buildPhraseFilter, Filter } from '@kbn/es-query';
+import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { MultiFieldKey } from '../multi_field_key';
 
 export const createFilterMultiTerms = (
   aggConfig: IBucketAggConfig,
-  key: MultiFieldKey,
-  params: any
+  key: MultiFieldKey | string,
+  params: { terms: MultiFieldKey[] }
 ): Filter => {
   const fields = aggConfig.params.fields;
   const indexPattern = aggConfig.aggConfigs.indexPattern;
 
-  if (key.length === 1 && key[0] === '__other__') {
-    // TODO do this in a meaningful way
-    const terms = params.terms;
+  if (String(key) === '__other__') {
+    const multiTerms = params.terms;
 
-    const phraseFilter = buildPhrasesFilter(field, terms, indexPattern);
-    phraseFilter.meta.negate = true;
+    const perMultiTermQuery = multiTerms.map((multiTerm) =>
+      multiTerm.keys.map(
+        (partialKey, i) =>
+          buildPhraseFilter(indexPattern.getFieldByName(fields[i])!, partialKey, indexPattern).query
+      )
+    );
 
-    const filters: Filter[] = [phraseFilter];
-
-    if (terms.some((term: string) => term === '__missing__')) {
-      filters.push(buildExistsFilter(field, indexPattern));
-    }
-
-    return filters;
+    return {
+      meta: {
+        negate: true,
+      },
+      query: {
+        bool: {
+          should: perMultiTermQuery.map((multiTermQuery) => ({
+            bool: {
+              must: multiTermQuery,
+            },
+          })),
+          minimum_should_match: 1,
+        },
+      },
+    };
   }
   const partials = key.keys.map((partialKey, i) =>
     buildPhraseFilter(indexPattern.getFieldByName(fields[i])!, partialKey, indexPattern)

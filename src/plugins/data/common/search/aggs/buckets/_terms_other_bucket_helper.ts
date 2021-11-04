@@ -8,7 +8,12 @@
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
+import {
+  buildExistsFilter,
+  buildPhrasesFilter,
+  buildQueryFromFilters,
+  Filter,
+} from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IBucketAggConfig } from './bucket_agg_type';
@@ -200,12 +205,16 @@ export const buildOtherBucketAgg = (
       return;
     }
 
-    const hasScriptedField = !!aggWithOtherBucket.params.field.scripted;
+    const hasScriptedField = !!aggWithOtherBucket.params.field?.scripted;
     const hasMissingBucket = !!aggWithOtherBucket.params.missingBucket;
     const hasMissingBucketKey = agg.buckets.some(
       (bucket: { key: string }) => bucket.key === '__missing__'
     );
-    if (!hasScriptedField && (!hasMissingBucket || hasMissingBucketKey)) {
+    if (
+      aggWithOtherBucket.params.field &&
+      !hasScriptedField &&
+      (!hasMissingBucket || hasMissingBucketKey)
+    ) {
       filters.push(
         buildExistsFilter(
           aggWithOtherBucket.params.field,
@@ -217,7 +226,7 @@ export const buildOtherBucketAgg = (
     // create not filters for all the buckets
     each(agg.buckets, (bucket) => {
       if (bucket.key === '__missing__') return;
-      const filter = currentAgg.createFilter(bucket.key);
+      const filter = currentAgg.createFilter(currentAgg.getKey(bucket, bucket.key));
       filter.meta.negate = true;
       filters.push(filter);
     });
@@ -245,7 +254,12 @@ export const mergeOtherBucketAggResponse = (
   response: estypes.SearchResponse<any>,
   otherResponse: any,
   otherAgg: IBucketAggConfig,
-  requestAgg: Record<string, any>
+  requestAgg: Record<string, any>,
+  otherFilterBuilder: (
+    requestAgg: Record<string, any>,
+    key: string,
+    otherAgg: IBucketAggConfig
+  ) => Filter
 ): estypes.SearchResponse<any> => {
   const updatedResponse = cloneDeep(response);
   each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
@@ -257,15 +271,8 @@ export const mergeOtherBucketAggResponse = (
       otherAgg,
       bucketKey
     );
-    const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
-
-    const phraseFilter = buildPhrasesFilter(
-      otherAgg.params.field,
-      requestFilterTerms,
-      otherAgg.aggConfigs.indexPattern
-    );
-    phraseFilter.meta.negate = true;
-    bucket.filters = [phraseFilter];
+    const otherFilter = otherFilterBuilder(requestAgg, key, otherAgg);
+    bucket.filters = [otherFilter];
     bucket.key = '__other__';
 
     if (
@@ -294,3 +301,32 @@ export const updateMissingBucket = (
   });
   return updatedResponse;
 };
+
+export function constructSingleTermOtherFilter(
+  requestAgg: Record<string, any>,
+  key: string,
+  otherAgg: IBucketAggConfig
+) {
+  const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
+
+  const phraseFilter = buildPhrasesFilter(
+    otherAgg.params.field,
+    requestFilterTerms,
+    otherAgg.aggConfigs.indexPattern
+  );
+  phraseFilter.meta.negate = true;
+  return phraseFilter;
+}
+
+export function constructMultiTermOtherFilter(
+  requestAgg: Record<string, any>,
+  key: string,
+  otherAgg: IBucketAggConfig
+): Filter {
+  return {
+    query: requestAgg['other-filter'].filters.filters[key],
+    meta: {
+      negate: true,
+    },
+  };
+}
