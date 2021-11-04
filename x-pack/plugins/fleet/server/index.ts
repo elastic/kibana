@@ -18,18 +18,18 @@ import {
 import { FleetPlugin } from './plugin';
 
 export { default as apm } from 'elastic-apm-node';
-export {
+export type {
   AgentService,
   ESIndexPatternService,
-  getRegistryUrl,
   PackageService,
   AgentPolicyServiceInterface,
   ArtifactsClientInterface,
   Artifact,
   ListArtifactsProps,
 } from './services';
+export { getRegistryUrl } from './services';
 
-export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
+export type { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
 export type {
   ExternalCallback,
   PutPackagePolicyUpdateCallback,
@@ -120,12 +120,16 @@ export const config: PluginConfigDescriptor = {
     agentPolicies: PreconfiguredAgentPoliciesSchema,
     outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    developer: schema.object({
+      // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
+      disableRegistryVersionCheck: schema.boolean({ defaultValue: true }),
+    }),
   }),
 };
 
 export type FleetConfigType = TypeOf<typeof config.schema>;
 
-export { PackagePolicyServiceInterface } from './services/package_policy';
+export type { PackagePolicyServiceInterface } from './services/package_policy';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 

@@ -11,7 +11,7 @@ import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
 
 import { ToolingLog } from '../tooling_log';
-import { createCliError } from './errors';
+import { createFailError } from '../run';
 import { Proc, ProcOptions, startProc } from './proc';
 
 const SECOND = 1000;
@@ -61,7 +61,6 @@ export class ProcRunner {
    */
   async run(name: string, options: RunOptions) {
     const {
-      cmd,
       args = [],
       cwd = process.cwd(),
       stdin = undefined,
@@ -69,6 +68,7 @@ export class ProcRunner {
       waitTimeout = 15 * MINUTE,
       env = process.env,
     } = options;
+    const cmd = options.cmd === 'node' ? process.execPath : options.cmd;
 
     if (this.closing) {
       throw new Error('ProcRunner is closing');
@@ -99,7 +99,7 @@ export class ProcRunner {
             first(),
             catchError((err) => {
               if (err.name !== 'EmptyError') {
-                throw createCliError(`[${name}] exited without matching pattern: ${wait}`);
+                throw createFailError(`[${name}] exited without matching pattern: ${wait}`);
               } else {
                 throw err;
               }
@@ -110,7 +110,7 @@ export class ProcRunner {
             : Rx.timer(waitTimeout).pipe(
                 map(() => {
                   const sec = waitTimeout / SECOND;
-                  throw createCliError(
+                  throw createFailError(
                     `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
                   );
                 })

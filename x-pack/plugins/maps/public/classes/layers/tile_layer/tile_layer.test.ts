@@ -8,7 +8,8 @@
 import { ITileLayerArguments, TileLayer } from './tile_layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { ITMSSource, AbstractTMSSource } from '../../sources/tms_source';
+import { AbstractSource } from '../../sources/source';
+import { ITMSSource } from '../../sources/tms_source';
 import { ILayer } from '../layer';
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
@@ -17,7 +18,7 @@ const sourceDescriptor: XYZTMSSourceDescriptor = {
   id: 'foobar',
 };
 
-class MockTileSource extends AbstractTMSSource implements ITMSSource {
+class MockTileSource extends AbstractSource implements ITMSSource {
   readonly _descriptor: XYZTMSSourceDescriptor;
   constructor(descriptor: XYZTMSSourceDescriptor) {
     super(descriptor, {});

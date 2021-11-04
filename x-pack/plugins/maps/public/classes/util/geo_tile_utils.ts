@@ -89,24 +89,6 @@ export function tile2lat(y: number, z: number): number {
   return tileToLatitude(y, tileCount);
 }
 
-export function tileToESBbox(x: number, y: number, z: number): ESBounds {
-  const wLon = tile2long(x, z);
-  const sLat = tile2lat(y + 1, z);
-  const eLon = tile2long(x + 1, z);
-  const nLat = tile2lat(y, z);
-
-  return {
-    top_left: {
-      lon: wLon,
-      lat: nLat,
-    },
-    bottom_right: {
-      lon: eLon,
-      lat: sLat,
-    },
-  };
-}
-
 export function tileToLatitude(y: number, tileCount: number) {
   const radians = Math.atan(sinh(Math.PI - (2 * Math.PI * y) / tileCount));
   const lat = (180 / Math.PI) * radians;
