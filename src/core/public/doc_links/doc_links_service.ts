@@ -479,7 +479,7 @@ export class DocLinksService {
           fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
-          settingsFleetServerProxySettings: `${FLEET_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
+          settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
           elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
