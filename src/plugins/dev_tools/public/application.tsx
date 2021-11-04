@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { EMPTY } from 'rxjs';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
@@ -84,6 +85,8 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
               setHeaderActionMenu: () => undefined,
               // TODO: adapt to use Core's ScopedHistory
               history: {} as any,
+              // TODO: adapt to use Core's theme
+              theme$: EMPTY,
             };
 
             const unmountHandler = await activeDevTool.mount(params);
