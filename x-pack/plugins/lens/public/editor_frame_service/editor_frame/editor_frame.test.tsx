@@ -786,7 +786,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      let { instance: editorFrameInstance, lensStore } = await mountWithProvider(
+      const { instance: editorFrameInstance, lensStore } = await mountWithProvider(
         <EditorFrame {...props} />
       );
 
@@ -845,7 +845,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      let { instance: editorFrameInstance, lensStore } = await mountWithProvider(
+      const { instance: editorFrameInstance, lensStore } = await mountWithProvider(
         <EditorFrame {...props} />
       );
 
