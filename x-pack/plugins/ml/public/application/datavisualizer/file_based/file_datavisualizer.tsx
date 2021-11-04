@@ -89,7 +89,7 @@ export const FileDataVisualizerPage: FC = () => {
             },
           });
         },
-        canDisplay: async () => true,
+        canDisplay: async ({ indexPatternId }) => indexPatternId !== '',
       },
     ],
     []

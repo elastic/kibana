@@ -58,7 +58,13 @@ export const ResultsLinks: FC<Props> = ({
   additionalLinks,
 }) => {
   const {
-    services: { fileUpload },
+    services: {
+      fileUpload,
+      application: { getUrlForApp, capabilities },
+      share: {
+        urlGenerators: { getUrlGenerator },
+      },
+    },
   } = useDataVisualizerKibana();
 
   const [duration, setDuration] = useState({
@@ -71,15 +77,6 @@ export const ResultsLinks: FC<Props> = ({
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [indexPatternManagementLink, setIndexPatternManagementLink] = useState('');
   const [generatedLinks, setGeneratedLinks] = useState<Record<string, string>>({});
-
-  const {
-    services: {
-      application: { getUrlForApp, capabilities },
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
-    },
-  } = useDataVisualizerKibana();
 
   useEffect(() => {
     let unmounted = false;
@@ -137,11 +134,14 @@ export const ResultsLinks: FC<Props> = ({
       setIndexManagementLink(
         getUrlForApp('management', { path: '/data/index_management/indices' })
       );
-      setIndexPatternManagementLink(
-        getUrlForApp('management', {
-          path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
-        })
-      );
+
+      if (capabilities.indexPatterns.save === true) {
+        setIndexPatternManagementLink(
+          getUrlForApp('management', {
+            path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
+          })
+        );
+      }
     }
 
     return () => {
