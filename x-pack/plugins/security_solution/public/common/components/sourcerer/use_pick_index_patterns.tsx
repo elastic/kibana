@@ -10,7 +10,6 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererModel } from '../../store/sourcerer';
 import { getPatternListWithoutSignals } from './helpers';
-import { SourcererModel, SourcererScopeName } from '../../store/sourcerer/model';
 
 interface UsePickIndexPatternsProps {
   alertsOptions: Array<EuiComboBoxOptionOption<string>>;
@@ -50,7 +49,7 @@ export const usePickIndexPatterns = ({
     }
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
     return theDataView != null
-      ? scopeId === SourcererScopeName.default
+      ? scopeId === sourcererModel.SourcererScopeName.default
         ? {
             patternList: getPatternListWithoutSignals(
               theDataView.title
