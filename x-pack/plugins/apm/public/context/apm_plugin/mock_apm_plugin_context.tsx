@@ -98,7 +98,7 @@ const mockCorePlugins = {
 };
 
 export const mockApmPluginContextValue = {
-  appMountParameters: coreMock.createAppMountParamters('/basepath'),
+  appMountParameters: coreMock.createAppMountParameters('/basepath'),
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
