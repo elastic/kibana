@@ -27,7 +27,7 @@ const CONFIG_DIRECTORIES = [
 
 const DATA_PATHS = [join(REPO_ROOT, 'data'), '/var/lib/kibana'].filter(isString);
 
-const LOGS_PATHS = [join(REPO_ROOT, 'logs'), '/var/lib/kibana'].filter(isString);
+const LOGS_PATHS = [join(REPO_ROOT, 'logs'), '/var/log/kibana'].filter(isString);
 
 function findFile(paths: string[]) {
   const availablePath = paths.find((configPath) => {
