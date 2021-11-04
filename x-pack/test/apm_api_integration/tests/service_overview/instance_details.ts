@@ -6,6 +6,7 @@
  */
 import url from 'url';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
@@ -77,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('return the correct data', () => {
-          expectSnapshot(response.body).toMatch();
+          expectSnapshot(omit(response.body, '@timestamp')).toMatch();
         });
       });
     }
