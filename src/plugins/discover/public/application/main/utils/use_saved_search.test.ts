@@ -11,7 +11,7 @@ import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useSavedSearch } from './use_saved_search';
-import { getState } from './discover_state';
+import { getState } from '../services/discover_state';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 import { useDiscoverState } from './use_discover_state';
 import { FetchStatus } from '../../types';

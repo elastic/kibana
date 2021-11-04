@@ -8,21 +8,21 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { DiscoverServices } from '../../../build_services';
-import { DiscoverSearchSessionManager } from './discover_search_session';
+import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { ISearchSource } from '../../../../../data/common';
-import { GetStateReturn } from './discover_state';
+import { GetStateReturn } from '../services/discover_state';
 import { ElasticSearchHit } from '../../../services/doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
-import { validateTimeRange } from '../utils/validate_time_range';
+import { validateTimeRange } from './validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
 import { FetchStatus } from '../../types';
 
-import { fetchAll } from '../utils/fetch_all';
+import { fetchAll } from './fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
-import { getFetch$ } from '../utils/get_fetch_observable';
+import { getFetch$ } from './get_fetch_observable';
 
 export interface SavedSearchData {
   main$: DataMain$;

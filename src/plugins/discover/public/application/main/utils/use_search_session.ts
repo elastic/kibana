@@ -7,8 +7,11 @@
  */
 import { useMemo, useEffect } from 'react';
 import { History } from 'history';
-import { DiscoverSearchSessionManager } from './discover_search_session';
-import { createSearchSessionRestorationDataProvider, GetStateReturn } from './discover_state';
+import { DiscoverSearchSessionManager } from '../services/discover_search_session';
+import {
+  createSearchSessionRestorationDataProvider,
+  GetStateReturn,
+} from '../services/discover_state';
 import { noSearchSessionStorageCapabilityMessage } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../services/saved_searches';

@@ -18,10 +18,10 @@ import { getChartAggConfigs, getDimensions } from './index';
 import { tabifyAggResponse } from '../../../../../data/common';
 import { buildPointSeriesData } from '../components/chart/point_series';
 import { FetchStatus } from '../../types';
-import { SavedSearchData } from '../services/use_saved_search';
+import { SavedSearchData } from './use_saved_search';
 import { AppState } from '../services/discover_state';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
-import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
+import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
 
 export function fetchChart(
   data$: SavedSearchData,

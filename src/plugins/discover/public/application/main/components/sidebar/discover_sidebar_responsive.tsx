@@ -35,7 +35,7 @@ import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../../build_services';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { DataDocuments$ } from '../../services/use_saved_search';
+import { DataDocuments$ } from '../../utils/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 

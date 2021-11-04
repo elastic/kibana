@@ -23,13 +23,13 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
-import { useColumns } from '../../../../services/use_data_grid_columns';
+import { useColumns } from '../../../../utils/use_data_grid_columns';
 import { IndexPattern } from '../../../../../../data/common';
 import { SavedSearch } from '../../../../services/saved_searches';
-import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_search';
+import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { useDataState } from '../../services/use_data_state';
+import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 

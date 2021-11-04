@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
 import { getServices } from '../../../../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
-import { useEsDocSearch } from '../../../use_es_doc_search';
+import { useEsDocSearch } from '../../../../utils/use_es_doc_search';
 import { IndexPattern } from '../../../../../../data_views/common';
 import { ElasticRequestState } from '../../../../application/doc/types';
 

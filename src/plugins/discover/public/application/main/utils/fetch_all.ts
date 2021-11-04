@@ -12,7 +12,7 @@ import {
   sendLoadingMsg,
   sendPartialMsg,
   sendResetMsg,
-} from '../services/use_saved_search_messages';
+} from './use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
 import type { SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
@@ -23,7 +23,7 @@ import { Adapters } from '../../../../../inspector';
 import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 import { DataPublicPluginStart } from '../../../../../data/public';
-import { SavedSearchData } from '../services/use_saved_search';
+import { SavedSearchData } from './use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
 

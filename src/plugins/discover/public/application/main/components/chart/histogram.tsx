@@ -39,10 +39,10 @@ import {
   getAdjustedInterval,
   renderEndzoneTooltip,
 } from '../../../../../../charts/public';
-import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
+import { DataCharts$, DataChartsMessage } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { DiscoverServices } from '../../../../build_services';
-import { useDataState } from '../../services/use_data_state';
+import { useDataState } from '../../utils/use_data_state';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../charts/common';
 
 export interface DiscoverHistogramProps {

@@ -20,7 +20,7 @@ import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
-import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
+import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';

@@ -14,7 +14,7 @@ import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
 import { GetStateReturn } from '../../services/discover_state';
-import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
+import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { Chart } from './point_series';

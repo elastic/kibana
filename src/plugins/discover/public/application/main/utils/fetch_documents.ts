@@ -10,8 +10,8 @@ import { filter } from 'rxjs/operators';
 import { Adapters } from '../../../../../inspector/common';
 import { isCompleteResponse, ISearchSource } from '../../../../../data/common';
 import { FetchStatus } from '../../types';
-import { SavedSearchData } from '../services/use_saved_search';
-import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
+import { SavedSearchData } from './use_saved_search';
+import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
 

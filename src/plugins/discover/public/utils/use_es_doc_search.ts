@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPattern } from '../../../data/common';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
-import { ElasticSearchHit } from './doc_views/doc_views_types';
+import { ElasticSearchHit } from '../services/doc_views/doc_views_types';
 import { getServices } from '../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
 
@@ -66,7 +66,7 @@ export function useEsDocSearch({
   index,
   indexPattern,
   requestSource,
-}: DocProps): [ElasticRequestState, ElasticSearchHit | null | null, () => void] {
+}: DocProps): [ElasticRequestState, ElasticSearchHit | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
   const { data, uiSettings } = useMemo(() => getServices(), []);

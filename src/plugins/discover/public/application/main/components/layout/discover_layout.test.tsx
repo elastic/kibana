@@ -25,7 +25,7 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-} from '../../services/use_saved_search';
+} from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';

@@ -14,7 +14,7 @@ import type {
   DataPublicPluginStart,
   ISearchSource,
 } from '../../../../../data/public';
-import { DataMain$, DataRefetch$ } from '../services/use_saved_search';
+import { DataMain$, DataRefetch$ } from './use_saved_search';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 
 /**

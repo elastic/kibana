@@ -12,7 +12,7 @@ import type {
 } from '@elastic/eui';
 import { search } from '../../../../../../data/public';
 import { AppState } from '../../services/discover_state';
-import { DataCharts$ } from '../../services/use_saved_search';
+import { DataCharts$ } from '../../utils/use_saved_search';
 
 export function useChartPanels(
   state: AppState,

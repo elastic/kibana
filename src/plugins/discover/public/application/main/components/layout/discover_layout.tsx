@@ -34,11 +34,11 @@ import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg } from '../../services/use_saved_search';
-import { useColumns } from '../../../../services/use_data_grid_columns';
+import { DataMainMsg } from '../../utils/use_saved_search';
+import { useColumns } from '../../../../utils/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../services/use_data_state';
+import { useDataState } from '../../utils/use_data_state';
 import {
   SavedSearchURLConflictCallout,
   useSavedSearchAliasMatchRedirect,

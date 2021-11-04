@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useChartPanels } from './use_chart_panels';
 import { AppState } from '../../services/discover_state';
 import { BehaviorSubject } from 'rxjs';
-import { DataCharts$ } from '../../services/use_saved_search';
+import { DataCharts$ } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 

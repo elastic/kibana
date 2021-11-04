@@ -10,7 +10,7 @@ import { FetchStatus } from '../../types';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { DataPublicPluginStart } from '../../../../../data/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
-import { DataRefetch$ } from '../services/use_saved_search';
+import { DataRefetch$ } from './use_saved_search';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 
 function createDataMock(
