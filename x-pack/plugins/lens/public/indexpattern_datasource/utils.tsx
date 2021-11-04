@@ -126,7 +126,6 @@ export function getPrecisionErrorWarningMessages(
     if (hasPrecisionError) {
       warningMessages.push(
         <FormattedMessage
-          key={`precision-error`}
           id="xpack.lens.indexPattern.precisionErrorWarning"
           defaultMessage="{docCount} values for a terms aggregation may be approximate. As a result, any sub-aggregations on the terms aggregation may also be approximate."
           values={{
