@@ -7,9 +7,9 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import { getObjectKey } from './internal_utils';
-import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
+import { getObjectKey } from '../internal_utils';
+import type { CreatePointInTimeFinderFn } from '../point_in_time_finder';
 
 interface FindLegacyUrlAliasesObject {
   type: string;
@@ -68,6 +68,7 @@ export async function findLegacyUrlAliases(
 
 function createAliasKueryFilter(objects: Array<{ type: string; id: string }>) {
   const { buildNode } = esKuery.nodeTypes.function;
+  // Note: these nodes include '.attributes' for type-level fields because these are eventually passed to `validateConvertFilterToKueryNode`, which requires it
   const kueryNodes = objects.reduce<unknown[]>((acc, { type, id }) => {
     const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.targetType`, type);
     const match2 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.sourceId`, id);
