@@ -123,4 +123,4 @@ export const useTimelinesStorage = (): TimelinesStorage => {
   return { getAllTimelines, getTimelineById, addTimeline };
 };
 
-export { TimelinesStorage };
+export type { TimelinesStorage };

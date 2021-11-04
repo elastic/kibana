@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataView } from 'src/plugins/data_views/common';
+import type { DataViewListItem } from 'src/plugins/data_views/common';
 
 export function loadSavedDashboards(maxNumber: number): Promise<any[]>;
-export function loadIndexPatterns(maxNumber: number): Promise<DataView[]>;
+export function loadDataViewListItems(): Promise<DataViewListItem[]>;

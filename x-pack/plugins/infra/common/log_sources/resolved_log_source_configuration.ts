@@ -92,7 +92,7 @@ const resolveKibanaIndexPatternReference = async (
 
   return {
     indices: indexPattern.title,
-    timestampField: TIMESTAMP_FIELD,
+    timestampField: indexPattern.timeFieldName ?? TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: ['message'],
     fields: indexPattern.fields,

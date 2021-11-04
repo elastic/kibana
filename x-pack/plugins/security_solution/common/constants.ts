@@ -226,6 +226,11 @@ export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable` as const;
 
 /**
+ * Internal actions route
+ */
+export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/notifications';
+
+/**
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
@@ -244,6 +249,13 @@ export const DETECTION_ENGINE_RULES_BULK_ACTION =
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL =
   `${DETECTION_ENGINE_RULES_PREVIEW}/index` as const;
+
+/**
+ * Internal detection engine routes
+ */
+export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
+export const INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/_find_status` as const;
 
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
