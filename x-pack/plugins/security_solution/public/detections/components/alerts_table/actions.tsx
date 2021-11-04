@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { get, getOr, isEmpty } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import dateMath from '@elastic/datemath';
@@ -153,10 +153,7 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
     }
   }, [] as Filter[]);
 
-export const getThresholdAggregationData = (
-  ecsData: Ecs | Ecs[],
-): ThresholdAggregationData => {
-  // TODO: AAD fields
+export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggregationData => {
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
   return thresholdEcsData.reduce<ThresholdAggregationData>(
     (outerAcc, thresholdData) => {
@@ -173,11 +170,9 @@ export const getThresholdAggregationData = (
       };
 
       try {
-        try {
-          thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
-        } catch (err) {
-          thresholdResult = JSON.parse((get(ALERT_THRESHOLD_RESULT, thresholdData) as string[])[0]);
-        }
+        thresholdResult = JSON.parse(
+          (getField(thresholdData, ALERT_THRESHOLD_RESULT) as string[])[0]
+        );
         aggField = JSON.parse(threshold[0]).field;
       } catch (err) {
         // Legacy support
