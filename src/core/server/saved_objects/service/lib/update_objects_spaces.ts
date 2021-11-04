@@ -306,7 +306,7 @@ export async function updateObjectsSpaces({
     }).catch((err) => {
       // The object has already been unshared, but we caught an error when attempting to delete aliases.
       // A consumer cannot attempt to unshare the object again, so just log the error and swallow it.
-      logger.error(err.message);
+      logger.error(`Unable to delete aliases when unsharing an object: ${err.message}`);
     });
   await pMap(objectsToDeleteAliasesFor, mapper, { concurrency: MAX_CONCURRENT_ALIAS_DELETIONS });
 

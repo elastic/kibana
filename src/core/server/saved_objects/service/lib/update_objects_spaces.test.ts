@@ -527,7 +527,9 @@ describe('#updateObjectsSpaces', () => {
         expectBulkArgs({ action: 'update', object: { ...obj1, namespaces: [space2] } });
         expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledTimes(1); // don't assert deleteLegacyUrlAliases args, we have tests for that above
         expect(params.logger.error).toHaveBeenCalledTimes(1);
-        expect(params.logger.error).toHaveBeenCalledWith('Oh no!');
+        expect(params.logger.error).toHaveBeenCalledWith(
+          'Unable to delete aliases when unsharing an object: Oh no!'
+        );
       });
     });
   });

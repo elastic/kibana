@@ -734,7 +734,7 @@ export class SavedObjectsRepository {
         }).catch((err) => {
           // The object has already been deleted, but we caught an error when attempting to delete aliases.
           // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
-          this._logger.error(err.message);
+          this._logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
         });
       }
       return {};

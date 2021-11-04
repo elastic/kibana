@@ -2542,7 +2542,9 @@ describe('SavedObjectsRepository', () => {
         await savedObjectsRepository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace });
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(logger.error).toHaveBeenCalledTimes(1);
-        expect(logger.error).toHaveBeenCalledWith('Oh no!');
+        expect(logger.error).toHaveBeenCalledWith(
+          'Unable to delete aliases when deleting an object: Oh no!'
+        );
       });
     });
 
