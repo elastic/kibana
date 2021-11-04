@@ -104,7 +104,7 @@ export const TableFieldValue = ({
   const valueClassName = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     kbnDocViewer__value: true,
-    'truncate-by-height': isCollapsible && isCollapsed,
+    dscTruncateByHeight: isCollapsible && isCollapsed,
   });
 
   const onToggleCollapse = () => setFieldOpen((fieldOpenPrev) => !fieldOpenPrev);
