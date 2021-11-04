@@ -122,10 +122,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.002,
-              "errorRate": 0.092511013215859,
-              "latency": 430318.696035242,
+              "errorRate": 0.0848214285714286,
+              "latency": 411589.785714286,
               "memoryUsage": 0.786029688517253,
-              "throughput": 7.56666666666667,
+              "throughput": 7.46666666666667,
             }
           `);
         });
@@ -183,9 +183,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.001,
-              "errorRate": 0.00343642611683849,
-              "latency": 21520.4776632302,
-              "throughput": 9.7,
+              "errorRate": 0.00341296928327645,
+              "latency": 40989.5802047782,
+              "throughput": 9.76666666666667,
             }
           `);
 
@@ -272,10 +272,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(values).toMatchInline(`
             Object {
               "cpuUsage": 0.00223333333333333,
-              "errorRate": 0.0852713178294574,
-              "latency": 706173.046511628,
+              "errorRate": 0.0894308943089431,
+              "latency": 739013.634146341,
               "memoryUsage": 0.783296203613281,
-              "throughput": 8.6,
+              "throughput": 8.2,
             }
           `);
         });

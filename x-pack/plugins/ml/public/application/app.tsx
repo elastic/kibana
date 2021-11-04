@@ -70,7 +70,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 
   const pageDeps = {
     history: appMountParams.history,
-    indexPatterns: deps.data.indexPatterns,
+    dataViewsContract: deps.data.dataViews,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,

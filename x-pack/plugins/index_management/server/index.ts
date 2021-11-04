@@ -14,7 +14,7 @@ export { config } from './config';
 export const plugin = (context: PluginInitializerContext) => new IndexMgmtServerPlugin(context);
 
 /** @public */
-export { Dependencies } from './types';
-export { IndexManagementPluginSetup } from './plugin';
-export { Index, LegacyTemplateSerialized } from '../common';
-export { IndexManagementConfig } from './config';
+export type { Dependencies } from './types';
+export type { IndexManagementPluginSetup } from './plugin';
+export type { Index, LegacyTemplateSerialized } from '../common';
+export type { IndexManagementConfig } from './config';

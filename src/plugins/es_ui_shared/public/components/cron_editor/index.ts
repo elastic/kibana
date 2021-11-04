@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { Frequency } from './types';
+export type { Frequency } from './types';
 export { CronEditor } from './cron_editor';
