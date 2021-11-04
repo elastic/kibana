@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { matchPath, RouteProps, Redirect } from 'react-router-dom';
 
@@ -22,6 +23,7 @@ import {
   OVERVIEW_PATH,
   CASES_PATH,
 } from '../common/constants';
+import { Ecs } from '../common/ecs';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -208,3 +210,27 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
   return <Redirect to={OVERVIEW_PATH} />;
 });
 RedirectRoute.displayName = 'RedirectRoute';
+
+const siemSignalsFieldMappings: Record<string, string> = {
+  [ALERT_RULE_UUID]: 'signal.rule.id',
+};
+
+const alertFieldMappings: Record<string, string> = {
+  'signal.rule.id': ALERT_RULE_UUID,
+};
+
+/*
+ * Deprecation notice: This functionality should be removed when support for signal.* is no longer
+ * supported.
+ *
+ * Selectively returns the AAD field value (kibana.alert.*) or the legacy field value
+ * (signal.*), whichever is present. For backwards compatibility.
+ */
+export const getField = (ecsData: Ecs, field: string) => {
+  const aadField = (alertFieldMappings[field] ?? field).replace('signal', 'kibana.alert');
+  const siemSignalsField = (siemSignalsFieldMappings[field] ?? field).replace(
+    'kibana.alert',
+    'signal'
+  );
+  return get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
+};

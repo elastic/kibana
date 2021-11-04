@@ -129,9 +129,9 @@ const useLogEntryUIProps = (
       if (isIsolateAction) {
         if (isCompleted) {
           if (isSuccessful) {
-            return i18.ACTIVITY_LOG.LogEntry.response.unisolationCompletedAndSuccessful;
+            return i18.ACTIVITY_LOG.LogEntry.response.isolationCompletedAndSuccessful;
           }
-          return i18.ACTIVITY_LOG.LogEntry.response.unisolationCompletedAndUnsuccessful;
+          return i18.ACTIVITY_LOG.LogEntry.response.isolationCompletedAndUnsuccessful;
         } else if (isSuccessful) {
           return i18.ACTIVITY_LOG.LogEntry.response.isolationSuccessful;
         } else {
