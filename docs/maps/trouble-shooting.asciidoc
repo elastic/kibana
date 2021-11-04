@@ -21,10 +21,10 @@ image::maps/images/inspector.png[]
 === Solutions to common problems
 
 [float]
-==== Index not listed when adding layer
+==== Data view not listed when adding layer
 
 * Verify your geospatial data is correctly mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
-  ** Run `GET myDataViewTitle/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myDataViewTitle` and `myGeoFieldName` with your data view title and geospatial field name.
+  ** Run `GET myIndexName/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexName` and `myGeoFieldName` with your index and geospatial field name.
   ** Ensure response specifies `type` as `geo_point` or `geo_shape`.
 * Verify your geospatial data is correctly mapped in your <<managing-fields, data view>>.
   ** Open your data view in <<management, Stack Management>>.

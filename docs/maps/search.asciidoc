@@ -44,7 +44,6 @@ To prevent the global search from applying to a layer, configure the following:
 ==== Narrow layers by global time
 
 Layers that request data from {es} using a <<data-views, data view>> with a configured time field are narrowed by the <<set-time-filter, global time>>.
-
 These layers contain the clock icon image:maps/images/clock_icon.png[clock icon] next to the layer name in the legend.
 
 Use the time slider to quickly select time slices within the global time range:

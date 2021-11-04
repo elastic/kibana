@@ -158,7 +158,7 @@ image::maps/images/asset-tracking-tutorial/logstash_output.png[]
 [float]
 ==== Step 3: Create a data view for the tri_met_tracks {es} index
 
-. In Kibana, open the main menu, and click *Stack Management > Data views*.
+. In {kib}, open the main menu, and click *Stack Management > Data Views*.
 . Click *Create data view*.
 . Give the data view a name: *tri_met_tracks**.
 . Click *Next step*.

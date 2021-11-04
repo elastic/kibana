@@ -70,29 +70,26 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export {
-  IndexPatternsContract,
-  DataViewsContract,
-  IndexPattern,
-  IndexPatternField,
-  TypeMeta,
-} from './data_views';
+export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
+export { IndexPattern, IndexPatternField } from './data_views';
 
-export {
+export type {
   IIndexPattern,
   IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
   IndexPatternAttributes,
-  UI_SETTINGS,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
-  fieldList,
   GetFieldsOptions,
   AggregationRestrictions,
-  IndexPatternType,
   IndexPatternListItem,
+} from '../common';
+export {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  UI_SETTINGS,
+  fieldList,
+  IndexPatternType,
   DuplicateDataViewError,
 } from '../common';
 
@@ -217,7 +214,8 @@ export type {
   SearchUsageCollector,
 } from './search';
 
-export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export type { ISearchOptions } from '../common';
+export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -301,7 +299,8 @@ export {
 
 export { isTimeRange, isQuery } from '../common';
 
-export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
+export type { ApplyGlobalFilterActionContext } from './actions';
+export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
