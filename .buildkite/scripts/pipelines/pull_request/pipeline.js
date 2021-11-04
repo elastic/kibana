@@ -57,6 +57,9 @@ const uploadPipeline = (pipelineContent) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/plugins\/cases/,
+        /^x-pack\/plugins\/lists/,
+        /^x-pack\/plugins\/timelines/,
         /^x-pack\/test\/security_solution_cypress/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
@@ -71,6 +74,16 @@ const uploadPipeline = (pipelineContent) => {
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/fleet/,
+        /^x-pack\/test\/fleet_cypress/,
+      ])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/uptime/])) {

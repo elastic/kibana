@@ -6,20 +6,20 @@
  */
 
 export { XJsonMode } from '@kbn/ace';
-export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
+export type { UseRequestConfig } from '../../../../src/plugins/es_ui_shared/public';
+export { useRequest } from '../../../../src/plugins/es_ui_shared/public';
 export {
   getSavedSearch,
   getSavedSearchUrlConflictMessage,
 } from '../../../../src/plugins/discover/public';
 
-export {
-  getMlSharedImports,
+export type {
   GetMlSharedImportsReturnType,
   UseIndexDataReturnType,
   EsSorting,
   RenderCellValue,
-  ES_CLIENT_TOTAL_HITS_RELATION,
 } from '../../ml/public';
+export { getMlSharedImports, ES_CLIENT_TOTAL_HITS_RELATION } from '../../ml/public';
 
 import { XJson } from '../../../../src/plugins/es_ui_shared/public';
 const { expandLiteralStrings, collapseLiteralStrings } = XJson;

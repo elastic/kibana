@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { findLegacyUrlAliases } from './find_legacy_url_aliases';
+import type { findLegacyUrlAliases } from './legacy_url_aliases';
 import type * as InternalUtils from './internal_utils';
 
 export const mockFindLegacyUrlAliases = jest.fn() as jest.MockedFunction<
   typeof findLegacyUrlAliases
 >;
 
-jest.mock('./find_legacy_url_aliases', () => {
+jest.mock('./legacy_url_aliases', () => {
   return { findLegacyUrlAliases: mockFindLegacyUrlAliases };
 });
 
