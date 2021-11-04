@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export {
+export type {
   FieldInfo,
   IndexField,
   BeatFields,
@@ -13,6 +13,8 @@ export {
   IndexFieldsStrategyResponse,
   BrowserField,
   BrowserFields,
+} from '../../../../timelines/common';
+export {
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_FIELDS,
