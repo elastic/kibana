@@ -41,20 +41,16 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   .euiAccordion {
     border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   }
-  .euiIEFlexWrapFix {
+  .euiAccordion__button {
     width: 100%;
     height: 48px;
   }
+
   .euiAccordion__childWrapper {
     transition: none;
   }
 
-  .euiAccordion__padding--l {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  .euiAccordion__iconWrapper {
+  .euiButtonIcon {
     display: flex;
     position: relative;
     &:after {
@@ -78,14 +74,12 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
         background-color: ${props.theme.eui.euiColorLightestShade};
       }
     }`;
-    //
   }}
-`;
 
-const WaterfallItemContainer = euiStyled.div`
-  position: absolute;
-  width: 100%;
-  left: 0;
+  .accordion__buttonContent {
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 export function AccordionWaterfall(props: AccordionWaterfallProps) {
@@ -113,27 +107,27 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
 
   return (
     <StyledAccordion
+      style={{ position: 'relative' }}
       buttonClassName={`button_${item.id}`}
       key={item.id}
       id={item.id}
       hasError={item.doc.event?.outcome === 'failure'}
       marginLeftLevel={marginLeftLevel}
       childrenCount={children.length}
+      buttonContentClassName="accordion__buttonContent"
       buttonContent={
-        <WaterfallItemContainer>
-          <WaterfallItem
-            key={item.id}
-            timelineMargins={timelineMargins}
-            color={item.color}
-            item={item}
-            totalDuration={duration}
-            isSelected={item.id === waterfallItemId}
-            errorCount={errorCount}
-            onClick={() => {
-              onClickWaterfallItem(item);
-            }}
-          />
-        </WaterfallItemContainer>
+        <WaterfallItem
+          key={item.id}
+          timelineMargins={timelineMargins}
+          color={item.color}
+          item={item}
+          totalDuration={duration}
+          isSelected={item.id === waterfallItemId}
+          errorCount={errorCount}
+          onClick={() => {
+            onClickWaterfallItem(item);
+          }}
+        />
       }
       arrowDisplay={isEmpty(children) ? 'none' : 'left'}
       initialIsOpen={true}
