@@ -91,21 +91,6 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
 
-  useEffect(() => {
-    if (!actionParams.subAction) {
-      editAction('subAction', 'addEvent', index);
-    }
-
-    if (!actionParams.subActionParams) {
-      editAction(
-        'subActionParams',
-        { additional_info: additionalInformation, message_key: '{{rule.id}}:{{alert.id}}' },
-        index
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionParams]);
-
   return (
     <>
       <EuiTitle size="s">

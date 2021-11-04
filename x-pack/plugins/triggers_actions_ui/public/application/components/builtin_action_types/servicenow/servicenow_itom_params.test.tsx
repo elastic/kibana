@@ -104,33 +104,6 @@ describe('ServiceNowITOMParamsFields renders', () => {
     expect(severity.prop('isInvalid')).toBeTruthy();
   });
 
-  test('When subActionParams is undefined, set to default', () => {
-    const { subActionParams, ...newParams } = actionParams;
-
-    const newProps = {
-      ...defaultProps,
-      actionParams: newParams,
-    };
-
-    mount(<ServiceNowITOMParamsFields {...newProps} />);
-    expect(editAction.mock.calls[0][1]).toEqual({
-      message_key: '{{rule.id}}:{{alert.id}}',
-      additional_info:
-        '{"alert":{"id":"{{alert.id}}","actionGroup":"{{alert.actionGroup}}","actionSubgroup":"{{alert.actionSubgroup}}","actionGroupName":"{{alert.actionGroupName}}"},"rule":{"id":"{{rule.id}}","name":"{{rule.name}}","type":"{{rule.type}}"},"date":"{{date}}"}',
-    });
-  });
-
-  test('When subAction is undefined, set to default', () => {
-    const { subAction, ...newParams } = actionParams;
-
-    const newProps = {
-      ...defaultProps,
-      actionParams: newParams,
-    };
-    mount(<ServiceNowITOMParamsFields {...newProps} />);
-    expect(editAction.mock.calls[0][1]).toEqual('addEvent');
-  });
-
   test('Resets fields when connector changes', () => {
     const wrapper = mount(<ServiceNowITOMParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
