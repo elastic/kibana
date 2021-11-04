@@ -19,6 +19,7 @@ import { mount, shallow } from 'enzyme';
 
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';
@@ -44,7 +45,11 @@ describe('#setup()', () => {
       http,
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -454,7 +459,11 @@ describe('#start()', () => {
       http,
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -1124,7 +1133,11 @@ describe('#stop()', () => {
     setupDeps = {
       http,
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
