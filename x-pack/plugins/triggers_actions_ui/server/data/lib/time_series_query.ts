@@ -12,7 +12,7 @@ import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
 import { TimeSeriesQuery, TimeSeriesResult, TimeSeriesResultRow } from './time_series_types';
-export { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
+export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;

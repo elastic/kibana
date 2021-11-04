@@ -45,14 +45,21 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
 
     describe('fixLogsStep', () => {
       before(async () => {
+        await PageObjects.upgradeAssistant.navigateToPage();
         // Access to system indices will be deprecated and should generate a deprecation log
         await es.indices.get({ index: '.kibana' });
-
-        await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
+        // Only click deprecation logging toggle if its not already enabled
+        if (!(await testSubjects.isDisplayed('externalLinksTitle'))) {
+          await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
+        }
 
         await retry.waitFor('UA external links title to be present', async () => {
           return testSubjects.isDisplayed('externalLinksTitle');
         });
+      });
+
+      beforeEach(async () => {
+        await PageObjects.upgradeAssistant.navigateToPage();
       });
 
       it('Shows warnings callout if there are deprecations', async () => {
