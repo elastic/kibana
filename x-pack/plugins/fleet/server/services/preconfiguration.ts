@@ -51,6 +51,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
 ): boolean {
   return (
     existingOutput.is_default !== preconfiguredOutput.is_default ||
+    existingOutput.is_default_monitoring !== preconfiguredOutput.is_default_monitoring ||
     existingOutput.name !== preconfiguredOutput.name ||
     existingOutput.type !== preconfiguredOutput.type ||
     (preconfiguredOutput.hosts &&
@@ -101,7 +102,7 @@ export async function ensurePreconfiguredOutputs(
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
       // If a default output already exists, delete it in favor of the preconfigured one
       if (isCreate || isUpdateWithNewData) {
-        const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+        const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
 
         if (defaultOutputId && defaultOutputId !== output.id) {
           await outputService.delete(soClient, defaultOutputId);
@@ -113,7 +114,7 @@ export async function ensurePreconfiguredOutputs(
       } else if (isUpdateWithNewData) {
         await outputService.update(soClient, id, data);
         // Bump revision of all policies using that output
-        if (outputData.is_default) {
+        if (outputData.is_default || outputData.is_default_monitoring) {
           await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
         } else {
           await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);

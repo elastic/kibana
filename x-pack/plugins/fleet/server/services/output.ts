@@ -44,7 +44,7 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
 }
 
 class OutputService {
-  private async _getDefaultOutputsSO(soClient: SavedObjectsClientContract) {
+  private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
     return await soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -52,8 +52,16 @@ class OutputService {
     });
   }
 
+  private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
+    return await soClient.find<OutputSOAttributes>({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      searchFields: ['is_default_monitoring'],
+      search: 'true',
+    });
+  }
+
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
-    const outputs = await this._getDefaultOutputsSO(soClient);
+    const outputs = await this._getDefaultDataOutputsSO(soClient);
 
     if (!outputs.saved_objects.length) {
       const newDefaultOutput = {
@@ -82,8 +90,18 @@ class OutputService {
     return cloudHosts || flagHosts || DEFAULT_ES_HOSTS;
   }
 
-  public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
-    const outputs = await this._getDefaultOutputsSO(soClient);
+  public async getDefaultDataOutputId(soClient: SavedObjectsClientContract) {
+    const outputs = await this._getDefaultDataOutputsSO(soClient);
+
+    if (!outputs.saved_objects.length) {
+      return null;
+    }
+
+    return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
+  }
+
+  public async getDefaultMonitoringOutputId(soClient: SavedObjectsClientContract) {
+    const outputs = await this._getDefaultMonitoringOutputsSO(soClient);
 
     if (!outputs.saved_objects.length) {
       return null;
@@ -101,9 +119,17 @@ class OutputService {
 
     // ensure only default output exists
     if (data.is_default) {
-      const defaultOuput = await this.getDefaultOutputId(soClient);
-      if (defaultOuput) {
-        throw new Error(`A default output already exists (${defaultOuput})`);
+      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
+      if (defaultDataOuputId) {
+        throw new Error(`A default output already exists (${defaultDataOuputId})`);
+      }
+    }
+    if (data.is_default_monitoring) {
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      if (defaultMonitoringOutputId) {
+        throw new Error(
+          `A default monitoring output already exists (${defaultMonitoringOutputId})`
+        );
       }
     }
 
@@ -165,6 +191,22 @@ class OutputService {
 
   public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
     const updateData = { ...data };
+
+    // ensure only default output exists
+    if (data.is_default) {
+      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
+      if (defaultDataOuputId && defaultDataOuputId !== id) {
+        throw new Error(`A default output already exists (${defaultDataOuputId})`);
+      }
+    }
+    if (data.is_default_monitoring) {
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
+        throw new Error(
+          `A default monitoring output already exists (${defaultMonitoringOutputId})`
+        );
+      }
+    }
 
     if (updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);

@@ -739,7 +739,7 @@ class PackagePolicyService {
           pkgName: pkgInstall.name,
           pkgVersion: pkgInstall.version,
         }),
-        outputService.getDefaultOutputId(soClient),
+        outputService.getDefaultDataOutputId(soClient),
       ]);
       if (packageInfo) {
         if (!defaultOutputId) {

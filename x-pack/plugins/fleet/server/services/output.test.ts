@@ -72,6 +72,7 @@ describe('Output Service', () => {
         soClient,
         {
           is_default: false,
+          is_default_monitoring: false,
           name: 'Test',
           type: 'elasticsearch',
         },
@@ -99,7 +100,7 @@ describe('Output Service', () => {
     });
   });
 
-  describe('getDefaultOutputId', () => {
+  describe('getDefaultDataOutputId', () => {
     it('work with a predefined id', async () => {
       const soClient = getMockedSoClient();
       soClient.find.mockResolvedValue({
@@ -119,7 +120,7 @@ describe('Output Service', () => {
           },
         ],
       });
-      const defaultId = await outputService.getDefaultOutputId(soClient);
+      const defaultId = await outputService.getDefaultDataOutputId(soClient);
 
       expect(soClient.find).toHaveBeenCalled();
 
