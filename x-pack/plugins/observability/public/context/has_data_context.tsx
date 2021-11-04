@@ -147,8 +147,10 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   });
 
   const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some((app) => {
-    const hasData = hasDataMap[app]?.hasData;
-    return hasData === true || (Array.isArray(hasData) && (hasData as Alert[])?.length > 0);
+    const appHasData = hasDataMap[app]?.hasData;
+    return (
+      appHasData === true || (Array.isArray(appHasData) && (appHasData as Alert[])?.length > 0)
+    );
   });
 
   return (
