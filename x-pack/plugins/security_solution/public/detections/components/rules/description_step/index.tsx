@@ -11,12 +11,8 @@ import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
 import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import {
-  IIndexPattern,
-  Filter,
-  esFilters,
-  FilterManager,
-} from '../../../../../../../../src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
+import { Filter, esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
@@ -55,7 +51,7 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
 interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
-  indexPatterns?: IIndexPattern;
+  indexPatterns?: DataViewBase;
   schema: FormSchema<T>;
 }
 
@@ -129,7 +125,7 @@ export const buildListItems = <T,>(
   data: unknown,
   schema: FormSchema<T>,
   filterManager: FilterManager,
-  indexPatterns?: IIndexPattern
+  indexPatterns?: DataViewBase
 ): ListItems[] =>
   Object.keys(schema).reduce<ListItems[]>(
     (acc, field) => [
@@ -161,7 +157,7 @@ export const getDescriptionItem = (
   label: string,
   data: unknown,
   filterManager: FilterManager,
-  indexPatterns?: IIndexPattern
+  indexPatterns?: DataViewBase
 ): ListItems[] => {
   if (field === 'queryBar') {
     const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);

@@ -413,8 +413,9 @@ export const dispatchUpdateTimeline =
   () => {
     if (!isEmpty(timeline.indexNames)) {
       dispatch(
-        sourcererActions.initTimelineIndexPatterns({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
+          selectedDataViewId: timeline.dataViewId,
           selectedPatterns: timeline.indexNames,
           eventType: timeline.eventType,
         })

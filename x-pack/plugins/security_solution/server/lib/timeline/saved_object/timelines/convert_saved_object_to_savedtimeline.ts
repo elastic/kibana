@@ -51,8 +51,8 @@ const getTimelineTypeAndStatus = (
   };
 };
 
-export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
-  const timeline = pipe(
+export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject =>
+  pipe(
     TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {
       const attributes = {
@@ -78,6 +78,3 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );
-
-  return timeline;
-};

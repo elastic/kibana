@@ -91,6 +91,7 @@ const AppRoot = React.memo(
                   setRefetch,
                   start: '',
                   rowRenderers: [],
+                  runtimeMappings: {},
                   filterStatus: 'open',
                   unit: (n: number) => `${n}`,
                 })) ??

@@ -85,6 +85,7 @@ export type SubsetTimelineModel = Readonly<
     | 'columns'
     | 'defaultColumns'
     | 'dataProviders'
+    | 'dataViewId'
     | 'deletedEventIds'
     | 'description'
     | 'documentType'

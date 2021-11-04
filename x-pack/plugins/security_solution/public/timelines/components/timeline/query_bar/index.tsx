@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import {
   Query,
@@ -81,8 +81,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields, indexPattern } = useSourcererScope(SourcererScopeName.timeline);
-
+    const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',

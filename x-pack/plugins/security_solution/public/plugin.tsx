@@ -43,14 +43,11 @@ import {
   APP_ICON_SOLUTION,
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
+  SOURCERER_API_URL,
 } from '../common/constants';
 
 import { getDeepLinks } from './app/deep_links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
-import {
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
-} from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
@@ -65,6 +62,8 @@ import {
 } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
+import { SecurityDataView } from './common/containers/sourcerer/api';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -328,7 +327,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       management: subPlugins.management.start(core, plugins),
     };
   }
-
   /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */
@@ -338,32 +336,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     subPlugins: StartedSubPlugins
   ): Promise<SecurityAppStore> {
     if (!this._store) {
-      const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [{ createStore, createInitialState }, kibanaIndexPatterns, configIndexPatterns] =
-        await Promise.all([
-          this.lazyApplicationDependencies(),
-          startPlugins.data.indexPatterns.getIdsWithTitle(),
-          startPlugins.data.search
-            .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-              { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
-              {
-                strategy: 'indexFields',
-              }
-            )
-            .toPromise(),
-        ]);
-
       let signal: { name: string | null } = { name: null };
       try {
-        // const { index_name: indexName } = await coreStart.http.fetch(
-        //   `${BASE_RAC_ALERTS_API_PATH}/index`,
-        //   {
-        //     method: 'GET',
-        //     query: { features: SERVER_APP_ID },
-        //   }
-        // );
-        // signal = { name: indexName[0] };
-        if (coreStart.application.capabilities[SERVER_APP_ID].read === true) {
+        if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
           signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
             method: 'GET',
           });
@@ -371,6 +346,28 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       } catch {
         signal = { name: null };
       }
+
+      const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
+      let defaultDataView: SourcererModel['defaultDataView'];
+      let kibanaDataViews: SourcererModel['kibanaDataViews'];
+      try {
+        // check for/generate default Security Solution Kibana data view
+        const sourcererDataViews: SecurityDataView = await coreStart.http.fetch(SOURCERER_API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
+          }),
+        });
+        defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
+        kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
+          ...initDataView,
+          ...dataView,
+        }));
+      } catch (error) {
+        defaultDataView = { ...initDataView, error };
+        kibanaDataViews = [];
+      }
+      const { createStore, createInitialState } = await this.lazyApplicationDependencies();
 
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
@@ -414,8 +411,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.management.store.initialState,
           },
           {
-            kibanaIndexPatterns,
-            configIndexPatterns: configIndexPatterns.indicesExist,
+            defaultDataView,
+            kibanaDataViews,
             signalIndexName: signal.name,
             enableExperimental: this.experimentalFeatures,
           }

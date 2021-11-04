@@ -41,3 +41,4 @@ export const OVERVIEW_URL = '/app/security/overview';
 export const RULE_CREATION = 'app/security/rules/create';
 export const TIMELINES_URL = '/app/security/timelines';
 export const TIMELINE_TEMPLATES_URL = '/app/security/timelines/template';
+export const LOGOUT_URL = '/logout';

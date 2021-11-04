@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
@@ -19,9 +19,10 @@ import {
 } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
-import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
+import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
 interface Props {
   timelineId?: string;
@@ -31,11 +32,8 @@ interface Props {
 
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
-  );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+  const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
@@ -44,18 +42,20 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
         setTimelineFullScreen(false);
       }
       dispatch(
-        sourcererActions.setSelectedIndexPatterns({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
-          selectedPatterns: existingIndexNames,
+          selectedDataViewId: dataViewId,
+          selectedPatterns,
         })
       );
       dispatch(
         timelineActions.createTimeline({
-          id,
           columns: defaultHeaders,
+          dataViewId,
+          id,
+          indexNames: selectedPatterns,
           show,
           timelineType,
-          indexNames: existingIndexNames,
         })
       );
       dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
@@ -78,9 +78,10 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       }
     },
     [
-      existingIndexNames,
       dispatch,
       globalTimeRange,
+      dataViewId,
+      selectedPatterns,
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,

@@ -6,6 +6,7 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
   docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
+  runtimeMappings={Object {}}
   tabType="query"
   timelineId="test"
 />
@@ -17,6 +18,7 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
   docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
+  runtimeMappings={Object {}}
   tabType="query"
   timelineId="test"
 />
@@ -35,6 +37,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
+  runtimeMappings={Object {}}
   tabType="query"
   timelineId="test"
 >
@@ -199,6 +202,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     handleOnEventClosed={[Function]}
     isDraggable={false}
     isFlyoutView={false}
+    runtimeMappings={Object {}}
     tabType="query"
     timelineId="test"
   >
@@ -742,6 +746,7 @@ Array [
         handleOnEventClosed={[Function]}
         isDraggable={false}
         isFlyoutView={true}
+        runtimeMappings={Object {}}
         tabType="query"
         timelineId="test"
       >
@@ -1781,6 +1786,7 @@ Array [
       handleOnEventClosed={[Function]}
       isDraggable={false}
       isFlyoutView={true}
+      runtimeMappings={Object {}}
       tabType="query"
       timelineId="test"
     >

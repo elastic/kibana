@@ -16,7 +16,7 @@ jest.mock('../route/use_route_spy', () => ({
     .mockImplementationOnce(() => [{ pageName: 'network' }]),
 }));
 jest.mock('../../../common/containers/sourcerer', () => ({
-  useSourcererScope: jest
+  useSourcererDataView: jest
     .fn()
     .mockImplementationOnce(() => [{ indicesExist: false }])
     .mockImplementationOnce(() => [{ indicesExist: false }])

@@ -10,6 +10,7 @@ export { LastEventIndexKey } from '../../../../../../timelines/common';
 export type {
   LastTimeDetails,
   TimelineEventsLastEventTimeStrategyResponse,
+  TimelineKpiStrategyRequest,
   TimelineKpiStrategyResponse,
   TimelineEventsLastEventTimeRequestOptions,
 } from '../../../../../../timelines/common';

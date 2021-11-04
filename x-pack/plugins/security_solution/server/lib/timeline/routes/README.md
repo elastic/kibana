@@ -713,6 +713,7 @@ api/timelines?page_size=10&page_index=1&sort_field=updated&sort_order=desc&timel
           "enabled": true
         }
       ],
+      "dataViewId": "security-solution",
       "description": "",
       "eqlOptions": {
         "tiebreakerField": "",
@@ -879,6 +880,7 @@ api/timelines?page_size=10&page_index=1&sort_field=updated&sort_order=desc&timel
           "enabled": true
         }
       ],
+      "dataViewId": "security-solution",
       "description": "",
       "eventType": "all",
       "filters": [],
@@ -1023,6 +1025,7 @@ kbn-version: 8.0.0
           "enabled": true
         }
       ],
+      "dataViewId": "security-solution",
       "description": "",
       "eventType": "all",
       "filters": [],
@@ -1214,6 +1217,7 @@ kbn-version: 8.0.0
           "enabled": true
         }
       ],
+      "dataViewId": "security-solution",
       "description": "",
       "eqlOptions": {
         "eventCategoryField": "event.category",

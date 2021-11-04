@@ -34,7 +34,6 @@ import {
   waitForRuleToChangeStatus,
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../../common/constants';
 
 import { ALERTS_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
@@ -45,6 +44,8 @@ import {
   getNewRule,
   getNewThresholdRule,
 } from '../../objects/rule';
+
+const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
 describe('Alerts detection rules', () => {
   beforeEach(() => {

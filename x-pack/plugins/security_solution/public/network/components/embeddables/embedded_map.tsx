@@ -28,8 +28,9 @@ import * as i18n from './translations';
 import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
-import { getDefaultSourcererSelector } from './selector';
 import { getLayerList } from './map_config';
+import { sourcererSelectors } from '../../../common/store/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 interface EmbeddableMapProps {
@@ -95,13 +96,13 @@ export const EmbeddedMapComponent = ({
   const [isIndexError, setIsIndexError] = useState(false);
 
   const [, dispatchToaster] = useStateToaster();
-  const defaultSourcererScopeSelector = useMemo(getDefaultSourcererSelector, []);
-  const { kibanaIndexPatterns, sourcererScope } = useDeepEqualSelector(
-    defaultSourcererScopeSelector
-  );
+
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const { kibanaDataViews, sourcererScope }: sourcererSelectors.SourcererScopeSelector =
+    useDeepEqualSelector((state) => sourcererScopeSelector(state, SourcererScopeName.default));
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+    kibanaDataViews.filter((dataView) => sourcererScope.selectedPatterns.includes(dataView.title))
   );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
@@ -114,8 +115,8 @@ export const EmbeddedMapComponent = ({
 
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
-      const newIndexPatterns = kibanaIndexPatterns.filter((kip) =>
-        sourcererScope.selectedPatterns.includes(kip.title)
+      const newIndexPatterns = kibanaDataViews.filter((dataView) =>
+        sourcererScope.selectedPatterns.includes(dataView.title)
       );
       if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
         if (newIndexPatterns.length === 0) {
@@ -125,7 +126,7 @@ export const EmbeddedMapComponent = ({
       }
       return prevMapIndexPatterns;
     });
-  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns]);
+  }, [kibanaDataViews, sourcererScope.selectedPatterns]);
 
   // Initial Load useEffect
   useEffect(() => {

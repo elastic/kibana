@@ -676,7 +676,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <div
                     data-test-subj="more-actions-source.ip"
                     field="source.ip"
-                    items="[object Object]"
+                    items="[object Object],[object Object]"
                     value="185.156.74.3"
                   >
                     Overflow button
@@ -1368,7 +1368,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <div
                     data-test-subj="more-actions-source.ip"
                     field="source.ip"
-                    items="[object Object]"
+                    items="[object Object],[object Object]"
                     value="185.156.74.3"
                   >
                     Overflow button
