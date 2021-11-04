@@ -93,7 +93,6 @@ export const RuleSchema = t.intersection([
     false_positives: t.array(t.string),
     from: t.string,
     id: t.string,
-    uuid: t.string,
     interval: t.string,
     immutable: t.boolean,
     name: t.string,
@@ -146,6 +145,7 @@ export const RuleSchema = t.intersection([
     timestamp_override,
     note: t.string,
     exceptions_list: listArray,
+    uuid: t.string,
     version: t.number,
   }),
 ]);
