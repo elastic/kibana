@@ -102,13 +102,15 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
   );
 
   const stopColorPickers = paletteColorStops.map(({ id, ...rest }, index) => (
-    <StopColorPicker
-      {...rest}
-      key={index}
-      removable={index >= MIN_STOPS}
-      onDelete={() => deleteColorStopAndApply(index)}
-      onChange={(cp: ColorStop) => updateColorStopAndApply(index, cp)}
-    />
+    <EuiFlexItem>
+      <StopColorPicker
+        {...rest}
+        key={index}
+        removable={index >= MIN_STOPS}
+        onDelete={() => deleteColorStopAndApply(index)}
+        onChange={(cp: ColorStop) => updateColorStopAndApply(index, cp)}
+      />
+    </EuiFlexItem>
   ));
 
   return (
@@ -123,7 +125,9 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
           />
         </EuiFlexItem>
         <EuiFormRow label={strings.getColorStopsLabel()}>
-          <>{stopColorPickers}</>
+          <EuiFlexGroup gutterSize="s" direction="column">
+            {stopColorPickers}
+          </EuiFlexGroup>
         </EuiFormRow>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

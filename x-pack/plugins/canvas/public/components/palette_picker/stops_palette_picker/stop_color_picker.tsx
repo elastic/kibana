@@ -92,44 +92,42 @@ export const StopColorPicker: FC<Props> = (props) => {
   }, [cancel]);
 
   return (
-    <EuiFlexItem>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            compressed
-            value={colorStop.stop}
-            min={-Infinity}
-            onChange={({ target: { valueAsNumber } }) =>
-              onChangeInput({ ...colorStop, stop: valueAsNumber })
-            }
-            isInvalid={!areValidFields.stop}
-          />
-        </EuiFlexItem>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem>
+        <EuiFieldNumber
+          compressed
+          value={colorStop.stop}
+          min={-Infinity}
+          onChange={({ target: { valueAsNumber } }) =>
+            onChangeInput({ ...colorStop, stop: valueAsNumber })
+          }
+          isInvalid={!areValidFields.stop}
+        />
+      </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiColorPicker
-            secondaryInputDisplay="top"
-            color={colorStop.color}
-            showAlpha
-            compressed
-            onChange={(newColor) => {
-              onChangeInput({ ...colorStop, color: newColor });
-            }}
-            isInvalid={!areValidFields.color}
-          />
-        </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiColorPicker
+          secondaryInputDisplay="top"
+          color={colorStop.color}
+          showAlpha
+          compressed
+          onChange={(newColor) => {
+            onChangeInput({ ...colorStop, color: newColor });
+          }}
+          isInvalid={!areValidFields.color}
+        />
+      </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            title={strings.getDeleteStopColorLabel()}
-            onClick={onDelete}
-            isDisabled={!removable}
-            aria-label={strings.getDeleteStopColorLabel()}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          title={strings.getDeleteStopColorLabel()}
+          onClick={onDelete}
+          isDisabled={!removable}
+          aria-label={strings.getDeleteStopColorLabel()}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
