@@ -28,6 +28,7 @@ export function AlertsDisclaimer() {
   return (
     !experimentalMsgAck && (
       <EuiCallOut
+        data-test-subj="o11y-experimental-disclaimer"
         title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
           defaultMessage: 'Alert history is currently an experimental feature within Observability',
         })}
@@ -48,7 +49,12 @@ export function AlertsDisclaimer() {
         />
 
         <EuiSpacer size="l" />
-        <EuiButton color="warning" onClick={dismissMessage} tabIndex={0}>
+        <EuiButton
+          data-test-subj="o11y-experimental-disclaimer-dismiss-btn"
+          color="warning"
+          onClick={dismissMessage}
+          tabIndex={0}
+        >
           {i18n.translate('xpack.observability.alertsDisclaimerDismissMessage', {
             defaultMessage: 'Dismiss message',
           })}
