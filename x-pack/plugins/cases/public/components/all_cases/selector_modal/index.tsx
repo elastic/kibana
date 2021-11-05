@@ -6,7 +6,15 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import {
   Case,
@@ -76,6 +84,12 @@ const AllCasesSelectorModalComponent: React.FC<AllCasesSelectorModalProps> = ({
           updateCase={updateCase}
         />
       </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={closeModal}>{i18n.CANCEL_ADD_TO_CASE_BUTTON}</EuiButtonEmpty>
+        <EuiButton isDisabled={true} type="submit" onClick={closeModal} fill>
+          {i18n.ADD_TO_CASE_BUTTON}
+        </EuiButton>
+      </EuiModalFooter>
     </Modal>
   ) : null;
 };
