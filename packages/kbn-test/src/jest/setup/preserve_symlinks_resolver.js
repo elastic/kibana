@@ -22,6 +22,7 @@ module.exports = (request, options) => {
     });
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
+      console.warn(request);
       return options.defaultResolver(request, options);
     }
 

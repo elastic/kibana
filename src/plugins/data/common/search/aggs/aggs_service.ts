@@ -7,7 +7,8 @@
  */
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../../../common';
+import { CreateAggConfigParams, IndexPattern } from '../../../common';
+import { UI_SETTINGS } from '../../../common/constants';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,

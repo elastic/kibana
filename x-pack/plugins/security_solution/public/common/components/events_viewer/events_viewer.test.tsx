@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+jest.mock('use-resize-observer/polyfilled');
+
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
@@ -99,7 +101,6 @@ const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../containers/sourcerer');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const mockUseTimelineEvents: jest.Mock = useTimelineEvents as jest.Mock;

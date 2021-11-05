@@ -87,7 +87,21 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
+    // '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
+    '^.+\\.(jsx?|tsx?)$': [
+      // '@swc/jest',
+      // {
+      //   jsc: {
+      //     parser: {
+      //       syntax: 'typescript',
+      //       tsx: true,
+      //     },
+      //   },
+      // },
+
+      '@swc-node/jest',
+      {},
+    ],
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },
@@ -111,5 +125,5 @@ module.exports = {
   ],
 
   // A custom resolver to preserve symlinks by default
-  resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+  // resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
 };

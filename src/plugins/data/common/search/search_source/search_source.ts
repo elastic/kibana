@@ -97,8 +97,8 @@ import {
   IKibanaSearchResponse,
   isErrorResponse,
   isPartialResponse,
-  UI_SETTINGS,
 } from '../../../common';
+import { UI_SETTINGS } from '../../../common/constants';
 import { getHighlightRequest } from '../../../../field_formats/common';
 import { extractReferences } from './extract_references';
 
