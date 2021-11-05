@@ -10,6 +10,7 @@ import {
   EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
+  EuiButtonEmpty,
   EuiLink,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -49,6 +50,9 @@ export type CasesColumns =
   | EuiTableComputedColumnType<Case>
   | EuiTableFieldDataColumnType<Case>;
 
+// TODO: extract to shared module
+const emptyFunction = () => {};
+
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
@@ -75,6 +79,7 @@ export interface GetCasesColumn {
   isSelectorView: boolean;
   userCanCrud: boolean;
   connectors?: ActionConnector[];
+  onRowClick?: (theCase: Case) => void;
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
@@ -87,6 +92,7 @@ export const useCasesColumns = ({
   isSelectorView,
   userCanCrud,
   connectors = [],
+  onRowClick = emptyFunction,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -281,6 +287,27 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
+    ...(isSelectorView
+      ? [
+          {
+            render: (theCase: Case) => {
+              if (theCase.id != null) {
+                return (
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      onRowClick(theCase);
+                    }}
+                    size="s"
+                  >
+                    {i18n.SELECT}
+                  </EuiButtonEmpty>
+                );
+              }
+              return getEmptyTagValue();
+            },
+          },
+        ]
+      : []),
     ...(!isSelectorView
       ? [
           {

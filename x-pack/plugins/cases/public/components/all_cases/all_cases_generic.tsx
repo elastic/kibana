@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
-import { difference, head, isEmpty, memoize } from 'lodash/fp';
+import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 
@@ -17,7 +17,6 @@ import {
   CaseType,
   CommentRequestAlertType,
   CaseStatusWithAllStatus,
-  CommentType,
   FilterOptions,
   SortFieldCase,
   SubCase,
@@ -103,7 +102,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     } = useGetCases({ initialFilterOptions });
 
     // Post Comment to Case
-    const { postComment, isLoading: isCommentUpdating } = usePostComment();
+    const { isLoading: isCommentUpdating } = usePostComment();
     const { connectors } = useConnectors({ toastPermissionsErrors: false });
 
     const sorting = useMemo(
@@ -207,6 +206,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       isSelectorView: !!isSelectorView,
       userCanCrud,
       connectors,
+      onRowClick,
     });
 
     const itemIdToExpandedRowMap = useMemo(
@@ -241,32 +241,11 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
     const tableRowProps = useCallback(
-      (theCase: Case) => {
-        const onTableRowClick = memoize(async () => {
-          if (alertData != null) {
-            await postComment({
-              caseId: theCase.id,
-              data: {
-                type: CommentType.alert,
-                ...alertData,
-              },
-              updateCase,
-            });
-          }
-          if (onRowClick) {
-            onRowClick(theCase);
-          }
-        });
-
-        return {
-          'data-test-subj': `cases-table-row-${theCase.id}`,
-          className: classnames({ isDisabled: theCase.type === CaseType.collection }),
-          ...(isSelectorView && theCase.type !== CaseType.collection
-            ? { onClick: onTableRowClick }
-            : {}),
-        };
-      },
-      [isSelectorView, alertData, onRowClick, postComment, updateCase]
+      (theCase: Case) => ({
+        'data-test-subj': `cases-table-row-${theCase.id}`,
+        className: classnames({ isDisabled: theCase.type === CaseType.collection }),
+      }),
+      []
     );
 
     return (
