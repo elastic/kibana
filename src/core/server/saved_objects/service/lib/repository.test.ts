@@ -59,6 +59,7 @@ import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import {
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
@@ -296,11 +297,15 @@ describe('SavedObjectsRepository', () => {
     } as estypes.GetResponse<SavedObjectsRawDocSource>;
   };
 
-  const getMockMgetResponse = (objects, namespace?: string) => ({
-    docs: objects.map((obj) =>
-      obj.found === false ? obj : getMockGetResponse(obj, obj.initialNamespaces ?? namespace)
-    ),
-  });
+  const getMockMgetResponse = (
+    objects: Array<TypeIdTuple & { found?: boolean; initialNamespaces?: string[] }>,
+    namespace?: string
+  ) =>
+    ({
+      docs: objects.map((obj) =>
+        obj.found === false ? obj : getMockGetResponse(obj, obj.initialNamespaces ?? namespace)
+      ),
+    } as estypes.MgetResponse<SavedObjectsRawDocSource>);
 
   expect.extend({
     toBeDocumentWithoutError(received, type, id) {
@@ -1119,7 +1124,10 @@ describe('SavedObjectsRepository', () => {
     };
     const namespace = 'foo-namespace';
 
-    const bulkGet = async (objects: SavedObject[], options?: SavedObjectsBaseOptions) =>
+    const bulkGet = async (
+      objects: SavedObjectsBulkGetObject[],
+      options?: SavedObjectsBaseOptions
+    ) =>
       savedObjectsRepository.bulkGet(
         objects.map(({ type, id, namespaces }) => ({ type, id, namespaces })), // bulkGet only uses type, id, and optionally namespaces
         options
@@ -1200,7 +1208,7 @@ describe('SavedObjectsRepository', () => {
 
     describe('errors', () => {
       const bulkGetError = async (
-        obj: SavedObject,
+        obj: SavedObjectsBulkGetObject & { found?: boolean },
         isBulkError: boolean,
         expectedErrorResult: ExpectedErrorResult
       ) => {
@@ -1236,7 +1244,7 @@ describe('SavedObjectsRepository', () => {
         const obj = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'three', namespaces: [] };
         await bulkGetError(
           obj,
-          undefined,
+          false,
           expectErrorResult(
             obj,
             createBadRequestError('"namespaces" cannot be used on space-agnostic types')
@@ -1245,11 +1253,11 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`returns error when namespaces is used with a space-isolated object and does not specify a single space`, async () => {
-        const doTest = async (objType, namespaces) => {
+        const doTest = async (objType: string, namespaces?: string[]) => {
           const obj = { type: objType, id: 'three', namespaces };
           await bulkGetError(
             obj,
-            undefined,
+            false,
             expectErrorResult(
               obj,
               createBadRequestError(
@@ -1265,22 +1273,31 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`returns error when type is invalid`, async () => {
-        const obj = { type: 'unknownType', id: 'three' };
-        await bulkGetError(obj, undefined, expectErrorInvalidType(obj));
+        const obj: SavedObjectsBulkGetObject = { type: 'unknownType', id: 'three' };
+        await bulkGetError(obj, false, expectErrorInvalidType(obj));
       });
 
       it(`returns error when type is hidden`, async () => {
-        const obj = { type: HIDDEN_TYPE, id: 'three' };
-        await bulkGetError(obj, undefined, expectErrorInvalidType(obj));
+        const obj: SavedObjectsBulkGetObject = { type: HIDDEN_TYPE, id: 'three' };
+        await bulkGetError(obj, false, expectErrorInvalidType(obj));
       });
 
       it(`returns error when document is not found`, async () => {
-        const obj = { type: 'dashboard', id: 'three', found: false };
+        const obj: SavedObjectsBulkGetObject & { found: boolean } = {
+          type: 'dashboard',
+          id: 'three',
+          found: false,
+        };
         await bulkGetError(obj, true, expectErrorNotFound(obj));
       });
 
       it(`handles missing ids gracefully`, async () => {
-        const obj = { type: 'dashboard', id: undefined, found: false };
+        const obj: SavedObjectsBulkGetObject & { found: boolean } = {
+          type: 'dashboard',
+          // @ts-expect-error id is undefined
+          id: undefined,
+          found: false,
+        };
         await bulkGetError(obj, true, expectErrorNotFound(obj));
       });
 
@@ -1295,16 +1312,19 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      const expectSuccessResult = ({ type, id }: TypeIdTuple, doc) => ({
+      const expectSuccessResult = (
+        { type, id }: TypeIdTuple,
+        doc: estypes.MgetHit<SavedObjectsRawDocSource>
+      ) => ({
         type,
         id,
-        namespaces: doc._source.namespaces ?? ['default'],
-        ...(doc._source.originId && { originId: doc._source.originId }),
-        ...(doc._source.updated_at && { updated_at: doc._source.updated_at }),
+        namespaces: doc._source!.namespaces ?? ['default'],
+        ...(doc._source!.originId && { originId: doc._source!.originId }),
+        ...(doc._source!.updated_at && { updated_at: doc._source!.updated_at }),
         version: encodeHitVersion(doc),
-        attributes: doc._source[type],
-        references: doc._source.references || [],
-        migrationVersion: doc._source.migrationVersion,
+        attributes: doc._source![type],
+        references: doc._source!.references || [],
+        migrationVersion: doc._source!.migrationVersion,
       });
 
       it(`returns early for empty objects argument`, async () => {
@@ -1333,7 +1353,12 @@ describe('SavedObjectsRepository', () => {
         client.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
-        const obj = { type: 'unknownType', id: 'three' };
+        const obj: SavedObject = {
+          type: 'unknownType',
+          id: 'three',
+          attributes: {},
+          references: [],
+        };
         const result = await bulkGet([obj1, obj, obj2]);
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
@@ -1346,7 +1371,12 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`includes namespaces property for single-namespace and multi-namespace documents`, async () => {
-        const obj = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'three' };
+        const obj: SavedObject = {
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+          id: 'three',
+          attributes: {},
+          references: [],
+        };
         const result = await bulkGetSuccess([obj1, obj]);
         expect(result).toEqual({
           saved_objects: [
@@ -1385,7 +1415,7 @@ describe('SavedObjectsRepository', () => {
       await expect(savedObjectsRepository.bulkResolve(objects)).resolves.toEqual({
         resolved_objects: [
           {
-            saved_object: 'mock-object',
+            saved_object: { type: 'mock', id: 'mock-object', attributes: {}, references: [] },
             outcome: 'exactMatch',
           },
           {
