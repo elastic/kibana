@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-declare module 'react-vis';
+export { findLegacyUrlAliases } from './find_legacy_url_aliases';
+
+export { deleteLegacyUrlAliases } from './delete_legacy_url_aliases';
+export type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';

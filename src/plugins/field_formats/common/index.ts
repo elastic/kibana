@@ -25,7 +25,6 @@ export {
   NumberFormat,
   PercentFormat,
   RelativeDateFormat,
-  SourceFormat,
   StaticLookupFormat,
   UrlFormat,
   StringFormat,
