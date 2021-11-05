@@ -32,14 +32,17 @@ export interface FilterMeta {
   start: string;
   /** End date string of filtered date range */
   end: string;
+  filterGroup: string;
 }
 
 function getFilterMeta(filter: string): FilterMeta {
   const ast = fromExpression(filter);
+
   const column = get(ast, 'chain[0].arguments.column[0]') as string;
   const start = get(ast, 'chain[0].arguments.from[0]') as string;
   const end = get(ast, 'chain[0].arguments.to[0]') as string;
-  return { column, start, end };
+  const filterGroup = get(ast, 'chain[0].arguments.filterGroup[0]') as string;
+  return { column, start, end, filterGroup };
 }
 
 export interface Props {
@@ -55,12 +58,14 @@ export interface Props {
 
 export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = [] }: Props) => {
   const setFilter =
-    (column: string) =>
+    (column: string, filterGroup: string) =>
     ({ start, end }: OnTimeChangeProps) => {
-      commit(`timefilter from="${start}" to=${end} column=${column}`);
+      const filterExpression = `timefilter from="${start}" to=${end} column=${column}`;
+      const filterGroupArg = filterGroup ? `filterGroup="${filterGroup}"` : '';
+      commit(`${filterExpression} ${filterGroupArg}`);
     };
 
-  const { column, start, end } = getFilterMeta(filter);
+  const { column, start, end, filterGroup } = getFilterMeta(filter);
 
   return (
     <div className="canvasTimeFilter">
@@ -68,7 +73,7 @@ export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = []
         start={start}
         end={end}
         isPaused={false}
-        onTimeChange={setFilter(column)}
+        onTimeChange={setFilter(column, filterGroup)}
         showUpdateButton={false}
         dateFormat={dateFormat}
         commonlyUsedRanges={commonlyUsedRanges.length ? commonlyUsedRanges : defaultQuickRanges}
