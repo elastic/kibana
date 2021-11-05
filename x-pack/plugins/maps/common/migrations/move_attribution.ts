@@ -18,7 +18,12 @@ export function moveAttribution({
     return attributes;
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
 
   layerList.forEach((layer: LayerDescriptor) => {
     const sourceDescriptor = layer.sourceDescriptor as {
