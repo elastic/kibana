@@ -21,17 +21,9 @@ export function useGetOutputs() {
 
 export function useDefaultOutput() {
   const outputsRequest = useGetOutputs();
-  const output = useMemo(() => {
-    return outputsRequest.data?.items.find((o) => o.is_default);
-  }, [outputsRequest.data]);
+  const output = outputsRequest.data?.items.find((o) => o.is_default);
 
-  const refresh = useCallback(() => {
-    return outputsRequest.resendRequest();
-  }, [outputsRequest]);
-
-  return useMemo(() => {
-    return { output, refresh };
-  }, [output, refresh]);
+  return { output, refresh: outputsRequest.resendRequest };
 }
 
 export function sendPutOutput(outputId: string, body: PutOutputRequest['body']) {
