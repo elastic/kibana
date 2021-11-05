@@ -23,7 +23,7 @@ import { useUserData } from '../../../../components/user_info';
 import { useRuleStatus } from '../../../../containers/detection_engine/rules';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 
-import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
 
@@ -128,7 +128,7 @@ describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
     (useUserData as jest.Mock).mockReturnValue([{}]);
     (useParams as jest.Mock).mockReturnValue({});
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });

@@ -48,11 +48,6 @@ import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
-import {
-  ENABLE_NEW_SN_ITSM_CONNECTOR,
-  ENABLE_NEW_SN_SIR_CONNECTOR,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../actions/server/constants/connectors';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -202,14 +197,19 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         const checkEnabledResult = checkActionTypeEnabled(
           actionTypesIndex && actionTypesIndex[item.actionTypeId]
         );
+
         const itemConfig = (
           item as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
         ).config;
-        const showDeprecatedTooltip =
-          itemConfig?.usesTableApi &&
-          // TODO: Remove when applications are certified
-          ((ENABLE_NEW_SN_ITSM_CONNECTOR && item.actionTypeId === '.servicenow') ||
-            (ENABLE_NEW_SN_SIR_CONNECTOR && item.actionTypeId === '.servicenow-sir'));
+
+        /**
+         * TODO: Remove when connectors can provide their own UX message.
+         * Issue: https://github.com/elastic/kibana/issues/114507
+         */
+        const hasSNApplication =
+          item?.actionTypeId === '.servicenow' || item?.actionTypeId === '.servicenow-sir';
+
+        const showDeprecatedTooltip = hasSNApplication && itemConfig?.usesTableApi;
 
         const link = (
           <>
