@@ -7,6 +7,11 @@
 
 export { getFlattenedObject } from '@kbn/std';
 
+export type {
+  PackagePolicyValidationResults,
+  PackagePolicyConfigValidationResults,
+  PackagePolicyInputValidationResults,
+} from '../../common';
 export {
   AgentStatusKueryHelper,
   agentPolicyRouteService,
@@ -30,9 +35,6 @@ export {
   LicenseService,
   isAgentUpgradeable,
   doesPackageHaveIntegrations,
-  PackagePolicyValidationResults,
-  PackagePolicyConfigValidationResults,
-  PackagePolicyInputValidationResults,
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
