@@ -51,7 +51,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     schema.recordOf(
                       schema.string(),
                       schema.object({
-                        field: schema.string(),
+                        field: schema.maybe(schema.string()),
+                        value: schema.maybe(schema.string()),
                       })
                     )
                   ),

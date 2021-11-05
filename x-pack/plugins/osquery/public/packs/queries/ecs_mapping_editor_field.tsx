@@ -81,30 +81,23 @@ const typeMap = {
 };
 
 const StyledEuiSuperSelect = styled(EuiSuperSelect)`
-  &.euiFormControlLayout__prepend {
-    padding-left: 8px;
-    padding-right: 24px;
-    box-shadow: none;
+  border-radius: 6px 0 0 6px;
 
-    .euiIcon {
-      padding: 0;
-      width: 18px;
-      background: none;
-    }
+  .euiIcon {
+    padding: 0;
+    width: 18px;
+    background: none;
   }
 `;
 
 // @ts-expect-error update types
 const ResultComboBox = styled(EuiComboBox)`
-  &.euiComboBox--prepended .euiSuperSelect {
-    border-right: 1px solid ${(props) => props.theme.eui.euiBorderColor};
+  &.euiComboBox {
+    position: relative;
+    left: -1px;
 
-    .euiFormControlLayout__childrenWrapper {
-      border-radius: 6px 0 0 6px;
-
-      .euiFormControlLayoutIcons--right {
-        right: 6px;
-      }
+    .euiComboBox__inputWrap {
+      border-radius: 0 6px 6px 0;
     }
   }
 `;
@@ -311,6 +304,8 @@ const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
   },
 ];
 
+const EMPTY_ARRAY: EuiComboBoxOptionOption[] = [];
+
 interface OsqueryColumnFieldProps {
   resultType: FieldHook<string>;
   resultValue: FieldHook<string>;
@@ -374,6 +369,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   const handleCreateOption = useCallback(
     (newOption) => {
+      console.error('')
       setValue(newOption);
     },
     [setValue]
@@ -416,18 +412,22 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       describedByIds={describedByIds}
       isDisabled={euiFieldProps.isDisabled}
     >
-      <ResultComboBox
-        fullWidth
-        prepend={Prepend}
-        singleSelection={singleSelection}
-        selectedOptions={selectedOptions}
-        onChange={handleChange}
-        onCreateOption={handleCreateOption}
-        renderOption={renderOsqueryOption}
-        rowHeight={32}
-        isClearable
-        {...euiFieldProps}
-      />
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>{Prepend}</EuiFlexItem>
+        <EuiFlexItem>
+          <ResultComboBox
+            fullWidth
+            selectedOptions={selectedOptions}
+            onChange={handleChange}
+            onCreateOption={handleCreateOption}
+            renderOption={renderOsqueryOption}
+            rowHeight={32}
+            isClearable
+            {...euiFieldProps}
+            options={(resultType.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 };
@@ -497,7 +497,7 @@ const getOsqueryResultFieldValidator =
   ) => {
     const fieldRequiredError = fieldValidators.emptyField(
       i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage', {
-        defaultMessage: 'Osquery result is required.',
+        defaultMessage: 'Value is required.',
       })
     )(args);
 
@@ -551,6 +551,7 @@ interface ECSMappingEditorFormRef {
 export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappingEditorFormProps>(
   ({ isDisabled, osquerySchemaOptions, defaultValue, onAdd, onChange, onDelete }, ref) => {
     const editForm = !!defaultValue;
+    const multipleValuesField = useRef(false);
     const currentFormData = useRef(defaultValue);
     const formSchema = {
       key: {
@@ -648,6 +649,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                 // @ts-expect-error update types
                 options: osquerySchemaOptions,
                 isDisabled,
+                singleSelection: !multipleValuesField.current ? { asPlainText: true } : false,
               }}
             />
           )}
@@ -687,16 +689,12 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     useEffect(() => {
       if (!deepEqual(formData, currentFormData.current)) {
         currentFormData.current = formData;
+        const ecsOption = find(ECSSchemaOptions, ['label', formData.key]);
+        multipleValuesField.current =
+          ecsOption?.value?.normalization === 'array' && formData.result.type === 'value';
         handleSubmit();
       }
     }, [handleSubmit, formData, onAdd]);
-
-    // useEffect(() => {
-    //   if (defaultValue) {
-    //     validate();
-    //     __validateFields(['result.value']);
-    //   }
-    // }, [defaultValue, osquerySchemaOptions, validate, __validateFields]);
 
     return (
       <Form form={form}>
