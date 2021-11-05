@@ -235,7 +235,7 @@ function MissingIntegrationContent({
       <p>
         <FormattedMessage
           id="xpack.fleet.integrations.missing"
-          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations using our {discussForumLink}."
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations is our {forumLink}."
           values={{
             customInputsLink: (
               <EuiLink onClick={handleCustomInputsLinkClick}>
@@ -249,7 +249,7 @@ function MissingIntegrationContent({
               <EuiLink href="https://discuss.elastic.co/tag/integrations" external target="_blank">
                 <FormattedMessage
                   id="xpack.fleet.integrations.discussForumLink"
-                  defaultMessage="discuss forum"
+                  defaultMessage="forum"
                 />
               </EuiLink>
             ),
