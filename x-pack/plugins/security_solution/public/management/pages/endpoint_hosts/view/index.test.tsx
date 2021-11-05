@@ -1083,6 +1083,11 @@ describe('when on the endpoint list page', () => {
         ).toBe('Policy Response');
       });
 
+      it('should display timestamp', async () => {
+        const timestamp = await renderResult.findByTestId('endpointDetailsPolicyResponseTimestamp');
+        expect(timestamp).not.toBeNull();
+      });
+
       it('should show a configuration section for each protection', async () => {
         const configAccordions = await renderResult.findAllByTestId(
           'endpointDetailsPolicyResponseConfigAccordion'
