@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EuiLink, EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -13,17 +13,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const LOCAL_STORAGE_KEY_MSG_ACK = 'xpack.observability.alert.ack.experimental.message';
 
 export function AlertsDisclaimer() {
-  const [experimentalMsgAck, setExperimentalMsgAck] = useState(false);
+  const getCurrentExperimentalMsgAckState = () => {
+    const isExperimentalMsgAck = localStorage.getItem(LOCAL_STORAGE_KEY_MSG_ACK);
+    return isExperimentalMsgAck === 'true';
+  };
+
+  const [experimentalMsgAck, setExperimentalMsgAck] = useState(getCurrentExperimentalMsgAckState);
 
   const dismissMessage = () => {
     setExperimentalMsgAck(true);
     localStorage.setItem(LOCAL_STORAGE_KEY_MSG_ACK, 'true');
   };
-
-  useEffect(() => {
-    const isExperimentalMsgAck = localStorage.getItem(LOCAL_STORAGE_KEY_MSG_ACK);
-    setExperimentalMsgAck(isExperimentalMsgAck === 'true');
-  }, []);
 
   return (
     !experimentalMsgAck && (
