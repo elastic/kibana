@@ -17,6 +17,7 @@ import {
   mockGetCurrentTime,
   mockPreflightCheckForCreate,
   mockDeleteLegacyUrlAliases,
+  mockGetSearchDsl,
 } from './repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -32,12 +33,15 @@ import {
   SavedObjectsIncrementCounterOptions,
   SavedObjectsRepository,
 } from './repository';
-import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { ALL_NAMESPACES_STRING } from './utils';
 import { loggerMock } from '../../../logging/logger.mock';
-import { SavedObjectsSerializer, SavedObjectUnsanitizedDoc } from '../../serialization';
+import {
+  SavedObjectsRawDocSource,
+  SavedObjectsSerializer,
+  SavedObjectUnsanitizedDoc,
+} from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
@@ -47,6 +51,7 @@ import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import {
+  SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
@@ -54,10 +59,9 @@ import {
   SavedObjectsUpdateOptions,
 } from '../saved_objects_client';
 import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
+import { BulkResponseItem } from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
 
 const { nodeTypes } = esKuery;
-
-jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -356,7 +360,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
-    getSearchDslNS.getSearchDsl.mockClear();
+    mockGetSearchDsl.mockClear();
   });
 
   const mockMigrationVersion = { foo: '2.3.4' };
@@ -378,14 +382,14 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    const obj1 = {
+    const obj1: SavedObject = {
       type: 'config',
       id: '6.0.0-alpha1',
       attributes: { title: 'Test One' },
       references: [{ name: 'ref_0', type: 'test', id: '1' }],
       originId: 'some-origin-id', // only one of the object args has an originId, this is intentional to test both a positive and negative case
     };
-    const obj2 = {
+    const obj2: SavedObject = {
       type: 'index-pattern',
       id: 'logstash-*',
       attributes: { title: 'Test Two' },
@@ -393,10 +397,17 @@ describe('SavedObjectsRepository', () => {
     };
     const namespace = 'foo-namespace';
 
-    const getMockBulkCreateResponse = (objects: SavedObject[], namespace?: string) => {
+    const getMockBulkCreateResponse = (
+      objects: SavedObjectsBulkCreateObject[],
+      namespace?: string
+    ) => {
       return {
+        errors: false,
+        took: 1,
         items: objects.map(({ type, id, originId, attributes, references, migrationVersion }) => ({
           create: {
+            // status: 1,
+            // _index: '.kibana',
             _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
             _source: {
               [type]: attributes,
@@ -410,16 +421,18 @@ describe('SavedObjectsRepository', () => {
             ...mockVersionProps,
           },
         })),
-      };
+      } as estypes.BulkResponse;
     };
 
-    const bulkCreateSuccess = async (objects, options?: SavedObjectsCreateOptions) => {
+    const bulkCreateSuccess = async (
+      objects: SavedObjectsBulkCreateObject[],
+      options?: SavedObjectsCreateOptions
+    ) => {
       const response = getMockBulkCreateResponse(objects, options?.namespace);
       client.bulk.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(response)
       );
-      const result = await savedObjectsRepository.bulkCreate(objects, options);
-      return result;
+      return await savedObjectsRepository.bulkCreate(objects, options);
     };
 
     // bulk create calls have two objects for each source -- the action, and the source
@@ -456,7 +469,7 @@ describe('SavedObjectsRepository', () => {
         attributes,
         references,
       }: { type: string; attributes: unknown; references?: SavedObjectReference[] },
-      overrides
+      overrides: Record<string, unknown> = {}
     ) => [
       expect.any(Object),
       expect.objectContaining({
@@ -589,7 +602,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`adds namespaces to request body for any types that are multi-namespace`, async () => {
-        const test = async (namespace) => {
+        const test = async (namespace?: string) => {
           const objects = [obj1, obj2].map((x) => ({ ...x, type: MULTI_NAMESPACE_ISOLATED_TYPE }));
           const [o1, o2] = objects;
           mockPreflightCheckForCreate.mockResolvedValueOnce([
@@ -597,7 +610,7 @@ describe('SavedObjectsRepository', () => {
             {
               type: o2.type,
               id: o2.id,
-              existingDocument: { _source: { namespaces: ['*'] } }, // second object does have an existing document to overwrite
+              existingDocument: { _id: o2.id, _source: { namespaces: ['*'], type: o2.type } }, // second object does have an existing document to overwrite
             },
           ]);
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
@@ -1046,7 +1059,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkGet', () => {
-    const obj1 = {
+    const obj1: SavedObject<unknown> = {
       type: 'config',
       id: '6.0.0-alpha1',
       attributes: { title: 'Testing' },
@@ -1059,7 +1072,7 @@ describe('SavedObjectsRepository', () => {
       ],
       originId: 'some-origin-id', // only one of the results has an originId, this is intentional to test both a positive and negative case
     };
-    const obj2 = {
+    const obj2: SavedObject<unknown> = {
       type: 'index-pattern',
       id: 'logstash-*',
       attributes: { title: 'Testing' },
@@ -1073,12 +1086,12 @@ describe('SavedObjectsRepository', () => {
     };
     const namespace = 'foo-namespace';
 
-    const bulkGet = async (objects, options?: SavedObjectsBaseOptions) =>
+    const bulkGet = async (objects: SavedObject[], options?: SavedObjectsBaseOptions) =>
       savedObjectsRepository.bulkGet(
         objects.map(({ type, id, namespaces }) => ({ type, id, namespaces })), // bulkGet only uses type, id, and optionally namespaces
         options
       );
-    const bulkGetSuccess = async (objects, options?: SavedObjectsBaseOptions) => {
+    const bulkGetSuccess = async (objects: SavedObject[], options?: SavedObjectsBaseOptions) => {
       const response = getMockMgetResponse(objects, options?.namespace);
       client.mget.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(response)
@@ -2796,7 +2809,7 @@ describe('SavedObjectsRepository', () => {
         elasticsearchClientMock.createSuccessTransportRequestPromise(mockUpdateResults)
       );
       const result = await savedObjectsRepository.deleteByNamespace(namespace, options);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+      expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
       expect(client.updateByQuery).toHaveBeenCalledTimes(1);
       return result;
     };
@@ -2845,7 +2858,7 @@ describe('SavedObjectsRepository', () => {
       it(`constructs a query using all multi-namespace types, and another using all single-namespace types`, async () => {
         await deleteByNamespaceSuccess(namespace);
         const allTypes = registry.getAllTypes().map((type) => type.name);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           namespaces: [namespace],
           type: [
             ...allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
@@ -2891,7 +2904,7 @@ describe('SavedObjectsRepository', () => {
 
       it('merges output of getSearchDsl into es request body', async () => {
         const query = { query: 1, aggregations: 2 };
-        getSearchDslNS.getSearchDsl.mockReturnValue(query);
+        mockGetSearchDsl.mockReturnValue(query);
         await removeReferencesToSuccess({ type });
 
         expect(client.updateByQuery).toHaveBeenCalledWith(
@@ -2945,16 +2958,12 @@ describe('SavedObjectsRepository', () => {
     describe('search dsl', () => {
       it(`passes mappings and registry to getSearchDsl`, async () => {
         await removeReferencesToSuccess();
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
-          mappings,
-          registry,
-          expect.anything()
-        );
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, expect.anything());
       });
 
       it('passes namespace to getSearchDsl', async () => {
         await removeReferencesToSuccess({ namespace: 'some-ns' });
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
           mappings,
           registry,
           expect.objectContaining({
@@ -2965,7 +2974,7 @@ describe('SavedObjectsRepository', () => {
 
       it('passes hasReference to getSearchDsl', async () => {
         await removeReferencesToSuccess();
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
           mappings,
           registry,
           expect.objectContaining({
@@ -2979,7 +2988,7 @@ describe('SavedObjectsRepository', () => {
 
       it('passes all known types to getSearchDsl', async () => {
         await removeReferencesToSuccess();
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
           mappings,
           registry,
           expect.objectContaining({
@@ -3015,6 +3024,9 @@ describe('SavedObjectsRepository', () => {
   describe('#find', () => {
     const generateSearchResults = (namespace?: string) => {
       return {
+        took: 1,
+        timed_out: false,
+        _shards: {} as any,
         hits: {
           total: 4,
           hits: [
@@ -3081,20 +3093,20 @@ describe('SavedObjectsRepository', () => {
             },
           ],
         },
-      } as estypes.SearchResponse;
+      } as estypes.SearchResponse<SavedObjectsRawDocSource>;
     };
 
     const type = 'index-pattern';
     const namespace = 'foo-namespace';
 
-    const findSuccess = async (options?: SavedObjectsFindOptions, namespace?: string) => {
+    const findSuccess = async (options: SavedObjectsFindOptions, namespace?: string) => {
       client.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateSearchResults(namespace)
         )
       );
       const result = await savedObjectsRepository.find(options);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+      expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledTimes(1);
       return result;
     };
@@ -3107,7 +3119,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`merges output of getSearchDsl into es request body`, async () => {
         const query = { query: 1, aggregations: 2 };
-        getSearchDslNS.getSearchDsl.mockReturnValue(query);
+        mockGetSearchDsl.mockReturnValue(query);
         await findSuccess({ type });
 
         expect(client.search).toHaveBeenCalledWith(
@@ -3243,7 +3255,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when KQL filter syntax is invalid`, async () => {
-        const findOpts = {
+        const findOpts: SavedObjectsFindOptions = {
           namespaces: [namespace],
           search: 'foo*',
           searchFields: ['foo'],
@@ -3255,7 +3267,6 @@ describe('SavedObjectsRepository', () => {
             type: 'foo',
             id: '1',
           },
-          indexPattern: undefined,
           filter: 'dashboard.attributes.otherField:<',
         };
 
@@ -3264,7 +3275,7 @@ describe('SavedObjectsRepository', () => {
                           dashboard.attributes.otherField:<
                           --------------------------------^: Bad Request]
                       `);
-        expect(getSearchDslNS.getSearchDsl).not.toHaveBeenCalled();
+        expect(mockGetSearchDsl).not.toHaveBeenCalled();
         expect(client.search).not.toHaveBeenCalled();
       });
     });
@@ -3370,7 +3381,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`passes mappings, registry, and search options to getSearchDsl`, async () => {
         await findSuccess(commonOptions, namespace);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, commonOptions);
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, commonOptions);
       });
 
       it(`accepts typeToNamespacesMap`, async () => {
@@ -3382,7 +3393,7 @@ describe('SavedObjectsRepository', () => {
         };
 
         await findSuccess(relevantOpts, namespace);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           ...relevantOpts,
           type: [type],
         });
@@ -3395,7 +3406,7 @@ describe('SavedObjectsRepository', () => {
         };
 
         await findSuccess(relevantOpts, namespace);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           ...relevantOpts,
           hasReferenceOperator: 'AND',
         });
@@ -3408,7 +3419,7 @@ describe('SavedObjectsRepository', () => {
         };
 
         await findSuccess(relevantOpts, namespace);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           ...relevantOpts,
           searchAfter: ['1', 'a'],
         });
@@ -3421,7 +3432,7 @@ describe('SavedObjectsRepository', () => {
         };
 
         await findSuccess(relevantOpts, namespace);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           ...relevantOpts,
           pit: { id: 'abc123', keepAlive: '2m' },
         });
@@ -3444,7 +3455,7 @@ describe('SavedObjectsRepository', () => {
         };
 
         await findSuccess(findOpts, namespace);
-        const { kueryNode } = getSearchDslNS.getSearchDsl.mock.calls[0][2];
+        const { kueryNode } = mockGetSearchDsl.mock.calls[0][2];
         expect(kueryNode).toMatchInlineSnapshot(`
           Object {
             "arguments": Array [
@@ -3484,7 +3495,7 @@ describe('SavedObjectsRepository', () => {
         };
 
         await findSuccess(findOpts, namespace);
-        const { kueryNode } = getSearchDslNS.getSearchDsl.mock.calls[0][2];
+        const { kueryNode } = mockGetSearchDsl.mock.calls[0][2];
         expect(kueryNode).toMatchInlineSnapshot(`
           Object {
             "arguments": Array [
@@ -3511,7 +3522,7 @@ describe('SavedObjectsRepository', () => {
         const types = ['config', 'index-pattern'];
         await findSuccess({ type: types });
 
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
           mappings,
           registry,
           expect.objectContaining({
@@ -3524,7 +3535,7 @@ describe('SavedObjectsRepository', () => {
         const types = ['config', 'unknownType', 'index-pattern'];
         await findSuccess({ type: types });
 
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
           mappings,
           registry,
           expect.objectContaining({
@@ -3537,7 +3548,7 @@ describe('SavedObjectsRepository', () => {
         const types = ['config', HIDDEN_TYPE, 'index-pattern'];
         await findSuccess({ type: types });
 
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
           mappings,
           registry,
           expect.objectContaining({
