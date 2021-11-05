@@ -128,7 +128,7 @@ To increase the minimum time interval:
 +
 You can increase and decrease the minimum interval, but you are unable to decrease the interval below the <<advanced-options,*Advanced Settings*>>. 
 
-To save space on the dashboard, hide the vertical and horizontal axes labels.
+To save space on the dashboard, hide the axis labels.
 
 . Open the *Left axis* menu, then deselect *Show*.
 +
@@ -142,7 +142,7 @@ image::images/lens_lineChartMetricOverTime_7.16.png[Line chart that displays met
 
 . Click *Save and return*
 
-Since you removed the axes labels, add a panel title:
+Since you removed the axis labels, add a panel title:
 
 . Open the panel menu, then select *Edit panel title*.
 
