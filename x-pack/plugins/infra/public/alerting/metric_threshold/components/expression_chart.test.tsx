@@ -54,7 +54,7 @@ describe('ExpressionChart', () => {
         metricAlias: 'metricbeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
-
+        // @ts-ignore message is missing
         fields: {
           timestamp: '@timestamp',
           container: 'container.id',

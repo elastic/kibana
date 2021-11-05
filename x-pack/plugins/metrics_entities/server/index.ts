@@ -10,7 +10,7 @@ import { PluginInitializerContext } from '../../../../src/core/server';
 
 import { MetricsEntitiesPlugin } from './plugin';
 
-export { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
+export type { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
