@@ -5,20 +5,42 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
+import path, { resolve } from 'path';
+
+import { defineDockerServersConfig } from '@kbn/test';
 
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
+// Docker image to use for Fleet API integration tests.
+// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
+// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
+// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
+export const dockerImage =
+  'docker.elastic.co/package-registry/distribution:ffcbe0ba25b9bae09a671249cbb1b25af0aa1994';
+
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
+  const registryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+  console.warn('registry PORT', process.env.FLEET_PACKAGE_REGISTRY_PORT);
+
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
   const kibanaFunctionalConfig = await readConfigFile(
     require.resolve('../../../test/functional/config.js')
   );
+
+  // mount the config file for the package registry as well as
+  // the directory containing additional packages into the container
+  const dockerArgs = [
+    '-v',
+    `${path.join(
+      path.dirname(__filename),
+      './fixtures/package_registry_config.yml'
+    )}:/package-registry/config.yml`,
+  ];
 
   return {
     // list paths to the files that contain your plugins tests
@@ -85,7 +107,8 @@ export default async function ({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
-        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
+        ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
       ],
     },
     uiSettings: {
@@ -480,7 +503,7 @@ export default async function ({ readConfigFile }) {
           },
         },
 
-        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        // Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
             cluster: ['manage_security', 'manage_api_key'],
@@ -567,5 +590,15 @@ export default async function ({ readConfigFile }) {
       },
       defaultRoles: ['superuser'],
     },
+    dockerServers: defineDockerServersConfig({
+      registry: {
+        enabled: !!registryPort,
+        image: dockerImage,
+        portInContainer: 8080,
+        port: registryPort,
+        args: dockerArgs,
+        waitForLogLine: 'package manifests loaded',
+      },
+    }),
   };
 }

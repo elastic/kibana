@@ -128,7 +128,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     type: `synthetics/${monitorType}`,
     use_output: 'default',
   });
-
   // Failing: See https://github.com/elastic/kibana/issues/116980
   describe.skip('When on the Synthetics Integration Policy Create Page', function () {
     this.tags(['ciGroup10']);
