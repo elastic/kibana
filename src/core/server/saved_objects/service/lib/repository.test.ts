@@ -291,8 +291,8 @@ describe('SavedObjectsRepository', () => {
         references,
         specialProperty: 'specialValue',
         ...mockTimestampFields,
-      },
-    } as estypes.GetResponse;
+      } as SavedObjectsRawDocSource,
+    } as estypes.GetResponse<SavedObjectsRawDocSource>;
   };
 
   const getMockMgetResponse = (objects, namespace?: string) => ({
@@ -2544,7 +2544,7 @@ describe('SavedObjectsRepository', () => {
       type: string,
       id: string,
       options?: SavedObjectsDeleteOptions,
-      internalOptions = {}
+      internalOptions: { mockGetResponseValue?: estypes.GetResponse } = {}
     ) => {
       const { mockGetResponseValue } = internalOptions;
       if (registry.isMultiNamespace(type)) {
@@ -2555,7 +2555,9 @@ describe('SavedObjectsRepository', () => {
         );
       }
       client.delete.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ result: 'deleted' })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          result: 'deleted',
+        } as estypes.DeleteResponse)
       );
       const result = await savedObjectsRepository.delete(type, id, options);
       expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
@@ -2686,7 +2688,9 @@ describe('SavedObjectsRepository', () => {
           )
         );
         client.delete.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ result: 'deleted' })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            result: 'deleted',
+          } as estypes.DeleteResponse)
         );
         mockDeleteLegacyUrlAliases.mockRejectedValueOnce(new Error('Oh no!'));
         await savedObjectsRepository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace });
@@ -2727,7 +2731,9 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            found: false,
+          } as estypes.GetResponse)
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -2735,7 +2741,9 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the index during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({} as estypes.GetResponse, {
+            statusCode: 404,
+          })
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -2754,7 +2762,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when the type is multi-namespace and the document has multiple namespaces and the force option is not enabled`, async () => {
         const response = getMockGetResponse({ type: MULTI_NAMESPACE_ISOLATED_TYPE, id, namespace });
-        response._source.namespaces = [namespace, 'bar-namespace'];
+        response._source!.namespaces = [namespace, 'bar-namespace'];
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -2768,7 +2776,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when the type is multi-namespace and the document has all namespaces and the force option is not enabled`, async () => {
         const response = getMockGetResponse({ type: MULTI_NAMESPACE_ISOLATED_TYPE, id, namespace });
-        response._source.namespaces = ['*'];
+        response._source!.namespaces = ['*'];
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -2782,7 +2790,9 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during delete`, async () => {
         client.delete.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ result: 'not_found' })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            result: 'not_found',
+          } as estypes.DeleteResponse)
         );
         await expectNotFoundError(type, id);
         expect(client.delete).toHaveBeenCalledTimes(1);
@@ -2791,8 +2801,9 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the index during delete`, async () => {
         client.delete.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise({
+            // @elastic/elasticsearch doesn't declare error on DeleteResponse
             error: { type: 'index_not_found_exception' },
-          })
+          } as unknown as estypes.DeleteResponse)
         );
         await expectNotFoundError(type, id);
         expect(client.delete).toHaveBeenCalledTimes(1);
@@ -2801,8 +2812,8 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES returns an unexpected response`, async () => {
         client.delete.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise({
-            result: 'something unexpected',
-          })
+            result: 'something unexpected' as estypes.Result,
+          } as estypes.DeleteResponse)
         );
         await expect(savedObjectsRepository.delete(type, id)).rejects.toThrowError(
           'Unexpected Elasticsearch DELETE response'
