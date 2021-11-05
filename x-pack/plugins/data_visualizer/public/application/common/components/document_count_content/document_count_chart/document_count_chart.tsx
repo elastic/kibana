@@ -20,6 +20,7 @@ import {
   XYBrushEvent,
 } from '@elastic/charts';
 import moment from 'moment';
+import { IUiSettingsClient } from 'kibana/public';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../../../src/plugins/charts/common';
 
@@ -37,6 +38,16 @@ interface Props {
 }
 
 const SPEC_ID = 'document_count';
+
+function getTimezone(uiSettings: IUiSettingsClient) {
+  if (uiSettings.isDefault('dateFormat:tz')) {
+    const detectedTimezone = moment.tz.guess();
+    if (detectedTimezone) return detectedTimezone;
+    else return moment().format('Z');
+  } else {
+    return uiSettings.get('dateFormat:tz', 'Browser');
+  }
+}
 
 export const DocumentCountChart: FC<Props> = ({
   width,
@@ -109,6 +120,8 @@ export const DocumentCountChart: FC<Props> = ({
     timefilterUpdateHandler(range);
   };
 
+  const timeZone = getTimezone(uiSettings);
+
   return (
     <div style={{ width: width ?? '100%' }} data-test-subj="dataVisualizerDocumentCountChart">
       <Chart
@@ -139,6 +152,7 @@ export const DocumentCountChart: FC<Props> = ({
           xAccessor="time"
           yAccessors={['value']}
           data={adjustedChartPoints}
+          timeZone={timeZone}
         />
       </Chart>
     </div>
