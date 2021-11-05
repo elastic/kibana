@@ -381,6 +381,7 @@ describe('SavedObjectsRepository', () => {
     const allTypes = registry.getAllTypes().map((type) => type.name);
     const allowedTypes = [...new Set(allTypes.filter((type) => !registry.isHidden(type)))];
 
+    // @ts-expect-error must use the private constructor to use the mocked serializer
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
