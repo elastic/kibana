@@ -3234,6 +3234,7 @@ describe('SavedObjectsRepository', () => {
 
     describe('errors', () => {
       it(`throws when type is not defined`, async () => {
+        // @ts-expect-error type should be defined
         await expect(savedObjectsRepository.find({})).rejects.toThrowError(
           'options.type must be a string or an array of strings'
         );
@@ -3257,7 +3258,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when type is not an empty array and typeToNamespacesMap is defined`, async () => {
-        const test = async (args) => {
+        const test = async (args: SavedObjectsFindOptions) => {
           await expect(savedObjectsRepository.find(args)).rejects.toThrowError(
             'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
           );
@@ -3332,14 +3333,14 @@ describe('SavedObjectsRepository', () => {
         noNamespaceSearchResults.hits.hits.forEach((doc, i) => {
           expect(response.saved_objects[i]).toEqual({
             id: doc._id.replace(/(index-pattern|config|globalType)\:/, ''),
-            type: doc._source.type,
-            originId: doc._source.originId,
+            type: doc._source!.type,
+            originId: doc._source!.originId,
             ...mockTimestampFields,
             version: mockVersion,
             score: doc._score,
-            attributes: doc._source[doc._source.type],
+            attributes: doc._source![doc._source!.type],
             references: [],
-            namespaces: doc._source.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : ['default'],
+            namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : ['default'],
           });
         });
       });
@@ -3359,20 +3360,20 @@ describe('SavedObjectsRepository', () => {
         namespacedSearchResults.hits.hits.forEach((doc, i) => {
           expect(response.saved_objects[i]).toEqual({
             id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
-            type: doc._source.type,
-            originId: doc._source.originId,
+            type: doc._source!.type,
+            originId: doc._source!.originId,
             ...mockTimestampFields,
             version: mockVersion,
             score: doc._score,
-            attributes: doc._source[doc._source.type],
+            attributes: doc._source![doc._source!.type],
             references: [],
-            namespaces: doc._source.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+            namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
           });
         });
       });
 
       it(`should return empty results when attempting to find only invalid or hidden types`, async () => {
-        const test = async (types) => {
+        const test = async (types: string | string[]) => {
           const result = await savedObjectsRepository.find({ type: types });
           expect(result).toEqual(expect.objectContaining({ saved_objects: [] }));
           expect(client.search).not.toHaveBeenCalled();
@@ -3384,7 +3385,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`should return empty results when attempting to find only invalid or hidden types using typeToNamespacesMap`, async () => {
-        const test = async (types) => {
+        const test = async (types: string[]) => {
           const result = await savedObjectsRepository.find({
             typeToNamespacesMap: new Map(types.map((x) => [x, undefined])),
             type: '',
