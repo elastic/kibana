@@ -365,7 +365,6 @@ export class RulesClient {
           id,
         }
       );
-      this.logger.info(`createdAlert ${JSON.stringify(createdAlert)}`);
     } catch (e) {
       // Avoid unused API key
       markApiKeyForInvalidation(
@@ -381,7 +380,8 @@ export class RulesClient {
         scheduledTask = await this.scheduleRule(
           createdAlert.id,
           rawAlert.alertTypeId,
-          data.schedule
+          data.schedule,
+          true
         );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
@@ -1062,7 +1062,6 @@ export class RulesClient {
   }
 
   private async enableWithOCC({ id }: { id: string }) {
-    this.logger.info('enableWithOCC');
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
     let version: string | undefined;
@@ -1075,7 +1074,6 @@ export class RulesClient {
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
-      this.logger.info(`enableWithOCC - decryptedRule ${JSON.stringify(decryptedAlert)}`);
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -1085,7 +1083,6 @@ export class RulesClient {
       const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
-      this.logger.info(`enableWithOCC - failed to decrypt rule, rule ${JSON.stringify(alert)}`);
     }
 
     try {
@@ -1128,7 +1125,6 @@ export class RulesClient {
         createdAPIKey = await this.createAPIKey(
           this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
         );
-        this.logger.info(`enableWithOCC - createdAPIKey ${createdAPIKey}`);
       } catch (error) {
         throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
       }
@@ -1146,10 +1142,8 @@ export class RulesClient {
           error: null,
         },
       });
-      this.logger.info(`enableWithOCC - updateAttributes ${JSON.stringify(updateAttributes)}`);
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
-        this.logger.info(`enableWithOCC - finished updating rule for enable`);
       } catch (e) {
         // Avoid unused API key
         markApiKeyForInvalidation(
@@ -1162,17 +1156,12 @@ export class RulesClient {
       const scheduledTask = await this.scheduleRule(
         id,
         attributes.alertTypeId,
-        attributes.schedule as IntervalSchedule
-      );
-      this.logger.info(
-        `enableWithOCC - scheduled rule with task id ${JSON.stringify(scheduledTask)}`
+        attributes.schedule as IntervalSchedule,
+        false
       );
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
-      this.logger.info(
-        `enableWithOCC - updated rule with task id ${JSON.stringify(scheduledTask.id)}`
-      );
       if (apiKeyToInvalidate) {
         await markApiKeyForInvalidation(
           { apiKey: apiKeyToInvalidate },
@@ -1180,8 +1169,6 @@ export class RulesClient {
           this.unsecuredSavedObjectsClient
         );
       }
-    } else {
-      this.logger.info(`enableWithOCC - attributes.enabled was true so no need to update rule`);
     }
   }
 
@@ -1194,7 +1181,6 @@ export class RulesClient {
   }
 
   private async disableWithOCC({ id }: { id: string }) {
-    this.logger.info('disableWithOCC');
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
     let version: string | undefined;
@@ -1207,7 +1193,6 @@ export class RulesClient {
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
-      this.logger.info(`disableWithOCC - decryptedRule ${JSON.stringify(decryptedAlert)}`);
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -1217,7 +1202,6 @@ export class RulesClient {
       const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
-      this.logger.info(`disableWithOCC - failed to decrypt rule, rule ${JSON.stringify(alert)}`);
     }
 
     if (this.eventLogger && attributes.scheduledTaskId) {
@@ -1304,7 +1288,6 @@ export class RulesClient {
         }),
         { version }
       );
-      this.logger.info(`disableWithOCC - finished updating rule`);
 
       await Promise.all([
         attributes.scheduledTaskId
@@ -1318,9 +1301,6 @@ export class RulesClient {
             )
           : null,
       ]);
-      this.logger.info(`disableWithOCC - finished removing scheduled task id`);
-    } else {
-      this.logger.info(`disableWithOCC - attributes.enabled was false so no need to update rule`);
     }
   }
 
@@ -1588,8 +1568,13 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleRule(id: string, ruleTypeId: string, schedule: IntervalSchedule) {
-    return await this.taskManager.schedule({
+  private async scheduleRule(
+    id: string,
+    ruleTypeId: string,
+    schedule: IntervalSchedule,
+    throwOnConflict: boolean // whether to throw conflict errors or swallow them
+  ) {
+    const taskInstance = {
       id, // use the same ID for task document as the rule
       taskType: `alerting:${ruleTypeId}`,
       schedule,
@@ -1603,7 +1588,15 @@ export class RulesClient {
         alertInstances: {},
       },
       scope: ['alerting'],
-    });
+    };
+    try {
+      return await this.taskManager.schedule(taskInstance);
+    } catch (err) {
+      if (err.statusCode === 409 && !throwOnConflict) {
+        return taskInstance;
+      }
+      throw err;
+    }
   }
 
   private injectReferencesIntoActions(
