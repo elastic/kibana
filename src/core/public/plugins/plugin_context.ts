@@ -141,5 +141,6 @@ export function createPluginStartContext<
     },
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
+    theme: deps.theme,
   };
 }

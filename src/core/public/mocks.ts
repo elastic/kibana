@@ -83,6 +83,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     deprecations: deprecationsServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
     },

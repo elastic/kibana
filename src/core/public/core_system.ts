@@ -217,6 +217,7 @@ export class CoreSystem {
         chrome,
         docLinks,
         http,
+        theme,
         savedObjects,
         i18n,
         injectedMetadata,
