@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
