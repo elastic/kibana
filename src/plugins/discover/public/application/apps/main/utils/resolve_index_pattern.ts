@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern, IndexPatternsContract, SearchSource } from 'src/plugins/data/common';
+import type { IndexPattern, IndexPatternsContract, ISearchSource } from 'src/plugins/data/common';
 import type { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
 export type IndexPatternSavedObject = SavedObject & { title: string };
 
@@ -95,7 +95,7 @@ export async function loadIndexPattern(
  */
 export function resolveIndexPattern(
   ip: IndexPatternData,
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   toastNotifications: ToastsStart
 ) {
   const { loaded: loadedIndexPattern, stateVal, stateValFound } = ip;
@@ -107,8 +107,8 @@ export function resolveIndexPattern(
   }
 
   if (stateVal && !stateValFound) {
-    const warningTitle = i18n.translate('discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
-      defaultMessage: '{stateVal} is not a configured index pattern ID',
+    const warningTitle = i18n.translate('discover.valueIsNotConfiguredDataViewIDWarningTitle', {
+      defaultMessage: '{stateVal} is not a configured data view ID',
       values: {
         stateVal: `"${stateVal}"`,
       },
@@ -117,9 +117,9 @@ export function resolveIndexPattern(
     if (ownIndexPattern) {
       toastNotifications.addWarning({
         title: warningTitle,
-        text: i18n.translate('discover.showingSavedIndexPatternWarningDescription', {
+        text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
           defaultMessage:
-            'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
+            'Showing the saved data view: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
           values: {
             ownIndexPatternTitle: ownIndexPattern.title,
             ownIndexPatternId: ownIndexPattern.id,
@@ -131,9 +131,9 @@ export function resolveIndexPattern(
 
     toastNotifications.addWarning({
       title: warningTitle,
-      text: i18n.translate('discover.showingDefaultIndexPatternWarningDescription', {
+      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
         defaultMessage:
-          'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
+          'Showing the default data view: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
         values: {
           loadedIndexPatternTitle: loadedIndexPattern.title,
           loadedIndexPatternId: loadedIndexPattern.id,

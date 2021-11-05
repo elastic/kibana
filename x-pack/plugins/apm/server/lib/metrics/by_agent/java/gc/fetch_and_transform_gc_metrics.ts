@@ -85,7 +85,7 @@ export async function fetchAndTransformGcMetrics({
               date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                metricsInterval: config['xpack.apm.metricsInterval'],
+                metricsInterval: config.metricsInterval,
               }),
               aggs: {
                 // get the max value
@@ -123,7 +123,6 @@ export async function fetchAndTransformGcMetrics({
   if (!aggregations) {
     return {
       ...chartBase,
-      noHits: true,
       series: [],
     };
   }
@@ -170,7 +169,6 @@ export async function fetchAndTransformGcMetrics({
 
   return {
     ...chartBase,
-    noHits: response.hits.total.value === 0,
     series,
   };
 }

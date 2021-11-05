@@ -130,7 +130,7 @@ export class CiStatsReporter {
     }
 
     try {
-      const { stdout } = await execa('git', ['branch', '--show-current']);
+      const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
       branch = stdout;
     } catch (e) {
       this.log.debug(e.message);

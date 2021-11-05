@@ -85,6 +85,7 @@ const basicTimeline: TimelineModel = {
   columns: [],
   defaultColumns: [],
   dataProviders: [{ ...basicDataProvider }],
+  dataViewId: '',
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',
     end: '2020-07-08T08:20:18.966Z',
@@ -219,6 +220,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
+        dataViewId: '',
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
@@ -230,6 +232,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: timelineDefaults.columns,
+        dataViewId: '',
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
@@ -247,6 +250,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
+        dataViewId: '',
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
@@ -1126,8 +1130,8 @@ describe('Timeline', () => {
       const newAndProvider = update.foo.dataProviders[indexProvider].and.find(
         (i) => i.id === '456'
       );
-      expect(oldAndProvider!.enabled).toEqual(false);
-      expect(newAndProvider!.enabled).toEqual(true);
+      expect(oldAndProvider?.enabled).toEqual(false);
+      expect(newAndProvider?.enabled).toEqual(true);
     });
   });
 
@@ -1386,8 +1390,8 @@ describe('Timeline', () => {
       const newAndProvider = update.foo.dataProviders[indexProvider].and.find(
         (i) => i.id === '456'
       );
-      expect(oldAndProvider!.excluded).toEqual(true);
-      expect(newAndProvider!.excluded).toEqual(false);
+      expect(oldAndProvider?.excluded).toEqual(true);
+      expect(newAndProvider?.excluded).toEqual(false);
     });
   });
 

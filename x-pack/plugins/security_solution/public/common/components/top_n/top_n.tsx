@@ -11,10 +11,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
-import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../store/inputs/constants';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
@@ -23,6 +23,7 @@ import * as i18n from './translations';
 import { getIndicesSelector, IndicesSelector } from './selectors';
 import { State } from '../../store';
 import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const TopNContainer = styled.div`
   min-width: 600px;
@@ -53,10 +54,12 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   options: TopNOption[];
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
+  showLegend?: boolean;
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -72,7 +75,9 @@ const TopNComponent: React.FC<Props> = ({
   from,
   indexPattern,
   options,
+  paddingSize,
   query,
+  showLegend,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   timelineId,
@@ -86,7 +91,15 @@ const TopNComponent: React.FC<Props> = ({
   );
   const indicesSelector = useMemo(getIndicesSelector, []);
   const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
-    (state) => indicesSelector(state),
+    (state) =>
+      indicesSelector(
+        state,
+        timelineId != null
+          ? defaultView === 'alert'
+            ? SourcererScopeName.detections
+            : SourcererScopeName.timeline
+          : SourcererScopeName.default
+      ),
     deepEqual
   );
 
@@ -127,7 +140,9 @@ const TopNComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             indexNames={view === 'raw' ? rawIndices : allIndices}
             onlyField={field}
+            paddingSize={paddingSize}
             query={query}
+            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
@@ -141,7 +156,9 @@ const TopNComponent: React.FC<Props> = ({
             filters={filters}
             headerChildren={headerChildren}
             onlyField={field}
+            paddingSize={paddingSize}
             query={query}
+            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             timelineId={timelineId}
           />

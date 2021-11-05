@@ -50,7 +50,7 @@ const createDeprecationsServiceMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockReturnValue(createInternalSetupContractMock());
+  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
   return mocked;
 };
 

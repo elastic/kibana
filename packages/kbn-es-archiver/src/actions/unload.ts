@@ -9,7 +9,7 @@
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { createPromiseFromStreams } from '@kbn/utils';
@@ -31,7 +31,7 @@ export async function unloadAction({
   kbnClient,
 }: {
   inputDir: string;
-  client: KibanaClient;
+  client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {

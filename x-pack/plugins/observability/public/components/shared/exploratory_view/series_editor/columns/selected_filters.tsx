@@ -26,7 +26,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
 
   const filters: UrlFilter[] = series.filters ?? [];
 
-  const { removeFilter } = useSeriesFilters({ seriesId, series });
+  const { removeFilter, replaceFilter } = useSeriesFilters({ seriesId, series });
 
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
@@ -34,49 +34,99 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
     return null;
   }
 
+  const btnProps = {
+    seriesId,
+    series,
+    indexPattern,
+  };
+
   return (
     <>
-      <EuiFlexGroup wrap gutterSize="xs">
-        {filters.map(({ field, values, notValues }) => (
-          <Fragment key={field}>
-            {(values ?? []).length > 0 && (
-              <EuiFlexItem grow={false} style={{ maxWidth: 300 }}>
-                <FilterLabel
-                  seriesId={seriesId}
-                  series={series}
-                  field={field}
-                  label={labels[field] ?? field}
-                  value={values ?? []}
-                  removeFilter={() => {
-                    values?.forEach((val) => {
-                      removeFilter({ field, value: val, negate: false });
-                    });
-                  }}
-                  negate={false}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
-            )}
-            {(notValues ?? []).length > 0 && (
-              <EuiFlexItem key={field} grow={false} style={{ maxWidth: 300 }}>
-                <FilterLabel
-                  series={series}
-                  seriesId={seriesId}
-                  field={field}
-                  label={labels[field] ?? field}
-                  value={notValues ?? []}
-                  negate={true}
-                  removeFilter={() => {
-                    values?.forEach((val) => {
-                      removeFilter({ field, value: val, negate: false });
-                    });
-                  }}
-                  indexPattern={indexPattern}
-                />
-              </EuiFlexItem>
-            )}
-          </Fragment>
-        ))}
+      <EuiFlexGroup wrap gutterSize="xs" alignItems="center">
+        {filters.map(
+          ({ field, values = [], notValues = [], wildcards = [], notWildcards = [] }) => (
+            <Fragment key={field}>
+              {values.length > 0 && (
+                <EuiFlexItem grow={false} style={{ maxWidth: 300 }}>
+                  <FilterLabel
+                    field={field}
+                    label={labels[field] ?? field}
+                    value={values ?? []}
+                    removeFilter={() => {
+                      replaceFilter({
+                        field,
+                        values: [],
+                        notValues,
+                        wildcards,
+                        notWildcards,
+                      });
+                    }}
+                    negate={false}
+                    {...btnProps}
+                  />
+                </EuiFlexItem>
+              )}
+              {notValues.length > 0 && (
+                <EuiFlexItem key={field} grow={false} style={{ maxWidth: 300 }}>
+                  <FilterLabel
+                    field={field}
+                    label={labels[field] ?? field}
+                    value={notValues ?? []}
+                    negate={true}
+                    removeFilter={() => {
+                      replaceFilter({
+                        field,
+                        notValues: [],
+                        values,
+                        wildcards,
+                        notWildcards,
+                      });
+                    }}
+                    {...btnProps}
+                  />
+                </EuiFlexItem>
+              )}
+              {wildcards.length > 0 && (
+                <EuiFlexItem key={field} grow={false} style={{ maxWidth: 300 }}>
+                  <FilterLabel
+                    field={field}
+                    label={i18n.translate('xpack.observability.filters.label.wildcard', {
+                      defaultMessage: '{label} wildcard',
+                      values: { label: labels[field] ?? field },
+                    })}
+                    value={wildcards ?? []}
+                    negate={false}
+                    removeFilter={() => {
+                      wildcards?.forEach((val) => {
+                        removeFilter({ field, value: val, negate: false, isWildcard: true });
+                      });
+                    }}
+                    {...btnProps}
+                  />
+                </EuiFlexItem>
+              )}
+              {notWildcards.length > 0 && (
+                <EuiFlexItem key={field} grow={false} style={{ maxWidth: 300 }}>
+                  <FilterLabel
+                    field={field}
+                    label={i18n.translate('xpack.observability.filters.label.wildcard', {
+                      defaultMessage: '{label} wildcard',
+                      values: { label: labels[field] ?? field },
+                    })}
+                    value={notWildcards ?? []}
+                    negate={false}
+                    removeFilter={() => {
+                      notWildcards?.forEach((val) => {
+                        removeFilter({ field, value: val, negate: true, isWildcard: true });
+                      });
+                    }}
+                    {...btnProps}
+                  />
+                </EuiFlexItem>
+              )}
+            </Fragment>
+          )
+        )}
 
         {(series.filters ?? []).length > 0 && (
           <EuiFlexItem grow={false}>

@@ -39,7 +39,7 @@
     "lists",
     "home",
     "telemetry",
-    "telemetryManagementSection"
+    "indexPatternFieldEditor"
   ],
   "server": true,
   "ui": true,

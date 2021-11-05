@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
-import { DataRecognizer } from '../../models/data_recognizer';
-import { GetGuards } from '../shared_services';
+import type { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { PluginStart as DataViewsPluginStart } from '../../../../../../src/plugins/data_views/server';
+import type { GetGuards } from '../shared_services';
+import { DataRecognizer, dataRecognizerFactory } from '../../models/data_recognizer';
 import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
-import { MlClient } from '../../lib/ml_client';
-import { JobSavedObjectService } from '../../saved_objects';
 
 export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
   TypeOf<typeof setupModuleBodySchema>;
@@ -28,7 +27,10 @@ export interface ModulesProvider {
   };
 }
 
-export function getModulesProvider(getGuards: GetGuards): ModulesProvider {
+export function getModulesProvider(
+  getGuards: GetGuards,
+  getDataViews: () => DataViewsPluginStart
+): ModulesProvider {
   return {
     modulesProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
       return {
@@ -36,11 +38,13 @@ export function getModulesProvider(getGuards: GetGuards): ModulesProvider {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(async ({ scopedClient, mlClient, jobSavedObjectService }) => {
+            .ok(async ({ scopedClient, mlClient, jobSavedObjectService, getDataViewsService }) => {
+              const dataViewsService = await getDataViewsService();
               const dr = dataRecognizerFactory(
                 scopedClient,
                 mlClient,
                 savedObjectsClient,
+                dataViewsService,
                 jobSavedObjectService,
                 request
               );
@@ -51,11 +55,13 @@ export function getModulesProvider(getGuards: GetGuards): ModulesProvider {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(async ({ scopedClient, mlClient, jobSavedObjectService }) => {
+            .ok(async ({ scopedClient, mlClient, jobSavedObjectService, getDataViewsService }) => {
+              const dataViewsService = await getDataViewsService();
               const dr = dataRecognizerFactory(
                 scopedClient,
                 mlClient,
                 savedObjectsClient,
+                dataViewsService,
                 jobSavedObjectService,
                 request
               );
@@ -66,11 +72,13 @@ export function getModulesProvider(getGuards: GetGuards): ModulesProvider {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(async ({ scopedClient, mlClient, jobSavedObjectService }) => {
+            .ok(async ({ scopedClient, mlClient, jobSavedObjectService, getDataViewsService }) => {
+              const dataViewsService = await getDataViewsService();
               const dr = dataRecognizerFactory(
                 scopedClient,
                 mlClient,
                 savedObjectsClient,
+                dataViewsService,
                 jobSavedObjectService,
                 request
               );
@@ -81,11 +89,13 @@ export function getModulesProvider(getGuards: GetGuards): ModulesProvider {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canCreateJob'])
-            .ok(async ({ scopedClient, mlClient, jobSavedObjectService }) => {
+            .ok(async ({ scopedClient, mlClient, jobSavedObjectService, getDataViewsService }) => {
+              const dataViewsService = await getDataViewsService();
               const dr = dataRecognizerFactory(
                 scopedClient,
                 mlClient,
                 savedObjectsClient,
+                dataViewsService,
                 jobSavedObjectService,
                 request
               );
@@ -108,14 +118,4 @@ export function getModulesProvider(getGuards: GetGuards): ModulesProvider {
       };
     },
   };
-}
-
-function dataRecognizerFactory(
-  client: IScopedClusterClient,
-  mlClient: MlClient,
-  savedObjectsClient: SavedObjectsClientContract,
-  jobSavedObjectService: JobSavedObjectService,
-  request: KibanaRequest
-) {
-  return new DataRecognizer(client, mlClient, savedObjectsClient, jobSavedObjectService, request);
 }

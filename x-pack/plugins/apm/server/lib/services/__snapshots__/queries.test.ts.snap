@@ -12,7 +12,7 @@ Object {
   "body": Object {
     "size": 0,
   },
-  "terminateAfter": 1,
+  "terminate_after": 1,
 }
 `;
 
@@ -49,7 +49,7 @@ Object {
     },
     "size": 0,
   },
-  "terminateAfter": 1,
+  "terminate_after": 1,
 }
 `;
 
@@ -98,8 +98,11 @@ Object {
       },
     },
     "size": 1,
+    "sort": Object {
+      "_score": "desc",
+    },
   },
-  "terminateAfter": 1,
+  "terminate_after": 1,
 }
 `;
 

@@ -21,7 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import type { IndexPattern } from 'src/plugins/data/common';
+import { flattenHit, IndexPattern } from '../../../../../data/common';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -36,7 +36,11 @@ import {
 import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
-import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '../../../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_MULTIFIELDS,
+} from '../../../../common';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 import { SortPairArr } from '../../apps/main/components/doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../helpers/get_fields_to_show';
@@ -91,7 +95,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set all columns
    */
-  onSetColumns: (columns: string[]) => void;
+  onSetColumns: (columns: string[], hideTimeColumn: boolean) => void;
   /**
    * function to change sorting of the documents, skipped when isSortEnabled is set to false
    */
@@ -271,7 +275,11 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         displayedRows,
-        displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
+        displayedRows
+          ? displayedRows.map((hit) =>
+              flattenHit(hit, indexPattern, { includeIgnoredValues: true })
+            )
+          : [],
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
@@ -298,15 +306,19 @@ export const DiscoverGrid = ({
     [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns, isSortEnabled]
   );
 
+  const hideTimeColumn = useMemo(
+    () => services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    [services.uiSettings]
+  );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
       visibleColumns: getVisibleColumns(displayedColumns, indexPattern, showTimeCol) as string[],
       setVisibleColumns: (newColumns: string[]) => {
-        onSetColumns(newColumns);
+        onSetColumns(newColumns, hideTimeColumn);
       },
     }),
-    [displayedColumns, indexPattern, showTimeCol, onSetColumns]
+    [displayedColumns, indexPattern, showTimeCol, hideTimeColumn, onSetColumns]
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {

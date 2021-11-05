@@ -42,16 +42,13 @@ describe('OverviewEmpty', () => {
     });
 
     it('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
-        actions: {
-          elasticAgent: {
-            description:
-              'Use Elastic Agent to collect security events and protect your endpoints from threats. Manage your agents in Fleet and add integrations with a single click.',
-            href: '/app/integrations/browse/security',
-          },
+      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
+        elasticAgent: {
+          category: 'security',
+          description:
+            'Use Elastic Agent to collect security events and protect your endpoints from threats.',
+          title: 'Add a Security integration',
         },
-        docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
-        solution: 'Security',
       });
     });
   });
@@ -66,14 +63,13 @@ describe('OverviewEmpty', () => {
     });
 
     it('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
-        actions: {
-          beats: {
-            href: '/app/home#/tutorial_directory/security',
-          },
+      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
+        elasticAgent: {
+          category: 'security',
+          description:
+            'Use Elastic Agent to collect security events and protect your endpoints from threats.',
+          title: 'Add a Security integration',
         },
-        docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
-        solution: 'Security',
       });
     });
   });

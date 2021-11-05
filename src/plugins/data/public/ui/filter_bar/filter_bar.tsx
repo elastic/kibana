@@ -55,6 +55,8 @@ function FilterBarUI(props: Props) {
     }
   }
 
+  const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
+
   function renderItems() {
     return props.filters.map((filter, i) => (
       <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
@@ -81,7 +83,7 @@ function FilterBarUI(props: Props) {
     const button = (
       <EuiButtonEmpty
         size="s"
-        onClick={() => setIsAddFilterPopoverOpen(true)}
+        onClick={onAddFilterClick}
         data-test-subj="addFilter"
         className="globalFilterBar__addButton"
       >

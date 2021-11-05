@@ -12,4 +12,4 @@
 export { NoData } from './no_data';
 export { License } from './license';
 export { PageLoading } from './page_loading';
-export { ElasticsearchOverview, ElasticsearchNodes, ElasticsearchIndices } from './elasticsearch';
+export { ElasticsearchNodes, ElasticsearchIndices } from './elasticsearch';

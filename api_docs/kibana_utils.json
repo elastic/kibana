@@ -59,6 +59,82 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-public.CharacterNotAllowedInField",
+        "type": "Class",
+        "tags": [],
+        "label": "CharacterNotAllowedInField",
+        "description": [
+          "\nwhen a user is attempting to create a field with disallowed character in the name, like *"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.CharacterNotAllowedInField",
+            "text": "CharacterNotAllowedInField"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.CharacterNotAllowedInField.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CharacterNotAllowedInField.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "character",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CharacterNotAllowedInField.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-public.Defer",
         "type": "Class",
         "tags": [],
@@ -1628,7 +1704,7 @@
           "\nCreates {@link IKbnUrlStateStorage} state storage"
         ],
         "signature": [
-          "({ useHash, history, onGetError, onSetError, }?: { useHash: boolean; history?: ",
+          "({ useHash, useHashQuery, history, onGetError, onSetError, }?: { useHash: boolean; useHashQuery?: boolean | undefined; history?: ",
           "History",
           "<any> | undefined; onGetError?: ((error: Error) => void) | undefined; onSetError?: ((error: Error) => void) | undefined; }) => ",
           {
@@ -1647,7 +1723,7 @@
             "id": "def-public.createKbnUrlStateStorage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
+            "label": "{\n    useHash = false,\n    useHashQuery = true,\n    history,\n    onGetError,\n    onSetError,\n  }",
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
@@ -1659,6 +1735,19 @@
                 "tags": [],
                 "label": "useHash",
                 "description": [],
+                "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHashQuery",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "useHashQuery",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false
               },
@@ -2259,7 +2348,7 @@
         "tags": [],
         "label": "createSessionStorageStateStorage",
         "description": [
-          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           "(storage?: Storage) => ",
@@ -2579,7 +2668,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -3932,7 +4021,7 @@
         "tags": [],
         "label": "syncState",
         "description": [
-          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
+          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
         ],
         "signature": [
           "({\n  storageKey,\n  stateStorage,\n  stateContainer,\n}: ",
@@ -4704,7 +4793,7 @@
         "tags": [],
         "label": "IKbnUrlStateStorage",
         "description": [
-          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
+          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
         ],
         "signature": [
           {
@@ -4953,7 +5042,7 @@
         "tags": [],
         "label": "ISessionStorageStateStorage",
         "description": [
-          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           {
@@ -6895,7 +6984,7 @@
           "signature": [
             "(history: Pick<",
             "History",
-            "<any>, \"location\" | \"replace\">) => void"
+            "<any>, \"replace\" | \"location\">) => void"
           ],
           "path": "src/plugins/kibana_utils/public/plugin.ts",
           "deprecated": false,
@@ -6910,7 +6999,7 @@
               "signature": [
                 "Pick<",
                 "History",
-                "<any>, \"location\" | \"replace\">"
+                "<any>, \"replace\" | \"location\">"
               ],
               "path": "src/plugins/kibana_utils/public/plugin.ts",
               "deprecated": false,
@@ -8117,6 +8206,82 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-common.CharacterNotAllowedInField",
+        "type": "Class",
+        "tags": [],
+        "label": "CharacterNotAllowedInField",
+        "description": [
+          "\nwhen a user is attempting to create a field with disallowed character in the name, like *"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.CharacterNotAllowedInField",
+            "text": "CharacterNotAllowedInField"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.CharacterNotAllowedInField.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CharacterNotAllowedInField.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "character",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CharacterNotAllowedInField.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-common.Defer",
         "type": "Class",
         "tags": [],
@@ -8982,7 +9147,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -9346,8 +9511,8 @@
             "pluginId": "@kbn/utility-types",
             "scope": "server",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
+            "section": "def-server.Serializable",
+            "text": "Serializable"
           },
           ">) => S"
         ],
@@ -9394,8 +9559,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">"
             ],
@@ -10203,8 +10368,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">) => P) | undefined"
             ],
@@ -10233,8 +10398,8 @@
                     "pluginId": "@kbn/utility-types",
                     "scope": "server",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],

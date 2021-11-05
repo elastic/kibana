@@ -36,6 +36,7 @@ describe('interpreter/functions#table', () => {
     splitColumn: undefined,
     splitRow: undefined,
     showMetricsAtAllLevels: false,
+    autoFitRowToContent: false,
     sort: {
       columnIndex: null,
       direction: null,

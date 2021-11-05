@@ -16,7 +16,7 @@ import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { CellValueElementProps } from './cell_rendering';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
 import { TimelineType, TimelineId, RowRenderer } from '../../../../common/types/timeline';
@@ -28,6 +28,7 @@ import { TabsContent } from './tabs_content';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
+import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -61,7 +62,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
+  const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+
   const { graphEventId, savedObjectId, timelineType, description } = useDeepEqualSelector((state) =>
     pick(
       ['graphEventId', 'savedObjectId', 'timelineType', 'description'],
@@ -76,6 +78,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         timelineActions.createTimeline({
           id: timelineId,
           columns: defaultHeaders,
+          dataViewId,
           indexNames: selectedPatterns,
           expandedDetail: activeTimeline.getExpandedDetail(),
           show: false,
@@ -119,6 +122,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
   const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
+  const resolveConflictComponent = useResolveConflict();
 
   return (
     <TimelineContext.Provider value={timelineContext}>
@@ -132,7 +136,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         {timelineType === TimelineType.template && (
           <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
         )}
-
+        {resolveConflictComponent}
         <HideShowContainer
           $isVisible={!timelineFullScreen}
           data-test-subj="timeline-hide-show-container"

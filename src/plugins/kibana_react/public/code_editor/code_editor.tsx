@@ -14,6 +14,7 @@ import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
+import './register_languages';
 
 import {
   DARK_THEME,

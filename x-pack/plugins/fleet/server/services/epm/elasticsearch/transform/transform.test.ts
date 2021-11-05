@@ -18,7 +18,7 @@ jest.mock('./common', () => {
   };
 });
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 
@@ -518,7 +518,7 @@ describe('test transform install', () => {
 
     esClient.transport.request.mockImplementationOnce(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(
-        new ResponseError(
+        new errors.ResponseError(
           elasticsearchClientMock.createApiResponse({
             statusCode: 400,
             body: { error: { type: 'resource_already_exists_exception' } },

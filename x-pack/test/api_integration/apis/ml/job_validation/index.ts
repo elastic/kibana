@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./calculate_model_memory_limit'));
     loadTestFile(require.resolve('./cardinality'));
     loadTestFile(require.resolve('./validate'));
+    loadTestFile(require.resolve('./datafeed_preview_validation'));
   });
 }

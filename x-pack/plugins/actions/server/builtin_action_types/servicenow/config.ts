@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  ENABLE_NEW_SN_ITSM_CONNECTOR,
-  ENABLE_NEW_SN_SIR_CONNECTOR,
-} from '../../constants/connectors';
 import { SNProductsConfig } from './types';
 
 export const serviceNowITSMTable = 'incident';
@@ -16,22 +12,31 @@ export const serviceNowSIRTable = 'sn_si_incident';
 
 export const ServiceNowITSMActionTypeId = '.servicenow';
 export const ServiceNowSIRActionTypeId = '.servicenow-sir';
+export const ServiceNowITOMActionTypeId = '.servicenow-itom';
 
 export const snExternalServiceConfig: SNProductsConfig = {
   '.servicenow': {
     importSetTable: 'x_elas2_inc_int_elastic_incident',
     appScope: 'x_elas2_inc_int',
     table: 'incident',
-    useImportAPI: ENABLE_NEW_SN_ITSM_CONNECTOR,
+    useImportAPI: true,
     commentFieldKey: 'work_notes',
   },
   '.servicenow-sir': {
     importSetTable: 'x_elas2_sir_int_elastic_si_incident',
     appScope: 'x_elas2_sir_int',
     table: 'sn_si_incident',
-    useImportAPI: ENABLE_NEW_SN_SIR_CONNECTOR,
+    useImportAPI: true,
+    commentFieldKey: 'work_notes',
+  },
+  '.servicenow-itom': {
+    importSetTable: 'x_elas2_inc_int_elastic_incident',
+    appScope: 'x_elas2_inc_int',
+    table: 'em_event',
+    useImportAPI: false,
     commentFieldKey: 'work_notes',
   },
 };
 
 export const FIELD_PREFIX = 'u_';
+export const DEFAULT_ALERTS_GROUPING_KEY = '{{rule.id}}:{{alert.id}}';

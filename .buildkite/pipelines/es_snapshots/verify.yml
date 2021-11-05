@@ -13,6 +13,7 @@ steps:
 
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
+    timeout_in_minutes: 10
 
   - wait
 
@@ -22,6 +23,7 @@ steps:
       queue: c2-16
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
@@ -81,6 +83,7 @@ steps:
 
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
     label: Trigger promotion
+    timeout_in_minutes: 10
     depends_on:
       - default-cigroup
       - default-cigroup-docker
@@ -93,3 +96,4 @@ steps:
 
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
+    timeout_in_minutes: 10

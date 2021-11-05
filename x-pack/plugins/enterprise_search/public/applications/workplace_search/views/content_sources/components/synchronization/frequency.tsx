@@ -24,13 +24,12 @@ import { SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, RESET_BUTTON } from '../../../../constants';
-import { DIFFERENT_SYNC_TYPES_DOCS_URL, SYNC_BEST_PRACTICES_DOCS_URL } from '../../../../routes';
+import { DIFFERENT_SYNC_TYPES_DOCS_URL } from '../../../../routes';
 import {
+  LEARN_MORE_LINK,
   SOURCE_FREQUENCY_DESCRIPTION,
   SOURCE_SYNC_FREQUENCY_TITLE,
   BLOCKED_TIME_WINDOWS_TITLE,
-  DIFFERENT_SYNC_TYPES_LINK_LABEL,
-  SYNC_BEST_PRACTICES_LINK_LABEL,
   SYNC_UNSAVED_CHANGES_MESSAGE,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
@@ -46,7 +45,9 @@ interface FrequencyProps {
 
 export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
   const { contentSource } = useValues(SourceLogic);
-  const { hasUnsavedFrequencyChanges } = useValues(SynchronizationLogic({ contentSource }));
+  const { hasUnsavedFrequencyChanges, navigatingBetweenTabs } = useValues(
+    SynchronizationLogic({ contentSource })
+  );
   const { handleSelectedTabChanged, resetSyncSettings, updateFrequencySettings } = useActions(
     SynchronizationLogic({ contentSource })
   );
@@ -83,21 +84,6 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
     </EuiFlexGroup>
   );
 
-  const docsLinks = (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiLink href={DIFFERENT_SYNC_TYPES_DOCS_URL} external>
-          {DIFFERENT_SYNC_TYPES_LINK_LABEL}
-        </EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiLink href={SYNC_BEST_PRACTICES_DOCS_URL} external>
-          {SYNC_BEST_PRACTICES_LINK_LABEL}
-        </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <SourceLayout
       pageChrome={[
@@ -108,15 +94,21 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
       isLoading={false}
     >
       <UnsavedChangesPrompt
-        hasUnsavedChanges={hasUnsavedFrequencyChanges}
+        hasUnsavedChanges={!navigatingBetweenTabs && hasUnsavedFrequencyChanges}
         messageText={SYNC_UNSAVED_CHANGES_MESSAGE}
       />
       <ViewContentHeader
         title={NAV.SYNCHRONIZATION_FREQUENCY}
-        description={SOURCE_FREQUENCY_DESCRIPTION}
+        description={
+          <>
+            {SOURCE_FREQUENCY_DESCRIPTION}{' '}
+            <EuiLink href={DIFFERENT_SYNC_TYPES_DOCS_URL} external>
+              {LEARN_MORE_LINK}
+            </EuiLink>
+          </>
+        }
         action={actions}
       />
-      {docsLinks}
       <EuiSpacer />
       <EuiTabbedContent tabs={tabs} selectedTab={tabs[tabId]} onTabClick={onSelectedTabChanged} />
     </SourceLayout>

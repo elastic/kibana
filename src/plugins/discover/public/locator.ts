@@ -69,7 +69,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort?: string[][] & SerializableRecord;
+  sort?: string[][];
 
   /**
    * id of the used saved query
