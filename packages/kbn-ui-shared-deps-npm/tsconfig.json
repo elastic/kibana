@@ -10,8 +10,7 @@
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-ui-shared-deps-npm/src",
     "types": [
-      "node",
-      "resize-observer-polyfill"
+      "node"
     ]
   },
   "include": [

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type ResizeObserver from 'resize-observer-polyfill';
 import type React from 'react';
 import { Store, Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
@@ -576,14 +575,6 @@ export type ProcessWithWidthMetadata = {
 );
 
 /**
- * The constructor for a ResizeObserver
- */
-interface ResizeObserverConstructor {
-  prototype: ResizeObserver;
-  new (callback: ResizeObserverCallback): ResizeObserver;
-}
-
-/**
  * Functions that introduce side effects. A React context provides these, and they may be mocked in tests.
  */
 export interface SideEffectors {
@@ -599,10 +590,6 @@ export interface SideEffectors {
    * Use instead of `window.cancelAnimationFrame`
    **/
   cancelAnimationFrame: typeof window.cancelAnimationFrame;
-  /**
-   * Use instead of the `ResizeObserver` global.
-   */
-  ResizeObserver: ResizeObserverConstructor;
   /**
    * Use this instead of the Clipboard API's `writeText` method.
    */

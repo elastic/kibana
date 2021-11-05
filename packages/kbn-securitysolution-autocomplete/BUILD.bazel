@@ -55,7 +55,6 @@ TYPES_DEPS = [
   "@npm//@testing-library/react",
   "@npm//@testing-library/react-hooks",
   "@npm//moment",
-  "@npm//resize-observer-polyfill",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",

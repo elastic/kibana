@@ -77,7 +77,6 @@ TYPES_DEPS = [
   "@npm//jest-diff",
   "@npm//lmdb-store",
   "@npm//pirates",
-  "@npm//resize-observer-polyfill",
   "@npm//rxjs",
   "@npm//zlib",
   "@npm//@types/compression-webpack-plugin",
