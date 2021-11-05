@@ -83,14 +83,6 @@ export const NoLogging: React.FC<Props> = ({ type, disabledAt }) => {
   );
 };
 
-export const ILMDisabled: React.FC<Props> = ({ type }) => (
-  <FormattedMessage
-    id="xpack.enterpriseSearch.appSearch.logRetention.ilmDisabled"
-    defaultMessage="App Search isn't managing {logsType} log retention."
-    values={{ logsType: CAPITALIZATION_MAP[type].lowercase }}
-  />
-);
-
 export const CustomPolicy: React.FC<Props> = ({ type }) => (
   <FormattedMessage
     id="xpack.enterpriseSearch.appSearch.logRetention.customPolicy"

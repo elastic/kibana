@@ -46,7 +46,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
     settings: {
       external_url: 'http://some.vanity.url/',
       read_only_mode: false,
-      ilm_enabled: true,
       is_federated_auth: false,
       search_oauth: {
         client_id: 'someUID',
@@ -139,7 +138,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       },
       publicUrl: undefined,
       readOnlyMode: false,
-      ilmEnabled: false,
       searchOAuth: {
         clientId: undefined,
         redirectUrl: undefined,
