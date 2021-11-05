@@ -45,17 +45,13 @@ interface SourcererComponentProps {
 
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
+  const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
 
   const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(false);
 
   const isOnlyDetectionAlerts: boolean =
-    scopeId === SourcererScopeName.detections ||
-    (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
-
-  const onCheckboxChanged = useCallback((e) => {
-    setIsOnlyDetectionAlertsChecked(e.target.checked);
-  }, []);
+    isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
 
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
@@ -66,21 +62,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const defaultSelectedDataView = selectedDataViewId ?? defaultDataView.id;
-  const [dataViewId, setDataViewId] = useState<string>(defaultSelectedDataView);
-
-  const alertsOptions = useMemo(
-    () =>
-      signalIndexName
-        ? [
-            {
-              label: signalIndexName,
-              value: signalIndexName,
-            },
-          ]
-        : [],
-    [signalIndexName]
-  );
+  const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? defaultDataView.id);
 
   const {
     isModified,
@@ -90,7 +72,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     selectedOptions,
     setIndexPatternsByDataView,
   } = usePickIndexPatterns({
-    alertsOptions,
     dataViewId,
     defaultDataViewId: defaultDataView.id,
     isOnlyDetectionAlerts,
@@ -99,7 +80,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     selectedPatterns,
     signalIndexName,
   });
-
+  const onCheckboxChanged = useCallback(
+    (e) => {
+      setDataViewId(defaultDataView.id);
+      setIndexPatternsByDataView(defaultDataView.id);
+      setIsOnlyDetectionAlertsChecked(e.target.checked);
+    },
+    [defaultDataView.id, setIndexPatternsByDataView]
+  );
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
   const [expandAdvancedOptions, setExpandAdvancedOptions] = useState(false);
 
@@ -129,15 +117,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   const resetDataSources = useCallback(() => {
-    setDataViewId(defaultSelectedDataView);
-    setIndexPatternsByDataView(defaultSelectedDataView);
-  }, [defaultSelectedDataView, setIndexPatternsByDataView]);
+    setDataViewId(defaultDataView.id);
+    setIndexPatternsByDataView(defaultDataView.id);
+    setIsOnlyDetectionAlertsChecked(false);
+  }, [defaultDataView.id, setIndexPatternsByDataView]);
 
   const handleSaveIndices = useCallback(() => {
-    onChangeDataView(
-      dataViewId,
-      selectedOptions.map((so) => so.label)
-    );
+    const patterns = selectedOptions.map((so) => so.label);
+    onChangeDataView(dataViewId, patterns);
     setPopoverIsOpen(false);
   }, [onChangeDataView, dataViewId, selectedOptions]);
 
@@ -158,15 +145,15 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         title={i18n.DATA_VIEW}
       >
         {i18n.DATA_VIEW}
-        {isModified && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
-        {isOnlyDetectionAlerts && (
+        {isModified === 'modified' && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
+        {isModified === 'alerts' && (
           <StyledBadge data-test-subj="sourcerer-alerts-badge">
             {i18n.ALERTS_BADGE_TITLE}
           </StyledBadge>
         )}
       </StyledButton>
     ),
-    [isTimelineSourcerer, loading, setPopoverIsOpenCb, isModified, isOnlyDetectionAlerts]
+    [isTimelineSourcerer, loading, setPopoverIsOpenCb, isModified]
   );
 
   const dataViewSelectOptions = useMemo(
@@ -174,7 +161,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       getDataViewSelectOptions({
         dataViewId,
         defaultDataView,
-        isModified,
+        isModified: isModified === 'modified',
         isOnlyDetectionAlerts,
         kibanaDataViews,
       }),
@@ -187,7 +174,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         ? selectedDataViewId
         : prevSelectedOption
     );
-  }, [isOnlyDetectionAlerts, selectedDataViewId]);
+  }, [selectedDataViewId]);
 
   const tooltipContent = useMemo(
     () =>
@@ -281,45 +268,44 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             <EuiComboBox
               data-test-subj="sourcerer-combo-box"
               fullWidth
+              isDisabled={isOnlyDetectionAlerts}
               onChange={onChangeCombo}
               options={selectableOptions}
               placeholder={i18n.PICK_INDEX_PATTERNS}
               renderOption={renderOption}
               selectedOptions={selectedOptions}
-              isDisabled={isOnlyDetectionAlerts}
             />
           </FormRow>
 
-          {!isOnlyDetectionAlerts ||
-            (isTimelineSourcerer && (
-              <StyledFormRow>
-                <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <ResetButton
-                      aria-label={i18n.INDEX_PATTERNS_RESET}
-                      data-test-subj="sourcerer-reset"
-                      flush="left"
-                      onClick={resetDataSources}
-                      title={i18n.INDEX_PATTERNS_RESET}
-                    >
-                      {i18n.INDEX_PATTERNS_RESET}
-                    </ResetButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={handleSaveIndices}
-                      disabled={isSavingDisabled}
-                      data-test-subj="sourcerer-save"
-                      fill
-                      fullWidth
-                      size="s"
-                    >
-                      {i18n.SAVE_INDEX_PATTERNS}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </StyledFormRow>
-            ))}
+          {!isDetectionsSourcerer && (
+            <StyledFormRow>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <ResetButton
+                    aria-label={i18n.INDEX_PATTERNS_RESET}
+                    data-test-subj="sourcerer-reset"
+                    flush="left"
+                    onClick={resetDataSources}
+                    title={i18n.INDEX_PATTERNS_RESET}
+                  >
+                    {i18n.INDEX_PATTERNS_RESET}
+                  </ResetButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={handleSaveIndices}
+                    disabled={isSavingDisabled}
+                    data-test-subj="sourcerer-save"
+                    fill
+                    fullWidth
+                    size="s"
+                  >
+                    {i18n.SAVE_INDEX_PATTERNS}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </StyledFormRow>
+          )}
           <EuiSpacer size="s" />
         </EuiForm>
       </PopoverContent>

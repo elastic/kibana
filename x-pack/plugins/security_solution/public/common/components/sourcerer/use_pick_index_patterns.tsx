@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererModel } from '../../store/sourcerer';
 import { getPatternListWithoutSignals } from './helpers';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface UsePickIndexPatternsProps {
-  alertsOptions: Array<EuiComboBoxOptionOption<string>>;
   dataViewId: string;
   defaultDataViewId: string;
   isOnlyDetectionAlerts: boolean;
@@ -21,8 +21,11 @@ interface UsePickIndexPatternsProps {
   selectedPatterns: string[];
   signalIndexName: string | null;
 }
+
+export type ModifiedTypes = 'modified' | 'alerts' | '';
+
 interface UsePickIndexPatterns {
-  isModified: boolean;
+  isModified: ModifiedTypes;
   onChangeCombo: (newSelectedDataViewId: Array<EuiComboBoxOptionOption<string>>) => void;
   renderOption: ({ value }: EuiComboBoxOptionOption<string>) => React.ReactElement;
   selectableOptions: Array<EuiComboBoxOptionOption<string>>;
@@ -30,8 +33,14 @@ interface UsePickIndexPatterns {
   setIndexPatternsByDataView: (newSelectedDataViewId: string) => void;
 }
 
+const patternListToOptions = (patternList: string[], selectablePatterns?: string[]) =>
+  patternList.map((s) => ({
+    label: s,
+    value: s,
+    ...(selectablePatterns != null ? { disabled: !selectablePatterns.includes(s) } : {}),
+  }));
+
 export const usePickIndexPatterns = ({
-  alertsOptions,
   dataViewId,
   defaultDataViewId,
   isOnlyDetectionAlerts,
@@ -40,6 +49,11 @@ export const usePickIndexPatterns = ({
   selectedPatterns,
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
+  const alertsOptions = useMemo(
+    () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
+    [signalIndexName]
+  );
+
   const { patternList, selectablePatterns } = useMemo(() => {
     if (isOnlyDetectionAlerts && signalIndexName) {
       return {
@@ -74,59 +88,63 @@ export const usePickIndexPatterns = ({
   }, [dataViewId, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]);
 
   const selectableOptions = useMemo(
-    () =>
-      patternList.map((indexName) => ({
-        label: indexName,
-        value: indexName,
-        disabled: !selectablePatterns.includes(indexName),
-      })),
+    () => patternListToOptions(patternList, selectablePatterns),
     [patternList, selectablePatterns]
   );
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    isOnlyDetectionAlerts
-      ? alertsOptions
-      : selectedPatterns.map((indexName) => ({
-          label: indexName,
-          value: indexName,
-        }))
+    isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(selectedPatterns)
   );
 
   const getDefaultSelectedOptionsByDataView = useCallback(
     (id: string): Array<EuiComboBoxOptionOption<string>> =>
-      isOnlyDetectionAlerts
+      scopeId === SourcererScopeName.detections
         ? alertsOptions
-        : getScopePatternListSelection(
-            kibanaDataViews.find((dataView) => dataView.id === id),
-            scopeId,
-            signalIndexName,
-            id === defaultDataViewId
-          ).map((indexSelected: string) => ({
-            label: indexSelected,
-            value: indexSelected,
-          })),
-    [
-      alertsOptions,
-      isOnlyDetectionAlerts,
-      kibanaDataViews,
-      scopeId,
-      signalIndexName,
-      defaultDataViewId,
-    ]
+        : patternListToOptions(
+            getScopePatternListSelection(
+              kibanaDataViews.find((dataView) => dataView.id === id),
+              scopeId,
+              signalIndexName,
+              id === defaultDataViewId
+            )
+          ),
+    [alertsOptions, kibanaDataViews, scopeId, signalIndexName, defaultDataViewId]
   );
 
-  const defaultSelectedOptions = useMemo(
+  const defaultSelectedPatternsAsOptions = useMemo(
     () => getDefaultSelectedOptionsByDataView(dataViewId),
     [dataViewId, getDefaultSelectedOptionsByDataView]
   );
 
-  const isModified = useMemo(
-    () =>
-      defaultSelectedOptions.length !== selectedOptions.length ||
-      !defaultSelectedOptions.every((option) =>
-        selectedOptions.find((selectedOption) => option.value === selectedOption.value)
-      ),
-    [defaultSelectedOptions, selectedOptions]
+  const [isModified, setIsModified] = useState<'modified' | 'alerts' | ''>('');
+  const onSetIsModified = useCallback(
+    (patterns?: string[]) => {
+      if (isOnlyDetectionAlerts) {
+        return setIsModified('alerts');
+      }
+      const modifiedPatterns = patterns != null ? patterns : selectedPatterns;
+      const isPatternsModified =
+        dataViewId !== defaultDataViewId ||
+        defaultSelectedPatternsAsOptions.length !== modifiedPatterns.length ||
+        !defaultSelectedPatternsAsOptions.every((option) =>
+          modifiedPatterns.find((pattern) => option.value === pattern)
+        );
+
+      return setIsModified(isPatternsModified ? 'modified' : '');
+    },
+    [
+      dataViewId,
+      defaultDataViewId,
+      defaultSelectedPatternsAsOptions,
+      isOnlyDetectionAlerts,
+      selectedPatterns,
+    ]
   );
+
+  // when scope updates, check modified to set/remove alerts label
+  useEffect(() => {
+    onSetIsModified();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scopeId, selectedPatterns]);
 
   const onChangeCombo = useCallback((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);
