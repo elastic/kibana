@@ -54,17 +54,11 @@ export function useLatencyCorrelations() {
     []
   );
 
-  // `abortCtrl` is used to cancel individual requests that already started.
-  // `isCancelledRef` is used to cancel the overall task in between requests in the `startFetch` callback.
   const abortCtrl = useRef(new AbortController());
-  // We're using a ref here because otherwise the startFetch function might have
-  // a stale value for checking if the task has been cancelled.
-  const isCancelledRef = useRef(false);
 
   const startFetch = useCallback(async () => {
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
-    isCancelledRef.current = false;
 
     setResponse({
       ...getInitialResponse(),
@@ -100,7 +94,7 @@ export function useLatencyCorrelations() {
       responseUpdate.overallHistogram = overallHistogram;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
-      if (isCancelledRef.current) {
+      if (abortCtrl.current.signal.aborted) {
         return;
       }
 
@@ -118,7 +112,7 @@ export function useLatencyCorrelations() {
         },
       });
 
-      if (isCancelledRef.current) {
+      if (abortCtrl.current.signal.aborted) {
         return;
       }
 
@@ -149,7 +143,7 @@ export function useLatencyCorrelations() {
           fieldValuePairs.push(...fieldValuePairChunkResponse.fieldValuePairs);
         }
 
-        if (isCancelledRef.current) {
+        if (abortCtrl.current.signal.aborted) {
           return;
         }
 
@@ -162,7 +156,7 @@ export function useLatencyCorrelations() {
         });
       }
 
-      if (isCancelledRef.current) {
+      if (abortCtrl.current.signal.aborted) {
         return;
       }
 
@@ -206,7 +200,7 @@ export function useLatencyCorrelations() {
               PROGRESS_STEP_CORRELATIONS,
         });
 
-        if (isCancelledRef.current) {
+        if (abortCtrl.current.signal.aborted) {
           return;
         }
       }
@@ -232,7 +226,7 @@ export function useLatencyCorrelations() {
       });
       setResponse.flush();
     } catch (e) {
-      if (!isCancelledRef.current) {
+      if (!abortCtrl.current.signal.aborted) {
         const err = e as Error | IHttpFetchError<ResponseErrorBody>;
         setResponse({
           error:
@@ -247,7 +241,6 @@ export function useLatencyCorrelations() {
   }, [fetchParams, setResponse]);
 
   const cancelFetch = useCallback(() => {
-    isCancelledRef.current = true;
     abortCtrl.current.abort();
     setResponse({
       isRunning: false,
@@ -259,7 +252,6 @@ export function useLatencyCorrelations() {
   useEffect(() => {
     startFetch();
     return () => {
-      isCancelledRef.current = true;
       abortCtrl.current.abort();
     };
   }, [startFetch, cancelFetch]);

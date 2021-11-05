@@ -52,17 +52,11 @@ export function useFailedTransactionsCorrelations() {
     []
   );
 
-  // `abortCtrl` is used to cancel individual requests that already started.
-  // `isCancelledRef` is used to cancel the overall task in between requests in the `startFetch` callback.
   const abortCtrl = useRef(new AbortController());
-  // We're using a ref here because otherwise the startFetch function might have
-  // a stale value for checking if the task has been cancelled.
-  const isCancelledRef = useRef(false);
 
   const startFetch = useCallback(async () => {
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
-    isCancelledRef.current = false;
 
     setResponse({
       ...getInitialResponse(),
@@ -85,36 +79,46 @@ export function useFailedTransactionsCorrelations() {
         ccsWarning: false,
       };
 
-      // Initial call to fetch the overall distribution for the log-log plot.
-      const { overallHistogram, percentileThresholdValue } = await callApmApi({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
-        signal: abortCtrl.current.signal,
-        params: {
-          body: {
-            ...fetchParams,
-            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-          },
-        },
-      });
+      const [overallHistogramResponse, errorHistogramRespone] =
+        await Promise.all([
+          // Initial call to fetch the overall distribution for the log-log plot.
+          callApmApi({
+            endpoint: 'POST /internal/apm/latency/overall_distribution',
+            signal: abortCtrl.current.signal,
+            params: {
+              body: {
+                ...fetchParams,
+                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              },
+            },
+          }),
+          callApmApi({
+            endpoint: 'POST /internal/apm/latency/overall_distribution',
+            signal: abortCtrl.current.signal,
+            params: {
+              body: {
+                ...fetchParams,
+                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                termFilters: [
+                  {
+                    fieldName: EVENT_OUTCOME,
+                    fieldValue: EventOutcome.failure,
+                  },
+                ],
+              },
+            },
+          }),
+        ]);
+
+      const { overallHistogram, percentileThresholdValue } =
+        overallHistogramResponse;
+      const { overallHistogram: errorHistogram } = errorHistogramRespone;
+
+      responseUpdate.errorHistogram = errorHistogram;
       responseUpdate.overallHistogram = overallHistogram;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
-      const { overallHistogram: errorHistogram } = await callApmApi({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
-        signal: abortCtrl.current.signal,
-        params: {
-          body: {
-            ...fetchParams,
-            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-            termFilters: [
-              { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
-            ],
-          },
-        },
-      });
-      responseUpdate.errorHistogram = errorHistogram;
-
-      if (isCancelledRef.current) {
+      if (abortCtrl.current.signal.aborted) {
         return;
       }
 
@@ -132,7 +136,7 @@ export function useFailedTransactionsCorrelations() {
         },
       });
 
-      if (isCancelledRef.current) {
+      if (abortCtrl.current.signal.aborted) {
         return;
       }
 
@@ -182,7 +186,7 @@ export function useFailedTransactionsCorrelations() {
               PROGRESS_STEP_P_VALUES,
         });
 
-        if (isCancelledRef.current) {
+        if (abortCtrl.current.signal.aborted) {
           return;
         }
       }
@@ -204,7 +208,7 @@ export function useFailedTransactionsCorrelations() {
       setResponse({ ...responseUpdate, loaded: LOADED_DONE, isRunning: false });
       setResponse.flush();
     } catch (e) {
-      if (!isCancelledRef.current) {
+      if (!abortCtrl.current.signal.aborted) {
         const err = e as Error | IHttpFetchError<ResponseErrorBody>;
         setResponse({
           error:
@@ -219,7 +223,6 @@ export function useFailedTransactionsCorrelations() {
   }, [fetchParams, setResponse]);
 
   const cancelFetch = useCallback(() => {
-    isCancelledRef.current = true;
     abortCtrl.current.abort();
     setResponse({
       isRunning: false,
@@ -231,7 +234,6 @@ export function useFailedTransactionsCorrelations() {
   useEffect(() => {
     startFetch();
     return () => {
-      isCancelledRef.current = true;
       abortCtrl.current.abort();
     };
   }, [startFetch, cancelFetch]);
