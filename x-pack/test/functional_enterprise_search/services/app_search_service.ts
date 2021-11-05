@@ -22,7 +22,7 @@ export interface IUser {
   user: string;
   password: string;
 }
-export { IEngine };
+export type { IEngine };
 
 export class AppSearchService {
   getEnterpriseSearchUser(): IUser {

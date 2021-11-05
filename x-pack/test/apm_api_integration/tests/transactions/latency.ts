@@ -12,12 +12,12 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
 
 type LatencyChartReturnType =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
@@ -113,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
@@ -138,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
@@ -165,10 +165,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
           expectSnapshot(latencyChartReturn.currentPeriod.overallAvgDuration).toMatchInline(
-            `53147.5747663551`
+            `53906.6603773585`
           );
 
-          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(61);
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(31);
         });
       });
 
