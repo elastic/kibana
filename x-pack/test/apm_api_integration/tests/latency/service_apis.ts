@@ -11,9 +11,9 @@ import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_a
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 

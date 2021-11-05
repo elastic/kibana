@@ -11,13 +11,13 @@ import {
 } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { config, generateData } from './generate_data';
 
 type ErrorsDistribution =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 

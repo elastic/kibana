@@ -13,11 +13,11 @@ import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_n
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
 import { createApmApiClient } from '../../common/apm_api_supertest';
 import { getServiceNodeIds } from './get_service_node_ids';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
   const apmApiSupertest = createApmApiClient(supertest);
 
