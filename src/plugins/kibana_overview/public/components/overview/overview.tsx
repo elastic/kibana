@@ -84,6 +84,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     solution: i18n.translate('kibanaOverview.noDataConfig.solutionName', {
       defaultMessage: `Analytics`,
     }),
+    pageTitle: i18n.translate('kibanaOverview.noDataConfig.pageTitle', {
+      defaultMessage: `Welcome to Analytics!`,
+    }),
     logo: 'logoKibana',
     actions: {
       elasticAgent: {
