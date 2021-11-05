@@ -19,7 +19,7 @@ export interface LayoutSelectorDictionary {
   timefilterDurationAttribute: string;
 }
 
-export { LayoutParams, PageSizeParams, PdfImageSize, Size } from '../../../common/types';
+export type { LayoutParams, PageSizeParams, PdfImageSize, Size } from '../../../common/types';
 export { CanvasLayout } from './canvas_layout';
 export { createLayout } from './create_layout';
 export type { Layout } from './layout';
