@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
-import { XOR } from './common';
+import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
+import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import type { XOR } from './common';
+import type { DeploymentState } from '../constants/trained_models';
 
 export interface IngestStats {
   count: number;
@@ -128,7 +129,7 @@ export interface TrainedModelDeploymentStatsResponse {
   model_size_bytes: number;
   inference_threads: number;
   model_threads: number;
-  state: string;
+  state: DeploymentState;
   allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
   nodes: Array<{
     node: Record<

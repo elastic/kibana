@@ -53,6 +53,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
+import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -406,8 +407,12 @@ export const ModelsList: FC = () => {
       icon: 'play',
       type: 'icon',
       isPrimary: true,
-      enabled: (item) =>
-        !isLoading && !['started', 'starting'].includes(item.stats?.deployment_stats?.state ?? ''),
+      enabled: (item) => {
+        const { state } = item.stats?.deployment_stats ?? {};
+        return (
+          !isLoading && state !== DEPLOYMENT_STATE.STARTED && state !== DEPLOYMENT_STATE.STARTING
+        );
+      },
       available: (item) => item.model_type === 'pytorch',
       onClick: async (item) => {
         try {
@@ -451,7 +456,7 @@ export const ModelsList: FC = () => {
         !isLoading &&
         !isPopulatedObject(item.pipelines) &&
         isPopulatedObject(item.stats?.deployment_stats) &&
-        item.stats?.deployment_stats?.state !== 'stopped',
+        item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
       onClick: async (item) => {
         try {
           setIsLoading(true);
