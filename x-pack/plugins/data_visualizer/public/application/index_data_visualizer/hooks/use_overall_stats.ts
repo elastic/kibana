@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { combineLatest, forkJoin, of, Subscription } from 'rxjs';
+import { forkJoin, of, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from 'kibana/public';
@@ -113,7 +113,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     };
     const nonAggregatableOverallStats$ =
       nonAggregatableFields.length > 0
-        ? combineLatest(
+        ? forkJoin(
             nonAggregatableFields.map((fieldName: string) =>
               data.search
                 .search<IKibanaSearchRequest, IKibanaSearchResponse>(
