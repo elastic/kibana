@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-export { Props, ProcessorsEditorContextProvider } from './context';
+export type { Props } from './context';
+export { ProcessorsEditorContextProvider } from './context';
 
-export { OnUpdateHandlerArg, OnUpdateHandler } from './types';
+export type { OnUpdateHandlerArg, OnUpdateHandler } from './types';
 
-export { SerializeResult } from './serialize';
+export type { SerializeResult } from './serialize';
 
-export { OnDoneLoadJsonHandler } from './components';
+export type { OnDoneLoadJsonHandler } from './components';
 
 export { PipelineEditor } from './pipeline_editor';
