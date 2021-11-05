@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError } from 'src/core/public';
 
 export interface AsyncInitState<ReduceStateType> {
   data: ReduceStateType | null;
   loading: boolean;
-  error?: IHttpFetchError<ResponseErrorBody> | null;
+  error?: IHttpFetchError | null;
 }

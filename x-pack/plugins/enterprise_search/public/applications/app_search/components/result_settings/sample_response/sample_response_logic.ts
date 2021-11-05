@@ -14,7 +14,6 @@ import { flashAPIErrors } from '../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../shared/http';
 import { EngineLogic } from '../../engine';
 
-import { FieldValue } from '../../result/types';
 import { SampleSearchResponse, ServerFieldResultSettingObject } from '../types';
 
 const NO_RESULTS_MESSAGE = i18n.translate(
@@ -72,7 +71,7 @@ export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, Sampl
       const url = `/internal/app_search/engines/${engineName}/search`;
 
       try {
-        const response = await http.post<{ results: Array<Record<string, FieldValue>> }>(url, {
+        const response = await http.post(url, {
           query: { query },
           body: JSON.stringify({
             page: {
@@ -85,7 +84,6 @@ export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, Sampl
 
         const result = response.results?.[0];
         actions.getSearchResultsSuccess(
-          // @ts-expect-error TS2345
           result ? { ...result, _meta: undefined } : NO_RESULTS_MESSAGE
         );
       } catch (e) {

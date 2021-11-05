@@ -21,7 +21,7 @@ export const useAgentPolicy = ({ policyId, skip, silent }: UseAgentPolicy) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<any, Error>(
+  return useQuery(
     ['agentPolicy', { policyId }],
     () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
     {

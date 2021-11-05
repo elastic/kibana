@@ -20,9 +20,7 @@ import {
 } from '../../../common/runtime_types/ping/synthetics';
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  return apiService.post<ScreenshotBlockDoc[]>('/api/uptime/journey/screenshot/block', {
-    hashes: params,
-  });
+  return apiService.post('/api/uptime/journey/screenshot/block', { hashes: params });
 }
 
 export async function fetchJourneySteps(
