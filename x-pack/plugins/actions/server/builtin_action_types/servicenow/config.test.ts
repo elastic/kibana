@@ -44,7 +44,7 @@ describe('config', () => {
       importSetTable: 'x_elas2_inc_int_elastic_incident',
       appScope: 'x_elas2_inc_int',
       table: 'em_event',
-      useImportAPI: true,
+      useImportAPI: false,
       commentFieldKey: 'work_notes',
     });
   });
