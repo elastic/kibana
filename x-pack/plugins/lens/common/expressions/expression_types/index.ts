@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { lensMultitable, LensMultitableExpressionTypeDefinition } from './lens_multitable';
+export { lensMultitable } from './lens_multitable';
+export type { LensMultitableExpressionTypeDefinition } from './lens_multitable';
