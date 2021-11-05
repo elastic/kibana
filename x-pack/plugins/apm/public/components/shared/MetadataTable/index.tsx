@@ -20,7 +20,7 @@ import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { HeightRetainer } from '../HeightRetainer';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { filterSectionsByTerm } from './helper';
@@ -36,7 +36,7 @@ interface Props {
 export function MetadataTable({ sections, isLoading }: Props) {
   const history = useHistory();
   const location = useLocation();
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { searchTerm = '' } = urlParams;
   const { docLinks } = useApmPluginContext().core;
 

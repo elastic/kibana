@@ -30,7 +30,6 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
-import { sourcererSelectors } from '../../../common/store';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 import {
@@ -39,6 +38,8 @@ import {
   endSelector,
 } from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -180,11 +181,8 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     globalFullScreen,
   ]);
 
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
-  );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+
   if (fullScreen && !isInTimeline) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">
@@ -206,7 +204,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
           <StyledResolver
             databaseDocumentID={graphEventId}
             resolverComponentInstanceID={timelineId}
-            indices={existingIndexNames}
+            indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
           />
@@ -238,7 +236,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
           <StyledResolver
             databaseDocumentID={graphEventId}
             resolverComponentInstanceID={timelineId}
-            indices={existingIndexNames}
+            indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
           />

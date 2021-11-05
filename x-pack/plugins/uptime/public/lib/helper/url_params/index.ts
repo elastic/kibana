@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { UptimeUrlParams, getSupportedUrlParams } from './get_supported_url_params';
+export type { UptimeUrlParams } from './get_supported_url_params';
+export { getSupportedUrlParams } from './get_supported_url_params';
