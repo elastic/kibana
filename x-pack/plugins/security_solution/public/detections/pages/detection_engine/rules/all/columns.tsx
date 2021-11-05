@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as H from 'history';
 import { sum } from 'lodash';
 import React, { Dispatch } from 'react';
@@ -36,7 +36,6 @@ import {
   exportRulesAction,
 } from './actions';
 import { RulesTableAction } from '../../../../containers/detection_engine/rules/rules_table';
-import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { PopoverTooltip } from './popover_tooltip';
@@ -200,9 +199,12 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
-            <FormattedRelative value={value} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+            relativeThresholdInHrs={24}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
       width: '14%',
