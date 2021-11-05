@@ -174,9 +174,7 @@ describe('<PipelinesCreateFromCsv />', () => {
           expect(exists('pipelineMappingsJSONEditor')).toBe(true);
 
           expect(exists('continueToCreate')).toBe(true);
-          expect(find('continueToCreate').text()).toContain(
-            'Continue to create pipeline'
-          );
+          expect(find('continueToCreate').text()).toContain('Continue to create pipeline');
 
           expect(exists('copyToClipboard')).toBe(true);
           expect(find('copyToClipboard').text()).toContain('Copy JSON');
