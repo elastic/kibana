@@ -38,8 +38,6 @@ const LOADED_DONE = 1;
 const PROGRESS_STEP_P_VALUES = 0.9;
 
 export function useFailedTransactionsCorrelations() {
-  const abortCtrl = useRef(new AbortController());
-
   const fetchParams = useFetchParams();
 
   // This use of useReducer (the dispatch function won't get reinstantiated
@@ -54,6 +52,9 @@ export function useFailedTransactionsCorrelations() {
     []
   );
 
+  // `abortCtrl` is used to cancel individual requests that already started.
+  // `isCancelledRef` is used to cancel the overall task in between requests in the `startFetch` callback.
+  const abortCtrl = useRef(new AbortController());
   // We're using a ref here because otherwise the startFetch function might have
   // a stale value for checking if the task has been cancelled.
   const isCancelledRef = useRef(false);
