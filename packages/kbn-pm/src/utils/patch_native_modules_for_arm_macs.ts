@@ -30,7 +30,7 @@ export async function patchNativeModulesForArmMacs(log: ToolingLog, kibanaProjec
   }
 
   if (!Fs.existsSync(re2NativeDist)) {
-    log.info('"Running build script for re2');
+    log.info('Running build script for re2');
     await spawn('npm', ['run', 'rebuild'], {
       cwd: re2Dir,
     });
