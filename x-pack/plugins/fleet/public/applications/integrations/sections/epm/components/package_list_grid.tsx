@@ -235,7 +235,7 @@ function MissingIntegrationContent({
       <p>
         <FormattedMessage
           id="xpack.fleet.integrations.missing"
-          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations is our {forumLink}."
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations in our {forumLink}."
           values={{
             customInputsLink: (
               <EuiLink onClick={handleCustomInputsLinkClick}>
