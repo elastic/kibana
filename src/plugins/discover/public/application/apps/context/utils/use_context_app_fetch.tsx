@@ -160,29 +160,19 @@ export function useContextAppFetch({
     [fetchSurroundingRows]
   );
 
-  const fetchAllRows = useCallback(
-    (reset: boolean = false) => {
-      if (reset) {
-        const resetState = {
-          ...fetchedState,
-          predecessors: [],
-          successors: [],
-          anchorStatus: { value: LoadingStatus.LOADING },
-          predecessorsStatus: { value: LoadingStatus.LOADING },
-          successorsStatus: { value: LoadingStatus.LOADING },
-        };
-        setFetchedState(resetState);
-      }
+  const fetchAllRows = useCallback(() => {
+    fetchAnchorRow().then((anchor) => anchor && fetchContextRows(anchor));
+  }, [fetchAnchorRow, fetchContextRows]);
 
-      fetchAnchorRow().then((anchor) => anchor && fetchContextRows(anchor));
-    },
-    [fetchAnchorRow, fetchContextRows, setFetchedState, fetchedState]
-  );
+  const resetFetchedState = useCallback(() => {
+    setFetchedState(getInitialContextQueryState());
+  }, []);
 
   return {
     fetchedState,
     fetchAllRows,
     fetchContextRows,
     fetchSurroundingRows,
+    resetFetchedState,
   };
 }

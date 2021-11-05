@@ -50,22 +50,30 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   /**
    * Context fetched state
    */
-  const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows } = useContextAppFetch(
-    {
+  const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows, resetFetchedState } =
+    useContextAppFetch({
       anchorId,
       indexPattern,
       appState,
       useNewFieldsApi,
       services,
+    });
+  /**
+   * Reset state when anchor changes
+   */
+  useEffect(() => {
+    if (prevAppState.current) {
+      prevAppState.current = undefined;
+      resetFetchedState();
     }
-  );
+  }, [anchorId, resetFetchedState]);
 
   /**
    * Fetch docs on ui changes
    */
   useEffect(() => {
-    if (!prevAppState.current || fetchedState.anchor._id !== anchorId) {
-      fetchAllRows(fetchedState.anchor._id && fetchedState.anchor._id !== anchorId);
+    if (!prevAppState.current) {
+      fetchAllRows();
     } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
       fetchSurroundingRows(SurrDocType.PREDECESSORS);
     } else if (prevAppState.current.successorCount !== appState.successorCount) {
