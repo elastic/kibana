@@ -47,6 +47,7 @@ import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
   LensBrushEvent,
   LensFilterEvent,
@@ -432,7 +433,7 @@ export class Embeddable
     return output;
   }
 
-  handleEvent = (event: ExpressionRendererEvent) => {
+  handleEvent = async (event: ExpressionRendererEvent) => {
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }
@@ -466,6 +467,31 @@ export class Embeddable
       );
       if (this.input.onTableRowClick) {
         this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
+      }
+    }
+
+    // TODO - inject this from datatable_visualization/visualization
+    const onEditAction = (state, event) => {
+      switch (event.data.action) {
+        case 'sort':
+          return {
+            ...state,
+            sorting: {
+              columnId: event.data.columnId,
+              direction: event.data.direction,
+            },
+          };
+        };
+    };
+
+    if (isLensEditEvent(event)) {
+      if (this.savedVis) {
+        const newSavedVis = JSON.parse(JSON.stringify(this.savedVis));
+        newSavedVis.state.visualization = onEditAction(this.savedVis.state.visualization, event);
+        const { ast, errors } = await this.deps.documentToExpression(newSavedVis);
+        this.errors = errors;
+        this.expression = ast ? toExpression(ast) : null;
+        this.reload();
       }
     }
   };
