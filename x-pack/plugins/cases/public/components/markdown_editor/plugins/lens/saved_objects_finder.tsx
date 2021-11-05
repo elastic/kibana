@@ -201,10 +201,10 @@ export class SavedObjectFinderUi extends React.Component<
 
   public render() {
     return (
-      <React.Fragment>
+      <>
         {this.renderSearchBar()}
         {this.renderListing()}
-      </React.Fragment>
+      </>
     );
   }
 
@@ -481,16 +481,23 @@ export class SavedObjectFinderUi extends React.Component<
               {items.map((item) => {
                 const currentSavedObjectMetaData = savedObjectMetaData.find(
                   (metaData) => metaData.type === item.type
-                )!;
+                );
+
+                if (currentSavedObjectMetaData == null) {
+                  return null;
+                }
+
                 const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
                   ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
-                  : `${item.title} (${currentSavedObjectMetaData!.name})`;
+                  : `${item.title} (${currentSavedObjectMetaData.name})`;
+
                 const iconType = (
                   currentSavedObjectMetaData ||
                   ({
                     getIconForSavedObject: () => 'document',
                   } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
                 ).getIconForSavedObject(item.savedObject);
+
                 return (
                   <EuiListGroupItem
                     key={item.id}
