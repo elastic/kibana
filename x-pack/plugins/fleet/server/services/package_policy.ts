@@ -620,13 +620,6 @@ class PackagePolicyService {
           success: true,
         });
       } catch (error) {
-        // We only want to specifically handle validation errors for the new package policy. If a more severe or
-        // general error is thrown elsewhere during the upgrade process, we want to surface that directly in
-        // order to preserve any status code mappings, etc that might be included w/ the particular error type
-        if (!(error instanceof PackagePolicyValidationError)) {
-          throw error;
-        }
-
         result.push({
           id,
           success: false,
@@ -704,10 +697,6 @@ class PackagePolicyService {
         hasErrors,
       };
     } catch (error) {
-      if (!(error instanceof PackagePolicyValidationError)) {
-        throw error;
-      }
-
       return {
         hasErrors: true,
         ...ingestErrorToResponseOptions(error),

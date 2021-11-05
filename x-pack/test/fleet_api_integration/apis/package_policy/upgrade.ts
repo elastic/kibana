@@ -570,16 +570,14 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('upgrade', function () {
         it('fails to upgrade package policy', async function () {
-          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+          await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
               dryRun: false,
             })
-            .expect(200);
-
-          expect(body[0].success).to.be(false);
+            .expect(400);
         });
       });
     });
@@ -672,16 +670,14 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('upgrade', function () {
         it('fails to upgrade package policy', async function () {
-          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+          await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
               dryRun: false,
             })
-            .expect(200);
-
-          expect(body[0].success).to.be(false);
+            .expect(400);
         });
       });
     });
