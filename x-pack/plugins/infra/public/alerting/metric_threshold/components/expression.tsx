@@ -19,6 +19,7 @@ import {
   EuiFieldSearch,
   EuiAccordion,
   EuiPanel,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -58,7 +59,7 @@ export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, metadata } = props;
-  const { http, notifications } = useKibanaContextForPlugin().services;
+  const { http, notifications, docLinks } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
@@ -260,6 +261,9 @@ export const Expressions: React.FC<Props> = (props) => {
     [alertParams.groupBy]
   );
 
+  // Test to see if any of the group fields in groupBy are already filtered down to a single
+  // group by the filterQuery. If this is the case, then a groupBy is unnecessary, as it would only
+  // ever produce one group instance
   const groupByFilterTestPatterns = useMemo(() => {
     if (!alertParams.groupBy) return null;
     const groups = !Array.isArray(alertParams.groupBy)
@@ -456,10 +460,20 @@ export const Expressions: React.FC<Props> = (props) => {
           <EuiText size="xs" color="danger">
             <FormattedMessage
               id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
-              defaultMessage="This rule will only alert per one {matchedGroups} because the filter query contains an exact match for {groupCount, plural, one {this field} other {these fields}}."
+              defaultMessage="This rule may alert on {matchedGroups} less than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
               values={{
                 matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
                 groupCount: redundantFilterGroupBy.length,
+                filteringAndGroupingLink: (
+                  <EuiLink
+                    href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
+                  >
+                    {i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError.docsLink',
+                      { defaultMessage: 'the docs' }
+                    )}
+                  </EuiLink>
+                ),
               }}
             />
           </EuiText>
