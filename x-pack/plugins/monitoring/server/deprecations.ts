@@ -21,30 +21,54 @@ export const deprecations = ({
   renameFromRoot,
 }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
-    deprecate('enabled', '8.0.0'),
+    deprecate('enabled', '8.0.0', { level: 'critical' }),
     // This order matters. The "blanket rename" needs to happen at the end
-    renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size'),
-    renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds'),
+    renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size', {
+      level: 'warning',
+    }),
+    renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds', {
+      level: 'warning',
+    }),
     renameFromRoot(
       'xpack.monitoring.show_license_expiration',
-      'monitoring.ui.show_license_expiration'
+      'monitoring.ui.show_license_expiration',
+      {
+        level: 'warning',
+      }
     ),
     renameFromRoot(
       'xpack.monitoring.ui.container.elasticsearch.enabled',
-      'monitoring.ui.container.elasticsearch.enabled'
+      'monitoring.ui.container.elasticsearch.enabled',
+      {
+        level: 'warning',
+      }
     ),
     renameFromRoot(
       'xpack.monitoring.ui.container.logstash.enabled',
-      'monitoring.ui.container.logstash.enabled'
+      'monitoring.ui.container.logstash.enabled',
+      {
+        level: 'warning',
+      }
     ),
-    renameFromRoot('xpack.monitoring.elasticsearch', 'monitoring.ui.elasticsearch'),
-    renameFromRoot('xpack.monitoring.ccs.enabled', 'monitoring.ui.ccs.enabled'),
+    renameFromRoot('xpack.monitoring.elasticsearch', 'monitoring.ui.elasticsearch', {
+      level: 'warning',
+    }),
+    renameFromRoot('xpack.monitoring.ccs.enabled', 'monitoring.ui.ccs.enabled', {
+      level: 'warning',
+    }),
     renameFromRoot(
       'xpack.monitoring.elasticsearch.logFetchCount',
-      'monitoring.ui.elasticsearch.logFetchCount'
+      'monitoring.ui.elasticsearch.logFetchCount',
+      {
+        level: 'warning',
+      }
     ),
-    renameFromRoot('xpack.monitoring', 'monitoring'),
-    rename('xpack_api_polling_frequency_millis', 'licensing.api_polling_frequency'),
+    renameFromRoot('xpack.monitoring', 'monitoring', {
+      level: 'warning',
+    }),
+    rename('xpack_api_polling_frequency_millis', 'licensing.api_polling_frequency', {
+      level: 'warning',
+    }),
 
     // TODO: Add deprecations for "monitoring.ui.elasticsearch.username: elastic" and "monitoring.ui.elasticsearch.username: kibana".
     // TODO: Add deprecations for using "monitoring.ui.elasticsearch.ssl.certificate" without "monitoring.ui.elasticsearch.ssl.key", and
