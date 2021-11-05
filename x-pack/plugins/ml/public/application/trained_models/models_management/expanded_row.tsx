@@ -138,20 +138,21 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
 
         const result = formatToListItems(deploymentStats)!;
 
-        const items: EuiListGroupItemProps[] = [];
-        for (const v of nodes!) {
-          const nodeObject = Object.values(v.node)[0];
-          const href = await mlLocator!.getUrl({
-            page: ML_PAGES.TRAINED_MODELS_NODES,
-            pageState: {
-              nodeId: nodeObject.name,
-            },
-          });
-          items.push({
-            label: nodeObject.name,
-            href,
-          });
-        }
+        const items: EuiListGroupItemProps[] = await Promise.all(
+          nodes!.map(async (v) => {
+            const nodeObject = Object.values(v.node)[0];
+            const href = await mlLocator!.getUrl({
+              page: ML_PAGES.TRAINED_MODELS_NODES,
+              pageState: {
+                nodeId: nodeObject.name,
+              },
+            });
+            return {
+              label: nodeObject.name,
+              href,
+            };
+          })
+        );
 
         result.push({
           title: 'nodes',
