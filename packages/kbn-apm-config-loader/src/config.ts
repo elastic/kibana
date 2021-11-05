@@ -23,7 +23,7 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
 };
 
 const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions = {
-  serverUrl: 'https://cloud-apm-server.kibana.dev',
+  serverUrl: 'https://kibana-cloud-apm-server.elastic.dev',
 
   // The secretToken below is intended to be hardcoded in this file even though
   // it makes it public. This is not a security/privacy issue. Normally we'd
