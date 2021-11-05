@@ -14,8 +14,13 @@ import { HttpLogic } from '../../../shared/http';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { EngineLogic } from '../engine';
 
-import { CrawlerDomain, CrawlerDomainFromServer } from './types';
-import { crawlerDomainServerToClient } from './utils';
+import {
+  CrawlerData,
+  CrawlerDataFromServer,
+  CrawlerDomain,
+  CrawlerDomainFromServer,
+} from './types';
+import { crawlerDataServerToClient, crawlerDomainServerToClient } from './utils';
 
 export interface CrawlerDomainsValues {
   dataLoading: boolean;
@@ -29,17 +34,21 @@ interface CrawlerDomainsResponse {
 }
 
 interface CrawlerDomainsActions {
+  deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   fetchCrawlerDomainsData(): void;
   onPaginate(newPageIndex: number): { newPageIndex: number };
   onReceiveData(domains: CrawlerDomain[], meta: Meta): { domains: CrawlerDomain[]; meta: Meta };
+  crawlerDomainDeleted(data: CrawlerData): { data: CrawlerData };
 }
 
 export const CrawlerDomainsLogic = kea<MakeLogicType<CrawlerDomainsValues, CrawlerDomainsActions>>({
   path: ['enterprise_search', 'app_search', 'crawler', 'crawler_domains_logic'],
   actions: {
+    deleteDomain: (domain) => ({ domain }),
     fetchCrawlerDomainsData: true,
     onReceiveData: (domains, meta) => ({ domains, meta }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
+    crawlerDomainDeleted: (data) => ({ data }),
   },
   reducers: {
     dataLoading: [
@@ -85,6 +94,29 @@ export const CrawlerDomainsLogic = kea<MakeLogicType<CrawlerDomainsValues, Crawl
         const domains = response.results.map(crawlerDomainServerToClient);
 
         actions.onReceiveData(domains, response.meta);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+
+    deleteDomain: async ({ domain }) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        const response = await http.delete<CrawlerDataFromServer>(
+          `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
+          {
+            query: {
+              respond_with: 'crawler_details',
+            },
+          }
+        );
+
+        const crawlerData = crawlerDataServerToClient(response);
+        // Publish for other logic files to listen for
+        actions.crawlerDomainDeleted(crawlerData);
+        actions.fetchCrawlerDomainsData();
       } catch (e) {
         flashAPIErrors(e);
       }

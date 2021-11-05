@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBasicTable, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../../shared/constants';
 import { mountWithIntl } from '../../../../test_helpers';
@@ -61,9 +61,8 @@ const values = {
 };
 
 const actions = {
-  // CrawlerOverviewLogic
-  deleteDomain: jest.fn(),
   // CrawlerDomainsLogic
+  deleteDomain: jest.fn(),
   fetchCrawlerDomainsData: jest.fn(),
   onPaginate: jest.fn(),
 };

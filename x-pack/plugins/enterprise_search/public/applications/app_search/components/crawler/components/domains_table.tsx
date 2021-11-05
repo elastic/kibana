@@ -23,7 +23,6 @@ import { AppLogic } from '../../../app_logic';
 import { ENGINE_CRAWLER_DOMAIN_PATH } from '../../../routes';
 import { generateEnginePath } from '../../engine';
 import { CrawlerDomainsLogic } from '../crawler_domains_logic';
-import { CrawlerOverviewLogic } from '../crawler_overview_logic';
 import { CrawlerDomain } from '../types';
 
 import { getDeleteDomainConfirmationMessage } from '../utils';
@@ -31,9 +30,8 @@ import { getDeleteDomainConfirmationMessage } from '../utils';
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
 export const DomainsTable: React.FC = () => {
-  const { deleteDomain } = useActions(CrawlerOverviewLogic);
   const { domains, meta, dataLoading } = useValues(CrawlerDomainsLogic);
-  const { fetchCrawlerDomainsData, onPaginate } = useActions(CrawlerDomainsLogic);
+  const { fetchCrawlerDomainsData, onPaginate, deleteDomain } = useActions(CrawlerDomainsLogic);
 
   useEffect(() => {
     fetchCrawlerDomainsData();

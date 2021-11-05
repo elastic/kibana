@@ -9,7 +9,6 @@ import {
   LogicMounter,
   mockHttpValues,
   mockFlashMessageHelpers,
-  mockKibanaValues,
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
@@ -20,13 +19,35 @@ import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
 
 import { CrawlerDomainsLogic, CrawlerDomainsValues } from './crawler_domains_logic';
-import { CrawlerDomain, CrawlerDomainFromServer } from './types';
+import { CrawlerDataFromServer, CrawlerDomain, CrawlerDomainFromServer } from './types';
+import { crawlerDataServerToClient } from './utils';
 
 const DEFAULT_VALUES: CrawlerDomainsValues = {
   dataLoading: true,
   domains: [],
   meta: DEFAULT_META,
 };
+
+const crawlerDataResponse: CrawlerDataFromServer = {
+  domains: [
+    {
+      id: '507f1f77bcf86cd799439011',
+      name: 'elastic.co',
+      created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      document_count: 13,
+      sitemaps: [],
+      entry_points: [],
+      crawl_rules: [],
+      deduplication_enabled: false,
+      deduplication_fields: ['title'],
+      available_deduplication_fields: ['title', 'description'],
+    },
+  ],
+  events: [],
+  most_recent_crawl_request: null,
+};
+
+const clientCrawlerData = crawlerDataServerToClient(crawlerDataResponse);
 
 const domainsFromServer: CrawlerDomainFromServer[] = [
   {
@@ -147,6 +168,35 @@ describe('CrawlerDomainsLogic', () => {
         http.get.mockReturnValueOnce(Promise.reject('error'));
 
         CrawlerDomainsLogic.actions.fetchCrawlerDomainsData();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
+    describe('deleteDomain', () => {
+      it('deletes the domain and then calls crawlerDomainDeleted with the response', async () => {
+        jest.spyOn(CrawlerDomainsLogic.actions, 'crawlerDomainDeleted');
+        http.delete.mockReturnValue(Promise.resolve(crawlerDataResponse));
+
+        CrawlerDomainsLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
+        await nextTick();
+
+        expect(http.delete).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/crawler/domains/1234',
+          {
+            query: { respond_with: 'crawler_details' },
+          }
+        );
+        expect(CrawlerDomainsLogic.actions.crawlerDomainDeleted).toHaveBeenCalledWith(
+          clientCrawlerData
+        );
+      });
+
+      it('calls flashApiErrors when there is an error', async () => {
+        http.delete.mockReturnValue(Promise.reject('error'));
+
+        CrawlerDomainsLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
