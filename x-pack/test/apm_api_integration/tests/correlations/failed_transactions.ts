@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import type { FailedTransactionsCorrelationsResponse } from '../../../../plugins/apm/common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../plugins/apm/common/event_outcome';
@@ -17,6 +16,7 @@ import { EventOutcome } from '../../../../plugins/apm/common/event_outcome';
 // to get the final results for a failed transactions correlation analysis.
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
+  const registry = getService('registry');
 
   // This matches the parameters used for the other tab's queries in `../correlations/*`.
   const getOptions = () => ({

@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import type { LatencyCorrelationsResponse } from '../../../../plugins/apm/common/correlations/latency_correlations/types';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
+  const registry = getService('registry');
 
   // This matches the parameters used for the other tab's queries in `../correlations/*`.
   const getOptions = () => ({
