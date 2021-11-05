@@ -8,6 +8,8 @@
 import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
 import type { LensMultiTable, LayerType } from '../../types';
 
+export type PieChartTypes = 'donut' | 'pie' | 'treemap' | 'mosaic';
+
 export interface SharedPieLayerState {
   groups: string[];
   metric?: string;
@@ -27,7 +29,7 @@ export type PieLayerState = SharedPieLayerState & {
 };
 
 export interface PieVisualizationState {
-  shape: 'donut' | 'pie' | 'treemap';
+  shape: PieChartTypes;
   layers: PieLayerState[];
   palette?: PaletteOutput;
 }
@@ -35,7 +37,7 @@ export interface PieVisualizationState {
 export type PieExpressionArgs = SharedPieLayerState & {
   title?: string;
   description?: string;
-  shape: 'pie' | 'donut' | 'treemap';
+  shape: PieChartTypes;
   hideLabels: boolean;
   palette: PaletteOutput;
 };

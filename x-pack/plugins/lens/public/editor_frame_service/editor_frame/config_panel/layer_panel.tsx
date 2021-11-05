@@ -388,7 +388,10 @@ export function LayerPanel(
           </header>
 
           {groups.map((group, groupIndex) => {
-            const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+            const isMissing =
+              !isEmptyLayer && group.required && group.minDimensions
+                ? group.accessors.length < group.minDimensions
+                : group.accessors.length === 0;
 
             return (
               <EuiFormRow

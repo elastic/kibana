@@ -16,7 +16,6 @@ import {
   Partition,
   PartitionConfig,
   PartitionLayer,
-  PartitionLayout,
   PartitionFillLabel,
   RecursivePartial,
   Position,
@@ -39,6 +38,7 @@ import {
 } from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
 import { getLegendAction } from './get_legend_action';
+import type { PieChartTypes } from '../../common/expressions/pie_chart/types';
 
 declare global {
   interface Window {
@@ -50,6 +50,8 @@ declare global {
 }
 
 const EMPTY_SLICE = Symbol('empty_slice');
+
+const isTreemapOrMosaic = (shape: PieChartTypes) => ['treemap', 'mosaic'].includes(shape);
 
 export function PieComponent(
   props: PieExpressionProps & {
@@ -140,7 +142,7 @@ export function PieComponent(
             tempParent = tempParent.parent;
           }
 
-          if (shape === 'treemap') {
+          if (isTreemapOrMosaic(shape)) {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             if (layerIndex < bucketColumns.length - 1) {
               // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
@@ -171,7 +173,7 @@ export function PieComponent(
   });
 
   const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout: shape === 'treemap' ? PartitionLayout.treemap : PartitionLayout.sunburst,
+    partitionLayout: CHART_NAMES[shape].partitionType,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
@@ -191,7 +193,7 @@ export function PieComponent(
     sectorLineWidth: 1.5,
     circlePadding: 4,
   };
-  if (shape === 'treemap') {
+  if (isTreemapOrMosaic(shape)) {
     if (hideLabels || categoryDisplay === 'hide') {
       config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
@@ -285,7 +287,9 @@ export function PieComponent(
           showLegend={
             !hideLabels &&
             (legendDisplay === 'show' ||
-              (legendDisplay === 'default' && bucketColumns.length > 1 && shape !== 'treemap'))
+              (legendDisplay === 'default' &&
+                bucketColumns.length > 1 &&
+                !isTreemapOrMosaic(shape)))
           }
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}

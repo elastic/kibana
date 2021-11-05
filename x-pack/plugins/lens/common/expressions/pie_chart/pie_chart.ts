@@ -49,7 +49,7 @@ export const pie: ExpressionFunctionDefinition<
     },
     shape: {
       types: ['string'],
-      options: ['pie', 'donut', 'treemap'],
+      options: ['pie', 'donut', 'treemap', 'mosaic'],
       help: '',
     },
     hideLabels: {

@@ -157,6 +157,45 @@ export function suggestions({
     });
   }
 
+  if (groups.length === 2 && state && state.shape !== 'mosaic') {
+    results.push({
+      title: i18n.translate('xpack.lens.pie.mosaicSuggestionLabel', {
+        defaultMessage: 'As Mosaic',
+      }),
+      score: state.shape === 'treemap' ? 0.7 : 0.5,
+      state: {
+        shape: 'mosaic',
+        palette: mainPalette || state?.palette,
+        layers: [
+          state?.layers[0]
+            ? {
+                ...state.layers[0],
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                categoryDisplay:
+                  state.layers[0].categoryDisplay === 'inside'
+                    ? 'default'
+                    : state.layers[0].categoryDisplay,
+                layerType: layerTypes.DATA,
+              }
+            : {
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                numberDisplay: 'percent',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+                nestedLegend: false,
+                layerType: layerTypes.DATA,
+              },
+        ],
+      },
+      previewIcon: 'bullseye',
+      hide: table.changeType === 'reduced',
+    });
+  }
+
   return [...results]
     .map((suggestion) => ({
       ...suggestion,

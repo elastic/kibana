@@ -227,6 +227,39 @@ describe('LayerPanel', () => {
       expect(group).toHaveLength(1);
     });
 
+    it('should render the required warning when only one group is configured (with minDimensions)', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [{ columnId: 'y' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+            required: true,
+            minDimensions: 2,
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      const group = instance
+        .find(EuiFormRow)
+        .findWhere((e) => e.prop('error') === 'Required dimension');
+
+      expect(group).toHaveLength(1);
+    });
+
     it('should render the datasource and visualization panels inside the dimension container', async () => {
       mockVisualization.getConfiguration.mockReturnValueOnce({
         groups: [

@@ -6,9 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PartitionLayout } from '@elastic/charts';
 import { LensIconChartDonut } from '../assets/chart_donut';
 import { LensIconChartPie } from '../assets/chart_pie';
 import { LensIconChartTreemap } from '../assets/chart_treemap';
+import { LensIconChartMosaic } from '../assets/chart_mosaic';
 
 const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
   defaultMessage: 'Proportion',
@@ -20,6 +22,7 @@ export const CHART_NAMES = {
     label: i18n.translate('xpack.lens.pie.donutLabel', {
       defaultMessage: 'Donut',
     }),
+    partitionType: PartitionLayout.sunburst,
     groupLabel,
   },
   pie: {
@@ -27,7 +30,7 @@ export const CHART_NAMES = {
     label: i18n.translate('xpack.lens.pie.pielabel', {
       defaultMessage: 'Pie',
     }),
-
+    partitionType: PartitionLayout.sunburst,
     groupLabel,
   },
   treemap: {
@@ -35,7 +38,15 @@ export const CHART_NAMES = {
     label: i18n.translate('xpack.lens.pie.treemaplabel', {
       defaultMessage: 'Treemap',
     }),
-
+    partitionType: PartitionLayout.treemap,
+    groupLabel,
+  },
+  mosaic: {
+    icon: LensIconChartMosaic,
+    label: i18n.translate('xpack.lens.pie.mosaiclabel', {
+      defaultMessage: 'Mosaic',
+    }),
+    partitionType: PartitionLayout.mosaic,
     groupLabel,
   },
 };
