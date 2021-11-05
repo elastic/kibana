@@ -76,6 +76,7 @@ export const getLegendActions = (
       <div
         tabIndex={0}
         ref={ref}
+        role="button"
         aria-pressed="false"
         style={{
           display: 'flex',
