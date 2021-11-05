@@ -8,7 +8,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'react-vis/dist/style.css';
-import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import { ConfigSchema } from '../';
 import {
   AppMountParameters,
@@ -27,30 +26,26 @@ import { ApmAppRoot } from '../components/routing/app_root';
  */
 
 export const renderApp = ({
-  coreStart,
-  pluginsSetup,
   appMountParameters,
   config,
+  coreStart,
+  pluginsSetup,
   pluginsStart,
-  observabilityRuleTypeRegistry,
 }: {
-  coreStart: CoreStart;
-  pluginsSetup: ApmPluginSetupDeps;
   appMountParameters: AppMountParameters;
   config: ConfigSchema;
+  coreStart: CoreStart;
+  pluginsSetup: ApmPluginSetupDeps;
   pluginsStart: ApmPluginStartDeps;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
   const { element } = appMountParameters;
   const apmPluginContextValue = {
-    appMountParameters,
     config,
     core: coreStart,
-    plugins: pluginsSetup,
     data: pluginsStart.data,
     inspector: pluginsStart.inspector,
     observability: pluginsStart.observability,
-    observabilityRuleTypeRegistry,
+    pluginsSetup,
   };
 
   // render APM feedback link in global help menu
@@ -70,6 +65,7 @@ export const renderApp = ({
   ReactDOM.render(
     <ApmAppRoot
       apmPluginContextValue={apmPluginContextValue}
+      appMountParameters={appMountParameters}
       pluginsStart={pluginsStart}
     />,
     element

@@ -104,7 +104,7 @@ const urlService = new UrlService({
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 
-const mockPlugin = {
+const mockPluginsStart = {
   ml: {
     locator,
   },
@@ -118,16 +118,15 @@ const mockPlugin = {
   },
 };
 
-const mockAppMountParameters = {
-  setHeaderActionMenu: () => {},
-};
-
 export const mockApmPluginContextValue = {
-  appMountParameters: mockAppMountParameters,
   config: mockConfig,
   core: mockCore,
-  plugins: mockPlugin,
-  observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+  pluginsSetup: {
+    observability: {
+      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+    },
+  },
+  pluginsStart: mockPluginsStart,
 };
 
 export function MockApmPluginContextWrapper({

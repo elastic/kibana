@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
+import {
+  APP_WRAPPER_CLASS,
+  AppMountParameters,
+} from '../../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -38,15 +39,19 @@ import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_da
 import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 
+export interface ApmAppRootProps {
+  apmPluginContextValue: ApmPluginContextValue;
+  appMountParameters: AppMountParameters;
+  pluginsStart: ApmPluginStartDeps;
+}
+
 export function ApmAppRoot({
   apmPluginContextValue,
+  appMountParameters,
   pluginsStart,
-}: {
-  apmPluginContextValue: ApmPluginContextValue;
-  pluginsStart: ApmPluginStartDeps;
-}) {
-  const { appMountParameters, core } = apmPluginContextValue;
-  const { history } = appMountParameters;
+}: ApmAppRootProps) {
+  const { core } = apmPluginContextValue;
+  const { history, setHeaderActionMenu } = appMountParameters;
   const i18nCore = core.i18n;
 
   return (
@@ -69,8 +74,11 @@ export function ApmAppRoot({
                           <AnomalyDetectionJobsContextProvider>
                             <InspectorContextProvider>
                               <ApmThemeProvider>
-                                <MountApmHeaderActionMenu />
-
+                                <HeaderMenuPortal
+                                  setHeaderActionMenu={setHeaderActionMenu}
+                                >
+                                  <ApmHeaderActionMenu />
+                                </HeaderMenuPortal>
                                 <Route component={ScrollToTopOnPathChange} />
                                 <RouteRenderer />
                               </ApmThemeProvider>
@@ -90,28 +98,8 @@ export function ApmAppRoot({
   );
 }
 
-function MountApmHeaderActionMenu() {
-  const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
-
-  return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-      <ApmHeaderActionMenu />
-    </HeaderMenuPortal>
-  );
-}
-
 function ApmThemeProvider({ children }: { children: React.ReactNode }) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  return (
-    <ThemeProvider
-      theme={(outerTheme?: DefaultTheme) => ({
-        ...outerTheme,
-        eui: darkMode ? euiDarkVars : euiLightVars,
-        darkMode,
-      })}
-    >
-      {children}
-    </ThemeProvider>
-  );
+  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
 }

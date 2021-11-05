@@ -9,14 +9,19 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { CoreStart, DocLinksStart, HttpStart } from 'src/core/public';
+import type {
+  AppMountParameters,
+  CoreStart,
+  DocLinksStart,
+  HttpStart,
+} from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ApmPluginStartDeps } from '../plugin';
+import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
@@ -44,7 +49,7 @@ describe('renderApp', () => {
     const { core, config, observabilityRuleTypeRegistry } =
       mockApmPluginContextValue;
 
-    const plugins = {
+    const pluginsSetup = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, ruleTypeRegistry: {} },
       data: {
@@ -54,12 +59,13 @@ describe('renderApp', () => {
           },
         },
       },
-    };
+    } as unknown as ApmPluginSetupDeps;
+
     const appMountParameters = {
       element: document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
-    };
+    } as unknown as AppMountParameters;
 
     const data = dataPluginMock.createStartContract();
     const embeddable = embeddablePluginMock.createStartContract();
@@ -115,12 +121,10 @@ describe('renderApp', () => {
 
     act(() => {
       unmount = renderApp({
-        coreStart: core as any,
-        pluginsSetup: plugins as any,
-        appMountParameters: appMountParameters as any,
-        pluginsStart,
         config,
-        observabilityRuleTypeRegistry,
+        coreStart: core as any,
+        pluginsSetup,
+        pluginsStart,
       });
     });
 

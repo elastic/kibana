@@ -32,7 +32,7 @@ import type {
 import type { FeaturesPluginSetup } from '../../features/public';
 import type { FleetStart } from '../../fleet/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
-import type { MapsStartApi } from '../../maps/public';
+import type { MapsSetupApi, MapsStartApi } from '../../maps/public';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
 import {
   FetchDataParams,
@@ -64,6 +64,7 @@ export interface ApmPluginSetupDeps {
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  maps?: MapsSetupApi;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -106,18 +107,17 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   ) {
     this.initializerContext = initializerContext;
   }
-  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+  public setup(coreSetup, pluginsSetup) {
     const config = this.initializerContext.config.get();
-    const pluginSetupDeps = plugins;
 
-    if (pluginSetupDeps.home) {
-      pluginSetupDeps.home.environment.update({ apmUi: true });
-      pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+    if (pluginsSetup.home) {
+      pluginsSetup.home.environment.update({ apmUi: true });
+      pluginsSetup.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
     // register observability nav if user has access to plugin
-    plugins.observability.navigation.registerSections(
-      from(core.getStartServices()).pipe(
+    pluginsSetup.observability.navigation.registerSections(
+      from(coreSetup.getStartServices()).pipe(
         map(([coreStart, pluginsStart]) => {
           if (coreStart.application.capabilities.apm.show) {
             return [
@@ -187,7 +187,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       );
 
       // have to do this here as well in case app isn't mounted yet
-      createCallApmApi(core);
+      createCallApmApi(coreSetup);
 
       return {
         fetchObservabilityOverviewPageData,
@@ -197,7 +197,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     };
 
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
-    pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
+    pluginsSetup.home?.tutorials.registerCustomStatusCheck(
       'apm_fleet_server_status_check',
       async () => {
         const { hasFleetApmIntegrations } = await getApmDataHelper();
@@ -206,22 +206,22 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     // Registers custom component that is going to be render on fleet section
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+    pluginsSetup.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
       () => import('./tutorial/tutorial_fleet_instructions')
     );
 
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+    pluginsSetup.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgent',
       () => import('./tutorial/config_agent')
     );
 
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+    pluginsSetup.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgentRumScript',
       () => import('./tutorial/config_agent/rum_script')
     );
 
-    plugins.observability.dashboard.register({
+    pluginsSetup.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
         const dataHelper = await getApmDataHelper();
@@ -241,14 +241,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         './services/rest/createCallApmApi'
       );
       // have to do this here as well in case app isn't mounted yet
-      createCallApmApi(core);
+      createCallApmApi(coreSetup);
 
       return { fetchUxOverviewDate, hasRumData };
     };
 
-    const { observabilityRuleTypeRegistry } = plugins.observability;
+    const { observabilityRuleTypeRegistry } = pluginsSetup.observability;
 
-    plugins.observability.dashboard.register({
+    pluginsSetup.observability.dashboard.register({
       appName: 'ux',
       hasData: async (params?: HasDataParams) => {
         const dataHelper = await getUxDataHelper();
@@ -260,7 +260,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    core.application.register({
+    coreSetup.application.register({
       id: 'apm',
       title: 'APM',
       order: 8300,
@@ -275,27 +275,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'backends', title: dependenciesTitle, path: '/backends' },
       ],
 
-      async mount(appMountParameters: AppMountParameters<unknown>) {
+      async mount(appMountParameters) {
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
-          core.getStartServices(),
+          coreSetup.getStartServices(),
         ]);
 
         return renderApp({
           coreStart,
-          pluginsSetup: pluginSetupDeps,
+          pluginsSetup,
           appMountParameters,
           config,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
-          observabilityRuleTypeRegistry,
         });
       },
     });
 
     registerApmAlerts(observabilityRuleTypeRegistry);
 
-    core.application.register({
+    coreSetup.application.register({
       id: 'ux',
       title: 'User Experience',
       order: 8500,
@@ -320,16 +319,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         'web performance',
         'web perf',
       ],
-      async mount(appMountParameters: AppMountParameters<unknown>) {
+      async mount(appMountParameters) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application/uxApp'),
-          core.getStartServices(),
+          coreSetup.getStartServices(),
         ]);
 
         return renderApp({
           core: coreStart,
-          deps: pluginSetupDeps,
+          deps: pluginsSetup,
           appMountParameters,
           config,
           corePlugins: corePlugins as ApmPluginStartDeps,
@@ -340,8 +339,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     return {};
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { fleet } = plugins;
+
+  public start(_coreStart, pluginsStart) {
+    const { fleet } = pluginsStart;
     if (fleet) {
       const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
 

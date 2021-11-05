@@ -86,7 +86,8 @@ export function TimeseriesChart({
   alerts,
 }: Props) {
   const history = useHistory();
-  const { observabilityRuleTypeRegistry, core } = useApmPluginContext();
+  const { pluginsSetup, core } = useApmPluginContext();
+  const { observabilityRuleTypeRegistry } = pluginsSetup.observability;
   const { getFormatter } = observabilityRuleTypeRegistry;
   const { annotations } = useAnnotationsContext();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();

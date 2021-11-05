@@ -79,8 +79,14 @@ const stories: Meta<Args> = {
           },
           uiSettings: { get: () => '' },
         },
-        plugins: { observability: { isAlertingExperienceEnabled: () => true } },
-        observabilityRuleTypeRegistry: { getFormatter: () => undefined },
+        pluginsSetup: {
+          observability: {
+            observabilityRuleTypeRegistry: { getFormatter: () => undefined },
+          },
+        },
+        pluginsStart: {
+          observability: { isAlertingExperienceEnabled: () => true },
+        },
       } as unknown as ApmPluginContextValue;
 
       createCallApmApi(apmPluginContextMock.core);

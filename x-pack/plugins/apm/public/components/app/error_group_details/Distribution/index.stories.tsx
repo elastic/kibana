@@ -24,7 +24,11 @@ export default {
       };
 
       const apmPluginContextMock = {
-        observabilityRuleTypeRegistry: { getFormatter: () => undefined },
+        pluginsSetup: {
+          observability: {
+            observabilityRuleTypeRegistry: { getFormatter: () => undefined },
+          },
+        },
         core: {
           uiSettings: kibanaContextServices.uiSettings,
         },

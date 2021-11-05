@@ -79,7 +79,8 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const max = Math.max(...xValues);
 
   const xFormatter = niceTimeFormatter([min, max]);
-  const { observabilityRuleTypeRegistry } = useApmPluginContext();
+  const { observabilityRuleTypeRegistry } =
+    useApmPluginContext().pluginsSetup.observability;
   const { alerts } = useApmServiceContext();
   const { getFormatter } = observabilityRuleTypeRegistry;
   const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
