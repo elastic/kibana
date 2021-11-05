@@ -43,6 +43,15 @@ export function ObservabilityAlertsCommonProvider({
     );
   };
 
+  const navigateWithoutFilter = async () => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      '/alerts',
+      `?`,
+      { ensureCurrentUrl: false }
+    );
+  };
+
   const setKibanaTimeZoneToUTC = async () => {
     await kibanaServer.uiSettings.update({
       'dateFormat:tz': 'UTC',
@@ -59,6 +68,13 @@ export function ObservabilityAlertsCommonProvider({
   const getTableCells = async () => {
     // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
     return await testSubjects.findAll('dataGridRowCell');
+  };
+
+  const getExperimentalDisclaimer = async () => {
+    return await testSubjects.find('experimentalDisclaimer');
+  };
+  const getExperimentalDisclaimerDismissButton = async () => {
+    return await testSubjects.find('experimentalDisclaimerDismissButton');
   };
 
   const getTableCellsInRows = async () => {
@@ -236,5 +252,8 @@ export function ObservabilityAlertsCommonProvider({
     typeInQueryBar,
     openActionsMenuForRow,
     getTimeRange,
+    navigateWithoutFilter,
+    getExperimentalDisclaimer,
+    getExperimentalDisclaimerDismissButton,
   };
 }

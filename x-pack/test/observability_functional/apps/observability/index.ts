@@ -11,8 +11,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ObservabilityApp', function () {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./exploratory_view'));
     loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./exploratory_view'));
+    loadTestFile(require.resolve('./alerts/alert_disclaimer'));
     loadTestFile(require.resolve('./alerts/workflow_status'));
     loadTestFile(require.resolve('./alerts/pagination'));
     loadTestFile(require.resolve('./alerts/add_to_case'));
