@@ -14,10 +14,10 @@ import type { RawSearchStrategyClientParams } from '../../../../plugins/apm/comm
 import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const retry = getService('retry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   };
 
   registry.when('failed transactions without data', { config: 'trial', archives: [] }, () => {
-    it('queries the search strategy and returns results', async () => {
+    it.skip('queries the search strategy and returns results', async () => {
       const intialResponse = await supertest
         .post(`/internal/bsearch`)
         .set('kbn-xsrf', 'foo')
@@ -134,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('failed transactions with data', { config: 'trial', archives: ['8.0.0'] }, () => {
-    it('queries the search strategy and returns results', async () => {
+    it.skip('queries the search strategy and returns results', async () => {
       const intialResponse = await supertest
         .post(`/internal/bsearch`)
         .set('kbn-xsrf', 'foo')

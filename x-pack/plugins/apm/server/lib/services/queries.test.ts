@@ -28,7 +28,6 @@ describe('services queries', () => {
       getServiceAgent({
         serviceName: 'foo',
         setup,
-        searchAggregatedTransactions: false,
         start: 0,
         end: 50000,
       })

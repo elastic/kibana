@@ -18,7 +18,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { merge, omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 interface Alert {
   schedule: {
@@ -36,6 +35,7 @@ interface Alert {
 }
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmWriteUser');
   const es = getService('es');
 
