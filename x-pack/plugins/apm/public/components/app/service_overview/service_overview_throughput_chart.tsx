@@ -30,7 +30,6 @@ import {
 const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
-  throughputUnit: 'minute' as const,
 };
 
 export function ServiceOverviewThroughputChart({

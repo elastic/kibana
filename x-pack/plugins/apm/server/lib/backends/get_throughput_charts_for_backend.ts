@@ -15,7 +15,6 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../helpers/get_bucket_size';
-import { calculateThroughputWithInterval } from '../helpers/calculate_throughput';
 
 export async function getThroughputChartsForBackend({
   backendName,
@@ -42,7 +41,7 @@ export async function getThroughputChartsForBackend({
     offset,
   });
 
-  const { intervalString, bucketSize } = getBucketSize({
+  const { intervalString } = getBucketSize({
     start: startWithOffset,
     end: endWithOffset,
     minBucketSize: 60,
@@ -73,9 +72,10 @@ export async function getThroughputChartsForBackend({
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
-            spanDestinationLatencySum: {
-              sum: {
+            throughput: {
+              rate: {
                 field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                unit: 'minute',
               },
             },
           },
@@ -88,10 +88,7 @@ export async function getThroughputChartsForBackend({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key + offsetInMs,
-        y: calculateThroughputWithInterval({
-          bucketSize,
-          value: bucket.spanDestinationLatencySum.value || 0,
-        }),
+        y: bucket.throughput.value,
       };
     }) ?? []
   );

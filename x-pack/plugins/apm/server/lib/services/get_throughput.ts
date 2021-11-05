@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AggregationsDateInterval } from '@elastic/elasticsearch/lib/api/types';
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_NAME,
@@ -18,7 +19,6 @@ import {
   getProcessorEventForTransactions,
 } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
-import { calculateThroughputWithInterval } from '../helpers/calculate_throughput';
 
 interface Options {
   environment: string;
@@ -81,6 +81,11 @@ export async function getThroughput({
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
+          aggs: {
+            throughput: {
+              rate: { unit: 'minute' as AggregationsDateInterval },
+            },
+          },
         },
       },
     },
@@ -95,10 +100,7 @@ export async function getThroughput({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: calculateThroughputWithInterval({
-          bucketSize,
-          value: bucket.doc_count,
-        }),
+        y: bucket.throughput.value,
       };
     }) ?? []
   );
