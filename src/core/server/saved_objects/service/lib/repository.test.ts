@@ -450,7 +450,7 @@ describe('SavedObjectsRepository', () => {
             ...mockVersionProps,
           },
         })),
-      } as estypes.BulkResponse;
+      } as unknown as estypes.BulkResponse;
     };
 
     const bulkCreateSuccess = async (
@@ -1042,7 +1042,7 @@ describe('SavedObjectsRepository', () => {
       it.todo(`should return objects in the same order regardless of type`);
 
       it(`handles a mix of successful creates and errors`, async () => {
-        const obj: SavedObjectsBulkCreateObject = {
+        const obj = {
           type: 'unknownType',
           id: 'three',
           attributes: {},
@@ -1063,7 +1063,10 @@ describe('SavedObjectsRepository', () => {
         // Test for fix to https://github.com/elastic/kibana/issues/65088 where
         // we returned raw ID's when an object without an id was created.
         const namespace = 'myspace';
-        const response = getMockBulkCreateResponse([obj1, obj2], namespace);
+        // FIXME: this test is based on a gigantic hack to have the bulk operation return the source
+        //        of the document when it actually does not, forcing to cast to any as BulkResponse
+        //        does not contains _source
+        const response = getMockBulkCreateResponse([obj1, obj2], namespace) as any;
         client.bulk.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -1077,7 +1080,7 @@ describe('SavedObjectsRepository', () => {
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
           ...response.items[0].create,
           _source: {
-            ...response.items[0].create!._source,
+            ...response.items[0].create._source,
             coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
             namespaces: response.items[0].create._source.namespaces,
           },
