@@ -797,6 +797,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableHeader(index = 0) {
+      log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
@@ -897,12 +898,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async toggleColumnVisibility(dimension: string) {
+    async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
       const id = 'lns-table-column-hidden';
+      await PageObjects.common.sleep(500);
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status before the toggle = ${isChecked}`);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await PageObjects.common.sleep(500);
+      const isChecked2 = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status after the toggle = ${isChecked2}`);
       await this.closeDimensionEditor();
+      await PageObjects.common.sleep(500);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
