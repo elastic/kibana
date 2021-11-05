@@ -564,13 +564,14 @@ export function MachineLearningJobTableProvider(
         timeRangeInterval?: string;
       }
     ) {
-      await this.openEditCustomUrlsForJobTab(jobId);
-
-      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
-
-      // Fill-in the form
-      await this.clickOpenCustomUrlEditor();
       await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+
+        const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+
+        // Fill-in the form
+        await this.clickOpenCustomUrlEditor();
         await customUrls.setCustomUrlLabel(customUrl.label);
         await mlCommonUI.selectRadioGroupValue(
           `mlJobCustomUrlLinkToTypeInput`,
@@ -611,13 +612,14 @@ export function MachineLearningJobTableProvider(
         timeRangeInterval?: string;
       }
     ) {
-      await this.openEditCustomUrlsForJobTab(jobId);
-
-      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
-
-      // Fill-in the form
-      await this.clickOpenCustomUrlEditor();
       await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+
+        const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+
+        // Fill-in the form
+        await this.clickOpenCustomUrlEditor();
         await customUrls.setCustomUrlLabel(customUrl.label);
         await mlCommonUI.selectRadioGroupValue(
           `mlJobCustomUrlLinkToTypeInput`,
@@ -649,13 +651,14 @@ export function MachineLearningJobTableProvider(
     }
 
     public async addOtherTypeCustomUrl(jobId: string, customUrl: { label: string; url: string }) {
-      await this.openEditCustomUrlsForJobTab(jobId);
-
-      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
-
-      // Fill-in the form
-      await this.clickOpenCustomUrlEditor();
       await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+
+        const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+
+        // Fill-in the form
+        await this.clickOpenCustomUrlEditor();
         await customUrls.setCustomUrlLabel(customUrl.label);
         await mlCommonUI.selectRadioGroupValue(`mlJobCustomUrlLinkToTypeInput`, URL_TYPE.OTHER);
         await customUrls.setCustomUrlOtherTypeUrl(customUrl.url);
