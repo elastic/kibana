@@ -32,6 +32,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   header,
   isDetails,
   isDraggable,
+  isTimeline,
   linkValues,
   rowRenderers,
   setCellProps,
@@ -49,7 +50,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-          asPlainText: !!getLink(header.id, header.type), // we want to render value with links as plain text but keep other formatters like badge.
+          asPlainText: !!getLink(header.id, header.type) && !isTimeline, // we want to render value with links as plain text but keep other formatters like badge.
           browserFields,
           columnName: header.id,
           ecsData,
