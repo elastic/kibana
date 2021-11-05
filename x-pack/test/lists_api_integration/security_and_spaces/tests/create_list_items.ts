@@ -27,6 +27,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('create_list_items', () => {
     describe('validation errors', () => {
@@ -46,11 +47,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('creating list items', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
+        await deleteListsIndex(supertest, log);
       });
 
       it('should create a simple list item with a list item id', async () => {
