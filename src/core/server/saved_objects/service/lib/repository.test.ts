@@ -32,6 +32,7 @@ import {
 import type { SavedObjectsUpdateObjectsSpacesResponse } from './update_objects_spaces';
 import {
   SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsRepository,
 } from './repository';
@@ -62,6 +63,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
 } from '../saved_objects_client';
 import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
@@ -71,6 +73,7 @@ import {
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
 } from 'kibana/server';
+import { InternalBulkResolveError } from "./internal_bulk_resolve";
 
 const { nodeTypes } = esKuery;
 
@@ -3707,7 +3710,9 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            found: false,
+          } as estypes.GetResponse)
         );
         await expectNotFoundError(type, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -3715,7 +3720,9 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the index during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({} as estypes.GetResponse, {
+            statusCode: 404,
+          })
         );
         await expectNotFoundError(type, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -3776,7 +3783,10 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('passes arguments to the internalBulkResolve module and returns the result', async () => {
-      const expectedResult = { saved_object: 'mock-object', outcome: 'exactMatch' };
+      const expectedResult: SavedObjectsResolveResponse = {
+        saved_object: { type: 'type', id: 'id', attributes: {}, references: [] },
+        outcome: 'exactMatch',
+      };
       mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
 
       await expect(savedObjectsRepository.resolve('obj-type', 'obj-id')).resolves.toEqual(
@@ -3789,8 +3799,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('throws when internalBulkResolve result is an error', async () => {
-      const error = new Error('Oh no!');
-      const expectedResult = { type: 'obj-type', id: 'obj-id', error };
+      const error = SavedObjectsErrorHelpers.decorateBadRequestError(new Error('Oh no!'));
+      const expectedResult: InternalBulkResolveError = { type: 'obj-type', id: 'obj-id', error };
       mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
 
       await expect(savedObjectsRepository.resolve('foo', '2')).rejects.toEqual(error);
@@ -3814,9 +3824,9 @@ describe('SavedObjectsRepository', () => {
     const incrementCounterSuccess = async (
       type: string,
       id: string,
-      fields: string[],
+      fields: Array<string | SavedObjectsIncrementCounterField>,
       options?: SavedObjectsIncrementCounterOptions,
-      internalOptions = {}
+      internalOptions: { mockGetResponseValue?: estypes.GetResponse } = {}
     ) => {
       const { mockGetResponseValue } = internalOptions;
       const isMultiNamespace = registry.isMultiNamespace(type);
@@ -3839,14 +3849,14 @@ describe('SavedObjectsRepository', () => {
               ...mockTimestampFields,
               [type]: {
                 ...fields.reduce((acc, field) => {
-                  acc[field] = 8468;
+                  acc[typeof field === 'string' ? field : field.fieldName] = 8468;
                   return acc;
-                }, {}),
+                }, {} as Record<string, number>),
                 defaultIndex: 'logstash-*',
               },
             },
           },
-        })
+        } as estypes.UpdateResponse)
       );
 
       const result = await savedObjectsRepository.incrementCounter(type, id, fields, options);
@@ -3857,7 +3867,7 @@ describe('SavedObjectsRepository', () => {
     beforeEach(() => {
       mockPreflightCheckForCreate.mockReset();
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
-        return objects.map(({ type, id }) => ({ type, id })); // respond with no errors by default
+        return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
       });
     });
 
@@ -3884,7 +3894,7 @@ describe('SavedObjectsRepository', () => {
           id,
           counterFields,
           { namespace },
-          { mockGetResponseValue: { found: false } }
+          { mockGetResponseValue: { found: false } as estypes.GetResponse }
         );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
@@ -3981,7 +3991,11 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const expectUnsupportedTypeError = async (type, id, field) => {
+      const expectUnsupportedTypeError = async (
+        type: string,
+        id: string,
+        field: Array<string | SavedObjectsIncrementCounterField>
+      ) => {
         await expect(savedObjectsRepository.incrementCounter(type, id, field)).rejects.toThrowError(
           createUnsupportedTypeError(type)
         );
@@ -3996,8 +4010,9 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when type is not a string`, async () => {
-        const test = async (type) => {
+        const test = async (type: unknown) => {
           await expect(
+            // @ts-expect-error type is supposed to be a string
             savedObjectsRepository.incrementCounter(type, id, counterFields)
           ).rejects.toThrowError(`"type" argument must be a string`);
           expect(client.update).not.toHaveBeenCalled();
@@ -4063,9 +4078,13 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when there is an alias conflict from preflightCheckForCreate`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            found: false,
+          } as estypes.GetResponse)
         );
-        mockPreflightCheckForCreate.mockResolvedValue([{ error: { type: 'aliasConflict' } }]);
+        mockPreflightCheckForCreate.mockResolvedValue([
+          { type: 'foo', id: 'bar', error: { type: 'aliasConflict' } },
+        ]);
         await expect(
           savedObjectsRepository.incrementCounter(
             MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -4081,15 +4100,19 @@ describe('SavedObjectsRepository', () => {
 
       it(`does not throw when there is a different error from preflightCheckForCreate`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            found: false,
+          } as estypes.GetResponse)
         );
-        mockPreflightCheckForCreate.mockResolvedValue([{ error: { type: 'something-else' } }]);
+        mockPreflightCheckForCreate.mockResolvedValue([
+          { type: 'foo', id: 'bar', error: { type: 'conflict' } },
+        ]);
         await incrementCounterSuccess(
           MULTI_NAMESPACE_ISOLATED_TYPE,
           id,
           counterFields,
           { namespace },
-          { mockGetResponseValue: { found: false } }
+          { mockGetResponseValue: { found: false } as estypes.GetResponse }
         );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
@@ -4134,7 +4157,7 @@ describe('SavedObjectsRepository', () => {
                 originId,
               },
             },
-          })
+          } as estypes.UpdateResponse)
         );
 
         const response = await savedObjectsRepository.incrementCounter(
