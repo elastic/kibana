@@ -120,7 +120,8 @@ export const ObservedItem: FC<Props> = (props: Props) => {
 
 export const DashboardGridItem: FC<Props> = (props: Props) => {
   const { isProjectEnabled } = useLabs();
-  const isEnabled = isProjectEnabled('labs:dashboard:deferBelowFold');
+  const isPrintMode = props.container.getInput().viewMode === ViewMode.PRINT;
+  const isEnabled = !isPrintMode && isProjectEnabled('labs:dashboard:deferBelowFold');
 
   return isEnabled ? <ObservedItem {...props} /> : <Item {...props} />;
 };
