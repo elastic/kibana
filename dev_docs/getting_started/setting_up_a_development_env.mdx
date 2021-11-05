@@ -44,6 +44,14 @@ Then, install the latest version of yarn using:
 npm install -g yarn
 ```
 
+<DocCallOut title="Using an ARM Mac?">
+  At this time there are several native modules we use which don't support ARM and will need to be compiled on your machine when you install them for the first time. To support this you need to install a few libraries with [Homebrew](https://brew.sh/). If you don't have that setup yet get that installed, then run:
+
+  ```sh
+  brew install python@3 cairo pango
+  ```
+</DocCallOut>
+
 Finally, bootstrap Kibana and install all of the remaining dependencies:
 
 ```sh
