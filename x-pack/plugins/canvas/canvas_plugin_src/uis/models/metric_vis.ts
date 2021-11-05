@@ -22,12 +22,14 @@ export const metricVis = () => ({
       help: strings.getMetricColumnHelp(),
       argType: 'vis_dimension',
       multi: true,
+      default: `{visdimension}`,
     },
     {
       name: 'bucket',
       displayName: strings.getBucketColumnDisplayName(),
       help: strings.getBucketColumnHelp(),
       argType: 'vis_dimension',
+      default: `{visdimension}`,
     },
     {
       name: 'palette',
