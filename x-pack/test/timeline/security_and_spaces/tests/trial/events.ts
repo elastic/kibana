@@ -200,7 +200,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('logging', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/117462
+    describe.skip('logging', () => {
       beforeEach(async () => {
         await logFile.reset();
       });
