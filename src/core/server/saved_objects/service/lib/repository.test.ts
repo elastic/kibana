@@ -1914,7 +1914,7 @@ describe('SavedObjectsRepository', () => {
     };
 
     const _expectClientCallArgs = (
-      objects,
+      objects: TypeIdTuple[],
       {
         _index = expect.any(String),
         getId = () => expect.any(String),
@@ -1981,7 +1981,6 @@ describe('SavedObjectsRepository', () => {
         const hiddenTypeObj = { type: HIDDEN_TYPE, id: 'three' };
         const objects = [unknownTypeObj, hiddenTypeObj, obj1, obj2, obj3, obj4, obj5, obj6, obj7];
         const response = {
-          status: 200,
           docs: [
             getMockGetResponse(obj1),
             { found: false },
@@ -1991,7 +1990,7 @@ describe('SavedObjectsRepository', () => {
             getMockGetResponse(obj6),
             { found: false },
           ],
-        };
+        } as estypes.MgetResponse;
         client.mget.mockResolvedValue(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
