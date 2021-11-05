@@ -24,16 +24,17 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('import_rules', () => {
     describe('importing rules with an index', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
