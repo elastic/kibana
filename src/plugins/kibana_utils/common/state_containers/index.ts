@@ -13,7 +13,7 @@
  * @packageDocumentation
  */
 
-export {
+export type {
   BaseState,
   BaseStateContainer,
   TransitionDescription,
@@ -37,7 +37,8 @@ export {
   PureTransition,
   Transition,
 } from './types';
-export { createStateContainer, CreateStateContainerOptions } from './create_state_container';
+export type { CreateStateContainerOptions } from './create_state_container';
+export { createStateContainer } from './create_state_container';
 export {
   createStateContainerReactHelpers,
   useContainerSelector,
