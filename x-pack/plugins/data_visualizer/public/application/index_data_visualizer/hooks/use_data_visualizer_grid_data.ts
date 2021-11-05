@@ -218,7 +218,10 @@ export const useDataVisualizerGridData = (
     ]
   );
 
+  const { overallStats, progress: overallStatsProgress } = useOverallStats(fieldStatsRequest);
+
   const configsWithoutStats = useMemo(() => {
+    if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
       .map((config) => {
         if (config.existsInDocs === false) return;
@@ -244,9 +247,8 @@ export const useDataVisualizerGridData = (
       .filter((c) => c !== undefined) as FieldRequestConfig[];
 
     return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
-  }, [metricConfigs, nonMetricConfigs]);
+  }, [metricConfigs, nonMetricConfigs, overallStatsProgress.loaded]);
 
-  const { overallStats, progress: overallStatsProgress } = useOverallStats(fieldStatsRequest);
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
