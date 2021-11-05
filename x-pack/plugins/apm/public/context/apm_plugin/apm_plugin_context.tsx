@@ -8,16 +8,13 @@
 import { CoreStart } from 'kibana/public';
 import { createContext } from 'react';
 import { ConfigSchema } from '../..';
-import { ApmPluginSetupDeps } from '../../plugin';
-import { ObservabilityPublicStart } from '../../../../observability/public';
-import { Start as InspectorPluginStart } from '../../../../../../src/plugins/inspector/public';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
 
 export interface ApmPluginContextValue {
   config: ConfigSchema;
   core: CoreStart;
-  inspector: InspectorPluginStart;
   pluginsSetup: ApmPluginSetupDeps;
-  observability: ObservabilityPublicStart;
+  pluginsStart: ApmPluginStartDeps;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

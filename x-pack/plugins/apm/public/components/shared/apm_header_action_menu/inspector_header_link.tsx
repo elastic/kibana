@@ -16,7 +16,7 @@ import {
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function InspectorHeaderLink() {
-  const { inspector } = useApmPluginContext();
+  const { inspector } = useApmPluginContext().pluginsStart;
   const { inspectorAdapters } = useInspectorContext();
   const {
     services: { uiSettings },

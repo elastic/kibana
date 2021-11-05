@@ -35,7 +35,7 @@ export function MLExplorerLink({ jobId, external, children }: Props) {
 export function useExplorerHref({ jobId }: { jobId: string }) {
   const {
     core,
-    plugins: { ml },
+    pluginsSetup: { ml },
   } = useApmPluginContext();
   const { urlParams } = useLegacyUrlParams();
 

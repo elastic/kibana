@@ -51,7 +51,7 @@ export function useSingleMetricHref({
 }) {
   const {
     core,
-    plugins: { ml },
+    pluginsSetup: { ml },
   } = useApmPluginContext();
   const { urlParams } = useLegacyUrlParams();
 

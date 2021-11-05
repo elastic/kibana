@@ -42,10 +42,8 @@ export const renderApp = ({
   const apmPluginContextValue = {
     config,
     core: coreStart,
-    data: pluginsStart.data,
-    inspector: pluginsStart.inspector,
-    observability: pluginsStart.observability,
     pluginsSetup,
+    pluginsStart,
   };
 
   // render APM feedback link in global help menu
@@ -66,7 +64,6 @@ export const renderApp = ({
     <ApmAppRoot
       apmPluginContextValue={apmPluginContextValue}
       appMountParameters={appMountParameters}
-      pluginsStart={pluginsStart}
     />,
     element
   );

@@ -21,7 +21,7 @@ interface Props {
 export function MLManageJobsLink({ children, external }: Props) {
   const {
     core,
-    plugins: { ml },
+    pluginsSetup: { ml },
   } = useApmPluginContext();
 
   const { urlParams } = useLegacyUrlParams();

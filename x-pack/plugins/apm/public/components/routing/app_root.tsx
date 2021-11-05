@@ -32,7 +32,6 @@ import { BreadcrumbsContextProvider } from '../../context/breadcrumbs/context';
 import { LicenseProvider } from '../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
-import { ApmPluginStartDeps } from '../../plugin';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
 import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_date_range';
 import { apmRouter } from './apm_route_config';
@@ -41,15 +40,13 @@ import { TrackPageview } from './track_pageview';
 export interface ApmAppRootProps {
   apmPluginContextValue: ApmPluginContextValue;
   appMountParameters: AppMountParameters;
-  pluginsStart: ApmPluginStartDeps;
 }
 
 export function ApmAppRoot({
   apmPluginContextValue,
   appMountParameters,
-  pluginsStart,
 }: ApmAppRootProps) {
-  const { core } = apmPluginContextValue;
+  const { core, pluginsStart } = apmPluginContextValue;
   const { history, setHeaderActionMenu } = appMountParameters;
   const i18nCore = core.i18n;
 

@@ -23,7 +23,7 @@ export function useServiceAlertsFetcher({
   end: string;
 }) {
   const {
-    plugins: { observability },
+    pluginsSetup: { observability },
   } = useApmPluginContext();
 
   const experimentalAlertsEnabled = observability.isAlertingExperienceEnabled();
