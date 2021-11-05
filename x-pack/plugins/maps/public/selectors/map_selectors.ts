@@ -31,6 +31,7 @@ import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
+  LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
   SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
@@ -69,9 +70,9 @@ export function createLayerInstance(
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
   switch (layerDescriptor.type) {
-    case TileLayer.type:
+    case LAYER_TYPE.TILE:
       return new TileLayer({ layerDescriptor, source: source as ITMSSource });
-    case GeoJsonVectorLayer.type:
+    case LAYER_TYPE.VECTOR:
       const joins: InnerJoin[] = [];
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
       if (vectorLayerDescriptor.joins) {
@@ -86,20 +87,20 @@ export function createLayerInstance(
         joins,
         chartsPaletteServiceGetColor,
       });
-    case VectorTileLayer.type:
+    case LAYER_TYPE.VECTOR_TILE:
       return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
-    case HeatmapLayer.type:
+    case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
         source: source as ESGeoGridSource,
       });
-    case BlendedVectorLayer.type:
+    case LAYER_TYPE.BLENDED_VECTOR:
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
         chartsPaletteServiceGetColor,
       });
-    case MvtVectorLayer.type:
+    case LAYER_TYPE.TILED_VECTOR:
       return new MvtVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
