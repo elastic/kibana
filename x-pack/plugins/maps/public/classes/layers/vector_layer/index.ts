@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-export {
-  addGeoJsonMbSource,
-  getVectorSourceBounds,
-  syncVectorSource,
-} from './geojson_vector_layer/utils';
-export {
-  isVectorLayer,
-  IVectorLayer,
-  VectorLayerArguments,
-  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
-} from './vector_layer';
+export { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './geojson_vector_layer/utils';
+export type { IVectorLayer, VectorLayerArguments } from './vector_layer';
+export { isVectorLayer, NO_RESULTS_ICON_AND_TOOLTIPCONTENT } from './vector_layer';
 
 export { BlendedVectorLayer } from './blended_vector_layer';
 export { GeoJsonVectorLayer } from './geojson_vector_layer';
