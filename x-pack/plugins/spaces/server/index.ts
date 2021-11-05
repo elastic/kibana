@@ -19,9 +19,13 @@ export { addSpaceIdToPath } from '../common';
 
 // end public contract exports
 
-export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
-export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-export { ISpacesClient, SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
+export type { SpacesPluginSetup, SpacesPluginStart } from './plugin';
+export type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+export type {
+  ISpacesClient,
+  SpacesClientRepositoryFactory,
+  SpacesClientWrapper,
+} from './spaces_client';
 
 export type {
   Space,

@@ -396,6 +396,8 @@ const ActionIcon = React.memo<{
   );
 });
 
+ActionIcon.displayName = 'ActionIcon';
+
 export const getActionAttachment = ({
   comment,
   userCanCrud,
