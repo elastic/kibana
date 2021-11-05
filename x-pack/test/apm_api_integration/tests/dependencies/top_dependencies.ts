@@ -53,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Top dependencies',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      describe('when data is generated', () => {
+      describe.skip('when data is generated', () => {
         let topDependencies: TopDependencies;
 
         before(async () => {
