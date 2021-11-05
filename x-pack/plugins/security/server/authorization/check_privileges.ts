@@ -60,7 +60,9 @@ export function checkPrivilegesWithRequestFactory(
       const clusterClient = await getClusterClient();
       const { body } = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
         body: {
+          // @ts-expect-error SecurityClusterPrivilege doesn't contain all possible priviledges
           cluster: privileges.elasticsearch?.cluster,
+          // @ts-expect-error SecurityIndexPrivilege doesn't contain all possible priviledges
           index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
             ([name, indexPrivileges]) => ({
               names: [name],

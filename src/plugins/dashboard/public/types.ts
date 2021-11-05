@@ -38,7 +38,7 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
 
-export { SavedDashboardPanel };
+export type { SavedDashboardPanel };
 
 export type NavAction = (anchorElement?: any) => void;
 export interface SavedDashboardPanelMap {

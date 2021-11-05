@@ -58,7 +58,8 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 
-export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
+export type { OperationType, IndexPatternColumn } from './operations';
+export { deleteColumn } from './operations';
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
