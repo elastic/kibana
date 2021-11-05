@@ -61,15 +61,7 @@ export const useWorkpad = (
         setError(e as Error | string);
       }
     })();
-  }, [
-    workpadId,
-    dispatch,
-    setError,
-    loadPages,
-    workpadResolve,
-    storedWorkpad.id,
-    storedWorkpad.aliasId,
-  ]);
+  }, [workpadId, dispatch, setError, loadPages, workpadResolve, storedWorkpad.id]);
 
   useEffect(() => {
     // If the resolved info is not for the current workpad id, bail out
