@@ -17,8 +17,8 @@ import {
 } from '../../../common/types';
 import type { ReportTaskParams } from '../tasks';
 
-export { ReportDocument };
-export { ReportApiJSON, ReportSource };
+export type { ReportDocument };
+export type { ReportApiJSON, ReportSource };
 
 const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';

@@ -10,7 +10,9 @@ import { EmbeddableInput } from '../../types';
 import { EmbeddableTypes } from './embeddable_types';
 
 export const EmbeddableExpressionType = 'embeddable';
-export { EmbeddableTypes, EmbeddableInput };
+export type { EmbeddableInput };
+export { EmbeddableTypes };
+
 export interface EmbeddableExpression<Input extends EmbeddableInput> {
   /**
    * The type of the expression result

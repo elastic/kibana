@@ -12,7 +12,6 @@ import type { ConfigType } from '../config';
 
 interface Usage {
   auditLoggingEnabled: boolean;
-  auditLoggingType?: 'ecs' | 'legacy';
   loginSelectorEnabled: boolean;
   accessAgreementEnabled: boolean;
   authProviderCount: number;
@@ -60,13 +59,6 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         _meta: {
           description:
             'Indicates if audit logging is both enabled and supported by the current license.',
-        },
-      },
-      auditLoggingType: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy).',
         },
       },
       loginSelectorEnabled: {
@@ -132,8 +124,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       },
     },
     fetch: () => {
-      const { allowRbac, allowAccessAgreement, allowAuditLogging, allowLegacyAuditLogging } =
-        license.getFeatures();
+      const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
       if (!allowRbac) {
         return {
           auditLoggingEnabled: false,
@@ -148,17 +139,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         };
       }
 
-      const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
-      const ecsAuditLoggingEnabled =
-        allowAuditLogging && config.audit.enabled && config.audit.appender != null;
-
-      let auditLoggingType: Usage['auditLoggingType'];
-      if (ecsAuditLoggingEnabled) {
-        auditLoggingType = 'ecs';
-      } else if (legacyAuditLoggingEnabled) {
-        auditLoggingType = 'legacy';
-      }
-
+      const auditLoggingEnabled = allowAuditLogging && config.audit.enabled;
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
@@ -183,8 +164,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
 
       return {
-        auditLoggingEnabled: legacyAuditLoggingEnabled || ecsAuditLoggingEnabled,
-        auditLoggingType,
+        auditLoggingEnabled,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,

@@ -720,9 +720,7 @@ export class TimeSeriesExplorer extends React.Component {
       appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, detectorId);
     }
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-    mlFieldFormatService.populateFormats([jobId]).catch((err) => {
-      console.log('Error populating field formats:', err);
-    });
+    mlFieldFormatService.populateFormats([jobId]);
   }
 
   componentDidMount() {
@@ -1170,9 +1168,13 @@ export class TimeSeriesExplorer extends React.Component {
                     <EuiFlexItem grow={false}>
                       <EuiCheckbox
                         id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
+                        label={
+                          <span data-test-subj={'mlForecastCheckbox'}>
+                            {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                              defaultMessage: 'show forecast',
+                            })}
+                          </span>
+                        }
                         checked={showForecast}
                         onChange={this.toggleShowForecastHandler}
                       />

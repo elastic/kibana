@@ -7,6 +7,7 @@
 
 import { IndexPattern } from 'src/plugins/data/public';
 import { AGG_TYPE } from '../../../../common/constants';
+import { TileMetaFeature } from '../../../../common/descriptor_types';
 import { CountAggField } from './count_agg_field';
 import { isMetricCountable } from '../../util/is_metric_countable';
 import { CountAggFieldParams } from './agg_field_types';
@@ -30,17 +31,22 @@ export class AggField extends CountAggField {
     this._aggType = params.aggType;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    // count and sum aggregations are not within field bounds so they do not support field meta.
+    return !isMetricCountable(this._getAggType());
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API returns meta tiles with numeric aggregation metrics.
+    return this._getDataTypeSynchronous() === 'number';
+  }
+
   isValid(): boolean {
     return !!this._esDocField;
   }
 
   getMbFieldName(): string {
     return this._source.isMvt() ? this.getName() + '.value' : this.getName();
-  }
-
-  supportsFieldMeta(): boolean {
-    // count and sum aggregations are not within field bounds so they do not support field meta.
-    return !isMetricCountable(this._getAggType());
   }
 
   canValueBeFormatted(): boolean {
@@ -73,8 +79,12 @@ export class AggField extends CountAggField {
         );
   }
 
-  async getDataType(): Promise<string> {
+  _getDataTypeSynchronous(): string {
     return this._getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
+  }
+
+  async getDataType(): Promise<string> {
+    return this._getDataTypeSynchronous();
   }
 
   getBucketCount(): number {
@@ -94,5 +104,18 @@ export class AggField extends CountAggField {
 
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
     return this._esDocField ? await this._esDocField.getCategoricalFieldMetaRequest(size) : null;
+  }
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
+    const minField = `aggregations.${this.getName()}.min`;
+    const maxField = `aggregations.${this.getName()}.max`;
+    return metaFeature.properties &&
+      typeof metaFeature.properties[minField] === 'number' &&
+      typeof metaFeature.properties[maxField] === 'number'
+      ? {
+          min: metaFeature.properties[minField] as number,
+          max: metaFeature.properties[maxField] as number,
+        }
+      : null;
   }
 }
