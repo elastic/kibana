@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 
 export interface CasesContextValue {
@@ -22,7 +22,17 @@ export const CasesContext = React.createContext<CasesContextValue | undefined>(u
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { basePath = DEFAULT_BASE_PATH, ...value },
+  value: { owner, appId, userCanCrud, basePath = DEFAULT_BASE_PATH },
 }) => {
-  return <CasesContext.Provider value={{ basePath, ...value }}>{children}</CasesContext.Provider>;
+  const [value, setValue] = useState<CasesContextValue>({ owner, appId, userCanCrud, basePath });
+
+  /**
+   * Once the plugin capabilities are loaded `userCanCrud` prop may change.
+   * We need to re-render in that case, the rest of props are never updated.
+   */
+  useEffect(() => {
+    setValue((prev) => ({ ...prev, userCanCrud }));
+  }, [userCanCrud]);
+
+  return <CasesContext.Provider value={value}>{children}</CasesContext.Provider>;
 };
