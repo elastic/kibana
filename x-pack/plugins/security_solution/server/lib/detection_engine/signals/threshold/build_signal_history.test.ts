@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_ORIGINAL_TIME } from '../../rule_types/field_maps/field_names';
+import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 import { sampleThresholdAlert } from '../../rule_types/__mocks__/threshold';
 import { buildThresholdSignalHistory } from './build_signal_history';
 
