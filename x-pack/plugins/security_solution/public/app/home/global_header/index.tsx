@@ -5,14 +5,14 @@
  * 2.0.
  */
 import {
-  EuiHeaderSection,
-  EuiHeaderLinks,
   EuiHeaderLink,
+  EuiHeaderLinks,
+  EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { createPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
+import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
 import { AppMountParameters } from '../../../../../../../src/core/public';
@@ -22,12 +22,11 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH, SecurityPageName } from '../../../../common/constants';
 import { isDetectionsPath } from '../../../../public/helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -55,23 +54,15 @@ export const GlobalHeader = React.memo(
       },
     } = useKibana().services;
     const { pathname } = useLocation();
-    const [{ pageName, detailName }] = useRouteSpy();
 
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const showTimeline = useShallowEqualSelector(
       (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
     );
 
-    const isAlertsOrRulesDetailsPage =
-      pageName === SecurityPageName.alerts ||
-      (pageName === SecurityPageName.rules && detailName != null);
-    const sourcererScope = isAlertsOrRulesDetailsPage
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-    const showSourcerer = useMemo(
-      () => pagesWithSourcerer.find((page) => page === pageName) || isAlertsOrRulesDetailsPage,
-      [isAlertsOrRulesDetailsPage, pageName]
-    );
+    const sourcererScope = getScopeFromPath(pathname);
+    const showSourcerer = showSourcererByPath(pathname);
+
     const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
 
     useEffect(() => {

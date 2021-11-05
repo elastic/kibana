@@ -21,7 +21,6 @@ import { Title } from './title';
 import { DraggableArguments, BadgeOptions, TitleProp } from './types';
 import { useFormatUrl } from '../link_to';
 import { SecurityPageName } from '../../../app/types';
-import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useKibana } from '../../lib/kibana';
 interface HeaderProps {
   border?: boolean;
@@ -75,7 +74,6 @@ export interface HeaderPageProps extends HeaderProps {
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
-  sourcererScope?: SourcererScopeName;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
@@ -115,7 +113,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   children,
   draggableArguments,
   isLoading,
-  sourcererScope = SourcererScopeName.default,
   subtitle,
   subtitle2,
   title,

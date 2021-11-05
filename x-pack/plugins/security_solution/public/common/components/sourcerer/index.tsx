@@ -26,9 +26,7 @@ import { useDispatch } from 'react-redux';
 import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { SecurityPageName } from '../../../../common/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import {
   FormRow,
@@ -47,21 +45,18 @@ interface SourcererComponentProps {
 
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
-  const [{ pageName, detailName }] = useRouteSpy();
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
-  const showAlertsOnlyCheckbox = isTimelineSourcerer;
-  const isAlertsOrRulesDetailsPage =
-    pageName === SecurityPageName.alerts ||
-    (pageName === SecurityPageName.rules && detailName != null);
 
   const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(false);
+
   const isOnlyDetectionAlerts: boolean =
-    (isAlertsOrRulesDetailsPage && !isTimelineSourcerer) ||
+    scopeId === SourcererScopeName.detections ||
     (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
 
   const onCheckboxChanged = useCallback((e) => {
     setIsOnlyDetectionAlertsChecked(e.target.checked);
   }, []);
+
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
     defaultDataView,
@@ -243,7 +238,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         )}
         <EuiSpacer size="s" />
         <EuiForm component="form">
-          {showAlertsOnlyCheckbox && (
+          {isTimelineSourcerer && (
             <StyledFormRow>
               <EuiCheckbox
                 id="sourcerer-alert-only-checkbox"
@@ -295,35 +290,36 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             />
           </FormRow>
 
-          {!isOnlyDetectionAlerts && (
-            <StyledFormRow>
-              <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <ResetButton
-                    aria-label={i18n.INDEX_PATTERNS_RESET}
-                    data-test-subj="sourcerer-reset"
-                    flush="left"
-                    onClick={resetDataSources}
-                    title={i18n.INDEX_PATTERNS_RESET}
-                  >
-                    {i18n.INDEX_PATTERNS_RESET}
-                  </ResetButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={handleSaveIndices}
-                    disabled={isSavingDisabled}
-                    data-test-subj="sourcerer-save"
-                    fill
-                    fullWidth
-                    size="s"
-                  >
-                    {i18n.SAVE_INDEX_PATTERNS}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </StyledFormRow>
-          )}
+          {!isOnlyDetectionAlerts ||
+            (isTimelineSourcerer && (
+              <StyledFormRow>
+                <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <ResetButton
+                      aria-label={i18n.INDEX_PATTERNS_RESET}
+                      data-test-subj="sourcerer-reset"
+                      flush="left"
+                      onClick={resetDataSources}
+                      title={i18n.INDEX_PATTERNS_RESET}
+                    >
+                      {i18n.INDEX_PATTERNS_RESET}
+                    </ResetButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={handleSaveIndices}
+                      disabled={isSavingDisabled}
+                      data-test-subj="sourcerer-save"
+                      fill
+                      fullWidth
+                      size="s"
+                    >
+                      {i18n.SAVE_INDEX_PATTERNS}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </StyledFormRow>
+            ))}
           <EuiSpacer size="s" />
         </EuiForm>
       </PopoverContent>
