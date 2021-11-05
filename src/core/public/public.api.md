@@ -15,6 +15,7 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiOverlayMaskProps } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
@@ -1047,6 +1048,8 @@ export interface OverlayFlyoutOpenOptions {
     closeButtonAriaLabel?: string;
     // (undocumented)
     hideCloseButton?: boolean;
+    // (undocumented)
+    maskProps?: EuiOverlayMaskProps;
     // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
