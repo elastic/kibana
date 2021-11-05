@@ -59,6 +59,7 @@ import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import {
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
@@ -1411,12 +1412,12 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkUpdate', () => {
-    const obj1 = {
+    const obj1: SavedObjectsBulkUpdateObject = {
       type: 'config',
       id: '6.0.0-alpha1',
       attributes: { title: 'Test One' },
     };
-    const obj2 = {
+    const obj2: SavedObjectsBulkUpdateObject = {
       type: 'index-pattern',
       id: 'logstash-*',
       attributes: { title: 'Test Two' },
@@ -1429,27 +1430,28 @@ describe('SavedObjectsRepository', () => {
       objects: TypeIdTuple[],
       options?: SavedObjectsBulkUpdateOptions,
       includeOriginId?: boolean
-    ) => ({
-      items: objects.map(({ type, id }) => ({
-        update: {
-          _id: `${
-            registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
-          }${type}:${id}`,
-          ...mockVersionProps,
-          get: {
-            _source: {
-              // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
-              // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
-              ...(includeOriginId && { originId }),
+    ) =>
+      ({
+        items: objects.map(({ type, id }) => ({
+          update: {
+            _id: `${
+              registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
+            }${type}:${id}`,
+            ...mockVersionProps,
+            get: {
+              _source: {
+                // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+                // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+                ...(includeOriginId && { originId }),
+              },
             },
+            result: 'updated',
           },
-          result: 'updated',
-        },
-      })),
-    });
+        })),
+      } as estypes.BulkResponse);
 
     const bulkUpdateSuccess = async (
-      objects,
+      objects: SavedObjectsBulkUpdateObject[],
       options?: SavedObjectsBulkUpdateOptions,
       includeOriginId?: boolean
     ) => {
@@ -1501,7 +1503,7 @@ describe('SavedObjectsRepository', () => {
       );
     };
 
-    const expectObjArgs = ({ type, attributes }) => [
+    const expectObjArgs = ({ type, attributes }: { type: string; attributes: unknown }) => [
       expect.any(Object),
       {
         doc: expect.objectContaining({
@@ -1568,7 +1570,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts custom references array`, async () => {
-        const test = async (references) => {
+        const test = async (references: SavedObjectReference[]) => {
           const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
           await bulkUpdateSuccess(objects);
           const expected = { doc: expect.objectContaining({ references }) };
@@ -1580,13 +1582,14 @@ describe('SavedObjectsRepository', () => {
           client.bulk.mockClear();
         };
         await test(references);
-        await test(['string']);
+        await test([{ type: 'type', id: 'id', name: 'some ref' }]);
         await test([]);
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
         const test = async (references: unknown) => {
           const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
+          // @ts-expect-error references is unknown
           await bulkUpdateSuccess(objects);
           const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
           const body = [expect.any(Object), expected, expect.any(Object), expected];
@@ -1643,7 +1646,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
+        const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkUpdateSuccess([obj1, obj2], { namespace });
         expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
 
@@ -1694,7 +1697,7 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([_obj1], { method: 'update', getId });
         client.bulk.mockClear();
         await bulkUpdateSuccess([_obj2], { namespace });
-        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides }, 2);
+        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
@@ -1702,7 +1705,7 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([_obj1], { method: 'update', getId });
         client.bulk.mockClear();
         await bulkUpdateSuccess([{ ..._obj2, namespace }]);
-        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides }, 2);
+        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides });
       });
     });
 
@@ -1711,18 +1714,23 @@ describe('SavedObjectsRepository', () => {
         mockGetBulkOperationError.mockReset();
       });
 
-      const obj = {
+      const obj: SavedObjectsBulkUpdateObject = {
         type: 'dashboard',
         id: 'three',
+        attributes: {},
       };
 
-      const bulkUpdateError = async (obj, isBulkError, expectedErrorResult) => {
+      const bulkUpdateError = async (
+        obj: SavedObjectsBulkUpdateObject,
+        isBulkError: boolean,
+        expectedErrorResult: ExpectedErrorResult
+      ) => {
         const objects = [obj1, obj, obj2];
         const mockResponse = getMockBulkUpdateResponse(objects);
         if (isBulkError) {
           // mock the bulk error for only the second object
           mockGetBulkOperationError.mockReturnValueOnce(undefined);
-          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error);
+          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error as Payload);
         }
         client.bulk.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(mockResponse)
@@ -1741,14 +1749,18 @@ describe('SavedObjectsRepository', () => {
         });
       };
 
-      const bulkUpdateMultiError = async ([obj1, _obj, obj2], options, mgetResponse) => {
+      const bulkUpdateMultiError = async (
+        [obj1, _obj, obj2]: SavedObjectsBulkUpdateObject[],
+        options: SavedObjectsBulkUpdateOptions | undefined,
+        mgetResponse: estypes.MgetResponse
+      ) => {
         client.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(mgetResponse, {
             statusCode: mgetResponse.statusCode,
           })
         );
 
-        const bulkResponse = getMockBulkUpdateResponse([obj1, obj2], namespace);
+        const bulkResponse = getMockBulkUpdateResponse([obj1, obj2], { namespace });
         client.bulk.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(bulkResponse)
         );
@@ -1817,7 +1829,14 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      const expectSuccessResult = ({ type, id, attributes, references, namespaces, originId }) => ({
+      const expectSuccessResult = ({
+        type,
+        id,
+        attributes,
+        references,
+        namespaces,
+        originId,
+      }: SavedObjectsBulkUpdateObject) => ({
         type,
         id,
         originId,
@@ -1844,9 +1863,10 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`handles a mix of successful updates and errors`, async () => {
-        const obj = {
+        const obj: SavedObjectsBulkUpdateObject = {
           type: 'unknownType',
           id: 'three',
+          attributes: {},
         };
         const objects = [obj1, obj, obj2];
         const mockResponse = getMockBulkUpdateResponse(objects);
@@ -1862,7 +1882,11 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`includes namespaces property for single-namespace and multi-namespace documents`, async () => {
-        const obj = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'three' };
+        const obj: SavedObjectsBulkUpdateObject = {
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+          id: 'three',
+          attributes: {},
+        };
         const result = await bulkUpdateSuccess([obj1, obj]);
         expect(result).toEqual({
           saved_objects: [
@@ -1873,7 +1897,11 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`includes originId property if present in cluster call response`, async () => {
-        const obj = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'three' };
+        const obj: SavedObjectsBulkUpdateObject = {
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+          id: 'three',
+          attributes: {},
+        };
         const result = await bulkUpdateSuccess([obj1, obj], {}, true);
         expect(result).toEqual({
           saved_objects: [
