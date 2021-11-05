@@ -46,6 +46,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Dependency metadata when data is generated',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
+      after(() => synthtraceEsClient.clean());
+
       it('returns correct metadata for the dependency', async () => {
         await generateData({ synthtraceEsClient, start, end });
         const { status, body } = await callApi();
