@@ -73,7 +73,7 @@ import {
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
 } from 'kibana/server';
-import { InternalBulkResolveError } from "./internal_bulk_resolve";
+import { InternalBulkResolveError } from './internal_bulk_resolve';
 
 const { nodeTypes } = esKuery;
 
@@ -2869,7 +2869,8 @@ describe('SavedObjectsRepository', () => {
 
     describe('errors', () => {
       it(`throws when namespace is not a string or is '*'`, async () => {
-        const test = async (namespace) => {
+        const test = async (namespace: unknown) => {
+          // @ts-expect-error namespace is unknown
           await expect(savedObjectsRepository.deleteByNamespace(namespace)).rejects.toThrowError(
             `namespace is required, and must be a string`
           );
@@ -3046,7 +3047,10 @@ describe('SavedObjectsRepository', () => {
         client.updateByQuery.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise({
             updated: 7,
-            failures: ['failure', 'another-failure'],
+            failures: [
+              { id: 'failure' } as estypes.BulkIndexByScrollFailure,
+              { id: 'another-failure' } as estypes.BulkIndexByScrollFailure,
+            ],
           })
         );
 
