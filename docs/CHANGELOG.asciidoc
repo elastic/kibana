@@ -97,7 +97,7 @@ Operations::
 [[fixes-v7.15.2]]
 === Bug Fixes
 APM::
-* Filter on tx metrics for instance stats {kibana-pull}114758[#114758]
+* Only filter on transaction metrics for instance throughput stats {kibana-pull}114758[#114758]
 * Fix loading of latency distribution chart on trace samples tab in load balanced setups {kibana-pull}114615[#114615]
 * Show trace samples even when overall histogram chart fails to load {kibana-pull}114247[#114247]
 Elastic Security::
