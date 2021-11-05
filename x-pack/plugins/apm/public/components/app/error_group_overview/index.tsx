@@ -7,7 +7,6 @@
 
 import {
   EuiFlexGroup,
-  EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
@@ -73,28 +72,30 @@ export function ErrorGroupOverview() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <ChartPointerEventContextProvider>
-        <EuiFlexGrid columns={2} gutterSize="s">
-          <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <ErrorDistribution
-                fetchStatus={status}
-                distribution={errorDistributionData}
-                title={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
-                  { defaultMessage: 'Error occurrences' }
-                )}
+      <EuiFlexItem>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <ChartPointerEventContextProvider>
+            <EuiFlexItem>
+              <EuiPanel hasBorder={true}>
+                <ErrorDistribution
+                  fetchStatus={status}
+                  distribution={errorDistributionData}
+                  title={i18n.translate(
+                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+                    { defaultMessage: 'Error occurrences' }
+                  )}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FailedTransactionRateChart
+                kuery={kuery}
+                environment={environment}
               />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FailedTransactionRateChart
-              kuery={kuery}
-              environment={environment}
-            />
-          </EuiFlexItem>
-        </EuiFlexGrid>
-      </ChartPointerEventContextProvider>
+            </EuiFlexItem>
+          </ChartPointerEventContextProvider>
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
       <EuiFlexItem>
         <EuiPanel hasBorder={true}>
