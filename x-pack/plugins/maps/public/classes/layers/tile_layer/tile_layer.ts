@@ -5,25 +5,41 @@
  * 2.0.
  */
 
-import { AbstractLayer } from '../layer';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import _ from 'lodash';
+import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { TileStyle } from '../../styles/tile/tile_style';
+import { ITMSSource } from '../../sources/tms_source';
+import { DataRequestContext } from '../../../actions';
 
+export interface ITileLayerArguments {
+  source: ITMSSource;
+  layerDescriptor: LayerDescriptor;
+}
+
+// TODO - rename to RasterTileLayer
 export class TileLayer extends AbstractLayer {
   static type = LAYER_TYPE.TILE;
 
-  static createDescriptor(options, mapColors) {
-    const tileLayerDescriptor = super.createDescriptor(options, mapColors);
+  static createDescriptor(options: Partial<LayerDescriptor>) {
+    const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = TileLayer.type;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
   }
 
-  constructor({ source, layerDescriptor }) {
+  private readonly _style: TileStyle;
+
+  constructor({ source, layerDescriptor }: ITileLayerArguments) {
     super({ source, layerDescriptor });
     this._style = new TileStyle();
+  }
+
+  getSource(): ITMSSource {
+    return super.getSource() as ITMSSource;
   }
 
   getStyleForEditing() {
@@ -38,10 +54,10 @@ export class TileLayer extends AbstractLayer {
     return this._style;
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }: DataRequestContext) {
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {
-      //data is immmutable
+      // data is immmutable
       return;
     }
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
@@ -62,28 +78,28 @@ export class TileLayer extends AbstractLayer {
     return [this._getMbLayerId()];
   }
 
-  ownsMbLayerId(mbLayerId) {
+  ownsMbLayerId(mbLayerId: string) {
     return this._getMbLayerId() === mbLayerId;
   }
 
-  ownsMbSourceId(mbSourceId) {
+  ownsMbSourceId(mbSourceId: string) {
     return this.getId() === mbSourceId;
   }
 
-  syncLayerWithMB(mbMap) {
+  syncLayerWithMB(mbMap: MbMap) {
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this._getMbLayerId();
 
     if (!source) {
       const sourceDataRequest = this.getSourceDataRequest();
       if (!sourceDataRequest) {
-        //this is possible if the layer was invisible at startup.
-        //the actions will not perform any data=syncing as an optimization when a layer is invisible
-        //when turning the layer back into visible, it's possible the url has not been resovled yet.
+        // this is possible if the layer was invisible at startup.
+        // the actions will not perform any data=syncing as an optimization when a layer is invisible
+        // when turning the layer back into visible, it's possible the url has not been resovled yet.
         return;
       }
 
-      const tmsSourceData = sourceDataRequest.getData();
+      const tmsSourceData = sourceDataRequest.getData() as { url?: string };
       if (!tmsSourceData || !tmsSourceData.url) {
         return;
       }
@@ -108,9 +124,9 @@ export class TileLayer extends AbstractLayer {
     this._setTileLayerProperties(mbMap, mbLayerId);
   }
 
-  _setTileLayerProperties(mbMap, mbLayerId) {
+  _setTileLayerProperties(mbMap: MbMap, mbLayerId: string) {
     this.syncVisibilityWithMb(mbMap, mbLayerId);
-    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setLayerZoomRange(mbLayerId, this.getMinZoom(), this.getMaxZoom());
     mbMap.setPaintProperty(mbLayerId, 'raster-opacity', this.getAlpha());
   }
 
@@ -118,7 +134,7 @@ export class TileLayer extends AbstractLayer {
     return 'grid';
   }
 
-  isBasemap(order) {
+  isBasemap(order: number) {
     return order === 0;
   }
 }
