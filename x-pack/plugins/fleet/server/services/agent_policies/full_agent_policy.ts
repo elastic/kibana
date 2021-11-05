@@ -48,23 +48,17 @@ export async function getFullAgentPolicy(
     return null;
   }
 
-  const dataOutputId: string =
-    agentPolicy.data_output_id ||
-    (await outputService.getDefaultDataOutputId(soClient).then((defaultDataId) => {
-      if (!defaultDataId) {
-        throw new Error('Default output is not setup');
-      }
-      return id;
-    }));
+  const defaultDataOutputId = await outputService.getDefaultDataOutputId(soClient);
 
+  if (!defaultDataOutputId) {
+    throw new Error('Default output is not setup');
+  }
+
+  const dataOutputId: string = agentPolicy.data_output_id || defaultDataOutputId;
   const monitoringOutputId: string =
     agentPolicy.monitoring_output_id ||
-    (await outputService.getDefaultMonitoringOutputId(soClient).then((defaultMonitoringId) => {
-      if (!defaultMonitoringId) {
-        throw new Error('Default monitoring output is not setup');
-      }
-      return id;
-    }));
+    (await outputService.getDefaultMonitoringOutputId(soClient)) ||
+    dataOutputId;
 
   const outputs = await Promise.all(
     Array.from(new Set([dataOutputId, monitoringOutputId])).map((outputId) =>

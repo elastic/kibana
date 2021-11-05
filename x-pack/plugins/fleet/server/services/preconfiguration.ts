@@ -104,19 +104,11 @@ export async function ensurePreconfiguredOutputs(
       const isCreate = !existingOutput;
       const isUpdateWithNewData =
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
-      // If a default output already exists, delete it in favor of the preconfigured one
-      if (isCreate || isUpdateWithNewData) {
-        const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
-
-        if (defaultOutputId && defaultOutputId !== output.id) {
-          await outputService.delete(soClient, defaultOutputId);
-        }
-      }
 
       if (isCreate) {
-        await outputService.create(soClient, data, { id, overwrite: true });
+        await outputService.create(soClient, data, { id, fromPreconfiguration: true });
       } else if (isUpdateWithNewData) {
-        await outputService.update(soClient, id, data);
+        await outputService.update(soClient, id, data, { fromPreconfiguration: true });
         // Bump revision of all policies using that output
         if (outputData.is_default || outputData.is_default_monitoring) {
           await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
@@ -140,7 +132,7 @@ export async function cleanPreconfiguredOutputs(
   for (const output of existingPreconfiguredOutput) {
     if (!outputs.find(({ id }) => output.id === id)) {
       logger.info(`Deleting preconfigured output ${output.id}`);
-      await outputService.delete(soClient, output.id);
+      await outputService.delete(soClient, output.id, { fromPreconfiguration: true });
     }
   }
 }

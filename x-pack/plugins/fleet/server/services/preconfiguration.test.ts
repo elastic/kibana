@@ -548,17 +548,6 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
     );
     expect(hasChanged).toBe(false);
   });
-
-  it('should not return hasChanged when only namespace field changes', () => {
-    const { hasChanged } = comparePreconfiguredPolicyToCurrent(
-      {
-        ...baseConfig,
-        namespace: 'newnamespace',
-      },
-      basePackagePolicy
-    );
-    expect(hasChanged).toBe(false);
-  });
 });
 
 describe('output preconfiguration', () => {
@@ -603,27 +592,6 @@ describe('output preconfiguration', () => {
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
   });
 
-  it('should delete existing default output if a new preconfigured output is added', async () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output-123');
-    await ensurePreconfiguredOutputs(soClient, esClient, [
-      {
-        id: 'non-existing-default-output-1',
-        name: 'Output 1',
-        type: 'elasticsearch',
-        is_default: true,
-        is_default_monitoring: false,
-        hosts: ['http://test.fr'],
-      },
-    ]);
-
-    expect(mockedOutputService.delete).toBeCalled();
-    expect(mockedOutputService.create).toBeCalled();
-    expect(mockedOutputService.update).not.toBeCalled();
-    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
-  });
-
   it('should set default hosts if hosts is not set output that does not exists', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -656,28 +624,6 @@ describe('output preconfiguration', () => {
       },
     ]);
 
-    expect(mockedOutputService.create).not.toBeCalled();
-    expect(mockedOutputService.update).toBeCalled();
-    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
-  });
-
-  it('should delete default output if preconfigured output exists and another default output exists', async () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
-    mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-123');
-    await ensurePreconfiguredOutputs(soClient, esClient, [
-      {
-        id: 'existing-output-1',
-        is_default: true,
-        is_default_monitoring: false,
-        name: 'Output 1',
-        type: 'elasticsearch',
-        hosts: ['http://newhostichanged.co:9201'], // field that changed
-      },
-    ]);
-
-    expect(mockedOutputService.delete).toBeCalled();
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();

@@ -68,6 +68,7 @@ class OutputService {
         ...DEFAULT_OUTPUT,
         hosts: this.getDefaultESHosts(),
         ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
+        is_default_monitoring: !(await this.getDefaultMonitoringOutputId(soClient)),
       } as NewOutput;
 
       return await this.create(soClient, newDefaultOutput);
@@ -113,7 +114,7 @@ class OutputService {
   public async create(
     soClient: SavedObjectsClientContract,
     output: NewOutput,
-    options?: { id?: string; overwrite?: boolean }
+    options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...output };
 
@@ -121,14 +122,22 @@ class OutputService {
     if (data.is_default) {
       const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
       if (defaultDataOuputId) {
-        throw new Error(`A default output already exists (${defaultDataOuputId})`);
+        await this.update(
+          soClient,
+          defaultDataOuputId,
+          { is_default: false },
+          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+        );
       }
     }
     if (data.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
       if (defaultMonitoringOutputId) {
-        throw new Error(
-          `A default monitoring output already exists (${defaultMonitoringOutputId})`
+        await this.update(
+          soClient,
+          defaultMonitoringOutputId,
+          { is_default: false },
+          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
         );
       }
     }
@@ -175,6 +184,21 @@ class OutputService {
       .filter((output): output is Output => typeof output !== 'undefined');
   }
 
+  public async list(soClient: SavedObjectsClientContract) {
+    const outputs = await soClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: 1000,
+    });
+
+    return {
+      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
+      total: outputs.total,
+      page: 1,
+      perPage: 1000,
+    };
+  }
+
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
     const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
@@ -185,25 +209,61 @@ class OutputService {
     return outputSavedObjectToOutput(outputSO);
   }
 
-  public async delete(soClient: SavedObjectsClientContract, id: string) {
+  public async delete(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
+      fromPreconfiguration: false,
+    }
+  ) {
+    const originalOutput = await this.get(soClient, id);
+
+    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
+      throw new Error(
+        `Preconfigured output ${id} cannot be deleted outside of kibana config file.`
+      );
+    }
     return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
-  public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
+  public async update(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    data: Partial<Output>,
+    { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
+      fromPreconfiguration: false,
+    }
+  ) {
+    const originalOutput = await this.get(soClient, id);
+
+    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
+      throw new Error(
+        `Preconfigured output ${id} cannot be updated outside of kibana config file.`
+      );
+    }
+
     const updateData = { ...data };
 
     // ensure only default output exists
     if (data.is_default) {
       const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
       if (defaultDataOuputId && defaultDataOuputId !== id) {
-        throw new Error(`A default output already exists (${defaultDataOuputId})`);
+        await this.update(
+          soClient,
+          defaultDataOuputId,
+          { is_default: false },
+          { fromPreconfiguration }
+        );
       }
     }
     if (data.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
-        throw new Error(
-          `A default monitoring output already exists (${defaultMonitoringOutputId})`
+        await this.update(
+          soClient,
+          defaultMonitoringOutputId,
+          { is_default_monitoring: false },
+          { fromPreconfiguration }
         );
       }
     }
@@ -220,21 +280,6 @@ class OutputService {
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
     }
-  }
-
-  public async list(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find<OutputSOAttributes>({
-      type: SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: 1000,
-    });
-
-    return {
-      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
-      total: outputs.total,
-      page: 1,
-      perPage: 1000,
-    };
   }
 }
 
