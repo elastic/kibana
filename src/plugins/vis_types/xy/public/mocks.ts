@@ -118,7 +118,7 @@ export const visParamsWithTwoYAxes = {
       },
       labels: {
         type: 'label',
-        filter: false,
+        filter: true,
         rotate: 0,
         show: true,
         truncate: 100,
@@ -138,7 +138,7 @@ export const visParamsWithTwoYAxes = {
         mode: 'normal',
       },
       labels: {
-        filter: false,
+        filter: true,
         rotate: 0,
         show: true,
         truncate: 100,
