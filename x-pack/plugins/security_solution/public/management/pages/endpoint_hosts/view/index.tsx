@@ -562,7 +562,7 @@ export const EndpointList = () => {
             docsPage: (
               <EuiLink
                 data-test-subj="failed-transform-docs-link"
-                href={services?.docLinks?.links.transforms.guide}
+                href={services?.docLinks?.links.endpoints.troubleshooting}
                 target="_blank"
               >
                 <FormattedMessage
@@ -576,7 +576,7 @@ export const EndpointList = () => {
         <EuiSpacer size="s" />
       </>
     );
-  }, [metadataTransformStats, services?.docLinks?.links.transforms.guide]);
+  }, [metadataTransformStats, services?.docLinks?.links.endpoints.troubleshooting]);
 
   const transformFailedCallout = useMemo(() => {
     if (!showTransformFailedCallout) {
