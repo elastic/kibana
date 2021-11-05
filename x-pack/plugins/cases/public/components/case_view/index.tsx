@@ -41,6 +41,7 @@ import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { generateCaseViewPath } from '../../common/navigation';
 import {
   useAllCasesNavigation,
   useCaseViewNavigation,
@@ -534,6 +535,7 @@ export const CaseView = React.memo(
   }: CaseViewProps) => {
     const { spaces: spacesApi, http } = useKibana().services;
     const { detailName: caseId, subCaseId } = useCaseViewParams();
+    const { basePath } = useCasesContext();
     const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
       useGetCase(caseId, subCaseId);
 
@@ -545,37 +547,34 @@ export const CaseView = React.memo(
 
     useEffect(() => {
       if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
-        // CAUTION: the path /cases/:detailName is working in both Observability (/app/observability/cases/:detailName) and
-        // Security Solutions (/app/security/cases/:detailName) plugins. This will need to be changed if this component is loaded
-        // under any another path, passing a path builder function by props from every parent plugin.
         const newPath = http.basePath.prepend(
-          `cases/${resolveAliasId}${window.location.search}${window.location.hash}`
+          `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}${
+            window.location.search
+          }${window.location.hash}`
         );
         spacesApi.ui.redirectLegacyUrl(newPath, i18n.CASE);
       }
-    }, [resolveOutcome, resolveAliasId, spacesApi, http]);
+    }, [resolveOutcome, resolveAliasId, basePath, spacesApi, http]);
 
     const getLegacyUrlConflictCallout = useCallback(() => {
       // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
       if (data && spacesApi && resolveOutcome === 'conflict' && resolveAliasId != null) {
         // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
         // callout with a warning for the user, and provide a way for them to navigate to the other object.
-        const otherObjectId = resolveAliasId; // This is always defined if outcome === 'conflict'
-        // CAUTION: the path /cases/:detailName is working in both Observability (/app/observability/cases/:detailName) and
-        // Security Solutions (/app/security/cases/:detailName) plugins. This will need to be changed if this component is loaded
-        // under any another path, passing a path builder function by props from every parent plugin.
         const otherObjectPath = http.basePath.prepend(
-          `cases/${otherObjectId}${window.location.search}${window.location.hash}`
+          `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}${
+            window.location.search
+          }${window.location.hash}`
         );
         return spacesApi.ui.components.getLegacyUrlConflict({
           objectNoun: i18n.CASE,
           currentObjectId: data.id,
-          otherObjectId,
+          otherObjectId: resolveAliasId,
           otherObjectPath,
         });
       }
       return null;
-    }, [data, resolveAliasId, resolveOutcome, spacesApi, http.basePath]);
+    }, [data, resolveAliasId, resolveOutcome, basePath, spacesApi, http]);
 
     return isError ? (
       <DoesNotExist caseId={caseId} />

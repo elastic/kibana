@@ -23,9 +23,9 @@ import {
   getSubCaseViewWithCommentPath,
 } from '../../common/navigation';
 
-const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, ...props }) => {
+const CasesRoutesComponent: React.FC<CasesRoutesProps> = (props) => {
   const { timelineIntegration } = props;
-  const { userCanCrud } = useCasesContext();
+  const { userCanCrud, basePath } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
 
@@ -36,13 +36,13 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, ...props }) =>
 
   return (
     <Switch>
-      <Route strict exact path={path}>
+      <Route strict exact path={basePath}>
         <AllCases {...props} />
       </Route>
 
       {/* Using individual "userCanCrud" conditionals since Switch do not work with Fragment wrapped Routes */}
       {userCanCrud && (
-        <Route path={getCreateCasePath(path)}>
+        <Route path={getCreateCasePath(basePath)}>
           <CreateCase
             onSuccess={onCreateCaseSuccess}
             onCancel={navigateToAllCases}
@@ -52,7 +52,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, ...props }) =>
       )}
 
       {userCanCrud && (
-        <Route path={getCasesConfigurePath(path)}>
+        <Route path={getCasesConfigurePath(basePath)}>
           <ConfigureCase />
         </Route>
       )}
@@ -61,18 +61,18 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, ...props }) =>
         <Route
           exact
           path={[
-            getSubCaseViewWithCommentPath(path),
-            getCaseViewWithCommentPath(path),
-            getSubCaseViewPath(path),
-            getCaseViewPath(path),
+            getSubCaseViewWithCommentPath(basePath),
+            getCaseViewWithCommentPath(basePath),
+            getSubCaseViewPath(basePath),
+            getCaseViewPath(basePath),
           ]}
         >
           <CaseView {...props} />
         </Route>
       )}
 
-      <Route path={path}>
-        <Redirect to={path} />
+      <Route path={basePath}>
+        <Redirect to={basePath} />
       </Route>
     </Switch>
   );

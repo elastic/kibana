@@ -290,7 +290,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         ],
       },
       getCasesDeepLinks<SecuritySolutionDeepLink>({
-        path: CASES_PATH,
+        basePath: CASES_PATH,
         extend: {
           [SecurityPageName.case]: {
             navLinkStatus: AppNavLinkStatus.visible,

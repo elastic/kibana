@@ -7,6 +7,7 @@
 
 import { generatePath } from 'react-router-dom';
 
+export const DEFAULT_BASE_PATH = '/cases';
 export interface CaseViewPathParams {
   detailName: string;
   subCaseId?: string;

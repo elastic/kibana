@@ -14,14 +14,13 @@ import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { CasesProvider, CasesContextValue } from '../cases_context';
 import { useAllCasesNavigation } from '../../common/navigation/hooks';
 
-export interface RecentCasesComponentProps {
+export interface RecentCasesProps {
   maxCasesToShow: number;
 }
 
-const RecentCasesComponent = ({ maxCasesToShow }: RecentCasesComponentProps) => {
+const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
   const currentUser = useCurrentUser();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
 
@@ -84,18 +83,7 @@ const RecentCasesComponent = ({ maxCasesToShow }: RecentCasesComponentProps) => 
       </EuiText>
     </>
   );
-};
-
-export type RecentCasesProps = RecentCasesComponentProps & CasesContextValue;
-export const RecentCases: React.FC<RecentCasesProps> = React.memo(
-  ({ owner, appId, userCanCrud, ...props }) => {
-    return (
-      <CasesProvider value={{ appId, owner, userCanCrud }}>
-        <RecentCasesComponent {...props} />
-      </CasesProvider>
-    );
-  }
-);
+});
 
 // eslint-disable-next-line import/no-default-export
 export { RecentCases as default };

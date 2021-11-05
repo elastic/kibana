@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AppDeepLink } from '../../../../../../src/core/public';
-import { getCreateCasePath, getCasesConfigurePath } from './paths';
+import { DEFAULT_BASE_PATH, getCreateCasePath, getCasesConfigurePath } from './paths';
 
 export const casesDeepLinkIds = {
   cases: 'cases',
@@ -18,10 +18,10 @@ export const casesDeepLinkIds = {
 export type CasesDeepLinkId = typeof casesDeepLinkIds[keyof typeof casesDeepLinkIds];
 
 export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
-  path,
+  basePath = DEFAULT_BASE_PATH,
   extend = {},
 }: {
-  path: string;
+  basePath?: string;
   extend?: Partial<Record<CasesDeepLinkId, Partial<T>>>;
 }) => ({
   title: i18n.translate('xpack.cases.navigation.cases', {
@@ -34,7 +34,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   ],
   ...(extend[casesDeepLinkIds.cases] ?? {}),
   id: casesDeepLinkIds.cases,
-  path,
+  path: basePath,
   deepLinks: [
     {
       title: i18n.translate('xpack.cases.navigation.create', {
@@ -42,7 +42,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
       }),
       ...(extend[casesDeepLinkIds.casesCreate] ?? {}),
       id: casesDeepLinkIds.casesCreate,
-      path: getCreateCasePath(path),
+      path: getCreateCasePath(basePath),
     },
     {
       title: i18n.translate('xpack.cases.navigation.configure', {
@@ -50,7 +50,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
       }),
       ...(extend[casesDeepLinkIds.casesConfigure] ?? {}),
       id: casesDeepLinkIds.casesConfigure,
-      path: getCasesConfigurePath(path),
+      path: getCasesConfigurePath(basePath),
     },
   ],
 });

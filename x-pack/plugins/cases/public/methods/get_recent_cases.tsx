@@ -7,11 +7,21 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
+import { CasesProvider, CasesContextProps } from '../components/cases_context';
 import { RecentCasesProps } from '../components/recent_cases';
 
+export type GetRecentCasesProps = RecentCasesProps & CasesContextProps;
+
 const RecentCasesLazy = lazy(() => import('../components/recent_cases'));
-export const getRecentCasesLazy = (props: RecentCasesProps) => (
-  <Suspense fallback={<EuiLoadingSpinner />}>
-    <RecentCasesLazy {...props} />
-  </Suspense>
+export const getRecentCasesLazy = ({
+  owner,
+  appId,
+  userCanCrud,
+  ...props
+}: GetRecentCasesProps) => (
+  <CasesProvider value={{ appId, owner, userCanCrud }}>
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <RecentCasesLazy {...props} />
+    </Suspense>
+  </CasesProvider>
 );

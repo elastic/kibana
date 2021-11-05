@@ -19,8 +19,12 @@ import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public'
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 
-import { RecentCasesProps } from './components/recent_cases';
-import { GetCasesProps, GetAllCasesSelectorModalProps, GetCreateCaseFlyoutProps } from './methods';
+import {
+  GetCasesProps,
+  GetAllCasesSelectorModalProps,
+  GetCreateCaseFlyoutProps,
+  GetRecentCasesProps,
+} from './methods';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -70,8 +74,8 @@ export interface CasesUiStart {
   getCreateCaseFlyout: (props: GetCreateCaseFlyoutProps) => ReactElement<GetCreateCaseFlyoutProps>;
   /**
    * Get the recent cases component
-   * @param props RecentCasesProps
+   * @param props GetRecentCasesProps
    * @returns A react component for showing recent cases
    */
-  getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
+  getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
 }

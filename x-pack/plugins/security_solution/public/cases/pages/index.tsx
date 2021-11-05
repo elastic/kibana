@@ -137,7 +137,7 @@ const CaseContainerComponent: React.FC = () => {
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
         {casesUi.getCases({
-          path: CASES_PATH,
+          basePath: CASES_PATH,
           owner: [APP_ID],
           appId: APP_UI_ID,
           refreshRef,
