@@ -38,7 +38,8 @@
     "lens",
     "lists",
     "home",
-    "telemetry"
+    "telemetry",
+    "indexPatternFieldEditor"
   ],
   "server": true,
   "ui": true,

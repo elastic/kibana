@@ -21,11 +21,16 @@ import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import type { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
+import type {
+  BrowserFields,
+  ColumnHeaderOptions,
+  CreateFieldComponentType,
+} from '../../../../../common';
 import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 import { Search } from './search';
+
 import {
   CATEGORY_PANE_WIDTH,
   CLOSE_BUTTON_CLASS_NAME,
@@ -53,6 +58,9 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
    * The current timeline column headers
    */
   columnHeaders: ColumnHeaderOptions[];
+
+  createFieldComponent?: CreateFieldComponentType;
+
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -99,6 +107,7 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
 const FieldsBrowserComponent: React.FC<Props> = ({
   columnHeaders,
   filteredBrowserFields,
+  createFieldComponent: CreateField,
   isSearching,
   onCategorySelected,
   onSearchInputChange,
@@ -187,14 +196,22 @@ const FieldsBrowserComponent: React.FC<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <Search
-            data-test-subj="header"
-            filteredBrowserFields={filteredBrowserFields}
-            isSearching={isSearching}
-            onSearchInputChange={onInputChange}
-            searchInput={searchInput}
-            timelineId={timelineId}
-          />
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem>
+              <Search
+                data-test-subj="header"
+                filteredBrowserFields={filteredBrowserFields}
+                isSearching={isSearching}
+                onSearchInputChange={onInputChange}
+                searchInput={searchInput}
+                timelineId={timelineId}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {CreateField && <CreateField onClick={onHide} />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiSpacer size="l" />
           <PanesFlexGroup alignItems="flexStart" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
