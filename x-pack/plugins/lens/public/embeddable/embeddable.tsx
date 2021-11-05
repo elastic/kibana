@@ -110,6 +110,14 @@ export interface LensEmbeddableDeps {
   spaces?: SpacesPluginStart;
 }
 
+const getExpressionFromDocument = async (document: Document, documentToExpression: LensEmbeddableDeps['documentToExpression']) => {
+  const { ast, errors } = await documentToExpression(document);
+  return {
+    expression: ast ? toExpression(ast) : null,
+    errors
+  };
+}
+
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
@@ -261,6 +269,26 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
+  private maybeAddConflictError (errors: ErrorMessage[], sharingSavedObjectProps?: SharingSavedObjectProps) {
+    const ret = [...errors];
+
+    if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
+      ret.push({
+        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+          defaultMessage: `You've encountered a URL conflict`,
+        }),
+        longMessage: (
+          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+            targetType={DOC_TYPE}
+            sourceId={sharingSavedObjectProps.sourceId!}
+          />
+        ),
+      })
+    }
+
+    return ret;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
     const attrs: ResolvedLensSavedObjectAttributes | false = await this.deps.attributeService
       .unwrapAttributes(input)
@@ -279,23 +307,11 @@ export class Embeddable
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
-    const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
-    this.errors = errors;
-    if (sharingSavedObjectProps?.outcome === 'conflict' && this.deps.spaces) {
-      const conflictError = {
-        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
-          defaultMessage: `You've encountered a URL conflict`,
-        }),
-        longMessage: (
-          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
-            targetType={DOC_TYPE}
-            sourceId={sharingSavedObjectProps.sourceId!}
-          />
-        ),
-      };
-      this.errors = this.errors ? [...this.errors, conflictError] : [conflictError];
-    }
-    this.expression = ast ? toExpression(ast) : null;
+
+    const { expression, errors } = await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+    this.expression = expression;
+    this.errors = this.maybeAddConflictError(errors || [], sharingSavedObjectProps);
+
     if (this.errors) {
       this.logError('validation');
     }
@@ -485,14 +501,16 @@ export class Embeddable
     };
 
     if (isLensEditEvent(event)) {
-      if (this.savedVis) {
-        const newSavedVis = JSON.parse(JSON.stringify(this.savedVis));
-        newSavedVis.state.visualization = onEditAction(this.savedVis.state.visualization, event);
-        const { ast, errors } = await this.deps.documentToExpression(newSavedVis);
-        this.errors = errors;
-        this.expression = ast ? toExpression(ast) : null;
-        this.reload();
-      }
+      if (!this.savedVis) return;
+
+      const newSavedVis = JSON.parse(JSON.stringify(this.savedVis));
+      newSavedVis.state.visualization = onEditAction(this.savedVis.state.visualization, event);
+      
+      const { expression, errors } = await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+      this.expression = expression;
+      this.errors = errors;
+
+      this.reload();
     }
   };
 
