@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function observabilityApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('Observability specs', () => {
-    loadTestFile(require.resolve('./annotations'));
+  describe('Observability', () => {
+    loadTestFile(require.resolve('./registry_rules'));
   });
 }
