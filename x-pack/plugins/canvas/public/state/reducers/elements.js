@@ -9,6 +9,7 @@ import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import * as actions from '../actions/elements';
+import { getPageWithElementId } from '../selectors/workpad';
 
 const { assign, push, del, set } = immutable;
 
@@ -88,18 +89,6 @@ const trimElement = ({ id, position, expression, filter }) => ({
   ...(filter !== void 0 && { filter }),
 });
 
-const getPageWithElementId = (workpad, elementId) => {
-  const matchingPage = workpad.pages.find((page) =>
-    page.elements.map((element) => element.id).includes(elementId)
-  );
-
-  if (matchingPage) {
-    return matchingPage.id;
-  }
-
-  return undefined;
-};
-
 export const elementsReducer = handleActions(
   {
     // TODO: This takes the entire element, which is not necessary, it could just take the id.
@@ -115,11 +104,6 @@ export const elementsReducer = handleActions(
       const { filter, elementId } = payload;
       const pageId = getPageWithElementId(workpadState, elementId);
       return assignNodeProperties(workpadState, pageId, elementId, { filter });
-    },
-    [actions.updateFilterElement]: (workpadState, { payload }) => {
-      const { filter, expression, elementId } = payload;
-      const pageId = getPageWithElementId(workpadState, elementId);
-      return assignNodeProperties(workpadState, pageId, elementId, { filter, expression });
     },
     [actions.setMultiplePositions]: (workpadState, { payload }) =>
       payload.repositionedElements.reduce(

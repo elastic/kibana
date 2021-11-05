@@ -45,8 +45,10 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
   height: 50,
   render(domNode, config, handlers) {
     let filterExpression = handlers.getFilter();
-
-    if (filterExpression === undefined || !filterExpression.includes('exactly')) {
+    if (
+      filterExpression === undefined ||
+      (!filterExpression.includes('exactly') && filterExpression !== '')
+    ) {
       filterExpression = '';
       handlers.setFilter(filterExpression);
     }
@@ -64,7 +66,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
               arguments: {
                 value: [commitValue],
                 column: [config.column],
-                filterGroup: [config.filterGroup],
+                ...(config.filterGroup ? { filterGroup: [config.filterGroup] } : {}),
               },
             },
           ],

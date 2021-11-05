@@ -7,16 +7,30 @@
 
 import { AnyAction, Dispatch, Middleware } from 'redux';
 
-// @ts-expect-error
-import { setExpressionAction, syncFilterWithExpression } from '../actions/elements';
+import {
+  setExpressionAction,
+  setFilterAction,
+  syncFilterWithExpression,
+  syncExpressionWithFilter,
+  // @ts-expect-error
+} from '../actions/elements';
 
 export const elementsSyncMiddleware: Middleware =
   ({ dispatch }) =>
   (next: Dispatch) =>
   (action: AnyAction) => {
-    if (action.type === setExpressionAction) {
-      dispatch(syncFilterWithExpression(...Object.values(action.payload)));
-    }
-
     next(action);
+
+    switch (action.type) {
+      case setExpressionAction:
+        if (action.payload.needSync) {
+          dispatch(syncFilterWithExpression(...Object.values(action.payload)));
+        }
+        break;
+      case setFilterAction:
+        if (action.payload.needSync) {
+          dispatch(syncExpressionWithFilter(...Object.values(action.payload)));
+        }
+        break;
+    }
   };

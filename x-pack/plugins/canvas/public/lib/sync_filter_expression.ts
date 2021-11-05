@@ -5,34 +5,83 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter/common';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter/common';
 import immutable from 'object-path-immutable';
-import { get } from 'lodash';
 
-const { set, del } = immutable;
+const { merge } = immutable;
 
-export function syncFilterExpression(
-  config: Record<string, any>,
-  filterExpression: string,
-  fields: string[] = []
-) {
-  let changed = false;
-  const filterAst = fromExpression(filterExpression);
+const exactlyRemapSchema = { column: 'filterColumn', filterGroup: 'filterGroup' };
+const timeRemapSchema = { column: 'column', filterGroup: 'filterGroup' };
 
-  const newAst = fields.reduce((ast, field) => {
-    const val = get(ast, `chain[0].arguments.${field}[0]`);
+const remappingSchemas: Record<string, Record<string, string>> = {
+  dropdownControl: exactlyRemapSchema,
+  exactly: exactlyRemapSchema,
+  timefilterControl: timeRemapSchema,
+};
 
-    if (val !== config[field]) {
-      changed = true;
-      if (!config[field]) {
-        // remove value if not in expression
-        return del(ast, `chain.0.arguments.${field}`);
-      }
-      return set(ast, `chain.0.arguments.${field}.0`, config[field]);
-    }
+const filterExpressionNames = ['dropdownControl', 'timefilterControl', 'exactly'];
 
-    return ast;
-  }, filterAst);
+const swapPropsWithValues = (record: Record<string, string>) =>
+  Object.keys(record).reduce(
+    (updatedRecord, row) => ({ ...updatedRecord, [record[row]]: row }),
+    {}
+  );
 
-  return { changed, newAst };
-}
+const remapArguments = (
+  argsToRemap: Record<string, any>,
+  remappingSchema: Record<string, string>
+) =>
+  Object.keys(remappingSchema).reduce((remappedArgs, argName) => {
+    const argsKey = remappingSchema[argName];
+    return {
+      ...remappedArgs,
+      ...(argsToRemap[argsKey] ? { [argName]: argsToRemap[argsKey] } : {}),
+    };
+  }, {});
+
+export const syncFilterWithExpr = (expression: string, filter: string) => {
+  const filterAst = fromExpression(filter);
+  const expressionAst = fromExpression(expression);
+  const filterExpressionAst = expressionAst.chain.find(({ function: fn }) =>
+    filterExpressionNames.includes(fn)
+  );
+
+  if (!filterExpressionAst) {
+    return filter;
+  }
+
+  const remappedArgs = remapArguments(
+    filterExpressionAst.arguments,
+    remappingSchemas[filterExpressionAst.function] ?? remappingSchemas.exactly
+  );
+
+  const updatedFilterAst = merge<Ast>(filterAst, `chain.0.arguments`, remappedArgs);
+  return toExpression(updatedFilterAst);
+};
+
+export const syncExprWithFilter = (expression: string, filter: string) => {
+  const filterAst = fromExpression(filter);
+  const expressionAst = fromExpression(expression);
+  const filterExpressionAstIndex = expressionAst.chain.findIndex(({ function: fn }) =>
+    filterExpressionNames.includes(fn)
+  );
+
+  if (filterExpressionAstIndex === -1) {
+    return expression;
+  }
+
+  const filterExpressionAst = expressionAst.chain[filterExpressionAstIndex];
+  const filterAstArgs = filterAst.chain[0].arguments ?? {};
+
+  const remappingSchema =
+    remappingSchemas[filterExpressionAst.function] ?? remappingSchemas.exactly;
+  const remappedArgs = remapArguments(filterAstArgs, swapPropsWithValues(remappingSchema));
+
+  const updatedExpressionAst = merge<Ast>(
+    expressionAst,
+    `chain.${filterExpressionAstIndex}.arguments`,
+    remappedArgs
+  );
+
+  return toExpression(updatedExpressionAst);
+};

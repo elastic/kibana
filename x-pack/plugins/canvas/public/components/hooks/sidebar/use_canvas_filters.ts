@@ -11,14 +11,10 @@ import { useCallback } from 'react';
 import deepEqual from 'react-fast-compare';
 import { State } from '../../../../types';
 import { getFiltersByGroups } from '../../../lib/filter';
-import {
-  adaptCanvasFilter,
-  adaptFilterToExpression,
-  adaptFilterToElementExpressionAst,
-} from '../../../lib/filter_adapters';
+import { adaptCanvasFilter, adaptFilterToExpression } from '../../../lib/filter_adapters';
 import { getGlobalFiltersWithIds } from '../../../state/selectors/workpad';
 // @ts-expect-error untyped local
-import { updateFilterElement } from '../../../state/actions/elements';
+import { setFilter } from '../../../state/actions/elements';
 
 const extractExpressionAST = (filtersExpressions: string[]) =>
   fromExpression(filtersExpressions.join(' | '));
@@ -46,8 +42,7 @@ export function useCanvasFiltersActions() {
   const updateFilter = useCallback(
     (filter) => {
       const filterExpression = adaptFilterToExpression(filter);
-      const elementExpressionAst = adaptFilterToElementExpressionAst(filter);
-      dispatch(updateFilterElement(elementExpressionAst, filterExpression, filter.id));
+      dispatch(setFilter(filterExpression, filter.id));
     },
     [dispatch]
   );

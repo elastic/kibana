@@ -63,7 +63,7 @@ const tranformObjectToExpression = (obj: Record<string, unknown>) =>
     })
     .join(' ');
 
-const convertExactlyFilter = (filter: Filter) => {
+export function adaptFilterToExpression(filter: Filter) {
   const { type, id, value, ...rest } = filter;
   const restOfExpression = tranformObjectToExpression({ ...rest });
   const valueArgs =
@@ -72,39 +72,4 @@ const convertExactlyFilter = (filter: Filter) => {
       : tranformObjectToExpression({ value });
 
   return `${filterToFunction[type]} ${restOfExpression} ${valueArgs}`;
-};
-
-export function adaptFilterToExpression(filter: Filter) {
-  return convertExactlyFilter(filter);
-}
-
-function adaptExactlyFilterToElementAst(filter: Filter): ExpressionFunctionAST {
-  return {
-    type: 'function',
-    function: 'dropdownControl',
-    arguments: {
-      ...(filter.column !== undefined ? { filterColumn: [filter.column ?? ''] } : {}),
-      ...(filter.filterGroup !== undefined ? { filterGroup: [filter.filterGroup ?? ''] } : {}),
-    },
-  };
-}
-
-function adaptTimeFilterToElementAst(filter: Filter): ExpressionFunctionAST {
-  return {
-    type: 'function',
-    function: 'timefilterControl',
-    arguments: {
-      ...(filter.column !== undefined ? { column: [filter.column ?? ''] } : {}),
-      ...(filter.filterGroup !== undefined ? { filterGroup: [filter.filterGroup ?? ''] } : {}),
-    },
-  };
-}
-
-export function adaptFilterToElementExpressionAst(filter: Filter) {
-  const adapters: Record<string, (filter: Filter) => ExpressionFunctionAST> = {
-    [FilterType.exactly]: adaptExactlyFilterToElementAst,
-    [FilterType.time]: adaptTimeFilterToElementAst,
-  };
-
-  return (adapters[filter.type] ?? adapters[FilterType.exactly])(filter);
 }

@@ -15,7 +15,6 @@ import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selector
 import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from '.';
-import { getFiltersByGroups } from '../lib/filter';
 
 export interface Arguments {
   group: string[];
@@ -36,7 +35,11 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
     });
   }
 
-  return getFiltersByGroups(allFilters, groups);
+  return allFilters.filter((filter) => {
+    const ast = fromExpression(filter);
+    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
+    return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
+  });
 }
 
 type FiltersFunction = ExpressionFunctionDefinition<

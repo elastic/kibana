@@ -539,3 +539,18 @@ export function getRenderedWorkpadExpressions(state: State) {
 
   return expressions;
 }
+
+export const getPageWithElementId = (
+  workpad: State['persistent']['workpad'],
+  elementId: string
+) => {
+  const matchingPage = workpad.pages.find((page) =>
+    page.elements.map((element) => element.id).includes(elementId)
+  );
+
+  if (matchingPage) {
+    return matchingPage.id;
+  }
+
+  return undefined;
+};

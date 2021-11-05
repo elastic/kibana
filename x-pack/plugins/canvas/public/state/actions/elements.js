@@ -16,13 +16,13 @@ import {
   getNodeById,
   getNodes,
   getSelectedPageIndex,
-  getElementById,
+  getPageWithElementId,
 } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
 import { runInterpreter, interpretAst } from '../../lib/run_interpreter';
-import { syncFilterWithExpr } from '../../lib/filter';
+import { syncFilterWithExpr, syncExprWithFilter } from '../../lib/sync_filter_expression';
 import { subMultitree } from '../../lib/aeroelastic/functional';
 import { pluginServices } from '../../services';
 import { selectToplevelNodes } from './transient';
@@ -30,9 +30,10 @@ import * as args from './resolved_args';
 
 const { actionsElements: strings } = ErrorStrings;
 
-const { set, del, assign } = immutable;
+const { set, del } = immutable;
 
 export const setExpressionAction = 'setExpression';
+export const setFilterAction = 'setFilter';
 
 export function getSiblingContext(state, elementId, checkIndex) {
   const prevContextPath = [elementId, 'expressionContext', checkIndex];
@@ -273,11 +274,10 @@ export const removeElements = createThunk(
 );
 
 export const setFilter = createThunk(
-  'setFilter',
-  ({ dispatch }, filter, elementId, doRender = true) => {
-    const _setFilter = createAction('setFilter');
-    dispatch(_setFilter({ filter, elementId }));
-
+  setFilterAction,
+  ({ dispatch }, filter, elementId, doRender = true, needSync = true) => {
+    const _setFilter = createAction(setFilterAction);
+    dispatch(_setFilter({ filter, elementId, needSync }));
     if (doRender === true) {
       dispatch(fetchAllRenderables());
     }
@@ -285,10 +285,17 @@ export const setFilter = createThunk(
 );
 
 export const setExpression = createThunk(setExpressionAction, setExpressionFn);
-function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, doRender = true) {
+function setExpressionFn(
+  { dispatch, getState },
+  expression,
+  elementId,
+  pageId,
+  doRender = true,
+  needSync = true
+) {
   // dispatch action to update the element in state
   const _setExpression = createAction(setExpressionAction);
-  dispatch(_setExpression({ expression, elementId, pageId }));
+  dispatch(_setExpression({ expression, elementId, pageId, needSync }));
 
   // read updated element from state and fetch renderable
   const updatedElement = getNodeById(getState(), elementId, pageId);
@@ -311,14 +318,26 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
 
 export const syncFilterWithExpression = createThunk(
   'syncFilterWithExpression',
-  ({ dispatch, getState }, expression, elementId, pageId) => {
+  ({ dispatch, getState }, expression, elementId) => {
+    const pageId = getPageWithElementId(getState().persistent.workpad, elementId);
     const element = getNodeById(getState(), elementId, pageId);
-    if (!element.filter) {
-      return;
-    }
 
-    const updatedFilter = syncFilterWithExpr(expression, element.filter);
-    dispatch(setFilter(updatedFilter, elementId));
+    if (element.filter) {
+      const updatedFilter = syncFilterWithExpr(expression, element.filter);
+      dispatch(setFilter(updatedFilter, elementId, true, false));
+    }
+  }
+);
+
+export const syncExpressionWithFilter = createThunk(
+  'syncExpressionWithFilter',
+  ({ dispatch, getState }, filter, elementId) => {
+    const pageId = getPageWithElementId(getState().persistent.workpad, elementId);
+    const element = getNodeById(getState(), elementId, pageId);
+    if (element.filter) {
+      const updatedExpression = syncExprWithFilter(element.expression, filter);
+      dispatch(setExpression(updatedExpression, elementId, pageId, true, false));
+    }
   }
 );
 
@@ -349,31 +368,6 @@ const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRend
   const res = setAstPlain(ast, element, pageId, doRender);
   dispatch(setExpression(...Object.values(res)));
 });
-
-export const updateFilterElement = createThunk(
-  'setFilterElement',
-  ({ dispatch, getState }, ast, filterExpression, elementId) => {
-    const element = getElementById(getState(), elementId);
-    if (!element) {
-      return;
-    }
-
-    const { ast: elementAst } = element;
-    const filterElementIndex = elementAst.chain?.findIndex(
-      (expr) => expr.function === ast.function
-    );
-
-    if (filterElementIndex === -1) {
-      return;
-    }
-
-    const path = `chain.${filterElementIndex}.arguments`;
-    const newAst = assign(elementAst, path, ast.arguments);
-    const _setFilterElement = createAction('setFilterElement');
-    const { expression } = setAstPlain(newAst, element);
-    dispatch(_setFilterElement({ filter: filterExpression, expression, elementId }));
-  }
-);
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
