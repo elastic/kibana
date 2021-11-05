@@ -88,9 +88,9 @@ describe('AppRouter', () => {
         appRoute: '/app/my-app/app6',
       }),
     ] as MockedMounterTuple[]);
+    theme = themeServiceMock.createStartContract();
     globalHistory = createMemoryHistory();
     update = createMountersRenderer();
-    theme = themeServiceMock.createStartContract();
   });
 
   it('calls mount handler and returned unmount function when navigating between apps', async () => {
