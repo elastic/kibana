@@ -250,16 +250,18 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
 
   useEffect(() => {
-    // Force refresh on index pattern change
-    setLastRefresh(Date.now());
-
     return () => {
       // When navigating away from the index pattern
       // Reset all previously set filters
       // to make sure new page doesn't have unrelated filters
       data.query.filterManager.removeAll();
     };
-  }, [currentIndexPattern.id, data.query.filterManager, setLastRefresh]);
+  }, [currentIndexPattern.id, data.query.filterManager]);
+
+  useEffect(() => {
+    // Force refresh on index pattern change
+    setLastRefresh(Date.now());
+  }, [currentIndexPattern.id, setLastRefresh]);
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -267,7 +269,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         from: globalState.time.from,
         to: globalState.time.to,
       });
-      setLastRefresh(Date.now());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.time), timefilter]);
@@ -275,7 +276,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   useEffect(() => {
     if (globalState?.refreshInterval !== undefined) {
       timefilter.setRefreshInterval(globalState.refreshInterval);
-      setLastRefresh(Date.now());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);

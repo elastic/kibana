@@ -22,11 +22,11 @@ import type {
   FieldStatsCommonRequestParams,
   StringFieldStats,
 } from '../../../../../common/types/field_stats';
-import {
-  DataPublicPluginStart,
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
+  ISearchStart,
 } from '../../../../../../../../src/plugins/data/public';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
@@ -82,7 +82,7 @@ export const getStringFieldStatsRequest = (
 };
 
 export const fetchStringFieldsStats = (
-  data: DataPublicPluginStart,
+  dataSearch: ISearchStart,
   params: FieldStatsCommonRequestParams,
   fields: Field[],
   options: ISearchOptions
@@ -90,7 +90,7 @@ export const fetchStringFieldsStats = (
   const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getStringFieldStatsRequest(params, fields);
 
-  return data.search
+  return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(
       catchError((e) =>

@@ -202,7 +202,6 @@ export const useDataVisualizerGridData = (
         runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
         aggregatableFields,
         nonAggregatableFields,
-        lastRefresh,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -218,7 +217,10 @@ export const useDataVisualizerGridData = (
     ]
   );
 
-  const { overallStats, progress: overallStatsProgress } = useOverallStats(fieldStatsRequest);
+  const { overallStats, progress: overallStatsProgress } = useOverallStats(
+    fieldStatsRequest,
+    lastRefresh
+  );
 
   const configsWithoutStats = useMemo(() => {
     if (overallStatsProgress.loaded < 100) return;

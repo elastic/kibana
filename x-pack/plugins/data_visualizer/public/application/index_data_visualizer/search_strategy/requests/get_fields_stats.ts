@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type { FieldStatsError } from '../../../../../common/types/field_stats';
-import { ISearchOptions } from '../../../../../../../../src/plugins/data/common';
-import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
-import { FieldStats } from '../../../../../common/types/field_stats';
+import type { ISearchOptions } from '../../../../../../../../src/plugins/data/common';
+import { ISearchStart } from '../../../../../../../../src/plugins/data/public';
+import type { FieldStats } from '../../../../../common/types/field_stats';
 import { JOB_FIELD_TYPES } from '../../../../../common';
 import { fetchDateFieldsStats } from './get_date_field_stats';
 import { fetchBooleanFieldsStats } from './get_boolean_field_stats';
@@ -19,7 +19,7 @@ import { fetchNumericFieldsStats } from './get_numeric_field_stats';
 import { fetchStringFieldsStats } from './get_string_field_stats';
 
 export const getFieldsStats = (
-  dataPlugin: DataPublicPluginStart,
+  dataSearch: ISearchStart,
   params: FieldStatsCommonRequestParams,
   fields: Array<{
     fieldName: string;
@@ -32,19 +32,19 @@ export const getFieldsStats = (
   const fieldType = fields[0].type;
   switch (fieldType) {
     case JOB_FIELD_TYPES.NUMBER:
-      return fetchNumericFieldsStats(dataPlugin, params, fields, options);
+      return fetchNumericFieldsStats(dataSearch, params, fields, options);
     case JOB_FIELD_TYPES.KEYWORD:
     case JOB_FIELD_TYPES.IP:
-      return fetchStringFieldsStats(dataPlugin, params, fields, options);
+      return fetchStringFieldsStats(dataSearch, params, fields, options);
     case JOB_FIELD_TYPES.DATE:
-      return fetchDateFieldsStats(dataPlugin, params, fields, options);
+      return fetchDateFieldsStats(dataSearch, params, fields, options);
     case JOB_FIELD_TYPES.BOOLEAN:
-      return fetchBooleanFieldsStats(dataPlugin, params, fields, options);
+      return fetchBooleanFieldsStats(dataSearch, params, fields, options);
     case JOB_FIELD_TYPES.TEXT:
-      return fetchFieldsExamples(dataPlugin, params, fields, options);
+      return fetchFieldsExamples(dataSearch, params, fields, options);
     default:
       // Use an exists filter on the the field name to get
       // examples of the field, so cannot batch up.
-      return fetchFieldsExamples(dataPlugin, params, fields, options);
+      return fetchFieldsExamples(dataSearch, params, fields, options);
   }
 };

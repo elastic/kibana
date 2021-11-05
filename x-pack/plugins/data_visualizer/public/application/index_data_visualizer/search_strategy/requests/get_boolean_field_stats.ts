@@ -20,11 +20,11 @@ import type {
   FieldStatsCommonRequestParams,
 } from '../../../../../common/types/field_stats';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
-import {
-  DataPublicPluginStart,
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
+  ISearchStart,
 } from '../../../../../../../../src/plugins/data/public';
 import { extractErrorProperties } from '../../utils/error_utils';
 
@@ -62,14 +62,14 @@ export const getBooleanFieldsStatsRequest = (
 };
 
 export const fetchBooleanFieldsStats = (
-  data: DataPublicPluginStart,
+  dataSearch: ISearchStart,
   params: FieldStatsCommonRequestParams,
   fields: Field[],
   options: ISearchOptions
 ): Observable<BooleanFieldStats[] | FieldStatsError> => {
   const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getBooleanFieldsStatsRequest(params, fields);
-  return data.search
+  return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(
       catchError((e) =>

@@ -10,8 +10,10 @@ import { forkJoin, of, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from 'kibana/public';
+import { chunk } from 'lodash';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
+  AggregatableFieldOverallStats,
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
   processAggregatableFieldsExistResponse,
@@ -62,7 +64,8 @@ function displayError(toastNotifications: ToastsStart, indexPattern: string, err
 }
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
-  searchStrategyParams: TParams | undefined
+  searchStrategyParams: TParams | undefined,
+  lastRefresh: number
 ): {
   progress: DataStatsFetchProgress;
   overallStats: OverallStats;
@@ -87,7 +90,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     searchSubscription$.current?.unsubscribe();
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
-    if (!searchStrategyParams) return;
+
+    if (!searchStrategyParams || lastRefresh === 0) return;
 
     setFetchState({
       ...getInitialProgress(),
@@ -142,25 +146,40 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           )
         : of(undefined);
 
-    const aggregatableOverallStats$ =
+    // Have to divide into smaller requests to avoid 413 payload too large
+    const aggregatableFieldsChunks = chunk(aggregatableFields, 30);
+
+    const aggregatableOverallStats$ = forkJoin(
       aggregatableFields.length > 0
-        ? data.search.search(
-            {
-              params: checkAggregatableFieldsExistRequest(
-                index,
-                searchQuery,
-                aggregatableFields,
-                samplerShardSize,
-                timeFieldName,
-                earliest,
-                latest,
-                undefined,
-                runtimeFieldMap
-              ),
-            },
-            searchOptions
+        ? aggregatableFieldsChunks.map((aggregatableFieldsChunk) =>
+            data.search
+              .search(
+                {
+                  params: checkAggregatableFieldsExistRequest(
+                    index,
+                    searchQuery,
+                    aggregatableFieldsChunk,
+                    samplerShardSize,
+                    timeFieldName,
+                    earliest,
+                    latest,
+                    undefined,
+                    runtimeFieldMap
+                  ),
+                },
+                searchOptions
+              )
+              .pipe(
+                switchMap((resp) => {
+                  return of({
+                    ...resp,
+                    aggregatableFields: aggregatableFieldsChunk,
+                  } as AggregatableFieldOverallStats);
+                })
+              )
           )
-        : of(undefined);
+        : of(undefined)
+    );
 
     const documentCountStats$ =
       timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
@@ -183,7 +202,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           aggregatableOverallStatsResp,
         }) => {
           const aggregatableOverallStats = processAggregatableFieldsExistResponse(
-            aggregatableOverallStatsResp?.rawResponse,
+            aggregatableOverallStatsResp,
             aggregatableFields,
             samplerShardSize
           );
@@ -224,7 +243,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
       },
     });
-  }, [data.search, searchStrategyParams, toasts]);
+  }, [data.search, searchStrategyParams, toasts, lastRefresh]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

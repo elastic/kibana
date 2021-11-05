@@ -34,7 +34,7 @@ import {
   IKibanaSearchResponse,
   ISearchOptions,
 } from '../../../../../../../../src/plugins/data/common';
-import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+import type { ISearchStart } from '../../../../../../../../src/plugins/data/public';
 import { extractErrorProperties } from '../../utils/error_utils';
 import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 
@@ -116,7 +116,7 @@ export const getNumericFieldsStatsRequest = (
 };
 
 export const fetchNumericFieldsStats = (
-  data: DataPublicPluginStart,
+  dataSearch: ISearchStart,
   params: FieldStatsCommonRequestParams,
   fields: Field[],
   options: ISearchOptions
@@ -124,7 +124,7 @@ export const fetchNumericFieldsStats = (
   const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getNumericFieldsStatsRequest(params, fields);
 
-  return data.search
+  return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(
       catchError((e) => {

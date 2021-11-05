@@ -158,15 +158,14 @@ export function useFieldStatsSearchStrategy(
       10
     );
 
-    const fieldStatsSub = combineLatest(
-      batches
-        .map((batch) => getFieldsStats(data, params, batch, searchOptions))
-        .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>
-    );
-
     const statsMap$ = new Subject();
     const fieldsToRetry$ = new Subject<Field[]>();
 
+    const fieldStatsSub = combineLatest(
+      batches
+        .map((batch) => getFieldsStats(data.search, params, batch, searchOptions))
+        .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>
+    );
     const onError = (error: any) => {
       toasts.addError(error, {
         title: i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
@@ -212,8 +211,10 @@ export function useFieldStatsSearchStrategy(
 
           setFieldStats(statsMap);
 
-          statsMap$.next(statsMap);
-          fieldsToRetry$.next(failedFields);
+          if (failedFields.length > 0) {
+            statsMap$.next(statsMap);
+            fieldsToRetry$.next(failedFields);
+          }
         }
       },
       error: onError,
@@ -227,7 +228,9 @@ export function useFieldStatsSearchStrategy(
         switchMap((failedFields) => {
           return combineLatest(
             failedFields
-              .map((failedField) => getFieldsStats(data, params, [failedField], searchOptions))
+              .map((failedField) =>
+                getFieldsStats(data.search, params, [failedField], searchOptions)
+              )
               .filter((obs) => obs !== undefined)
           );
         })
@@ -253,7 +256,8 @@ export function useFieldStatsSearchStrategy(
       error: onError,
       complete: onComplete,
     });
-  }, [data, toasts, searchStrategyParams, fieldStatsParams, initialDataVisualizerListState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.search, toasts, fieldStatsParams, initialDataVisualizerListState]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

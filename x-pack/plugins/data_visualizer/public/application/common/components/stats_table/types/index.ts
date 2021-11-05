@@ -10,7 +10,7 @@ export type {
   FileBasedFieldVisConfig,
   MetricFieldVisStats,
 } from '../../../../../../common/types/field_vis_config';
-export type {
+export {
   isFileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
 } from '../../../../../../common/types/field_vis_config';

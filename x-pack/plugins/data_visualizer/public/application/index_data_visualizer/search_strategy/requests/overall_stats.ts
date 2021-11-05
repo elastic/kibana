@@ -87,8 +87,11 @@ export const checkAggregatableFieldsExistRequest = (
   };
 };
 
+export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
+  aggregatableFields: string[];
+}
 export const processAggregatableFieldsExistResponse = (
-  body: estypes.SearchResponse | undefined,
+  responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],
   samplerShardSize: number,
   datafeedConfig?: estypes.MlDatafeed
@@ -99,38 +102,20 @@ export const processAggregatableFieldsExistResponse = (
     aggregatableNotExistsFields: [] as AggregatableField[],
   };
 
-  if (!body || aggregatableFields.length === 0) return stats;
+  if (!responses || aggregatableFields.length === 0) return stats;
 
-  const aggregations = body.aggregations;
-  const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total;
-  stats.totalCount = totalCount as number;
+  responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
+    const aggregations = body.aggregations;
+    const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total;
+    stats.totalCount = totalCount as number;
 
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-  const sampleCount =
-    samplerShardSize > 0 ? get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
-  aggregatableFields.forEach((field, i) => {
-    const safeFieldName = getSafeAggregationName(field, i);
-    const count = get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'doc_count'], 0);
-    if (count > 0) {
-      const cardinality = get(
-        aggregations,
-        [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
-        0
-      );
-      stats.aggregatableExistsFields.push({
-        fieldName: field,
-        existsInDocs: true,
-        stats: {
-          sampleCount,
-          count,
-          cardinality,
-        },
-      });
-    } else {
-      if (
-        datafeedConfig?.script_fields?.hasOwnProperty(field) ||
-        datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
-      ) {
+    const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+    const sampleCount =
+      samplerShardSize > 0 ? get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
+    aggregatableFieldsChunk.forEach((field, i) => {
+      const safeFieldName = getSafeAggregationName(field, i);
+      const count = get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'doc_count'], 0);
+      if (count > 0) {
         const cardinality = get(
           aggregations,
           [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
@@ -146,13 +131,33 @@ export const processAggregatableFieldsExistResponse = (
           },
         });
       } else {
-        stats.aggregatableNotExistsFields.push({
-          fieldName: field,
-          existsInDocs: false,
-          stats: {},
-        });
+        if (
+          datafeedConfig?.script_fields?.hasOwnProperty(field) ||
+          datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
+        ) {
+          const cardinality = get(
+            aggregations,
+            [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
+            0
+          );
+          stats.aggregatableExistsFields.push({
+            fieldName: field,
+            existsInDocs: true,
+            stats: {
+              sampleCount,
+              count,
+              cardinality,
+            },
+          });
+        } else {
+          stats.aggregatableNotExistsFields.push({
+            fieldName: field,
+            existsInDocs: false,
+            stats: {},
+          });
+        }
       }
-    }
+    });
   });
 
   return stats as {

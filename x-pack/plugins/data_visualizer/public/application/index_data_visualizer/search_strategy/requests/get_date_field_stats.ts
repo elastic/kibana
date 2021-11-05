@@ -16,11 +16,11 @@ import {
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type { Field, DateFieldStats, Aggs } from '../../../../../common/types/field_stats';
-import {
-  DataPublicPluginStart,
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
+  ISearchStart,
 } from '../../../../../../../../src/plugins/data/public';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
@@ -59,7 +59,7 @@ export const getDateFieldsStatsRequest = (
 };
 
 export const fetchDateFieldsStats = (
-  data: DataPublicPluginStart,
+  dataSearch: ISearchStart,
   params: FieldStatsCommonRequestParams,
   fields: Field[],
   options: ISearchOptions
@@ -67,7 +67,7 @@ export const fetchDateFieldsStats = (
   const { samplerShardSize } = params;
 
   const request: estypes.SearchRequest = getDateFieldsStatsRequest(params, fields);
-  return data.search
+  return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(
       catchError((e) =>
