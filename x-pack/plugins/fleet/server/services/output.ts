@@ -114,7 +114,7 @@ class OutputService {
   public async create(
     soClient: SavedObjectsClientContract,
     output: NewOutput,
-    options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
+    options?: { id?: string; fromPreconfiguration?: boolean }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...output };
 
@@ -151,7 +151,7 @@ class OutputService {
     }
 
     const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
-      ...options,
+      overwrite: options?.fromPreconfiguration,
       id: options?.id ? outputIdToUuid(options.id) : undefined,
     });
 
@@ -258,6 +258,7 @@ class OutputService {
     }
     if (data.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
         await this.update(
           soClient,
