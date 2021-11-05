@@ -22,7 +22,7 @@ import React, { Dispatch } from 'react';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
 import { getStatusColor } from '../../../../components/rules/rule_status/helpers';
@@ -228,9 +228,12 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
-            <FormattedDate value={value} fieldName={'last rule update date'} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_UPDATE}
+            relativeThresholdInHrs={24}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
       sortable: true,
@@ -410,9 +413,12 @@ export const getMonitoringColumns = (
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
-            <FormattedRelative value={value} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+            relativeThresholdInHrs={24}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
       width: '20%',
