@@ -65,3 +65,5 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     ) : null;
   }
 );
+
+AllCasesSelectorModal.displayName = 'AllCasesSelectorModal';

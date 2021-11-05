@@ -9,7 +9,24 @@ import { i18n } from '@kbn/i18n';
 import { CaseConnector, CaseConnectorsRegistry } from './types';
 
 export const createCaseConnectorsRegistry = (): CaseConnectorsRegistry => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const connectors: Map<string, CaseConnector<any>> = new Map();
+
+  function assertConnectorExists(
+    connector: CaseConnector | undefined | null,
+    id: string
+  ): asserts connector {
+    if (!connector) {
+      throw new Error(
+        i18n.translate('xpack.cases.connecors.get.missingCaseConnectorErrorMessage', {
+          defaultMessage: 'Object type "{id}" is not registered.',
+          values: {
+            id,
+          },
+        })
+      );
+    }
+  }
 
   const registry: CaseConnectorsRegistry = {
     has: (id: string) => connectors.has(id),
@@ -28,17 +45,9 @@ export const createCaseConnectorsRegistry = (): CaseConnectorsRegistry => {
       connectors.set(connector.id, connector);
     },
     get: <UIProps>(id: string): CaseConnector<UIProps> => {
-      if (!connectors.has(id)) {
-        throw new Error(
-          i18n.translate('xpack.cases.connecors.get.missingCaseConnectorErrorMessage', {
-            defaultMessage: 'Object type "{id}" is not registered.',
-            values: {
-              id,
-            },
-          })
-        );
-      }
-      return connectors.get(id)!;
+      const connector = connectors.get(id);
+      assertConnectorExists(connector, id);
+      return connector;
     },
     list: () => {
       return Array.from(connectors).map(([id, connector]) => connector);

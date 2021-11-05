@@ -10,7 +10,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { AllCases } from '../all_cases';
 import { CaseView } from '../case_view';
 import { CreateCase } from '../create';
-import { ConfigureCase } from '../configure_cases';
+import { ConfigureCases } from '../configure_cases';
 import { CasesRoutesProps } from './types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAllCasesNavigation, useCaseViewNavigation } from '../../common/navigation/hooks';
@@ -53,7 +53,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = (props) => {
 
       {userCanCrud && (
         <Route path={getCasesConfigurePath(basePath)}>
-          <ConfigureCase />
+          <ConfigureCases />
         </Route>
       )}
 

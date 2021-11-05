@@ -85,5 +85,7 @@ const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
   );
 });
 
+RecentCases.displayName = 'RecentCases';
+
 // eslint-disable-next-line import/no-default-export
 export { RecentCases as default };

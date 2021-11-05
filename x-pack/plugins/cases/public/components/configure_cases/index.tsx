@@ -50,7 +50,7 @@ const FormWrapper = styled.div`
   `}
 `;
 
-export const ConfigureCase: React.FC = React.memo(() => {
+export const ConfigureCases: React.FC = React.memo(() => {
   const { userCanCrud } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
@@ -260,3 +260,5 @@ export const ConfigureCase: React.FC = React.memo(() => {
     </>
   );
 });
+
+ConfigureCases.displayName = 'ConfigureCases';
