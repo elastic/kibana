@@ -411,14 +411,14 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    const obj1: SavedObjectsBulkCreateObject = {
+    const obj1 = {
       type: 'config',
       id: '6.0.0-alpha1',
       attributes: { title: 'Test One' },
       references: [{ name: 'ref_0', type: 'test', id: '1' }],
       originId: 'some-origin-id', // only one of the object args has an originId, this is intentional to test both a positive and negative case
     };
-    const obj2: SavedObjectsBulkCreateObject = {
+    const obj2 = {
       type: 'index-pattern',
       id: 'logstash-*',
       attributes: { title: 'Test Two' },
@@ -466,12 +466,12 @@ describe('SavedObjectsRepository', () => {
 
     // bulk create calls have two objects for each source -- the action, and the source
     const expectClientCallArgsAction = (
-      objects,
+      objects: Array<{ type: string; id?: string; if_primary_term?: string; if_seq_no?: string }>,
       {
         method,
         _index = expect.any(String),
         getId = () => expect.any(String),
-      }: { method: string; _index?: string; getId?: (type: string, id: string) => string }
+      }: { method: string; _index?: string; getId?: (type: string, id?: string) => string }
     ) => {
       const body = [];
       for (const { type, id, if_primary_term: ifPrimaryTerm, if_seq_no: ifSeqNo } of objects) {
@@ -510,7 +510,11 @@ describe('SavedObjectsRepository', () => {
       }),
     ];
 
-    const expectSuccessResult = (obj: SavedObjectUnsanitizedDoc) => ({
+    const expectSuccessResult = (obj: {
+      type: string;
+      namespace?: string;
+      namespaces?: string[];
+    }) => ({
       ...obj,
       migrationVersion: { [obj.type]: '1.1.1' },
       coreMigrationVersion: KIBANA_VERSION,
@@ -635,11 +639,11 @@ describe('SavedObjectsRepository', () => {
           const objects = [obj1, obj2].map((x) => ({ ...x, type: MULTI_NAMESPACE_ISOLATED_TYPE }));
           const [o1, o2] = objects;
           mockPreflightCheckForCreate.mockResolvedValueOnce([
-            { type: o1.type, id: o1.id }, // first object does not have an existing document to overwrite
+            { type: o1.type, id: o1.id! }, // first object does not have an existing document to overwrite
             {
               type: o2.type,
-              id: o2.id,
-              existingDocument: { _id: o2.id, _source: { namespaces: ['*'], type: o2.type } }, // second object does have an existing document to overwrite
+              id: o2.id!,
+              existingDocument: { _id: o2.id!, _source: { namespaces: ['*'], type: o2.type } }, // second object does have an existing document to overwrite
             },
           ]);
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
@@ -669,12 +673,12 @@ describe('SavedObjectsRepository', () => {
           const [o1, o2, o3] = objects;
           mockPreflightCheckForCreate.mockResolvedValueOnce([
             // first object does not get passed in to preflightCheckForCreate at all
-            { type: o2.type, id: o2.id }, // second object does not have an existing document to overwrite
+            { type: o2.type, id: o2.id! }, // second object does not have an existing document to overwrite
             {
               type: o3.type,
-              id: o3.id,
+              id: o3.id!,
               existingDocument: {
-                _id: o3.id,
+                _id: o3.id!,
                 _source: { type: o3.type, namespaces: [namespace ?? 'default', 'something-else'] }, // third object does have an existing document to overwrite
               },
             },
@@ -771,19 +775,19 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
+        const getId = (type: string, id: string = '') => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkCreateSuccess([obj1, obj2], { namespace });
         expectClientCallArgsAction([obj1, obj2], { method: 'create', getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string = '') => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkCreateSuccess([obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], { method: 'create', getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
+        const getId = (type: string, id: string = '') => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         const objects = [
           { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE },
           { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE },
@@ -814,7 +818,7 @@ describe('SavedObjectsRepository', () => {
         if (isBulkError) {
           // mock the bulk error for only the second object
           mockGetBulkOperationError.mockReturnValueOnce(undefined);
-          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error);
+          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error as Payload);
           response = getMockBulkCreateResponse([obj1, obj, obj2]);
         } else {
           response = getMockBulkCreateResponse([obj1, obj2]);
@@ -909,15 +913,15 @@ describe('SavedObjectsRepository', () => {
         const [o1, o2, o3, o4, o5] = objects;
         mockPreflightCheckForCreate.mockResolvedValueOnce([
           // first and last objects do not get passed in to preflightCheckForCreate at all
-          { type: o2.type, id: o2.id, error: { type: 'conflict' } },
+          { type: o2.type, id: o2.id!, error: { type: 'conflict' } },
           {
             type: o3.type,
-            id: o3.id,
+            id: o3.id!,
             error: { type: 'unresolvableConflict', metadata: { isNotOverwritable: true } },
           },
           {
             type: o4.type,
-            id: o4.id,
+            id: o4.id!,
             error: { type: 'aliasConflict', metadata: { spacesWithConflictingAliases: ['foo'] } },
           },
         ]);
@@ -1038,9 +1042,10 @@ describe('SavedObjectsRepository', () => {
       it.todo(`should return objects in the same order regardless of type`);
 
       it(`handles a mix of successful creates and errors`, async () => {
-        const obj = {
+        const obj: SavedObjectsBulkCreateObject = {
           type: 'unknownType',
           id: 'three',
+          attributes: {},
         };
         const objects = [obj1, obj, obj2];
         const response = getMockBulkCreateResponse([obj1, obj2]);
@@ -1072,7 +1077,7 @@ describe('SavedObjectsRepository', () => {
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
           ...response.items[0].create,
           _source: {
-            ...response.items[0].create._source,
+            ...response.items[0].create!._source,
             coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
             namespaces: response.items[0].create._source.namespaces,
           },
