@@ -13,7 +13,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
 
-  describe('lens heatmap', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/117404
+  // FLAKY: https://github.com/elastic/kibana/issues/113043
+  describe.skip('lens heatmap', () => {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');

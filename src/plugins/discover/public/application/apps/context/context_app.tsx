@@ -19,7 +19,7 @@ import { IndexPattern, IndexPatternField } from '../../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { getServices } from '../../../kibana_services';
 import { AppState, isEqualFilters } from './services/context_state';
-import { useDataGridColumns } from '../../helpers/use_data_grid_columns';
+import { useColumns } from '../../helpers/use_data_grid_columns';
 import { useContextAppState } from './utils/use_context_app_state';
 import { useContextAppFetch } from './utils/use_context_app_fetch';
 import { popularizeField } from '../../helpers/popularize_field';
@@ -84,7 +84,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     fetchedState.anchor._id,
   ]);
 
-  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
+  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
     capabilities,
     config: uiSettings,
     indexPattern,

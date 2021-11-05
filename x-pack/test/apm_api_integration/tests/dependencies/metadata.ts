@@ -15,14 +15,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const backendName = 'elasticsearh';
 
   async function callApi() {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/backends/metadata`,
       params: {
         query: {
-          backendName,
+          backendName: dataConfig.span.destination,
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
         },
@@ -44,16 +43,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Dependency metadata when data is loaded',
-    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    'Dependency metadata when data is generated',
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       it('returns correct metadata for the dependency', async () => {
-        await generateData({ synthtraceEsClient, backendName, start, end });
+        await generateData({ synthtraceEsClient, start, end });
         const { status, body } = await callApi();
+        const { span } = dataConfig;
 
         expect(status).to.be(200);
-        expect(body.metadata.spanType).to.equal(dataConfig.spanType);
-        expect(body.metadata.spanSubtype).to.equal(backendName);
+        expect(body.metadata.spanType).to.equal(span.type);
+        expect(body.metadata.spanSubtype).to.equal(span.subType);
       });
     }
   );
