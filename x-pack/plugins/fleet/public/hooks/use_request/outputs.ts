@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
-
 import { outputRoutesService } from '../../services';
 import type { PutOutputRequest, GetOutputsResponse } from '../../types';
 
