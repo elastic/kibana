@@ -29,13 +29,18 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
 } from '../../types';
+import type { SavedObjectsUpdateObjectsSpacesResponse } from './update_objects_spaces';
 import {
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsRepository,
 } from './repository';
 import { SavedObjectsErrorHelpers } from './errors';
-import { PointInTimeFinder } from './point_in_time_finder';
+import {
+  PointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+} from './point_in_time_finder';
 import { ALL_NAMESPACES_STRING } from './utils';
 import { loggerMock } from '../../../logging/logger.mock';
 import {
@@ -60,6 +65,12 @@ import {
   SavedObjectsUpdateOptions,
 } from '../saved_objects_client';
 import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
+import {
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+} from 'kibana/server';
 
 const { nodeTypes } = esKuery;
 
@@ -4207,7 +4218,7 @@ describe('SavedObjectsRepository', () => {
     const mockUpdateResponse = (
       type: string,
       id: string,
-      options?: SavedObjectsBaseOptions,
+      options?: SavedObjectsUpdateOptions,
       includeOriginId?: boolean
     ) => {
       client.update.mockResolvedValueOnce(
@@ -4227,7 +4238,7 @@ describe('SavedObjectsRepository', () => {
                 ...(includeOriginId && { originId }),
               },
             },
-          },
+          } as estypes.UpdateResponse,
           { statusCode: 200 }
         )
       );
@@ -4238,7 +4249,10 @@ describe('SavedObjectsRepository', () => {
       id: string,
       attributes: T,
       options?: SavedObjectsUpdateOptions,
-      internalOptions = {}
+      internalOptions: {
+        includeOriginId?: boolean;
+        mockGetResponseValue?: estypes.GetResponse;
+      } = {}
     ) => {
       const { mockGetResponseValue, includeOriginId } = internalOptions;
       if (registry.isMultiNamespace(type)) {
@@ -4285,7 +4299,7 @@ describe('SavedObjectsRepository', () => {
           id,
           attributes,
           { upsert: true },
-          { mockGetResponseValue: { found: false } }
+          { mockGetResponseValue: { found: false } as estypes.GetResponse }
         );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
@@ -4515,7 +4529,10 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { found: false } as estypes.GetResponse,
+            undefined
+          )
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -4523,7 +4540,9 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the index during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({} as estypes.GetResponse, {
+            statusCode: 404,
+          })
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -4540,11 +4559,25 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when there is an alias conflict from preflightCheckForCreate`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            found: false,
+          } as estypes.GetResponse)
         );
-        mockPreflightCheckForCreate.mockResolvedValue([{ error: { type: 'aliasConflict' } }]);
+        mockPreflightCheckForCreate.mockResolvedValue([
+          { type: 'type', id: 'id', error: { type: 'aliasConflict' } },
+        ]);
         await expect(
-          savedObjectsRepository.update(MULTI_NAMESPACE_ISOLATED_TYPE, id, {}, { upsert: true })
+          savedObjectsRepository.update(
+            MULTI_NAMESPACE_ISOLATED_TYPE,
+            id,
+            { attr: 'value' },
+            {
+              upsert: {
+                upsertAttr: 'val',
+                attr: 'value',
+              },
+            }
+          )
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
@@ -4552,13 +4585,15 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`does not throw when there is a different error from preflightCheckForCreate`, async () => {
-        mockPreflightCheckForCreate.mockResolvedValue([{ error: { type: 'something-else' } }]);
+        mockPreflightCheckForCreate.mockResolvedValue([
+          { type: 'type', id: 'id', error: { type: 'conflict' } },
+        ]);
         await updateSuccess(
           MULTI_NAMESPACE_ISOLATED_TYPE,
           id,
           attributes,
           { upsert: true },
-          { mockGetResponseValue: { found: false } }
+          { mockGetResponseValue: { found: false } as estypes.GetResponse }
         );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
@@ -4621,7 +4656,7 @@ describe('SavedObjectsRepository', () => {
   describe('#openPointInTimeForType', () => {
     const type = 'index-pattern';
 
-    const generateResults = (id?: string) => ({ id: id || null });
+    const generateResults = (id?: string) => ({ id: id || 'id' });
     const successResponse = async (type: string, options?: SavedObjectsOpenPointInTimeOptions) => {
       client.openPointInTime.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
@@ -4677,7 +4712,10 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the index`, async () => {
         client.openPointInTime.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { id: 'error' },
+            { statusCode: 404 }
+          )
         );
         await expectNotFoundError(type);
         expect(client.openPointInTime).toHaveBeenCalledTimes(1);
@@ -4752,17 +4790,19 @@ describe('SavedObjectsRepository', () => {
 
   describe('#createPointInTimeFinder', () => {
     it('returns a new PointInTimeFinder instance', async () => {
-      const result = await savedObjectsRepository.createPointInTimeFinder({}, {});
+      const result = await savedObjectsRepository.createPointInTimeFinder({ type: 'PIT' });
       expect(result).toBeInstanceOf(PointInTimeFinder);
     });
 
     it('calls PointInTimeFinder with the provided options and dependencies', async () => {
-      const options = Symbol();
-      const dependencies = {
+      const options: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: 'my-type',
+      };
+      const dependencies: SavedObjectsCreatePointInTimeFinderDependencies = {
         client: {
-          find: Symbol(),
-          openPointInTimeForType: Symbol(),
-          closePointInTime: Symbol(),
+          find: jest.fn(),
+          openPointInTimeForType: jest.fn(),
+          closePointInTime: jest.fn(),
         },
       };
 
@@ -4783,8 +4823,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('passes arguments to the collectMultiNamespaceReferences module and returns the result', async () => {
-      const objects = Symbol();
-      const expectedResult = Symbol();
+      const objects: SavedObjectsCollectMultiNamespaceReferencesObject[] = [
+        { type: 'foo', id: 'bar' },
+      ];
+      const expectedResult: SavedObjectsCollectMultiNamespaceReferencesResponse = {
+        objects: [{ type: 'foo', id: 'bar', spaces: ['ns-1'], inboundReferences: [] }],
+      };
       mockCollectMultiNamespaceReferences.mockResolvedValue(expectedResult);
 
       await expect(
@@ -4812,11 +4856,19 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('passes arguments to the updateObjectsSpaces module and returns the result', async () => {
-      const objects = Symbol();
-      const spacesToAdd = Symbol();
-      const spacesToRemove = Symbol();
-      const options = Symbol();
-      const expectedResult = Symbol();
+      const objects: SavedObjectsUpdateObjectsSpacesObject[] = [{ type: 'type', id: 'id' }];
+      const spacesToAdd = ['to-add', 'also-to-add'];
+      const spacesToRemove = ['to-remove'];
+      const options: SavedObjectsUpdateObjectsSpacesOptions = { namespace: 'ns-1' };
+      const expectedResult: SavedObjectsUpdateObjectsSpacesResponse = {
+        objects: [
+          {
+            type: 'type',
+            id: 'id',
+            spaces: ['foo', 'bar'],
+          },
+        ],
+      };
       mockUpdateObjectsSpaces.mockResolvedValue(expectedResult);
 
       await expect(
