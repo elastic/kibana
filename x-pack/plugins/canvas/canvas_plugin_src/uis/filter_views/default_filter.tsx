@@ -35,13 +35,10 @@ const strings = {
 };
 const NO_GROUP = 'no_group';
 
-const GroupComponent: FC<FilterFieldProps> = ({ filter, availableFilters, updateFilter }) => {
+const GroupComponent: FC<FilterFieldProps> = ({ filter, filterGroups, updateFilter }) => {
   const { filterGroup } = filter;
-  const availableFilterGroups = availableFilters
-    .filter(({ filterGroup: group }) => group)
-    .map(({ filterGroup: group }) => group);
 
-  const uniqueGroups = [...new Set([undefined, ...availableFilterGroups])];
+  const uniqueGroups = [...new Set([undefined, ...filterGroups])];
   const groups = uniqueGroups.map((group) => ({
     text: group ?? strings.getNoGroupLabel(),
     value: group ?? NO_GROUP,

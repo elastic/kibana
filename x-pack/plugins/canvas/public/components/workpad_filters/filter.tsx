@@ -6,8 +6,10 @@
  */
 
 import React, { FC } from 'react';
-import { FormattedFilterViewInstance, Filter as FilterType } from '../../../types';
-import { useCanvasFilters, useCanvasFiltersActions } from '../hooks/sidebar';
+import { useSelector } from 'react-redux';
+import { FormattedFilterViewInstance, Filter as FilterType, State } from '../../../types';
+import { getGlobalFilterGroups } from '../../state/selectors/workpad';
+import { useCanvasFiltersActions } from '../hooks/sidebar';
 import { Filter as Component } from './filter.component';
 
 interface Props {
@@ -18,10 +20,10 @@ interface Props {
 const StaticFilter: FC<Props> = (props) => <Component {...props} />;
 
 const InteractiveFilter: FC<Props> = (props) => {
-  const filters = useCanvasFilters();
+  const filterGroups = useSelector<State, string[]>((state) => getGlobalFilterGroups(state));
   const { updateFilter } = useCanvasFiltersActions();
 
-  return <Component {...props} updateFilter={updateFilter} availableFilters={filters} />;
+  return <Component {...props} updateFilter={updateFilter} filterGroups={filterGroups} />;
 };
 
 export const Filter: FC<Props> = (props) => {

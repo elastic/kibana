@@ -16,7 +16,7 @@ import {
 interface InteractiveFilterProps {
   filterView: FormattedFilterViewInstance;
   filter: FilterType;
-  availableFilters: FilterType[];
+  filterGroups: string[];
   updateFilter: (value: any) => void;
 }
 
@@ -24,7 +24,7 @@ interface StaticFilterProps {
   filterView: FormattedFilterViewInstance;
   updateFilter?: (value: any) => void;
   filter?: FilterType;
-  availableFilters?: FilterType[];
+  filterGroups?: string[];
 }
 
 type Props = InteractiveFilterProps | StaticFilterProps;

@@ -75,5 +75,5 @@ export interface FilterFieldProps {
   value: string;
   updateFilter: (filter: Filter) => void;
   filter: Filter;
-  availableFilters: Filter[];
+  filterGroups: string[];
 }
