@@ -12,7 +12,6 @@ import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_a
 
 export interface LogQueryFields {
   indexPattern: string;
-  timestamp: string;
 }
 
 export const createGetLogQueryFields = (sources: InfraSources, framework: KibanaFramework) => {
@@ -29,7 +28,6 @@ export const createGetLogQueryFields = (sources: InfraSources, framework: Kibana
 
     return {
       indexPattern: resolvedLogSourceConfiguration.indices,
-      timestamp: resolvedLogSourceConfiguration.timestampField,
     };
   };
 };

@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { AggListForm, AggListProps } from './list_form';
-export { AggListSummary, AggListSummaryProps } from './list_summary';
+export type { AggListProps } from './list_form';
+export { AggListForm } from './list_form';
+export type { AggListSummaryProps } from './list_summary';
+export { AggListSummary } from './list_summary';

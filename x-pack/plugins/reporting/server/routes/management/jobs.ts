@@ -6,20 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import { ReportingCore } from '../../';
 import {
-  kibanaResponseFactory,
   IKibanaResponse,
+  kibanaResponseFactory,
   ResponseError,
 } from '../../../../../../src/core/server';
-import { ReportingCore } from '../../';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../../security/server';
 import { API_BASE_URL } from '../../../common/constants';
 import { Report } from '../../lib/store';
+import type { ReportApiJSON } from '../../lib/store/report';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { deleteJobResponseHandler, downloadJobResponseHandler } from '../lib/job_response_handler';
 import { handleUnavailable } from '../lib/request_handler';
-import type { ReportApiJSON } from '../../lib/store/report';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
@@ -111,8 +112,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
     if (!jobTypes.includes(jobType)) {
       // Bad result
-      return kibanaResponseFactory.unauthorized({
-        body: `Sorry, you are not authorized to view ${jobType} info`,
+      return kibanaResponseFactory.forbidden({
+        body: i18n.translate('xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage', {
+          defaultMessage: 'Sorry, you are not authorized to view {jobType} info',
+          values: { jobType },
+        }),
       });
     }
 

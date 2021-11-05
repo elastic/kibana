@@ -175,7 +175,6 @@ export enum GRID_RESOLUTION {
   SUPER_FINE = 'SUPER_FINE',
 }
 
-export const SUPER_FINE_ZOOM_DELTA = 7; // (2 ^ SUPER_FINE_ZOOM_DELTA) ^ 2 =  number of cells in a given tile
 export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
 export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 

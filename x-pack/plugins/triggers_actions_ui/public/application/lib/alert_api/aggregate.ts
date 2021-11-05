@@ -8,7 +8,7 @@ import { HttpSetup } from 'kibana/public';
 import { AlertAggregations } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import { RewriteRequestCase } from '../../../../../actions/common';
+import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteBodyRes: RewriteRequestCase<AlertAggregations> = ({
   rule_execution_status: alertExecutionStatus,
@@ -32,13 +32,16 @@ export async function loadAlertAggregations({
   alertStatusesFilter?: string[];
 }): Promise<AlertAggregations> {
   const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
-  const res = await http.get(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`, {
-    query: {
-      search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
-      search: searchText,
-      filter: filters.length ? filters.join(' and ') : undefined,
-      default_search_operator: 'AND',
-    },
-  });
+  const res = await http.get<AsApiContract<AlertAggregations>>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
+    {
+      query: {
+        search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
+        search: searchText,
+        filter: filters.length ? filters.join(' and ') : undefined,
+        default_search_operator: 'AND',
+      },
+    }
+  );
   return rewriteBodyRes(res);
 }
