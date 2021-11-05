@@ -316,8 +316,11 @@ describe('SavedObjectsRepository', () => {
       }
     },
   });
-  const expectSuccess = ({ type, id }: { type: string; id: string }) =>
-    expect.toBeDocumentWithoutError(type, id);
+  const expectSuccess = ({ type, id }: { type: string; id: string }) => {
+    // @ts-expect-error TS is not aware of the extension
+    return expect.toBeDocumentWithoutError(type, id);
+  };
+
   const expectError = ({ type, id }: { type: string; id: string }) => ({
     type,
     id,
@@ -356,6 +359,7 @@ describe('SavedObjectsRepository', () => {
     };
     const realInstance = new SavedObjectsSerializer(registry);
     Object.keys(spyInstance).forEach((key) => {
+      // @ts-expect-error no proper way to do this with typing support
       spyInstance[key].mockImplementation((...args) => realInstance[key](...args));
     });
 
