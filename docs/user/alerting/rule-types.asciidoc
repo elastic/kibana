@@ -26,6 +26,9 @@ see {subscriptions}[the subscription page].
 | <<rule-type-es-query>>
 | Run a user-configured {es} query, compare the number of matches to a configured threshold, and schedule actions to run when the threshold condition is met.
 
+| {ref}/transform-alerts.html[{transform-cap} rules] beta:[]
+| beta:[] Run scheduled checks on a {ctransform} to check its health. If a {ctransform} meets the conditions, an alert is created and the associated action is triggered.
+
 |===
 
 [float]
@@ -47,7 +50,7 @@ Domain rules are registered by *Observability*, *Security*, <<maps, Maps>> and <
 | Run an {es} query to determine if any documents are currently contained in any boundaries from a specified boundary index and generate alerts when a rule's conditions are met.
 
 | {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] beta:[]
-| Run scheduled checks on an anomaly detection job to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
+| beta:[] Run scheduled checks on an {anomaly-job} to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
 
 |===
 
