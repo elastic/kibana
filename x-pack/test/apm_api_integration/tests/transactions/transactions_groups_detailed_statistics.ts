@@ -12,13 +12,13 @@ import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_a
 import { asPercent } from '../../../../plugins/apm/common/utils/formatters';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { roundNumber } from '../../utils';
 
 type TransactionsGroupsDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
