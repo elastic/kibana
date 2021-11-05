@@ -14,7 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
@@ -34,7 +34,7 @@ export function PageLoadDistribution() {
     services: { http },
   } = useKibana();
 
-  const { urlParams, uxUiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, rangeFrom, rangeTo, searchTerm } = urlParams;
 
