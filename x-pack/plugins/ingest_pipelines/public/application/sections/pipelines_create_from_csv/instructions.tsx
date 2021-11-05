@@ -27,12 +27,8 @@ export const Instructions: FC = () => {
                       sample mappings
                     </EuiLink>
                   ),
-                  source: (
-                    <EuiCode>source_field</EuiCode>
-                  ),
-                  destination: (
-                    <EuiCode>destination_field</EuiCode>
-                  )
+                  source: <EuiCode>source_field</EuiCode>,
+                  destination: <EuiCode>destination_field</EuiCode>,
                 }}
               />
             </p>
