@@ -392,7 +392,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const sortDirection: SortDirection = 'desc';
     return {
       appId: observabilityFeatureId,
-      appIdUI: observabilityFeatureId,
+      casesOwner: observabilityFeatureId,
       casePermissions,
       type,
       columns,
