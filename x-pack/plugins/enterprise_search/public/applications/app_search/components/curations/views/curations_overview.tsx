@@ -11,22 +11,18 @@ import { useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { LicensingLogic } from '../../../../shared/licensing';
+import { EngineLogic } from '../../engine';
 import { CurationsTable, EmptyState } from '../components';
 import { SuggestionsTable } from '../components/suggestions_table';
 import { CurationsLogic } from '../curations_logic';
 
-import { CurationsSettingsLogic } from './curations_settings';
-
 export const CurationsOverview: React.FC = () => {
   const { curations } = useValues(CurationsLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
-
   const {
-    curationsSettings: { enabled },
-  } = useValues(CurationsSettingsLogic);
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
+  } = useValues(EngineLogic);
 
-  const shouldShowSuggestions = enabled && hasPlatinumLicense;
+  const shouldShowSuggestions = adaptiveRelevanceSuggestionsActive;
 
   return (
     <>

@@ -79,8 +79,9 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const suggestionResponse = await http.get(
-          `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${props.query}`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const suggestionResponse = await http.get<any>(
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions/${props.query}`,
           {
             query: {
               type: 'curation',
@@ -137,7 +138,7 @@ export const CurationSuggestionLogic = kea<
         setQueuedSuccessMessage(
           i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
-            { defaultMessage: 'Suggestion was succefully applied.' }
+            { defaultMessage: 'Suggestion was successfully applied.' }
           )
         );
         if (suggestion!.operation === 'delete') {
@@ -177,7 +178,7 @@ export const CurationSuggestionLogic = kea<
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAutomatedMessage',
             {
               defaultMessage:
-                'Suggestion was succefully applied and all future suggestions for the query "{query}" will be automatically applied.',
+                'Suggestion was successfully applied and all future suggestions for the query "{query}" will be automatically applied.',
               values: { query: suggestion!.query },
             }
           )
@@ -208,7 +209,7 @@ export const CurationSuggestionLogic = kea<
           i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyRejectedMessage',
             {
-              defaultMessage: 'Suggestion was succefully rejected.',
+              defaultMessage: 'Suggestion was successfully rejected.',
             }
           )
         );
@@ -230,7 +231,7 @@ export const CurationSuggestionLogic = kea<
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyDisabledMessage',
             {
               defaultMessage:
-                'Suggestion was succefully rejected and you will no longer receive suggestions for the query "{query}".',
+                'Suggestion was successfully rejected and you will no longer receive suggestions for the query "{query}".',
               values: { query: suggestion!.query },
             }
           )
@@ -250,7 +251,7 @@ const updateSuggestion = async (
   status: string
 ) => {
   const response = await http.put<{ results: Array<CurationSuggestion | Error> }>(
-    `/internal/app_search/engines/${engineName}/search_relevance_suggestions`,
+    `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
     {
       body: JSON.stringify([
         {

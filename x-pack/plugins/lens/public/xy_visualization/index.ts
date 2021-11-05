@@ -12,6 +12,7 @@ import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public
 import type { LensPluginStartDependencies } from '../plugin';
 import { getTimeZone } from '../utils';
 import type { FormatFactory } from '../../common';
+import { LEGACY_TIME_AXIS } from '../../../../../src/plugins/charts/common';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -37,6 +38,7 @@ export class XyVisualization {
           chartsActiveCursorService: charts.activeCursor,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
+          useLegacyTimeAxis: core.uiSettings.get(LEGACY_TIME_AXIS),
         })
       );
       return getXyVisualization({ paletteService: palettes, fieldFormats });

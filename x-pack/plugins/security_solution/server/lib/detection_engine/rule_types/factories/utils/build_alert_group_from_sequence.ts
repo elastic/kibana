@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { Logger } from 'kibana/server';
 
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
-import { Ancestor, SignalSource } from '../../../signals/types';
+import { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { RACAlert, WrappedRACAlert } from '../../types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
@@ -19,12 +19,12 @@ import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import { objectArrayIntersection } from '../../../signals/build_bulk_body';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
-} from '../../field_maps/field_names';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+} from '../../../../../../common/field_maps/field_names';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
@@ -63,7 +63,7 @@ export const buildAlertGroupFromSequence = (
     _index: '',
     _source: {
       ...block,
-      [ALERT_INSTANCE_ID]: buildingBlockIds[i],
+      [ALERT_UUID]: buildingBlockIds[i],
     },
   }));
 
@@ -92,9 +92,9 @@ export const buildAlertRoot = (
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
   const rule = buildRuleWithoutOverrides(completeRule);
-  const reason = buildReasonMessage({ rule });
-  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
+  const reason = buildReasonMessage({ rule, mergedDoc: mergedAlerts as SignalSourceHit });
+  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
   return {
     ...mergedAlerts,
     event: {

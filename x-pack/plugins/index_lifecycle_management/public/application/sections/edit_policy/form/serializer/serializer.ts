@@ -237,10 +237,10 @@ export const createSerializer =
 
         /**
          * COLD PHASE FREEZE
+         * The freeze action has been removed in 8.0.
+         * Clean up any policies that still have this action configured
          */
-        if (_meta.cold.freezeEnabled) {
-          coldPhase.actions.freeze = coldPhase.actions.freeze ?? {};
-        } else {
+        if (coldPhase.actions.freeze) {
           delete coldPhase.actions.freeze;
         }
 

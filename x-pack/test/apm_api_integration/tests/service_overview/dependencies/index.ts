@@ -17,10 +17,10 @@ import {
 import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { registry } from '../../../common/registry';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const es = getService('es');
 
@@ -75,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         const allIndices = Object.values(indices).join(',');
-        const indexExists = (await es.indices.exists({ index: allIndices })).body;
+        const indexExists = await es.indices.exists({ index: allIndices });
         if (indexExists) {
           await es.indices.delete({
             index: allIndices,

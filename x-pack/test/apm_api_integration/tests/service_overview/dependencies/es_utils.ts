@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingTypeMapping } from '@elastic/elasticsearch/api/types';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import uuid from 'uuid';
 
 export function createServiceDependencyDocs({

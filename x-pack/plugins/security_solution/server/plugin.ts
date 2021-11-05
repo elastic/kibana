@@ -7,12 +7,22 @@
 
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
-import { estypes } from '@elastic/elasticsearch';
+import {
+  SIGNALS_ID,
+  QUERY_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
 
 import { Logger, SavedObjectsClient } from '../../../../src/core/server';
 import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
+import { FieldMap } from '../../rule_registry/common/field_map';
+import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { IRuleDataClient, Dataset } from '../../rule_registry/server';
 import { ListPluginSetup } from '../../lists/server';
@@ -23,6 +33,7 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
+  createSavedQueryAlertType,
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
@@ -34,16 +45,7 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import {
-  APP_ID,
-  SERVER_APP_ID,
-  SIGNALS_ID,
-  LEGACY_NOTIFICATIONS_ID,
-  QUERY_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-} from '../common/constants';
+import { APP_ID, SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
@@ -62,8 +64,6 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
-import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
-import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -86,8 +86,9 @@ import type {
   SecuritySolutionPluginStart,
   PluginInitializerContext,
 } from './plugin_contract';
+import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 
-export { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
+export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
@@ -107,6 +108,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
+  private kibanaIndex?: string;
 
   constructor(context: PluginInitializerContext) {
     this.pluginContext = context;
@@ -130,6 +132,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { pluginContext, config, logger, appClientFactory } = this;
     const experimentalFeatures = config.experimentalFeatures;
+    this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
     appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
@@ -162,7 +165,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      kibanaIndex: config.kibanaIndex,
+      kibanaIndex: core.savedObjects.getKibanaIndex(),
       signalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
@@ -185,13 +188,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
 
     if (isRuleRegistryEnabled) {
-      // NOTE: this is not used yet
-      // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
-      // Split aliases by component template since we need to alias some fields in technical field mappings,
-      // some fields in security solution specific component template.
-      const aliases: Record<string, estypes.MappingProperty> = {};
+      const aliasesFieldMap: FieldMap = {};
       Object.entries(aadFieldConversion).forEach(([key, value]) => {
-        aliases[key] = {
+        aliasesFieldMap[key] = {
           type: 'alias',
           path: value,
         };
@@ -205,7 +204,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         componentTemplates: [
           {
             name: 'mappings',
-            mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
+            mappings: mappingFromFieldMap(
+              { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
+              false
+            ),
           },
         ],
         secondaryAlias: config.signalsIndex,
@@ -221,6 +223,9 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
       plugins.alerting.registerType(
+        securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions))
+      );
+      plugins.alerting.registerType(
         securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
       );
       plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
@@ -234,10 +239,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       config,
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
+      this.telemetryEventsSender,
       plugins.ml,
+      ruleDataService,
       logger,
-      isRuleRegistryEnabled,
-      ruleOptions
+      ruleDataClient,
+      ruleOptions,
+      core.getStartServices
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -248,9 +256,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const racRuleTypes = [
       EQL_RULE_TYPE_ID,
-      QUERY_RULE_TYPE_ID,
       INDICATOR_RULE_TYPE_ID,
       ML_RULE_TYPE_ID,
+      QUERY_RULE_TYPE_ID,
+      SAVED_QUERY_RULE_TYPE_ID,
+      THRESHOLD_RULE_TYPE_ID,
     ];
     const ruleTypes = [
       SIGNALS_ID,
@@ -411,7 +421,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryReceiver.start(
       core,
-      config.kibanaIndex,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.kibanaIndex!,
       this.endpointAppContextService,
       exceptionListClient
     );

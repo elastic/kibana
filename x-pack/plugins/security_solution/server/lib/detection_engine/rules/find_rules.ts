@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+
 import { FindResult } from '../../../../../alerting/server';
-import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
-import { ruleTypeMappings } from '../signals/utils';
 import { FindRuleOptions } from './types';
 
 export const getFilter = (
@@ -17,8 +17,8 @@ export const getFilter = (
 ) => {
   const alertTypeFilter = isRuleRegistryEnabled
     ? `(${Object.values(ruleTypeMappings)
-        .map((type) => (type !== SIGNALS_ID ? `alert.attributes.alertTypeId: ${type}` : undefined))
-        .filter((type) => type != null)
+        .map((type) => `alert.attributes.alertTypeId: ${type}`)
+        .filter((type, i, arr) => type != null && arr.indexOf(type) === i)
         .join(' OR ')})`
     : `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
   if (filter == null) {

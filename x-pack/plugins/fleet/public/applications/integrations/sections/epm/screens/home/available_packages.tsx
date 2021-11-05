@@ -221,6 +221,7 @@ export const AvailablePackages: React.FC = memo(() => {
     if (selectedCategory === '') {
       return true;
     }
+
     return c.categories.includes(selectedCategory);
   });
 
@@ -231,6 +232,7 @@ export const AvailablePackages: React.FC = memo(() => {
         <EuiFlexItem>
           <TrackApplicationView viewId="integration-card:epr:endpoint:featured">
             <EuiCard
+              data-test-subj="integration-card:epr:endpoint:featured"
               icon={<EuiIcon type="logoSecurity" size="xxl" />}
               href={addBasePath('/app/integrations/detail/endpoint/')}
               title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
@@ -246,6 +248,7 @@ export const AvailablePackages: React.FC = memo(() => {
         <EuiFlexItem>
           <TrackApplicationView viewId="integration-card:epr:apm:featured">
             <EuiCard
+              data-test-subj="integration-card:epr:apm:featured"
               title={i18n.translate('xpack.fleet.featuredObsTitle', {
                 defaultMessage: 'Elastic APM',
               })}
@@ -253,7 +256,7 @@ export const AvailablePackages: React.FC = memo(() => {
                 defaultMessage:
                   'Monitor, detect and diagnose complex performance issues from your application.',
               })}
-              href={addBasePath('/app/integrations/detail/apm')}
+              href={addBasePath('/app/home#/tutorial/apm')}
               icon={<EuiIcon type="logoObservability" size="xxl" />}
             />
           </TrackApplicationView>
@@ -261,6 +264,7 @@ export const AvailablePackages: React.FC = memo(() => {
         <EuiFlexItem>
           <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
             <EuiCard
+              data-test-sub="integration-card:epr:app_search_web_crawler:featured"
               icon={<EuiIcon type="logoAppSearch" size="xxl" />}
               href={addBasePath('/app/enterprise_search/app_search')}
               title={i18n.translate('xpack.fleet.featuredSearchTitle', {

@@ -11,7 +11,7 @@ import * as t from 'io-ts';
 import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../common/profiling';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
@@ -191,18 +191,9 @@ const serviceAgentRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
-      start,
-      end,
-      kuery: '',
-    });
-
     return getServiceAgent({
       serviceName,
       setup,
-      searchAggregatedTransactions,
       start,
       end,
     });

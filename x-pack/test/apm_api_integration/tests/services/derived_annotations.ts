@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const es = getService('es');
 
@@ -32,7 +32,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         let response: APIReturnType<'GET /api/apm/services/{serviceName}/annotation/search'>;
 
         before(async () => {
-          const { body: indexExists } = await es.indices.exists({ index: indexName });
+          const indexExists = await es.indices.exists({ index: indexName });
           if (indexExists) {
             await es.indices.delete({
               index: indexName,

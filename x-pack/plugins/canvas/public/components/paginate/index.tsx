@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Paginate as Component, PaginateProps, PaginateChildProps } from './paginate';
 
-export { PaginateProps, PaginateChildProps };
+export type { PaginateProps, PaginateChildProps };
 export interface InPaginateProps {
   perPage?: number;
   startPage?: number;

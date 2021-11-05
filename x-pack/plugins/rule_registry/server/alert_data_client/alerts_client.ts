@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
@@ -23,7 +23,10 @@ import {
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
-import { InlineScript, QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  InlineScript,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
 import {
   ReadOperations,

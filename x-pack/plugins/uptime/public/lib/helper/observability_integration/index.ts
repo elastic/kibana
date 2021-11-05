@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getApmHref } from './get_apm_href';
+export { getLegacyApmHref } from './get_apm_href';
 export { getInfraContainerHref, getInfraIpHref, getInfraKubernetesHref } from './get_infra_href';
 export {
   getLoggingContainerHref,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
 import moment from 'moment';
+import { first, get, last } from 'lodash';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates } from './types';

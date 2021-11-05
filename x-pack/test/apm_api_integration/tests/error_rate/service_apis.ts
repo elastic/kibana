@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-generator';
+import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { mean, meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       serviceInventoryAPIResponse.body.items[0].transactionErrorRate;
 
     const errorRateChartApiMean = meanBy(
-      transactionsErrorRateChartAPIResponse.body.currentPeriod.transactionErrorRate.filter(
+      transactionsErrorRateChartAPIResponse.body.currentPeriod.timeseries.filter(
         (item) => isFiniteNumber(item.y) && item.y > 0
       ),
       'y'
@@ -114,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let errorRateMetricValues: PromiseReturnType<typeof getErrorRateValues>;
   let errorTransactionValues: PromiseReturnType<typeof getErrorRateValues>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;
@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transactionNameProductList = 'GET /api/product/list';
         const transactionNameProductId = 'GET /api/product/:id';
 
-        await traceData.index([
+        await synthtraceEsClient.index([
           ...timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)
@@ -176,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => traceData.clean());
+      after(() => synthtraceEsClient.clean());
 
       describe('compare error rate value between service inventory, error rate chart, service inventory and transactions apis', () => {
         before(async () => {

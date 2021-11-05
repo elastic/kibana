@@ -9,14 +9,13 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { LicensingLogic } from '../../../../shared/licensing';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { ENGINE_CURATIONS_NEW_PATH } from '../../../routes';
-import { generateEnginePath } from '../../engine';
+import { EngineLogic, generateEnginePath } from '../../engine';
 import { AppSearchPageTemplate } from '../../layout';
 
 import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
@@ -25,13 +24,16 @@ import { getCurationsBreadcrumbs } from '../utils';
 
 import { CurationsHistory } from './curations_history/curations_history';
 import { CurationsOverview } from './curations_overview';
-import { CurationsSettings, CurationsSettingsLogic } from './curations_settings';
+import { CurationsSettings } from './curations_settings';
 
 export const Curations: React.FC = () => {
-  const { dataLoading: curationsDataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
+  const { dataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const { dataLoading: curationsSettingsDataLoading } = useValues(CurationsSettingsLogic);
+  const {
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
+  } = useValues(EngineLogic);
+
+  const suggestionsEnabled = adaptiveRelevanceSuggestionsActive;
 
   const OVERVIEW_TAB = {
     label: i18n.translate(
@@ -61,17 +63,18 @@ export const Curations: React.FC = () => {
     ),
     isSelected: selectedPageTab === 'settings',
     onClick: () => onSelectPageTab('settings'),
+    append: suggestionsEnabled ? undefined : (
+      <EuiBadge color="success">
+        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.newBadgeLabel', {
+          defaultMessage: 'New!',
+        })}
+      </EuiBadge>
+    ),
   };
 
-  const pageTabs = hasPlatinumLicense
+  const pageTabs = adaptiveRelevanceSuggestionsActive
     ? [OVERVIEW_TAB, HISTORY_TAB, SETTINGS_TAB]
-    : [
-        OVERVIEW_TAB,
-        {
-          ...SETTINGS_TAB,
-          prepend: <EuiIcon type="cheer" />,
-        },
-      ];
+    : [OVERVIEW_TAB, SETTINGS_TAB];
 
   useEffect(() => {
     loadCurations();
@@ -91,9 +94,9 @@ export const Curations: React.FC = () => {
             {CREATE_NEW_CURATION_TITLE}
           </EuiButtonTo>,
         ],
-        tabs: pageTabs,
+        tabs: dataLoading ? undefined : pageTabs,
       }}
-      isLoading={curationsSettingsDataLoading || curationsDataLoading}
+      isLoading={dataLoading}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
       {selectedPageTab === 'history' && <CurationsHistory />}

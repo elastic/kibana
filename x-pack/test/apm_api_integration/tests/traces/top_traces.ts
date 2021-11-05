@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1638,
+            "averageResponseTime": 1639,
             "impact": 0,
             "key": Object {
               "service.name": "opbeans-java",
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
-            "averageResponseTime": 5918288.44444444,
+            "averageResponseTime": 5963775,
             "impact": 100,
             "key": Object {
               "service.name": "opbeans-dotnet",
@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "serviceName": "opbeans-dotnet",
             "transactionName": "GET Orders/Get",
             "transactionType": "request",
-            "transactionsPerMinute": 0.6,
+            "transactionsPerMinute": 0.633333333333333,
           }
         `);
 
