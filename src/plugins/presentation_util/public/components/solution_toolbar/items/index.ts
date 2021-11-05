@@ -9,6 +9,7 @@
 export { SolutionToolbarButton } from './button';
 export { SolutionToolbarPopover } from './popover';
 export { AddFromLibraryButton } from './add_from_library';
-export { QuickButtonProps, QuickButtonGroup } from './quick_group';
+export type { QuickButtonProps } from './quick_group';
+export { QuickButtonGroup } from './quick_group';
 export { PrimaryActionButton } from './primary_button';
 export { PrimaryActionPopover } from './primary_popover';
