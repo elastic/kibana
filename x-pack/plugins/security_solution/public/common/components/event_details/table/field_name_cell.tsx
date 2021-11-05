@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elast
 import { isEmpty } from 'lodash';
 import * as i18n from '../translations';
 import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
-import { IndexPatternField } from '../../../../../../../../src/plugins/data/public';
+import { DataViewField } from '../../../../../../../../src/plugins/data_views/common';
 import { getExampleText } from '../helpers';
 import { BrowserField } from '../../../containers/source';
 import { EventFieldsData } from '../types';
@@ -20,7 +20,7 @@ export interface FieldNameCellProps {
   data: EventFieldsData;
   field: string;
   fieldFromBrowserField: BrowserField;
-  fieldMapping?: IndexPatternField;
+  fieldMapping?: DataViewField;
   scripted?: boolean;
 }
 export const FieldNameCell = React.memo(
