@@ -245,7 +245,7 @@ function MissingIntegrationContent({
                 />
               </EuiLink>
             ),
-            discussForumLink: (
+            forumLink: (
               <EuiLink href="https://discuss.elastic.co/tag/integrations" external target="_blank">
                 <FormattedMessage
                   id="xpack.fleet.integrations.discussForumLink"
