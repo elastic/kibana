@@ -20,7 +20,11 @@ import { moveAttribution } from '../../common/migrations/move_attribution';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
 
 function logMigrationWarning(context, errorMsg, doc) {
-  context.log.warning(`map migration failed (${context.migrationVersion}). ${errorMsg}. attributes: ${JSON.stringify(doc)}`);
+  context.log.warning(
+    `map migration failed (${context.migrationVersion}). ${errorMsg}. attributes: ${JSON.stringify(
+      doc
+    )}`
+  );
 }
 
 /*
