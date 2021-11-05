@@ -20,6 +20,7 @@ import {
   mockGetSearchDsl,
 } from './repository.test.mock';
 
+import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   SavedObjectsType,
@@ -59,7 +60,6 @@ import {
   SavedObjectsUpdateOptions,
 } from '../saved_objects_client';
 import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
-import { BulkResponseItem } from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
 
 const { nodeTypes } = esKuery;
 
@@ -71,14 +71,22 @@ interface TypeIdTuple {
   type: string;
 }
 
+interface ExpectedErrorResult {
+  type: string;
+  id: string;
+  error: Record<string, any>;
+}
+
+type ErrorPayload = Error & Payload;
+
 const createBadRequestError = (reason?: string) =>
-  SavedObjectsErrorHelpers.createBadRequestError(reason).output.payload;
+  SavedObjectsErrorHelpers.createBadRequestError(reason).output.payload as ErrorPayload;
 const createConflictError = (type: string, id: string, reason?: string) =>
-  SavedObjectsErrorHelpers.createConflictError(type, id, reason).output.payload;
+  SavedObjectsErrorHelpers.createConflictError(type, id, reason).output.payload as ErrorPayload;
 const createGenericNotFoundError = (type: string | null = null, id: string | null = null) =>
-  SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload;
+  SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload as ErrorPayload;
 const createUnsupportedTypeError = (type: string) =>
-  SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload;
+  SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload as ErrorPayload;
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -295,11 +303,12 @@ describe('SavedObjectsRepository', () => {
     id,
     error: expect.any(Object),
   });
+
   const expectErrorResult = (
     { type, id }: TypeIdTuple,
     error: Record<string, any>,
     overrides: Record<string, unknown> = {}
-  ) => ({
+  ): ExpectedErrorResult => ({
     type,
     id,
     error: { ...error, ...overrides },
@@ -382,14 +391,14 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    const obj1: SavedObject = {
+    const obj1: SavedObjectsBulkCreateObject = {
       type: 'config',
       id: '6.0.0-alpha1',
       attributes: { title: 'Test One' },
       references: [{ name: 'ref_0', type: 'test', id: '1' }],
       originId: 'some-origin-id', // only one of the object args has an originId, this is intentional to test both a positive and negative case
     };
-    const obj2: SavedObject = {
+    const obj2: SavedObjectsBulkCreateObject = {
       type: 'index-pattern',
       id: 'logstash-*',
       attributes: { title: 'Test Two' },
@@ -645,7 +654,8 @@ describe('SavedObjectsRepository', () => {
               type: o3.type,
               id: o3.id,
               existingDocument: {
-                _source: { namespaces: [namespace ?? 'default', 'something-else'] }, // third object does have an existing document to overwrite
+                _id: o3.id,
+                _source: { type: o3.type, namespaces: [namespace ?? 'default', 'something-else'] }, // third object does have an existing document to overwrite
               },
             },
           ]);
@@ -775,7 +785,11 @@ describe('SavedObjectsRepository', () => {
         references: [{ name: 'ref_0', type: 'test', id: '2' }],
       };
 
-      const bulkCreateError = async (obj, isBulkError, expectedErrorResult) => {
+      const bulkCreateError = async (
+        obj: SavedObjectsBulkCreateObject,
+        isBulkError: boolean | undefined,
+        expectedErrorResult: ExpectedErrorResult
+      ) => {
         let response;
         if (isBulkError) {
           // mock the bulk error for only the second object
@@ -921,7 +935,11 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`returns bulk error`, async () => {
-        const expectedErrorResult = { type: obj3.type, id: obj3.id, error: 'Oh no, a bulk error!' };
+        const expectedErrorResult = {
+          type: obj3.type,
+          id: obj3.id,
+          error: { error: 'Oh no, a bulk error!' },
+        };
         await bulkCreateError(obj3, true, expectedErrorResult);
       });
     });
@@ -1166,12 +1184,16 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const bulkGetError = async (obj, isBulkError: boolean, expectedErrorResult) => {
+      const bulkGetError = async (
+        obj: SavedObject,
+        isBulkError: boolean,
+        expectedErrorResult: ExpectedErrorResult
+      ) => {
         let response;
         if (isBulkError) {
           // mock the bulk error for only the second object
           mockGetBulkOperationError.mockReturnValueOnce(undefined);
-          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error);
+          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error as Payload);
           response = getMockMgetResponse([obj1, obj, obj2]);
         } else {
           response = getMockMgetResponse([obj1, obj2]);
@@ -4182,7 +4204,12 @@ describe('SavedObjectsRepository', () => {
     ];
     const originId = 'some-origin-id';
 
-    const mockUpdateResponse = (type, id, options, includeOriginId) => {
+    const mockUpdateResponse = (
+      type: string,
+      id: string,
+      options?: SavedObjectsBaseOptions,
+      includeOriginId?: boolean
+    ) => {
       client.update.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           {
@@ -4233,7 +4260,7 @@ describe('SavedObjectsRepository', () => {
     beforeEach(() => {
       mockPreflightCheckForCreate.mockReset();
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
-        return objects.map(({ type, id }) => ({ type, id })); // respond with no errors by default
+        return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
       });
     });
 
@@ -4276,7 +4303,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts custom references array`, async () => {
-        const test = async (references) => {
+        const test = async (references: SavedObjectReference[]) => {
           await updateSuccess(type, id, attributes, { references });
           expect(client.update).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -4287,7 +4314,7 @@ describe('SavedObjectsRepository', () => {
           client.update.mockClear();
         };
         await test(references);
-        await test(['string']);
+        await test([{ type: 'foo', id: '42', name: 'some ref' }]);
         await test([]);
       });
 
@@ -4352,7 +4379,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        const test = async (references) => {
+        const test = async (references: unknown) => {
+          // @ts-expect-error references is unknown
           await updateSuccess(type, id, attributes, { references });
           expect(client.update).toHaveBeenCalledWith(
             expect.objectContaining({
