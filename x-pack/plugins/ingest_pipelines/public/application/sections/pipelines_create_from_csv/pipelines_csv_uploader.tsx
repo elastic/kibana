@@ -90,13 +90,13 @@ export const PipelinesCsvUploader: FC<Props> = ({
         fullWidth
         label={
           <p>
-            Default copy action
+            Default action
             <EuiIconTip
               type="iInCircle"
               content={
                 <FormattedMessage
                   id="xpack.ingestPipelines.createFromCsv.fileUpload.settingDescription"
-                  defaultMessage="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
+                  defaultMessage="Whether to copy or rename the field if no action is specified in the CSV."
                 />
               }
             />

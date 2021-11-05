@@ -63,7 +63,7 @@ describe('<PipelinesCreateFromCsv />', () => {
       const { exists, find } = testBed;
 
       expect(exists('pageTitle')).toBe(true);
-      expect(find('pageTitle').text()).toEqual('Create new pipeline from CSV');
+      expect(find('pageTitle').text()).toEqual('Create pipeline from CSV');
 
       expect(exists('documentationLink')).toBe(true);
       expect(find('documentationLink').text()).toBe('Create pipeline docs');
@@ -175,11 +175,11 @@ describe('<PipelinesCreateFromCsv />', () => {
 
           expect(exists('continueToCreate')).toBe(true);
           expect(find('continueToCreate').text()).toContain(
-            'Continue to create ingest node pipeline'
+            'Continue to create pipeline'
           );
 
           expect(exists('copyToClipboard')).toBe(true);
-          expect(find('copyToClipboard').text()).toContain('Copy JSON to clipboard');
+          expect(find('copyToClipboard').text()).toContain('Copy JSON');
 
           expect(exists('downloadJson')).toBe(true);
           expect(find('downloadJson').text()).toContain('Download JSON');

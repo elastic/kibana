@@ -62,12 +62,12 @@ export const PipelinesPreview: FC<Props> = ({
     <EuiFlexGroup>
       <EuiFlexItem>
         {!hasError && (
-          <EuiCallOut title="CSV processed successfully" color="success" iconType="check">
+          <EuiCallOut title="Processor definitions generated" color="success" iconType="check">
             <EuiText>
               <p>
                 <FormattedMessage
                   id="xpack.ingestPipelines.createFromCsv.preview.jsonMapSuccessful"
-                  defaultMessage="Your CSV mappings have been processed as JSON which you may modify below."
+                  defaultMessage="You can save or edit the JSON before generating the pipeline."
                 />
               </p>
             </EuiText>
@@ -120,7 +120,7 @@ export const PipelinesPreview: FC<Props> = ({
             <EuiButton fill onClick={onClickToCreatePipeline} data-test-subj="continueToCreate">
               <FormattedMessage
                 id="xpack.ingestPipelines.createFromCsv.preview.createPipeline"
-                defaultMessage="Continue to create ingest node pipeline"
+                defaultMessage="Continue to create pipeline"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -136,7 +136,7 @@ export const PipelinesPreview: FC<Props> = ({
                 >
                   <FormattedMessage
                     id="xpack.ingestPipelines.createFromCsv.preview.copy"
-                    defaultMessage="Copy JSON to clipboard"
+                    defaultMessage="Copy JSON"
                   />
                 </EuiButtonEmpty>
               )}

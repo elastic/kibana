@@ -163,7 +163,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.createFromCsv.pageTitle"
-              defaultMessage="Create new pipeline from CSV"
+              defaultMessage="Create pipeline from CSV"
             />
           </span>
         }
