@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 interface Mapping {
   type?: string;
@@ -20,7 +20,7 @@ interface MetaProperties {
 }
 
 export interface FlatSettings {
-  settings: estypes.IndicesIndexState['settings'];
+  settings?: estypes.IndicesIndexState['settings'];
   mappings?: {
     properties?: MappingProperties;
     _meta?: MetaProperties;

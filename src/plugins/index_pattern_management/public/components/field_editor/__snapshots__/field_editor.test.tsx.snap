@@ -546,7 +546,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       onClose={[Function]}
     />
     <eui-form-row
-      error={null}
+      error={false}
       helpText={
         <span>
           <eui-icon
@@ -1175,7 +1175,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       onClose={[Function]}
     />
     <eui-form-row
-      error={null}
+      error={false}
       helpText={
         <span>
           <eui-icon

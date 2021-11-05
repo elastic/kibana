@@ -18,6 +18,8 @@ import { extractReferences, injectReferences } from '../../common/saved_dashboar
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { DashboardOptions } from '../types';
 
+import { ControlStyle } from '../../../presentation_util/public';
+
 export interface DashboardSavedObject extends SavedObject {
   id?: string;
   timeRestore: boolean;
@@ -36,6 +38,8 @@ export interface DashboardSavedObject extends SavedObject {
   getFullEditPath: (editMode?: boolean) => string;
   outcome?: string;
   aliasId?: string;
+
+  controlGroupInput?: { controlStyle?: ControlStyle; panelsJSON?: string };
 }
 
 const defaults = {
@@ -84,6 +88,13 @@ export function createSavedDashboardClass(
           pause: { type: 'boolean' },
           section: { type: 'integer' },
           value: { type: 'integer' },
+        },
+      },
+      controlGroupInput: {
+        type: 'object',
+        properties: {
+          controlStyle: { type: 'keyword' },
+          panelsJSON: { type: 'text' },
         },
       },
     };

@@ -16,12 +16,17 @@ import { controlsServiceFactory } from './controls';
 export { dashboardsServiceFactory } from './dashboards';
 export { capabilitiesServiceFactory } from './capabilities';
 
+import { dataServiceFactory } from '../storybook/data';
+import { dataViewsServiceFactory } from '../storybook/data_views';
+
 export const providers: PluginServiceProviders<PresentationUtilServices> = {
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   controls: new PluginServiceProvider(controlsServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
+  data: new PluginServiceProvider(dataServiceFactory),
+  dataViews: new PluginServiceProvider(dataViewsServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<PresentationUtilServices>(providers);

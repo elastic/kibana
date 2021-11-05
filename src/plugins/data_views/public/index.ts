@@ -15,15 +15,15 @@ export {
 } from '../common/lib';
 export { onRedirectNoIndexPattern } from './data_views';
 
-export { IndexPatternField, IIndexPatternFieldList, TypeMeta } from '../common';
+export type { IIndexPatternFieldList, TypeMeta } from '../common';
+export { IndexPatternField } from '../common';
 
+export type { IndexPatternsContract, DataViewsContract } from './data_views';
 export {
   IndexPatternsService,
-  IndexPatternsContract,
   IndexPattern,
   DataViewsApiClient,
   DataViewsService,
-  DataViewsContract,
   DataView,
 } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';

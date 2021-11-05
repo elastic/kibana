@@ -17,14 +17,16 @@ import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../';
 import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { OnActionComplete } from '../components';
 import { UISession } from '../types';
-import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 import { getColumns } from './get_columns';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { managementPluginMock } from '../../../../../../../src/plugins/management/public/mocks';
+import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
+import { sharePluginMock } from '../../../../../../../src/plugins/share/public/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;
+let mockShareStart: jest.Mocked<SharePluginStart>;
 let mockPluginsSetup: IManagementSectionsPluginsSetup;
 let mockConfig: SessionsConfigSchema;
 let api: SearchSessionsMgmtAPI;
@@ -38,6 +40,7 @@ describe('Search Sessions Management table column factory', () => {
   beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockShareStart = sharePluginMock.createStartContract();
     mockPluginsSetup = {
       data: dataPluginMock.createSetupContract(),
       management: managementPluginMock.createSetupContract(),
@@ -54,7 +57,7 @@ describe('Search Sessions Management table column factory', () => {
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
     api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-      urls: mockUrls,
+      locators: mockShareStart.url.locators,
       notifications: mockCoreStart.notifications,
       application: mockCoreStart.application,
     });

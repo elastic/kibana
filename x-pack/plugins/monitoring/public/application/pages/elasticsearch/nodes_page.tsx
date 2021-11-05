@@ -66,7 +66,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
     if (services.http?.fetch && clusterUuid) {
       setIsLoading(true);
-      const response = await services.http?.fetch(url, {
+      const response = await services.http?.fetch<{ totalNodeCount: number }>(url, {
         method: 'POST',
         body: JSON.stringify({
           ccs,

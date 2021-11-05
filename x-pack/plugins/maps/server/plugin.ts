@@ -77,17 +77,37 @@ export class MapsPlugin implements Plugin {
 
     home.sampleData.addAppLinksToSampleDataset('ecommerce', [
       {
-        path: getFullPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },
     ]);
 
+    home.sampleData.replacePanelInSampleDatasetDashboard({
+      sampleDataId: 'ecommerce',
+      dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+      oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
+      embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+      // @ts-ignore
+      embeddableType: MAP_SAVED_OBJECT_TYPE,
+      embeddableConfig: {
+        isLayerTOCOpen: false,
+      },
+    });
+
     home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
     home.sampleData.addAppLinksToSampleDataset('flights', [
       {
-        path: getFullPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: '5dd88580-1906-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },
@@ -108,7 +128,11 @@ export class MapsPlugin implements Plugin {
     home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
     home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: getFullPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },
