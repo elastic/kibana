@@ -32,7 +32,6 @@ import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
-import { PrintDashboardViewport } from './viewport/print_viewport';
 import {
   KibanaContextProvider,
   KibanaReactContext,
@@ -261,11 +260,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <this.services.presentationUtil.ContextProvider>
-            {this.input.viewMode === ViewMode.PRINT ? (
-              <PrintDashboardViewport container={this} />
-            ) : (
-              <DashboardViewport container={this} controlGroup={this.controlGroup} />
-            )}
+            <DashboardViewport container={this} controlGroup={this.controlGroup} />
           </this.services.presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </I18nProvider>,

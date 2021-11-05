@@ -8,7 +8,6 @@
 
 import { History } from 'history';
 import React, { useEffect, useMemo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
@@ -18,11 +17,11 @@ import {
   getDashboardTitle,
   leaveConfirmStrings,
 } from '../dashboard_strings';
-import { EmbeddableRenderer } from '../services/embeddable';
+import { createDashboardEditUrl } from '../dashboard_constants';
+import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -36,27 +35,8 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const {
-    core,
-    chrome,
-    embeddable,
-    onAppLeave,
-    uiSettings,
-    data,
-    spacesService,
-    screenshotModeService,
-  } = useKibana<DashboardAppServices>().services;
-
-  const isScreenshotMode = screenshotModeService.isScreenshotMode();
-
-  // Print layout detected by current route
-  const isOnPrintRoute = !!useRouteMatch(DashboardConstants.PRINT_DASHBOARD_URL);
-
-  // Backwards compatible way of detecting that we are taking a screenshot
-  const legacyPrintLayoutDetected =
-    isScreenshotMode && screenshotModeService.getScreenshotLayout() === 'print';
-
-  const printLayoutDetected = isOnPrintRoute || legacyPrintLayoutDetected;
+  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
+    useKibana<DashboardAppServices>().services;
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -71,11 +51,9 @@ export function DashboardApp({
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
     history,
-    redirectTo,
     savedDashboardId,
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
-    printLayoutDetected,
   });
 
   // Build app leave handler whenever hasUnsavedChanges changes
@@ -122,15 +100,20 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
+  const printMode = useMemo(
+    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,
+    [dashboardAppState]
+  );
+
   useEffect(() => {
-    if (!embedSettings) chrome.setIsVisible(!printLayoutDetected);
-  }, [chrome, printLayoutDetected, embedSettings]);
+    if (!embedSettings) chrome.setIsVisible(!printMode);
+  }, [chrome, printMode, embedSettings]);
 
   return (
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {!printLayoutDetected && (
+          {!printMode && (
             <DashboardTopNav
               redirectTo={redirectTo}
               embedSettings={embedSettings}

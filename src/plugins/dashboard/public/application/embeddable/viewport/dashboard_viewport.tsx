@@ -94,7 +94,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public render() {
     const { container } = this.props;
     const viewMode = container.getInput().viewMode;
-    const isEditMode = viewMode !== ViewMode.VIEW && viewMode !== ViewMode.PRINT;
     const { isEmbeddedExternally, isFullScreenMode, panels, title, description, useMargins } =
       this.state;
     return (
@@ -119,7 +118,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
                 isReadonlyMode={
                   !this.props.container.getInput().dashboardCapabilities?.showWriteControls
                 }
-                isEditMode={isEditMode}
+                isEditMode={viewMode === ViewMode.EDIT}
                 uiSettings={this.context.services.uiSettings}
                 http={this.context.services.http}
               />
