@@ -698,7 +698,9 @@ export const OnPremInstructions: React.FC = () => {
     if (!modal) {
       refresh();
     }
-  }, [modal, refresh]);
+    // refresh in dep list causes it being called on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modal]);
 
   const { docLinks } = useStartServices();
 
