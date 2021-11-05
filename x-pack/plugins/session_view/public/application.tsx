@@ -34,7 +34,7 @@ interface RenderAppProps {
 const queryClient = new QueryClient();
 
 export const renderApp = (props: RenderAppProps) => {
-  const { coreStart, depsServices, appMountParams, version, config } = props;
+  const { coreStart, depsServices, appMountParams, version } = props;
 
   const { element, history } = appMountParams;
 
