@@ -32,7 +32,11 @@ import { getBaseTheme, getChartClasses } from './utils/theme';
 import { TOOLTIP_MODES } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
-import { renderEndzoneTooltip, useActiveCursor } from '../../../../../../../charts/public';
+import {
+  MULTILAYER_TIME_AXIS_STYLE,
+  renderEndzoneTooltip,
+  useActiveCursor,
+} from '../../../../../../../charts/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
@@ -140,49 +144,15 @@ export const TimeSeries = ({
     [palettesService, series, syncColors]
   );
 
-  const darkMode = uiSettings.get('theme:darkMode');
-  const gridLineStyle = !useLegacyTimeAxis
-    ? {
-        visible: showGrid,
-        strokeWidth: 0.1,
-        stroke: darkMode ? 'white' : 'black',
-      }
-    : {
-        ...GRID_LINE_CONFIG,
-        visible: showGrid,
-      };
-  const xAxisStyle = !useLegacyTimeAxis
-    ? {
-        tickLabel: {
-          visible: true,
-          fontSize: 11,
-          padding: 0,
-          alignment: {
-            vertical: Position.Bottom,
-            horizontal: Position.Left,
-          },
-          offset: {
-            x: 1.5,
-            y: 0,
-          },
-        },
-        axisLine: {
-          stroke: darkMode ? 'lightgray' : 'darkgray',
-          strokeWidth: 1,
-        },
-        tickLine: {
-          size: 12,
-          strokeWidth: 0.15,
-          stroke: darkMode ? 'white' : 'black',
-          padding: -10,
-          visible: true,
-        },
-        axisTitle: {
-          visible: true,
-          padding: 0,
-        },
-      }
-    : {};
+  const gridLineStyle = {
+    ...GRID_LINE_CONFIG,
+    visible: showGrid,
+  };
+
+  const shouldUseNewTimeAxis =
+    series.every(
+      ({ stack, bars, lines }) => (bars?.show && stack !== STACKED_OPTIONS.NONE) || lines?.show
+    ) && !useLegacyTimeAxis;
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -361,10 +331,8 @@ export const TimeSeries = ({
           position={position}
           domain={domain}
           hide={hide}
-          gridLine={{
-            ...GRID_LINE_CONFIG,
-            visible: showGrid,
-          }}
+          gridLine={gridLineStyle}
+          ticks={5}
           tickFormat={tickFormatter}
         />
       ))}
@@ -375,8 +343,8 @@ export const TimeSeries = ({
         title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
         gridLine={gridLineStyle}
-        style={xAxisStyle}
-        timeAxisLayerCount={useLegacyTimeAxis ? 0 : 3}
+        style={shouldUseNewTimeAxis ? MULTILAYER_TIME_AXIS_STYLE : undefined}
+        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
     </Chart>
   );
