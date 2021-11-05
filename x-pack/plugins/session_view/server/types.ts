@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export interface SessionViewSetupPlugins {};
-export interface SessionViewStartPlugins {};
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionViewSetupPlugins {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionViewStartPlugins {}

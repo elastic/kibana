@@ -18,7 +18,7 @@ import { SessionViewConfigType } from './types';
 export class SessionViewPlugin implements Plugin {
   private kibanaVersion: string;
 
-  /** 
+  /**
    * Initialize SessionViewPlugin class properties (logger, etc) that is accessible
    * through the initializerContext.
    */
@@ -51,7 +51,6 @@ export class SessionViewPlugin implements Plugin {
     // NO-OP
     return {};
   }
-  
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+
   public stop() {}
 }

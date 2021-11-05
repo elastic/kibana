@@ -4,7 +4,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": true
   },
   "include": [
     // add all the folders containg files to be compiled
@@ -37,6 +37,6 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../infra/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" }
   ]
 }
