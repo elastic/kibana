@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiAccordionProps,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
@@ -28,6 +35,8 @@ interface AccordionWaterfallProps {
   onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
 }
 
+const ACCORDION_HEIGHT = '48px';
+
 const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   shouldForwardProp: (prop) =>
     !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
@@ -43,24 +52,11 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   }
   .euiAccordion__button {
     width: 100%;
-    height: 48px;
+    height: ${ACCORDION_HEIGHT};
   }
 
   .euiAccordion__childWrapper {
     transition: none;
-  }
-
-  .euiButtonIcon {
-    display: flex;
-    position: relative;
-    &:after {
-      content: ${(props) => `'${props.childrenCount}'`};
-      position: absolute;
-      left: 20px;
-      top: -1px;
-      z-index: 1;
-      font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-    }
   }
 
   ${(props) => {
@@ -105,6 +101,10 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
   // To indent the items creating the parent/child tree
   const marginLeftLevel = 8 * level;
 
+  function toggleAccordion() {
+    setIsOpen((isCurrentOpen) => !isCurrentOpen);
+  }
+
   return (
     <StyledAccordion
       style={{ position: 'relative' }}
@@ -116,25 +116,35 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       childrenCount={children.length}
       buttonContentClassName="accordion__buttonContent"
       buttonContent={
-        <WaterfallItem
-          key={item.id}
-          timelineMargins={timelineMargins}
-          color={item.color}
-          item={item}
-          totalDuration={duration}
-          isSelected={item.id === waterfallItemId}
-          errorCount={errorCount}
-          onClick={() => {
-            onClickWaterfallItem(item);
-          }}
-        />
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <ToggleAccordionButton
+              show={!!children.length}
+              isOpen={isOpen}
+              childrenAmount={children.length}
+              onClick={toggleAccordion}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <WaterfallItem
+              key={item.id}
+              timelineMargins={timelineMargins}
+              color={item.color}
+              item={item}
+              totalDuration={duration}
+              isSelected={item.id === waterfallItemId}
+              errorCount={errorCount}
+              onClick={() => {
+                onClickWaterfallItem(item);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
-      arrowDisplay={isEmpty(children) ? 'none' : 'left'}
+      arrowDisplay="none"
       initialIsOpen={true}
       forceState={isOpen ? 'open' : 'closed'}
-      onToggle={() => {
-        setIsOpen((isCurrentOpen) => !isCurrentOpen);
-      }}
+      onToggle={toggleAccordion}
     >
       {children.map((child) => (
         <AccordionWaterfall
@@ -146,5 +156,40 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
         />
       ))}
     </StyledAccordion>
+  );
+}
+
+function ToggleAccordionButton({
+  show,
+  isOpen,
+  childrenAmount,
+  onClick,
+}: {
+  show: boolean;
+  isOpen: boolean;
+  childrenAmount: number;
+  onClick: () => void;
+}) {
+  if (!show) {
+    return null;
+  }
+
+  return (
+    <div style={{ height: ACCORDION_HEIGHT, display: 'flex' }}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={(e: any) => {
+              e.stopPropagation();
+              onClick();
+            }}
+            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">{childrenAmount}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 }
