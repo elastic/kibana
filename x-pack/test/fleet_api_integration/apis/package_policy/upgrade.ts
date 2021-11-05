@@ -570,7 +570,7 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('upgrade', function () {
         it('fails to upgrade package policy', async function () {
-          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+          await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
             .send({
@@ -670,7 +670,7 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('upgrade', function () {
         it('fails to upgrade package policy', async function () {
-          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+          await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
             .send({

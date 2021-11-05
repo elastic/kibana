@@ -25,7 +25,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '../../../common';
-import { defaultIngestErrorHandler, IngestManagerError } from '../../errors';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,
