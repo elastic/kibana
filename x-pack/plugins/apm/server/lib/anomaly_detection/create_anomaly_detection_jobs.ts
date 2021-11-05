@@ -101,6 +101,11 @@ async function createAnomalyDetectionJob({
       startDatafeed: true,
       jobOverrides: [
         {
+          datafeed_config: {
+            indices_options: {
+              ignore_unavailable: true,
+            },
+          },
           custom_settings: {
             job_tags: {
               environment,
