@@ -270,6 +270,7 @@ describe('enable()', () => {
       }
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
+      id: '1',
       taskType: `alerting:myType`,
       params: {
         alertId: '1',

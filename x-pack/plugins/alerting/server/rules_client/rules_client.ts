@@ -7,7 +7,6 @@
 
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import uuidv5 from 'uuid/v5';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -331,14 +330,10 @@ export class RulesClient {
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
-    // Create a taskId and assign it to this rule
-    const taskId = generateTaskId(this.namespace, id);
-
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       legacyId,
-      taskId,
       actions,
       createdBy: username,
       updatedBy: username,
@@ -370,6 +365,7 @@ export class RulesClient {
           id,
         }
       );
+      this.logger.info(`createdAlert ${JSON.stringify(createdAlert)}`);
     } catch (e) {
       // Avoid unused API key
       markApiKeyForInvalidation(
@@ -385,8 +381,7 @@ export class RulesClient {
         scheduledTask = await this.scheduleRule(
           createdAlert.id,
           rawAlert.alertTypeId,
-          data.schedule,
-          taskId
+          data.schedule
         );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
@@ -1167,11 +1162,10 @@ export class RulesClient {
       const scheduledTask = await this.scheduleRule(
         id,
         attributes.alertTypeId,
-        attributes.schedule as IntervalSchedule,
-        attributes.taskId
+        attributes.schedule as IntervalSchedule
       );
       this.logger.info(
-        `enableWithOCC - scheduled rule with task id ${JSON.stringify(scheduledTask.id)}`
+        `enableWithOCC - scheduled rule with task id ${JSON.stringify(scheduledTask)}`
       );
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
@@ -1594,13 +1588,9 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleRule(
-    id: string,
-    ruleTypeId: string,
-    schedule: IntervalSchedule,
-    taskId: string | undefined
-  ) {
+  private async scheduleRule(id: string, ruleTypeId: string, schedule: IntervalSchedule) {
     return await this.taskManager.schedule({
+      id, // use the same ID for task document as the rule
       taskType: `alerting:${ruleTypeId}`,
       schedule,
       params: {
@@ -1613,7 +1603,6 @@ export class RulesClient {
         alertInstances: {},
       },
       scope: ['alerting'],
-      ...(taskId ? { id: taskId } : {}),
     });
   }
 
@@ -1677,7 +1666,6 @@ export class RulesClient {
       notifyWhen,
       legacyId,
       scheduledTaskId,
-      taskId, // exclude from result because it is an internal variable
       params,
       executionStatus,
       schedule,
@@ -1910,9 +1898,4 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   }
 
   return parsedDate;
-}
-
-export function generateTaskId(namespace: string | undefined, id: string) {
-  namespace = namespace ?? 'default';
-  return uuidv5(`${namespace}:alert:${id}`, uuidv5.DNS); // The uuidv5 namespace constant (uuidv5.DNS) is arbitrary.
 }
