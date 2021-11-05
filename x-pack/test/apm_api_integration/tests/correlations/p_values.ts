@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
+  const registry = getService('registry');
 
   const endpoint = 'POST /internal/apm/correlations/p_values';
 
