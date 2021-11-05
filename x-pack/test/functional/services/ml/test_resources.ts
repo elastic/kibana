@@ -509,5 +509,18 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       log.debug(` > found version '${packageVersion}'`);
       return packageVersion;
     },
+
+    async setAdvancedSettingProperty(
+      propertyName: string,
+      propertyValue: string | number | boolean
+    ) {
+      await kibanaServer.uiSettings.update({
+        [propertyName]: propertyValue,
+      });
+    },
+
+    async clearAdvancedSettingProperty(propertyName: string) {
+      await kibanaServer.uiSettings.unset(propertyName);
+    },
   };
 }

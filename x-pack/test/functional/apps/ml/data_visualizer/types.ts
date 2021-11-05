@@ -33,6 +33,13 @@ export interface TestData {
     expected: { field: string; docCountFormatted: string };
   }>;
   expected: {
+    filters?: Array<{
+      key: string;
+      value: string;
+      enabled?: boolean;
+      pinned?: boolean;
+      negated?: boolean;
+    }>;
     totalDocCountFormatted: string;
     metricFields?: MetricFieldVisConfig[];
     nonMetricFields?: NonMetricFieldVisConfig[];
