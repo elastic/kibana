@@ -1366,7 +1366,10 @@ describe('SavedObjectsRepository', () => {
     it('passes arguments to the internalBulkResolve module and returns the expected results', async () => {
       mockInternalBulkResolve.mockResolvedValue({
         resolved_objects: [
-          { saved_object: 'mock-object', outcome: 'exactMatch' },
+          {
+            saved_object: { type: 'mock', id: 'mock-object', attributes: {}, references: [] },
+            outcome: 'exactMatch',
+          },
           {
             type: 'obj-type',
             id: 'obj-id-2',
@@ -1407,7 +1410,7 @@ describe('SavedObjectsRepository', () => {
       const error = new Error('Oh no!');
       mockInternalBulkResolve.mockRejectedValue(error);
 
-      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
+      await expect(savedObjectsRepository.resolve('some-type', 'some-id')).rejects.toEqual(error);
     });
   });
 
