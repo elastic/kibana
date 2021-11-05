@@ -18,6 +18,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
 }) => {
   const { addExistingCaseClick, isDisabled, userCanCrud } = useAddToCase({
@@ -25,6 +26,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     useInsertTimeline,
     casePermissions,
     appId,
+    owner,
     onClose,
   });
   return (

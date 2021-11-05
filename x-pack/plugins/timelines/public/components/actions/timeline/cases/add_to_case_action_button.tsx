@@ -25,6 +25,7 @@ const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
 }) => {
   const {
@@ -36,7 +37,7 @@ const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
     openPopover,
     closePopover,
     isPopoverOpen,
-  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, onClose });
+  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, owner, onClose });
   const tooltipContext = userCanCrud
     ? isEventSupported
       ? i18n.ACTION_ADD_TO_CASE_TOOLTIP

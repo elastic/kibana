@@ -81,6 +81,7 @@ export const useAddToCase = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
 }: AddToCaseActionProps): UseAddToCase => {
   const eventId = event?.ecs._id ?? '';
@@ -167,13 +168,13 @@ export const useAddToCase = ({
               id: ruleId,
               name: ruleName,
             },
-            owner: appId,
+            owner,
           },
           updateCase,
         });
       }
     },
-    [eventId, eventIndex, appId, dispatch, event]
+    [eventId, eventIndex, owner, dispatch, event]
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
@@ -187,7 +188,7 @@ export const useAddToCase = ({
     async (ev) => {
       ev.preventDefault();
       return navigateToApp(appId, {
-        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
+        deepLinkId: appId === 'securitySolutionUI' ? 'case' : 'cases',
         path: getCreateCaseUrl(urlSearch),
       });
     },
