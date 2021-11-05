@@ -19,12 +19,12 @@ import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import { objectArrayIntersection } from '../../../signals/build_bulk_body';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
-} from '../../field_maps/field_names';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+} from '../../../../../../common/field_maps/field_names';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -

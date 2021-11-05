@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { createPublicDrilldownManager, PublicDrilldownManagerComponent } from './drilldown_manager';
+export type { PublicDrilldownManagerComponent } from './drilldown_manager';
+export { createPublicDrilldownManager } from './drilldown_manager';
