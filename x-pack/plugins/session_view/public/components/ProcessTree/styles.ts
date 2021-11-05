@@ -5,37 +5,43 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const defaultSelectionColor = euiTheme.colors.accent;
-  const padding = euiTheme.size.s;
 
-  const scroller = `
-    font-family: ${euiTheme.font.familyCode};
-    overflow: auto;
-    height: 100%;
-    background-color: ${euiTheme.colors.lightestShade};
-    padding-top: ${padding};
-    padding-left: ${padding};
-    display: flex;
-    flex-direction: column;
-  `;
+  const cached = useMemo(() => {
+    const defaultSelectionColor = euiTheme.colors.accent;
+    const padding = euiTheme.size.s;
 
-  const selectionArea = `
-    position: absolute;
-    display: none;
-    margin-left: -50%;
-    width: 150%;
-    height: 100%;
-    background-color: ${defaultSelectionColor};
-    pointer-events:none;
-    opacity: .1;
-  `;
+    const scroller = `
+      font-family: ${euiTheme.font.familyCode};
+      overflow: auto;
+      height: 100%;
+      background-color: ${euiTheme.colors.lightestShade};
+      padding-top: ${padding};
+      padding-left: ${padding};
+      display: flex;
+      flex-direction: column;
+    `;
 
-  return {
-    scroller,
-    selectionArea,
-  };
+    const selectionArea = `
+      position: absolute;
+      display: none;
+      margin-left: -50%;
+      width: 150%;
+      height: 100%;
+      background-color: ${defaultSelectionColor};
+      pointer-events:none;
+      opacity: .1;
+    `;
+
+    return {
+      scroller,
+      selectionArea,
+    };
+  }, [euiTheme]);
+
+  return cached;
 };
