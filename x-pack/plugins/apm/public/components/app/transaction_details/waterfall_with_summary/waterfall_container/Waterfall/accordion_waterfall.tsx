@@ -8,19 +8,19 @@
 import {
   EuiAccordion,
   EuiAccordionProps,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiText,
 } from '@elastic/eui';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
-import { WaterfallItem } from './waterfall_item';
 import {
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
+import { WaterfallItem } from './waterfall_item';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
@@ -177,13 +177,15 @@ function ToggleAccordionButton({
     <div style={{ height: ACCORDION_HEIGHT, display: 'flex' }}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+          <div
             onClick={(e: any) => {
               e.stopPropagation();
               onClick();
             }}
-            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-          />
+          >
+            <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
+          </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">{childrenAmount}</EuiText>
