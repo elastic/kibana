@@ -52,12 +52,7 @@ nvm use
 
 Install the latest version of https://classic.yarnpkg.com/en/docs/install[yarn v1].
 
-NOTE: At this time there are several native modules we use which don't support ARM and will need to be compiled on your machine when you install them for the first time. To support this you need to install a few libraries with https://brew.sh/[Homebrew]. If you don't have that setup yet get that installed, then run:
-+
-[source,bash]
-----
-brew install python@3 cairo pango
-----
+NOTE: At this time there are several native modules we use which don't support ARM and will need to be compiled on your machine when you install them for the first time. To support this you need to install a few libraries with https://brew.sh/[Homebrew]. If you don't have that setup yet get that installed, then run: `brew install python@3 cairo pango`
 
 Bootstrap {kib} and install all the dependencies:
 

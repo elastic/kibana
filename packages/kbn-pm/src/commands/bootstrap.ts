@@ -22,6 +22,7 @@ import {
   runBazel,
   yarnIntegrityFileExists,
 } from '../utils/bazel';
+import { patchNativeModulesForArmMacs } from '../utils/patch_native_modules_for_arm_macs';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
@@ -67,9 +68,19 @@ export const BootstrapCommand: ICommand = {
     if (forceInstall) {
       const forceInstallStartTime = Date.now();
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
+
       timings.push({
         id: 'force install dependencies',
         ms: Date.now() - forceInstallStartTime,
+      });
+    }
+
+    if (process.platform === 'darwin' && process.arch === 'arm64') {
+      const patchNativeModulesStartTime = Date.now();
+      await patchNativeModulesForArmMacs(log, kibanaProjectPath);
+      timings.push({
+        id: 'patch native modudles for arm macs',
+        ms: Date.now() - patchNativeModulesStartTime,
       });
     }
 
