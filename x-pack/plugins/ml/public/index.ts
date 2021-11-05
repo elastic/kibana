@@ -54,7 +54,8 @@ export {
 export { ES_CLIENT_TOTAL_HITS_RELATION } from '../common/types/es_client';
 
 export { ANOMALY_SEVERITY } from '../common';
-export { useMlHref, ML_PAGES, MlLocator, MlLocatorDefinition } from './locator';
+export type { MlLocator } from './locator';
+export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 
 // Bundled shared exports
 // Exported this way so the code doesn't end up in ML's page load bundle
