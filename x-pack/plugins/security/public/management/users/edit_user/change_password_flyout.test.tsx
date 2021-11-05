@@ -21,7 +21,7 @@ describe('ChangePasswordFlyout', () => {
               `);
       });
 
-      it('should show errors when there is no current/new password', () => {
+      it('should show errors when there is no new password', () => {
         expect(
           validateChangePasswordForm(
             {
@@ -48,30 +48,13 @@ describe('ChangePasswordFlyout', () => {
               `);
       });
 
-      it('should show errors when there is no confirmation password', () => {
-        expect(
-          validateChangePasswordForm(
-            {
-              password: 'changeme',
-              confirm_password: undefined,
-            } as unknown as ChangePasswordFormValues,
-            true
-          )
-        ).toMatchInlineSnapshot(`
-                  Object {
-                    "confirm_password": "Passwords do not match.",
-                    "current_password": "Enter your current password.",
-                  }
-              `);
-      });
-
       it('should show errors when new password does not match confirmation password', () => {
         expect(
           validateChangePasswordForm(
             {
               password: 'changeme',
-              confirm_password: undefined,
-            } as unknown as ChangePasswordFormValues,
+              confirm_password: 'notTheSame',
+            },
             true
           )
         ).toMatchInlineSnapshot(`
@@ -89,7 +72,7 @@ describe('ChangePasswordFlyout', () => {
               current_password: 'oldpassword',
               password: 'changeme',
               confirm_password: 'changeme',
-            } as unknown as ChangePasswordFormValues,
+            },
             true
           )
         ).toMatchInlineSnapshot(`Object {}`);
@@ -97,7 +80,7 @@ describe('ChangePasswordFlyout', () => {
     });
 
     describe('for another user', () => {
-      it('should show errors when there is no current/new password', () => {
+      it('should show errors when there is no new password', () => {
         expect(
           validateChangePasswordForm(
             {
@@ -114,26 +97,10 @@ describe('ChangePasswordFlyout', () => {
       });
 
       it('should show errors when the new password is not at least 6 characters', () => {
-        expect(validateChangePasswordForm({ password: '12345', confirm_password: '12345' }, false))
+        expect(validateChangePasswordForm({ password: '', confirm_password: '' }, false))
           .toMatchInlineSnapshot(`
           Object {
             "password": "Password must be at least 6 characters.",
-          }
-        `);
-      });
-
-      it('should show errors when there is no confirmation password', () => {
-        expect(
-          validateChangePasswordForm(
-            {
-              password: 'changeme',
-              confirm_password: undefined,
-            } as unknown as ChangePasswordFormValues,
-            false
-          )
-        ).toMatchInlineSnapshot(`
-          Object {
-            "confirm_password": "Passwords do not match.",
           }
         `);
       });
@@ -143,8 +110,8 @@ describe('ChangePasswordFlyout', () => {
           validateChangePasswordForm(
             {
               password: 'changeme',
-              confirm_password: undefined,
-            } as unknown as ChangePasswordFormValues,
+              confirm_password: 'notTheSame',
+            },
             false
           )
         ).toMatchInlineSnapshot(`
@@ -160,7 +127,7 @@ describe('ChangePasswordFlyout', () => {
             {
               password: 'changeme',
               confirm_password: 'changeme',
-            } as unknown as ChangePasswordFormValues,
+            },
             false
           )
         ).toMatchInlineSnapshot(`Object {}`);

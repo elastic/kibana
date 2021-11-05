@@ -460,17 +460,12 @@ export class SecurityPageObject extends FtrService {
     }
   }
 
-  async updateUserForm(user: UserFormValues) {
+  async updateUserProfileForm(user: UserFormValues) {
     if (user.full_name) {
       await this.find.setValue('[name=full_name]', user.full_name);
     }
     if (user.email) {
       await this.find.setValue('[name=email]', user.email);
-    }
-
-    const rolesToAdd = user.roles || [];
-    for (let i = 0; i < rolesToAdd.length; i++) {
-      await this.selectRole(rolesToAdd[i]);
     }
   }
 
@@ -500,13 +495,10 @@ export class SecurityPageObject extends FtrService {
     if (isCurrentUser) {
       await this.testSubjects.setValue(
         'editUserChangePasswordCurrentPasswordInput',
-        user.password ?? ''
+        user.current_password ?? ''
       );
     }
-    await this.testSubjects.setValue(
-      'editUserChangePasswordNewPasswordInput',
-      user.new_password ?? ''
-    );
+    await this.testSubjects.setValue('editUserChangePasswordNewPasswordInput', user.password ?? '');
     await this.testSubjects.setValue(
       'editUserChangePasswordConfirmPasswordInput',
       user.confirm_password ?? ''
@@ -514,9 +506,9 @@ export class SecurityPageObject extends FtrService {
     await this.testSubjects.click('formFlyoutSubmitButton');
   }
 
-  async updateUser(user: UserFormValues) {
+  async updateUserProfile(user: UserFormValues) {
     await this.clickUserByUserName(user.username ?? '');
-    await this.updateUserForm(user);
+    await this.updateUserProfileForm(user);
     await this.submitUpdateUserForm();
   }
 

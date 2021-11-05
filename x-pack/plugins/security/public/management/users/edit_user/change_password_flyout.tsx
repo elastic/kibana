@@ -75,13 +75,6 @@ export const validateChangePasswordForm = (
         defaultMessage: 'Password must be at least 6 characters.',
       }
     );
-  } else if (!values.confirm_password) {
-    errors.confirm_password = i18n.translate(
-      'xpack.security.management.users.changePasswordFlyout.confirmPasswordRequiredError',
-      {
-        defaultMessage: 'Passwords do not match.',
-      }
-    );
   } else if (values.password !== values.confirm_password) {
     errors.confirm_password = i18n.translate(
       'xpack.security.management.users.changePasswordFlyout.confirmPasswordInvalidError',
