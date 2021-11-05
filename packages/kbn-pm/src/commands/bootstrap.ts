@@ -68,7 +68,6 @@ export const BootstrapCommand: ICommand = {
     if (forceInstall) {
       const forceInstallStartTime = Date.now();
       await runBazel(['run', '@nodejs//:yarn'], runOffline);
-
       timings.push({
         id: 'force install dependencies',
         ms: Date.now() - forceInstallStartTime,
