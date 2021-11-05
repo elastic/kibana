@@ -9,17 +9,15 @@ import React, { FC } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeItemWithStats } from './nodes_list';
 import { formatToListItems } from '../models_management/expanded_row';
+import { AllocatedModels } from './allocated_models';
 
 interface ExpandedRowProps {
   item: NodeItemWithStats;
@@ -55,8 +53,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               listItems={formatToListItems(details)}
             />
           </EuiPanel>
-
-          <EuiSpacer size={'m'} />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -76,10 +72,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               listItems={formatToListItems(attributes)}
             />
           </EuiPanel>
+        </EuiFlexItem>
 
-          <EuiSpacer size={'m'} />
-
-          {allocatedModels.length > 0 ? (
+        {allocatedModels.length > 0 ? (
+          <EuiFlexItem grow={2}>
             <EuiPanel>
               <EuiTitle size={'xs'}>
                 <h5>
@@ -91,34 +87,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               </EuiTitle>
               <EuiSpacer size={'m'} />
 
-              {allocatedModels.map(({ model_id: modelId, ...rest }) => {
-                return (
-                  <>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <EuiTitle size="xxs">
-                          <EuiTextColor color="subdued">
-                            <h5>{modelId}</h5>
-                          </EuiTextColor>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiHorizontalRule size={'full'} margin={'s'} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    <EuiDescriptionList
-                      compressed={true}
-                      type="column"
-                      listItems={formatToListItems(rest)}
-                    />
-                    <EuiSpacer size={'s'} />
-                  </>
-                );
-              })}
+              <AllocatedModels models={allocatedModels} />
             </EuiPanel>
-          ) : null}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGrid>
     </>
   );

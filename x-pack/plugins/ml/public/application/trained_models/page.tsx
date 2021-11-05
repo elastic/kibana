@@ -10,6 +10,7 @@ import React, { FC, Fragment, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { useLocation } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { NavigationMenu } from '../components/navigation_menu';
 import { ModelsList } from './models_management';
 import { TrainedModelsNavigationBar } from './navigation_bar';
@@ -44,14 +46,35 @@ export const Page: FC = () => {
         <EuiPageBody>
           <EuiPageHeader>
             <EuiPageHeaderSection>
-              <EuiTitle>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.title"
-                    defaultMessage="Trained Models"
+              <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle>
+                    <h1>
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.title"
+                        defaultMessage="Trained Models"
+                      />
+                    </h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
+                      defaultMessage: 'Experimental',
+                    })}
+                    size="m"
+                    color="hollow"
+                    tooltipContent={i18n.translate(
+                      'xpack.ml.navMenu.trainedModelsTabBetaTooltipContent',
+                      {
+                        defaultMessage:
+                          "Model Management is an experimental feature and subject to change. We'd love to hear your feedback.",
+                      }
+                    )}
+                    tooltipPosition={'right'}
                   />
-                </h1>
-              </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiPageHeaderSection>
             <EuiPageHeaderSection>
               <EuiFlexGroup alignItems="center" gutterSize="s">
