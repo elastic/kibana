@@ -1642,7 +1642,7 @@ describe('SavedObjectsRepository', () => {
         ];
         await bulkUpdateSuccess(objects);
         const overrides = { if_seq_no: 100, if_primary_term: 200 };
-        expectClientCallArgsAction(objects, { method: 'update', overrides }, 2);
+        expectClientCallArgsAction(objects, { method: 'update', overrides });
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
@@ -1752,11 +1752,12 @@ describe('SavedObjectsRepository', () => {
       const bulkUpdateMultiError = async (
         [obj1, _obj, obj2]: SavedObjectsBulkUpdateObject[],
         options: SavedObjectsBulkUpdateOptions | undefined,
-        mgetResponse: estypes.MgetResponse
+        mgetResponse: estypes.MgetResponse,
+        mgetOptions?: { statusCode?: number }
       ) => {
         client.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(mgetResponse, {
-            statusCode: mgetResponse.statusCode,
+            statusCode: mgetOptions?.statusCode,
           })
         );
 
@@ -1812,8 +1813,9 @@ describe('SavedObjectsRepository', () => {
 
       it(`returns error when ES is unable to find the index (mget)`, async () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
-        const mgetResponse = { statusCode: 404 };
-        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse);
+        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, {} as estypes.MgetResponse, {
+          statusCode: 404,
+        });
       });
 
       it(`returns error when there is a conflict with an existing multi-namespace saved object (mget)`, async () => {
@@ -1823,7 +1825,11 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`returns bulk error`, async () => {
-        const expectedErrorResult = { type: obj.type, id: obj.id, error: 'Oh no, a bulk error!' };
+        const expectedErrorResult = {
+          type: obj.type,
+          id: obj.id,
+          error: { message: 'Oh no, a bulk error!' },
+        };
         await bulkUpdateError(obj, true, expectedErrorResult);
       });
     });
@@ -1834,16 +1840,13 @@ describe('SavedObjectsRepository', () => {
         id,
         attributes,
         references,
-        namespaces,
-        originId,
       }: SavedObjectsBulkUpdateObject) => ({
         type,
         id,
-        originId,
         attributes,
         references,
         version: mockVersion,
-        namespaces: namespaces ?? ['default'],
+        namespaces: ['default'],
         ...mockTimestampFields,
       });
 
