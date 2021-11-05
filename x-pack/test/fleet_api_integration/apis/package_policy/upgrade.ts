@@ -577,9 +577,7 @@ export default function (providerContext: FtrProviderContext) {
               packagePolicyIds: [packagePolicyId],
               dryRun: false,
             })
-            .expect(200);
-
-          expect(body[0].success).to.be(false);
+            .expect(400);
         });
       });
     });
@@ -679,9 +677,7 @@ export default function (providerContext: FtrProviderContext) {
               packagePolicyIds: [packagePolicyId],
               dryRun: false,
             })
-            .expect(200);
-
-          expect(body[0].success).to.be(false);
+            .expect(400);
         });
       });
     });
