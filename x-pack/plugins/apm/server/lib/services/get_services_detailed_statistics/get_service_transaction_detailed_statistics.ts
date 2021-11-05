@@ -70,7 +70,7 @@ export async function getServiceTransactionDetailedStatistics({
   };
 
   const response = await apmEventClient.search(
-    'get_service_transaction_stats',
+    'get_service_transaction_detail_stats',
     {
       apm: {
         events: [
@@ -82,6 +82,7 @@ export async function getServiceTransactionDetailedStatistics({
         query: {
           bool: {
             filter: [
+              { terms: { [SERVICE_NAME]: serviceNames } },
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
@@ -95,8 +96,6 @@ export async function getServiceTransactionDetailedStatistics({
           services: {
             terms: {
               field: SERVICE_NAME,
-              include: serviceNames,
-              size: serviceNames.length,
             },
             aggs: {
               transactionType: {

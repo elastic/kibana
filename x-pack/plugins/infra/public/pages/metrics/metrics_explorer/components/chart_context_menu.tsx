@@ -27,6 +27,7 @@ import {
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 import { useLinkProps } from '../../../../hooks/use_link_props';
 
 export interface Props {
@@ -44,13 +45,13 @@ const fieldToNodeType = (
   groupBy: string | string[]
 ): InventoryItemType | undefined => {
   const fields = Array.isArray(groupBy) ? groupBy : [groupBy];
-  if (fields.includes(source.fields.host)) {
+  if (fields.includes(HOST_FIELD)) {
     return 'host';
   }
-  if (fields.includes(source.fields.pod)) {
+  if (fields.includes(POD_FIELD)) {
     return 'pod';
   }
-  if (fields.includes(source.fields.container)) {
+  if (fields.includes(CONTAINER_FIELD)) {
     return 'container';
   }
 };
