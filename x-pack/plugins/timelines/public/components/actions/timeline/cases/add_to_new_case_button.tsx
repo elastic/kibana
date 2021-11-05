@@ -22,6 +22,7 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
 }) => {
   const { addNewCaseClick, isDisabled, userCanCrud } = useAddToCase({
@@ -29,6 +30,7 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
     useInsertTimeline,
     casePermissions,
     appId,
+    owner,
     onClose,
   });
 

@@ -16,7 +16,7 @@ const onSuccess = jest.fn();
 const defaultProps = {
   onClose,
   onSuccess,
-  appId: 'securitySolution',
+  owner: 'securitySolution',
 };
 
 describe('CreateCaseFlyout', () => {
