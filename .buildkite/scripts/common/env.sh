@@ -42,7 +42,11 @@ if is_pr; then
     export ELASTIC_APM_ACTIVE=false
   fi
 
-  export CHECKS_REPORTER_ACTIVE=true
+  if [[ "${GITHUB_STEP_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
+    export CHECKS_REPORTER_ACTIVE=true
+  else
+    export CHECKS_REPORTER_ACTIVE=false
+  fi
 
   # These can be removed once we're not supporting Jenkins and Buildkite at the same time
   # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
