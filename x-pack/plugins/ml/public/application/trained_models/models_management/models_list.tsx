@@ -152,7 +152,9 @@ export const ModelsList: FC = () => {
       }
 
       // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchDeploymentStats(newItems.filter((v) => v.model_type.includes('pytorch')));
+      await fetchAndPopulateDeploymentStats(
+        newItems.filter((v) => v.model_type.includes('pytorch'))
+      );
 
       setItems(newItems);
 
@@ -240,7 +242,7 @@ export const ModelsList: FC = () => {
    * We have to fetch all deployment stats on each update,
    * because for stopped models the API returns 404 response.
    */
-  const fetchDeploymentStats = useCallback(async (modelItems: ModelItem[]) => {
+  const fetchAndPopulateDeploymentStats = useCallback(async (modelItems: ModelItem[]) => {
     try {
       const { deployment_stats: deploymentStats } =
         await trainedModelsApiService.getTrainedModelDeploymentStats('*');
