@@ -2025,13 +2025,13 @@ describe('SavedObjectsRepository', () => {
     beforeEach(() => {
       mockPreflightCheckForCreate.mockReset();
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
-        return objects.map(({ type, id }) => ({ type, id })); // respond with no errors by default
+        return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
       });
       client.create.mockImplementation((params) =>
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           _id: params.id,
           ...mockVersionProps,
-        })
+        } as estypes.CreateResponse)
       );
     });
 
@@ -2113,24 +2113,34 @@ describe('SavedObjectsRepository', () => {
 
       it(`defaults to empty references array`, async () => {
         await createSuccess(type, attributes, { id });
-        expect(client.create.mock.calls[0][0].body.references).toEqual([]);
+        expect(
+          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
+            .references
+        ).toEqual([]);
       });
 
       it(`accepts custom references array`, async () => {
-        const test = async (references) => {
+        const test = async (references: SavedObjectReference[]) => {
           await createSuccess(type, attributes, { id, references });
-          expect(client.create.mock.calls[0][0].body.references).toEqual(references);
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .body!.references
+          ).toEqual(references);
           client.create.mockClear();
         };
         await test(references);
-        await test(['string']);
+        await test([{ type: 'type', id: 'id', name: 'some ref' }]);
         await test([]);
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        const test = async (references) => {
+        const test = async (references: unknown) => {
+          // @ts-expect-error references is unknown
           await createSuccess(type, attributes, { id, references });
-          expect(client.create.mock.calls[0][0].body.references).not.toBeDefined();
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .body!.references
+          ).not.toBeDefined();
           client.create.mockClear();
         };
         await test('string');
@@ -2233,7 +2243,10 @@ describe('SavedObjectsRepository', () => {
           {
             type: MULTI_NAMESPACE_TYPE,
             id,
-            existingDocument: { _source: { namespaces: ['*'] } }, // second object does have an existing document to overwrite
+            existingDocument: {
+              _id: id,
+              _source: { type: MULTI_NAMESPACE_TYPE, namespaces: ['*'] },
+            }, // second object does have an existing document to overwrite
           },
         ]);
         await createSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, {
@@ -2297,7 +2310,10 @@ describe('SavedObjectsRepository', () => {
           {
             type: MULTI_NAMESPACE_ISOLATED_TYPE,
             id,
-            existingDocument: { _source: { namespaces: ['something-else'] } }, // third object does have an existing document to overwrite
+            existingDocument: {
+              _id: id,
+              _source: { type: MULTI_NAMESPACE_ISOLATED_TYPE, namespaces: ['something-else'] },
+            }, // third object does have an existing document to overwrite
           },
         ]);
         await savedObjectsRepository.create(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, {
@@ -2403,7 +2419,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when options.initialNamespaces is used with a space-isolated object and does not specify a single space`, async () => {
-        const doTest = async (objType, initialNamespaces) => {
+        const doTest = async (objType: string, initialNamespaces?: string[]) => {
           await expect(
             savedObjectsRepository.create(objType, attributes, { initialNamespaces })
           ).rejects.toThrowError(
