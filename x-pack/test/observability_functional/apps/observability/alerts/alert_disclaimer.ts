@@ -36,7 +36,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     it('Dismiss experimental disclaimer', async () => {
       await testSubjects.click('o11y-experimental-disclaimer-dismiss-btn');
       const o11yExperimentalDisclaimer = await testSubjects.exists('o11y-experimental-disclaimer');
-      expect(o11yExperimentalDisclaimer).not.to.be(false);
+      expect(o11yExperimentalDisclaimer).not.to.be(null);
     });
   });
 };
