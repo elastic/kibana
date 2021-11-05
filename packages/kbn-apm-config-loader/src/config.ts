@@ -23,27 +23,28 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
 };
 
 const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions = {
-  serverUrl: 'https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io',
+  serverUrl: 'https://cloud-apm-server.kibana.dev',
 
   // The secretToken below is intended to be hardcoded in this file even though
   // it makes it public. This is not a security/privacy issue. Normally we'd
   // instead disable the need for a secretToken in the APM Server config where
   // the data is transmitted to, but due to how it's being hosted, it's easier,
   // for now, to simply leave it in.
-  secretToken: '7YKhoXsO4MzjhXjx2c',
+  secretToken: 'JpBCcOQxN81D5yucs2',
 
+  breakdownMetrics: true,
+  captureSpanStackTraces: false,
   centralConfig: false,
   metricsInterval: '30s',
-  captureSpanStackTraces: false,
   transactionSampleRate: 1.0,
-  breakdownMetrics: true,
 };
 
 const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
-  metricsInterval: '120s',
+  breakdownMetrics: false,
   captureBody: 'off',
   captureHeaders: false,
-  breakdownMetrics: false,
+  metricsInterval: '120s',
+  transactionSampleRate: 0.1,
 };
 
 export class ApmConfiguration {
