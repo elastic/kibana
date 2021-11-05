@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { convertToKibanaClient } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
