@@ -80,6 +80,7 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 
 export interface TGridStandaloneProps {
   appId: string;
+  appIdUI: string;
   casePermissions: {
     crud: boolean;
     read: boolean;
@@ -123,6 +124,7 @@ export interface TGridStandaloneProps {
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   afterCaseSelection,
   appId,
+  appIdUI,
   casePermissions,
   columns,
   defaultCellActions,
@@ -275,9 +277,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       event: selectedEvent,
       casePermissions: casePermissions ?? null,
       appId,
+      owner: appIdUI,
       onClose: afterCaseSelection,
     };
-  }, [appId, casePermissions, afterCaseSelection, selectedEvent]);
+  }, [appId, casePermissions, afterCaseSelection, selectedEvent, appIdUI]);
 
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),

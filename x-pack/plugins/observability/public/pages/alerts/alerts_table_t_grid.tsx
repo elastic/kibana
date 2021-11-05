@@ -235,12 +235,14 @@ function ObservabilityActions({
               event,
               casePermissions,
               appId: observabilityFeatureId,
+              owner: observabilityFeatureId,
               onClose: afterCaseSelection,
             }),
             timelines.getAddToNewCaseButton({
               event,
               casePermissions,
               appId: observabilityFeatureId,
+              owner: observabilityFeatureId,
               onClose: afterCaseSelection,
             }),
           ]
@@ -390,6 +392,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const sortDirection: SortDirection = 'desc';
     return {
       appId: observabilityFeatureId,
+      appIdUI: observabilityFeatureId,
       casePermissions,
       type,
       columns,
