@@ -85,3 +85,5 @@ export type { ExploratoryEmbeddableProps } from './components/shared/exploratory
 export type { AddInspectorRequest } from './context/inspector/inspector_context';
 export { InspectorContextProvider } from './context/inspector/inspector_context';
 export { useInspectorContext } from './context/inspector/use_inspector_context';
+
+export { enableComparisonByDefault } from '../common/ui_settings_keys';
