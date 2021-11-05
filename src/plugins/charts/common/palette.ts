@@ -149,17 +149,13 @@ export function palette(): ExpressionFunctionDefinition<
         throw Error('When stop is used, each color must have an associated stop value.');
       }
 
-      // If user defined stops, choose
-      // rangeMin/Max, provided by user
-      // or range, taken from first/last element of ranges
-      // or default range (0 or 100).
-      //
-      // If user haven't passed any stop, choose rangeMin/Max, provided by user or default range (0 or 100).
+      // If the user has defined stops, choose rangeMin/Max, provided by user or range,
+      // taken from first/last element of ranges or default range (0 or 100).
       const calculateRange = (
         userRange: number | undefined,
         stopsRange: number | undefined,
         defaultRange: number
-      ) => (stops.length ? userRange ?? stopsRange ?? defaultRange : userRange ?? defaultRange);
+      ) => userRange ?? stopsRange ?? defaultRange;
 
       const rangeMinDefault = 0;
       const rangeMaxDefault = 100;
