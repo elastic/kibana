@@ -263,7 +263,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
     describe('dependencies/upstream_services', function () {
       loadTestFile(require.resolve('./dependencies/upstream_services'));
-
+    });
     describe('dependencies/top_dependencies', function () {
       loadTestFile(require.resolve('./dependencies/top_dependencies'));
     });
