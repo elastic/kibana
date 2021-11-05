@@ -38,10 +38,10 @@ export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
 if is_pr; then
   if [[ "${GITHUB_PR_LABELS:-}" == *"ci:collect-apm"* ]]; then
     export ELASTIC_APM_ACTIVE=true
-    export ELASTIC_APM_DISABLE_SEND=false
+    export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
   else
     export ELASTIC_APM_ACTIVE=true
-    export ELASTIC_APM_DISABLE_SEND=true
+    export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=true
   fi
 
   export CHECKS_REPORTER_ACTIVE=true
@@ -59,7 +59,7 @@ if is_pr; then
   export PR_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
 else
   export ELASTIC_APM_ACTIVE=true
-  export ELASTIC_APM_DISABLE_SEND=false
+  export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
   export CHECKS_REPORTER_ACTIVE=false
 fi
 

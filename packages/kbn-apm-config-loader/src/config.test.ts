@@ -90,7 +90,7 @@ describe('ApmConfiguration', () => {
         "breakdownMetrics": true,
         "captureSpanStackTraces": false,
         "centralConfig": false,
-        "disableSend": true,
+        "contextPropagationOnly": true,
         "environment": "development",
         "globalLabels": Object {},
         "logUncaughtExceptions": true,
@@ -112,7 +112,7 @@ describe('ApmConfiguration', () => {
         "captureHeaders": false,
         "captureSpanStackTraces": false,
         "centralConfig": false,
-        "disableSend": true,
+        "contextPropagationOnly": true,
         "environment": "development",
         "globalLabels": Object {
           "git_rev": "sha",
@@ -226,19 +226,19 @@ describe('ApmConfiguration', () => {
     );
   });
 
-  describe('disableSend', () => {
-    it('sets "active: true" and "disableSend: true" by default', () => {
+  describe('contextPropagationOnly', () => {
+    it('sets "active: true" and "contextPropagationOnly: true" by default', () => {
       expect(new ApmConfiguration(mockedRootDir, {}, false).getConfig('serviceName')).toEqual(
         expect.objectContaining({
           active: true,
-          disableSend: true,
+          contextPropagationOnly: true,
         })
       );
 
       expect(new ApmConfiguration(mockedRootDir, {}, true).getConfig('serviceName')).toEqual(
         expect.objectContaining({
           active: true,
-          disableSend: true,
+          contextPropagationOnly: true,
         })
       );
     });
@@ -248,7 +248,7 @@ describe('ApmConfiguration', () => {
         elastic: {
           apm: {
             active: false,
-            disableSend: false,
+            contextPropagationOnly: false,
           },
         },
       };
@@ -258,7 +258,7 @@ describe('ApmConfiguration', () => {
       ).toEqual(
         expect.objectContaining({
           active: false,
-          disableSend: false,
+          contextPropagationOnly: false,
         })
       );
 
@@ -267,12 +267,12 @@ describe('ApmConfiguration', () => {
       ).toEqual(
         expect.objectContaining({
           active: false,
-          disableSend: false,
+          contextPropagationOnly: false,
         })
       );
     });
 
-    it('is "false" if "active:true" and "disableSend" is not specified', () => {
+    it('is "false" if "active: true" configured and "contextPropagationOnly" is not specified', () => {
       const kibanaConfig = {
         elastic: {
           apm: {
@@ -286,7 +286,7 @@ describe('ApmConfiguration', () => {
       ).toEqual(
         expect.objectContaining({
           active: true,
-          disableSend: false,
+          contextPropagationOnly: false,
         })
       );
 
@@ -295,16 +295,39 @@ describe('ApmConfiguration', () => {
       ).toEqual(
         expect.objectContaining({
           active: true,
-          disableSend: false,
+          contextPropagationOnly: false,
         })
       );
     });
 
-    it('is "true" if "active:false" and "disableSend" is not specified', () => {
+    it('throws if "active: false" set without configuring "contextPropagationOnly: false"', () => {
       const kibanaConfig = {
         elastic: {
           apm: {
             active: false,
+          },
+        },
+      };
+
+      expect(() =>
+        new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false"`
+      );
+
+      expect(() =>
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false"`
+      );
+    });
+
+    it('does not throw if "active: false" and "contextPropagationOnly: false" configured', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: false,
+            contextPropagationOnly: false,
           },
         },
       };
@@ -314,7 +337,7 @@ describe('ApmConfiguration', () => {
       ).toEqual(
         expect.objectContaining({
           active: false,
-          disableSend: true,
+          contextPropagationOnly: false,
         })
       );
 
@@ -323,7 +346,7 @@ describe('ApmConfiguration', () => {
       ).toEqual(
         expect.objectContaining({
           active: false,
-          disableSend: true,
+          contextPropagationOnly: false,
         })
       );
     });
