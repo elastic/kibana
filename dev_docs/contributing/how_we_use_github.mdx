@@ -37,6 +37,28 @@ Pull requests are made into the master branch and then backported when it is saf
 - Resolve merge conflicts by rebasing the target branch over your feature branch, and force-pushing (see below for instructions).
 - When merging, we’ll squash your commits into a single commit.
 
+### Commit using your `@elastic.co` email address
+
+In order to assist with developer tooling we ask that all Elastic engineers use their `@elastic.co` email address when committing to the Kibana repo. We have implemented a CI check that validates any PR opened by a member of the `@elastic` organization has at least one commit that is attributed to an `@elastic.co` email address. If you have a PR that is failing because of this check you can fix your PR by following these steps:
+
+ 1. Ensure that you don't have any staged changes
+ 1. Checkout the branch for your PR
+ 1. Update the git config for your current repository to commit with your `@elastic.co` email:
+
+    ```bash
+    git config --local user.email YOUR_ELASTIC_EMAIL@elastic.co
+    ```
+
+ 1. Create a commit using the new email address
+
+    ```bash
+    git commit -m 'commit using @elastic.co' --allow-empty
+    ```
+
+ 1. Push the new commit to your PR and the status should now be green
+
+**Note:** If doing this prevents your commits from being attributed to your Github account then make sure to add your `@elastic.co` address at [https://github.com/settings/emails](https://github.com/settings/emails).
+
 ### Rebasing and fixing merge conflicts
 
 Rebasing can be tricky, and fixing merge conflicts can be even trickier because it involves force pushing. This is all compounded by the fact that attempting to push a rebased branch remotely will be rejected by git, and you’ll be prompted to do a pull, which is not at all what you should do (this will really mess up your branch’s history).

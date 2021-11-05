@@ -271,4 +271,29 @@ describe('FieldsBrowser', () => {
 
     expect(onSearchInputChange).toBeCalledWith(inputText);
   });
+
+  test('it renders the CreateField button when createFieldComponent is provided', () => {
+    const MyTestComponent = () => <div>{'test'}</div>;
+
+    const wrapper = mount(
+      <TestProviders>
+        <FieldsBrowser
+          columnHeaders={[]}
+          browserFields={mockBrowserFields}
+          filteredBrowserFields={mockBrowserFields}
+          searchInput={''}
+          isSearching={false}
+          onCategorySelected={jest.fn()}
+          onHide={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          restoreFocusTo={React.createRef<HTMLButtonElement>()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+          createFieldComponent={MyTestComponent}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(MyTestComponent).exists()).toBeTruthy();
+  });
 });

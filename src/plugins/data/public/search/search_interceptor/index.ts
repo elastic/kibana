@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { SearchInterceptor, ISearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
+export type { ISearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
+export { SearchInterceptor } from './search_interceptor';

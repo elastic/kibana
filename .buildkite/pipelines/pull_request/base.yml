@@ -117,14 +117,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/jest.sh
-    label: 'Jest Tests'
-    parallelism: 6
-    agents:
-      queue: n2-4
-    timeout_in_minutes: 90
-    key: jest
-
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
     agents:
@@ -139,11 +131,25 @@ steps:
     timeout_in_minutes: 120
     key: api-integration
 
+  - command: .buildkite/scripts/steps/test/jest.sh
+    label: 'Jest Tests'
+    agents:
+      queue: c2-16
+    timeout_in_minutes: 120
+    key: jest
+
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
       queue: n2-2
     key: linting
+    timeout_in_minutes: 90
+
+  - command: .buildkite/scripts/steps/lint_with_types.sh
+    label: 'Linting (with types)'
+    agents:
+      queue: c2-16
+    key: linting_with_types
     timeout_in_minutes: 90
 
   - command: .buildkite/scripts/steps/checks.sh
