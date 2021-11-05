@@ -113,6 +113,8 @@ export class ApmConfiguration {
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
+    } else if (process.env.ELASTIC_APM_ACTIVE === 'false') {
+      config.active = false;
     }
 
     if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
@@ -268,14 +270,10 @@ export class ApmConfiguration {
       this.getConfigFromEnv()
     );
 
-    if (config.active === false && config.contextPropagationOnly !== false) {
+    if (config.active !== undefined && config.contextPropagationOnly === undefined) {
       throw new Error(
-        'APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false'
+        '[apm.active] is configured but contextPropagationOnly is not. Please, set [apm.contextPropagationOnly] value explicitly.'
       );
-    }
-
-    if (config.active === true) {
-      config.contextPropagationOnly = config.contextPropagationOnly ?? false;
     }
 
     return config;

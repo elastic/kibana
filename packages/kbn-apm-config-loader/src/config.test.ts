@@ -133,6 +133,7 @@ describe('ApmConfiguration', () => {
       elastic: {
         apm: {
           active: true,
+          contextPropagationOnly: false,
           serverUrl: 'https://url',
           secretToken: 'secret',
         },
@@ -151,6 +152,7 @@ describe('ApmConfiguration', () => {
   it('loads the configuration from the dev config is present', () => {
     devConfigMock.raw = {
       active: true,
+      contextPropagationOnly: false,
       serverUrl: 'https://dev-url.co',
     };
     const config = new ApmConfiguration(mockedRootDir, {}, false);
@@ -179,6 +181,7 @@ describe('ApmConfiguration', () => {
       elastic: {
         apm: {
           active: true,
+          contextPropagationOnly: false,
           serverUrl: 'https://url',
           secretToken: 'secret',
         },
@@ -272,7 +275,29 @@ describe('ApmConfiguration', () => {
       );
     });
 
-    it('is "false" if "active: true" configured and "contextPropagationOnly" is not specified', () => {
+    it('throws if "active: false" set without configuring "contextPropagationOnly"', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: false,
+          },
+        },
+      };
+
+      expect(() =>
+        new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[apm.active] is configured but contextPropagationOnly is not. Please, set [apm.contextPropagationOnly] value explicitly."`
+      );
+
+      expect(() =>
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[apm.active] is configured but contextPropagationOnly is not. Please, set [apm.contextPropagationOnly] value explicitly."`
+      );
+    });
+
+    it('throws if "active: true" set without configuring "contextPropagationOnly"', () => {
       const kibanaConfig = {
         elastic: {
           apm: {
@@ -281,73 +306,16 @@ describe('ApmConfiguration', () => {
         },
       };
 
-      expect(
-        new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
-      ).toEqual(
-        expect.objectContaining({
-          active: true,
-          contextPropagationOnly: false,
-        })
-      );
-
-      expect(
-        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
-      ).toEqual(
-        expect.objectContaining({
-          active: true,
-          contextPropagationOnly: false,
-        })
-      );
-    });
-
-    it('throws if "active: false" set without configuring "contextPropagationOnly: false"', () => {
-      const kibanaConfig = {
-        elastic: {
-          apm: {
-            active: false,
-          },
-        },
-      };
-
       expect(() =>
         new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false"`
+        `"[apm.active] is configured but contextPropagationOnly is not. Please, set [apm.contextPropagationOnly] value explicitly."`
       );
 
       expect(() =>
         new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false"`
-      );
-    });
-
-    it('does not throw if "active: false" and "contextPropagationOnly: false" configured', () => {
-      const kibanaConfig = {
-        elastic: {
-          apm: {
-            active: false,
-            contextPropagationOnly: false,
-          },
-        },
-      };
-
-      expect(
-        new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
-      ).toEqual(
-        expect.objectContaining({
-          active: false,
-          contextPropagationOnly: false,
-        })
-      );
-
-      expect(
-        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
-      ).toEqual(
-        expect.objectContaining({
-          active: false,
-          contextPropagationOnly: false,
-        })
+        `"[apm.active] is configured but contextPropagationOnly is not. Please, set [apm.contextPropagationOnly] value explicitly."`
       );
     });
   });
