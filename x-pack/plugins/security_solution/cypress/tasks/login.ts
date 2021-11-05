@@ -10,7 +10,7 @@ import Url, { UrlObject } from 'url';
 
 import { ROLES } from '../../common/test';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
-import { hostDetailsUrl } from '../urls/navigation';
+import { hostDetailsUrl, LOGOUT_URL } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -325,4 +325,8 @@ export const loginAndWaitForHostDetailsPage = () => {
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const logout = () => {
+  cy.visit(LOGOUT_URL);
 };
