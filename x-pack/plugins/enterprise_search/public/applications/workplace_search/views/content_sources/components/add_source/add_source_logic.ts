@@ -392,7 +392,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const route = `/internal/workplace_search/org/settings/connectors/${serviceType}`;
 
       try {
-        const response = await HttpLogic.values.http.get<SourceConfigData>(route);
+        const response = await HttpLogic.values.http.get(route);
         actions.setSourceConfigData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -415,7 +415,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       if (subdomain) query.subdomain = subdomain;
 
       try {
-        const response = await HttpLogic.values.http.get<SourceConnectData>(route, { query });
+        const response = await HttpLogic.values.http.get(route, { query });
         actions.setSourceConnectData(response);
         successCallback(response.oauthUrl);
       } catch (e) {
@@ -435,7 +435,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       } as HttpFetchQuery;
 
       try {
-        const response = await HttpLogic.values.http.get<SourceConnectData>(route, { query });
+        const response = await HttpLogic.values.http.get(route, { query });
         actions.setSourceConnectData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -449,7 +449,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         : `/internal/workplace_search/account/pre_sources/${preContentSourceId}`;
 
       try {
-        const response = await HttpLogic.values.http.get<PreContentSourceResponse>(route);
+        const response = await HttpLogic.values.http.get(route);
         actions.setPreContentSourceConfigData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -482,7 +482,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       };
 
       try {
-        const response = await http<SourceConfigData>(route, {
+        const response = await http(route, {
           body: JSON.stringify(params),
         });
         if (successCallback) successCallback();
@@ -527,13 +527,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       }
 
       try {
-        const response = await http.get<{
-          serviceName: string;
-          indexPermissions: boolean;
-          serviceType: string;
-          preContentSourceId: string;
-          hasConfigureStep: boolean;
-        }>(route, { query });
+        const response = await http.get(route, { query });
         const { serviceName, indexPermissions, serviceType, preContentSourceId, hasConfigureStep } =
           response;
 
@@ -580,7 +574,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
 
       try {
-        const response = await HttpLogic.values.http.post<CustomSource>(route, {
+        const response = await HttpLogic.values.http.post(route, {
           body: JSON.stringify({ ...params }),
         });
         actions.setCustomSourceData(response);

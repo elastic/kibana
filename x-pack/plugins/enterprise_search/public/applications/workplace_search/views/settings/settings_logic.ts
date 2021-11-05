@@ -200,7 +200,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const route = '/internal/workplace_search/org/settings';
 
       try {
-        const response = await http.get<SettingsServerProps>(route);
+        const response = await http.get(route);
         actions.setServerProps(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -211,7 +211,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const route = '/internal/workplace_search/org/settings/connectors';
 
       try {
-        const response = await http.get<Connector[]>(route);
+        const response = await http.get(route);
         actions.onInitializeConnectors(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -225,9 +225,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const body = JSON.stringify({ name });
 
       try {
-        const response = await http.put<{
-          organizationName: string;
-        }>(route, { body });
+        const response = await http.put(route, { body });
         actions.setUpdatedName(response);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
         AppLogic.actions.setOrgName(name);
@@ -242,7 +240,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const body = JSON.stringify({ logo });
 
       try {
-        const response = await http.put<{ logo: string | null }>(imageRoute, { body });
+        const response = await http.put(imageRoute, { body });
         actions.setLogo(response.logo);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
       } catch (e) {
@@ -257,7 +255,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const body = JSON.stringify({ icon });
 
       try {
-        const response = await http.put<{ icon: string | null }>(imageRoute, { body });
+        const response = await http.put(imageRoute, { body });
         actions.setIcon(response.icon);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
       } catch (e) {
@@ -277,9 +275,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       clearFlashMessages();
 
       try {
-        const response = await http.put<{
-          oauthApplication: IOauthApplication;
-        }>(route, { body });
+        const response = await http.put(route, { body });
         actions.setUpdatedOauthApplication(response);
         flashSuccessToast(OAUTH_APP_UPDATED_MESSAGE);
       } catch (e) {

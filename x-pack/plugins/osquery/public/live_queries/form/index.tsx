@@ -86,7 +86,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const { data, isLoading, mutateAsync, isError, isSuccess } = useMutation(
     (payload: Record<string, unknown>) =>
-      http.post<any>('/internal/osquery/action', {
+      http.post('/internal/osquery/action', {
         body: JSON.stringify(payload),
       }),
     {

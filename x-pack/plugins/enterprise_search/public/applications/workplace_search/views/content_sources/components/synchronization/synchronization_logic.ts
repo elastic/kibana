@@ -20,12 +20,10 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-
 import {
   BlockedWindow,
   DayOfWeek,
   IndexingSchedule,
-  ContentSourceFullData,
   SyncJobType,
   TimeUnit,
 } from '../../../../types';
@@ -315,7 +313,7 @@ export const SynchronizationLogic = kea<
       const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
 
       try {
-        const response = await HttpLogic.values.http.patch<ContentSourceFullData>(route, {
+        const response = await HttpLogic.values.http.patch(route, {
           body: JSON.stringify(body),
         });
 

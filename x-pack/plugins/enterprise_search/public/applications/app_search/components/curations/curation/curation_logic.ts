@@ -231,7 +231,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get<Curation>(
+        const response = await http.get(
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           { query: { skip_record_analytics: 'true' } }
         );
@@ -251,7 +251,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       clearFlashMessages();
 
       try {
-        const response = await http.put<Curation>(
+        const response = await http.put(
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           {
             query: { skip_record_analytics: 'true' },
