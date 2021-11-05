@@ -44,6 +44,7 @@ export function useFailedTransactionsCorrelations() {
 
   // This use of useReducer (the dispatch function won't get reinstantiated
   // on every update) and debounce avoids flooding consuming components with updates.
+  // `setResponse.flush()` can be used to enforce an update.
   const [response, setResponseUnDebounced] = useReducer(
     getReducer<FailedTransactionsCorrelationsResponse & CorrelationsProgress>(),
     getInitialResponse()
@@ -222,6 +223,7 @@ export function useFailedTransactionsCorrelations() {
     setResponse({
       isRunning: false,
     });
+    setResponse.flush();
   }, [setResponse]);
 
   // auto-update

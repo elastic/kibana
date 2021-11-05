@@ -8,7 +8,7 @@
 import React, { ReactNode } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -150,7 +150,7 @@ describe('useLatencyCorrelations', () => {
 
       try {
         jest.advanceTimersByTime(150);
-        await waitFor(() => result.current.progress.loaded === 0.05);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
 
         expect(result.current.progress).toEqual({
           error: undefined,
@@ -171,7 +171,7 @@ describe('useLatencyCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => result.current.progress.loaded === 0.1);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
 
         // field candidates are an implementation detail and
         // will not be exposed, it will just set loaded to 0.1.
@@ -182,7 +182,7 @@ describe('useLatencyCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => result.current.progress.loaded === 0.4);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.4));
 
         // field value pairs are an implementation detail and
         // will not be exposed, it will just set loaded to 0.4.
@@ -193,7 +193,7 @@ describe('useLatencyCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => result.current.progress.loaded === 1);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(1));
 
         expect(result.current.progress).toEqual({
           error: undefined,
@@ -223,7 +223,9 @@ describe('useLatencyCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => result.current.response.fieldStats !== undefined);
+        await waitFor(() =>
+          expect(result.current.response.fieldStats).toBeDefined()
+        );
 
         expect(result.current.progress).toEqual({
           error: undefined,
@@ -259,6 +261,7 @@ describe('useLatencyCorrelations', () => {
       }
     });
   });
+
   describe('when throwing an error', () => {
     it('should automatically start fetching results', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
@@ -312,13 +315,43 @@ describe('useLatencyCorrelations', () => {
 
       try {
         jest.advanceTimersByTime(150);
-        await waitFor(() => result.current.progress.error !== undefined);
+        await waitFor(() =>
+          expect(result.current.progress.error).toBeDefined()
+        );
 
         expect(result.current.progress).toEqual({
           error: 'Something went wrong',
           isRunning: false,
           loaded: 0,
         });
+      } finally {
+        unmount();
+      }
+    });
+  });
+
+  describe('when canceled', () => {
+    it('should stop running', async () => {
+      const { result, unmount, waitFor } = renderHook(
+        () => useLatencyCorrelations(),
+        {
+          wrapper,
+        }
+      );
+
+      try {
+        jest.advanceTimersByTime(150);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
+
+        expect(result.current.progress.isRunning).toBe(true);
+
+        act(() => {
+          result.current.cancelFetch();
+        });
+
+        await waitFor(() =>
+          expect(result.current.progress.isRunning).toEqual(false)
+        );
       } finally {
         unmount();
       }

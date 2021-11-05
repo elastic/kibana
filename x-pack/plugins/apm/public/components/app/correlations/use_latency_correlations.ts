@@ -46,6 +46,7 @@ export function useLatencyCorrelations() {
 
   // This use of useReducer (the dispatch function won't get reinstantiated
   // on every update) and debounce avoids flooding consuming components with updates.
+  // `setResponse.flush()` can be used to enforce an update.
   const [response, setResponseUnDebounced] = useReducer(
     getReducer<LatencyCorrelationsResponse & CorrelationsProgress>(),
     getInitialResponse()
@@ -250,6 +251,7 @@ export function useLatencyCorrelations() {
     setResponse({
       isRunning: false,
     });
+    setResponse.flush();
   }, [setResponse]);
 
   // auto-update
