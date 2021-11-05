@@ -29,7 +29,7 @@ export function DatePicker({
 }) {
   const history = useHistory();
   const location = useLocation();
-  const { core, plugins } = useApmPluginContext();
+  const { core, pluginsSetup } = useApmPluginContext();
 
   const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
@@ -78,13 +78,13 @@ export function DatePicker({
   useEffect(() => {
     // set time if both to and from are given in the url
     if (rangeFrom && rangeTo) {
-      plugins.data.query.timefilter.timefilter.setTime({
+      pluginsSetup.data.query.timefilter.timefilter.setTime({
         from: rangeFrom,
         to: rangeTo,
       });
       return;
     }
-  }, [rangeFrom, rangeTo, plugins]);
+  }, [rangeFrom, rangeTo, pluginsSetup]);
 
   return (
     <EuiSuperDatePicker

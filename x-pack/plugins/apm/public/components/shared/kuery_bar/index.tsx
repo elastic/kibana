@@ -54,7 +54,7 @@ export function KueryBar(props: {
   });
   const { urlParams } = useLegacyUrlParams();
   const location = useLocation();
-  const { data } = useApmPluginContext().plugins;
+  const { data } = useApmPluginContext().pluginsSetup;
 
   let currentRequestCheck;
 

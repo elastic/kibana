@@ -28,7 +28,6 @@ import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '../../context/apm_plugin/apm_plugin_context';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { BreadcrumbsContextProvider } from '../../context/breadcrumbs/context';
 import { LicenseProvider } from '../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';

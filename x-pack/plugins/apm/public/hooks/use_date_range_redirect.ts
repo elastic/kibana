@@ -15,14 +15,14 @@ export function useDateRangeRedirect() {
   const location = useLocation();
   const query = qs.parse(location.search);
 
-  const { core, plugins } = useApmPluginContext();
+  const { core, pluginsSetup } = useApmPluginContext();
 
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
 
   const timePickerSharedState =
-    plugins.data.query.timefilter.timefilter.getTime();
+    pluginsSetup.data.query.timefilter.timefilter.getTime();
 
   const isDateRangeSet = 'rangeFrom' in query && 'rangeTo' in query;
 

@@ -107,7 +107,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   ) {
     this.initializerContext = initializerContext;
   }
-  public setup(coreSetup, pluginsSetup) {
+  public setup(coreSetup: CoreSetup, pluginsSetup: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
 
     if (pluginsSetup.home) {
@@ -275,7 +275,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'backends', title: dependenciesTitle, path: '/backends' },
       ],
 
-      async mount(appMountParameters) {
+      async mount(appMountParameters: AppMountParameters) {
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
@@ -319,7 +319,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         'web performance',
         'web perf',
       ],
-      async mount(appMountParameters) {
+      async mount(appMountParameters: AppMountParameters) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application/uxApp'),
@@ -340,7 +340,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     return {};
   }
 
-  public start(_coreStart, pluginsStart) {
+  public start(_coreStart: CoreStart, pluginsStart: ApmPluginStartDeps) {
     const { fleet } = pluginsStart;
     if (fleet) {
       const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();

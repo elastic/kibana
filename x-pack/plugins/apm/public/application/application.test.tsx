@@ -46,8 +46,7 @@ describe('renderApp', () => {
   });
 
   it('renders the app', () => {
-    const { core, config, observabilityRuleTypeRegistry } =
-      mockApmPluginContextValue;
+    const { core, config } = mockApmPluginContextValue;
 
     const pluginsSetup = {
       licensing: { license$: new Observable() },
@@ -121,6 +120,7 @@ describe('renderApp', () => {
 
     act(() => {
       unmount = renderApp({
+        appMountParameters,
         config,
         coreStart: core as any,
         pluginsSetup,

@@ -17,7 +17,7 @@ import { useServiceName } from '../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
 
 export function ApmHeaderActionMenu() {
-  const { core, plugins } = useApmPluginContext();
+  const { core, pluginsSetup } = useApmPluginContext();
   const serviceName = useServiceName();
   const { search } = window.location;
   const { application, http } = core;
@@ -29,7 +29,7 @@ export function ApmHeaderActionMenu() {
     canReadAlerts,
     canSaveAlerts,
     canReadAnomalies,
-  } = getAlertingCapabilities(plugins, capabilities);
+  } = getAlertingCapabilities(pluginsSetup, capabilities);
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
 
   function apmHref(path: string) {
