@@ -33,7 +33,7 @@ interface Props {
 function getOptions(actions: FieldCopyAction[]) {
   return actions.map((action) => ({
     id: action,
-    label: action,
+    label: action === FieldCopyAction.Copy ? 'Copy field name' : 'Rename field',
   }));
 }
 
@@ -50,11 +50,6 @@ export const PipelinesCsvUploader: FC<Props> = ({
   const { services } = useKibana();
 
   const maxFileSize = services.fileUpload.getMaxBytesFormatted();
-
-  const selectedAction = [];
-  if (action) {
-    selectedAction.push({ value: action, label: action });
-  }
 
   const options = getOptions(actionOptions);
 

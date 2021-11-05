@@ -17,14 +17,22 @@ export const Instructions: FC = () => {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.ingestPipelines.createFromCsv.instructions.link"
-                defaultMessage="Map your CSV into a starter ingest pipeline. Reference&nbsp;{templateLink} for more information."
+                id="xpack.ingestPipelines.createFromCsv.instructions"
+                defaultMessage="Use a CSV file to define how to map your custom data source to 
+                Elastic Common Schema (ECS). For each {source} , you can specify a {destination}
+                and format adjustments. Refer to the &nbsp;{templateLink} for the supported headers."
                 values={{
                   templateLink: (
                     <EuiLink href="https://ela.st/sample-pipeline-mapping" target="_blank">
-                      sample mapping templates
+                      sample mappings
                     </EuiLink>
                   ),
+                  source: (
+                    <EuiCode>source_field</EuiCode>
+                  ),
+                  destination: (
+                    <EuiCode>destination_field</EuiCode>
+                  )
                 }}
               />
             </p>
@@ -32,18 +40,10 @@ export const Instructions: FC = () => {
           <EuiSpacer size="m" />
           <EuiText>
             <p>
-              Two headers are required: <EuiCode>source_field</EuiCode> and{' '}
-              <EuiCode>destination_field</EuiCode>, but please see the linked template for more
-              header information.
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiText>
-            <p>
-              Please note that this tool generates starter pipelines. It will only perform field{' '}
-              <strong>rename</strong> and <strong>copy</strong> operations, as well as some field
-              format adjustments. It&apos;s up to you to integrate them in a complete pipeline that
-              ingests and outputs the data however you need.
+              <FormattedMessage
+                id="xpack.ingestPipelines.createFromCsv.instructions.continued"
+                defaultMessage="Add processors to the resulting starter pipeline to perform additional data transformations."
+              />
             </p>
           </EuiText>
           <EuiSpacer size="m" />
