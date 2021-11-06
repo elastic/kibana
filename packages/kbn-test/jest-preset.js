@@ -88,8 +88,8 @@ module.exports = {
   // A map from regular expressions to paths to transformers
   transform: {
     // '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
-    '^.+\\.(js)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
-    '^.+\\.(tsx?)$': [
+    '^.+\\.(jsxx)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
+    '^.+\\.(js|tsx?)$': [
       // '@swc/jest',
       // {
       //   jsc: {
@@ -102,6 +102,7 @@ module.exports = {
 
       '@swc-node/jest',
       {
+        esModuleInterop: false,
         dynamicImport: true,
         jsx: true,
       },
