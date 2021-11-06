@@ -123,6 +123,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [visibleColumns, setVisibleColumns]
   );
 
+  const ecsMappingColumns = useMemo(
+    () => keys(get('actionDetails._source.data.ecs_mapping', actionDetails) || {}),
+    [actionDetails]
+  );
+
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
     () =>
       // eslint-disable-next-line react/display-name
@@ -140,9 +145,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
         }
 
+        if (ecsMappingColumns.includes(columnId)) {
+          const ecsFieldValue = get(columnId, data[rowIndex % pagination.pageSize]?._source);
+
+          return ecsFieldValue ?? '-';
+        }
+
         return !isEmpty(value) ? value : '-';
       },
-    [getFleetAppUrl, pagination.pageSize]
+    [ecsMappingColumns, getFleetAppUrl, pagination.pageSize]
   );
 
   const tableSorting = useMemo(
@@ -218,50 +229,63 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       return;
     }
 
-    const newColumns = keys(allResultsData?.edges[0]?.fields)
-      .sort()
-      .reduce(
-        (acc, fieldName) => {
-          const { data, seen } = acc;
-          if (fieldName === 'agent.name') {
-            data.push({
-              id: fieldName,
-              displayAsText: i18n.translate(
-                'xpack.osquery.liveQueryResults.table.agentColumnTitle',
-                {
-                  defaultMessage: 'agent',
-                }
-              ),
-              defaultSortDirection: Direction.asc,
-            });
+    const fields = [
+      'agent.name',
+      ...ecsMappingColumns.sort(),
+      ...keys(allResultsData?.edges[0]?.fields || {}).sort(),
+    ];
 
-            return acc;
-          }
-
-          if (fieldName.startsWith('osquery.')) {
-            const displayAsText = fieldName.split('.')[1];
-            if (!seen.has(displayAsText)) {
-              data.push({
-                id: fieldName,
-                displayAsText,
-                display: getHeaderDisplay(displayAsText),
-                defaultSortDirection: Direction.asc,
-              });
-              seen.add(displayAsText);
-            }
-            return acc;
-          }
+    const newColumns = fields.reduce(
+      (acc, fieldName) => {
+        const { data, seen } = acc;
+        if (fieldName === 'agent.name') {
+          data.push({
+            id: fieldName,
+            displayAsText: i18n.translate('xpack.osquery.liveQueryResults.table.agentColumnTitle', {
+              defaultMessage: 'agent',
+            }),
+            defaultSortDirection: Direction.asc,
+          });
 
           return acc;
-        },
-        { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
-      ).data;
+        }
+
+        if (ecsMappingColumns.includes(fieldName)) {
+          if (!seen.has(fieldName)) {
+            data.push({
+              id: fieldName,
+              displayAsText: fieldName,
+              defaultSortDirection: Direction.asc,
+            });
+            seen.add(fieldName);
+          }
+          return acc;
+        }
+
+        if (fieldName.startsWith('osquery.')) {
+          const displayAsText = fieldName.split('.')[1];
+          if (!seen.has(displayAsText)) {
+            data.push({
+              id: fieldName,
+              displayAsText,
+              display: getHeaderDisplay(displayAsText),
+              defaultSortDirection: Direction.asc,
+            });
+            seen.add(displayAsText);
+          }
+          return acc;
+        }
+
+        return acc;
+      },
+      { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
+    ).data;
 
     setColumns((currentColumns) =>
       !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
     );
     setVisibleColumns(map('id', newColumns));
-  }, [allResultsData?.edges, getHeaderDisplay]);
+  }, [allResultsData?.edges, ecsMappingColumns, getHeaderDisplay]);
 
   const toolbarVisibility = useMemo(
     () => ({

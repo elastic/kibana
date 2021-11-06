@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, pickBy } from 'lodash';
+import { isEmpty, filter, pickBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN_ID } from '../../../common';
@@ -76,17 +76,20 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       const updatedSavedQuerySO = await savedObjectsClient.update(
         savedQuerySavedObjectType,
         request.params.id,
-        pickBy({
-          id,
-          description,
-          platform,
-          query,
-          version,
-          interval,
-          ecs_mapping: convertECSMappingToArray(ecs_mapping),
-          updated_by: currentUser,
-          updated_at: new Date().toISOString(),
-        }),
+        pickBy(
+          {
+            id,
+            description,
+            platform,
+            query,
+            version,
+            interval,
+            ecs_mapping: convertECSMappingToArray(ecs_mapping),
+            updated_by: currentUser,
+            updated_at: new Date().toISOString(),
+          },
+          (value) => !isEmpty(value)
+        ),
         {
           refresh: 'wait_for',
         }
