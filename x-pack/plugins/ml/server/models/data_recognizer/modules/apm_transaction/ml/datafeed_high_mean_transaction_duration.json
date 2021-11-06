@@ -13,7 +13,7 @@
   },
   "datafeed_config": {
     "indices_options": {
-      "ignore_unavailable": true,
-    },
+      "ignore_unavailable": true
+    }
   }  
 }
