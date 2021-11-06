@@ -74,6 +74,14 @@ export const BootstrapCommand: ICommand = {
       });
     }
 
+    // build packages
+    const packageStartTime = Date.now();
+    await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
+    timings.push({
+      id: 'build packages',
+      ms: Date.now() - packageStartTime,
+    });
+
     if (process.platform === 'darwin' && process.arch === 'arm64') {
       const patchNativeModulesStartTime = Date.now();
       await patchNativeModulesForArmMacs(log, kibanaProjectPath);
@@ -82,14 +90,6 @@ export const BootstrapCommand: ICommand = {
         ms: Date.now() - patchNativeModulesStartTime,
       });
     }
-
-    // build packages
-    const packageStartTime = Date.now();
-    await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
-    timings.push({
-      id: 'build packages',
-      ms: Date.now() - packageStartTime,
-    });
 
     // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {
