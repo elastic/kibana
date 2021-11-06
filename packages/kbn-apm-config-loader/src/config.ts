@@ -216,10 +216,11 @@ export class ApmConfiguration {
     return {
       globalLabels: {
         branch: process.env.GIT_BRANCH || '',
-        targetBranch: process.env.PR_TARGET_BRANCH || '',
-        ciBuildNumber: process.env.BUILD_NUMBER || '',
-        isPr: process.env.GITHUB_PR_NUMBER ? true : false,
-        prId: process.env.GITHUB_PR_NUMBER || '',
+        targetBranch: process.env.GITHUB_PR_TARGET_BRANCH || '',
+        ciBuildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
+        ciBuildId: process.env.BUILDKITE_BUILD_ID || '',
+        isPr: process.env.BUILDKITE_PULL_REQUEST ? true : false,
+        prId: process.env.BUILDKITE_PULL_REQUEST || '',
       },
     };
   }
