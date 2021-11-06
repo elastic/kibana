@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
   farequoteDataViewTestData,
+  farequoteKQLFiltersSearchTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
@@ -76,6 +77,13 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
 
+      if (testData.expected.filters) {
+        await ml.testExecution.logTestStep('displays filters in filter bar correctly');
+        for (const filter of testData.expected.filters!) {
+          await ml.dataVisualizerIndexBased.assertFilterBarFilterContent(filter);
+        }
+      }
+
       await ml.testExecution.logTestStep(
         'displays details for metric fields and non-metric fields correctly'
       );
@@ -96,7 +104,9 @@ export default function ({ getService }: FtrProviderContext) {
           fieldRow.fieldName!,
           fieldRow.docCountFormatted,
           fieldRow.exampleCount,
-          fieldRow.viewableInLens
+          fieldRow.viewableInLens,
+          false,
+          fieldRow.exampleContent
         );
       }
 
@@ -150,6 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -182,6 +193,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       runTests(farequoteLuceneSearchTestData);
+
+      it(`${farequoteKQLFiltersSearchTestData.suiteTitle} loads the data visualizer selector page`, async () => {
+        // Start navigation from the base of the ML app.
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToDataVisualizer();
+      });
+
+      runTests(farequoteKQLFiltersSearchTestData);
     });
 
     describe('with module_sample_logs ', function () {

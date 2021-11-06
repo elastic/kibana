@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
-
 import { isEmpty } from 'lodash/fp';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -32,6 +31,7 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { useCreateFieldButton } from '../../../timelines/components/create_field_button';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
@@ -175,6 +175,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
+  const createFieldComponent = useCreateFieldButton(scopeId, id);
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -218,6 +220,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               trailingControlColumns,
               type: 'embedded',
               unit,
+              createFieldComponent,
             })
           ) : (
             <EventsViewer
