@@ -8,10 +8,11 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import validateArgWrapper from './validate_arg';
 
 // Only applies to already resolved arguments
 export default function indexArguments(functionDef, orderedArgs) {
-  const validateArg = require('./validate_arg')(functionDef);
+  const validateArg = validateArgWrapper(functionDef);
 
   // This almost certainly is not required
   const allowedLength = functionDef.extended
