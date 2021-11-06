@@ -4,7 +4,7 @@ When debugging an issue with the APM UI it can be very helpful to see the exact 
 To enable debugging of Elasticsearch queries in APM UI do the following:
 
 1. Go to "Stack Management" 
-2. Select "Advanced Settings"
+2. Under "Kibana" on the left-hand side, select "Advanced Settings"
 3. Search for "Observability"
 4. Enable "Inspect ES queries" setting
 5. Click "Save"
