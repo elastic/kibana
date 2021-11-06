@@ -10,9 +10,10 @@
 import _ from 'lodash';
 
 import indexArguments from '../../handlers/lib/index_arguments';
+import tlConfigGenerator from '../fixtures/tl_config';
 
 export default function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
-  const tlConfig = _.merge(require('../fixtures/tl_config')(), tlConfigOverrides);
+  const tlConfig = _.merge(tlConfigGenerator(), tlConfigOverrides);
 
   return Promise.all(args).then(function (args) {
     args.byName = indexArguments(fnDef, args);

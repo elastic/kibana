@@ -10,11 +10,12 @@ import moment from 'moment';
 import { of } from 'rxjs';
 import timelionDefaults from '../../lib/get_namespaced_settings';
 import esResponse from './es_response';
+import loadFunctions from '../../lib/load_functions';
+import tlConfigGenerator from '../../handlers/lib/tl_config';
 
 export default function () {
-  const functions = require('../../lib/load_functions')('series_functions');
-
-  const tlConfig = require('../../handlers/lib/tl_config.js')({
+  const functions = loadFunctions('series_functions');
+  const tlConfig = tlConfigGenerator({
     getFunction: (name) => {
       if (!functions[name]) throw new Error('No such function: ' + name);
       return functions[name];

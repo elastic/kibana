@@ -11,11 +11,12 @@ import fn from './sum';
 import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
+import seriesListGenerator from './fixtures/series_list';
 
 describe('sum.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list.js')();
+    seriesList = seriesListGenerator();
   });
 
   it('it adds a number', () => {

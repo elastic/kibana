@@ -21,7 +21,8 @@ import { ANALYTICS_TITLE } from '../../analytics';
 import { API_LOGS_TITLE } from '../../api_logs';
 import { CRAWLER_TITLE } from '../../crawler';
 
-import { LogRetentionLogic, LogRetentionOptions, renderLogRetentionDate } from '../index';
+import { LogRetentionLogic, renderLogRetentionDate } from '../index';
+import { LogRetentionOptions } from '../types';
 
 const TITLE_MAP = {
   [LogRetentionOptions.Analytics]: ANALYTICS_TITLE,

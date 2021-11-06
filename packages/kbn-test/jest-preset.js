@@ -88,7 +88,8 @@ module.exports = {
   // A map from regular expressions to paths to transformers
   transform: {
     // '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
-    '^.+\\.(jsx?|tsx?)$': [
+    '^.+\\.(js)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
+    '^.+\\.(tsx?)$': [
       // '@swc/jest',
       // {
       //   jsc: {
@@ -100,7 +101,42 @@ module.exports = {
       // },
 
       '@swc-node/jest',
-      {},
+      {
+        dynamicImport: true,
+        jsx: true,
+      },
+    ],
+    '^.+\\.(disabledfornowjsx?)$': [
+      // '@swc/jest',
+      // {
+      //   jsc: {
+      //     parser: {
+      //       syntax: 'typescript',
+      //       tsx: true,
+      //     },
+      //   },
+      // },
+
+      '@swc-node/jest',
+      {
+        dynamicImport: true,
+        jsx: true,
+        swc: {
+          jsc: {
+            target: 'es2018',
+            parser: {
+              syntax: 'ecmascript',
+              jsx: true,
+              dynamicImport: true,
+            },
+            transform: {
+              hidden: {
+                jest: true,
+              },
+            },
+          },
+        },
+      },
     ],
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
@@ -125,5 +161,5 @@ module.exports = {
   ],
 
   // A custom resolver to preserve symlinks by default
-  // resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+  resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
 };
