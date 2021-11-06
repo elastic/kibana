@@ -37,7 +37,6 @@ export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
 export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io
 export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
 
-
 if is_pr; then
   if [[ "${GITHUB_PR_LABELS:-}" == *"ci:collect-apm"* ]]; then
     export ELASTIC_APM_ACTIVE=true
