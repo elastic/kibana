@@ -10,5 +10,10 @@
         { "exists": { "field": "transaction.duration.us" } }
       ]
     }
-  }
+  },
+  "datafeed_config": {
+    "indices_options": {
+      "ignore_unavailable": true,
+    },
+  }  
 }
