@@ -60380,7 +60380,7 @@ async function patchNativeModulesForArmMacs(log, kibanaProjectPath) {
   }
 
   if (!fs__WEBPACK_IMPORTED_MODULE_1___default.a.existsSync(re2NativeDist)) {
-    log.info('"Running build script for re2');
+    log.info('Running build script for re2');
     await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('npm', ['run', 'rebuild'], {
       cwd: re2Dir
     });
