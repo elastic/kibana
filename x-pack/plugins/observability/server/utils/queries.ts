@@ -8,6 +8,14 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
+export function termQuery(field: string, value: string | undefined) {
+  if (!value) {
+    return [];
+  }
+
+  return [{ term: { [field]: value } }];
+}
+
 export function rangeQuery(
   start?: number,
   end?: number,
