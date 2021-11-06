@@ -102,7 +102,6 @@ module.exports = {
 
       '@swc-node/jest',
       {
-        esModuleInterop: false,
         dynamicImport: true,
         jsx: true,
       },
