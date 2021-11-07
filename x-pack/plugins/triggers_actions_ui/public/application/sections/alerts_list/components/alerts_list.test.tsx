@@ -633,6 +633,13 @@ describe('alerts_list with show only capability', () => {
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
   });
+
+  it('renders table of alerts with actions menu collapsedItemActions', async () => {
+    await setup();
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="collapsedItemActions"]')).toHaveLength(2);
+  });
 });
 
 describe('alerts_list with disabled itmes', () => {
