@@ -50,25 +50,23 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
-const byReasonSchema: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_per_day'] =
-  {
-    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
-    DYNAMIC_KEY: { type: 'long' },
-    read: { type: 'long' },
-    decrypt: { type: 'long' },
-    license: { type: 'long' },
-    unknown: { type: 'long' },
-  };
+const byReasonSchema: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_per_day'] = {
+  // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+  DYNAMIC_KEY: { type: 'long' },
+  read: { type: 'long' },
+  decrypt: { type: 'long' },
+  license: { type: 'long' },
+  unknown: { type: 'long' },
+};
 
-const byReasonSchemaByType: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] =
-  {
-    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
-    DYNAMIC_KEY: byTypeSchema,
-    read: byTypeSchema,
-    decrypt: byTypeSchema,
-    license: byTypeSchema,
-    unknown: byTypeSchema,
-  };
+const byReasonSchemaByType: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] = {
+  // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+  DYNAMIC_KEY: byTypeSchema,
+  read: byTypeSchema,
+  decrypt: byTypeSchema,
+  license: byTypeSchema,
+  unknown: byTypeSchema,
+};
 
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -95,11 +93,21 @@ export function createAlertsUsageCollector(
           count_active_total: 0,
           count_disabled_total: 0,
           throttle_time: {
+            min: '0s',
+            avg: '0s',
+            max: '0s',
+          },
+          schedule_time: {
+            min: '0s',
+            avg: '0s',
+            max: '0s',
+          },
+          throttle_time_number: {
             min: 0,
             avg: 0,
             max: 0,
           },
-          schedule_time: {
+          schedule_time_number: {
             min: 0,
             avg: 0,
             max: 0,
@@ -127,11 +135,21 @@ export function createAlertsUsageCollector(
       count_active_total: { type: 'long' },
       count_disabled_total: { type: 'long' },
       throttle_time: {
+        min: { type: 'keyword' },
+        avg: { type: 'keyword' },
+        max: { type: 'keyword' },
+      },
+      schedule_time: {
+        min: { type: 'keyword' },
+        avg: { type: 'keyword' },
+        max: { type: 'keyword' },
+      },
+      throttle_time_number: {
         min: { type: 'long' },
         avg: { type: 'float' },
         max: { type: 'long' },
       },
-      schedule_time: {
+      schedule_time_number: {
         min: { type: 'long' },
         avg: { type: 'float' },
         max: { type: 'long' },

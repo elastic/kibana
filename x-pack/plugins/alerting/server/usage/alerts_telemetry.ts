@@ -107,6 +107,8 @@ export async function getTotalCountAggregations(
     | 'count_by_type'
     | 'throttle_time'
     | 'schedule_time'
+    | 'throttle_time_number'
+    | 'schedule_time_number'
     | 'connectors_per_alert'
     | 'count_rules_namespaces'
   >
@@ -253,11 +255,21 @@ export async function getTotalCountAggregations(
       {}
     ),
     throttle_time: {
+      min: `${aggregations.min_throttle_time.value}s`,
+      avg: `${aggregations.avg_throttle_time.value}s`,
+      max: `${aggregations.max_throttle_time.value}s`,
+    },
+    schedule_time: {
+      min: `${aggregations.min_interval_time.value}s`,
+      avg: `${aggregations.avg_interval_time.value}s`,
+      max: `${aggregations.max_interval_time.value}s`,
+    },
+    throttle_time_number: {
       min: aggregations.min_throttle_time.value,
       avg: aggregations.avg_throttle_time.value,
       max: aggregations.max_throttle_time.value,
     },
-    schedule_time: {
+    schedule_time_number: {
       min: aggregations.min_interval_time.value,
       avg: aggregations.avg_interval_time.value,
       max: aggregations.max_interval_time.value,
@@ -385,8 +397,9 @@ export async function getExecutionsPerDayCount(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]:
-          executionsAggregations.byRuleTypeId.value.ruleTypes[key],
+        [replaceFirstAndLastDotSymbols(key)]: executionsAggregations.byRuleTypeId.value.ruleTypes[
+          key
+        ],
       }),
       {}
     ),
@@ -426,8 +439,8 @@ export async function getExecutionsPerDayCount(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]:
-          executionFailuresAggregations.failuresByReason.value.reasons[key],
+        [replaceFirstAndLastDotSymbols(key)]: executionFailuresAggregations.failuresByReason.value
+          .reasons[key],
       }),
       {}
     ),
