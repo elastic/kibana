@@ -397,9 +397,8 @@ export async function getExecutionsPerDayCount(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: executionsAggregations.byRuleTypeId.value.ruleTypes[
-          key
-        ],
+        [replaceFirstAndLastDotSymbols(key)]:
+          executionsAggregations.byRuleTypeId.value.ruleTypes[key],
       }),
       {}
     ),
@@ -439,8 +438,8 @@ export async function getExecutionsPerDayCount(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: executionFailuresAggregations.failuresByReason.value
-          .reasons[key],
+        [replaceFirstAndLastDotSymbols(key)]:
+          executionFailuresAggregations.failuresByReason.value.reasons[key],
       }),
       {}
     ),
