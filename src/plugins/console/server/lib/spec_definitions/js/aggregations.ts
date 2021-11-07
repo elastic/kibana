@@ -79,6 +79,17 @@ const rules = {
         },
       },
     },
+    t_test: {
+      __template: {
+        a: {
+          field: 0
+        },
+        b: {
+          field: 0
+        },
+        type: { __one_of: ['paired', 'homoscedastic', 'heteroscedastic'] }
+      }
+    },
     adjacency_matrix: {
       filters: {},
     },
