@@ -8926,15 +8926,6 @@ const BootstrapCommand = {
         id: 'force install dependencies',
         ms: Date.now() - forceInstallStartTime
       });
-    }
-
-    if (process.platform === 'darwin' && process.arch === 'arm64') {
-      const patchNativeModulesStartTime = Date.now();
-      await Object(_utils_patch_native_modules_for_arm_macs__WEBPACK_IMPORTED_MODULE_9__["patchNativeModulesForArmMacs"])(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"], kibanaProjectPath);
-      timings.push({
-        id: 'patch native modudles for arm macs',
-        ms: Date.now() - patchNativeModulesStartTime
-      });
     } // build packages
 
 
@@ -8943,7 +8934,17 @@ const BootstrapCommand = {
     timings.push({
       id: 'build packages',
       ms: Date.now() - packageStartTime
-    }); // Install monorepo npm dependencies outside of the Bazel managed ones
+    });
+
+    if (process.platform === 'darwin' && process.arch === 'arm64') {
+      const patchNativeModulesStartTime = Date.now();
+      await Object(_utils_patch_native_modules_for_arm_macs__WEBPACK_IMPORTED_MODULE_9__["patchNativeModulesForArmMacs"])(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"], kibanaProjectPath);
+      timings.push({
+        id: 'patch native modudles for arm macs',
+        ms: Date.now() - patchNativeModulesStartTime
+      });
+    } // Install monorepo npm dependencies outside of the Bazel managed ones
+
 
     for (const batch of batchedNonBazelProjects) {
       for (const project of batch) {
