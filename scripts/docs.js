@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/docs/cli');
+require('../src/dev/run_build_docs_cli').runBuildDocsCli();
