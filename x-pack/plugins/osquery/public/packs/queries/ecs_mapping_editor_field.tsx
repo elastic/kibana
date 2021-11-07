@@ -92,6 +92,7 @@ const typeMap = {
 };
 
 const StyledEuiSuperSelect = styled(EuiSuperSelect)`
+  min-width: 70px;
   border-radius: 6px 0 0 6px;
 
   .euiIcon {
@@ -330,6 +331,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   euiFieldProps = {},
   idAria,
 }) => {
+  const inputRef = useRef<HTMLInputElement>();
   const { setValue } = resultValue;
   const { setValue: setType } = resultType;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(resultValue);
@@ -373,9 +375,10 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     (newType) => {
       if (newType !== resultType.value) {
         setType(newType);
+        setValue(newType === 'value' && euiFieldProps.singleSelection === false ? [] : '');
       }
     },
-    [setType, resultType.value]
+    [resultType.value, setType, setValue, euiFieldProps.singleSelection]
   );
 
   const handleCreateOption = useCallback(
@@ -387,6 +390,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         } else {
           setValue([newOption]);
         }
+        inputRef.current?.blur();
       } else {
         setValue(newOption);
       }
@@ -440,6 +444,10 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         <EuiFlexItem grow={false}>{Prepend}</EuiFlexItem>
         <EuiFlexItem>
           <ResultComboBox
+            // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+            inputRef={(ref: HTMLInputElement) => {
+              inputRef.current = ref;
+            }}
             fullWidth
             selectedOptions={selectedOptions}
             onChange={handleChange}
