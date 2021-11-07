@@ -68,8 +68,8 @@
       "@testing-library/jest-dom",
       "resize-observer-polyfill",
       "@emotion/react/types/css-prop"
-    ]
-    // "disableReferencedProjectLoad": true,
-    // "disableSolutionSearching": true
+    ],
+    "disableReferencedProjectLoad": true,
+    "disableSolutionSearching": true
   }
 }

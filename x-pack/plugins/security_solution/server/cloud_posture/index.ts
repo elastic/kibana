@@ -19,6 +19,9 @@ const data = [
   },
 ];
 
+// /api/csp/logs -> [runId...]
+// /api/csp/findings -> [].filter(runId)
+
 export const createCSPIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
@@ -30,6 +33,27 @@ export const createCSPIndexRoute = (router: SecuritySolutionPluginRouter) => {
     },
     async (context, _, response) => {
       try {
+        // const esClient = context.core.elasticsearch.client.asCurrentUser;
+        // const agentLogs = esClient.search<unknown>(
+        //   {
+        //     index: 'agent_logs*',
+        //     size: 10000,
+        //     from: 0,
+        //     body: {
+        //       query: {
+        //         bool: {
+        //           filter: [
+        //             { term: { 'event_status.keyword': 'end' } },
+        //             { range: { timestamp: { gte: 'now-1d' } } },
+        //             { term: { 'compliance.keyword': 'k8s cis' } },
+        //           ],
+        //         },
+        //       },
+        //     },
+        //   },
+        //   { ignore: [404] }
+        // );
+        // console.log({ data2 });
         return response.ok({ body: data });
       } catch (err) {
         return response.notFound({ body: { message: 'err' } });
