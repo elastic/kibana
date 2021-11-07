@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -14,7 +13,11 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
@@ -61,22 +64,6 @@ function searchLatency({
     searchAggregatedTransactions,
   });
 
-  const filter: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
-    ...environmentQuery(environment),
-    ...kqlQuery(kuery),
-  ];
-
-  if (transactionName) {
-    filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
-  }
-
-  if (transactionType) {
-    filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
-
   const transactionDurationField = getTransactionDurationFieldForTransactions(
     searchAggregatedTransactions
   );
@@ -87,7 +74,21 @@ function searchLatency({
     },
     body: {
       size: 0,
-      query: { bool: { filter } },
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...getDocumentTypeFilterForTransactions(
+              searchAggregatedTransactions
+            ),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+          ],
+        },
+      },
       aggs: {
         latencyTimeseries: {
           date_histogram: {
