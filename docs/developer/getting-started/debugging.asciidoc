@@ -53,7 +53,7 @@ APM
 https://www.elastic.co/guide/en/apm/agent/rum-js/current/index.html[Real
 User Monitoring agent] is not available in the {kib} distributables,
 however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to
-`true` and `ELASTIC_APM_CONTEXT_PROPAGATION_ONLY` to `false`. flags
+`true`. flags
 
 ....
 ELASTIC_APM_ACTIVE=true yarn start
