@@ -26,12 +26,25 @@ import {
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { Partition, ScaleType, Chart, Settings, BarSeries } from '@elastic/charts';
 import styled from 'styled-components';
+import { useQuery } from 'react-query';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useKibana } from '../../../common/lib/kibana';
 import { ChartList } from './chart_list';
 
-export const CloudPostureScoreChart = () => <Pie2 />;
+const useCloudPostureScore = () => {
+  const { http } = useKibana().services;
+  console.log({ http });
+  return useQuery(['csp_score'], () => http.get('/api/csp/score'));
+};
+
+export const CloudPostureScoreChart = () => {
+  const foo = useCloudPostureScore();
+  console.log({ foo });
+  if (foo.isLoading) return <h1>LOADING</h1>;
+  return <PieChart data={foo.data} />;
+  // return <Pie2 data={foo.data} />;
+};
 
 export const CloudPostureScoreChart2 = () => {
   const euiChartTheme = EUI_CHARTS_THEME_LIGHT;
@@ -66,21 +79,14 @@ export const CloudPostureScoreChart2 = () => {
     </Chart>
   );
 };
-const slices = [
-  {
-    value: 78,
-    color: '#54B399',
-  },
-  { value: 22, color: '#E7664C' },
-];
 
-const Pie2 = () => {
+const Pie2 = ({ data }: any) => {
   const radius = 50;
   const circ = 2 * Math.PI * radius;
 
   return (
     <svg width="100%" viewBox="0 0 623 150">
-      {slices.map((slice, i) => {
+      {data.map((slice, i) => {
         const percentage = slice.value / 100;
         return (
           <circle
@@ -102,7 +108,7 @@ const Pie2 = () => {
     </svg>
   );
 };
-const PieChart = () => {
+const PieChart = ({ data }: any) => {
   const ref = React.useRef<SVGCircleElement>();
   const cref = React.useRef<SVGCircleElement>();
   const [length, setLength] = React.useState(0);
@@ -115,7 +121,7 @@ const PieChart = () => {
     setSize(cref.current.getBoundingClientRect());
   }, []);
 
-  const foo = slices.map((slice) => ({
+  const foo = data.map((slice) => ({
     ...slice,
     v: (slice.value / 100) * length,
   }));

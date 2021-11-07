@@ -130,6 +130,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
+    // const f = core.elasticsearch;
+
     const { pluginContext, config, logger, appClientFactory } = this;
     const experimentalFeatures = config.experimentalFeatures;
     this.kibanaIndex = core.savedObjects.getKibanaIndex();

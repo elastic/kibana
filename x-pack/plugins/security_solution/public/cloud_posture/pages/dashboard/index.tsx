@@ -16,8 +16,6 @@ import {
   EuiTitle,
   EuiButtonEmpty,
   EuiFlexItem,
-  EuiStat,
-  EuiPanel,
   EuiCard,
   EuiSpacer,
   EuiFlexGroup,

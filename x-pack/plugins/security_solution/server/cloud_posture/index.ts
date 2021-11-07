@@ -6,13 +6,23 @@
  */
 import type { SecuritySolutionPluginRouter } from '../types';
 
-// /csp/rules
-// /csp/findings
+const data = [
+  {
+    category: 'Passed',
+    value: 78,
+    color: '#54B399',
+  },
+  {
+    category: 'Failed',
+    value: 22,
+    color: '#E7664C',
+  },
+];
 
 export const createCSPIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
-      path: '/api/csp',
+      path: '/api/csp/score',
       validate: false,
       // options: {
       //   tags: ['access:securitySolution'],
@@ -20,7 +30,7 @@ export const createCSPIndexRoute = (router: SecuritySolutionPluginRouter) => {
     },
     async (context, _, response) => {
       try {
-        return response.ok({ body: { acknowledged: true } });
+        return response.ok({ body: data });
       } catch (err) {
         return response.notFound({ body: { message: 'err' } });
       }
