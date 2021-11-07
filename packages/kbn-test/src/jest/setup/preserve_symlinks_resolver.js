@@ -13,18 +13,29 @@
 
 const resolve = require('resolve');
 
+const cache = new Map();
+
 module.exports = (request, options) => {
+  const cacheKey = request.startsWith('.') ? options.basedir + request : request;
+
+  let r = cache.get(cacheKey);
+  if (r !== undefined) {
+    return r;
+  }
+
   try {
-    return resolve.sync(request, {
+    r = resolve.sync(request, {
       basedir: options.basedir,
       extensions: options.extensions,
       preserveSymlinks: true,
     });
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-      return options.defaultResolver(request, options);
+      r = options.defaultResolver(request, options);
+    } else {
+      throw error;
     }
-
-    throw error;
   }
+  cache.set(cacheKey, r);
+  return r;
 };
