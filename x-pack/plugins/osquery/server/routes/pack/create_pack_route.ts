@@ -44,7 +44,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     schema.string(),
                     schema.object({
                       field: schema.maybe(schema.string()),
-                      value: schema.maybe(schema.string()),
+                      value: schema.maybe(
+                        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+                      ),
                     })
                   )
                 ),

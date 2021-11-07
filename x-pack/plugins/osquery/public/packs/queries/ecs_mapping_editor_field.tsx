@@ -6,7 +6,18 @@
  */
 
 import { produce } from 'immer';
-import { each, isEmpty, find, orderBy, sortedUniqBy, isArray, map, reduce, get } from 'lodash';
+import {
+  castArray,
+  each,
+  isEmpty,
+  find,
+  orderBy,
+  sortedUniqBy,
+  isArray,
+  map,
+  reduce,
+  get,
+} from 'lodash';
 import React, {
   forwardRef,
   useCallback,
@@ -308,7 +319,7 @@ const EMPTY_ARRAY: EuiComboBoxOptionOption[] = [];
 
 interface OsqueryColumnFieldProps {
   resultType: FieldHook<string>;
-  resultValue: FieldHook<string>;
+  resultValue: FieldHook<string | string[]>;
   euiFieldProps: EuiComboBoxProps<OsquerySchemaOption>;
   idAria?: string;
 }
@@ -368,11 +379,19 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 
   const handleCreateOption = useCallback(
-    (newOption) => {
-      console.error('')
-      setValue(newOption);
+    (newOption: string) => {
+      if (euiFieldProps.singleSelection === false) {
+        setValue([newOption]);
+        if (resultValue.value.length) {
+          setValue([...castArray(resultValue.value), newOption]);
+        } else {
+          setValue([newOption]);
+        }
+      } else {
+        setValue(newOption);
+      }
     },
-    [setValue]
+    [euiFieldProps.singleSelection, resultValue.value, setValue]
   );
 
   const Prepend = useMemo(
@@ -395,6 +414,11 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   useEffect(() => {
     setSelected(() => {
       if (!resultValue.value.length) return [];
+
+      // Static array values
+      if (isArray(resultValue.value)) {
+        return resultValue.value.map((value) => ({ label: value }));
+      }
 
       const selectedOption = find(euiFieldProps?.options, ['label', resultValue.value]);
 
@@ -649,6 +673,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                 // @ts-expect-error update types
                 options: osquerySchemaOptions,
                 isDisabled,
+                // @ts-expect-error update types
                 singleSelection: !multipleValuesField.current ? { asPlainText: true } : false,
               }}
             />
