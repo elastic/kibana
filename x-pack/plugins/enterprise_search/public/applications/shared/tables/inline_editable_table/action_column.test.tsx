@@ -23,9 +23,10 @@ describe('ActionColumn', () => {
   const mockValues = {
     doesEditingItemValueContainEmptyProperty: false,
     editingItemId: 1,
-    fieldErrors: [],
+    fieldErrors: {},
     isEditing: false,
     isEditingUnsavedItem: false,
+    rowErrors: [],
   };
   const mockActions = {
     editExistingItem: jest.fn(),
@@ -91,6 +92,16 @@ describe('ActionColumn', () => {
         setMockValues({
           ...mockValues,
           fieldErrors: { foo: ['I am an error for foo'] },
+        });
+
+        const wrapper = shallow(<ActionColumn {...activelyEditingParams} />);
+        expect(subject(wrapper).prop('disabled')).toBe(true);
+      });
+
+      it('which is disabled if there are row errors', () => {
+        setMockValues({
+          ...mockValues,
+          rowErrors: ['I am a row error'],
         });
 
         const wrapper = shallow(<ActionColumn {...activelyEditingParams} />);

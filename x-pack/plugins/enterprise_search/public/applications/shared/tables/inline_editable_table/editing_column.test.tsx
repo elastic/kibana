@@ -28,8 +28,9 @@ describe('EditingColumn', () => {
   };
 
   const mockValues = {
-    fieldErrors: [],
     editingItemValue: { id: 1 },
+    fieldErrors: {},
+    rowErrors: [],
   };
 
   const mockActions = {
@@ -74,6 +75,22 @@ describe('EditingColumn', () => {
       expect(shallow(wrapper.find(EuiFormRow).prop('helpText') as any).html()).toContain(
         'I am an error for foo and should be displayed'
       );
+    });
+
+    it('renders as invalid', () => {
+      expect(wrapper.find(EuiFormRow).prop('isInvalid')).toBe(true);
+    });
+  });
+
+  describe('when there is a form error for this row', () => {
+    let wrapper: ShallowWrapper;
+    beforeEach(() => {
+      setMockValues({
+        ...mockValues,
+        rowErrors: ['I am an error for this row'],
+      });
+
+      wrapper = shallow(<EditingColumn {...requiredProps} />);
     });
 
     it('renders as invalid', () => {

@@ -31,6 +31,7 @@ describe('InlineEditableTableLogic', () => {
     editingItemValue: null,
     fieldErrors: {},
     isEditing: false,
+    rowErrors: [],
   };
 
   const SELECTORS = {
@@ -155,13 +156,25 @@ describe('InlineEditableTableLogic', () => {
     describe('setFieldErrors', () => {
       it('sets fieldErrors', () => {
         const fieldErrors = {
-          bar: 'I am an error',
+          foo: 'I am an error for foo',
         };
         const logic = mountLogic();
         logic.actions.setFieldErrors(fieldErrors);
         expect(logicValuesWithoutSelectors(logic)).toEqual({
           ...DEFAULT_VALUES,
           fieldErrors,
+        });
+      });
+    });
+
+    describe('setRowErrors', () => {
+      it('sets rowErrors', () => {
+        const rowErrors = ['I am a row error'];
+        const logic = mountLogic();
+        logic.actions.setRowErrors(rowErrors);
+        expect(logicValuesWithoutSelectors(logic)).toEqual({
+          ...DEFAULT_VALUES,
+          rowErrors,
         });
       });
     });

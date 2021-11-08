@@ -25,13 +25,13 @@ export const EditingColumn = <Item extends ItemWithAnID>({
   column,
   isLoading = false,
 }: EditingColumnProps<Item>) => {
-  const { fieldErrors, editingItemValue } = useValues(InlineEditableTableLogic);
+  const { fieldErrors, rowErrors, editingItemValue } = useValues(InlineEditableTableLogic);
   const { setEditingItemValue } = useActions(InlineEditableTableLogic);
 
   if (!editingItemValue) return null;
 
   const fieldError = fieldErrors[column.field];
-  const isInvalid = !!fieldError;
+  const isInvalid = !!fieldError || rowErrors.length > 0;
 
   return (
     <EuiFormRow

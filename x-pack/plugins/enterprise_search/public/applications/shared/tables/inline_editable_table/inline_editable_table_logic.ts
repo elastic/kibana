@@ -21,6 +21,7 @@ interface InlineEditableTableActions<Item extends ItemWithAnID> {
   saveNewItem(): void;
   setEditingItemValue(newValue: Item): { item: Item };
   setFieldErrors(fieldErrors: FormErrors): { fieldErrors: FormErrors };
+  setRowErrors(rowErrors: string[]): { rowErrors: string[] };
 }
 
 const generateEmptyItem = <Item extends ItemWithAnID>(
@@ -40,6 +41,7 @@ interface InlineEditableTableValues<Item extends ItemWithAnID> {
   editingItemId: Item['id'] | null; // editingItem is null when the user is editing a new but not saved item
   editingItemValue: Item | null;
   fieldErrors: FormErrors;
+  rowErrors: string[];
   isEditingUnsavedItem: boolean;
   doesEditingItemValueContainEmptyProperty: boolean;
 }
@@ -76,6 +78,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
     saveNewItem: true,
     setEditingItemValue: (newValue) => ({ item: newValue }),
     setFieldErrors: (fieldErrors) => ({ fieldErrors }),
+    setRowErrors: (rowErrors) => ({ rowErrors }),
   }),
   reducers: ({ props: { columns } }) => ({
     isEditing: [
@@ -109,6 +112,14 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
         doneEditing: () => ({}),
         setEditingItemValue: () => ({}),
         setFieldErrors: (_, { fieldErrors }) => fieldErrors,
+      },
+    ],
+    rowErrors: [
+      [],
+      {
+        doneEditing: () => [],
+        setEditingItemValue: () => [],
+        setRowErrors: (_, { rowErrors }) => rowErrors,
       },
     ],
   }),
