@@ -171,6 +171,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `Expected status to be '200', got '${failedTransactionsCorrelationsResponse.status}'`
       );
 
+      const fieldsToSample = new Set<string>();
+      if (failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations.length > 0) {
+        failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations.forEach((d) => {
+          fieldsToSample.add(d.fieldName);
+        });
+      }
+
+      const failedtransactionsFieldStats = await apmApiClient.readUser({
+        endpoint: 'POST /internal/apm/correlations/field_stats',
+        params: {
+          body: {
+            ...getOptions(),
+            fieldsToSample: [...fieldsToSample],
+          },
+        },
+      });
+
       const finalRawResponse: FailedTransactionsCorrelationsResponse = {
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
@@ -178,6 +195,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         errorHistogram: errorDistributionResponse.body?.overallHistogram,
         failedTransactionsCorrelations:
           failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations,
+        fieldStats: failedtransactionsFieldStats.body?.stats,
       };
 
       expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);

@@ -181,11 +181,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `Expected 1244 total doc count, got ${significantCorrelationsResponse.body?.totalDocCount}.`
         );
 
+        const fieldsToSample = new Set<string>();
+        if (significantCorrelationsResponse.body?.latencyCorrelations.length > 0) {
+          significantCorrelationsResponse.body?.latencyCorrelations.forEach((d) => {
+            fieldsToSample.add(d.fieldName);
+          });
+        }
+
+        const failedtransactionsFieldStats = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/correlations/field_stats',
+          params: {
+            body: {
+              ...getOptions(),
+              fieldsToSample: [...fieldsToSample],
+            },
+          },
+        });
+
         const finalRawResponse: LatencyCorrelationsResponse = {
           ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,
           latencyCorrelations: significantCorrelationsResponse.body?.latencyCorrelations,
+          fieldStats: failedtransactionsFieldStats.body?.stats,
         };
 
         // Fetched 95th percentile value of 1309695.875 based on 1244 documents.
