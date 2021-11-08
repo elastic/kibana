@@ -9,7 +9,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../../observability/server';
+import { rangeQuery, termQuery } from '../../../../../observability/server';
 import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -39,7 +39,7 @@ export async function getTransaction({
         bool: {
           filter: asMutableArray([
             { term: { [TRANSACTION_ID]: transactionId } },
-            ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
+            ...termQuery(TRACE_ID, traceId),
             ...(start && end ? rangeQuery(start, end) : []),
           ]),
         },
