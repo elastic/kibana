@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FunctionComponent } from 'react';
 import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
@@ -54,6 +55,76 @@ import type { CategoryFacet } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
+
+const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
+  statusCode,
+}: {
+  statusCode?: number;
+}) => {
+  let titleMessage;
+  let descriptionMessage;
+  if (statusCode === 500) {
+    titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailable400500CalloutTitle', {
+      defaultMessage:
+        'Kibana encounters an error connecting to the Elastic Package Registry, which provides Elastic Agent integrations.\n',
+    });
+    descriptionMessage = (
+      <FormattedMessage
+        id="xpack.fleet.epmList.eprUnavailableCallout400500TitleMessage"
+        defaultMessage="Please ensure the {registryproxy} or {onpremregistry} is configured correctly, or try again later."
+        values={{
+          registryproxy: <ProxyLink />,
+          onpremregistry: <OnPremLink />,
+        }}
+      />
+    );
+  } else {
+    titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailableBadGatewayCalloutTitle', {
+      defaultMessage:
+        'Kibana cannot reach the Elastic Package Registry, which provides Elastic Agent integrations.\n',
+    });
+    descriptionMessage = (
+      <FormattedMessage
+        id="xpack.fleet.epmList.eprUnavailableCallouBdGatewaytTitleMessage"
+        defaultMessage="To view these integrations, configure a  {registryproxy} or host {onpremregistry}."
+        values={{
+          registryproxy: <ProxyLink />,
+          onpremregistry: <OnPremLink />,
+        }}
+      />
+    );
+  }
+
+  return (
+    <EuiCallOut title={titleMessage} iconType="iInCircle" color={'warning'}>
+      <p>{descriptionMessage}</p>
+    </EuiCallOut>
+  );
+};
+
+function ProxyLink() {
+  const { docLinks } = useStartServices();
+
+  return (
+    <EuiLink href={docLinks.links.fleet.settingsFleetServerProxySettings} target="_blank">
+      {i18n.translate('xpack.fleet.epmList.proxyLinkSnippedText', {
+        defaultMessage: 'proxy server',
+      })}
+    </EuiLink>
+  );
+}
+
+function OnPremLink() {
+  const { docLinks } = useStartServices();
+
+  return (
+    <EuiLink href={docLinks.links.fleet.onPremRegistry} target="_blank">
+      {i18n.translate('xpack.fleet.epmList.onPremLinkSnippetText', {
+        defaultMessage: 'your own registry',
+      })}
+    </EuiLink>
+  );
+}
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
   if (!doesPackageHaveIntegrations(pkg)) {
@@ -292,6 +363,12 @@ export const AvailablePackages: React.FC = memo(() => {
     </>
   );
 
+  let noEprCallout;
+  if (eprPackageLoadingError || eprCategoryLoadingError) {
+    const error = eprPackageLoadingError || eprCategoryLoadingError;
+    noEprCallout = <NoEprCallout statusCode={error?.statusCode} />;
+  }
+
   return (
     <PackageListGrid
       featuredList={featuredList}
@@ -302,54 +379,7 @@ export const AvailablePackages: React.FC = memo(() => {
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage
-      callout={eprPackageLoadingError || eprCategoryLoadingError ? <NoEprCallout /> : undefined}
+      callout={noEprCallout}
     />
   );
 });
-
-function NoEprCallout() {
-  return (
-    <EuiCallOut
-      title={i18n.translate('xpack.fleet.epmList.eprUnavailableCalloutTitle', {
-        defaultMessage: 'Update your package registry setting to view more integrations\n',
-      })}
-      iconType="iInCircle"
-      color={'warning'}
-    >
-      <p>
-        <FormattedMessage
-          id="xpack.fleet.epmList.eprUnavailableCalloutTitleMessage"
-          defaultMessage="Kibana cannot reach the Elastic Package Registry, which provides Elastic Agent integrations. To view these integrations, set the URL for a {registryproxy} or an {onpremregistry}."
-          values={{
-            registryproxy: <ProxyLink />,
-            onpremregistry: <OnPremLink />,
-          }}
-        />
-      </p>
-    </EuiCallOut>
-  );
-}
-
-function ProxyLink() {
-  const { docLinks } = useStartServices();
-
-  return (
-    <EuiLink href={docLinks.links.fleet.settingsFleetServerProxySettings} target="_blank">
-      {i18n.translate('xpack.fleet.epmList.proxyLinkSnippedText', {
-        defaultMessage: 'registry proxy',
-      })}
-    </EuiLink>
-  );
-}
-
-function OnPremLink() {
-  const { docLinks } = useStartServices();
-
-  return (
-    <EuiLink href={docLinks.links.fleet.onPremRegistry} target="_blank">
-      {i18n.translate('xpack.fleet.epmList.onPremLinkSnippetText', {
-        defaultMessage: 'on-prem registry',
-      })}
-    </EuiLink>
-  );
-}
