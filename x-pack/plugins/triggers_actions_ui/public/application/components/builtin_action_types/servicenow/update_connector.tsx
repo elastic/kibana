@@ -28,6 +28,8 @@ import { isFieldInvalid } from './helpers';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { SNStoreLink } from './sn_store_button';
 import { CredentialsAuth } from './credentials_auth';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 
 const title = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormTitle',
@@ -140,7 +142,11 @@ const UpdateConnectorComponent: React.FC<Props> = ({
                     id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.serviceNowAppRunning"
                     defaultMessage="The Elastic App from the ServiceNow app store must be installed prior to running the update. {visitLink} to install the app"
                     values={{
-                      visitLink: <SNStoreLink />,
+                      visitLink: (
+                        <SNStoreLink
+                          appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
+                        />
+                      ),
                     }}
                   />
                 ),
@@ -175,7 +181,10 @@ const UpdateConnectorComponent: React.FC<Props> = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             {applicationInfoErrorMsg && (
-              <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
+              <ApplicationRequiredCallout
+                message={applicationInfoErrorMsg}
+                appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

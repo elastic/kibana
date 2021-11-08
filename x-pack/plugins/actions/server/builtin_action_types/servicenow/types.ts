@@ -253,6 +253,7 @@ export interface SNProductsConfigValue {
   useImportAPI: boolean;
   importSetTable: string;
   commentFieldKey: string;
+  appId?: string;
 }
 
 export type SNProductsConfig = Record<string, SNProductsConfigValue>;
