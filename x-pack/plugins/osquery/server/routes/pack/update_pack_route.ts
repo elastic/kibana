@@ -97,8 +97,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       if (name) {
         const conflictingEntries = await savedObjectsClient.find({
           type: packSavedObjectType,
-          search: name,
-          searchFields: ['name'],
+          filter: `${packSavedObjectType}.attributes.name: "${name}"`,
         });
 
         if (

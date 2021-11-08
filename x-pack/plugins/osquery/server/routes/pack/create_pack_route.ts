@@ -71,8 +71,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const conflictingEntries = await savedObjectsClient.find({
         type: packSavedObjectType,
-        search: name,
-        searchFields: ['name'],
+        filter: `${packSavedObjectType}.attributes.name: "${name}"`,
       });
 
       if (conflictingEntries.saved_objects.length) {

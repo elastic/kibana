@@ -39,8 +39,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
 
       const conflictingEntries = await savedObjectsClient.find({
         type: savedQuerySavedObjectType,
-        search: id,
-        searchFields: ['id'],
+        filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
       });
 
       if (conflictingEntries.saved_objects.length) {
