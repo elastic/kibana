@@ -21,11 +21,9 @@ export interface ITileLayerArguments {
 
 // TODO - rename to RasterTileLayer
 export class TileLayer extends AbstractLayer {
-  static type = LAYER_TYPE.TILE;
-
   static createDescriptor(options: Partial<LayerDescriptor>) {
     const tileLayerDescriptor = super.createDescriptor(options);
-    tileLayerDescriptor.type = TileLayer.type;
+    tileLayerDescriptor.type = LAYER_TYPE.TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
