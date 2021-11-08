@@ -12,4 +12,6 @@ export { getLinks } from './documentation';
 
 export { parseEsError } from './runtime_field_validation';
 
-export { initApi, ApiService } from './api';
+export type { ApiService } from './api';
+
+export { initApi } from './api';
