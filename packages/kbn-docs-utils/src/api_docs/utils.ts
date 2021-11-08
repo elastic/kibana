@@ -44,6 +44,10 @@ export function getPluginForPath(
   }
 }
 
+export function isTypeKindATSType(typeKind: TypeKind) {
+  return typeKind === TypeKind.TypeKind || typeKind === TypeKind.InterfaceKind;
+}
+
 /**
  * Groups ApiDeclarations by typescript kind - classes, functions, enums, etc, so they
  * can be displayed separately in the mdx files.

@@ -9,87 +9,80 @@
 import fs from 'fs';
 import Path from 'path';
 import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
-import { ApiDeclaration, PluginApi, PluginMetaInfo, PluginOrPackage, TypeKind } from './types';
-
-// Each team has an entry in the map that is a mapping of teams it depends on and the number of times it
-// depends on a plugin ownedd by that team. For example, if TeamA owns PluginA1 and PluginA2 and TeamB
-// owns PluginB1 and PluginB2, and PluginA1 -> PluginB2  and pluginA1 -> PluginB1, the map will be:
-// {
-//   TeamA: {
-//     TeamB: 2
-//   }
-// }
-//
-interface TeamDependencyMap {
-  [key: string]: { [key: string]: number };
-}
-
-interface Node {
-  name: string;
-  properties?: string;
-}
-
-interface GroupedNodes {
-  [key: string]: Node[];
-}
-
-interface DependencyMap {
-  [key: string]: string[];
-}
-
-interface DependencyEdge {
-  source: string;
-  dest: string;
-  properties?: string;
-}
+import { ApiDeclaration, PluginApi, PluginMetaInfo, PluginOrPackage, TypeKind } from '../types';
+import {
+  WeightedDependencyMap,
+  DependencyEdge,
+  DependencyMap,
+  getDiGraphTextWithSubClusters,
+  GroupedNodes,
+} from './generate_weighted_dot_file';
+import { getWeightedColor, getNodeProperties, getRelativeSizeOfNode } from './styles';
+import { getSafeName } from './utils';
+import { GVNode } from './types';
+import { generateTeamGraphs } from './generate_team_graphs';
+import { isTypeKindATSType } from '../utils';
 
 interface PluginStatsMap {
   [key: string]: PluginMetaInfo;
 }
 
 export function writeDependencyGraph(
-  outputFolder: string,
   plugins: PluginOrPackage[],
   pluginStats: PluginStatsMap,
   log: ToolingLog,
-  onlyTrackThisPlugin?: PluginApi
+  onlyTrackThesePlugins?: PluginApi[]
 ) {
-  log.info(`writeDependencyGraph, onlyTrackThisPlugin is ` + onlyTrackThisPlugin);
+  log.info(`writeDependencyGraph`);
   const pluginTeamSubClusters: { [key: string]: PluginOrPackage[] } = groupPluginsByTeam(plugins);
   const transitiveDependencies = getTransitiveDependencyListMap(plugins, log);
 
   log.info('Building team dependency map with weights');
-  const teamDependencyMap: TeamDependencyMap = getTeamDependencies(
+
+  const teamDependencyMap: WeightedDependencyMap = getTeamDependencies(
     pluginTeamSubClusters,
     transitiveDependencies,
     plugins
   );
 
-  writeTeamDependencyDotFile(teamDependencyMap);
+  if (!onlyTrackThesePlugins) {
+    generateTeamGraphs(plugins, pluginStats, teamDependencyMap);
+  }
 
-  // const FILTER_ON_TEAM = onlyTrackThisPlugin ? onlyTrackThisPlugin.id : undefined;
   writePluginDotFile(
     plugins,
     transitiveDependencies,
     teamDependencyMap,
     pluginStats,
-    log
-    // FILTER_ON_TEAM
+    log,
+    onlyTrackThesePlugins ? onlyTrackThesePlugins.map((p) => p.id) : undefined
   );
 
-  if (onlyTrackThisPlugin) {
-    log.info('Building plugin reference graph');
-    const FROM_PLUGIN = 'lens';
-    writeInnerPluginDotFile(onlyTrackThisPlugin, plugins, log, transitiveDependencies, FROM_PLUGIN);
+  if (onlyTrackThesePlugins) {
+    onlyTrackThesePlugins.forEach((p) => {
+      log.info('Building plugin reference graph');
+      writeInnerPluginDotFile(p, plugins, log, transitiveDependencies);
+    });
   }
+}
+
+export function getPluginsOwnedByTeam(plugins: PluginOrPackage[]): { [key: string]: string[] } {
+  const pluginsOwnedByTeam: { [key: string]: string[] } = {};
+  plugins.forEach((plugin) => {
+    const teamOwner = plugin.manifest.owner.name;
+    if (pluginsOwnedByTeam[teamOwner] === undefined) {
+      pluginsOwnedByTeam[teamOwner] = [];
+    }
+    pluginsOwnedByTeam[teamOwner].push(plugin.manifest.id);
+  });
+  return pluginsOwnedByTeam;
 }
 
 function writeInnerPluginDotFile(
   pluginApi: PluginApi,
   plugins: PluginOrPackage[],
   log: ToolingLog,
-  transitiveDependencies: { [key: string]: string[] },
-  fromPlugin: string
+  transitiveDependencies: { [key: string]: string[] }
 ) {
   const plugin = plugins.find((p) => p.manifest.id === pluginApi.id);
 
@@ -99,71 +92,76 @@ function writeInnerPluginDotFile(
   }
 
   const edges: DependencyEdge[] = [];
-  const apiNodes: Node[] = [];
-  const pluginNodes: Node[] = [];
+  const apiNodes: GVNode[] = [];
+  const pluginNodes: GVNode[] = [];
 
-  getPluginEdgesAndNodes(
+  const avgPublicWeight = getPluginEdgesAndNodes(
     pluginApi.client,
-    'client',
     edges,
     apiNodes,
     pluginNodes,
-    transitiveDependencies,
-    fromPlugin
+    transitiveDependencies
   );
-  getPluginEdgesAndNodes(
+  const avgServerWeight = getPluginEdgesAndNodes(
     pluginApi.server,
-    'server',
     edges,
     apiNodes,
     pluginNodes,
-    transitiveDependencies,
-    fromPlugin
+    transitiveDependencies
   );
-  getPluginEdgesAndNodes(
+  const avgCommonWeight = getPluginEdgesAndNodes(
     pluginApi.common,
-    'common',
     edges,
     apiNodes,
     pluginNodes,
-    transitiveDependencies,
-    fromPlugin
+    transitiveDependencies
   );
 
-  const text = getDiGraphTextWithSubClusters(edges, { [`${pluginApi.id}`]: apiNodes });
+  const avgApiWeight = (avgCommonWeight + avgPublicWeight + avgServerWeight) / 3;
+
+  const color = getWeightedColor(avgApiWeight, 4);
+  log.warning(`Avg api weight for ${pluginApi.id} is ${avgApiWeight}`);
+  const text = getDiGraphTextWithSubClusters(edges, { [`${pluginApi.id}`]: apiNodes }, color);
 
   fs.writeFileSync(
-    Path.resolve(REPO_ROOT, `plugin${getSafeName(pluginApi.id)}Dependencies.dot`),
+    Path.resolve(REPO_ROOT, '..', 'ArchArt', `${getSafeName(pluginApi.id)}PluginDependencies.dot`),
     text
   );
 }
 
 function getPluginEdgesAndNodes(
   apis: ApiDeclaration[],
-  scope: string,
   edges: DependencyEdge[],
-  apiNodes: Node[],
-  pluginNodes: Node[],
-  transitiveDependencies: { [key: string]: string[] },
-  fromPlugin: string
+  apiNodes: GVNode[],
+  pluginNodes: GVNode[],
+  transitiveDependencies: { [key: string]: string[] }
 ) {
+  let totalApiRefCount = 0;
   apis.forEach((api) => {
     if (api.lifecycle === undefined) {
-      const nodeName = `${scope}${api.id}`;
-      apiNodes.push({ name: nodeName });
+      const nodeName = api.id;
+      let color = getWeightedColor(api.references ? api.references.length : 0, 10);
 
-      if (api.references) {
+      if (api.references && api.references.length > 0) {
         api.references.forEach((ref) => {
           edges.push({ dest: nodeName, source: ref.plugin });
           if (!pluginNodes.find((p) => p.name === ref.plugin)) {
             pluginNodes.push({ name: ref.plugin });
           }
         });
-
-        apiNodes.push({ name: nodeName });
+        totalApiRefCount += api.references.length;
       } else {
-        apiNodes.push({ name: nodeName, properties: 'style=filled,color=yellow' });
+        color = 'yellow';
       }
+
+      // Hide unreferenced types - those sometimes have to be exported even if they are unused and it makes the unreferened nodes
+      // less actionable.
+      if ((!api.references || api.references.length === 0) && isTypeKindATSType(api.type)) {
+        return;
+      }
+
+      const properties = getNodeProperties(nodeName, color);
+      apiNodes.push({ name: nodeName, properties });
     }
 
     if (
@@ -172,69 +170,44 @@ function getPluginEdgesAndNodes(
         api.type === TypeKind.ClassKind ||
         api.type === TypeKind.ObjectKind)
     ) {
-      getPluginEdgesAndNodes(
-        api.children!,
-        scope,
-        edges,
-        apiNodes,
-        pluginNodes,
-        transitiveDependencies,
-        fromPlugin
-      );
+      getPluginEdgesAndNodes(api.children!, edges, apiNodes, pluginNodes, transitiveDependencies);
     }
   });
-}
 
-function writeTeamDependencyDotFile(allTeamDependencies: TeamDependencyMap) {
-  const edges = getTeamEdges(allTeamDependencies);
-  const text = getDiGraphText(edges, []);
-
-  fs.writeFileSync(Path.resolve(REPO_ROOT, '..', 'ArchArt', 'teamDependencies.dot'), text);
-}
-
-function getTeamEdges(allTeamDependencies: TeamDependencyMap): DependencyEdge[] {
-  const edges: DependencyEdge[] = [];
-  Object.keys(allTeamDependencies).forEach((team) => {
-    const oneTeamDependencies = allTeamDependencies[team];
-    Object.keys(oneTeamDependencies).forEach((teamDependency) => {
-      // An interesting cohesion metric, but don't connect nodes to themselves.
-      if (team === teamDependency) return;
-
-      //  const properties = `penwidth=${Math.min(oneTeamDependencies[teamDependency], 10)}`;
-      edges.push({ source: team, dest: teamDependency });
-    });
-  });
-  return edges;
+  return totalApiRefCount / apis.length;
 }
 
 function writePluginDotFile(
   plugins: PluginOrPackage[],
   transitiveDependencies: DependencyMap,
-  teamDependencies: TeamDependencyMap,
+  teamDependencies: WeightedDependencyMap,
   pluginStats: PluginStatsMap,
   log: ToolingLog,
-  teamFilter?: string
+  pluginFilters?: string[]
 ) {
-  const pluginDependencyCount: { [key: string]: number } = getHowManyPluginsDependOnMe(plugins);
+  const pluginInwardDependencyCount: { [key: string]: number } =
+    getHowManyPluginsDependOnMe(plugins);
 
   const pluginsGroupedByTeam: { [key: string]: PluginOrPackage[] } = groupPluginsByTeam(plugins);
-  const edges = getDirectPluginDependencies(plugins, teamFilter);
+  const edges = getDirectPluginDependencies(plugins, pluginFilters);
   const nodes = getPluginNodes(
     pluginsGroupedByTeam,
     transitiveDependencies,
     teamDependencies,
-    pluginDependencyCount,
+    pluginInwardDependencyCount,
     pluginStats
   );
 
   const text = getDiGraphTextWithSubClusters(edges, nodes);
-  const fileName = teamFilter ? `${teamFilter}PluginDependencies.dot` : 'allPluginDependencies.dot';
-  fs.writeFileSync(Path.resolve(REPO_ROOT, fileName), text);
+  const fileName = pluginFilters
+    ? `filtered${pluginFilters.join('')}PluginDependencies.dot`
+    : 'allPluginDependencies.dot';
+  fs.writeFileSync(Path.resolve(REPO_ROOT, '..', 'ArchArt', fileName), text);
 }
 
 function getDirectPluginDependencies(
   plugins: PluginOrPackage[],
-  teamFilter?: string
+  pluginFilters?: string[]
 ): DependencyEdge[] {
   const dependencyList: DependencyEdge[] = [];
   plugins.forEach((plugin) => {
@@ -243,9 +216,9 @@ function getDirectPluginDependencies(
     dependencies.forEach((dep) => {
       const pluginDependency = getPluginWithName(dep, plugins);
       if (
-        !teamFilter ||
-        plugin.manifest.owner.name === teamFilter ||
-        (pluginDependency && pluginDependency.manifest.owner.name === teamFilter)
+        !pluginFilters ||
+        pluginFilters?.find((p) => p === plugin.manifest.id) ||
+        (pluginDependency && pluginFilters?.find((p) => p === pluginDependency.manifest.id))
       ) {
         dependencyList.push({ source: name, dest: dep });
       }
@@ -257,7 +230,7 @@ function getDirectPluginDependencies(
 function getPluginNodes(
   pluginsGroupedByTeam: { [key: string]: PluginOrPackage[] },
   transitiveDependencies: DependencyMap,
-  teamDependencyMap: TeamDependencyMap,
+  teamDependencyMap: WeightedDependencyMap,
   howManyPluginsDependendOnMeMap: { [key: string]: number },
   pluginStats: PluginStatsMap,
   teamFilter?: string
@@ -287,70 +260,27 @@ function getPluginNodes(
         groupedNodes[team] = [];
       }
 
+      const maxIncomingPluginDependencies = Object.values(howManyPluginsDependendOnMeMap).reduce(
+        (max, current) => {
+          return current > max ? current : max;
+        },
+        0
+      );
+
       const properties = getPluginProperties(
         pluginName,
         howManyPluginsDependendOnMeMap[plugin.manifest.id]
           ? howManyPluginsDependendOnMeMap[plugin.manifest.id]
           : 0,
+        maxIncomingPluginDependencies,
         pluginStats[plugin.manifest.id],
         getMaxPublicApiSize,
         transitiveDependencyCount
       );
-      groupedNodes[team].push({ name: pluginName, properties });
+      (groupedNodes[team] as GVNode[]).push({ name: pluginName, properties });
     });
   });
   return groupedNodes;
-}
-
-function getDiGraphTextWithSubClusters(
-  dependencies: Array<{ source: string; dest: string }>,
-  groupedNodes: { [key: string]: Node[] }
-) {
-  return `digraph test{
-    ${getNodesSubGraphText(groupedNodes)}
-     ${getDependenciesText(dependencies)}
-  }`;
-}
-
-function getDiGraphText(dependencies: Array<{ source: string; dest: string }>, nodes: Node[]) {
-  return `digraph test{
-  ${getNodesText(nodes)}
-   ${getDependenciesText(dependencies)}
-}`;
-}
-
-function getDependenciesText(
-  dependencies: Array<{ source: string; dest: string; properties?: string }>
-) {
-  let text = '';
-  dependencies.forEach(({ source, dest, properties }) => {
-    text += `${getSafeName(source)} -> ${getSafeName(dest)} ${
-      properties ? `[${properties}]` : ''
-    }\n`;
-  });
-  return text;
-}
-
-function getNodesSubGraphText(groupedNodes: { [key: string]: Node[] }) {
-  let text = '';
-  Object.keys(groupedNodes).forEach((groupName) => {
-    const nodes = groupedNodes[groupName];
-    text += `subgraph cluster${getSafeName(groupName)} {
-      label="${groupName}"
-      style=filled
-      `;
-    text += getNodesText(nodes);
-    text += `}\n`;
-  });
-  return text;
-}
-
-function getNodesText(nodes: Node[]): string {
-  let text = '';
-  nodes.forEach(({ name, properties }) => {
-    text += `${getSafeName(name)} ${properties ? `[${properties}]` : ''}\n`;
-  });
-  return text;
 }
 
 function getPluginWithName(name: string, plugins: PluginOrPackage[]): PluginOrPackage | undefined {
@@ -367,7 +297,7 @@ function getPluginWithName(name: string, plugins: PluginOrPackage[]): PluginOrPa
 function teamDependsOnTeam(
   teamA: string,
   teamB: string,
-  teamDependencyMap: TeamDependencyMap
+  teamDependencyMap: WeightedDependencyMap
 ): boolean {
   if (teamDependencyMap[teamA] === undefined) return false;
 
@@ -378,8 +308,8 @@ function getTeamDependencies(
   pluginTeamCluster: { [key: string]: PluginOrPackage[] },
   transitivePluginDependencies: { [key: string]: string[] },
   plugins: PluginOrPackage[]
-): TeamDependencyMap {
-  const teamDependencyMap: TeamDependencyMap = {};
+): WeightedDependencyMap {
+  const teamDependencyMap: WeightedDependencyMap = {};
   Object.keys(pluginTeamCluster).forEach((team) => {
     const teamOwnedPlugins = pluginTeamCluster[team];
 
@@ -404,16 +334,6 @@ function getTeamDependencies(
   });
   return teamDependencyMap;
 }
-
-// function getPluginDependencyCountMap(plugins: PluginOrPackage[]): { [key: string]: number } {
-//   const pluginDependencyCounts: { [key: string]: number } = {};
-//   plugins.forEach((plugin) => {
-//     const dependencies = getDependenciesList(plugin);
-//     pluginDependencyCounts[plugin.manifest.id] = dependencies.length;
-//   });
-
-//   return pluginDependencyCounts;
-// }
 
 function getTransitiveDependencyListMap(
   plugins: PluginOrPackage[],
@@ -510,85 +430,17 @@ function getHowManyPluginsDependOnMe(plugins: PluginOrPackage[]): { [key: string
 function getPluginProperties(
   pluginId: string,
   howManyPluginsDependendOnMe: number,
+  maxIncomingDependencyCount: number,
   pluginStats: PluginMetaInfo,
   maxPublicApiSize: number,
   howManyModulesIDependOn: number
 ): string {
-  const size = getSizeOfPlugin(pluginStats.apiCount, maxPublicApiSize);
-  const color = getColorForPlugin(howManyModulesIDependOn);
+  const size = getRelativeSizeOfNode(pluginStats.apiCount, maxPublicApiSize);
+  const color = getWeightedColor(howManyPluginsDependendOnMe, maxIncomingDependencyCount);
   const Ce = howManyModulesIDependOn;
   const Ca = howManyPluginsDependendOnMe;
 
   const instability = Math.round((Ce / (Ce + Ca)) * 100) / 100;
 
-  return `label="${getSafeName(
-    pluginId
-  )}\\nI: ${instability}\\nCe: ${Ce} | Ca: ${Ca}" fillcolor="${color}", style=filled fixedsize=true width=${size} height=${size}`;
-}
-
-function getSafeName(name: string): string {
-  return name === 'graph' ? 'graph1' : name.replaceAll(/[ -.@]/gi, '');
-}
-
-// function getInstabilityColorForPlugin(instability: number): string {
-//   const colors = [
-//     '#FFFFFF', // 0
-//     '#F6DDCC', // .1 Light orange
-//     '#F5CBA7', // .2  Med orange
-//     '#F5B7B1', // .4
-//     '#EC7063', // .8
-//     '#E74C3C', // .9
-//     '#B03A2E', // 1
-//   ];
-//   const thresholds = [0, 0.1, 0.2, 0.4, 0.8, 0.9, 1];
-//   const color = '#943126'; // dark red
-
-//   if (isNaN(instability) || instability === undefined || instability === 0) {
-//     return '#A3E4D7'; // light green
-//   }
-
-//   for (let i = 0; i < thresholds.length; i++) {
-//     if (instability <= thresholds[i]) {
-//       return colors[i];
-//     }
-//   }
-
-//   console.log('Instability is ' + instability);
-//   return color;
-// }
-
-function getColorForPlugin(howManyPluginsDependendOnMe: number): string {
-  const colors = [
-    '#FFFFFF', // 0
-    '#F6DDCC', // 1 Light orange
-    '#F5CBA7', // 2  Med orange
-    '#F5B7B1', // 4
-    '#EC7063', // 8
-    '#E74C3C', // 16
-    '#B03A2E', // 32
-    '#78281F', // 64
-    '#641E16', // 128
-  ];
-  const thresholds = [0, 1, 2, 4, 8, 16, 32, 64, 128];
-  let color = 'black';
-
-  if (howManyPluginsDependendOnMe === undefined || howManyPluginsDependendOnMe === 0) {
-    return '#A3E4D7'; // light green
-  }
-
-  for (let i = 0; i < thresholds.length; i++) {
-    if (howManyPluginsDependendOnMe <= thresholds[i]) {
-      color = colors[i];
-      return color;
-    }
-  }
-  return color;
-}
-
-function getSizeOfPlugin(publicAPISize: number, maxPublicApiSize: number): number {
-  const MAX_SIZE = 10;
-
-  const comparativeApiSizeRatio = publicAPISize / maxPublicApiSize;
-
-  return Math.max(comparativeApiSizeRatio * MAX_SIZE, 1);
+  return getNodeProperties(`${pluginId}\\nI: ${instability}\\nCe: ${Ce} | Ca: ${Ca}"`, color, size);
 }

@@ -28,7 +28,7 @@ import { getPluginApiMap } from './get_plugin_api_map';
 import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
-import { writeDependencyGraph } from './write_dependency_graph';
+import { writeDependencyGraph } from './dependency_graphs/write_dependency_graph';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -38,8 +38,10 @@ export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
       const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
-      const pluginFilter =
-        flags.plugin && typeof flags.plugin === 'string' ? [flags.plugin] : flags.plugin;
+      const pluginFilter: string[] | undefined =
+        flags.plugin && typeof flags.plugin === 'string'
+          ? flags.plugin.split(',')
+          : (flags.plugin as string[]);
 
       if (pluginFilter && !isStringArray(pluginFilter)) {
         throw createFlagError('expected --plugin must only contain strings');
@@ -104,15 +106,16 @@ export function runBuildApiDocsCli() {
 
       log.info('Writing dependency graph');
 
-      const filteredPluginApi =
-        pluginFilter && typeof pluginFilter === 'object'
-          ? pluginApiMap[pluginFilter[0]]
-          : undefined;
+      const filteredPluginApis = pluginFilter
+        ? (pluginFilter as string[]).map((pf) => {
+            log.info('Getting plugin api for filter ' + pf);
+            return pluginApiMap[pf];
+          })
+        : undefined;
 
-      log.info('filteredPluginApi is ' + filteredPluginApi);
       log.info('typeof pluginFilter is ' + typeof pluginFilter);
 
-      writeDependencyGraph(outputFolder, plugins, allPluginStats, log, filteredPluginApi);
+      writeDependencyGraph(plugins, allPluginStats, log, filteredPluginApis);
 
       log.info('Writing api docs, pluginFilter is ' + pluginFilter);
       plugins.forEach((plugin) => {
@@ -169,7 +172,7 @@ export function runBuildApiDocsCli() {
         if (
           collectReferences &&
           typeof pluginFilter === 'object' &&
-          pluginFilter[0] === plugin.manifest.id
+          pluginFilter.includes(plugin.manifest.id)
         ) {
           if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
             log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
