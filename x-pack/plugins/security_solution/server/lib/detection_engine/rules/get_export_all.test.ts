@@ -15,6 +15,10 @@ import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
+import {
+  getOutputDetailsSampleWithExceptions,
+  getSampleDetailsAsNdjson,
+} from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
@@ -103,6 +107,7 @@ describe.each([
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,
       exported_exception_list_item_count: 1,
+      exported_count: 3,
       exported_rules_count: 1,
       missing_exception_list_item_count: 0,
       missing_exception_list_items: [],
@@ -121,6 +126,7 @@ describe.each([
       total: 0,
       data: [],
     };
+    const details = getOutputDetailsSampleWithExceptions();
 
     rulesClient.find.mockResolvedValue(findResult);
 
@@ -133,8 +139,7 @@ describe.each([
     );
     expect(exports).toEqual({
       rulesNdjson: '',
-      exportDetails:
-        '{"exported_rules_count":0,"missing_rules":[],"missing_rules_count":0,"exported_exception_list_count":0,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n',
+      exportDetails: getSampleDetailsAsNdjson(details),
       exceptionLists: '',
     });
   });

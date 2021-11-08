@@ -212,12 +212,12 @@ export interface IndexLifecyclePolicy {
   index: string;
   managed: boolean;
   action?: string;
-  action_time_millis?: number;
-  age?: string;
+  action_time_millis?: string | number;
+  age?: string | number;
   failed_step?: string;
   failed_step_retry_count?: number;
   is_auto_retryable_error?: boolean;
-  lifecycle_date_millis?: number;
+  lifecycle_date_millis?: string | number;
   phase?: string;
   phase_execution?: {
     policy: string;
