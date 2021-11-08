@@ -12,6 +12,7 @@ import {
   useKibana,
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
@@ -42,10 +43,12 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks, observability } = services;
+  const { pluginsSetup } = useApmPluginContext();
+  const { http, docLinks } = services;
   const basePath = http?.basePath.get();
 
-  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate =
+    pluginsSetup.observability.navigation.PageTemplate;
 
   const { data } = useFetcher((callApmApi) => {
     return callApmApi({ endpoint: 'GET /internal/apm/has_data' });

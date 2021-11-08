@@ -115,18 +115,16 @@ const mockPluginsSetup = {
   },
   observability: {
     isAlertingExperienceEnabled: () => false,
+    navigation: { PageTemplate: () => null },
+    observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   },
 };
 
 export const mockApmPluginContextValue = {
   config: mockConfig,
-  core: mockCore,
+  coreStart: mockCore,
   pluginsSetup: mockPluginsSetup,
-  pluginsStart: {
-    observability: {
-      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-    },
-  },
+  pluginsStart: {},
 };
 
 export function MockApmPluginContextWrapper({
@@ -140,8 +138,8 @@ export function MockApmPluginContextWrapper({
 }) {
   const contextValue = merge({}, mockApmPluginContextValue, value);
 
-  if (contextValue.core) {
-    createCallApmApi(contextValue.core);
+  if (contextValue.coreStart) {
+    createCallApmApi(contextValue.coreStart);
   }
 
   const contextHistory = useHistory();

@@ -12,7 +12,6 @@ import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
 
 export interface ApmPluginContextValue {
   config: ConfigSchema;
-  core: CoreStart;
   pluginsSetup: ApmPluginSetupDeps;
   pluginsStart: ApmPluginStartDeps;
 }

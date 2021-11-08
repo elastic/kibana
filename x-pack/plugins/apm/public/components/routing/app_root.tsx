@@ -11,6 +11,7 @@ import { Route } from 'react-router-dom';
 import {
   APP_WRAPPER_CLASS,
   AppMountParameters,
+  CoreStart,
 } from '../../../../../../src/core/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import {
@@ -34,32 +35,43 @@ import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_ran
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
 import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_date_range';
+import type { ConfigSchema } from '../../';
 import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 
 export interface ApmAppRootProps {
-  apmPluginContextValue: ApmPluginContextValue;
   appMountParameters: AppMountParameters;
+  config: ConfigSchema;
+  coreStart: CoreStart;
+  pluginsSetup: ApmPluginSetupDeps;
+  pluginsStart: ApmPluginStartDeps;
 }
 
 export function ApmAppRoot({
-  apmPluginContextValue,
   appMountParameters,
+  config,
+  coreStart,
+  pluginsSetup,
+  pluginsStart,
 }: ApmAppRootProps) {
-  const { core, pluginsStart } = apmPluginContextValue;
   const { history, setHeaderActionMenu } = appMountParameters;
-  const i18nCore = core.i18n;
+  const I18nContextProvider = coreStart.i18n.Context;
+  const apmPluginContextValue: ApmPluginContextValue = {
+    config,
+    pluginsSetup,
+    pluginsStart,
+  };
 
   return (
     <RedirectAppLinks
-      application={core.application}
+      application={coreStart.application}
       className={APP_WRAPPER_CLASS}
       data-test-subj="apmMainContainer"
       role="main"
     >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
-          <i18nCore.Context>
+        <KibanaContextProvider services={{ ...coreStart }}>
+          <I18nContextProvider>
             <TimeRangeIdContextProvider>
               <RouterProvider history={history} router={apmRouter as any}>
                 <RedirectWithDefaultDateRange>
@@ -87,7 +99,7 @@ export function ApmAppRoot({
                 </RedirectWithDefaultDateRange>
               </RouterProvider>
             </TimeRangeIdContextProvider>
-          </i18nCore.Context>
+          </I18nContextProvider>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>
     </RedirectAppLinks>

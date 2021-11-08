@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 
 export const Breadcrumb = ({
@@ -17,8 +17,10 @@ export const Breadcrumb = ({
   href: string;
   children: React.ReactElement;
 }) => {
-  const { core } = useApmPluginContext();
-  useBreadcrumb({ title, href: core.http.basePath.prepend('/app/apm' + href) });
+  const {
+    services: { http },
+  } = useKibana();
+  useBreadcrumb({ title, href: http.basePath.prepend('/app/apm' + href) });
 
   return children;
 };

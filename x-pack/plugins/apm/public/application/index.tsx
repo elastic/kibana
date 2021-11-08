@@ -19,32 +19,15 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticDataView } from '../services/rest/data_view';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
-import { ApmAppRoot } from '../components/routing/app_root';
+import { ApmAppRoot, ApmAppRootProps } from '../components/routing/app_root';
 
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export const renderApp = ({
-  appMountParameters,
-  config,
-  coreStart,
-  pluginsSetup,
-  pluginsStart,
-}: {
-  appMountParameters: AppMountParameters;
-  config: ConfigSchema;
-  coreStart: CoreStart;
-  pluginsSetup: ApmPluginSetupDeps;
-  pluginsStart: ApmPluginStartDeps;
-}) => {
+export const renderApp = (props: ApmAppRootProps) => {
+  const { appMountParameters, coreStart } = props;
   const { element } = appMountParameters;
-  const apmPluginContextValue = {
-    config,
-    core: coreStart,
-    pluginsSetup,
-    pluginsStart,
-  };
 
   // render APM feedback link in global help menu
   setHelpExtension(coreStart);
@@ -60,13 +43,8 @@ export const renderApp = ({
   // add .kbnAppWrappers class to root element
   element.classList.add(APP_WRAPPER_CLASS);
 
-  ReactDOM.render(
-    <ApmAppRoot
-      apmPluginContextValue={apmPluginContextValue}
-      appMountParameters={appMountParameters}
-    />,
-    element
-  );
+  ReactDOM.render(<ApmAppRoot {...props} />, element);
+
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };

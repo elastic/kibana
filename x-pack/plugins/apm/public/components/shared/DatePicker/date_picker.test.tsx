@@ -68,7 +68,7 @@ function mountDatePicker(initialParams: {
     <MockApmPluginContextWrapper
       value={
         {
-          plugins: {
+          pluginsSetup: {
             data: {
               query: {
                 timefilter: {

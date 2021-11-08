@@ -67,7 +67,7 @@ function mountDatePicker(
       history={history}
       value={
         {
-          plugins: {
+          pluginsSetup: {
             data: {
               query: {
                 timefilter: {

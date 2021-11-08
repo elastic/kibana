@@ -46,8 +46,7 @@ describe('renderApp', () => {
   });
 
   it('renders the app', () => {
-    const { core, config } = mockApmPluginContextValue;
-
+    const { coreStart, config } = mockApmPluginContextValue;
     const pluginsSetup = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, ruleTypeRegistry: {} },
@@ -58,6 +57,7 @@ describe('renderApp', () => {
           },
         },
       },
+      observability: { navigation: { PageTemplate: () => null } },
     } as unknown as ApmPluginSetupDeps;
 
     const appMountParameters = {
@@ -104,7 +104,7 @@ describe('renderApp', () => {
     } as unknown as ApmPluginStartDeps;
 
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
-    createCallApmApi(core as unknown as CoreStart);
+    createCallApmApi(coreStart);
 
     jest
       .spyOn(window.console, 'warn')
@@ -122,7 +122,7 @@ describe('renderApp', () => {
       unmount = renderApp({
         appMountParameters,
         config,
-        coreStart: core as any,
+        coreStart,
         pluginsSetup,
         pluginsStart,
       });
