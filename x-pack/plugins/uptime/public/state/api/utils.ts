@@ -71,13 +71,8 @@ class ApiService {
     return ApiService.instance;
   }
 
-  public async get<T>(
-    apiUrl: string,
-    params?: HttpFetchQuery,
-    decodeType?: any,
-    asResponse = false
-  ) {
-    const response = await this._http!.fetch<T>({
+  public async get(apiUrl: string, params?: HttpFetchQuery, decodeType?: any, asResponse = false) {
+    const response = await this._http!.fetch({
       path: apiUrl,
       query: params,
       asResponse,
@@ -88,7 +83,7 @@ class ApiService {
     if (decodeType) {
       const decoded = decodeType.decode(response);
       if (isRight(decoded)) {
-        return decoded.right as T;
+        return decoded.right;
       } else {
         // eslint-disable-next-line no-console
         console.error(
@@ -103,8 +98,8 @@ class ApiService {
     return response;
   }
 
-  public async post<T>(apiUrl: string, data?: any, decodeType?: any) {
-    const response = await this._http!.post<T>(apiUrl, {
+  public async post(apiUrl: string, data?: any, decodeType?: any) {
+    const response = await this._http!.post(apiUrl, {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -112,7 +107,7 @@ class ApiService {
     if (decodeType) {
       const decoded = decodeType.decode(response);
       if (isRight(decoded)) {
-        return decoded.right as T;
+        return decoded.right;
       } else {
         // eslint-disable-next-line no-console
         console.warn(
@@ -123,8 +118,8 @@ class ApiService {
     return response;
   }
 
-  public async delete<T>(apiUrl: string) {
-    const response = await this._http!.delete<T>(apiUrl);
+  public async delete(apiUrl: string) {
+    const response = await this._http!.delete(apiUrl);
     if (response instanceof Error) {
       throw response;
     }

@@ -50,7 +50,7 @@ export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/apm`;
 
-    const response = await services.http?.fetch<any>(url, {
+    const response = await services.http?.fetch(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
