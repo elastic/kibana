@@ -12,7 +12,7 @@ import type { ScopedHistory, AppMountParameters } from 'kibana/public';
 import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../kibana_utils/public';
-import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 
 let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;
