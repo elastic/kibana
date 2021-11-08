@@ -729,6 +729,9 @@ export interface DocLinksStart {
             readonly rubyOverview: string;
             readonly rustGuide: string;
         };
+        readonly endpoints: {
+            readonly troubleshooting: string;
+        };
     };
 }
 
