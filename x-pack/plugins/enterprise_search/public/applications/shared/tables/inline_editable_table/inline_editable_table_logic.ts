@@ -46,7 +46,7 @@ interface InlineEditableTableValues<Item extends ItemWithAnID> {
   doesEditingItemValueContainEmptyProperty: boolean;
 }
 
-interface InlineEditableTableProps<Item extends ItemWithAnID> {
+export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   instanceId: string;
   // TODO Because these callbacks are params, they are only set on the logic once (i.e., they are cached)

@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+const MOCK_SET_ROW_ERRORS = jest.fn();
+
+jest.mock('../inline_editable_table/inline_editable_table_logic', () => ({
+  InlineEditableTableLogic: () => ({
+    actions: {
+      setRowErrors: MOCK_SET_ROW_ERRORS,
+    },
+  }),
+}));
+
 import {
   LogicMounter,
   mockFlashMessageHelpers,
@@ -126,7 +136,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         logic.actions.addItem(item, onSuccess);
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(MOCK_SET_ROW_ERRORS).toHaveBeenCalledWith(['An unexpected error occurred']);
       });
     });
 
@@ -174,7 +184,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         logic.actions.deleteItem(item, onSuccess);
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(MOCK_SET_ROW_ERRORS).toHaveBeenCalledWith(['An unexpected error occurred']);
       });
     });
 
@@ -228,7 +238,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         logic.actions.updateItem(item, onSuccess);
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(MOCK_SET_ROW_ERRORS).toHaveBeenCalledWith(['An unexpected error occurred']);
       });
     });
 
