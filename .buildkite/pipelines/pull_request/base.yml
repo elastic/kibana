@@ -17,7 +17,7 @@ steps:
     label: 'Default CI Group'
     parallelism: 27
     agents:
-      queue: ci-group-6
+      queue: ci-group-4
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
@@ -29,7 +29,7 @@ steps:
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
-      queue: ci-group-6
+      queue: ci-group-4
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
@@ -42,7 +42,7 @@ steps:
     label: 'OSS CI Group'
     parallelism: 11
     agents:
-      queue: ci-group-4d
+      queue: n2-2
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
@@ -54,7 +54,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_accessibility.sh
     label: 'OSS Accessibility Tests'
     agents:
-      queue: ci-group-4d
+      queue: n2-2
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -157,7 +157,7 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
-      queue: c2-8
+      queue: c2-4
     key: checks
     timeout_in_minutes: 120
 
