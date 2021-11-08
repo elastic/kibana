@@ -98,9 +98,11 @@ function getDescription(state?: State) {
 export const getXyVisualization = ({
   paletteService,
   fieldFormats,
+  useLegacyTimeAxis,
 }: {
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
+  useLegacyTimeAxis: boolean;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -568,7 +570,7 @@ export const getXyVisualization = ({
   renderToolbar(domElement, props) {
     render(
       <I18nProvider>
-        <XyToolbar {...props} />
+        <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />
       </I18nProvider>,
       domElement
     );
