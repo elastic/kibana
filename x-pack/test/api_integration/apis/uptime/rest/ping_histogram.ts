@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
       const dateEnd = '2019-09-11T03:40:34.410Z';
 
       const apiResponse = await supertest.get(
-        `/api/uptime/ping/histogram?dateStart=${dateStart}&dateEnd=${dateEnd}`
+        `/internal/uptime/ping/histogram?dateStart=${dateStart}&dateEnd=${dateEnd}`
       );
       const data = apiResponse.body;
 
@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       const monitorId = '0002-up';
 
       const apiResponse = await supertest.get(
-        `/api/uptime/ping/histogram?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
+        `/internal/uptime/ping/histogram?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
       );
       const data = apiResponse.body;
 
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}';
 
       const apiResponse = await supertest.get(
-        `/api/uptime/ping/histogram?dateStart=${dateStart}&dateEnd=${dateEnd}&filters=${filters}`
+        `/internal/uptime/ping/histogram?dateStart=${dateStart}&dateEnd=${dateEnd}&filters=${filters}`
       );
       const data = apiResponse.body;
 

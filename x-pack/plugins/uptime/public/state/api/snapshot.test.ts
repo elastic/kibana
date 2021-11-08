@@ -36,7 +36,7 @@ describe('snapshot API', () => {
     });
     expect(fetchMock).toHaveBeenCalledWith({
       asResponse: false,
-      path: '/api/uptime/snapshot/count',
+      path: '/internal/uptime/snapshot/count',
       query: {
         dateRangeEnd: 'now',
         dateRangeStart: 'now-15m',

@@ -6,16 +6,16 @@
  */
 
 export enum API_URLS {
-  INDEX_STATUS = '/api/uptime/index_status',
-  MONITOR_LIST = `/api/uptime/monitor/list`,
-  MONITOR_LOCATIONS = `/api/uptime/monitor/locations`,
-  MONITOR_DURATION = `/api/uptime/monitor/duration`,
-  MONITOR_DETAILS = `/api/uptime/monitor/details`,
-  MONITOR_STATUS = `/api/uptime/monitor/status`,
-  PINGS = '/api/uptime/pings',
-  PING_HISTOGRAM = `/api/uptime/ping/histogram`,
-  SNAPSHOT_COUNT = `/api/uptime/snapshot/count`,
-  LOG_PAGE_VIEW = `/api/uptime/log_page_view`,
+  INDEX_STATUS = '/internal/uptime/index_status',
+  MONITOR_LIST = `/internal/uptime/monitor/list`,
+  MONITOR_LOCATIONS = `/internal/uptime/monitor/locations`,
+  MONITOR_DURATION = `/internal/uptime/monitor/duration`,
+  MONITOR_DETAILS = `/internal/uptime/monitor/details`,
+  MONITOR_STATUS = `/internal/uptime/monitor/status`,
+  PINGS = '/internal/uptime/pings',
+  PING_HISTOGRAM = `/internal/uptime/ping/histogram`,
+  SNAPSHOT_COUNT = `/internal/uptime/snapshot/count`,
+  LOG_PAGE_VIEW = `/internal/uptime/log_page_view`,
 
   ML_MODULE_JOBS = `/api/ml/modules/jobs_exist/`,
   ML_SETUP_MODULE = '/api/ml/modules/setup/',

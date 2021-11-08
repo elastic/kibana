@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('when no data is present', async () => {
       it('returns a null snapshot', async () => {
         const apiResponse = await supertest.get(
-          `/api/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
+          `/internal/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
         );
 
         expectFixtureEql(apiResponse.body, 'snapshot_empty');
@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             it('will count all statuses correctly', async () => {
               const apiResponse = await supertest.get(
-                `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}`
+                `/internal/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}`
               );
 
               expectFixtureEql(apiResponse.body, 'snapshot');

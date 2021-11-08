@@ -33,7 +33,9 @@ export default function ({ getService }: FtrProviderContext) {
       const from = '2019-01-28T17:40:08.078Z';
       const to = '2025-01-28T19:00:16.078Z';
 
-      const apiResponse = await supertest.get(`/api/uptime/pings?from=${from}&to=${to}&size=10`);
+      const apiResponse = await supertest.get(
+        `/internal/uptime/pings?from=${from}&to=${to}&size=10`
+      );
 
       const { total, pings } = decodePingsResponseData(apiResponse.body);
 
@@ -59,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       const size = 50;
 
       const apiResponse = await supertest.get(
-        `/api/uptime/pings?from=${from}&to=${to}&size=${size}`
+        `/internal/uptime/pings?from=${from}&to=${to}&size=${size}`
       );
 
       const { total, pings } = decodePingsResponseData(apiResponse.body);
@@ -127,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       const size = 15;
 
       const apiResponse = await supertest.get(
-        `/api/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}`
+        `/internal/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}`
       );
 
       const { total, pings } = decodePingsResponseData(apiResponse.body);
@@ -161,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
       const sort = 'asc';
 
       const apiResponse = await supertest.get(
-        `/api/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}&sort=${sort}`
+        `/internal/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}&sort=${sort}`
       );
 
       const { total, pings } = decodePingsResponseData(apiResponse.body);

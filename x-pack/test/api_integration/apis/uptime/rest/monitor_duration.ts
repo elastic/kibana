@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
       const monitorId = '0002-up';
 
       const apiResponse = await supertest.get(
-        `/api/uptime/monitor/duration?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
+        `/internal/uptime/monitor/duration?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
       );
       const data = apiResponse.body;
       expectFixtureEql(data, 'monitor_charts');
@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       const monitorId = '0002-up';
 
       const apiResponse = await supertest.get(
-        `/api/uptime/monitor/duration?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
+        `/internal/uptime/monitor/duration?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
       );
       const data = apiResponse.body;
 

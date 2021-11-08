@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns the status for only the given monitor', async () => {
       const apiResponse = await supertest.get(
-        `/api/uptime/monitor/status?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
+        `/internal/uptime/monitor/status?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
       );
       expectFixtureEql(apiResponse.body, 'monitor_latest_status');
     });
