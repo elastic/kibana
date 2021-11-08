@@ -14,48 +14,21 @@ import {
   EuiTextColor,
   EuiText,
   EuiTitle,
+  EuiListGroup,
   EuiButtonEmpty,
   EuiFlexItem,
   EuiCard,
+  EuiProgress,
   EuiSpacer,
   EuiFlexGroup,
-  PropsOf,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../common/components/header_page';
-import { ChartList } from './chart_list';
 import { CloudPostureScoreChart } from './cloud_posture_score_chart';
-import { TopResourceRiskList } from './top_resource_risk_list';
-import { ScorePerAccountAndCluster } from './score_per_account_and_cluster';
-
-const Desc = (
-  <EuiText size="s">
-    <EuiTextColor color="subdued">Non compliant first</EuiTextColor>
-  </EuiText>
-);
-
-const cards = [
-  {
-    title: (
-      <EuiFlexGroup alignItems="center" style={{ marginBottom: 8 }}>
-        <EuiFlexItem grow={true}>
-          <EuiTitle size="s">
-            <span>Cloud Posture Score</span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ marginRight: 0 }}>
-          <EuiButtonEmpty size="xs" href="#href" aria-label="Go to Dashboards">
-            View Rules
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    children: CloudPostureScoreChart,
-  },
-  { title: 'Top 5 Resource Types at Risk', description: Desc, children: TopResourceRiskList },
-  { title: 'Score Per Account / Cluster', description: Desc, children: ScorePerAccountAndCluster },
-];
+import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import { CloudPosturePage } from '../../../app/types';
+import { useCloudPostureFindingsApi } from '../../common/api';
 
 export const Dashboard = () => {
   return (
@@ -63,22 +36,65 @@ export const Dashboard = () => {
       <HeaderPage hideSourcerer border title={'Dashboard'} />
       <DashboardWrapper>
         <TopContent>
-          {cards.map(({ children: Comp, ...rest }, i) => (
-            <Card key={i} {...rest}>
-              <Comp />
-            </Card>
-          ))}
+          <ScoreCard />
+          <ResourcesCard />
         </TopContent>
-        <MiddleContent>
-          <Card title="Compliance Trend"> </Card>
-          <Card title="Findings Trend"> </Card>
-        </MiddleContent>
-        <BottomContent>
-          <div style={{ gridColumn: '1/-1' }}>foo 4</div>
-        </BottomContent>
       </DashboardWrapper>
       <EuiSpacer />
+      <SpyRoute pageName={CloudPosturePage.dashboard} />
     </SecuritySolutionPageWrapper>
+  );
+};
+
+const ResourcesCard = () => {
+  const findings = useCloudPostureFindingsApi();
+
+  // TODO: handle states: isSuccess/isError/isLoading
+  if (!findings.isSuccess) return <h1>???</h1>;
+
+  const d = [...new Set(findings.data.map((v) => v._source['Resource']))];
+
+  return (
+    <Card title="Resources">
+      <EuiListGroup
+        listItems={d.map((v) => ({
+          label: v,
+          href: '#',
+        }))}
+      />
+    </Card>
+  );
+};
+const ScoreCard = () => {
+  const findings = useCloudPostureFindingsApi();
+
+  // TODO: handle states: isSuccess/isError/isLoading
+  if (!findings.isSuccess) return <h1>???</h1>;
+
+  const d = findings.data.map((v) => ({ ...v, ...v._source }));
+
+  console.log({ d });
+  const passed = d.filter((v) => v.Evaluation === 'pass');
+  const failed = d.filter((v) => v.Evaluation === 'Fail');
+
+  const data = [
+    { label: 'Passed', value: (passed.length / d.length) * 100, color: 'success' },
+    {
+      label: 'Failed',
+      value: (failed.length / d.length) * 100,
+      color: 'danger',
+    },
+  ];
+  return (
+    <Card title="Rules">
+      <EuiSpacer size="l" />
+      {data.map((item) => (
+        <React.Fragment key={item.value}>
+          <EuiProgress valueText={true} max={100} size="l" {...item} />
+          <EuiSpacer size="l" />
+        </React.Fragment>
+      ))}
+    </Card>
   );
 };
 
@@ -103,24 +119,12 @@ const DashboardWrapper = styled.div`
   display: grid;
   height: 100%;
   flex: 1;
-  grid-template-rows: 300px 300px 1fr;
+  grid-template-rows: max-content 1fr;
   grid-gap: 30px;
 `;
 
 const TopContent = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-gap: 30px;
-`;
-const MiddleContent = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 30px;
-`;
-
-const BottomContent = styled.div`
-  display: grid;
-  grid-auto-flow: row;
-  grid-auto-rows: 150px;
   grid-gap: 30px;
 `;

@@ -34,8 +34,6 @@ import { ChartList } from './chart_list';
 
 const useCloudPostureScore = () => {
   const { http } = useKibana().services;
-  console.log({ http });
-  //return useQuery(['csp_foo'], () => http.get('/api/csp/foo'));
   return useQuery(['csp_findings'], () => http.get('/api/csp/findings'));
 };
 

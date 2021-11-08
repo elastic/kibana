@@ -7,22 +7,11 @@
 import React from 'react';
 import { Redirect, RouteProps, RouteComponentProps, Switch, Route } from 'react-router-dom';
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from 'react-query';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { Dashboard } from './pages/dashboard';
-import { Alerts } from './pages/alerts';
-import { Rules } from './pages/rules';
 import { Findings } from './pages/findings';
-import { SpyRoute } from '../common/utils/route/spy_routes';
-import { SecurityPageName } from '../app/types';
 
-// Create a client
 const queryClient = new QueryClient();
 
 const Providers: React.FC = ({ children }) => {
@@ -31,8 +20,6 @@ const Providers: React.FC = ({ children }) => {
 
 const innerRoutes: RouteProps[] = [
   { path: '/csp/dashboard', render: Dashboard },
-  { path: '/csp/rules', render: Rules },
-  { path: '/csp/alerts', render: Alerts },
   { path: '/csp/findings', render: Findings },
 ];
 
@@ -47,7 +34,6 @@ const Routes = (props: RouteComponentProps<{}>) => {
           {pages}
           <Route path="*">{`Not Found`}</Route>
         </Switch>
-        <SpyRoute pageName={SecurityPageName.cloud_posture} />
       </EuiErrorBoundary>
     </Providers>
   );

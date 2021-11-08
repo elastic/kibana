@@ -11,13 +11,16 @@ import { Logger } from 'src/core/server';
 import { AggregationsFiltersAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { SecuritySolutionPluginRouter } from '../../types';
 
+const FINDINGS_INDEX = `findings*`;
+const AGENT_LOGS_INDEX = `agent_log_2*`;
+
 const getFindingsEsQuery = ({ runIds }: { runIds: string[] }): SearchRequest => ({
-  index: 'findings*',
+  index: FINDINGS_INDEX,
   query: { terms: { 'run_id.keyword': runIds } },
 });
 
 const getAgentLogsEsQuery = (): SearchRequest => ({
-  index: 'agent_log_2*',
+  index: AGENT_LOGS_INDEX,
   size: 0,
   query: {
     bool: {
@@ -52,8 +55,8 @@ export const createFindingsRoute = (router: SecuritySolutionPluginRouter, logger
     try {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const agentLogs = await esClient.search(getAgentLogsEsQuery());
-
       const aggregations = agentLogs.body.aggregations;
+
       if (!aggregations) {
         logger.error(`Missing 'aggregations' in agent logs query response`);
         return response.notFound();
@@ -67,8 +70,9 @@ export const createFindingsRoute = (router: SecuritySolutionPluginRouter, logger
       }
 
       const findings = await esClient.search(getFindingsEsQuery({ runIds: buckets.map(getRunId) }));
+      const hits = findings.body.hits.hits;
 
-      return response.ok({ body: findings });
+      return response.ok({ body: hits });
     } catch (err) {
       return response.customError({ body: { message: 'Unknown error' }, statusCode: 500 });
     }
