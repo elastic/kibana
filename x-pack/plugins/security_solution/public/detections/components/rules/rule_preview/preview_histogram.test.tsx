@@ -53,6 +53,7 @@ describe('PreviewHistogram', () => {
           timeFrame="M"
           previewId={'test-preview-id'}
           spaceId={'default'}
+          ruleType={'query'}
         />
       </TestProviders>
     );
@@ -86,6 +87,7 @@ describe('PreviewHistogram', () => {
           timeFrame="M"
           previewId={'test-preview-id'}
           spaceId={'default'}
+          ruleType={'query'}
         />
       </TestProviders>
     );
