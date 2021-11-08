@@ -17,7 +17,7 @@ export async function validateInfluencers(job: CombinedJob) {
   validateJobObject(job);
 
   const messages = [];
-  const influencers = job.analysis_config.influencers;
+  const influencers = job.analysis_config.influencers!;
 
   const detectorFieldNames: string[] = [];
   job.analysis_config.detectors.forEach((d) => {

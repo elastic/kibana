@@ -21,7 +21,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 /** @public */
 export { colorUtil, KibanaMapLayer, mapTooltipProvider };
 
-export { WMSOptions } from './common/types';
+export type { WMSOptions } from './common/types';
 export { WmsOptions } from './components/wms_options';
 export { LegacyMapDeprecationMessage } from './components/legacy_map_deprecation_message';
 
