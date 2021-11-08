@@ -289,7 +289,7 @@ function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) =>
   // This hooks returns `rect`.
   const [rect, setRect] = useState<DOMRect | null>(null);
 
-  const { requestAnimationFrame } = useContext(SideEffectContext);
+  const { ResizeObserver, requestAnimationFrame } = useContext(SideEffectContext);
 
   // Keep the current DOM node in state so that we can create a ResizeObserver for it via `useEffect`.
   const [currentNode, setCurrentNode] = useState<Element | null>(null);
@@ -353,6 +353,6 @@ function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) =>
         resizeObserver.disconnect();
       };
     }
-  }, [currentNode, getBoundingClientRect]);
+  }, [ResizeObserver, currentNode, getBoundingClientRect]);
   return [rect, ref];
 }

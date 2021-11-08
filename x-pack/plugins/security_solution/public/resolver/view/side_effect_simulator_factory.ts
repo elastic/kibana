@@ -199,6 +199,7 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
       requestAnimationFrame,
       cancelAnimationFrame,
       timestamp,
+      ResizeObserver: MockResizeObserver,
       writeTextToClipboard,
       getBoundingClientRect,
     },
