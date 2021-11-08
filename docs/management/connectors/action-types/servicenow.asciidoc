@@ -36,7 +36,7 @@ A CORS rule is required for communication between the Elastic and ServiceNow. To
 
 . Go to *System Web Services -> CORS Rules*.
 . Click *New*.
-. Configure the rule settings to use the Elastic SIR API and the Kibana URL:
+. Configure the rule settings to use the Elastic ITSM API and the Kibana URL:
 * *REST API*: Choose `Elastic ITSM API [x_elas2_inc_int/elastic_api]`.
 * *Domain*: Enter the Kibana URL.
 . Go to the *HTTP methods* tab and select *GET*. This chooses the GET HTTP method.
