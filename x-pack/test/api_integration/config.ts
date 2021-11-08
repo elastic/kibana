@@ -9,7 +9,6 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProviderContext) {
-  const registryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT;
   const xPackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.js')
   );
@@ -37,7 +36,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
-        ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
       ],
     },
     esTestCluster: {
