@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickBy } from 'lodash';
+import { isEmpty, pickBy } from 'lodash';
 import { IRouter } from '../../../../../../src/core/server';
 import { PLUGIN_ID } from '../../../common';
 import {
@@ -39,8 +39,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
 
       const conflictingEntries = await savedObjectsClient.find({
         type: savedQuerySavedObjectType,
-        search: id,
-        searchFields: ['id'],
+        filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
       });
 
       if (conflictingEntries.saved_objects.length) {
@@ -49,26 +48,32 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
 
       const savedQuerySO = await savedObjectsClient.create(
         savedQuerySavedObjectType,
-        pickBy({
-          id,
-          description,
-          query,
-          platform,
-          version,
-          interval,
-          ecs_mapping: convertECSMappingToArray(ecs_mapping),
-          created_by: currentUser,
-          created_at: new Date().toISOString(),
-          updated_by: currentUser,
-          updated_at: new Date().toISOString(),
-        })
+        pickBy(
+          {
+            id,
+            description,
+            query,
+            platform,
+            version,
+            interval,
+            ecs_mapping: convertECSMappingToArray(ecs_mapping),
+            created_by: currentUser,
+            created_at: new Date().toISOString(),
+            updated_by: currentUser,
+            updated_at: new Date().toISOString(),
+          },
+          (value) => !isEmpty(value)
+        )
       );
 
       return response.ok({
-        body: pickBy({
-          ...savedQuerySO,
-          ecs_mapping,
-        }),
+        body: pickBy(
+          {
+            ...savedQuerySO,
+            ecs_mapping,
+          },
+          (value) => !isEmpty(value)
+        ),
       });
     }
   );

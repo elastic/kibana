@@ -52,7 +52,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: strin
 
   const button = useMemo(
     () => (
-      <EuiButtonEmpty flush="both" onClick={onButtonClick}>
+      <EuiButtonEmpty size="s" flush="both" onClick={onButtonClick}>
         <>{agentPolicyIds?.length ?? 0}</>
       </EuiButtonEmpty>
     ),
