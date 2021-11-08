@@ -125,7 +125,9 @@ export const IndexPatternTable = ({
           </EuiButtonEmpty>
           &emsp;
           <EuiBadgeGroup gutterSize="s">
-            {index.id && index.id.indexOf(securitySolution) === 0 && <EuiBadge>{securityDataView}</EuiBadge>}
+            {index.id && index.id.indexOf(securitySolution) === 0 && (
+              <EuiBadge>{securityDataView}</EuiBadge>
+            )}
 
             {index.tags &&
               index.tags.map(({ key: tagKey, name: tagName }) => (
