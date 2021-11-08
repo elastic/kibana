@@ -319,6 +319,7 @@ export const useCasesColumns = ({
               if (theCase.id != null) {
                 return (
                   <EuiButtonEmpty
+                    data-test-subj={`cases-table-row-select-${theCase.id}`}
                     onClick={() => {
                       assignCaseAction(theCase);
                     }}
