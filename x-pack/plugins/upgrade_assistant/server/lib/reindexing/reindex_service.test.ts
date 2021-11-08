@@ -96,6 +96,7 @@ describe('reindexService', () => {
 
     it('calls security API with basic requirements', async () => {
       clusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         asApiResponse({ has_all_requested: true })
       );
 
@@ -121,6 +122,7 @@ describe('reindexService', () => {
 
     it('includes checking for permissions on the baseName which could be an alias', async () => {
       clusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         asApiResponse({ has_all_requested: true })
       );
 
@@ -381,6 +383,7 @@ describe('reindexService', () => {
         },
       } as any);
 
+      // @ts-expect-error not full interface
       clusterClient.asCurrentUser.tasks.cancel.mockResolvedValueOnce(asApiResponse(true));
 
       await service.cancelReindexing('myIndex');
@@ -453,6 +456,7 @@ describe('reindexService', () => {
       it('creates new index with settings and mappings and updates lastCompletedStep', async () => {
         actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
         clusterClient.asCurrentUser.indices.create.mockResolvedValueOnce(
+          // @ts-expect-error not full interface
           asApiResponse({ acknowledged: true })
         );
         const updatedOp = await service.processNextStep(reindexOp);
@@ -469,10 +473,12 @@ describe('reindexService', () => {
 
       it('fails if create index is not acknowledged', async () => {
         clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+          // @ts-expect-error not full interface
           asApiResponse({ myIndex: settingsMappings })
         );
 
         clusterClient.asCurrentUser.indices.create.mockResolvedValueOnce(
+          // @ts-expect-error not full interface
           asApiResponse({ acknowledged: false })
         );
         const updatedOp = await service.processNextStep(reindexOp);
@@ -484,6 +490,7 @@ describe('reindexService', () => {
 
       it('fails if create index fails', async () => {
         clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+          // @ts-expect-error not full interface
           asApiResponse({ myIndex: settingsMappings })
         );
 
@@ -562,6 +569,7 @@ describe('reindexService', () => {
       describe('reindex task is not complete', () => {
         it('updates reindexTaskPercComplete', async () => {
           clusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce(
+            // @ts-expect-error not full interface
             asApiResponse({
               completed: false,
               task: { status: { created: 10, total: 100 } },
@@ -577,6 +585,7 @@ describe('reindexService', () => {
       describe('reindex task is complete', () => {
         it('deletes task, updates reindexTaskPercComplete, updates lastCompletedStep', async () => {
           clusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce(
+            // @ts-expect-error not full interface
             asApiResponse({
               completed: true,
               task: { status: { created: 100, total: 100 } },
@@ -584,12 +593,14 @@ describe('reindexService', () => {
           );
 
           clusterClient.asCurrentUser.count.mockResolvedValueOnce(
+            // @ts-expect-error not full interface
             asApiResponse({
               count: 100,
             })
           );
 
           clusterClient.asCurrentUser.delete.mockResolvedValueOnce(
+            // @ts-expect-error not full interface
             asApiResponse({
               result: 'deleted',
             })
@@ -606,6 +617,7 @@ describe('reindexService', () => {
 
         it('fails if docs created is less than count in source index', async () => {
           clusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce(
+            // @ts-expect-error not full interface
             asApiResponse({
               completed: true,
               task: { status: { created: 95, total: 95 } },
@@ -613,6 +625,7 @@ describe('reindexService', () => {
           );
 
           clusterClient.asCurrentUser.count.mockResolvedValueOnce(
+            // @ts-expect-error not full interface
             asApiResponse({
               count: 100,
             })
@@ -629,6 +642,7 @@ describe('reindexService', () => {
       describe('reindex task is cancelled', () => {
         it('deletes task, updates status to cancelled', async () => {
           clusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce(
+            // @ts-expect-error not full interface
             asApiResponse({
               completed: true,
               task: { status: { created: 100, total: 100, canceled: 'by user request' } },
@@ -636,6 +650,7 @@ describe('reindexService', () => {
           );
 
           clusterClient.asCurrentUser.delete.mockResolvedValue(
+            // @ts-expect-error not full interface
             asApiResponse({ result: 'deleted' })
           );
 
