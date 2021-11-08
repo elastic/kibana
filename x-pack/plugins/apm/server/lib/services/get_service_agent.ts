@@ -70,7 +70,7 @@ export async function getServiceAgent({
       },
       sort: {
         _score: {
-          order: 'desc',
+          order: 'desc' as const,
         },
       },
     },
