@@ -8,10 +8,10 @@
 import React, { FC } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import { getJobTypeLabel } from '../../util/field_types_utils';
 import type { JobFieldType } from '../../../../../common';
 import './_index.scss';
-import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
