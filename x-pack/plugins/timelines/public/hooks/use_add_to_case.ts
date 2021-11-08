@@ -16,7 +16,7 @@ import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
 import { AddToCaseActionProps } from '../components/actions';
-import { casesDeepLinkIds, generateCaseViewPath } from '../../../cases/public';
+import { CasesDeepLinkIds, generateCaseViewPath } from '../../../cases/public';
 
 interface UseAddToCase {
   addNewCaseClick: () => void;
@@ -110,7 +110,7 @@ export const useAddToCase = ({
   const onViewCaseClick = useCallback(
     (id) => {
       navigateToApp(appId, {
-        deepLinkId: casesDeepLinkIds.cases,
+        deepLinkId: CasesDeepLinkIds.cases,
         path: generateCaseViewPath({ detailName: id }),
       });
     },

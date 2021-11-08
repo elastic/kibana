@@ -21,4 +21,4 @@ export type { CreateCaseProps } from './components/create';
 export type { RecentCasesProps } from './components/recent_cases';
 
 export type { CasesDeepLinkId } from './common/navigation';
-export { getCasesDeepLinks, casesDeepLinkIds, generateCaseViewPath } from './common/navigation';
+export { getCasesDeepLinks, CasesDeepLinkIds, generateCaseViewPath } from './common/navigation';
