@@ -23,7 +23,12 @@ import {
   ScaleType,
   HeatmapSpec,
 } from '@elastic/charts';
-import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../charts/public';
+import {
+  LegendToggle,
+  ChartsPluginSetup,
+  PaletteRegistry,
+  CustomPaletteState,
+} from '../../../charts/public';
 import type { FieldFormatsStart } from '../../../field_formats/public';
 import type { IUiSettingsClient } from '../../../../core/public';
 import type { PersistedState } from '../../../visualizations/public';
@@ -32,7 +37,7 @@ import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/publ
 // import { DEFAULT_PERCENT_DECIMALS } from '../common';
 import { HeatmapVisParams } from './types';
 import { getTimeZone } from './utils/get_timezone';
-import { getStopsFromColorsNumber } from './utils/palette';
+import { shiftAndNormalizeStops } from './utils/palette';
 
 import './chart.scss';
 
@@ -335,42 +340,28 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
 
   const valueFormatter = (d: number) => {
     let value = d;
-    if (visParams.percentageMode && !visParams.setColorRange) {
-      value = value / max;
+    if (visParams.percentageMode) {
+      const percentageNumber = (value / max) * 100;
+      value = parseInt(percentageNumber.toString(), 10);
     }
-    return visParams.percentageMode && !visParams.setColorRange
-      ? percentFormatter.convert(value)
+    return visParams.percentageMode
+      ? percentFormatter.convert(value / 100)
       : metricFieldFormatter.convert(d);
   };
 
-  interface ColorStopsParams {
-    colors: string[];
-    stops: number[];
-    rangeMax?: number;
-    labels?: string[];
-  }
-  let params = visParams.palette.params as unknown as ColorStopsParams;
-  if (!visParams.setColorRange) {
-    const stops = getStopsFromColorsNumber(
-      Number(visParams.colorsNumber),
-      visParams.percentageMode,
-      visParams.percentageMode ? percentFormatter : metricFieldFormatter,
-      min,
-      max
-    );
-    params = {
-      ...stops,
-      colors: visParams.palette?.params?.colors,
-    } as unknown as ColorStopsParams;
-  }
-
-  const endValue = visParams.setColorRange ? params.rangeMax : max + 1;
+  let params = visParams.palette.params as unknown as CustomPaletteState;
+  const stops = shiftAndNormalizeStops(params, { min, max });
+  params = {
+    ...params,
+    stops,
+  };
+  // I want the last value to be included
+  const endValue = params.range === 'number' ? params.rangeMax : max + 0.00000001;
   const bands = params.stops.map((stop, index) => {
     return {
       start: stop ?? -Infinity,
       end: params.stops[index + 1] ?? endValue,
       color: params.colors[index],
-      label: params?.labels && params.labels.length ? params.labels[index] : undefined,
     };
   });
 

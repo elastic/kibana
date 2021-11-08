@@ -11,7 +11,7 @@ import moment from 'moment';
 import { VisToExpressionAst, getVisSchemas } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import type { DateHistogramParams, HistogramParams } from '../../../visualizations/public';
-import { getStopsWithColorsFromRanges, getColorsFromColorsNumber } from './utils/palette';
+import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './utils/palette';
 
 import { BUCKET_TYPES } from '../../../data/public';
 
@@ -72,8 +72,7 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
     enableHover: vis.params.enableHover,
     addLegend: vis.params.addLegend,
     legendPosition: vis.params.legendPosition,
-    colorsNumber: vis.params.colorsNumber,
-    setColorRange: vis.params.setColorRange,
+    useDistinctBands: vis.params.useDistinctBands,
     percentageMode: vis.params.percentageMode,
     percentageFormatPattern: vis.params.percentageFormatPattern,
     isCellLabelVisible: vis.params.isCellLabelVisible,
@@ -91,30 +90,36 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
     vislibHeatmapName,
     args
   );
-  let stopsWithColors;
+  let palette;
   if (vis.params.setColorRange && vis.params.colorsRange && vis.params.colorsRange.length) {
-    stopsWithColors = getStopsWithColorsFromRanges(
+    const stopsWithColors = getStopsWithColorsFromRanges(
       vis.params.colorsRange,
       vis.params.colorSchema,
       vis.params.invertColors
     );
+    palette = buildExpressionFunction('palette', {
+      ...stopsWithColors,
+      range: 'number',
+      continuity: 'none',
+      rangeMax:
+        vis.params.setColorRange && vis.params.colorsRange && vis.params.colorsRange.length
+          ? vis.params.colorsRange[vis.params?.colorsRange.length - 1].to
+          : undefined,
+    });
   } else {
-    stopsWithColors = getColorsFromColorsNumber(
+    const stopsWithColors = getStopsWithColorsFromColorsNumber(
       vis.params.colorsNumber,
       vis.params.colorSchema,
       vis.params.invertColors
     );
+    palette = buildExpressionFunction('palette', {
+      ...stopsWithColors,
+      range: 'percent',
+      continuity: 'none',
+      rangeMin: 0,
+      rangeMax: 100,
+    });
   }
-  const palette = buildExpressionFunction('palette', {
-    ...stopsWithColors,
-    range: 'number',
-    continuity: 'none',
-    rangeMax:
-      vis.params.setColorRange && vis.params.colorsRange && vis.params.colorsRange.length
-        ? vis.params.colorsRange[vis.params?.colorsRange.length - 1].to
-        : undefined,
-  });
-
   visTypeHeatmap.addArgument('palette', buildExpression([palette]));
 
   const ast = buildExpression([getEsaggsFn(vis), visTypeHeatmap]);

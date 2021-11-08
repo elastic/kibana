@@ -90,7 +90,8 @@ export const createHeatmapVisFn = (): ExpressionHeatmapFunction => ({
     enableHover: {
       types: ['boolean'],
       help: i18n.translate('visTypeHeatmap.function.args.enableHoverHelpText', {
-        defaultMessage: 'Enables hover',
+        defaultMessage:
+          'When this is enabled, it highlights the ranges of the same color on legend hover',
       }),
     },
     legendPosition: {
@@ -99,17 +100,12 @@ export const createHeatmapVisFn = (): ExpressionHeatmapFunction => ({
         defaultMessage: 'Position the legend on top, bottom, left, right of the chart',
       }),
     },
-    colorsNumber: {
-      types: ['number'],
-      help: i18n.translate('visTypeHeatmap.function.args.colorsNumberHelpText', {
-        defaultMessage: 'Specify the number of bands dynamically created by the min and max value',
-      }),
-    },
-    setColorRange: {
+    useDistinctBands: {
       types: ['boolean'],
-      help: i18n.translate('visTypeHeatmap.function.args.setColorRangeHelpText', {
-        defaultMessage: 'When this is enabled. it highlights the ranges of the same color',
+      help: i18n.translate('visTypeHeatmap.function.args.useDistinctBandsHelpText', {
+        defaultMessage: 'TBD',
       }),
+      default: true,
     },
     percentageMode: {
       types: ['boolean'],

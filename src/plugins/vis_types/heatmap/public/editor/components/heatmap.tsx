@@ -57,6 +57,12 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
     setValidity(stateParams.setColorRange ? isColorRangesValid : !isColorsNumberInvalid);
   }, [stateParams.setColorRange, isColorRangesValid, isColorsNumberInvalid, setValidity]);
 
+  useEffect(() => {
+    if (stateParams.setColorRange) {
+      stateParams.percentageMode = false;
+    }
+  }, [stateParams]);
+
   return (
     <>
       <EuiPanel paddingSize="s">
