@@ -11,10 +11,11 @@ import { sortBy, uniq } from 'lodash';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldButton } from '@kbn/react-field/field_button';
 
 import { FieldSearch } from './field_search';
 import { DataView, DataViewField } from '../../../../data_views/common';
-import { FieldIcon, FieldButton } from '../../../../kibana_react/public';
 
 import './field_picker.scss';
 
