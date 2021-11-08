@@ -6,6 +6,7 @@
  */
 
 import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -132,7 +133,9 @@ export function UXAppRoot({
             <RouterProvider history={history} router={uxRouter}>
               <InspectorContextProvider>
                 <UrlParamsProvider>
-                  <UxApp />
+                  <EuiErrorBoundary>
+                    <UxApp />
+                  </EuiErrorBoundary>
                   <UXActionMenu appMountParameters={appMountParameters} />
                 </UrlParamsProvider>
               </InspectorContextProvider>
