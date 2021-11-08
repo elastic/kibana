@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-import 'brace/theme/github';
 import { XJsonMode } from '@kbn/ace';
+import 'brace/theme/github';
 
 import './add_message_variables.scss';
 import { XJson, EuiCodeEditor } from '../../../../../../src/plugins/es_ui_shared/public';
