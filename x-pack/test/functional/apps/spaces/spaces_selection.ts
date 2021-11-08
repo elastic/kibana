@@ -61,6 +61,68 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
+    describe('Space Selector', () => {
+      before(async () => {
+        await PageObjects.security.forceLogout();
+      });
+
+      afterEach(async () => {
+        await PageObjects.security.forceLogout();
+      });
+
+      it('allows user to navigate to different spaces', async () => {
+        const spaceId = 'another-space';
+
+        await PageObjects.security.login(undefined, undefined, {
+          expectSpaceSelector: true,
+        });
+
+        await PageObjects.spaceSelector.clickSpaceCard(spaceId);
+
+        await PageObjects.spaceSelector.expectHomePage(spaceId);
+
+        await PageObjects.spaceSelector.openSpacesNav();
+
+        // change spaces
+
+        await PageObjects.spaceSelector.clickSpaceAvatar('default');
+
+        await PageObjects.spaceSelector.expectHomePage('default');
+      });
+    });
+
+    describe('Search spaces in popover', () => {
+      const spaceId = 'default';
+      before(async () => {
+        await PageObjects.security.forceLogout();
+        await PageObjects.security.login(undefined, undefined, {
+          expectSpaceSelector: true,
+        });
+      });
+
+      after(async () => {
+        await PageObjects.security.forceLogout();
+      });
+
+      it('allows user to search for spaces', async () => {
+        await PageObjects.spaceSelector.clickSpaceCard(spaceId);
+        await PageObjects.spaceSelector.expectHomePage(spaceId);
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.expectSearchBoxInSpacesSelector();
+      });
+
+      it('search for "ce 1" and find one space', async () => {
+        await PageObjects.spaceSelector.setSearchBoxInSpacesSelector('ce 1');
+        await PageObjects.spaceSelector.expectToFindThatManySpace(1);
+      });
+
+      it('search for "dog" and find NO space', async () => {
+        await PageObjects.spaceSelector.setSearchBoxInSpacesSelector('dog');
+        await PageObjects.spaceSelector.expectToFindThatManySpace(0);
+        await PageObjects.spaceSelector.expectNoSpacesFound();
+      });
+    });
+
     describe('Spaces Data', () => {
       const spaceId = 'another-space';
       const sampleDataHash = '/tutorial_directory/sampleData';

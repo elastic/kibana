@@ -190,4 +190,29 @@ export class SpaceSelectorPageObject extends FtrService {
       await this.common.sleep(1000);
     });
   }
+
+  async expectSearchBoxInSpacesSelector() {
+    expect(await this.find.existsByCssSelector('div[role="dialog"] input[type="search"]')).to.be(
+      true
+    );
+  }
+
+  async setSearchBoxInSpacesSelector(searchText: string) {
+    const searchBox = await this.find.byCssSelector('div[role="dialog"] input[type="search"]');
+    searchBox.clearValue();
+    searchBox.type(searchText);
+    await this.common.sleep(1000);
+  }
+
+  async expectToFindThatManySpace(numberOfExpectedSpace: number) {
+    const spacesFound = await this.find.allByCssSelector('div[role="dialog"] a.euiContextMenuItem');
+    expect(spacesFound.length).to.be(numberOfExpectedSpace);
+  }
+
+  async expectNoSpacesFound() {
+    const msgElem = await this.find.byCssSelector(
+      'div[role="dialog"] .euiContextMenuPanel .euiText'
+    );
+    expect(await msgElem.getVisibleText()).to.be('no spaces found');
+  }
 }
