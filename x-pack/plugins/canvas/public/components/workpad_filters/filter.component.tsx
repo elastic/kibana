@@ -19,11 +19,11 @@ interface Props {
 type CustomComponentProps = Omit<Props, 'filter'> & { value: string };
 
 const titleStyle = {
-  width: '40%',
+  width: '30%',
 };
 
 const descriptionStyle = {
-  width: '60%',
+  width: '70%',
 };
 
 const renderElement = (
@@ -52,7 +52,7 @@ export const Filter: FC<Props> = ({ filter, ...restProps }) => {
   });
 
   return (
-    <EuiPanel grow={false} hasShadow={false} paddingSize="m">
+    <EuiPanel grow={false} hasShadow={false} paddingSize="s">
       <EuiDescriptionList
         type="column"
         className="workpadFilter"
