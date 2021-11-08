@@ -12,5 +12,6 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
   describe('Observability specs (trial)', function () {
     this.tags('ciGroup1');
     loadTestFile(require.resolve('./annotations'));
+    loadTestFile(require.resolve('./registry_rules'));
   });
 }

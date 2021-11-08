@@ -11,3 +11,4 @@ export * from './create_transaction_metric';
 export * from './get_alerts_target_indices';
 export * from './wait_until_next_execution';
 export * from './cleanup_target_indices';
+export * from './delete_alert';

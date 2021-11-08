@@ -8,7 +8,7 @@ import { User, TEST_PASSWORD } from '../common/users';
 import { GetService } from '../common/types';
 import { getAlertsTargetIndices } from './get_alerts_target_indices';
 import { BULK_INDEX_DELAY, MAX_POLLS } from '../common/constants';
-import { Alert } from '../../../../../plugins/alerting/common';
+import { Alert } from '../../../plugins/alerting/common';
 
 export async function waitUntilNextExecution(
   getService: GetService,

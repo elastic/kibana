@@ -17,8 +17,8 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { createUser, User } from './common/users';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createUser, User } from '../../common/users';
 import {
   getAlertsTargetIndices,
   createApmMetricIndex,
@@ -26,19 +26,19 @@ import {
   waitUntilNextExecution,
   createTransactionMetric,
   cleanupTargetIndices,
-} from '../../../observability_api_integration/lib';
-import { AlertDef, AlertParams } from './common/types';
+  deleteAlert,
+} from '../../lib';
+import { AlertDef, AlertParams } from '../../common/types';
 import { Alert } from '../../../../plugins/alerting/common';
-import { deleteAlert } from '../../../observability_api_integration/lib/delete_alert';
-import { APM_METRIC_INDEX_NAME } from './common/constants';
+import { APM_METRIC_INDEX_NAME } from '../../common/constants';
 
+// eslint-disable-next-line import/no-default-export
 export default function registryRulesApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const security = getService('security');
 
   describe('Rule Registry API', () => {
     before(async () => {
-      await createUser(security, User.apmReadUser);
       await createUser(security, User.apmWriteUser);
     });
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { GenericFtrProviderContext } from '@kbn/test';
-import { Alert, AlertTypeParams } from '../../../../../plugins/alerting/common';
-import { services } from '../../../services';
+import { Alert, AlertTypeParams } from '../../../plugins/alerting/common';
+import { services } from '../../api_integration/services';
 
 export type GetService = GenericFtrProviderContext<typeof services, {}>['getService'];
 

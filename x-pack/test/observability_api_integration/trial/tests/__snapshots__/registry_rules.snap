@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`apis Observability Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 1`] = `
+exports[`Observability specs (trial) Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 1`] = `
 Object {
   "event.action": Array [
     "open",
@@ -63,7 +63,7 @@ Object {
 }
 `;
 
-exports[`apis Observability Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 2`] = `
+exports[`Observability specs (trial) Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 2`] = `
 Object {
   "event.action": Array [
     "close",
