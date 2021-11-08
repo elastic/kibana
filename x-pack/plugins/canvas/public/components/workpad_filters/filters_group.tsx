@@ -6,7 +6,6 @@
  */
 
 import { EuiAccordion } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FormattedFilterViewInstance } from '../../../types';
 import { createFilledFilterView } from '../../lib/filter';
@@ -20,13 +19,6 @@ interface Props {
 
 const panelStyle = {
   paddingTop: '15px',
-};
-
-const strings = {
-  getBlankValueLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.filters_group.blankValue', {
-      defaultMessage: '(Blank)',
-    }),
 };
 
 export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
@@ -45,7 +37,7 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
     <div className="canvasSidebar__expandable">
       <EuiAccordion
         id="canvas-element-stats"
-        buttonContent={name ?? strings.getBlankValueLabel()}
+        buttonContent={name}
         initialIsOpen={true}
         className="canvasSidebar__accordion filtersSidebar__accordion"
         style={{ marginLeft: '0px' }}

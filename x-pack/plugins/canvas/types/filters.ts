@@ -69,4 +69,4 @@ export interface FilterViewSpec<FilterValue = unknown> {
 export type FlattenFilterViewInstance = Record<string, SimpleFilterViewField>;
 export type FormattedFilterViewInstance = Record<string, FormattedFilterViewField>;
 
-export type FilterField = keyof Filter;
+export type FilterField = 'column' | 'type' | 'filterGroup';
