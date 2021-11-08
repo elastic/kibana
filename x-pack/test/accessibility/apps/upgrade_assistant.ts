@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IndicesCreateRequest } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const translogSettingsIndexDeprecation: IndicesCreateRequest = {
+const translogSettingsIndexDeprecation: estypes.IndicesCreateRequest = {
   index: 'deprecated_settings',
   body: {
     settings: {
@@ -19,7 +19,7 @@ const translogSettingsIndexDeprecation: IndicesCreateRequest = {
   },
 };
 
-const multiFieldsIndexDeprecation: IndicesCreateRequest = {
+const multiFieldsIndexDeprecation: estypes.IndicesCreateRequest = {
   index: 'nested_multi_fields',
   body: {
     mappings: {
