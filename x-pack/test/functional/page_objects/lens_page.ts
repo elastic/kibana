@@ -126,12 +126,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (opts.operation === 'formula') {
         await this.switchToFormula();
       } else {
-        const operationSelector = opts.isPreviousIncompatible
-          ? `lns-indexPatternDimension-${opts.operation} incompatible`
-          : `lns-indexPatternDimension-${opts.operation}`;
-        await testSubjects.click(operationSelector);
+        await retry.try(async () => {
+          const operationSelector = opts.isPreviousIncompatible
+            ? `lns-indexPatternDimension-${opts.operation} incompatible`
+            : `lns-indexPatternDimension-${opts.operation}`;
+          await testSubjects.click(operationSelector);
+        });
       }
-
       if (opts.field) {
         const target = await testSubjects.find('indexPattern-dimension-field');
         await comboBox.openOptionsList(target);
