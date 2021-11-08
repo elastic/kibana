@@ -44,11 +44,11 @@ describe('When using the Endpoint Details Actions Menu', () => {
   const setEndpointMetadataResponse = (isolation: boolean = false) => {
     const endpointHost = httpMocks.responseProvider.metadataDetails();
     // Safe to mutate this mocked data
-    // @ts-ignore
+    // @ts-expect-error TS2540
     endpointHost.metadata.Endpoint.state.isolation = isolation;
-    // @ts-ignore
+    // @ts-expect-error TS2540
     endpointHost.metadata.host.os.name = 'Windows';
-    // @ts-ignore
+    // @ts-expect-error TS2540
     endpointHost.metadata.agent.version = '7.14.0';
     httpMocks.responseProvider.metadataDetails.mockReturnValue(endpointHost);
   };

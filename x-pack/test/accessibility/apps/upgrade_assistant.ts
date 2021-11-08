@@ -13,20 +13,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('Upgrade Assistant', () => {
+  describe.skip('Upgrade Assistant', () => {
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
     });
 
-    it('Coming soon prompt', async () => {
-      await retry.waitFor('Upgrade Assistant coming soon prompt to be visible', async () => {
-        return testSubjects.exists('comingSoonPrompt');
-      });
-      await a11y.testAppSnapshot();
-    });
-
     // These tests will be skipped until the last minor of the next major release
-    describe.skip('Upgrade Assistant content', () => {
+    describe('Upgrade Assistant content', () => {
       it('Overview page', async () => {
         await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
           return testSubjects.exists('overviewPageContent');

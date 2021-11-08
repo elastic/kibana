@@ -8,7 +8,7 @@ With *TSVB*, you can:
 * Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
 * Annotate time series data with timestamped events from an {es} index.
 * View the data in several types of visualizations, including charts, data tables, and markdown panels.
-* Display multiple <<index-patterns, index patterns>> in each visualization.
+* Display multiple <<data-views, data views>> in each visualization.
 * Use custom functions and some math on aggregations.
 * Customize the data with labels and colors.
 
@@ -208,7 +208,7 @@ For example `dashboards#/view/f193ca90-c9f4-11eb-b038-dd3270053a27`.
 
 . Click *Save and return*.
 
-. In the toolbar, cick *Save as*, then make sure *Store time with dashboard* is deselected. 
+. In the toolbar, click *Save as*, then make sure *Store time with dashboard* is deselected. 
 ====
 
 [discrete]

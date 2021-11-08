@@ -25,6 +25,7 @@ export type {
   ConfigPath,
   CliArgs,
   ConfigDeprecation,
+  ConfigDeprecationContext,
   AddConfigDeprecation,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,

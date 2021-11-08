@@ -10,6 +10,7 @@ import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
 } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { useUiTracker } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
   ReportViewType,
@@ -20,6 +21,7 @@ import type {
 import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
+import { trackTelemetryOnApply } from '../utils/telemetry';
 
 export interface SeriesContextValue {
   firstSeries?: SeriesUrl;
@@ -45,7 +47,7 @@ export function convertAllShortSeries(allShortSeries: AllShortSeries) {
 }
 
 export const allSeriesKey = 'sr';
-const reportTypeKey = 'reportType';
+export const reportTypeKey = 'reportType';
 
 export function UrlStorageContextProvider({
   children,
@@ -63,6 +65,8 @@ export function UrlStorageContextProvider({
 
   const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
 
+  const trackEvent = useUiTracker();
+
   useEffect(() => {
     const firstSeriesT = allSeries?.[0];
 
@@ -71,9 +75,16 @@ export function UrlStorageContextProvider({
 
   const setSeries = useCallback((seriesIndex: number, newValue: SeriesUrl) => {
     setAllSeries((prevAllSeries) => {
+      const seriesWithCurrentBreakdown = prevAllSeries.findIndex((series) => series.breakdown);
       const newStateRest = prevAllSeries.map((series, index) => {
         if (index === seriesIndex) {
-          return newValue;
+          return {
+            ...newValue,
+            breakdown:
+              seriesWithCurrentBreakdown === seriesIndex || seriesWithCurrentBreakdown === -1
+                ? newValue.breakdown
+                : undefined,
+          };
         }
         return series;
       });
@@ -109,11 +120,14 @@ export function UrlStorageContextProvider({
 
       (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
       setLastRefresh(Date.now());
+
+      trackTelemetryOnApply(trackEvent, allSeries, reportType);
+
       if (onApply) {
         onApply();
       }
     },
-    [allSeries, storage]
+    [allSeries, storage, trackEvent, reportType]
   );
 
   const value = {

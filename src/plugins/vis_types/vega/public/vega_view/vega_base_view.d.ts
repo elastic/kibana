@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { IExternalUrl } from 'kibana/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { IServiceSettings } from 'src/plugins/maps_ems/public';
@@ -20,6 +21,7 @@ interface VegaViewParams {
   filterManager: DataPublicPluginStart['query']['filterManager'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
+  externalUrl: IExternalUrl;
 }
 
 export class VegaBaseView {

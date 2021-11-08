@@ -98,8 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(res.text).to.be(`\n`);
       });
 
-      // FIXME: https://github.com/elastic/kibana/issues/112186
-      it.skip('generates a large export', async () => {
+      it('generates a large export', async () => {
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
@@ -112,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport();
-        expect(csvFile.length).to.be(4954749);
+        expect(csvFile.length).to.be(5093456);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
       });

@@ -8,7 +8,7 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
 jest.mock('../grammar');
 
@@ -17,11 +17,12 @@ import * as exists from './exists';
 
 describe('kuery functions', () => {
   describe('exists', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 

@@ -19,7 +19,7 @@ import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/common';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
@@ -41,7 +41,7 @@ export class ChartLoader {
   private _timeFieldName: string = '';
   private _query: object = {};
 
-  constructor(indexPattern: IndexPattern, query: object) {
+  constructor(indexPattern: DataView, query: object) {
     this._indexPatternTitle = indexPattern.title;
     this._query = query;
 

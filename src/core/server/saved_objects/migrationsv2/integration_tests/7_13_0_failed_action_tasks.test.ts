@@ -55,7 +55,7 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
     kibanaIndexName = '.kibana',
     taskManagerIndexName = '.kibana_task_manager'
   ): Promise<{ tasksCount: number; actionTaskParamsCount: number }> => {
-    const esClient: ElasticsearchClient = esServer.es.getClient();
+    const esClient: ElasticsearchClient = esServer.es.getKibanaEsClient();
 
     const actionTaskParamsResponse = await esClient.count({
       index: kibanaIndexName,
@@ -113,7 +113,6 @@ function createRoot() {
     {
       migrations: {
         skip: false,
-        enableV2: true,
         batchSize: 250,
       },
       logging: {

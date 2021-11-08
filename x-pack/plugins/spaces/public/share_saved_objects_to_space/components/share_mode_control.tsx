@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { DocumentationLinksService } from '../../lib';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
@@ -85,10 +84,7 @@ export const ShareModeControl = (props: Props) => {
       return null;
     }
 
-    const kibanaPrivilegesUrl = new DocumentationLinksService(
-      docLinks!
-    ).getKibanaPrivilegesDocUrl();
-
+    const docLink = docLinks?.links.security.kibanaPrivileges;
     return (
       <>
         <EuiCallOut
@@ -108,7 +104,7 @@ export const ShareModeControl = (props: Props) => {
             values={{
               objectNoun,
               readAndWritePrivilegesLink: (
-                <EuiLink href={kibanaPrivilegesUrl} target="_blank">
+                <EuiLink href={docLink} target="_blank">
                   <FormattedMessage
                     id="xpack.spaces.shareToSpace.privilegeWarningLink"
                     defaultMessage="read and write privileges"

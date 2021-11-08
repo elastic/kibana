@@ -34,7 +34,7 @@ const alertParamsRt = t.intersection([
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
 
 const transactionErrorRateChartPreview = createApmServerRoute({
-  endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -52,7 +52,7 @@ const transactionErrorRateChartPreview = createApmServerRoute({
 });
 
 const transactionErrorCountChartPreview = createApmServerRoute({
-  endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
+  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -71,7 +71,7 @@ const transactionErrorCountChartPreview = createApmServerRoute({
 });
 
 const transactionDurationChartPreview = createApmServerRoute({
-  endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {

@@ -50,7 +50,7 @@ export function IconPopover({
           <EuiIcon
             type={icon.type}
             size={icon.size ?? 'l'}
-            color={icon.color ?? 'text'}
+            color={icon.color}
           />
         </EuiButtonEmpty>
       }

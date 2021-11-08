@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { EuiButton, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FilterBar } from './components/filter_bar';
 
 import { DocumentTitle } from '../../../components/document_title';
-import { NoIndices } from '../../../components/empty_states/no_indices';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
 import { Source } from '../../../containers/metrics_source';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { LayoutView } from './components/layout_view';
-import { useLinkProps } from '../../../hooks/use_link_props';
 import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
@@ -30,9 +26,9 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
+import { SnapshotContainer } from './components/snapshot_container';
 
 export const SnapshotPage = () => {
-  const uiCapabilities = useKibana().services.application?.capabilities;
   const {
     hasFailedLoadingSource,
     isLoading,
@@ -44,11 +40,6 @@ export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
   const { source: optionsSource } = useWaffleOptionsContext();
-
-  const tutorialLinkProps = useLinkProps({
-    app: 'home',
-    hash: '/tutorial_directory/metrics',
-  });
 
   useMetricsBreadcrumbs([
     {
@@ -79,6 +70,7 @@ export const SnapshotPage = () => {
               defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
             >
               <MetricsPageTemplate
+                hasData={metricIndicesExist}
                 pageHeader={{
                   pageTitle: inventoryTitle,
                   rightSideItems: [<SavedViews />],
@@ -87,8 +79,19 @@ export const SnapshotPage = () => {
                   paddingSize: 'none',
                 }}
               >
-                <FilterBar />
-                <LayoutView />
+                <SnapshotContainer
+                  render={({ loading, nodes, reload, interval }) => (
+                    <>
+                      <FilterBar interval={interval} />
+                      <LayoutView
+                        loading={loading}
+                        nodes={nodes}
+                        reload={reload}
+                        interval={interval}
+                      />
+                    </>
+                  )}
+                />
               </MetricsPageTemplate>
             </SavedViewProvider>
           </InventoryPageWrapper>
@@ -96,43 +99,7 @@ export const SnapshotPage = () => {
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
       ) : (
-        <NoIndices
-          title={i18n.translate('xpack.infra.homePage.noMetricsIndicesTitle', {
-            defaultMessage: "Looks like you don't have any metrics indices.",
-          })}
-          message={i18n.translate('xpack.infra.homePage.noMetricsIndicesDescription', {
-            defaultMessage: "Let's add some!",
-          })}
-          actions={
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiButton
-                  {...tutorialLinkProps}
-                  color="primary"
-                  fill
-                  data-test-subj="infrastructureViewSetupInstructionsButton"
-                >
-                  {i18n.translate('xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel', {
-                    defaultMessage: 'View setup instructions',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-              {uiCapabilities?.infrastructure?.configureSource ? (
-                <EuiFlexItem>
-                  <ViewSourceConfigurationButton
-                    app="metrics"
-                    data-test-subj="configureSourceButton"
-                  >
-                    {i18n.translate('xpack.infra.configureSourceActionLabel', {
-                      defaultMessage: 'Change source configuration',
-                    })}
-                  </ViewSourceConfigurationButton>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          }
-          data-test-subj="noMetricsIndicesPrompt"
-        />
+        <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
       )}
     </EuiErrorBoundary>
   );

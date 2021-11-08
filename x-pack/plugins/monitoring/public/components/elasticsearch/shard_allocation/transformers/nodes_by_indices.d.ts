@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const nodesByIndices: () => (shards, nodes) => any;
+export const nodesByIndices: () => (shards: any, nodes: any) => any;

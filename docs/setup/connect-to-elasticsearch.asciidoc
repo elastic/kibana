@@ -47,7 +47,7 @@ so you can quickly get insights into your data, and {fleet} mode offers several 
 image::images/addData_fleet_7.15.0.png[Add data using Fleet]
 
 To get started, refer to
-{fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].
+{observability-guide}/ingest-logs-metrics-uptime.html[Ingest logs, metrics, and uptime data with {agent}].
 
 [discrete]
 [[upload-data-kibana]]
@@ -84,7 +84,7 @@ You can manage your roles, privileges, and spaces in **{stack-manage-app}** in
 If the {kib} ingest options don't work for you, you can index your
 data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
 or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
-After you add your data, you're required to create an <<index-patterns,index pattern>> to tell
+After you add your data, you're required to create a <<data-views,data view>> to tell
 {kib} where to find the data.
 
 * To add data for Elastic Observability, refer to {observability-guide}/add-observability-data.html[Send data to Elasticsearch].

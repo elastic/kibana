@@ -1,0 +1,19 @@
+.kbnDocTableHeader {
+  white-space: nowrap;
+}
+.kbnDocTableHeader button,
+.kbnDocTableHeader svg {
+  margin-left: $euiSizeXS * .5;
+}
+.kbnDocTableHeader__move,
+.kbnDocTableHeader__sortChange {
+  opacity: 0;
+  th:hover &,
+  &:focus {
+    opacity: 1;
+  }
+}
+.kbnDocTableHeader__actions {
+  display: flex;
+  align-items: center;
+}

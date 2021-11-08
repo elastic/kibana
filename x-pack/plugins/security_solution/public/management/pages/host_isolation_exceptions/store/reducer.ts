@@ -38,6 +38,33 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
   action
 ) => {
   switch (action.type) {
+    case 'hostIsolationExceptionsCreateEntry': {
+      return {
+        ...state,
+        form: {
+          entry: action.payload,
+          status: createUninitialisedResourceState(),
+        },
+      };
+    }
+    case 'hostIsolationExceptionsFormStateChanged': {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          status: action.payload,
+        },
+      };
+    }
+    case 'hostIsolationExceptionsFormEntryChanged': {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          entry: action.payload,
+        },
+      };
+    }
     case 'hostIsolationExceptionsPageDataChanged': {
       return {
         ...state,

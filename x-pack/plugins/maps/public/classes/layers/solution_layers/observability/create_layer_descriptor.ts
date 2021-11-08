@@ -33,7 +33,7 @@ import { DISPLAY } from './display_select';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import { EMSFileSource } from '../../../sources/ems_file_source';
 import { ESGeoGridSource } from '../../../sources/es_geo_grid_source';
-import { VectorLayer } from '../../vector_layer';
+import { GeoJsonVectorLayer } from '../../vector_layer';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 
@@ -164,7 +164,7 @@ export function createLayerDescriptor({
       aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
       rightSourceId: joinId,
     });
-    return VectorLayer.createDescriptor({
+    return GeoJsonVectorLayer.createDescriptor({
       label,
       joins: [
         {
@@ -244,7 +244,7 @@ export function createLayerDescriptor({
     },
   };
 
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label,
     query: apmSourceQuery,
     sourceDescriptor: geoGridSourceDescriptor,

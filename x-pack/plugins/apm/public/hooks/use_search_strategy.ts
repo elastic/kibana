@@ -16,7 +16,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
-import type { SearchStrategyClientParams } from '../../common/search_strategies/types';
+import type { RawSearchStrategyClientParams } from '../../common/search_strategies/types';
 import type { RawResponseBase } from '../../common/search_strategies/types';
 import type {
   LatencyCorrelationsParams,
@@ -31,7 +31,7 @@ import {
   APM_SEARCH_STRATEGIES,
 } from '../../common/search_strategies/constants';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 
 import { ApmPluginStartDeps } from '../plugin';
 
@@ -77,13 +77,15 @@ interface SearchStrategyReturnBase<TRawResponse extends RawResponseBase> {
 export function useSearchStrategy(
   searchStrategyName: typeof APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
   searchStrategyParams: LatencyCorrelationsParams
-): SearchStrategyReturnBase<LatencyCorrelationsRawResponse>;
+): SearchStrategyReturnBase<LatencyCorrelationsRawResponse & RawResponseBase>;
 
 // Function overload for Failed Transactions Correlations
 export function useSearchStrategy(
   searchStrategyName: typeof APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
   searchStrategyParams: FailedTransactionsCorrelationsParams
-): SearchStrategyReturnBase<FailedTransactionsCorrelationsRawResponse>;
+): SearchStrategyReturnBase<
+  FailedTransactionsCorrelationsRawResponse & RawResponseBase
+>;
 
 export function useSearchStrategy<
   TRawResponse extends RawResponseBase,
@@ -101,7 +103,7 @@ export function useSearchStrategy<
     query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/transactions/view');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { transactionName } = urlParams;
 
   const [rawResponse, setRawResponse] = useReducer(
@@ -145,7 +147,7 @@ export function useSearchStrategy<
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search
       .search<
-        IKibanaSearchRequest<SearchStrategyClientParams & (TParams | {})>,
+        IKibanaSearchRequest<RawSearchStrategyClientParams & (TParams | {})>,
         IKibanaSearchResponse<TRawResponse>
       >(request, {
         strategy: searchStrategyName,

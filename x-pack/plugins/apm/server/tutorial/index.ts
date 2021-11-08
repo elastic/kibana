@@ -14,15 +14,15 @@ import {
 } from '../../../../../src/plugins/home/server';
 import { CloudSetup } from '../../../cloud/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
-import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
+import { getApmDataViewTitle } from '../lib/data_view/get_apm_data_view_title';
 import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
-import apmIndexPattern from './index_pattern.json';
+import apmDataView from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
-    'Collect in-depth performance metrics and errors from inside your applications.',
+    'Collect performance metrics from your applications with Elastic APM.',
 });
 const moduleName = 'apm';
 
@@ -39,14 +39,14 @@ export const tutorialProvider =
     isFleetPluginEnabled: boolean;
   }) =>
   () => {
-    const indexPatternTitle = getApmIndexPatternTitle(apmIndices);
+    const indexPatternTitle = getApmDataViewTitle(apmIndices);
 
     const savedObjects = [
       {
-        ...apmIndexPattern,
+        ...apmDataView,
         id: APM_STATIC_INDEX_PATTERN_ID,
         attributes: {
-          ...apmIndexPattern.attributes,
+          ...apmDataView.attributes,
           title: indexPatternTitle,
         },
       },
@@ -67,7 +67,7 @@ export const tutorialProvider =
       ],
     };
 
-    if (apmConfig['xpack.apm.ui.enabled']) {
+    if (apmConfig.ui.enabled) {
       // @ts-expect-error artifacts.application is readonly
       artifacts.application = {
         path: '/app/apm',
@@ -103,7 +103,6 @@ It allows you to monitor the performance of thousands of applications in real ti
         }
       ),
       euiIconType: 'apmApp',
-      eprPackageOverlap: 'apm',
       integrationBrowserCategories: ['web'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',

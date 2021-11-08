@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setMockActions } from '../../../../../__mocks__/kea_logic';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -12,48 +14,40 @@ import { shallow } from 'enzyme';
 import { CurationActionsPopover } from './curation_actions_popover';
 
 describe('CurationActionsPopover', () => {
-  const handleAccept = jest.fn();
-  const handleAutomate = jest.fn();
-  const handleReject = jest.fn();
-  const handleTurnOff = jest.fn();
+  const actions = {
+    acceptSuggestion: jest.fn(),
+    acceptAndAutomateSuggestion: jest.fn(),
+    rejectSuggestion: jest.fn(),
+    rejectAndDisableSuggestion: jest.fn(),
+  };
+
+  beforeAll(() => {
+    setMockActions(actions);
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders', () => {
-    const wrapper = shallow(
-      <CurationActionsPopover
-        onAccept={handleAccept}
-        onAutomate={handleAutomate}
-        onReject={handleReject}
-        onTurnOff={handleTurnOff}
-      />
-    );
+    const wrapper = shallow(<CurationActionsPopover />);
     expect(wrapper.isEmptyRender()).toBe(false);
 
     wrapper.find('[data-test-subj="acceptButton"]').simulate('click');
-    expect(handleAccept).toHaveBeenCalled();
+    expect(actions.acceptSuggestion).toHaveBeenCalled();
 
     wrapper.find('[data-test-subj="automateButton"]').simulate('click');
-    expect(handleAutomate).toHaveBeenCalled();
+    expect(actions.acceptAndAutomateSuggestion).toHaveBeenCalled();
 
     wrapper.find('[data-test-subj="rejectButton"]').simulate('click');
-    expect(handleReject).toHaveBeenCalled();
+    expect(actions.rejectSuggestion).toHaveBeenCalled();
 
     wrapper.find('[data-test-subj="turnoffButton"]').simulate('click');
-    expect(handleTurnOff).toHaveBeenCalled();
+    expect(actions.rejectAndDisableSuggestion).toHaveBeenCalled();
   });
 
   it('can open and close', () => {
-    const wrapper = shallow(
-      <CurationActionsPopover
-        onAccept={handleAccept}
-        onAutomate={handleAutomate}
-        onReject={handleReject}
-        onTurnOff={handleTurnOff}
-      />
-    );
+    const wrapper = shallow(<CurationActionsPopover />);
 
     expect(wrapper.prop('isOpen')).toBe(false);
 

@@ -20,7 +20,7 @@ import {
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type FleetMigrationCheckResponse =
-  APIReturnType<'GET /api/apm/fleet/migration_check'>;
+  APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
 const APM_DATA_STREAMS_MIGRATION_STATUS_LS = {
   value: '',
@@ -46,14 +46,16 @@ export function Schema() {
     data = {} as FleetMigrationCheckResponse,
     status,
   } = useFetcher(
-    (callApi) => callApi({ endpoint: 'GET /api/apm/fleet/migration_check' }),
+    (callApi) =>
+      callApi({ endpoint: 'GET /internal/apm/fleet/migration_check' }),
     [],
     { preservePreviousData: false }
   );
   const isLoading = status !== FETCH_STATUS.SUCCESS;
   const cloudApmMigrationEnabled = !!data.cloud_apm_migration_enabled;
   const hasCloudAgentPolicy = !!data.has_cloud_agent_policy;
-  const hasCloudApmPackagePolicy = !!data.has_cloud_apm_package_policy;
+  const cloudApmPackagePolicy = data.cloud_apm_package_policy;
+  const hasCloudApmPackagePolicy = !!cloudApmPackagePolicy;
   const hasRequiredRole = !!data.has_required_role;
 
   function updateLocalStorage(newStatus: FETCH_STATUS) {
@@ -89,6 +91,7 @@ export function Schema() {
         cloudApmMigrationEnabled={cloudApmMigrationEnabled}
         hasCloudAgentPolicy={hasCloudAgentPolicy}
         hasRequiredRole={hasRequiredRole}
+        cloudApmPackagePolicy={cloudApmPackagePolicy}
       />
       {isSwitchActive && (
         <ConfirmSwitchModal
@@ -118,7 +121,7 @@ async function getUnsupportedApmServerConfigs(
 ) {
   try {
     const { unsupported } = await callApmApi({
-      endpoint: 'GET /api/apm/fleet/apm_server_schema/unsupported',
+      endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
       signal: null,
     });
     return unsupported;
@@ -142,7 +145,7 @@ async function createCloudApmPackagePolicy(
   updateLocalStorage(FETCH_STATUS.LOADING);
   try {
     const { cloudApmPackagePolicy } = await callApmApi({
-      endpoint: 'POST /api/apm/fleet/cloud_apm_package_policy',
+      endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
       signal: null,
     });
     updateLocalStorage(FETCH_STATUS.SUCCESS);

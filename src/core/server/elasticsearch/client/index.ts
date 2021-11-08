@@ -14,6 +14,7 @@ export type {
   SearchResponse,
   GetResponse,
   DeleteDocumentResponse,
+  ElasticsearchErrorDetails,
 } from './types';
 export { ScopedClusterClient } from './scoped_cluster_client';
 export type { IScopedClusterClient } from './scoped_cluster_client';

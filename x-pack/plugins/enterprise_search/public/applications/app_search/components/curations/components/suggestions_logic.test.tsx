@@ -45,6 +45,7 @@ const MOCK_RESPONSE: SuggestionsAPIResponse = {
       updated_at: '2021-07-08T14:35:50Z',
       promoted: ['1', '2'],
       status: 'applied',
+      operation: 'create',
     },
   ],
 };
@@ -121,7 +122,7 @@ describe('SuggestionsLogic', () => {
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify({
               page: {

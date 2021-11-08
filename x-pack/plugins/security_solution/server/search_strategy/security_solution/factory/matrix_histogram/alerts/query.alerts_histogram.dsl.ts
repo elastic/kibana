@@ -83,8 +83,8 @@ export const buildAlertsHistogramQuery = ({
 
   const dslQuery = {
     index: defaultIndex,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     track_total_hits: true,
     body: {
       aggregations: getHistogramAggregation(),
