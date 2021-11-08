@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { GlobalHeader, pagesWithSourcerer } from '.';
-import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { useLocation } from 'react-router-dom';
+import { GlobalHeader } from '.';
 import { SecurityPageName } from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
@@ -18,18 +18,23 @@ import {
 import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
 import { kibanaObservable } from '../../../../../timelines/public/mock';
+import { sourcererPaths } from '../../../common/containers/sourcerer';
 
-jest.mock('../../../common/utils/route/use_route_spy', () => ({ useRouteSpy: jest.fn() }));
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest
-    .fn()
-    .mockReturnValue({ services: { http: { basePath: { prepend: jest.fn() } } } }),
-}));
+jest.mock('../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: jest
+      .fn()
+      .mockReturnValue({ services: { http: { basePath: { prepend: jest.fn() } } } }),
+    useUiSetting$: jest.fn().mockReturnValue([]),
+  };
+});
 
 jest.mock('react-reverse-portal', () => ({
   InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -55,7 +60,7 @@ describe('global header', () => {
   const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   it('has add data link', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useLocation as jest.Mock).mockReturnValue([
       { pageName: SecurityPageName.overview, detailName: undefined },
     ]);
     const { getByText } = render(
@@ -66,8 +71,8 @@ describe('global header', () => {
     expect(getByText('Add integrations')).toBeInTheDocument();
   });
 
-  it.each(pagesWithSourcerer)('shows sourcerer on %s page', (page) => {
-    (useRouteSpy as jest.Mock).mockReturnValue([{ pageName: page, detailName: undefined }]);
+  it.each(sourcererPaths)('shows sourcerer on %s page', (pathname) => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -78,9 +83,7 @@ describe('global header', () => {
   });
 
   it('shows sourcerer on rule details page', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
-      { pageName: SecurityPageName.rules, detailName: 'mockruleId' },
-    ]);
+    (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -105,9 +108,7 @@ describe('global header', () => {
     };
     const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-    (useRouteSpy as jest.Mock).mockReturnValue([
-      { pageName: SecurityPageName.rules, detailName: 'mockruleId' },
-    ]);
+    (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>

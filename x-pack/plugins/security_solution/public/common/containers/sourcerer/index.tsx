@@ -20,7 +20,6 @@ import {
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  SecurityPageName,
   UEBA_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common';
@@ -310,9 +309,18 @@ export const getScopeFromPath = (
     ? SourcererScopeName.default
     : SourcererScopeName.detections;
 
+export const sourcererPaths = [
+  ALERTS_PATH,
+  `${RULES_PATH}/id/:id`,
+  HOSTS_PATH,
+  NETWORK_PATH,
+  OVERVIEW_PATH,
+  UEBA_PATH,
+];
+
 export const showSourcererByPath = (pathname: string): boolean =>
   matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, HOSTS_PATH, NETWORK_PATH, OVERVIEW_PATH, UEBA_PATH],
+    path: sourcererPaths,
     strict: false,
   }) != null;
 

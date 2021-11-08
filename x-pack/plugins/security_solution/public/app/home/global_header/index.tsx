@@ -19,7 +19,7 @@ import { AppMountParameters } from '../../../../../../../src/core/public';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { ADD_DATA_PATH, SecurityPageName } from '../../../../common/constants';
+import { ADD_DATA_PATH } from '../../../../common/constants';
 import { isDetectionsPath } from '../../../../public/helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -31,15 +31,6 @@ import { getScopeFromPath, showSourcererByPath } from '../../../common/container
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
 });
-
-export const pagesWithSourcerer = [
-  SecurityPageName.alerts,
-  SecurityPageName.detections,
-  SecurityPageName.events,
-  SecurityPageName.hosts,
-  SecurityPageName.network,
-  SecurityPageName.overview,
-];
 
 /**
  * This component uses the reverse portal to add the Add Data and ML job settings buttons on the
