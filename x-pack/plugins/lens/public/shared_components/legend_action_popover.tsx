@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { useLegendAction } from '@elastic/charts';
 import type { LensFilterEvent } from '../types';
 
 export interface LegendActionPopoverProps {
@@ -31,6 +32,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   context,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [ref, onClose] = useLegendAction<HTMLDivElement>();
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 'main',
@@ -65,6 +67,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   const Button = (
     <div
       tabIndex={0}
+      ref={ref}
       role="button"
       aria-pressed="false"
       style={{
@@ -87,7 +90,10 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       id="contextMenuNormal"
       button={Button}
       isOpen={popoverOpen}
-      closePopover={() => setPopoverOpen(false)}
+      closePopover={() => {
+        setPopoverOpen(false);
+        onClose();
+      }}
       panelPaddingSize="none"
       anchorPosition="upLeft"
       title={i18n.translate('xpack.lens.shared.legend.filterOptionsLegend', {
