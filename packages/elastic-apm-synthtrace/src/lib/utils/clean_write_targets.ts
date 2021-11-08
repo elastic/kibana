@@ -27,6 +27,7 @@ export async function cleanWriteTargets({
     index: targets,
     allow_no_indices: true,
     conflicts: 'proceed',
+    refresh: true,
     body: {
       query: {
         match_all: {},

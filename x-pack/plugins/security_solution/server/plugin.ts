@@ -88,7 +88,7 @@ import type {
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 
-export { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
+export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
@@ -244,7 +244,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataService,
       logger,
       ruleDataClient,
-      ruleOptions
+      ruleOptions,
+      core.getStartServices
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
