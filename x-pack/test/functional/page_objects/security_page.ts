@@ -389,7 +389,7 @@ export class SecurityPageObject extends FtrService {
       // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
       const isUserReserved = (await user.findAllByTestSubject('userReserved', 1)).length > 0;
       const isUserDeprecated = (await user.findAllByTestSubject('userDeprecated', 1)).length > 0;
-
+      const isEnabled = (await user.findAllByTestSubject('userDisabled', 1)).length === 0;
       users.push({
         username: await usernameElement.getVisibleText(),
         fullname: await fullnameElement.getVisibleText(),
@@ -397,6 +397,7 @@ export class SecurityPageObject extends FtrService {
         roles: (await rolesElement.getVisibleText()).split('\n').map((role) => role.trim()),
         reserved: isUserReserved,
         deprecated: isUserDeprecated,
+        enabled: isEnabled,
       });
     }
 
@@ -459,8 +460,21 @@ export class SecurityPageObject extends FtrService {
     }
   }
 
+  async updateUserProfileForm(user: UserFormValues) {
+    if (user.full_name) {
+      await this.find.setValue('[name=full_name]', user.full_name);
+    }
+    if (user.email) {
+      await this.find.setValue('[name=email]', user.email);
+    }
+  }
+
   async submitCreateUserForm() {
     await this.find.clickByButtonText('Create user');
+  }
+
+  async submitUpdateUserForm() {
+    await this.find.clickByButtonText('Update user');
   }
 
   async createUser(user: UserFormValues) {
@@ -468,6 +482,62 @@ export class SecurityPageObject extends FtrService {
     await this.clickCreateNewUser();
     await this.fillUserForm(user);
     await this.submitCreateUserForm();
+  }
+
+  async clickUserByUserName(username: string) {
+    await this.find.clickByDisplayedLinkText(username);
+    await this.header.awaitGlobalLoadingIndicatorHidden();
+  }
+
+  async updateUserPassword(user: UserFormValues, isCurrentUser: boolean = false) {
+    await this.clickUserByUserName(user.username ?? '');
+    await this.testSubjects.click('editUserChangePasswordButton');
+    if (isCurrentUser) {
+      await this.testSubjects.setValue(
+        'editUserChangePasswordCurrentPasswordInput',
+        user.current_password ?? ''
+      );
+    }
+    await this.testSubjects.setValue('editUserChangePasswordNewPasswordInput', user.password ?? '');
+    await this.testSubjects.setValue(
+      'editUserChangePasswordConfirmPasswordInput',
+      user.confirm_password ?? ''
+    );
+    await this.testSubjects.click('formFlyoutSubmitButton');
+  }
+
+  async updateUserProfile(user: UserFormValues) {
+    await this.clickUserByUserName(user.username ?? '');
+    await this.updateUserProfileForm(user);
+    await this.submitUpdateUserForm();
+  }
+
+  async deactivatesUser(user: UserFormValues) {
+    await this.clickUserByUserName(user.username ?? '');
+    await this.testSubjects.click('editUserDisableUserButton');
+    await this.testSubjects.click('confirmModalConfirmButton');
+    await this.submitUpdateUserForm();
+  }
+
+  async activatesUser(user: UserFormValues) {
+    await this.clickUserByUserName(user.username ?? '');
+    await this.testSubjects.click('editUserEnableUserButton');
+    await this.testSubjects.click('confirmModalConfirmButton');
+    await this.submitUpdateUserForm();
+  }
+
+  async deleteUser(username: string) {
+    this.log.debug('Delete user ' + username);
+    await this.clickUserByUserName(username);
+
+    this.log.debug('Find delete button and click');
+    await this.find.clickByButtonText('Delete user');
+    await this.common.sleep(2000);
+
+    const confirmText = await this.testSubjects.getVisibleText('confirmModalBodyText');
+    this.log.debug('Delete user alert text = ' + confirmText);
+    await this.testSubjects.click('confirmModalConfirmButton');
+    return confirmText;
   }
 
   async addRole(roleName: string, roleObj: Role) {
@@ -547,20 +617,5 @@ export class SecurityPageObject extends FtrService {
     await input.type(role);
     await this.find.clickByCssSelector(`[role=option][title="${role}"]`);
     await this.testSubjects.click('comboBoxToggleListButton');
-  }
-
-  async deleteUser(username: string) {
-    this.log.debug('Delete user ' + username);
-    await this.find.clickByDisplayedLinkText(username);
-    await this.header.awaitGlobalLoadingIndicatorHidden();
-
-    this.log.debug('Find delete button and click');
-    await this.find.clickByButtonText('Delete user');
-    await this.common.sleep(2000);
-
-    const confirmText = await this.testSubjects.getVisibleText('confirmModalBodyText');
-    this.log.debug('Delete user alert text = ' + confirmText);
-    await this.testSubjects.click('confirmModalConfirmButton');
-    return confirmText;
   }
 }
