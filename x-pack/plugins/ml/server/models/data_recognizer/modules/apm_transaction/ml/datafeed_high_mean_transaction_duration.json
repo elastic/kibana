@@ -10,5 +10,8 @@
         { "exists": { "field": "transaction.duration.us" } }
       ]
     }
-  }
+  },
+  "indices_options": {
+    "ignore_unavailable": true
+  } 
 }
