@@ -7,12 +7,13 @@
  */
 
 import { SavedObjectsClientProvider } from './scoped_client_provider';
+import { httpServerMock } from '../../../http/http_server.mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 
 test(`uses default client factory when one isn't set`, () => {
   const returnValue = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(returnValue);
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
 
   const clientProvider = new SavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
@@ -29,7 +30,7 @@ test(`uses default client factory when one isn't set`, () => {
 
 test(`uses custom client factory when one is set`, () => {
   const defaultClientFactoryMock = jest.fn();
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
   const returnValue = Symbol();
   const customClientFactoryMock = jest.fn().mockReturnValue(returnValue);
 
@@ -49,11 +50,20 @@ test(`uses custom client factory when one is set`, () => {
 });
 
 test(`throws error when more than one scoped saved objects client factory is set`, () => {
-  const clientProvider = new SavedObjectsClientProvider({});
-  clientProvider.setClientFactory(() => {});
+  const defaultClientFactory = jest.fn();
+  const clientFactory = jest.fn();
+
+  const clientProvider = new SavedObjectsClientProvider({
+    defaultClientFactory,
+    typeRegistry: typeRegistryMock.create(),
+  });
+
+  clientProvider.setClientFactory(clientFactory);
   expect(() => {
-    clientProvider.setClientFactory(() => {});
-  }).toThrowErrorMatchingSnapshot();
+    clientProvider.setClientFactory(clientFactory);
+  }).toThrowErrorMatchingInlineSnapshot(
+    `"custom client factory is already set, unable to replace the current one"`
+  );
 });
 
 test(`throws error when registering a wrapper with a duplicate id`, () => {
@@ -83,7 +93,7 @@ test(`invokes and uses wrappers in specified order`, () => {
   const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
   const secondWrapperClient = Symbol('second client');
   const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
 
   clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
   clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
@@ -114,7 +124,7 @@ test(`does not invoke or use excluded wrappers`, () => {
   const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
   const secondWrapperClient = Symbol('second client');
   const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
 
   clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
   clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
@@ -143,7 +153,7 @@ test(`allows all wrappers to be excluded`, () => {
   const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
   const secondWrapperClient = Symbol('second client');
   const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
 
   clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
   clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
@@ -164,7 +174,7 @@ test(`allows hidden typed to be included`, () => {
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry: typeRegistryMock.create(),
   });
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
 
   const actualClient = clientProvider.getClient(request, {
     includedHiddenTypes: ['task'],
