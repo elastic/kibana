@@ -224,6 +224,10 @@ describe('EventsViewer', () => {
       );
     });
 
+    test('should fail', () => {
+      expect(false).toBe(true);
+    });
+
     test('should not render the "Showing..." subtitle with the expected event count if showTotalCount is set to false ', () => {
       const disableSubTitle = {
         ...eventsViewerDefaultProps,
