@@ -12,7 +12,7 @@ The ServiceNow ITSM connector uses the https://docs.servicenow.com/bundle/orland
 ==== Prerequisites
 After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow ITSM connector or <<servicenow-itsm-connector-update, updating an existing one>>:
 
-* Install Elastic for ITSM from the https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[ServiceNow Store].
+* Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM] from the ServiceNow Store.
 * Create a ServiceNow integration user and assign it the appropriate roles.
 * Create a CORS rule.
 
