@@ -473,7 +473,6 @@ describe('Field editor Preview panel', () => {
 
       const {
         exists,
-        find,
         actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
       } = testBed;
 
@@ -485,15 +484,14 @@ describe('Field editor Preview panel', () => {
       await waitForUpdates(); // Run validations
 
       expect(exists('scriptErrorBadge')).toBe(true);
-      expect(exists('painlessScriptError')).toBe(true);
-      expect(find('painlessScriptError').text()).toBe(error.caused_by.reason);
+      expect(fields.getScriptError()).toBe(error.caused_by.reason);
 
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
       await fields.updateScript('echo("ok")');
       await waitForUpdates();
 
       expect(exists('scriptErrorBadge')).toBe(false);
-      expect(exists('painlessScriptError')).toBe(false);
+      expect(fields.getScriptError()).toBe(null);
       expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'ok' }]);
     });
 
@@ -536,12 +534,12 @@ describe('Field editor Preview panel', () => {
       await waitForUpdates(); // Run validations
 
       expect(exists('scriptErrorBadge')).toBe(true);
-      expect(exists('painlessScriptError')).toBe(true);
+      expect(fields.getScriptError()).toBe(error.caused_by.reason);
 
       await toggleFormRow('value', 'off');
 
       expect(exists('scriptErrorBadge')).toBe(false);
-      expect(exists('painlessScriptError')).toBe(false);
+      expect(fields.getScriptError()).toBe(null);
     });
   });
 

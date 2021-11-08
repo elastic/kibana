@@ -90,7 +90,6 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       const {
         find,
-        exists,
         form,
         actions: { waitForUpdates },
       } = await setup({ onSave });
@@ -106,8 +105,6 @@ describe('<FieldEditorFlyoutContent />', () => {
       expect(onSave).toHaveBeenCalledTimes(0);
       expect(find('fieldSaveButton').props().disabled).toBe(true);
       expect(form.getErrorsMessages()).toEqual(['A name is required.']);
-      expect(exists('formError')).toBe(true);
-      expect(find('formError').text()).toBe('Fix errors in form before continuing.');
     });
 
     test('should forward values from the form', async () => {

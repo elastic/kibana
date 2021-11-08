@@ -96,6 +96,18 @@ export const getCommonActions = (testBed: TestBed) => {
     testBed.component.update();
   };
 
+  const getScriptError = () => {
+    const scriptError = testBed.component.find('#runtimeFieldScript-error-0');
+
+    if (scriptError.length === 0) {
+      return null;
+    } else if (scriptError.length > 1) {
+      return scriptError.at(0).text();
+    }
+
+    return scriptError.text();
+  };
+
   return {
     toggleFormRow,
     waitForUpdates: waitForUpdates.bind(null, testBed),
@@ -105,6 +117,7 @@ export const getCommonActions = (testBed: TestBed) => {
       updateType,
       updateScript,
       updateFormat,
+      getScriptError,
     },
   };
 };
