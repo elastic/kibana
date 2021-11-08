@@ -265,6 +265,29 @@ export function createTestEsCluster<
     }
 
     async stop() {
+      await this.getClient()
+        .search<{ message: string }>(
+          { index: '.logs-deprecation.elasticsearch-default', ignore_unavailable: true, size: 100 },
+          { ignore: [404] }
+        )
+        .then((res) => {
+          const deps = res.body.hits.hits
+            .map((d) => {
+              return d._source!.message;
+            })
+            .filter(
+              (m) =>
+                !m?.match(
+                  /this request accesses system indices: \[\.kibana_.*\], but in a future major version, direct access to system indices will be prevented by default/
+                )
+            );
+          if (deps.length > 0) {
+            log.error(`Found ${deps.length} deprecation warnings.`);
+          }
+          deps.forEach((m) => {
+            log.error(m);
+          });
+        });
       const nodeStopPromises = [];
       for (let i = 0; i < this.nodes.length; i++) {
         nodeStopPromises.push(async () => {
