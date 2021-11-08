@@ -1086,8 +1086,8 @@ describe('when on the endpoint list page', () => {
         ).toBe('Policy Response');
       });
 
-      it('should display timestamp', async () => {
-        const timestamp = await renderResult.findByTestId('endpointDetailsPolicyResponseTimestamp');
+      it('should display timestamp', () => {
+        const timestamp = renderResult.queryByTestId('endpointDetailsPolicyResponseTimestamp');
         expect(timestamp).not.toBeNull();
       });
 
