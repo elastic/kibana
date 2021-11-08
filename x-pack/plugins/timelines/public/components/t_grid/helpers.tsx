@@ -9,7 +9,6 @@ import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
 import { DataViewBase, FilterStateStore } from '@kbn/es-query';
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
@@ -189,10 +188,9 @@ export const combineQueries = ({
 
 export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
   const combinedQuery = combineQueries(combineQueriesParams);
-  return combinedQuery
+  return combinedQuery?.filterQuery
     ? {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        filterQuery: replaceStatusField(combinedQuery!.filterQuery),
+        filterQuery: combinedQuery.filterQuery,
       }
     : null;
 };
@@ -228,22 +226,14 @@ export const getCombinedFilterQuery = ({
   to,
   filters,
   ...combineQueriesParams
-}: CombineQueries & { from: string; to: string }): string =>
-  replaceStatusField(
-    combineQueries({
-      ...combineQueriesParams,
-      filters: [...filters, buildTimeRangeFilter(from, to)],
-    })?.filterQuery
-  );
+}: CombineQueries & { from: string; to: string }): string | undefined => {
+  const combinedQueries = combineQueries({
+    ...combineQueriesParams,
+    filters: [...filters, buildTimeRangeFilter(from, to)],
+  });
 
-/**
- * This function is a temporary patch to prevent queries using old `signal.status` field.
- * @todo The `signal.status` field should not be queried anymore and
- * must be replaced by `ALERT_WORKFLOW_STATUS` field name constant
- * @deprecated
- */
-const replaceStatusField = (filterQuery?: string): string =>
-  filterQuery?.replaceAll('signal.status', ALERT_WORKFLOW_STATUS) ?? '';
+  return combinedQueries ? combinedQueries.filterQuery : undefined;
+};
 
 /**
  * The CSS class name of a "stateful event", which appears in both
