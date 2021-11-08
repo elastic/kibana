@@ -52,7 +52,7 @@ ServiceNow ITSM connectors created in 7.15 or earlier are marked as deprecated a
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
 
-IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to a new rule. However, we strongly recommend upgrading the deprecated connector or <<creating-new-connector, creating a new one>> to ensure you have access to connector enhancements, such as updating incidents.
+IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to a new rule. However, we strongly recommend updating the deprecated connector or <<creating-new-connector, creating a new one>> to ensure you have access to connector enhancements, such as updating incidents.
 
 To update a deprecated connector:
 
