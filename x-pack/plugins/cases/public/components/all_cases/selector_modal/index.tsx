@@ -8,4 +8,4 @@ import { AllCasesSelectorModal, AllCasesSelectorModalProps } from './all_cases_s
 
 export { AllCasesSelectorModal, AllCasesSelectorModalProps };
 // eslint-disable-next-line import/no-default-export
-export default AllCasesSelectorModal;
+export { AllCasesSelectorModal as default };

@@ -21,14 +21,16 @@ export const SUB_CASE_VIEW_PATH = `${CASE_VIEW_PATH}/sub-cases/:subCaseId` as co
 export const CASE_VIEW_COMMENT_PATH = `${CASE_VIEW_PATH}/:commentId` as const;
 export const SUB_CASE_VIEW_COMMENT_PATH = `${SUB_CASE_VIEW_PATH}/:commentId` as const;
 
-export const getCreateCasePath = (casesPath: string) => `${casesPath}${CASES_CREATE_PATH}`;
-export const getCasesConfigurePath = (casesPath: string) => `${casesPath}${CASES_CONFIGURE_PATH}`;
-export const getCaseViewPath = (casesPath: string) => `${casesPath}${CASE_VIEW_PATH}`;
-export const getSubCaseViewPath = (casesPath: string) => `${casesPath}${SUB_CASE_VIEW_PATH}`;
-export const getCaseViewWithCommentPath = (casesPath: string) =>
-  `${casesPath}${CASE_VIEW_COMMENT_PATH}`;
-export const getSubCaseViewWithCommentPath = (casesPath: string) =>
-  `${casesPath}${SUB_CASE_VIEW_COMMENT_PATH}`;
+export const getCreateCasePath = (casesBasePath: string) => `${casesBasePath}${CASES_CREATE_PATH}`;
+export const getCasesConfigurePath = (casesBasePath: string) =>
+  `${casesBasePath}${CASES_CONFIGURE_PATH}`;
+export const getCaseViewPath = (casesBasePath: string) => `${casesBasePath}${CASE_VIEW_PATH}`;
+export const getSubCaseViewPath = (casesBasePath: string) =>
+  `${casesBasePath}${SUB_CASE_VIEW_PATH}`;
+export const getCaseViewWithCommentPath = (casesBasePath: string) =>
+  `${casesBasePath}${CASE_VIEW_COMMENT_PATH}`;
+export const getSubCaseViewWithCommentPath = (casesBasePath: string) =>
+  `${casesBasePath}${SUB_CASE_VIEW_COMMENT_PATH}`;
 
 export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   const { subCaseId, commentId } = params;

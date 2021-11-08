@@ -17,8 +17,7 @@ export interface AllCasesProps {
   showTitle?: boolean;
 }
 
-export const AllCases: React.FC<AllCasesProps> = (props) => {
-  const { showTitle } = props;
+export const AllCases: React.FC<AllCasesProps> = ({ showTitle, disableAlerts }) => {
   const { userCanCrud } = useCasesContext();
   const [refresh, setRefresh] = useState<number>(0);
   const doRefresh = useCallback(() => {
@@ -36,7 +35,7 @@ export const AllCases: React.FC<AllCasesProps> = (props) => {
         showTitle={showTitle}
         userCanCrud={userCanCrud}
       />
-      <AllCasesList {...props} doRefresh={doRefresh} />
+      <AllCasesList disableAlerts={disableAlerts} doRefresh={doRefresh} />
     </>
   );
 };

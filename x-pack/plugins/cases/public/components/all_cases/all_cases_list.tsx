@@ -64,12 +64,12 @@ interface AllCasesListProps {
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({
-    alertData, // only modal
+    alertData,
     disableAlerts,
-    hiddenStatuses = [], // only modal
-    isSelectorView = false, // only modal
-    onRowClick, // only modal
-    updateCase, // only modal
+    hiddenStatuses = [],
+    isSelectorView = false,
+    onRowClick,
+    updateCase,
     doRefresh,
   }) => {
     const { userCanCrud } = useCasesContext();

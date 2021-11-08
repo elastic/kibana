@@ -26,12 +26,23 @@ import {
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 
-const CasesRoutesComponent: React.FC<CasesRoutesProps> = (props) => {
-  const { timelineIntegration } = props;
+const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
+  showTitle,
+  disableAlerts,
+  onComponentInitialized,
+  actionsNavigation,
+  ruleDetailsNavigation,
+  showAlertDetails,
+  useFetchAlertData,
+  refreshRef,
+  hideSyncAlerts,
+  onCaseDataSuccess,
+  timelineIntegration,
+}) => {
   const { basePath, userCanCrud } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
-  
+
   const onCreateCaseSuccess = useCallback(
     async ({ id }) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
@@ -40,7 +51,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = (props) => {
   return (
     <Switch>
       <Route strict exact path={basePath}>
-        <AllCases {...props} />
+        <AllCases disableAlerts={disableAlerts} showTitle={showTitle} />
       </Route>
 
       <Route path={getCreateCasePath(basePath)}>
@@ -72,7 +83,17 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = (props) => {
           getCaseViewPath(basePath),
         ]}
       >
-        <CaseView {...props} />
+        <CaseView
+          onComponentInitialized={onComponentInitialized}
+          actionsNavigation={actionsNavigation}
+          ruleDetailsNavigation={ruleDetailsNavigation}
+          showAlertDetails={showAlertDetails}
+          useFetchAlertData={useFetchAlertData}
+          refreshRef={refreshRef}
+          hideSyncAlerts={hideSyncAlerts}
+          onCaseDataSuccess={onCaseDataSuccess}
+          timelineIntegration={timelineIntegration}
+        />
       </Route>
 
       <Route path={basePath}>
