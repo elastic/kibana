@@ -9,6 +9,7 @@ import { ALERT_FLYOUT, CELL_TEXT, JSON_TEXT, TABLE_ROWS } from '../../screens/al
 
 import {
   expandFirstAlert,
+  refreshAlerts,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
@@ -32,6 +33,7 @@ describe('Alert details with unmapped fields', () => {
     createCustomRuleActivated(getUnmappedRule());
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
+    refreshAlerts();
     expandFirstAlert();
   });
 
