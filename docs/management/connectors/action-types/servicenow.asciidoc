@@ -1,6 +1,6 @@
 [role="xpack"]
 [[servicenow-action-type]]
-=== ServiceNow SecOps connector and action
+=== ServiceNow ITSM connector and action
 ++++
 <titleabbrev>ServiceNow ITSM</titleabbrev>
 ++++
@@ -27,7 +27,6 @@ To ensure authenticated communication between Elastic and ServiceNow, create a S
 * `import_set_loader`
 * `import_transformer`
 * `personalize_choices`
-* `sn_si.basic`
 * `x_elas2_inc_int.integration_user`
 . Click *Submit* to create the user.
 
