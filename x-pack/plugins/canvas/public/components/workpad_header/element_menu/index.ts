@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { ElementMenu } from './element_menu';
-export { ElementMenu as ElementMenuComponent } from './element_menu.component';
+export { ElementMenu } from './element_menu.component';
