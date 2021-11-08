@@ -288,14 +288,20 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
+    const latency: number = +(process.env.KBN_TEST_NETWORK_LATENCY ?? 100);
+    const downloadThroughput: number = +(process.env.KBN_TEST_DOWNLOAD_THROUGHPUT ?? 1024 * 5); // 5120 bytes
+    const uploadThroughput: number = +(process.env.KBN_TEST_UPLOAD_THROUGHPUT ?? 1024); // 1024 bytes
+
     // Only chrome supports this option.
-    log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
+    log.debug(
+      `NETWORK THROTTLED: ${downloadThroughput}k down, ${uploadThroughput}k up, ${latency} latency.`
+    );
 
     (session as any).setNetworkConditions({
       offline: false,
-      latency: 100, // Additional latency (ms).
-      download_throughput: 768 * 1024, // These speeds are in bites per second, not kilobytes.
-      upload_throughput: 256 * 1024,
+      latency, // Additional latency (ms).
+      download_throughput: downloadThroughput * 1024, // These speeds are in bites per second, not kilobytes.
+      upload_throughput: uploadThroughput * 1024,
     });
   }
 
