@@ -150,13 +150,18 @@ type DimensionEditorTabsType =
   | typeof formulaOperationName;
 
 export const DimensionEditorTabs = ({
-  tabsEnabled,
-  tabsState,
-  onClick,
+  tabs,
 }: {
-  tabsEnabled: Record<DimensionEditorTabsType, boolean>;
-  tabsState: Record<DimensionEditorTabsType, boolean>;
-  onClick: (tabClicked: DimensionEditorTabsType) => void;
+  tabs: Record<
+    DimensionEditorTabsType,
+    {
+      enabled: boolean;
+      state: boolean;
+      onClick: () => void;
+      id: string;
+      label: string;
+    }
+  >;
 }) => {
   return (
     <EuiTabs
@@ -164,37 +169,13 @@ export const DimensionEditorTabs = ({
       className="lnsIndexPatternDimensionEditor__header"
       data-test-subj="lens-dimensionTabs"
     >
-      {tabsEnabled.static_value ? (
-        <EuiTab
-          isSelected={tabsState.static_value}
-          data-test-subj="lens-dimensionTabs-static_value"
-          onClick={() => onClick(staticValueOperationName)}
-        >
-          {i18n.translate('xpack.lens.indexPattern.staticValueLabel', {
-            defaultMessage: 'Static value',
-          })}
-        </EuiTab>
-      ) : null}
-      <EuiTab
-        isSelected={tabsState.quickFunctions}
-        data-test-subj="lens-dimensionTabs-quickFunctions"
-        onClick={() => onClick(quickFunctionsName)}
-      >
-        {i18n.translate('xpack.lens.indexPattern.quickFunctionsLabel', {
-          defaultMessage: 'Quick functions',
-        })}
-      </EuiTab>
-      {tabsEnabled.formula ? (
-        <EuiTab
-          isSelected={tabsState.formula}
-          data-test-subj="lens-dimensionTabs-formula"
-          onClick={() => onClick(formulaOperationName)}
-        >
-          {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
-            defaultMessage: 'Formula',
-          })}
-        </EuiTab>
-      ) : null}
+      {Object.entries(tabs).map(([id, { enabled, state, onClick, label }]) => {
+        return enabled ? (
+          <EuiTab isSelected={state} data-test-subj={`lens-dimensionTabs-${id}`} onClick={onClick}>
+            {label}
+          </EuiTab>
+        ) : null;
+      })}
     </EuiTabs>
   );
 };
