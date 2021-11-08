@@ -24,5 +24,8 @@
   },
   "engines": {
     "yarn": "^1.21.1"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.5"
   }
 }
