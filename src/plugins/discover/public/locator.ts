@@ -11,7 +11,7 @@ import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../.
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import type { VIEW_MODE } from './application/apps/main/components/view_mode_toggle';
+import type { VIEW_MODE } from './components/view_mode_toggle';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 

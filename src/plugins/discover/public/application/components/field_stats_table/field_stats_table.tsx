@@ -7,10 +7,10 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../data/common';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -18,10 +18,10 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '../../../../../embeddable/public';
-import { SavedSearch } from '../../../saved_searches';
-import { GetStateReturn } from '../../apps/main/services/discover_state';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import { DataRefetch$ } from '../../apps/main/services/use_saved_search';
+import type { SavedSearch } from '../../../services/saved_searches';
+import type { GetStateReturn } from '../../main/services/discover_state';
+import { DataRefetch$ } from '../../main/utils/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: IndexPattern;

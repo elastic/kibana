@@ -44,7 +44,7 @@ export function getDefaultQuery() {
 export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject | SavedSearch) {
   const search = isSavedSearchSavedObject(savedSearch)
     ? savedSearch?.attributes?.kibanaSavedObjectMeta
-    : // @ts-expect-error kibanaSavedObjectMeta does exist
+    : // @ts-ignore
       savedSearch?.kibanaSavedObjectMeta;
 
   const parsed =
