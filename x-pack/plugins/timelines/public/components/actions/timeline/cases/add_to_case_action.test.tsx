@@ -35,7 +35,8 @@ describe('AddToCaseAction', () => {
       crud: true,
       read: true,
     },
-    appId: 'securitySolution',
+    appId: 'securitySolutionUI',
+    owner: 'securitySolution',
     onClose: () => null,
   };
 

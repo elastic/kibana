@@ -17,21 +17,18 @@ export const useMetricHostsModule = ({
   indexPattern,
   sourceId,
   spaceId,
-  timestampField,
 }: {
   indexPattern: string;
   sourceId: string;
   spaceId: string;
-  timestampField: string;
 }) => {
   const sourceConfiguration: ModuleSourceConfiguration = useMemo(
     () => ({
       indices: indexPattern.split(','),
       sourceId,
       spaceId,
-      timestampField,
     }),
-    [indexPattern, sourceId, spaceId, timestampField]
+    [indexPattern, sourceId, spaceId]
   );
 
   const infraMLModule = useInfraMLModule({

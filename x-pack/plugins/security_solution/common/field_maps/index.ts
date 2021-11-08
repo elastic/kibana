@@ -7,4 +7,5 @@
 
 import { AlertsFieldMap, alertsFieldMap } from './alerts';
 import { RulesFieldMap, rulesFieldMap } from './rules';
-export { AlertsFieldMap, RulesFieldMap, alertsFieldMap, rulesFieldMap };
+export type { AlertsFieldMap, RulesFieldMap };
+export { alertsFieldMap, rulesFieldMap };
