@@ -110,6 +110,7 @@ module.exports = {
     '!**/index.{js,ts,tsx}',
   ],
 
-  // A custom resolver to preserve symlinks by default
-  resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+  haste: {
+    enableSymlinks: true,
+  },
 };
