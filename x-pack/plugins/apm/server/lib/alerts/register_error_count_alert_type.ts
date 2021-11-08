@@ -41,6 +41,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { termQuery } from '../../../../observability/server';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
   ALERT_EVALUATION_THRESHOLD_NON_TYPED;
@@ -113,9 +114,7 @@ export function registerErrorCountAlertType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...(alertParams.serviceName
-                    ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                    : []),
+                  ...termQuery(SERVICE_NAME, alertParams.serviceName),
                   ...environmentQuery(alertParams.environment),
                 ],
               },
