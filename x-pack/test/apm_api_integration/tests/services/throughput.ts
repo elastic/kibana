@@ -120,54 +120,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         after(() => synthtraceEsClient.clean());
 
-        describe('compare transactions and metrics based throughput', () => {
-          let throughputMetrics: ThroughputReturn;
-          let throughputTransactions: ThroughputReturn;
-
-          before(async () => {
-            const [throughputMetricsResponse, throughputTransactionsResponse] = await Promise.all([
-              callApi({ query: { kuery: 'processor.event : "metric"' } }),
-              callApi({ query: { kuery: 'processor.event : "transaction"' } }),
-            ]);
-            throughputMetrics = throughputMetricsResponse.body;
-            throughputTransactions = throughputTransactionsResponse.body;
-          });
-
-          it('returns some transactions data', () => {
-            expect(throughputTransactions.currentPeriod.length).to.be.greaterThan(0);
-            const hasData = throughputTransactions.currentPeriod.some(({ y }) => isFiniteNumber(y));
-            expect(hasData).to.equal(true);
-          });
-
-          it('returns some metrics data', () => {
-            expect(throughputMetrics.currentPeriod.length).to.be.greaterThan(0);
-            const hasData = throughputMetrics.currentPeriod.some(({ y }) => isFiniteNumber(y));
-            expect(hasData).to.equal(true);
-          });
-
-          it('has same mean value for metrics and transactions data', () => {
-            const transactionsMean = meanBy(throughputTransactions.currentPeriod, 'y');
-            const metricsMean = meanBy(throughputMetrics.currentPeriod, 'y');
-            [transactionsMean, metricsMean].forEach((value) =>
-              expect(roundNumber(value)).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE))
-            );
-          });
-
-          it('has a bucket size of 10 seconds for transactions data', () => {
-            const firstTimerange = throughputTransactions.currentPeriod[0].x;
-            const secondTimerange = throughputTransactions.currentPeriod[1].x;
-            const timeIntervalAsSeconds = (secondTimerange - firstTimerange) / 1000;
-            expect(timeIntervalAsSeconds).to.equal(10);
-          });
-
-          it('has a bucket size of 1 minute for metrics data', () => {
-            const firstTimerange = throughputMetrics.currentPeriod[0].x;
-            const secondTimerange = throughputMetrics.currentPeriod[1].x;
-            const timeIntervalAsMinutes = (secondTimerange - firstTimerange) / 1000 / 60;
-            expect(timeIntervalAsMinutes).to.equal(1);
-          });
-        });
-
         describe('production environment', () => {
           let throughput: ThroughputReturn;
 

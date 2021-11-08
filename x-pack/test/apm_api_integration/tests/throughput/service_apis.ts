@@ -101,7 +101,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let throughputMetricValues: PromiseReturnType<typeof getThroughputValues>;
   let throughputTransactionValues: PromiseReturnType<typeof getThroughputValues>;
 
   registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
@@ -143,17 +142,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('compare throughput value between service inventory, throughput chart, service inventory and transactions apis', () => {
         before(async () => {
-          [throughputTransactionValues, throughputMetricValues] = await Promise.all([
-            getThroughputValues('transaction'),
-            getThroughputValues('metric'),
-          ]);
+          throughputTransactionValues = await getThroughputValues('transaction');
         });
 
-        it('returns same throughput value for Transaction-based and Metric-based data', () => {
-          [
-            ...Object.values(throughputTransactionValues),
-            ...Object.values(throughputMetricValues),
-          ].forEach((value) =>
+        it('returns the expected throughput values', () => {
+          Object.values(throughputTransactionValues).forEach((value) =>
             expect(roundNumber(value)).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE))
           );
         });

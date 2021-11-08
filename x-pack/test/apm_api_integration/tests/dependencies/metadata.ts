@@ -46,14 +46,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Dependency metadata when data is generated',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      it('returns correct metadata for the dependency', async () => {
+      before(async () => {
         await generateData({ synthtraceEsClient, start, end });
+      });
+
+      it('returns correct metadata for the dependency', async () => {
         const { status, body } = await callApi();
         const { span } = dataConfig;
 
         expect(status).to.be(200);
         expect(body.metadata.spanType).to.equal(span.type);
         expect(body.metadata.spanSubtype).to.equal(span.subType);
+      });
+
+      after(async () => {
+        await synthtraceEsClient.clean();
       });
     }
   );
