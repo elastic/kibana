@@ -87,7 +87,7 @@
 #elasticsearch.ssl.verificationMode: full
 
 # =================== System: Logging ===================
-# Set the value of this setting to off to suppress all logging output, or to debug to log everything. Defaults to 'error'
+# Set the value of this setting to off to suppress all logging output, or to debug to log everything. Defaults to 'info'
 #logging.root.level: debug
 
 # Enables you to specify a file where Kibana stores log output.
@@ -120,7 +120,7 @@
 #pid.file: /run/kibana/kibana.pid
 
 # Set the interval in milliseconds to sample system and process performance
-# metrics. Minimum is 100ms. Defaults to 5000.
+# metrics. Minimum is 100ms. Defaults to 5000ms.
 #ops.interval: 5000
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
@@ -134,25 +134,25 @@
 
 # The number of documents migrated at a time.
 # If Kibana can't start up or upgrade due to an Elasticsearch `circuit_breaking_exception`,
-# use a smaller batchSize value to reduce the memory pressure. Defaults to 1000
-# migrations.batchSize: 1000
+# use a smaller batchSize value to reduce the memory pressure. Defaults to 1000 objects per batch.
+#migrations.batchSize: 1000
 
 # The maximum payload size for indexing batches of upgraded saved objects.
 # To avoid migrations failing due to a 413 Request Entity Too Large response from Elasticsearch.
 # This value should be lower than or equal to your Elasticsearch cluster’s `http.max_content_length`
 # configuration option. Default: 100mb
-# migrations.maxBatchSizeBytes: 100mb
+#migrations.maxBatchSizeBytes: 100mb
 
 # The number of times to retry temporary migration failures. Increase the setting
 # if migrations fail frequently with a message such as `Unable to complete the [...] step after
 # 15 attempts, terminating`. Defaults to 15
-# migrations.retryAttempts: 15
+#migrations.retryAttempts: 15
 
 # =================== Search Autocomplete ===================
 # Time in milliseconds to wait for autocomplete suggestions from Elasticsearch.
-# This value must be a whole number greater than zero. Defaults to 1000
-# data.autocomplete.valueSuggestions.timeout: 1000
+# This value must be a whole number greater than zero. Defaults to 1000ms
+#data.autocomplete.valueSuggestions.timeout: 1000
 
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
-# This value must be a whole number greater than zero. Defaults to 100000
-# data.autocomplete.valueSuggestions.terminateAfter: 100000
+# This value must be a whole number greater than zero. Defaults to 100_000
+#data.autocomplete.valueSuggestions.terminateAfter: 100000
