@@ -410,7 +410,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -467,7 +467,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -509,7 +509,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -580,7 +580,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -1490,7 +1490,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -1547,7 +1547,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -1589,7 +1589,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -1660,7 +1660,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -2570,7 +2570,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -2627,7 +2627,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -2669,7 +2669,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -2722,7 +2722,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -3679,7 +3679,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -3736,7 +3736,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -3778,7 +3778,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -3849,7 +3849,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -4816,7 +4816,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -4873,7 +4873,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -4915,7 +4915,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -4968,7 +4968,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -5925,7 +5925,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -5982,7 +5982,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -6024,7 +6024,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -6077,7 +6077,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -7034,7 +7034,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -7091,7 +7091,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -7133,7 +7133,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -7186,7 +7186,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -8143,7 +8143,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -8200,7 +8200,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -8242,7 +8242,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -8332,7 +8332,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -9289,7 +9289,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -9346,7 +9346,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -9388,7 +9388,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell"
+                    className="euiTableRowCell euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,
@@ -9478,7 +9478,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                   textOnly={false}
                 >
                   <td
-                    className="euiTableRowCell euiTableRowCell--hasActions"
+                    className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                     style={
                       Object {
                         "width": undefined,

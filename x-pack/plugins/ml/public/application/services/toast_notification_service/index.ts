@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+export type { ToastNotificationService } from './toast_notification_service';
 export {
-  ToastNotificationService,
   toastNotificationServiceProvider,
   useToastNotificationService,
   getToastNotificationService,

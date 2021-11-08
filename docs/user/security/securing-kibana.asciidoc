@@ -108,7 +108,7 @@ TIP: For more information on Basic Authentication and additional methods of auth
 TIP: You can define as many different roles for your {kib} users as you need.
 
 For example, create roles that have `read` and `view_index_metadata` privileges
-on specific index patterns. For more information, see
+on specific data views. For more information, see
 {ref}/authorization.html[User authorization].
 
 --

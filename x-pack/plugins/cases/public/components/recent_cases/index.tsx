@@ -100,5 +100,7 @@ export const RecentCases: React.FC<RecentCasesProps> = React.memo((props) => {
   );
 });
 
+RecentCases.displayName = 'RecentCases';
+
 // eslint-disable-next-line import/no-default-export
 export { RecentCases as default };

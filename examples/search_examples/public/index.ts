@@ -15,4 +15,4 @@ import { SearchExamplesPlugin } from './plugin';
 export function plugin() {
   return new SearchExamplesPlugin();
 }
-export { SearchExamplesPluginSetup, SearchExamplesPluginStart } from './types';
+export type { SearchExamplesPluginSetup, SearchExamplesPluginStart } from './types';
