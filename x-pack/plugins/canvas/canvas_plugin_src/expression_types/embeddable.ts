@@ -6,7 +6,7 @@
  */
 
 import { ExpressionTypeDefinition } from '../../../../../src/plugins/expressions';
-import { EmbeddableInput } from '../../../../../src/plugins/embeddable/common/';
+import { EmbeddableInput } from '../../types';
 import { EmbeddableTypes } from './embeddable_types';
 
 export const EmbeddableExpressionType = 'embeddable';
