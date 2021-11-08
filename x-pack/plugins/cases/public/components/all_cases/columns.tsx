@@ -53,9 +53,6 @@ export type CasesColumns =
   | EuiTableComputedColumnType<Case>
   | EuiTableFieldDataColumnType<Case>;
 
-// TODO: extract to shared module
-const emptyFunction = () => {};
-
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
@@ -98,7 +95,7 @@ export const useCasesColumns = ({
   isSelectorView,
   userCanCrud,
   connectors = [],
-  onRowClick = emptyFunction,
+  onRowClick,
   alertData,
   postComment,
   updateCase,
