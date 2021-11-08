@@ -4,11 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { EuiSearchBar, EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '../../../../../../src/core/public';
+import { useQuery, useMutation } from 'react-query';
+import { 
+  EuiSearchBar, 
+  EuiSearchBarOnChangeArgs, 
+  EuiButton, 
+  EuiPage, 
+  EuiPageContent,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiEmptyPrompt
+} from '@elastic/eui';
 import { ProcessTree } from '../ProcessTree';
-import { mockData } from '../../../common/test/mock_data';
+import { getStart, getEnd, getEvent } from '../../../common/test/mock_data';
 import { IProcess } from '../../hooks/use_process_tree';
+
+import {
+  INTERNAL_TEST_ROUTE,
+} from '../../../common/constants';
 
 interface ISessionViewDeps {
   sessionId: string;
@@ -26,7 +44,10 @@ interface ISessionViewDeps {
  */
 export const SessionView = ({ sessionId }: ISessionViewDeps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [data, setData] = useState<any[]>([]);
   const [selectedProcess, setSelectedProcess] = useState<IProcess | null>(null);
+
+  const { http } = useKibana<CoreStart>().services;
 
   const processTreeCSS = `
     height: 300px;
@@ -46,18 +67,139 @@ export const SessionView = ({ sessionId }: ISessionViewDeps) => {
     }
   };
 
+  const {
+    mutate
+  } = useMutation((insertData) => {
+    return http.put(INTERNAL_TEST_ROUTE, { 
+      body: JSON.stringify({ 
+        index: 'process_tree',
+        data: JSON.stringify(insertData)
+      })
+    });
+  });
+
+  const {
+    data: getData
+  } = useQuery(['process-tree', 'process_tree'], () =>
+    http.get(INTERNAL_TEST_ROUTE, {
+      query: {
+        index: 'process_tree',
+      },
+    })
+  );
+
+  const {
+    mutate: deleteMutate
+  } = useMutation((insertData) => {
+    return http.delete(INTERNAL_TEST_ROUTE, { 
+      body: JSON.stringify({ 
+        index: 'process_tree'
+      })
+    });
+  });
+  
+  const handleMutate = (insertData: any) => {
+    mutate(insertData, {
+      onSuccess: () => {
+        setData([...data, ...insertData])
+      }
+    });
+  }
+
+  const handleDelete = () => {
+    deleteMutate(undefined, {
+      onSuccess: () => {
+        setData([]);
+      }
+    })
+  }
+
+  useEffect(() => {
+    if (!getData) {
+      return;
+    }
+
+    if (getData.length <= data.length) {
+      return;
+    }
+
+    setData(getData.hits.map((event: any) => event._source));
+  }, [getData]);
+
+  const renderNoData = () => {
+    if (data.length) {
+      return null;
+    }
+    return (
+      <EuiEmptyPrompt 
+        title={<h2>No data to render</h2>}
+        body={
+          <p>
+            Please start by adding some data using the bottons below
+          </p>
+        }
+      />
+    )
+  }
+
+  const renderInsertButtons = () => {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem>
+          <EuiButton onClick={() => handleMutate(getStart())}>
+            Insert Session Start
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton onClick={() => handleMutate(getEvent())}>
+            Insert Command
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton onClick={() => handleMutate(getEnd())}>
+            Insert End
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton onClick={handleDelete}>
+            Delete Data
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    )
+  }
+
   return (
-    <>
-      <EuiSearchBar query={searchQuery} onChange={onSearch} />
-      <div css={processTreeCSS}>
-        <ProcessTree
-          sessionId={sessionId}
-          forward={mockData}
-          searchQuery={searchQuery}
-          selectedProcess={selectedProcess}
-          onProcessSelected={onProcessSelected}
+    <EuiPage>
+      <EuiPageContent>
+        <EuiPageHeader 
+          pageTitle="Process Tree"
+          iconType="logoKibana"
+          description={
+            `Below is an example of the process tree, demonstrating data fetching patterns and data rendering.
+            Please start by adding some mock data
+            `
+          }
         />
-      </div>
-    </>
+        <EuiSpacer />
+        {renderNoData()}
+        {!!data.length &&
+          <>
+            <EuiSearchBar query={searchQuery} onChange={onSearch} />
+            <div css={processTreeCSS}>
+              <ProcessTree
+                sessionId={sessionId}
+                forward={data}
+                searchQuery={searchQuery}
+                selectedProcess={selectedProcess}
+                onProcessSelected={onProcessSelected}
+              />
+            </div>  
+          </>
+        }
+        <EuiSpacer />
+        {renderInsertButtons()}
+      </EuiPageContent>
+    </EuiPage>
   );
 };

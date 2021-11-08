@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import uuid from 'uuid';
 import { IRouter } from '../../../../../src/core/server';
 import { INTERNAL_TEST_SAVED_OBJECT_ROUTE, TEST_SAVED_OBJECT } from '../../common/constants';
 

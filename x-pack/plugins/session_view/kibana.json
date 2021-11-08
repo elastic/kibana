@@ -7,7 +7,7 @@
     "githubTeam": "security-team"
   },
   "requiredPlugins": ["data"],
-  "requiredBundles": ["kibanaReact"],
+  "requiredBundles": [],
   "server": true,
   "ui": true
 }
