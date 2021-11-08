@@ -22,7 +22,6 @@ import {
   viewRegistry,
 } from './expression_types';
 import { SetupRegistries } from './plugin_api';
-import { filterViewsRegistry } from './filter_view_types';
 
 export let registries = {};
 
@@ -37,7 +36,6 @@ export function initRegistries() {
     templates: templatesRegistry,
     tagUIs: tagsRegistry,
     transitions: transitionsRegistry,
-    filterViewsUIs: filterViewsRegistry,
   });
 }
 

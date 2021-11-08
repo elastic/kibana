@@ -9,8 +9,9 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FormattedFilterViewInstance } from '../../../types';
-import { formatFilter } from '../../lib/filter';
+import { createFilledFilterView } from '../../lib/filter';
 import { Filter } from './filter';
+import { filterViews } from './filter_views';
 import { FiltersGroup as FiltersGroupType } from './types';
 
 interface Props {
@@ -31,11 +32,12 @@ const strings = {
 export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
   const { name, filters: groupFilters } = filtersGroup;
 
-  const filterViews: FormattedFilterViewInstance[] = groupFilters.map((filter) =>
-    formatFilter(filter)
-  );
+  const filledFilterViews: FormattedFilterViewInstance[] = groupFilters.map((filter) => {
+    const filterView = filterViews[filter.type] ?? filterViews.default;
+    return createFilledFilterView(filterView.view, filter);
+  });
 
-  const filtersComponents = filterViews.map((filter, index) => (
+  const filtersComponents = filledFilterViews.map((filter, index) => (
     <Filter key={`filter-${name}-${index}`} filter={filter} />
   ));
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FilterViewSpec } from '../../../public/filter_view_types';
+import { FilterViewSpec } from '../../../../types';
 
 const strings = {
   getTypeLabel: () =>
@@ -29,18 +29,10 @@ const strings = {
 
 export const defaultFilter: FilterViewSpec = {
   name: 'default',
-  view: () => ({
-    type: {
-      label: strings.getTypeLabel(),
-    },
-    column: {
-      label: strings.getColumnLabel(),
-    },
-    filterGroup: {
-      label: strings.getFilterGroupLabel(),
-    },
-    value: {
-      label: strings.getValueLabel(),
-    },
-  }),
+  view: {
+    type: { label: strings.getTypeLabel() },
+    column: { label: strings.getColumnLabel() },
+    filterGroup: { label: strings.getFilterGroupLabel() },
+    value: { label: strings.getValueLabel() },
+  },
 };

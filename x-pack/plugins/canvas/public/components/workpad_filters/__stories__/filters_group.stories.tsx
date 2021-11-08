@@ -10,9 +10,6 @@ import React from 'react';
 import moment from 'moment';
 import { FiltersGroup } from '../filters_group';
 import { FiltersGroup as FiltersGroupType } from '../types';
-import { prepareFilterViews } from './utils';
-
-prepareFilterViews();
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 

@@ -11,10 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import { WorkpadFilters } from '../workpad_filters.component';
 import { FiltersGroup as FiltersGroupType } from '../types';
-import { prepareFilterViews } from './utils';
 import { Filter } from '../../../../types';
-
-prepareFilterViews();
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 

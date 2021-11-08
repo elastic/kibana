@@ -61,6 +61,11 @@ export type FilterViewInstance<FilterValue = unknown> = Record<
   SimpleFilterViewField | ComplexFilterViewField<FilterValue>
 >;
 
+export interface FilterViewSpec<FilterValue = unknown> {
+  name: string;
+  view: FilterViewInstance<FilterValue>;
+}
+
 export type FlattenFilterViewInstance = Record<string, SimpleFilterViewField>;
 export type FormattedFilterViewInstance = Record<string, FormattedFilterViewField>;
 
