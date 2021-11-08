@@ -7,10 +7,8 @@
  */
 
 const path = require('path');
-let KIBANA_ROOT = path.resolve(__dirname, '../../..');
-if (KIBANA_ROOT.includes('.cache/bazel')) {
-  KIBANA_ROOT = path.resolve(process.argv[1], '../../../');
-}
+const findKibanaRoot = require('../helpers/find_kibana_root');
+const KIBANA_ROOT = findKibanaRoot();
 
 function checkModuleNameNode(context, mappings, node, desc = 'Imported') {
   const mapping = mappings.find(
