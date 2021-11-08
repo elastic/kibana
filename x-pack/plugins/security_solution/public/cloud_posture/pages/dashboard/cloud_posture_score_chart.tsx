@@ -35,14 +35,14 @@ import { ChartList } from './chart_list';
 const useCloudPostureScore = () => {
   const { http } = useKibana().services;
   console.log({ http });
-  return useQuery(['csp_score'], () => http.get('/api/csp/score'));
+  //return useQuery(['csp_foo'], () => http.get('/api/csp/foo'));
+  return useQuery(['csp_findings'], () => http.get('/api/csp/findings'));
 };
 
 export const CloudPostureScoreChart = () => {
   const foo = useCloudPostureScore();
   console.log({ foo });
-  if (foo.isLoading) return <h1>LOADING</h1>;
-  return <PieChart data={foo.data} />;
+  return <h1>status: {foo.status}</h1>;
   // return <Pie2 data={foo.data} />;
 };
 
