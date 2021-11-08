@@ -69,7 +69,8 @@ describe('query_field_value_pairs', () => {
         fieldCandidates
       );
 
-      expect(resp).toEqual([
+      expect(resp.errors).toEqual([]);
+      expect(resp.fieldValuePairs).toEqual([
         { fieldName: 'myFieldCandidate1', fieldValue: 'myValue1' },
         { fieldName: 'myFieldCandidate1', fieldValue: 'myValue2' },
         { fieldName: 'myFieldCandidate2', fieldValue: 'myValue1' },
