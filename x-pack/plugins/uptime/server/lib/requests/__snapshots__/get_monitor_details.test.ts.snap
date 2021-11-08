@@ -55,7 +55,7 @@ Array [
       },
       "size": 0,
     },
-    "index": "heartbeat-*,synthetics-*",
+    "index": "heartbeat-7*,synthetics-*",
   },
 ]
 `;
@@ -103,7 +103,7 @@ Array [
         },
       ],
     },
-    "index": "heartbeat-*,synthetics-*",
+    "index": "heartbeat-7*,synthetics-*",
   },
 ]
 `;
