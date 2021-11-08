@@ -6,7 +6,7 @@
  */
 import { service, timerange } from '@elastic/apm-synthtrace';
 
-export function generatesData({ from, to }: { from: number; to: number }) {
+export function generateData({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
 
   const opbeansJava = service('opbeans-java', 'production', 'java')

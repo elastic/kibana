@@ -7,7 +7,7 @@
 
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
-import { generatesData } from './generates_data';
+import { generateData } from './generate_data';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
@@ -30,7 +30,7 @@ describe('Errors page', () => {
   describe('when data is loaded', () => {
     before(async () => {
       await synthtrace.index(
-        generatesData({
+        generateData({
           from: new Date(start).getTime(),
           to: new Date(end).getTime(),
         })
