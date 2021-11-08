@@ -24,6 +24,10 @@ export const CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-${id}"]`;
 };
 
+export const SELECT_CASE = (id: string) => {
+  return `[data-test-subj="cases-table-row-select-${id}"]`;
+};
+
 export const CELL = '[data-test-subj="statefulCell"]';
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
