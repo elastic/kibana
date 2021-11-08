@@ -43,11 +43,11 @@ export const Filter: FC<Props> = ({ filter, ...restProps }) => {
 
     return {
       title: (
-        <EuiText size="xs">
+        <EuiText size="s">
           <h4>{filterValue.label}</h4>
         </EuiText>
       ),
-      description: <EuiText size="xs">{description}</EuiText>,
+      description: <EuiText size="s">{description}</EuiText>,
     };
   });
 
