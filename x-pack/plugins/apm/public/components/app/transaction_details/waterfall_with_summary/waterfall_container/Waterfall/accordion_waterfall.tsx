@@ -46,12 +46,8 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
     hasError: boolean;
   }
 >`
-  .euiAccordion {
+  .waterfall_accordion {
     border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  }
-  .euiAccordion__button {
-    width: 100%;
-    height: ${ACCORDION_HEIGHT};
   }
 
   .euiAccordion__childWrapper {
@@ -63,6 +59,8 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
       ? `2px solid ${props.theme.eui.euiColorDanger};`
       : `1px solid ${props.theme.eui.euiColorLightShade};`;
     return `.button_${props.id} {
+      width: 100%;
+      height: ${ACCORDION_HEIGHT};
       margin-left: ${props.marginLeftLevel}px;
       border-left: ${borderLeft}
       &:hover {
@@ -106,6 +104,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
 
   return (
     <StyledAccordion
+      className="waterfall_accordion"
       style={{ position: 'relative' }}
       buttonClassName={`button_${item.id}`}
       key={item.id}
