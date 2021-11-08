@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isEmpty, isEqual, keys, map, reduce } from 'lodash/fp';
+import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
 import {
   EuiCallOut,
   EuiCode,
@@ -148,6 +148,13 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         if (ecsMappingColumns.includes(columnId)) {
           const ecsFieldValue = get(columnId, data[rowIndex % pagination.pageSize]?._source);
 
+          if (isArray(ecsFieldValue) || isObject(ecsFieldValue)) {
+            try {
+              return JSON.stringify(ecsFieldValue, null, 2);
+              // eslint-disable-next-line no-empty
+            } catch (e) {}
+          }
+
           return ecsFieldValue ?? '-';
         }
 
@@ -239,13 +246,19 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       (acc, fieldName) => {
         const { data, seen } = acc;
         if (fieldName === 'agent.name') {
-          data.push({
-            id: fieldName,
-            displayAsText: i18n.translate('xpack.osquery.liveQueryResults.table.agentColumnTitle', {
-              defaultMessage: 'agent',
-            }),
-            defaultSortDirection: Direction.asc,
-          });
+          if (!seen.has(fieldName)) {
+            data.push({
+              id: fieldName,
+              displayAsText: i18n.translate(
+                'xpack.osquery.liveQueryResults.table.agentColumnTitle',
+                {
+                  defaultMessage: 'agent',
+                }
+              ),
+              defaultSortDirection: Direction.asc,
+            });
+            seen.add(fieldName);
+          }
 
           return acc;
         }
