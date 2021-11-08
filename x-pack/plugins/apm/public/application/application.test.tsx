@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { act } from '@testing-library/react';
+import { EuiErrorBoundary } from '@elastic/eui';
+import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
 import type {
@@ -17,19 +19,24 @@ import type {
 } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { renderApp } from './';
+import { renderApp as renderApmApp } from './';
+import { UXAppRoot } from './uxApp';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import { RumHome } from '../components/app/RumDashboard/RumHome';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
 }));
 
-describe('renderApp', () => {
-  let mockConsole: jest.SpyInstance;
+jest.mock('../components/app/RumDashboard/RumHome', () => ({
+  RumHome: () => <p>Home Mock</p>,
+}));
 
+describe('renderApp (APM)', () => {
+  let mockConsole: jest.SpyInstance;
   beforeAll(() => {
     // The RUM agent logs an unnecessary message here. There's a couple open
     // issues need to be fixed to get the ability to turn off all of the logging:
@@ -45,8 +52,14 @@ describe('renderApp', () => {
     mockConsole.mockRestore();
   });
 
-  it('renders the app', () => {
-    const { coreStart, config } = mockApmPluginContextValue;
+  const getApmMountProps = () => {
+    const {
+      core: coreStart,
+      config,
+      observabilityRuleTypeRegistry,
+      corePlugins,
+    } = mockApmPluginContextValue;
+
     const pluginsSetup = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, ruleTypeRegistry: {} },
@@ -116,20 +129,46 @@ describe('renderApp', () => {
         }
       });
 
+    return {
+      coreStart,
+      pluginsSetup: pluginsSetup as unknown as ApmPluginSetupDeps,
+      appMountParameters: appMountParameters as unknown as AppMountParameters,
+      pluginsStart,
+      config,
+      observabilityRuleTypeRegistry,
+      corePlugins,
+    };
+  };
+
+  it('renders the app', () => {
+    const mountProps = getApmMountProps();
+
     let unmount: () => void;
 
     act(() => {
-      unmount = renderApp({
-        appMountParameters,
-        config,
-        coreStart,
-        pluginsSetup,
-        pluginsStart,
-      });
+      unmount = renderApmApp(mountProps);
     });
 
     expect(() => {
       unmount();
     }).not.toThrowError();
+  });
+});
+
+describe('renderUxApp', () => {
+  it('has an error boundary for the UXAppRoot', async () => {
+    const uxMountProps = mockApmPluginContextValue;
+
+    const wrapper = mount(<UXAppRoot {...(uxMountProps as any)} />);
+
+    wrapper
+      .find(RumHome)
+      .simulateError(new Error('Oh no, an unexpected error!'));
+
+    expect(wrapper.find(RumHome)).toHaveLength(0);
+    expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
+    expect(wrapper.find(EuiErrorBoundary).text()).toMatch(
+      /Error: Oh no, an unexpected error!/
+    );
   });
 });
