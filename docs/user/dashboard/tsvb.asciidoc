@@ -16,7 +16,7 @@ With *TSVB*, you can:
 image::images/tsvb-screenshot.png[TSVB overview]
 
 [float]
-[[tsvb-required-choices]]
+[[tsvb-index-pattern-mode]]
 ==== Open and set up TSVB
 
 Open *TSVB*, then configure the required settings. You can create *TSVB* visualizations with only {data-sources}, or {es} index strings. 
