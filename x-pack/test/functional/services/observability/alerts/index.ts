@@ -16,7 +16,7 @@ export function ObservabilityAlertsProvider(context: FtrProviderContext) {
   const common = ObservabilityAlertsCommonProvider(context);
   const pagination = ObservabilityAlertsPaginationProvider(context);
   const addToCase = ObservabilityAlertsAddToCaseProvider(context);
-  const bulkActions = ObservabilityAlertsBulkActionsProvider(context, common);
+  const bulkActions = ObservabilityAlertsBulkActionsProvider(context);
 
   return {
     common,

@@ -17,8 +17,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const observability = getService('observability');
-  const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'error', 'security']);
 
   const retry = getService('retry');
 
@@ -34,7 +32,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('When user has all priviledges for logs app', () => {
+    describe.skip('When user has all priviledges for logs app', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -70,45 +68,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     describe('When user has all priviledges for apm app', () => {
-      // before(async () => {
-      // await PageObjects.security.forceLogout();
-
-      // await security.role.create('global_apm_all_role', {
-      //   elasticsearch: {
-      //     indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
-      //   },
-      //   kibana: [
-      //     {
-      //       feature: {
-      //         apm: ['all'],
-      //       },
-      //       spaces: ['*'],
-      //     },
-      //   ],
-      // });
-
-      // await security.user.create('global_apm_all_user', {
-      //   password: 'global_apm_all_user-password',
-      //   roles: ['global_apm_all_role'],
-      //   full_name: 'test user',
-      // });
-
-      // await PageObjects.security.login('global_apm_all_user', 'global_apm_all_user-password', {
-      //   expectSpaceSelector: false,
-      // });
-
-      // await observability.alerts.common.navigateToTimeWithData();
-      // });
-
-      // after(async () => {
-      //   await security.role.delete('global_apm_all_role');
-      //   await security.user.delete('global_apm_all_user');
-      //   await PageObjects.security.forceLogout();
-      // });
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             apm: ['all'],
+            // logs: ['all']
           })
         );
         await observability.alerts.common.navigateToTimeWithData();
@@ -139,7 +103,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('When user has read permissions for logs', () => {
+    describe.skip('When user has read permissions for logs', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({

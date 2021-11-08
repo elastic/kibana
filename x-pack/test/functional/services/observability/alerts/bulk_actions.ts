@@ -8,8 +8,8 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 const CHECKBOX_SELECTOR = 'select-event';
 
-export function ObservabilityAlertsBulkActionsProvider({ getService }: FtrProviderContext, common) {
-  const testSubjects = getService('testSubjects');
+export function ObservabilityAlertsBulkActionsProvider({ getService }: FtrProviderContext) {
+  // const testSubjects = getService('testSubjects');
   const find = getService('find');
 
   const getCheckboxSelectorForFirstRow = async () => {
