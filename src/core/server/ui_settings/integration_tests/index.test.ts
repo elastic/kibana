@@ -20,9 +20,9 @@ describe('uiSettings/routes', function () {
   jest.setTimeout(120_000);
 
   beforeAll(startServers);
-  /* eslint-disable jest/valid-describe */
+  // eslint-disable-next-line jest/valid-describe
   describe('doc missing', docMissingSuite(savedObjectIndex));
+  // eslint-disable-next-line jest/valid-describe
   describe('doc exists', docExistsSuite(savedObjectIndex));
-  /* eslint-enable jest/valid-describe */
   afterAll(stopServers);
 });
