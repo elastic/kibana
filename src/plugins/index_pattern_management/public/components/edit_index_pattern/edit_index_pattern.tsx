@@ -160,7 +160,7 @@ export const EditIndexPattern = withRouter(
                   <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
                 </EuiFlexItem>
               )}
-              {indexPattern.id && indexPattern.id === securitySolution && (
+              {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge>{securityDataView}</EuiBadge>
                 </EuiFlexItem>
