@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/security/discover'

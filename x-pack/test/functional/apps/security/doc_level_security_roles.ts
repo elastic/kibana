@@ -76,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rowData).to.contain('EAST');
     });
     after('logout', async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
   });
