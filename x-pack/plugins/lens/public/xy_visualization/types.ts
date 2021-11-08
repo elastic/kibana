@@ -69,6 +69,7 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar vertical',
     }),
     groupLabel: groupLabelForBar,
+    sortPriority: 2,
   },
   {
     id: 'bar_horizontal',

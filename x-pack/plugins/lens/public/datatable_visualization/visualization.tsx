@@ -49,7 +49,7 @@ export const getDatatableVisualization = ({
       icon: LensIconChartDatatable,
       label: visualizationLabel,
       groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
-        defaultMessage: 'Tabular and single value',
+        defaultMessage: 'Tabular',
       }),
       sortPriority: 1,
     },
