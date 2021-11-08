@@ -94,6 +94,7 @@ async function createAnomalyDetectionJob({
           filter: [
             { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
             { term: { [METRICSET_NAME]: 'transaction' } },
+            { terms: { _tier: ['content', 'hot', 'warm'] } },
             ...environmentQuery(environment),
           ],
         },

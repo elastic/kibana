@@ -10,7 +10,8 @@
     "bool": {
       "filter": [
         { "term": { "processor.event": "metric" } },
-        { "term": { "metricset.name": "transaction" } }
+        { "term": { "metricset.name": "transaction" } },
+        { "terms": { "_tier": [ "content", "hot", "warm" ]} }
       ]
     }
   },
@@ -91,5 +92,8 @@
         }
       }
     }
+  },
+  "indices_options": {
+    "ignore_unavailable": true
   }
 }
