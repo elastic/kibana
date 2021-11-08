@@ -40,7 +40,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
     });
 
     const devTool = devTools.register({
-      id: 'searchprofiler',
+      id: 'searchProfiler',
       title: i18n.translate('xpack.searchProfiler.pageDisplayName', {
         defaultMessage: 'Search Profiler',
       }),

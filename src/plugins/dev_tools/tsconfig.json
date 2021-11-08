@@ -9,6 +9,7 @@
   "include": ["public/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../url_forwarding/tsconfig.json" }
+    { "path": "../url_forwarding/tsconfig.json" },
+    { "path": "../../../src/plugins/management/tsconfig.json" }
   ]
 }

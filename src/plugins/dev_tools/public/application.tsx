@@ -15,6 +15,8 @@ import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 import { ApplicationStart, ChromeStart, ScopedHistory } from 'src/core/public';
+import { docTitleService, breadcrumbService } from './services';
+import type { BreadcrumbType } from './types';
 
 import { DevToolApp } from './dev_tool';
 
@@ -41,6 +43,11 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
     },
     []
   );
+
+  useEffect(() => {
+    docTitleService.setTitle(activeDevTool.id as BreadcrumbType);
+    breadcrumbService.setBreadcrumbs(activeDevTool.id as BreadcrumbType);
+  }, [activeDevTool]);
 
   return (
     <main className="devApp">
@@ -124,25 +131,6 @@ function setBadge(application: ApplicationStart, chrome: ChromeStart) {
   });
 }
 
-function setTitle(chrome: ChromeStart) {
-  chrome.docTitle.change(
-    i18n.translate('devTools.pageTitle', {
-      defaultMessage: 'Dev Tools',
-    })
-  );
-}
-
-function setBreadcrumbs(chrome: ChromeStart) {
-  chrome.setBreadcrumbs([
-    {
-      text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
-        defaultMessage: 'Dev Tools',
-      }),
-      href: '#/',
-    },
-  ]);
-}
-
 export function renderApp(
   element: HTMLElement,
   application: ApplicationStart,
@@ -155,8 +143,8 @@ export function renderApp(
   }
 
   setBadge(application, chrome);
-  setBreadcrumbs(chrome);
-  setTitle(chrome);
+  docTitleService.setup(chrome.docTitle.change);
+  breadcrumbService.setup(chrome.setBreadcrumbs);
 
   ReactDOM.render(
     <I18nProvider>
