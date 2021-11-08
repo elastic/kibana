@@ -1,6 +1,6 @@
 [role="xpack"]
 [[servicenow-itom-action-type]]
-=== ServiceNow connector and action
+=== ServiceNow ITOM connector and action
 ++++
 <titleabbrev>ServiceNow ITOM</titleabbrev>
 ++++
@@ -10,7 +10,10 @@ The ServiceNow ITOM connector uses the https://docs.servicenow.com/bundle/rome-i
 [float]
 [[servicenow-itom-connector-prerequisites]]
 ==== Prerequisites
-After upgrading to 7.16, you must create an integration user in ServiceNow and assign it the `personalize_choices` and `evt_mgmt_integration` roles.
+Create an integration user in ServiceNow and assign it the following roles.
+
+* `personalize_choices`: Allows the user to retrieve Choice element options, such as Severity.
+* `evt_mgmt_integration`: Enables integration with external event sources by allowing the user to create events.
 
 [float]
 [[servicenow-itom-connector-configuration]]
@@ -22,8 +25,6 @@ Name::      The name of the connector. The name is used to identify a  connector
 URL::       ServiceNow instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
-
-The ServiceNow user requires at minimum read, create, and update access to the Event table and read access to the https://docs.servicenow.com/bundle/paris-platform-administration/page/administer/localization/reference/r_ChoicesTable.html[sys_choice]. If you don't provide access to sys_choice, then the choices will not render.
 
 [float]
 [[servicenow-itom-connector-networking-configuration]]

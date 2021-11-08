@@ -1,6 +1,6 @@
 [role="xpack"]
 [[servicenow-sir-action-type]]
-=== ServiceNow connector and action
+=== ServiceNow ITSM connector and action
 ++++
 <titleabbrev>ServiceNow SecOps</titleabbrev>
 ++++
@@ -12,7 +12,7 @@ The ServiceNow SecOps connector uses the https://docs.servicenow.com/bundle/orla
 ==== Prerequisites
 After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
 
-* Install Elastic for Security Operations (SecOps) from the https://store.servicenow.com/sn_appstore_store.do#!/store/home[ServiceNow Store].
+* Install Elastic for Security Operations (SecOps) from the https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[ServiceNow Store].
 * Create a ServiceNow integration user and assign it the appropriate roles.
 * Create a CORS rule.
 
@@ -25,9 +25,8 @@ To ensure authenticated communication between Elastic and ServiceNow, create a S
 . Complete the form.
 . Assign the integration user the following roles: 
 * `import_set_loader`
-* `Import_transformer`
+* `import_transformer`
 * `personalize_choices`
-* `sn_si.basic`
 * `x_elas2_sir_int.integration_user`
 . Click *Submit* to create the user.
 
@@ -38,7 +37,7 @@ A CORS rule is required for communication between the Elastic and ServiceNow. To
 . Go to *System Web Services -> CORS Rules*.
 . Click *New*.
 . Configure the rule settings to use the Elastic SIR API and the Kibana URL:
-* *REST API*: Choose `x_elas2_sir_int/elastic_api`.
+* *REST API*: Choose `Elastic ITSM API [x_elas2_inc_int/elastic_api]`.
 * *Domain*: Enter the Kibana URL.
 . Go to the *HTTP methods* tab and select *GET*. This chooses the GET HTTP method.
 . Click *Submit* to create the rule.
@@ -52,7 +51,7 @@ ServiceNow SecOps connectors created in 7.15 version are marked as deprecated af
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
 
-IMPORTANT: Deprecated connectors will continue to function with the rules they were added to, but you cannot assign a deprecated connector to a new rule. If you do so, you'll be prompted to update the connector or create a new one.
+IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to a new rule. However, we strongly recommend upgrading the deprecated connector or <<creating-new-connector, creating a new one>> to ensure you have access to connector enhancements, such as updating incidents.
 
 To update a deprecated connector:
 
@@ -135,7 +134,7 @@ Short description::    A short description for the incident, used for searching 
 Priority::             The priority of the incident.
 Category::             The category of the incident.
 Subcategory::          The subcategory of the incident.
-Correlation ID::       Actions using the same Correlation ID will be associated with the same ServiceNow incident. This value determines whether a new ServiceNow incident will be created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the Correlation ID value in ServiceNow. The maximum character length for this value is 100 characters.
+Correlation ID::       Connectors using the same Correlation ID will be associated with the same ServiceNow incident. This value determines whether a new ServiceNow incident will be created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the Correlation ID value in ServiceNow. The maximum character length for this value is 100 characters.
 
 NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that ServiceNow will create a separate incident record for every generated alert that uses a unique alert ID. In other words, if the rule generates multiple alerts that use the same alert IDs, ServiceNow creates and continually updates a single incident record for the alert.
 
