@@ -10,6 +10,7 @@ import type { UrlGeneratorsDefinition } from '../../share/public';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
+import { VIEW_MODE } from './components/view_mode_toggle';
 
 export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
 
@@ -75,6 +76,8 @@ export interface DiscoverUrlGeneratorState {
    * id of the used saved query
    */
   savedQuery?: string;
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
 }
 
 interface Params {
@@ -104,6 +107,8 @@ export class DiscoverUrlGenerator
     savedQuery,
     sort,
     interval,
+    viewMode,
+    hideAggregatedPreview,
   }: DiscoverUrlGeneratorState): Promise<string> => {
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -114,6 +119,8 @@ export class DiscoverUrlGenerator
       interval?: string;
       sort?: string[][];
       savedQuery?: string;
+      viewMode?: VIEW_MODE;
+      hideAggregatedPreview?: boolean;
     } = {};
     const queryState: QueryState = {};
 
@@ -130,6 +137,8 @@ export class DiscoverUrlGenerator
     if (filters && filters.length)
       queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
+    if (viewMode) appState.viewMode = viewMode;
+    if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
 
     let url = `${this.params.appBasePath}#/${savedSearchPath}`;
     url = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, url);

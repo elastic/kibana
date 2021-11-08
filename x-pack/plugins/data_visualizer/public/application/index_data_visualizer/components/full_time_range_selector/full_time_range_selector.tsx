@@ -6,7 +6,6 @@
  */
 
 import React, { FC } from 'react';
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Query, IndexPattern, TimefilterContract } from 'src/plugins/data/public';
 import { EuiButton } from '@elastic/eui';

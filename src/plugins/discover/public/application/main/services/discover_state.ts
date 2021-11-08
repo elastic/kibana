@@ -411,5 +411,7 @@ function createUrlGeneratorState({
         }
       : undefined,
     useHash: false,
+    viewMode: appState.viewMode,
+    hideAggregatedPreview: appState.hideAggregatedPreview,
   };
 }

@@ -59,9 +59,11 @@ const FieldInfoIcon: React.FC = memo(() => (
   </EuiToolTip>
 ));
 
-const DiscoverFieldTypeIcon: React.FC<{ field: IndexPatternField }> = memo(({ field }) => (
-  <FieldIcon type={field.type} label={getFieldTypeName(field.type)} scripted={field.scripted} />
-));
+const DiscoverFieldTypeIcon: React.FC<{ field: IndexPatternField }> = memo(({ field }) => {
+  // If it's a string type, we want to distinguish between keyword and text
+  const tempType = field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
+  return <FieldIcon type={tempType} label={getFieldTypeName(tempType)} scripted={field.scripted} />;
+});
 
 const FieldName: React.FC<{ field: IndexPatternField }> = memo(({ field }) => {
   const title =

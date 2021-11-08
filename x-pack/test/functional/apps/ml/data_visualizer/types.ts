@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { FieldVisConfig } from '../../../../../plugins/data_visualizer/public/application/common/components/stats_table/types';
+import type { FieldVisConfig } from '../../../../../plugins/data_visualizer/public/application/common/components/stats_table/types';
 
 export interface MetricFieldVisConfig extends FieldVisConfig {
+  fieldName: string;
   statsMaxDecimalPlaces: number;
   docCountFormatted: string;
   topValuesCount: number;
   viewableInLens: boolean;
+  hasActionMenu?: boolean;
 }
 
 export interface NonMetricFieldVisConfig extends FieldVisConfig {
+  fieldName: string;
   docCountFormatted: string;
   exampleCount: number;
   exampleContent?: string[];
   viewableInLens: boolean;
+  hasActionMenu?: boolean;
 }
 
 export interface TestData {

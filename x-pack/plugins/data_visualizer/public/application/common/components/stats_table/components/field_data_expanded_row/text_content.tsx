@@ -30,8 +30,9 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
         {numExamples > 0 && <ExamplesList examples={examples} />}
         {numExamples === 0 && (
           <Fragment>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="xs" />
             <EuiCallOut
+              size="s"
               title={i18n.translate(
                 'xpack.dataVisualizer.dataGrid.fieldText.noExamplesForFieldsTitle',
                 {

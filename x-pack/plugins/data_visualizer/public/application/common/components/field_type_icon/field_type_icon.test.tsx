@@ -14,7 +14,7 @@ import { JOB_FIELD_TYPES } from '../../../../../common';
 describe('FieldTypeIcon', () => {
   test(`render component when type matches a field type`, () => {
     const typeIconComponent = shallow(
-      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
+      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
     expect(typeIconComponent).toMatchSnapshot();
   });
@@ -24,7 +24,7 @@ describe('FieldTypeIcon', () => {
     jest.useFakeTimers();
 
     const typeIconComponent = mount(
-      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
+      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
 
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);

@@ -48,8 +48,11 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   murmur3: { iconType: 'tokenFile' },
   number: { iconType: 'tokenNumber' },
   number_range: { iconType: 'tokenNumber' },
+  histogram: { iconType: 'tokenHistogram' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   string: { iconType: 'tokenString' },
+  text: { iconType: 'tokenString' },
+  keyword: { iconType: 'tokenKeyword' },
   nested: { iconType: 'tokenNested' },
 };
 

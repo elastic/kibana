@@ -23,6 +23,7 @@ import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
 import { LoadingIndicator } from '../loading_indicator';
 import { IndexPatternField } from '../../../../../../../../src/plugins/data/common';
+import { ErrorMessageContent } from '../stats_table/components/field_data_expanded_row/error_message';
 
 export const IndexBasedDataVisualizerExpandedRow = ({
   item,
@@ -44,6 +45,10 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   function getCardContent() {
     if (existsInDocs === false) {
       return <NotInDocsContent />;
+    }
+
+    if (config.stats?.error) {
+      return <ErrorMessageContent fieldName={fieldName} error={config.stats?.error} />;
     }
 
     switch (type) {

@@ -43,7 +43,7 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
 }
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
-  if (stats === undefined) return null;
+  if (stats === undefined || !stats.topValues) return null;
   const {
     topValues,
     topValuesSampleSize,
@@ -81,11 +81,11 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                   size="xs"
                   label={kibanaFieldFormat(value.key, fieldFormat)}
                   className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
-                  valueText={
+                  valueText={`${value.doc_count}${
                     progressBarMax !== undefined
-                      ? getPercentLabel(value.doc_count, progressBarMax)
-                      : undefined
-                  }
+                      ? ` (${getPercentLabel(value.doc_count, progressBarMax)})`
+                      : ''
+                  }`}
                 />
               </EuiFlexItem>
               {fieldName !== undefined && value.key !== undefined && onAddFilter !== undefined ? (
