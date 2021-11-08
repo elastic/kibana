@@ -77,7 +77,7 @@ class OutputService {
       return await this.create(soClient, newDefaultOutput);
     }
 
-    return outputSavedObjectToOutput(defaultOutput);
+    return defaultOutput;
   }
 
   public getDefaultESHosts(): string[] {
