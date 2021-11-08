@@ -16,18 +16,16 @@ export default function ({ getService }: FtrProviderContext) {
   const CLOUD_SNAPSHOT_REPOSITORY = 'found-snapshots';
 
   const createCloudRepository = () => {
-    return es.snapshot
-      .createRepository({
-        repository: CLOUD_SNAPSHOT_REPOSITORY,
-        body: {
-          type: 'fs',
-          settings: {
-            location: '/tmp/cloud-snapshots/',
-          },
+    return es.snapshot.createRepository({
+      name: CLOUD_SNAPSHOT_REPOSITORY,
+      body: {
+        type: 'fs',
+        settings: {
+          location: '/tmp/cloud-snapshots/',
         },
-        verify: false,
-      })
-      .then(({ body }) => body);
+      },
+      verify: false,
+    });
   };
 
   const createCloudSnapshot = (snapshotName: string) => {
@@ -60,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         before(async () => {
           await createCloudRepository();
           await createCloudSnapshot('test_snapshot_1');
-          mostRecentSnapshot = (await createCloudSnapshot('test_snapshot_2')).body.snapshot;
+          mostRecentSnapshot = (await createCloudSnapshot('test_snapshot_2')).snapshot;
         });
 
         after(async () => {
