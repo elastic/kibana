@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -33,6 +34,7 @@ export interface UseTimelineEventsDetailsProps {
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
+  runtimeMappings: MappingRuntimeFields;
   skip: boolean;
 }
 
@@ -41,6 +43,7 @@ export const useTimelineEventsDetails = ({
   docValueFields,
   indexName,
   eventId,
+  runtimeMappings,
   skip,
 }: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData'], object | undefined] => {
   const { data } = useKibana().services;
@@ -112,13 +115,14 @@ export const useTimelineEventsDetails = ({
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
+        runtimeMappings,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [docValueFields, entityType, eventId, indexName]);
+  }, [docValueFields, entityType, eventId, indexName, runtimeMappings]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
