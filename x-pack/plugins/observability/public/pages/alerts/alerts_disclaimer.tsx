@@ -30,40 +30,43 @@ export function AlertsDisclaimer() {
   };
 
   return (
-    !experimentalMsgAck && (
-      <EuiCallOut
-        data-test-subj="o11y-experimental-disclaimer"
-        title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-          defaultMessage: 'Alert history is currently an experimental feature within Observability',
-        })}
-        color="warning"
-      >
-        <FormattedMessage
-          id="xpack.observability.alertsDisclaimerText"
-          defaultMessage="This functionality may change or be removed completely in a future release. We value your {feedback} as we work to add new capabilities. "
-          values={{
-            feedback: (
-              <EuiLink href="https://discuss.elastic.co/c/observability/82" target="_blank">
-                {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'feedback',
-                })}
-              </EuiLink>
-            ),
-          }}
-        />
-
-        <EuiSpacer size="l" />
-        <EuiButton
-          data-test-subj="o11y-experimental-disclaimer-dismiss-btn"
-          color="warning"
-          onClick={dismissMessage}
-          tabIndex={0}
-        >
-          {i18n.translate('xpack.observability.alertsDisclaimerDismissMessage', {
-            defaultMessage: 'Dismiss message',
+    <>
+      {!experimentalMsgAck && (
+        <EuiCallOut
+          data-test-subj="o11y-experimental-disclaimer"
+          title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
+            defaultMessage:
+              'Alert history is currently an experimental feature within Observability',
           })}
-        </EuiButton>
-      </EuiCallOut>
-    )
+          color="warning"
+        >
+          <FormattedMessage
+            id="xpack.observability.alertsDisclaimerText"
+            defaultMessage="This functionality may change or be removed completely in a future release. We value your {feedback} as we work to add new capabilities. "
+            values={{
+              feedback: (
+                <EuiLink href="https://discuss.elastic.co/c/observability/82" target="_blank">
+                  {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
+                    defaultMessage: 'feedback',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+
+          <EuiSpacer size="l" />
+          <EuiButton
+            data-test-subj="o11y-experimental-disclaimer-dismiss-btn"
+            color="warning"
+            onClick={dismissMessage}
+            tabIndex={0}
+          >
+            {i18n.translate('xpack.observability.alertsDisclaimerDismissMessage', {
+              defaultMessage: 'Dismiss message',
+            })}
+          </EuiButton>
+        </EuiCallOut>
+      )}
+    </>
   );
 }
