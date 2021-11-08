@@ -25,11 +25,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load('x-pack/test/functional/es_archives/observability/apm-test');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/observability/apm-test');
     });
 
     describe.skip('When user has all priviledges for logs app', () => {
