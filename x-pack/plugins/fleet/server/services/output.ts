@@ -10,7 +10,7 @@ import uuid from 'uuid/v5';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
-import { decodeCloudId, normalizeHostsForAgents } from '../../common';
+import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT } from '../../common';
 
 import { appContextService } from './app_context';
 
@@ -61,20 +61,23 @@ class OutputService {
   }
 
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
-    const outputs = await this._getDefaultDataOutputsSO(soClient);
+    const outputs = await this.list(soClient);
 
-    if (!outputs.saved_objects.length) {
+    const defaultOutput = outputs.items.find((o) => o.is_default);
+    const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
+
+    if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: this.getDefaultESHosts(),
         ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
-        is_default_monitoring: !(await this.getDefaultMonitoringOutputId(soClient)),
+        is_default_monitoring: !defaultMonitoringOutput,
       } as NewOutput;
 
       return await this.create(soClient, newDefaultOutput);
     }
 
-    return outputSavedObjectToOutput(outputs.saved_objects[0]);
+    return outputSavedObjectToOutput(defaultOutput);
   }
 
   public getDefaultESHosts(): string[] {
@@ -136,7 +139,7 @@ class OutputService {
         await this.update(
           soClient,
           defaultMonitoringOutputId,
-          { is_default: false },
+          { is_default_monitoring: false },
           { fromPreconfiguration: options?.fromPreconfiguration ?? false }
         );
       }
@@ -188,14 +191,14 @@ class OutputService {
     const outputs = await soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
-      perPage: 1000,
+      perPage: SO_SEARCH_LIMIT,
     });
 
     return {
       items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
-      page: 1,
-      perPage: 1000,
+      page: outputs.page,
+      perPage: outputs.per_page,
     };
   }
 

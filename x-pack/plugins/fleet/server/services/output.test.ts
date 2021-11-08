@@ -247,7 +247,7 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-monitoring-output'),
-        { is_default: false }
+        { is_default_monitoring: false }
       );
     });
 
@@ -275,7 +275,7 @@ describe('Output Service', () => {
 
     it('should update existing default preconfigured monitoring output when creating a new default output from preconfiguration', async () => {
       const soClient = getMockedSoClient({
-        defaultOutputMonitoringId: 'existing-default-monitoring-output',
+        defaultOutputId: 'existing-preconfigured-default-output',
       });
 
       await outputService.create(
@@ -292,7 +292,7 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalledTimes(1);
       expect(soClient.update).toBeCalledWith(
         expect.anything(),
-        outputIdToUuid('existing-default-monitoring-output'),
+        outputIdToUuid('existing-preconfigured-default-output'),
         { is_default: false }
       );
     });
