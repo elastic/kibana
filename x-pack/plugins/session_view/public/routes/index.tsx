@@ -8,6 +8,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { TestPage } from '../components/TestPage';
+import { SessionViewPage } from '../components/SessionViewPage';
 
 export const Routes = () => {
   /**
@@ -17,8 +18,7 @@ export const Routes = () => {
   return (
     <Switch>
       <Route exact path={'/'} component={TestPage} />
-      <Route path={'/path_1'} component={TestPage} />
-      <Route path={'/path_2'} component={TestPage} />
+      <Route path={'/process_tree'} component={SessionViewPage} />
     </Switch>
   );
 };

@@ -30,10 +30,7 @@ const Links = () => {
         <Link to="/">Home</Link>
       </li>
       <li css={listItemCss}>
-        <Link to="/path_1">Path 1</Link>
-      </li>
-      <li css={listItemCss}>
-        <Link to="/path_2">Path 2</Link>
+        <Link to="/process_tree">Process Tree</Link>
       </li>
     </ul>
   );

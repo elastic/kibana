@@ -27,16 +27,7 @@ export const registerTestRoute = (router: IRouter) => {
       const { index } = request.query;
 
       const search = await client.search({
-        index: [`${index}*`],
-        body: {
-          size: 20,
-          timeout: '30s',
-          query: {
-            bool: {
-              filter: [],
-            },
-          },
-        },
+        index: [`${index}`]
       });
 
       return response.ok({ body: search.body.hits });
@@ -49,29 +40,62 @@ export const registerTestRoute = (router: IRouter) => {
       validate: {
         body: schema.object({
           index: schema.string(),
+          data: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
       // TODO (Jiawei & Paulo): Evaluate saved objects & ES client
-      const { index } = request.body;
+      const { index, data } = request.body;
 
       const client = context.core.elasticsearch.client.asCurrentUser;
 
-      client.create({
-        index,
-        id: uuid(),
-        body: {
-          message: 'Test Message',
-          timestamp: new Date().toISOString(),
-        },
-      });
+      const requests = JSON.parse(data).map((obj: any) => {
+        return client.create({
+          index,
+          id: uuid(),
+          body: {
+            ...obj,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      })
+
+      await Promise.all(requests);
 
       return response.ok({
         body: {
-          message: 'success',
+          message: 'ok!',
         },
       });
     }
   );
+
+  router.delete(
+    {
+      path: INTERNAL_TEST_ROUTE,
+      validate: {
+        body: schema.object({
+          index: schema.string()
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { index } = request.body;
+      const client = context.core.elasticsearch.client.asCurrentUser;
+
+      await client.deleteByQuery({ 
+        index,
+        body: {
+          query: { match_all: {} },
+        },
+      });
+      
+      return response.ok({
+        body: {
+          message: 'ok!',
+        },
+      });
+    },
+  )
 };
