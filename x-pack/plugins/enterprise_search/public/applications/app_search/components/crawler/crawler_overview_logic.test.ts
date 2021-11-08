@@ -22,6 +22,8 @@ jest.mock('./crawler_logic', () => ({
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { CrawlerLogic } from './crawler_logic';
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
 
@@ -52,7 +54,7 @@ const MOCK_CLIENT_CRAWLER_DATA = crawlerDataServerToClient(MOCK_SERVER_CRAWLER_D
 describe('CrawlerOverviewLogic', () => {
   const { mount } = new LogicMounter(CrawlerOverviewLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -80,13 +82,8 @@ describe('CrawlerOverviewLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
       });
 
-      it('calls flashApiErrors when there is an error', async () => {
-        http.delete.mockReturnValue(Promise.reject('error'));
-
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });
