@@ -126,10 +126,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (opts.operation === 'formula') {
         await this.switchToFormula();
       } else {
+        const operationSelector = opts.isPreviousIncompatible
+          ? `lns-indexPatternDimension-${opts.operation} incompatible`
+          : `lns-indexPatternDimension-${opts.operation}`;
         await retry.try(async () => {
-          const operationSelector = opts.isPreviousIncompatible
-            ? `lns-indexPatternDimension-${opts.operation} incompatible`
-            : `lns-indexPatternDimension-${opts.operation}`;
+          await testSubjects.exists(operationSelector);
           await testSubjects.click(operationSelector);
         });
       }
