@@ -92,7 +92,7 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
       code: dedent`
         import "x-pack/common/foo"
       `,
-      filename: 'x-pack/common/other/folder/bar',
+      filename: 'x-pack/common/other/folder/bar.ts',
       options: [
         [
           {
@@ -128,7 +128,7 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
       code: dedent`
         import "x-pack/common/foo"
       `,
-      filename: 'x-pack/another/possible/example',
+      filename: 'x-pack/another/possible/example.ts',
       options: [
         [
           {
