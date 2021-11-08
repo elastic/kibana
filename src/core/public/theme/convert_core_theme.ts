@@ -9,7 +9,8 @@
 import type { EuiThemeSystem, EuiThemeColorMode } from '@elastic/eui';
 import type { CoreTheme } from './types';
 
-interface EuiTheme {
+/** @internal */
+export interface EuiTheme {
   colorMode: EuiThemeColorMode;
   euiThemeSystem?: EuiThemeSystem;
 }
