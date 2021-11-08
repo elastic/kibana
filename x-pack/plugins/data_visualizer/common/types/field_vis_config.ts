@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Percentile, JobFieldType, FieldVisStats } from '../../../../../../common/types';
-
+import type { Percentile, JobFieldType, FieldVisStats } from './index';
 export interface MetricFieldVisStats {
   avg?: number;
   distribution?: {
@@ -23,7 +22,7 @@ export interface MetricFieldVisStats {
 // which display the field information.
 export interface FieldVisConfig {
   type: JobFieldType;
-  fieldName?: string;
+  fieldName: string;
   displayName?: string;
   existsInDocs: boolean;
   aggregatable: boolean;

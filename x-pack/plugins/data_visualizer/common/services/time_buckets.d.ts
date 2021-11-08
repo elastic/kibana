@@ -31,7 +31,7 @@ export declare class TimeBuckets {
   public setMaxBars(maxBars: number): void;
   public setInterval(interval: string): void;
   public setBounds(bounds: TimeRangeBounds): void;
-  public getBounds(): { min: any; max: any };
+  public getBounds(): { min: Moment; max: Moment };
   public getInterval(): TimeBucketsInterval;
   public getScaledDateFormat(): string;
 }

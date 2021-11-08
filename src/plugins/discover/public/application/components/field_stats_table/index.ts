@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { DiscoverDataVisualizerGrid } from './data_visualizer_grid';
+export { FieldStatisticsTable } from './field_stats_table';
+export { FieldStatsTableSavedSearchEmbeddable } from './field_stats_table_saved_search_embeddable';
