@@ -337,7 +337,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
       },
       ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
-      timeZone: 'UTC',
     };
 
     return config;
@@ -470,12 +469,13 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         valueAccessor="value"
                         highlightedData={highlightedData}
                         valueFormatter={getFormattedSeverityScore}
-                        // the xDomain.minInterval should always be available at rendering time, just falling back to 1m bucket just in case
                         xScale={{
                           type: ScaleType.Time,
                           interval: {
                             type: 'fixed',
                             unit: 'ms',
+                            // the xDomain.minInterval should always be available at rendering time
+                            // adding a fallback to 1m bucket
                             value: xDomain?.minInterval ?? 1000 * 60,
                           },
                           timeZone: 'UTC',
