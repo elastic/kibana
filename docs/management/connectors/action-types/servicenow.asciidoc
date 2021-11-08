@@ -29,37 +29,41 @@ To ensure authenticated communication between Elastic and ServiceNow, create a S
 * `personalize_choices`
 * `sn_si.basic`
 * `x_elas2_sir_int.integration_user`
+. Click *Submit* to create the user.
 
 *Create a CORS rule*
 
-A CORS rule is required for communication between the Elastic and Servicenow:
+A CORS rule is required for communication between the Elastic and ServiceNow. To create a CORS rule:
 
 . Go to *System Web Services -> CORS Rules*.
 . Click *New*.
 . Configure the rule settings to use the Elastic SIR API and the Kibana URL:
 * *REST API*: Choose `x_elas2_sir_int/elastic_api`.
 * *Domain*: Enter the Kibana URL.
-. Go to the *HTTP methods* tab and choose the GET HTTP method by selecting *GET*.
+. Go to the *HTTP methods* tab and select *GET*. This chooses the GET HTTP method.
 . Click *Submit* to create the rule.
 
 [float]
 [[servicenow-itsm-connector-update]]
 === Update a deprecated ServiceNow ITSM connector
 
-ServiceNow ITSM connectors created in 7.15, or an earlier version, will be marked as deprecated after you upgrade to 7.16. Deprecated connectors have a yellow icon at the end of their name and display a warning message if you select them.
+ServiceNow ITSM connectors created in 7.15 or earlier are marked as deprecated after you upgrade to 7.16. Deprecated connectors have a yellow icon after their name and display a warning message when you select them.
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-sir-update-connector.png[Shows outdated ServiceNow connectors]
+image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
 
 IMPORTANT: Deprecated connectors will continue to function with the rules they were added to, but you cannot assign a deprecated connector to a new rule. If you do so, you'll be prompted to update the connector or create a new one.
 
 To update a deprecated connector:
 
-. Open the main menu and go to *Stack Management -> Rules and connectors*.
-. Select the deprecated connector and click *Update*.
-. Enter the URL to your ServiceNow instance.
-. Enter the username and password of your ServiceNow instance.
-. Click *Save* to finish updating the connector.
+. Open the main menu and go to *Stack Management -> Rules and connectors -> Connectors*.
+. Select the deprecated connector to open the connector Edit flyout.
+. In the warning message, click *Update this connector*.
+. Complete the guided steps in the Edit connector flyout.
+.. Install Elastic for ITSM from the https://store.servicenow.com/sn_appstore_store.do#!/store/home[ServiceNow Store] and complete the <<servicenow-itsm-connector-prerequisites, required prerequisites>>.
+.. Enter the URL of your ServiceNow instance.
+.. Enter the username and password of your ServiceNow instance.
+. Click *Update*.
 
 [float]
 [[servicenow-connector-configuration]]
@@ -71,8 +75,6 @@ Name::      The name of the connector. The name is used to identify a  connector
 URL::       ServiceNow instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
-
-The ServiceNow user requires at minimum read, create, and update access to the Incident table and read access to the https://docs.servicenow.com/bundle/paris-platform-administration/page/administer/localization/reference/r_ChoicesTable.html[sys_choice]. If you don't provide access to sys_choice, then the choices will not render.
 
 [float]
 [[servicenow-connector-networking-configuration]]
