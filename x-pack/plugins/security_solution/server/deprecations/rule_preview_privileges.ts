@@ -75,11 +75,11 @@ export const registerRulePreviewPrivilegeDeprecations = ({
             'xpack.securitySolution.deprecations.rulePreviewPrivileges.message',
             {
               values: {
-                previewIndexPrefix: '.alerts-security.preview.alert',
+                previewIndexPrefix: '.preview.alerts-security.alerts',
                 signalsIndexPrefix: DEFAULT_SIGNALS_INDEX,
               },
               defaultMessage:
-                'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices ({previewIndexPrefix}-<KIBANA_SPACE>), analogous to existing detection alerts indices ({signalsIndexPrefix}-<KIBANA_SPACE>).',
+                'In order to enable a more robust preview in 8.0+, users will need read privileges to new detection alerts preview indices ({previewIndexPrefix}-<KIBANA_SPACE>), analogous to existing detection alerts indices ({signalsIndexPrefix}-<KIBANA_SPACE>).',
             }
           ),
           level: 'warning',
