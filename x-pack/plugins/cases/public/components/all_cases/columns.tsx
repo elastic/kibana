@@ -25,6 +25,8 @@ import styled from 'styled-components';
 import {
   CaseStatuses,
   CaseType,
+  CommentType,
+  CommentRequestAlertType,
   DeleteCase,
   Case,
   SubCase,
@@ -44,6 +46,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
+import { PostComment } from '../../containers/use_post_comment';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -80,6 +83,9 @@ export interface GetCasesColumn {
   userCanCrud: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
+  postComment?: (args: PostComment) => Promise<void>;
+  updateCase?: (newCase: Case) => void;
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
@@ -93,6 +99,9 @@ export const useCasesColumns = ({
   userCanCrud,
   connectors = [],
   onRowClick = emptyFunction,
+  alertData,
+  postComment,
+  updateCase,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -136,6 +145,25 @@ export const useCasesColumns = ({
         deleteCaseOnClick: toggleDeleteModal,
       }),
     [toggleDeleteModal]
+  );
+
+  const assignCaseAction = useCallback(
+    async (theCase: Case) => {
+      if (alertData != null) {
+        await postComment?.({
+          caseId: theCase.id,
+          data: {
+            type: CommentType.alert,
+            ...alertData,
+          },
+          updateCase,
+        });
+      }
+      if (onRowClick) {
+        onRowClick(theCase);
+      }
+    },
+    [alertData, onRowClick, postComment, updateCase]
   );
 
   useEffect(() => {
@@ -295,7 +323,7 @@ export const useCasesColumns = ({
                 return (
                   <EuiButtonEmpty
                     onClick={() => {
-                      onRowClick(theCase);
+                      assignCaseAction(theCase);
                     }}
                     size="s"
                   >

@@ -102,7 +102,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     } = useGetCases({ initialFilterOptions });
 
     // Post Comment to Case
-    const { isLoading: isCommentUpdating } = usePostComment();
+    const { postComment, isLoading: isCommentUpdating } = usePostComment();
     const { connectors } = useConnectors({ toastPermissionsErrors: false });
 
     const sorting = useMemo(
@@ -207,6 +207,9 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       userCanCrud,
       connectors,
       onRowClick,
+      alertData,
+      postComment,
+      updateCase,
     });
 
     const itemIdToExpandedRowMap = useMemo(
