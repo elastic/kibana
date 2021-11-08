@@ -214,32 +214,17 @@ export class HeadlessChromiumDriver {
     {
       fn,
       args,
-      toEqual,
       timeout,
     }: {
       fn: EvaluateFn;
       args: SerializableOrJSHandle[];
-      toEqual: number;
       timeout: number;
     },
-    context: EvaluateMetaOpts,
+    meta: EvaluateMetaOpts,
     logger: LevelLogger
   ): Promise<void> {
-    const startTime = Date.now();
-
-    while (true) {
-      const result = await this.evaluate({ fn, args }, context, logger);
-      if (result === toEqual) {
-        return;
-      }
-
-      if (Date.now() - startTime > timeout) {
-        throw new Error(
-          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
-        );
-      }
-      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
-    }
+    logger.debug(`evaluate ${meta.context}`);
+    await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
   public async setViewport(

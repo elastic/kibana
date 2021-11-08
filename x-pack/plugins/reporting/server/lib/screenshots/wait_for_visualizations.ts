@@ -11,10 +11,16 @@ import { HeadlessChromiumDriver } from '../../browsers';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
-type SelectorArgs = Record<string, string>;
+interface CompletedItemsCountParameters {
+  renderCompleteSelector: string;
+  count: number;
+}
 
-const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
-  return document.querySelectorAll(renderCompleteSelector).length;
+const getCompletedItemsCount = ({
+  renderCompleteSelector,
+  count,
+}: CompletedItemsCountParameters) => {
+  return document.querySelectorAll(renderCompleteSelector).length >= count;
 };
 
 /*
@@ -41,7 +47,7 @@ export const waitForVisualizations = async (
 
   try {
     await browser.waitFor(
-      { fn: getCompletedItemsCount, args: [{ renderCompleteSelector }], toEqual, timeout },
+      { fn: getCompletedItemsCount, args: [{ renderCompleteSelector, count: toEqual }], timeout },
       { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },
       logger
     );
