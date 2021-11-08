@@ -26,4 +26,5 @@ export {
   waitForDocumentsAndPreviewUpdate,
 } from './common_actions';
 
-export { mockDocuments, EsDoc, TestDoc } from './mocks';
+export type { EsDoc, TestDoc } from './mocks';
+export { mockDocuments } from './mocks';

@@ -10,4 +10,4 @@ export { useFieldPreviewContext, FieldPreviewProvider } from './field_preview_co
 
 export { FieldPreview } from './field_preview';
 
-export { PainlessExecuteContext, FieldPreviewResponse, Context } from './types';
+export type { PainlessExecuteContext, FieldPreviewResponse, Context } from './types';
