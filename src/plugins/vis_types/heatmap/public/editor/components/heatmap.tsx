@@ -85,10 +85,17 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
           paramName="enableHover"
           value={stateParams.enableHover}
           setValue={setValue}
-          tooltip={i18n.translate('visTypeVislib.editors.heatmap.highlightLabelTooltip', {
-            defaultMessage:
-              'Highlight hovered range in the chart and corresponding label in the legend.',
-          })}
+          tooltip={
+            showElasticChartsOptions
+              ? i18n.translate('visTypeVislib.editors.heatmap.highlightLabelTooltipNotAvailable', {
+                  defaultMessage:
+                    'Highlight hovered range is not yet supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
+                })
+              : i18n.translate('visTypeVislib.editors.heatmap.highlightLabelTooltip', {
+                  defaultMessage:
+                    'Highlight hovered range in the chart and corresponding label in the legend.',
+                })
+          }
           disabled={showElasticChartsOptions}
         />
       </EuiPanel>

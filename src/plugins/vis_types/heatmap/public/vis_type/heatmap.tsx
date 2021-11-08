@@ -5,16 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../../../data/public';
 import { ColorSchemas } from '../../../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
-import { HeatmapTypeProps, HeatmapVisParams } from '../types';
+import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
+import { SplitTooltip } from './split_tooltip';
 
 export const getHeatmapVisTypeDefinition = ({
   showElasticChartsOptions = false,
@@ -42,23 +43,23 @@ export const getHeatmapVisTypeDefinition = ({
       colorsRange: [],
       invertColors: false,
       percentageMode: false,
-      // valueAxes: [
-      //   {
-      //     show: false,
-      //     id: 'ValueAxis-1',
-      //     type: AxisType.Value,
-      //     scale: {
-      //       type: ScaleType.Linear,
-      //       defaultYExtents: false,
-      //     },
-      //     labels: {
-      //       show: false,
-      //       rotate: 0,
-      //       overwriteColor: false,
-      //       color: 'black',
-      //     },
-      //   },
-      // ],
+      valueAxes: [
+        {
+          show: false,
+          id: 'ValueAxis-1',
+          type: AxisType.Value,
+          scale: {
+            type: ScaleType.Linear,
+            defaultYExtents: false,
+          },
+          labels: {
+            show: false,
+            rotate: 0,
+            overwriteColor: false,
+            color: 'black',
+          },
+        },
+      ],
     },
   },
   editorConfig: {
@@ -110,6 +111,11 @@ export const getHeatmapVisTypeDefinition = ({
       {
         group: AggGroupNames.Buckets,
         name: 'split',
+        // TODO: Remove when split chart aggs are supported
+        ...(showElasticChartsOptions && {
+          disabled: true,
+          tooltip: <SplitTooltip />,
+        }),
         title: i18n.translate('visTypeHeatmap.heatmap.splitTitle', {
           defaultMessage: 'Split chart',
         }),

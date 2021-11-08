@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useMemo } from 'react';
 import { uniq } from 'lodash';
 import {
   Chart,
@@ -32,11 +32,14 @@ import {
 import type { FieldFormatsStart } from '../../../field_formats/public';
 import type { IUiSettingsClient } from '../../../../core/public';
 import type { PersistedState } from '../../../visualizations/public';
-import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
-// import type { FieldFormat } from '../../../field_formats/common';
-// import { DEFAULT_PERCENT_DECIMALS } from '../common';
+import {
+  Datatable,
+  IInterpreterRenderHandlers,
+  DatatableColumn,
+} from '../../../expressions/public';
 import { HeatmapVisParams } from './types';
 import { getTimeZone } from './utils/get_timezone';
+import { getColorPicker } from './utils/get_color_picker';
 import { shiftAndNormalizeStops } from './utils/palette';
 
 import './chart.scss';
@@ -49,6 +52,31 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
+export interface SourceParams {
+  order?: string;
+  orderBy?: string;
+}
+
+const getSortPredicate = (accessor: DatatableColumn) => {
+  const params = accessor.meta?.sourceParams?.params as SourceParams | undefined;
+  const sort: string | undefined = params?.orderBy;
+  // metric sorting
+  if (sort && sort !== '_key') {
+    if (params?.order === 'desc') {
+      return 'numDesc';
+    } else {
+      return 'numAsc';
+    }
+    // alphabetical sorting
+  } else {
+    if (params?.order === 'desc') {
+      return 'alphaDesc';
+    } else {
+      return 'alphaAsc';
+    }
+  }
+  return 'dataIndex';
+};
 
 export interface HeatmapComponentProps {
   visParams: Omit<HeatmapVisParams, 'colorSchema' | 'invertColors'>;
@@ -93,53 +121,29 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
     });
   }, [props.uiState]);
 
-  //   const setColor = useCallback(
-  //     (newColor: string | null, seriesLabel: string | number) => {
-  //       const colors = props.uiState?.get('vis.colors') || {};
-  //       if (colors[seriesLabel] === newColor || !newColor) {
-  //         delete colors[seriesLabel];
-  //       } else {
-  //         colors[seriesLabel] = newColor;
-  //       }
-  //       props.uiState?.setSilent('vis.colors', null);
-  //       props.uiState?.set('vis.colors', colors);
-  //       props.uiState?.emit('reload');
-  //     },
-  //     [props.uiState]
-  //   );
+  const setColor = useCallback(
+    (newColor: string | null, seriesLabel: string | number) => {
+      const colors = props.uiState?.get('vis.colors') || {};
+      if (colors[seriesLabel] === newColor || !newColor) {
+        delete colors[seriesLabel];
+      } else {
+        colors[seriesLabel] = newColor;
+      }
+      props.uiState?.setSilent('vis.colors', null);
+      props.uiState?.set('vis.colors', colors);
+      props.uiState?.emit('reload');
+    },
+    [props.uiState]
+  );
 
   const { visData, visParams, fieldFormats } = props;
-  // console.dir(visData);
-  // console.dir(visParams);
-
-  //   const config = useMemo(
-  //     () => getConfig(visParams, chartTheme, dimensions),
-  //     [chartTheme, visParams, dimensions]
-  //   );
 
   const legendPosition = visParams.legendPosition ?? Position.Right;
 
-  //   const legendColorPicker = useMemo(
-  //     () =>
-  //       getColorPicker(
-  //         legendPosition,
-  //         setColor,
-  //         bucketColumns,
-  //         visParams.palette.name,
-  //         visData.rows,
-  //         props.uiState,
-  //         visParams.distinctColors
-  //       ),
-  //     [
-  //       legendPosition,
-  //       setColor,
-  //       bucketColumns,
-  //       visParams.palette.name,
-  //       visParams.distinctColors,
-  //       visData.rows,
-  //       props.uiState,
-  //     ]
-  //   );
+  const legendColorPicker = useMemo(
+    () => getColorPicker(legendPosition, setColor, props.uiState),
+    [legendPosition, setColor, props.uiState]
+  );
 
   // accessors
   const xAccessorIdx = visParams?.xDimension?.accessor ?? 0;
@@ -357,11 +361,18 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
   };
   // I want the last value to be included
   const endValue = params.range === 'number' ? params.rangeMax : max + 0.00000001;
+  const overwriteColors = props.uiState?.get('vis.colors', {}) ?? {};
   const bands = params.stops.map((stop, index) => {
+    const end = params.stops[index + 1] ?? endValue;
+    const overwriteArrayIdx = `${metricFieldFormatter.convert(
+      stop
+    )} - ${metricFieldFormatter.convert(end)}`;
+    const overwriteColor = overwriteColors[overwriteArrayIdx];
+
     return {
-      start: stop ?? -Infinity,
-      end: params.stops[index + 1] ?? endValue,
-      color: params.colors[index],
+      start: stop,
+      end,
+      color: overwriteColor ?? params.colors[index],
     };
   });
 
@@ -379,6 +390,7 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
           tooltip={tooltip}
           showLegend={showLegend}
           legendPosition={legendPosition}
+          legendColorPicker={legendColorPicker}
           debugState={window._echDebugStateFlag ?? false}
           theme={{
             ...chartTheme,
@@ -403,9 +415,9 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
           valueAccessor={valueAccessor}
           valueFormatter={valueFormatter}
           xScaleType={xScaleType}
-          ySortPredicate="dataIndex"
+          ySortPredicate={getSortPredicate(visData.columns[yAccessorIdx])}
           config={config}
-          xSortPredicate="dataIndex"
+          xSortPredicate={getSortPredicate(visData.columns[xAccessorIdx])}
         />
       </Chart>
     </div>

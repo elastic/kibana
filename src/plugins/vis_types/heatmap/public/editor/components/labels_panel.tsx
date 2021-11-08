@@ -92,6 +92,10 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
         paramName="rotate"
         value={rotateLabels}
         setValue={setRotateLabels}
+        tooltip={i18n.translate('visTypeVislib.editors.heatmap.rotateLabelNotAvailable', {
+          defaultMessage:
+            'Rotate label is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
+        })}
       />
 
       <SwitchOption
@@ -105,6 +109,10 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
         paramName="overwriteColor"
         value={Boolean(valueAxis.labels.overwriteColor)}
         setValue={setValueAxisLabels}
+        tooltip={i18n.translate('visTypeVislib.editors.heatmap.overwriteColorlNotAvailable', {
+          defaultMessage:
+            'Overwrite automatic color is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
+        })}
       />
 
       <EuiFormRow

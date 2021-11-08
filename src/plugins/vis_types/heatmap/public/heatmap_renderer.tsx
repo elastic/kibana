@@ -15,6 +15,7 @@ import type { PersistedState } from '../../../visualizations/public';
 import { VisTypeHeatmapDependencies } from './plugin';
 
 import { HeatmapRendererConfig, vislibHeatmapName } from './heatmap_fn';
+import { SplitChartWarning } from './split_chart_warning';
 
 const HeatmapComponent = lazy(() => import('./heatmap_component'));
 
@@ -32,6 +33,7 @@ export const getHeatmapVisRenderer: (
   displayName: 'Heatmap visualization',
   reuseDomNode: true,
   render: async (domNode, { visConfig, visData, syncColors }, handlers) => {
+    const isSplitChart = Boolean(visConfig.splitRowDimension || visConfig.splitColumnDimension);
     const showNoResult = shouldShowNoResultsMessage(visData);
 
     handlers.onDestroy(() => {
@@ -43,20 +45,23 @@ export const getHeatmapVisRenderer: (
 
     render(
       <I18nProvider>
-        <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-          <HeatmapComponent
-            chartsThemeService={theme}
-            palettesRegistry={palettesRegistry}
-            visParams={visConfig}
-            visData={visData}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-            uiState={handlers.uiState as PersistedState}
-            fieldFormats={services.fieldFormats}
-            uiSettings={services.uiSettings}
-            syncColors={syncColors}
-          />
-        </VisualizationContainer>
+        <>
+          {isSplitChart && <SplitChartWarning docLinks={services.docLinks} />}
+          <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+            <HeatmapComponent
+              chartsThemeService={theme}
+              palettesRegistry={palettesRegistry}
+              visParams={visConfig}
+              visData={visData}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+              uiState={handlers.uiState as PersistedState}
+              fieldFormats={services.fieldFormats}
+              uiSettings={services.uiSettings}
+              syncColors={syncColors}
+            />
+          </VisualizationContainer>
+        </>
       </I18nProvider>,
       domNode
     );

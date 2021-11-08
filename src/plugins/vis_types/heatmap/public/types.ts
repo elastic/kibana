@@ -54,6 +54,8 @@ export interface HeatmapVisParams extends HeatmapCommonParams {
   xDimension: Dimension | null;
   yDimension: Dimension[];
   seriesDimension: Dimension[];
+  splitRowDimension?: Dimension[];
+  splitColumnDimension?: Dimension[];
   palette: PaletteOutput;
   valueAxes: ValueAxis[];
   colorSchema: ColorSchemas;
