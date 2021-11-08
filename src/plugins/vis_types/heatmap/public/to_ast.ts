@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 
-import { VisToExpressionAst, getVisSchemas } from '../../../visualizations/public';
+import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import type { DateHistogramParams, HistogramParams } from '../../../visualizations/public';
 import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './utils/palette';
@@ -18,6 +18,8 @@ import { BUCKET_TYPES } from '../../../data/public';
 import { vislibHeatmapName, ExpressionHeatmapFunction } from './heatmap_fn';
 import type { Dimensions, Dimension, HeatmapVisParams } from './types';
 import { getEsaggsFn } from './to_ast_esaggs';
+
+const DEFAULT_PERCENT_DECIMALS = 2;
 
 const prepareVisDimension = (data: Dimension) => {
   const visDimension = buildExpressionFunction('visdimension', { accessor: data.accessor });
@@ -66,15 +68,27 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
     }
   }
 
+  // fix formatter for percentage mode
+  if (vis.params.percentageMode) {
+    schemas.metric.forEach((metric: SchemaConfig) => {
+      metric.format = {
+        id: 'percent',
+        params: {
+          pattern:
+            vis.params.percentageFormatPattern ?? `0,0.[${'0'.repeat(DEFAULT_PERCENT_DECIMALS)}]%`,
+        },
+      };
+    });
+  }
+
   const args = {
     // explicitly pass each param to prevent extra values trapping
     addTooltip: vis.params.addTooltip,
     enableHover: vis.params.enableHover,
     addLegend: vis.params.addLegend,
     legendPosition: vis.params.legendPosition,
-    useDistinctBands: vis.params.useDistinctBands,
+    useDistinctBands: vis.params.useDistinctBands ?? true,
     percentageMode: vis.params.percentageMode,
-    percentageFormatPattern: vis.params.percentageFormatPattern,
     isCellLabelVisible: vis.params.isCellLabelVisible,
     // maxLegendLines: vis.params.maxLegendLines,
     palette: vis.params?.palette,
@@ -101,6 +115,10 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
       ...stopsWithColors,
       range: 'number',
       continuity: 'none',
+      rangeMin:
+        vis.params.setColorRange && vis.params.colorsRange && vis.params.colorsRange.length
+          ? vis.params.colorsRange[0].from
+          : undefined,
       rangeMax:
         vis.params.setColorRange && vis.params.colorsRange && vis.params.colorsRange.length
           ? vis.params.colorsRange[vis.params?.colorsRange.length - 1].to

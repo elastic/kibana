@@ -93,7 +93,7 @@ export const getStopsWithColorsFromRanges = (
       }
 
       acc.color.push(getColor(index, rangesArr.length, colorSchema, invertColors));
-      acc.stop.push(range.from);
+      acc.stop.push(range.to);
 
       return acc;
     },

@@ -113,12 +113,6 @@ export const createHeatmapVisFn = (): ExpressionHeatmapFunction => ({
         defaultMessage: 'When is on, tooltip and legends appear as percentages',
       }),
     },
-    percentageFormatPattern: {
-      types: ['string'],
-      help: i18n.translate('visTypeHeatmap.function.args.percentageFormatPatternHelpText', {
-        defaultMessage: 'The formatter of the percentage mode',
-      }),
-    },
     isCellLabelVisible: {
       types: ['boolean'],
       help: i18n.translate('visTypeHeatmap.function.args.isCellLabelVisible', {

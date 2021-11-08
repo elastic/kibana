@@ -37,7 +37,6 @@ interface HeatmapCommonParams {
   colorsRange?: Range[];
   useDistinctBands: boolean;
   percentageMode: boolean;
-  percentageFormatPattern?: string;
   isCellLabelVisible?: boolean;
 }
 
@@ -62,6 +61,7 @@ export interface HeatmapVisParams extends HeatmapCommonParams {
   invertColors: boolean;
   colorsNumber: number | '';
   setColorRange: boolean;
+  percentageFormatPattern?: string;
 }
 
 // ToDo: move them to constants

@@ -331,26 +331,17 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
   const [min] = sortedValues;
   const max = sortedValues[sortedValues.length - 1];
 
-  const DEFAULT_PERCENT_DECIMALS = 2;
   // formatters
   const metricFieldFormatter = fieldFormats.deserialize(visParams.yDimension[0].format);
-  const percentFormatter = fieldFormats.deserialize({
-    id: 'percent',
-    params: {
-      pattern:
-        visParams.percentageFormatPattern ?? `0,0.[${'0'.repeat(DEFAULT_PERCENT_DECIMALS)}]%`,
-    },
-  });
 
   const valueFormatter = (d: number) => {
     let value = d;
+
     if (visParams.percentageMode) {
-      const percentageNumber = (value / max) * 100;
-      value = parseInt(percentageNumber.toString(), 10);
+      const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
+      value = parseInt(percentageNumber.toString(), 10) / 100;
     }
-    return visParams.percentageMode
-      ? percentFormatter.convert(value / 100)
-      : metricFieldFormatter.convert(d);
+    return metricFieldFormatter.convert(value);
   };
 
   let params = visParams.palette.params as unknown as CustomPaletteState;
@@ -359,6 +350,7 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
     ...params,
     stops,
   };
+
   // I want the last value to be included
   const endValue = params.range === 'number' ? params.rangeMax : max + 0.00000001;
   const overwriteColors = props.uiState?.get('vis.colors', {}) ?? {};
@@ -375,6 +367,7 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
       color: overwriteColor ?? params.colors[index],
     };
   });
+  // console.dir(bands);
 
   return (
     <div className="heatmapChart__container" data-test-subj="visTypeHeatmapChart">
