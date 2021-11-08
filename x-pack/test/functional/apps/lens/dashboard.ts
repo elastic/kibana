@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.getActions().move({ x, y, origin: el._webElement }).click().perform();
   }
 
-  describe('lens dashboard tests', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/117770
+  describe.skip('lens dashboard tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await security.testUser.setRoles(
