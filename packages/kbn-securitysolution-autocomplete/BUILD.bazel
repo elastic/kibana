@@ -42,7 +42,6 @@ RUNTIME_DEPS = [
   "@npm//enzyme",
   "@npm//moment",
   "@npm//react",
-  "@npm//resize-observer-polyfill",
 ]
 
 TYPES_DEPS = [
@@ -55,7 +54,6 @@ TYPES_DEPS = [
   "@npm//@testing-library/react",
   "@npm//@testing-library/react-hooks",
   "@npm//moment",
-  "@npm//resize-observer-polyfill",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
