@@ -311,7 +311,8 @@ describe('reference_line helpers', () => {
                     c: i === 2 ? 75 : null,
                   })),
               },
-            ])
+            ]),
+            'yLeft'
           )
         ).toEqual({ min: 0, max: 150 }); // there's just one series with 150, so the lowerbound fallbacks to 0
     });
@@ -337,7 +338,8 @@ describe('reference_line helpers', () => {
                     c: i === 2 ? 0.25 : null,
                   })),
               },
-            ])
+            ]),
+            'yLeft'
           )
         ).toEqual({ min: 0, max: 0.75 });
     });
@@ -354,7 +356,8 @@ describe('reference_line helpers', () => {
             getActiveData([
               { id: 'id-a', rows: [{ a: 25, b: 100, c: 100 }] },
               { id: 'id-b', rows: [{ d: 50, e: 50, f: 50 }] },
-            ])
+            ]),
+            'yLeft'
           )
         ).toEqual({ min: 0, max: 375 });
         // same as before but spread on 3 rows with nulls
@@ -386,7 +389,8 @@ describe('reference_line helpers', () => {
                     f: i === 2 ? 50 : null,
                   })),
               },
-            ])
+            ]),
+            'yLeft'
           )
         ).toEqual({ min: 0, max: 375 });
       }
@@ -404,7 +408,8 @@ describe('reference_line helpers', () => {
             getActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
               { id: 'id-b', rows: Array(3).fill({ d: 50, e: 50, f: 50 }) },
-            ])
+            ]),
+            'yLeft'
           )
         ).toEqual({ min: 50, max: 100 });
     });
@@ -422,7 +427,8 @@ describe('reference_line helpers', () => {
               getActiveData([
                 { id: 'id-a', rows: [{ a: 100, b: 100, c: 100 }] },
                 { id: 'id-b', rows: [{ d: 50, e: 50, f: 50 }] },
-              ])
+              ]),
+              'yLeft'
             )
           ).toEqual({
             min: 0, // min is 0 as there is at least one stacked series
@@ -454,9 +460,38 @@ describe('reference_line helpers', () => {
                   .fill(1)
                   .map((_, i) => ({ d: 25 * (i + 1), e: i % 2 ? 100 : null, f: i })),
               },
-            ])
+            ]),
+            'yLeft'
           )
         ).toEqual({ min: 0, max: 375 });
+    });
+
+    it('should compute the correct value for a histogram on stacked chart for the xAccessor', () => {
+      for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked'])
+        expect(
+          computeOverallDataDomain(
+            [
+              { layerId: 'id-a', seriesType, accessors: ['c'] },
+              { layerId: 'id-b', seriesType, accessors: ['f'] },
+            ] as XYLayerConfig[],
+            ['c', 'f'],
+            getActiveData([
+              {
+                id: 'id-a',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({ a: 50 * i, b: 100 * i, c: i })),
+              },
+              {
+                id: 'id-b',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({ d: 25 * (i + 1), e: i % 2 ? 100 : null, f: i })),
+              },
+            ]),
+            'x' // this will force the function to see the accessors as xAccessor
+          )
+        ).toEqual({ min: 0, max: 2 });
     });
 
     it('should compute the correct value for a histogram non-stacked chart', () => {
@@ -481,7 +516,8 @@ describe('reference_line helpers', () => {
                   .fill(1)
                   .map((_, i) => ({ d: 25 * (i + 1), e: i % 2 ? 100 : null, f: i })),
               },
-            ])
+            ]),
+            'yLeft'
           )
         ).toEqual({ min: 0, max: 200 });
     });
@@ -509,7 +545,8 @@ describe('reference_line helpers', () => {
                   c: i === 2 ? 100 : null,
                 })),
             },
-          ])
+          ]),
+          'yLeft'
         )
       ).toEqual({ min: 0, max: 200 }); // it is stacked, so max is the sum and 0 is the fallback
       expect(
@@ -527,7 +564,8 @@ describe('reference_line helpers', () => {
                   c: i === 2 ? 100 : null,
                 })),
             },
-          ])
+          ]),
+          'yLeft'
         )
       ).toEqual({ min: -100, max: 200 });
     });
@@ -537,7 +575,8 @@ describe('reference_line helpers', () => {
         computeOverallDataDomain(
           [],
           ['a', 'b', 'c'],
-          getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) }])
+          getActiveData([{ id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) }]),
+          'yLeft'
         )
       ).toEqual({ min: undefined, max: undefined });
     });
@@ -550,7 +589,8 @@ describe('reference_line helpers', () => {
             { layerId: 'id-b', seriesType: 'line', accessors: ['d', 'e', 'f'] },
           ] as XYLayerConfig[],
           ['a', 'b'],
-          getActiveData([{ id: 'id-c', rows: [{ a: 100, b: 100 }] }]) // mind the layer id here
+          getActiveData([{ id: 'id-c', rows: [{ a: 100, b: 100 }] }]), // mind the layer id here
+          'yLeft'
         )
       ).toEqual({ min: undefined, max: undefined });
 
@@ -561,7 +601,8 @@ describe('reference_line helpers', () => {
             { layerId: 'id-b', seriesType: 'bar_stacked' },
           ] as XYLayerConfig[],
           ['a', 'b'],
-          getActiveData([])
+          getActiveData([]),
+          'yLeft'
         )
       ).toEqual({ min: undefined, max: undefined });
     });
