@@ -23,7 +23,7 @@ export class SessionViewPlugin implements Plugin {
    * Initialize SessionViewPlugin class properties (logger, etc) that is accessible
    * through the initializerContext.
    */
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
