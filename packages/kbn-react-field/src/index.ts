@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { FieldIconProps, FieldIcon } from './field_icon';
-export { FieldButtonProps, ButtonSize, FieldButton } from './field_button';
+export { FieldIcon } from './field_icon';
+export type { FieldIconProps } from './field_icon';
+export { FieldButton } from './field_button';
+export type { FieldButtonProps, ButtonSize } from './field_button';
