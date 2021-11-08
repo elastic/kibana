@@ -13,7 +13,7 @@ import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
 import { Case } from '../../../common';
 import { CaseService } from '../../containers/use_get_case_user_actions';
-import { useAllCasesNavigation } from '../../common/navigation/hooks';
+import { useAllCasesNavigation } from '../../common/navigation';
 
 interface CaseViewActions {
   caseData: Case;

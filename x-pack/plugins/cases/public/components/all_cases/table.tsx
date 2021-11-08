@@ -20,7 +20,7 @@ import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
 import { AllCases, Case, FilterOptions } from '../../../common';
 import * as i18n from './translations';
-import { useCreateCaseNavigation } from '../../common/navigation/hooks';
+import { useCreateCaseNavigation } from '../../common/navigation';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<Case>['columns']; //  CasesColumns[];

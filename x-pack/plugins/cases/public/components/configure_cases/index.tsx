@@ -30,7 +30,7 @@ import * as i18n from './translations';
 import { getConnectorById } from '../utils';
 import { HeaderPage, BackOptions } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useAllCasesNavigation } from '../../common/navigation/hooks';
+import { useAllCasesNavigation } from '../../common/navigation';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`

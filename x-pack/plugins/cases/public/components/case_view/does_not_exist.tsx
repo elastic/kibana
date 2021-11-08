@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
-import { useAllCasesNavigation } from '../../common/navigation/hooks';
+import { useAllCasesNavigation } from '../../common/navigation';
 
 interface Props {
   caseId: string;
@@ -33,3 +33,5 @@ export const DoesNotExist = React.memo(({ caseId }: Props) => {
     />
   );
 });
+
+DoesNotExist.displayName = 'DoesNotExist';

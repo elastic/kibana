@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { useCreateCaseNavigation } from '../../../common/navigation/hooks';
+import { useCreateCaseNavigation } from '../../../common/navigation';
 
 const NoCasesComponent = () => {
   const { userCanCrud } = useCasesContext();

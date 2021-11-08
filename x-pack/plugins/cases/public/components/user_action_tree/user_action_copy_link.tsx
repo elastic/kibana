@@ -10,7 +10,7 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 
 import * as i18n from './translations';
-import { useCaseViewNavigation, useCaseViewParams } from '../../common/navigation/hooks';
+import { useCaseViewNavigation, useCaseViewParams } from '../../common/navigation';
 
 interface UserActionCopyLinkProps {
   id: string;

@@ -13,7 +13,6 @@ import { CreateCase } from '../create';
 import { ConfigureCases } from '../configure_cases';
 import { CasesRoutesProps } from './types';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useAllCasesNavigation, useCaseViewNavigation } from '../../common/navigation/hooks';
 import {
   getCasesConfigurePath,
   getCreateCasePath,
@@ -21,14 +20,18 @@ import {
   getCaseViewWithCommentPath,
   getSubCaseViewPath,
   getSubCaseViewWithCommentPath,
+  useAllCasesNavigation,
+  useCaseViewNavigation,
 } from '../../common/navigation';
+import { NoPrivilegesPage } from '../no_privileges';
+import * as i18n from './translations';
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = (props) => {
   const { timelineIntegration } = props;
-  const { userCanCrud, basePath } = useCasesContext();
+  const { basePath, userCanCrud } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
-
+  
   const onCreateCaseSuccess = useCallback(
     async ({ id }) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
@@ -40,36 +43,37 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = (props) => {
         <AllCases {...props} />
       </Route>
 
-      {/* Using individual "userCanCrud" conditionals since Switch do not work with Fragment wrapped Routes */}
-      {userCanCrud && (
-        <Route path={getCreateCasePath(basePath)}>
+      <Route path={getCreateCasePath(basePath)}>
+        {userCanCrud ? (
           <CreateCase
             onSuccess={onCreateCaseSuccess}
             onCancel={navigateToAllCases}
             timelineIntegration={timelineIntegration}
           />
-        </Route>
-      )}
+        ) : (
+          <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
+        )}
+      </Route>
 
-      {userCanCrud && (
-        <Route path={getCasesConfigurePath(basePath)}>
+      <Route path={getCasesConfigurePath(basePath)}>
+        {userCanCrud ? (
           <ConfigureCases />
-        </Route>
-      )}
+        ) : (
+          <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
+        )}
+      </Route>
 
-      {userCanCrud && (
-        <Route
-          exact
-          path={[
-            getSubCaseViewWithCommentPath(basePath),
-            getCaseViewWithCommentPath(basePath),
-            getSubCaseViewPath(basePath),
-            getCaseViewPath(basePath),
-          ]}
-        >
-          <CaseView {...props} />
-        </Route>
-      )}
+      <Route
+        exact
+        path={[
+          getSubCaseViewWithCommentPath(basePath),
+          getCaseViewWithCommentPath(basePath),
+          getSubCaseViewPath(basePath),
+          getCaseViewPath(basePath),
+        ]}
+      >
+        <CaseView {...props} />
+      </Route>
 
       <Route path={basePath}>
         <Redirect to={basePath} />

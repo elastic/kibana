@@ -11,7 +11,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
-import { useConfigureCasesNavigation } from '../../../common/navigation/hooks';
+import { useConfigureCasesNavigation } from '../../../common/navigation';
 
 export * from './helpers';
 

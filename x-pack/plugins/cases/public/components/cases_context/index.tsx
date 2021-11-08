@@ -27,7 +27,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   const [value, setValue] = useState<CasesContextValue>({ owner, appId, userCanCrud, basePath });
 
   /**
-   * Once the plugin capabilities are loaded `userCanCrud` prop may change.
+   * `userCanCrud` prop may change by the parent plugin.
    * We need to re-render in that case, the rest of props are never updated.
    */
   useEffect(() => {

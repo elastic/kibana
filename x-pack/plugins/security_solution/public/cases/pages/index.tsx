@@ -16,7 +16,7 @@ import * as i18n from './translations';
 import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_ID, APP_UI_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store/timeline';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -29,13 +29,16 @@ import { InvestigateInTimelineAction } from '../../detections/components/alerts_
 import { useFetchAlertData } from './helpers';
 
 const TimelineDetailsPanel = () => {
-  const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
+  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
   return (
     <DetailsPanel
       browserFields={browserFields}
       docValueFields={docValueFields}
       entityType="events"
       isFlyoutView
+      runtimeMappings={runtimeMappings}
       timelineId={TimelineId.casePage}
     />
   );
@@ -124,6 +127,7 @@ const CaseContainerComponent: React.FC = () => {
       timelineActions.createTimeline({
         id: TimelineId.casePage,
         columns: [],
+        dataViewId: '',
         indexNames: [],
         expandedDetail: {},
         show: false,

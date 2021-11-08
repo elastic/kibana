@@ -12,7 +12,7 @@ import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 import { ConfigureCaseButton, LinkButton } from '../links';
 import { ErrorMessage } from '../use_push_to_service/callout/types';
-import { useCreateCaseNavigation } from '../../common/navigation/hooks';
+import { useCreateCaseNavigation } from '../../common/navigation';
 
 const ButtonFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`

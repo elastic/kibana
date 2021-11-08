@@ -42,10 +42,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const { cases } = useKibana<TimelinesStartServices>().services;
   const {
     onCaseClicked,
-    goToCreateCase,
     onCaseSuccess,
     attachAlertToCase,
-    createCaseUrl,
     isAllCaseModalOpen,
     isCreateCaseFlyoutOpen,
   } = useAddToCase({ event, casePermissions, appId, owner, onClose });
@@ -63,10 +61,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         },
         owner,
       },
-      createCaseNavigation: {
-        href: createCaseUrl,
-        onClick: goToCreateCase,
-      },
       hooks: {
         useInsertTimeline,
       },
@@ -83,8 +77,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     casePermissions?.crud,
     onCaseSuccess,
     onCaseClicked,
-    createCaseUrl,
-    goToCreateCase,
     eventId,
     eventIndex,
     dispatch,

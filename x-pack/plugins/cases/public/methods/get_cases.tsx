@@ -16,7 +16,7 @@ const CasesLazy = lazy(() => import('../components/app'));
 export const getCasesLazy = ({ owner, appId, userCanCrud, basePath, ...props }: GetCasesProps) => (
   <CasesProvider value={{ owner, appId, userCanCrud, basePath }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesLazy {...props} />
+      <CasesLazy userCanCrud={userCanCrud} {...props} />
     </Suspense>
   </CasesProvider>
 );

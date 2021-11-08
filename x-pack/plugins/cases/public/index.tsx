@@ -17,9 +17,8 @@ export type { CasesUiStart } from './types';
 export type { AllCasesProps } from './components/all_cases';
 export type { AllCasesSelectorModalProps } from './components/all_cases/selector_modal';
 export type { CaseViewProps } from './components/case_view';
-export type { ConfigureCasesProps } from './components/configure_cases';
 export type { CreateCaseProps } from './components/create';
 export type { RecentCasesProps } from './components/recent_cases';
 
-export { getCasesDeepLinks, casesDeepLinkIds } from './common/navigation';
-export type { CASES_DEEP_LINK_ID } from './common/navigation';
+export type { CasesDeepLinkId } from './common/navigation';
+export { getCasesDeepLinks, casesDeepLinkIds, generateCaseViewPath } from './common/navigation';

@@ -14,7 +14,7 @@ import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { useAllCasesNavigation } from '../../common/navigation/hooks';
+import { useAllCasesNavigation } from '../../common/navigation';
 
 export interface RecentCasesProps {
   maxCasesToShow: number;

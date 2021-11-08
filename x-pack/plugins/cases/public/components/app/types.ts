@@ -26,4 +26,5 @@ export interface CasesRoutesProps {
   hideSyncAlerts?: boolean;
   onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
+  userCanCrud: boolean | null;
 }

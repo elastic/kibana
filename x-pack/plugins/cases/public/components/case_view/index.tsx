@@ -41,12 +41,12 @@ import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { generateCaseViewPath } from '../../common/navigation';
 import {
+  generateCaseViewPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
   useCaseViewParams,
-} from '../../common/navigation/hooks';
+} from '../../common/navigation';
 
 export interface CaseViewComponentProps {
   caseId: string;
