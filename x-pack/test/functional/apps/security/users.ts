@@ -212,9 +212,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Delete user', () => {
         it('when confirming and closes dialog', async () => {
-          await PageObjects.security.deleteUser(optionalUser.username);
+          await PageObjects.security.deleteUser(optionalUser.username ?? '');
           const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
-          expect(users).to.not.have.key(optionalUser.username);
+          expect(users).to.not.have.key(optionalUser.username ?? '');
           expect(await browser.getCurrentUrl()).to.contain('app/management/security/users');
         });
       });

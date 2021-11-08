@@ -97,7 +97,7 @@ describe('ChangePasswordFlyout', () => {
       });
 
       it('should show errors when the new password is not at least 6 characters', () => {
-        expect(validateChangePasswordForm({ password: '', confirm_password: '' }, false))
+        expect(validateChangePasswordForm({ password: '1234', confirm_password: '1234' }, false))
           .toMatchInlineSnapshot(`
           Object {
             "password": "Password must be at least 6 characters.",
