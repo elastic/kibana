@@ -310,7 +310,7 @@ export class Embeddable
 
     const { expression, errors } = await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
     this.expression = expression;
-    this.errors = this.maybeAddConflictError(errors || [], sharingSavedObjectProps);
+    this.errors = errors && this.maybeAddConflictError(errors, sharingSavedObjectProps);
 
     if (this.errors) {
       this.logError('validation');
