@@ -309,7 +309,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const ruleTypesClearFilter = await find.allByCssSelector(
         '.triggersActionsUI__alertTypeNodeHeading'
       );
-      expect(ruleTypes.length).to.above(0);
+      expect(ruleTypesClearFilter.length).to.above(0);
     });
   });
 };
