@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererModel } from '../../store/sourcerer';
@@ -123,7 +123,6 @@ export const usePickIndexPatterns = ({
       }
       const modifiedPatterns = patterns != null ? patterns : selectedPatterns;
       const isPatternsModified =
-        dataViewId !== defaultDataViewId ||
         defaultSelectedPatternsAsOptions.length !== modifiedPatterns.length ||
         !defaultSelectedPatternsAsOptions.every((option) =>
           modifiedPatterns.find((pattern) => option.value === pattern)
@@ -131,13 +130,7 @@ export const usePickIndexPatterns = ({
 
       return setIsModified(isPatternsModified ? 'modified' : '');
     },
-    [
-      dataViewId,
-      defaultDataViewId,
-      defaultSelectedPatternsAsOptions,
-      isOnlyDetectionAlerts,
-      selectedPatterns,
-    ]
+    [defaultSelectedPatternsAsOptions, isOnlyDetectionAlerts, selectedPatterns]
   );
 
   // when scope updates, check modified to set/remove alerts label
@@ -158,16 +151,19 @@ export const usePickIndexPatterns = ({
   const setIndexPatternsByDataView = (newSelectedDataViewId: string) => {
     setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId));
   };
-
+  const lastOptions = useRef<Array<EuiComboBoxOptionOption<string>>>([]);
   useEffect(() => {
-    setSelectedOptions(
-      isOnlyDetectionAlerts
-        ? alertsOptions
-        : selectedPatterns.map((indexName) => ({
-            label: indexName,
-            value: indexName,
-          }))
-    );
+    const newOptions = isOnlyDetectionAlerts
+      ? alertsOptions
+      : lastOptions.current.length > 0
+      ? lastOptions.current
+      : patternListToOptions(selectedPatterns);
+    setSelectedOptions((old) => {
+      if (isOnlyDetectionAlerts) {
+        lastOptions.current = old;
+      }
+      return newOptions;
+    });
   }, [alertsOptions, isOnlyDetectionAlerts, selectedPatterns]);
 
   return {

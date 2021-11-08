@@ -14,27 +14,13 @@ export const CALL_OUT_TITLE = i18n.translate('xpack.securitySolution.indexPatter
 export const CALL_OUT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutTimelineTitle',
   {
-    defaultMessage: 'Data view cannot be modified',
-  }
-);
-
-export const CALL_OUT_MESSAGE = i18n.translate(
-  'xpack.securitySolution.indexPatterns.callOutMessage',
-  {
-    defaultMessage: 'Data view cannot be modified for this page',
+    defaultMessage: 'Data view cannot be modified when show only detection alerts is selected',
   }
 );
 
 export const DATA_VIEW = i18n.translate('xpack.securitySolution.indexPatterns.dataViewLabel', {
   defaultMessage: 'Data view',
 });
-export const SIEM_DATA_VIEW_LABEL = i18n.translate(
-  'xpack.securitySolution.indexPatterns.kipLabel',
-  {
-    defaultMessage: 'Default Security Data View',
-  }
-);
-
 export const MODIFIED_BADGE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.modifiedBadgeTitle',
   {

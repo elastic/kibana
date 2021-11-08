@@ -53,11 +53,11 @@ export const StyledBadge = styled(EuiBadge)`
 `;
 
 interface GetDataViewSelectOptionsProps {
-  kibanaDataViews: sourcererModel.KibanaDataView[];
-  isOnlyDetectionAlerts: boolean;
-  defaultDataView: sourcererModel.KibanaDataView;
   dataViewId: string;
+  defaultDataView: sourcererModel.KibanaDataView;
   isModified: boolean;
+  isOnlyDetectionAlerts: boolean;
+  kibanaDataViews: sourcererModel.KibanaDataView[];
 }
 
 export const getDataViewSelectOptions = ({
@@ -93,6 +93,9 @@ export const getDataViewSelectOptions = ({
           ) : (
             <span data-test-subj="dataView-option-super">
               <EuiIcon type="logoKibana" size="s" /> {title}
+              {isModified && id === dataViewId && (
+                <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>
+              )}
             </span>
           ),
         value: id,
