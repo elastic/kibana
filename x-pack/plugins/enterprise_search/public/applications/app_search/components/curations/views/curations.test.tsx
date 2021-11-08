@@ -55,7 +55,7 @@ describe('Curations', () => {
     },
     // EngineLogic
     engine: {
-      search_relevance_suggestions_active: true,
+      adaptive_relevance_suggestions_active: true,
     },
   };
 
@@ -89,7 +89,7 @@ describe('Curations', () => {
   });
 
   it('renders less tabs when suggestions are not active', () => {
-    setMockValues(set('engine.search_relevance_suggestions_active', false, values));
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, values));
     const wrapper = shallow(<Curations />);
 
     expect(getPageTitle(wrapper)).toEqual('Curated results');
@@ -99,7 +99,7 @@ describe('Curations', () => {
   });
 
   it('renders a New! badge  when suggestions are not active', () => {
-    setMockValues(set('engine.search_relevance_suggestions_active', false, values));
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, values));
     const wrapper = shallow(<Curations />);
 
     expect(getPageTitle(wrapper)).toEqual('Curated results');
@@ -109,7 +109,7 @@ describe('Curations', () => {
   });
 
   it('hides the badge when suggestions are active', () => {
-    setMockValues(set('engine.search_relevance_suggestions_active', true, values));
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', true, values));
     const wrapper = shallow(<Curations />);
 
     expect(getPageTitle(wrapper)).toEqual('Curated results');

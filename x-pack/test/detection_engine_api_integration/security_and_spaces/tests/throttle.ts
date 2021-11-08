@@ -29,6 +29,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   /**
    *
@@ -46,12 +47,12 @@ export default ({ getService }: FtrProviderContext) => {
   describe('throttle', () => {
     describe('adding actions', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       describe('creating a rule', () => {
@@ -63,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getWebHookAction())
             .expect(200);
 
-          const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id));
+          const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
@@ -76,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
@@ -96,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleWithWebHookAction(hookAction.id),
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
@@ -109,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
@@ -123,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
           expect(rule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
         });
 
@@ -139,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleWithWebHookAction(hookAction.id),
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
@@ -152,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getSimpleRule(),
             throttle: '1h',
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
@@ -172,7 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleWithWebHookAction(hookAction.id),
             throttle: '1h',
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
@@ -190,8 +191,8 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getWebHookAction())
             .expect(200);
 
-          const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id));
-          const readRule = await getRule(supertest, rule.rule_id);
+          const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
+          const readRule = await getRule(supertest, log, rule.rule_id);
           expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_RULE);
         });
 
@@ -200,8 +201,8 @@ export default ({ getService }: FtrProviderContext) => {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
-          const readRule = await getRule(supertest, rule.rule_id);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
+          const readRule = await getRule(supertest, log, rule.rule_id);
           expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
         });
 
@@ -211,8 +212,8 @@ export default ({ getService }: FtrProviderContext) => {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
-          const rule = await createRule(supertest, ruleWithThrottle);
-          const readRule = await getRule(supertest, rule.rule_id);
+          const rule = await createRule(supertest, log, ruleWithThrottle);
+          const readRule = await getRule(supertest, log, rule.rule_id);
           expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
         });
 
@@ -224,13 +225,13 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getWebHookAction())
             .expect(200);
 
-          const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id));
+          const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
           await supertest
             .post(`/api/alerting/rule/${rule.id}/_mute_all`)
             .set('kbn-xsrf', 'true')
             .send()
             .expect(204);
-          const readRule = await getRule(supertest, rule.rule_id);
+          const readRule = await getRule(supertest, log, rule.rule_id);
           expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
         });
       });
@@ -245,9 +246,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
-          await createRule(supertest, ruleWithWebHookAction);
+          await createRule(supertest, log, ruleWithWebHookAction);
           ruleWithWebHookAction.name = 'some other name';
-          const updated = await updateRule(supertest, ruleWithWebHookAction);
+          const updated = await updateRule(supertest, log, ruleWithWebHookAction);
           expect(updated.throttle).to.eql(NOTIFICATION_THROTTLE_RULE);
         });
 
@@ -260,9 +261,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
-          await createRule(supertest, ruleWithWebHookAction);
+          await createRule(supertest, log, ruleWithWebHookAction);
           ruleWithWebHookAction.name = 'some other name';
-          const updated = await updateRule(supertest, ruleWithWebHookAction);
+          const updated = await updateRule(supertest, log, ruleWithWebHookAction);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${updated.id}`);
@@ -280,9 +281,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
-          await createRule(supertest, ruleWithWebHookAction);
+          await createRule(supertest, log, ruleWithWebHookAction);
           ruleWithWebHookAction.actions = [];
-          const updated = await updateRule(supertest, ruleWithWebHookAction);
+          const updated = await updateRule(supertest, log, ruleWithWebHookAction);
           expect(updated.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
         });
       });
@@ -297,14 +298,14 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
-          const rule = await createRule(supertest, ruleWithWebHookAction);
+          const rule = await createRule(supertest, log, ruleWithWebHookAction);
           // patch a simple rule's name
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
             .send({ rule_id: rule.rule_id, name: 'some other name' })
             .expect(200);
-          const readRule = await getRule(supertest, rule.rule_id);
+          const readRule = await getRule(supertest, log, rule.rule_id);
           expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_RULE);
         });
 
@@ -317,7 +318,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
-          const rule = await createRule(supertest, ruleWithWebHookAction);
+          const rule = await createRule(supertest, log, ruleWithWebHookAction);
           // patch a simple rule's name
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
@@ -341,14 +342,14 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
-          const rule = await createRule(supertest, ruleWithWebHookAction);
+          const rule = await createRule(supertest, log, ruleWithWebHookAction);
           // patch a simple rule's action
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
             .send({ rule_id: rule.rule_id, actions: [] })
             .expect(200);
-          const readRule = await getRule(supertest, rule.rule_id);
+          const readRule = await getRule(supertest, log, rule.rule_id);
           expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
         });
       });
