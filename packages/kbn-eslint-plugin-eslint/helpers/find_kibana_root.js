@@ -24,7 +24,7 @@ module.exports = function findKibanaRoot() {
   let maybeKibanaRoot = path.resolve(__dirname, '../../..');
 
   // when using syslinks, __dirname reports outside of the repo
-  // if that's the case, the path will have .cache/bazel on its path
+  // if that's the case, the path will contain .cache/bazel
   if (!maybeKibanaRoot.includes('.cache/bazel')) {
     return maybeKibanaRoot;
   }
