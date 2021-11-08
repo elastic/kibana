@@ -6,7 +6,7 @@
  */
 
 import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
+import { DataViewBase, FilterStateStore } from '@kbn/es-query';
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import {
@@ -16,7 +16,6 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '../../../common';
-import { IIndexPattern } from '../../../../../../src/plugins/data/public';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
@@ -137,7 +136,7 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
 interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
