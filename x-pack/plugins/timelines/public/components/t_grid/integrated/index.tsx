@@ -23,6 +23,7 @@ import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   BulkActionsProp,
+  CreateFieldComponentType,
   TGridCellAction,
   TimelineId,
   TimelineTabs,
@@ -98,6 +99,7 @@ export interface TGridIntegratedProps {
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
+  createFieldComponent?: CreateFieldComponentType;
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
   defaultCellActions?: TGridCellAction[];
@@ -152,6 +154,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   globalFullScreen,
   graphEventId,
   graphOverlay = null,
+  createFieldComponent,
   hasAlertsCrud,
   id,
   indexNames,
@@ -349,6 +352,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                           activePage={pageInfo.activePage}
                           browserFields={browserFields}
                           bulkActions={bulkActions}
+                          createFieldComponent={createFieldComponent}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
                           filterQuery={filterQuery}
