@@ -74,7 +74,7 @@ export const lineVisTypeDefinition = {
           labels: {
             show: true,
             rotate: LabelRotation.Horizontal,
-            filter: false,
+            filter: true,
             truncate: 100,
           },
           title: {

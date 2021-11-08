@@ -271,6 +271,7 @@ export function Detail() {
           {
             path: pagePathGetters.integration_details_policies({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ];
@@ -289,6 +290,7 @@ export function Detail() {
           {
             path: pagePathGetters.integration_details_overview({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ],
@@ -368,12 +370,12 @@ export function Detail() {
                             content: missingSecurityConfiguration ? (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
-                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the minimum required privileges. Contact your administrator."
+                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the superuser role. Contact your administrator."
                               />
                             ) : (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                defaultMessage="To add Elastic Agent integrations, you must have the minimum required privileges. Contact your adminstrator."
+                                defaultMessage="To add Elastic Agent integrations, you must have the superuser role. Contact your adminstrator."
                               />
                             ),
                           }
