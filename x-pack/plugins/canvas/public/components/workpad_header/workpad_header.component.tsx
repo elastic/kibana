@@ -27,6 +27,7 @@ import { ElementMenu } from './element_menu';
 import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
 import { LabsControl } from './labs_control';
+import { EditorMenu } from './editor_menu';
 
 const strings = {
   getFullScreenButtonAriaLabel: () =>
@@ -160,24 +161,22 @@ export const WorkpadHeader: FC<Props> = ({
       <EuiFlexGroup
         gutterSize="none"
         alignItems="center"
-        justifyContent="spaceBetween"
         className="canvasLayout__stageHeaderInner"
       >
+        {isWriteable && (
+          <EuiFlexItem grow={false}>
+            <SolutionToolbar>
+              {{
+                primaryActionButton: <ElementMenu addElement={addElement} elements={elements} />,
+                quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+                addFromLibraryButton: <AddFromLibraryButton onClick={showEmbedPanel} />,
+                extraButtons: [<EditorMenu addElement={addElement} />],
+              }}
+            </SolutionToolbar>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="none">
-            {isWriteable && (
-              <EuiFlexItem>
-                <SolutionToolbar>
-                  {{
-                    primaryActionButton: (
-                      <ElementMenu addElement={addElement} elements={elements} />
-                    ),
-                    quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-                    addFromLibraryButton: <AddFromLibraryButton onClick={showEmbedPanel} />,
-                  }}
-                </SolutionToolbar>
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false}>
               <ViewMenu />
             </EuiFlexItem>
@@ -192,6 +191,7 @@ export const WorkpadHeader: FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
