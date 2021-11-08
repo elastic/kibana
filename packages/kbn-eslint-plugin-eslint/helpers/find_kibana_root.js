@@ -29,7 +29,7 @@ module.exports = function findKibanaRoot() {
     return maybeKibanaRoot;
   }
 
-  // process.argv[1] would be the eslint binary, a corrected set editor
+  // process.argv[1] would be the eslint binary, a correctly-set editor
   // will use a local eslint inside the repo node_modules and its value
   // should be `ACTUAL_KIBANA_ROOT/node_modules/.bin/eslint`
   maybeKibanaRoot = path.resolve(process.argv[1], '../../../');
