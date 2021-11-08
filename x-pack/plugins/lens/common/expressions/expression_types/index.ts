@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { FilterView } from './filter_view';
-export { filterViewsRegistry } from './filter_views_registry';
-export type { FilterViewSpec } from './filter_view';
+export { lensMultitable } from './lens_multitable';
+export type { LensMultitableExpressionTypeDefinition } from './lens_multitable';

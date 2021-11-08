@@ -13,7 +13,6 @@ import {
   FilterViewInstance,
   FlattenFilterViewInstance,
 } from '../../types/filters';
-import { filterViewsRegistry } from '../filter_view_types';
 
 export const defaultFormatter = (value: unknown) => (value || null ? `${value}` : '-');
 
@@ -45,17 +44,8 @@ export const flattenFilterView = (filterValue: FilterType) => (filterView: Filte
   }, {});
 };
 
-export const transformFilterView = (filterView: FilterViewInstance, filterValue: FilterType) =>
-  flowRight(formatFilterView(filterValue), flattenFilterView(filterValue))(filterView);
-
-export const formatFilter = (filter: FilterType) => {
-  const filterView = filterViewsRegistry.get(filter.type) ?? filterViewsRegistry.get('default');
-  if (!filterView) {
-    throw new Error('At least default filter view should be defined');
-  }
-
-  return transformFilterView(filterView.view(), filter);
-};
+export const createFilledFilterView = (filterView: FilterViewInstance<any>, filter: FilterType) =>
+  flowRight(formatFilterView(filter), flattenFilterView(filter))(filterView);
 
 export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField) => {
   const groupedFilters = groupBy(filters, (filter) => filter[groupByField]);

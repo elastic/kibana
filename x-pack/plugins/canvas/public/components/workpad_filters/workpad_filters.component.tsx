@@ -8,9 +8,11 @@
 import React, { FC, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { identity } from 'lodash';
 import { FiltersGroup as FiltersGroupType } from './types';
 import { FiltersGroup } from './filters_group';
 import { FilterField } from '../../../types';
+import { formatByKey } from './utils';
 
 interface Props {
   filtersGroups: FiltersGroupType[];
@@ -39,6 +41,10 @@ const strings = {
     i18n.translate('xpack.canvas.workpad_filters.filters_group.withoutGroup', {
       defaultMessage: 'Without group',
     }),
+  getBlankValueLabel: () =>
+    i18n.translate('xpack.canvas.workpad_filters.filters_group.blankValue', {
+      defaultMessage: '(Blank)',
+    }),
 };
 
 const groupByOptions: Array<{ value: FilterField; text: string }> = [
@@ -53,14 +59,14 @@ export const WorkpadFilters: FC<Props> = ({
   groupFiltersByField,
 }) => {
   const groupedByFilterGroupField = groupFiltersByField === 'filterGroup';
-  const preparedFilterGroups = filtersGroups.map((filterGroup) =>
-    groupedByFilterGroupField
-      ? {
-          ...filterGroup,
-          name: filterGroup.name ?? strings.getWithoutGroupLabel(),
-        }
-      : filterGroup
-  );
+  const formatter = groupFiltersByField ? formatByKey(groupFiltersByField) ?? identity : identity;
+
+  const preparedFilterGroups = filtersGroups.map((filterGroup) => ({
+    ...filterGroup,
+    name:
+      formatter(filterGroup.name) ??
+      (groupedByFilterGroupField ? strings.getWithoutGroupLabel() : strings.getBlankValueLabel()),
+  }));
 
   const filtersGroupsComponents = preparedFilterGroups.map((filtersGroup, index) => (
     <FiltersGroup key={`filter-group-${index}`} filtersGroup={filtersGroup} />

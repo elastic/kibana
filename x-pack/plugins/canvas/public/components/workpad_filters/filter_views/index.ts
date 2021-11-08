@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FilterViewSpec } from '../../../public/filter_view_types';
+import { FilterViewSpec } from '../../../../types';
 import { defaultFilter } from './default_filter';
-import { timeFilter, TimeFilterValue } from './time_filter';
+import { timeFilter } from './time_filter';
 
-export const filterViewsSpecs: Array<FilterViewSpec | FilterViewSpec<TimeFilterValue>> = [
-  defaultFilter,
-  timeFilter,
-];
+export const filterViews: Record<string, FilterViewSpec<any>> = {
+  [defaultFilter.name]: defaultFilter,
+  [timeFilter.name]: timeFilter,
+};

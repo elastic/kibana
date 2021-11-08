@@ -9,10 +9,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { reduxDecorator } from '../../../../storybook';
 import { WorkpadFilters } from '../workpad_filters';
-import { prepareFilterViews } from './utils';
 import { elementWithGroup, elements } from './elements';
-
-prepareFilterViews();
 
 storiesOf('components/WorkpadFilters/WorkpadFilters', module)
   .addDecorator((story) => (

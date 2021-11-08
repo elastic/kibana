@@ -19,13 +19,11 @@ import {
   FlattenFilterViewInstance,
   SimpleFilterViewField,
 } from '../../types';
-import { FilterViewSpec } from '../filter_view_types';
 import {
   defaultFormatter,
   formatFilterView,
   flattenFilterView,
-  transformFilterView,
-  formatFilter,
+  createFilledFilterView,
   groupFiltersBy,
   getFiltersByGroups,
   extractGroupsFromElementsFilters,
@@ -66,19 +64,6 @@ const nestedFilterView: FilterViewInstance = {
   }),
   filterGroup: { label: 'filterGroup' },
 };
-
-jest.mock('../filter_view_types', () => ({
-  filterViewsRegistry: {
-    get: (type: string) => {
-      const views: Record<string, FilterViewSpec> = {
-        default: { name: 'default', view: () => simpleFilterView },
-        exactly: { name: 'exactly', view: () => simpleFilterView },
-        exactlyNested: { name: 'exactlyNested', view: () => nestedFilterView },
-      };
-      return views[type] ? views[type] : views.default;
-    },
-  },
-}));
 
 describe('defaultFormatter', () => {
   it('returns string when passed not null/undefined/falsy/emtpy value', () => {
@@ -201,7 +186,7 @@ describe('formatFilterView returns fn which', () => {
   });
 });
 
-describe('transformFilterView', () => {
+describe('createFilledFilterView', () => {
   it('returns simple filter view with formattedValue and components', () => {
     const simpleFilterValueWithComponent = {
       ...simpleFilterView,
@@ -211,7 +196,7 @@ describe('transformFilterView', () => {
       },
     };
 
-    expect(transformFilterView(simpleFilterValueWithComponent, simpleFilterValue)).toEqual({
+    expect(createFilledFilterView(simpleFilterValueWithComponent, simpleFilterValue)).toEqual({
       type: { label: 'label', formattedValue: simpleFilterValue.type },
       value: { label: 'value', formattedValue: simpleFilterValue.value, component: fc },
       column: { label: 'column', formattedValue: simpleFilterValue.column },
@@ -231,7 +216,7 @@ describe('transformFilterView', () => {
       }),
     };
 
-    expect(transformFilterView(nestedFilterViewWithComponent, filterWithNestedValue)).toEqual({
+    expect(createFilledFilterView(nestedFilterViewWithComponent, filterWithNestedValue)).toEqual({
       type: { label: 'label', formattedValue: filterWithNestedValue.type },
       column: { label: 'column', formattedValue: filterWithNestedValue.column },
       filterGroup: { label: 'filterGroup', formattedValue: filterWithNestedValue.filterGroup },
@@ -240,44 +225,6 @@ describe('transformFilterView', () => {
         formattedValue: formatterFactory(filterWithNestedValue.value)(),
         component: fc,
       },
-    });
-  });
-});
-
-describe('formatFilter', () => {
-  const simpleResult = {
-    type: { label: 'label', formattedValue: simpleFilterValue.type },
-    value: { label: 'value', formattedValue: simpleFilterValue.value },
-    column: { label: 'column', formattedValue: simpleFilterValue.column },
-    filterGroup: { label: 'filterGroup', formattedValue: simpleFilterValue.filterGroup },
-  };
-
-  const nestedResult = {
-    type: { label: 'label', formattedValue: filterWithNestedValue.type },
-    column: { label: 'column', formattedValue: filterWithNestedValue.column },
-    filterGroup: { label: 'filterGroup', formattedValue: filterWithNestedValue.filterGroup },
-    nested: {
-      label: 'nested',
-      formattedValue: formatterFactory(filterWithNestedValue.value)(),
-    },
-  };
-
-  it('returns formatted filter view by filter view name', () => {
-    expect(formatFilter(simpleFilterValue)).toEqual(simpleResult);
-    expect(formatFilter(filterWithNestedValue)).toEqual(nestedResult);
-  });
-
-  it('formatting by default filter view if filter view name is not specified', () => {
-    expect(formatFilter({ ...simpleFilterValue, type: null } as any)).toEqual({
-      ...simpleResult,
-      type: { ...simpleResult.type, formattedValue: '-' },
-    });
-  });
-
-  it('foramtting by default filter view if filter view name was not found', () => {
-    expect(formatFilter({ ...simpleFilterValue, type: 'some_absent_filter_vew' } as any)).toEqual({
-      ...simpleResult,
-      type: { ...simpleResult.type, formattedValue: 'some_absent_filter_vew' },
     });
   });
 });
