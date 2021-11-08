@@ -292,7 +292,8 @@ describe('migration actions', () => {
     });
   });
 
-  describe('cloneIndex', () => {
+  // FAILED ES PROMOTION: https://github.com/elastic/kibana/issues/117856
+  describe.skip('cloneIndex', () => {
     afterAll(async () => {
       try {
         await client.indices.delete({ index: 'clone_*' });
