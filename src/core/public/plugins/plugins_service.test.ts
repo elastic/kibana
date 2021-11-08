@@ -110,6 +110,7 @@ describe('PluginsService', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
       deprecations: deprecationsServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,

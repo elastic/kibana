@@ -20,7 +20,7 @@ describe('AppRouter', () => {
   let mounters: MockedMounterMap;
   let globalHistory: History;
   let update: ReturnType<typeof createRenderer>;
-  let theme: ReturnType<typeof themeServiceMock.createStartContract>;
+  let theme$: ReturnType<typeof themeServiceMock.createTheme$>;
   let scopedAppHistory: History;
 
   const navigate = (path: string) => {
@@ -51,7 +51,7 @@ describe('AppRouter', () => {
         setAppLeaveHandler={noop}
         setAppActionMenu={noop}
         setIsMounting={noop}
-        theme$={theme.theme$}
+        theme$={theme$}
       />
     );
 
@@ -88,9 +88,23 @@ describe('AppRouter', () => {
         appRoute: '/app/my-app/app6',
       }),
     ] as MockedMounterTuple[]);
-    theme = themeServiceMock.createStartContract();
+    theme$ = themeServiceMock.createTheme$();
     globalHistory = createMemoryHistory();
     update = createMountersRenderer();
+  });
+
+  it('calls mount handler with the correct parameters', async () => {
+    const app1 = mounters.get('app1')!;
+
+    await navigate('/app/app1');
+
+    expect(app1.mounter.mount).toHaveBeenCalledTimes(1);
+    expect(app1.mounter.mount).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appBasePath: '/app/app1',
+        theme$,
+      })
+    );
   });
 
   it('calls mount handler and returned unmount function when navigating between apps', async () => {

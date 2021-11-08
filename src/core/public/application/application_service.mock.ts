@@ -7,10 +7,11 @@
  */
 
 import { History } from 'history';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { MountPoint } from '../types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
 import { scopedHistoryMock } from './scoped_history.mock';
 import {
   ApplicationSetup,
@@ -90,7 +91,7 @@ const createAppMountParametersMock = (parts: Partial<AppMountParameters>) => {
     appBasePath: '/app',
     onAppLeave: jest.fn(),
     setHeaderActionMenu: jest.fn(),
-    theme$: of({ darkMode: false }),
+    theme$: themeServiceMock.createTheme$(),
     ...parts,
   };
   return mock;

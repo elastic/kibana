@@ -156,13 +156,11 @@ function createAppMountParametersMock(appBasePath = '') {
   rawHistory.push(appBasePath);
   const history = new ScopedHistory(rawHistory, appBasePath);
 
-  const theme$ = themeServiceMock.createSetupContract().theme$;
-
   const params: jest.Mocked<AppMountParameters> = {
     appBasePath,
     element: document.createElement('div'),
     history,
-    theme$,
+    theme$: themeServiceMock.createTheme$(),
     onAppLeave: jest.fn(),
     setHeaderActionMenu: jest.fn(),
   };

@@ -15,16 +15,24 @@ const mockTheme: CoreTheme = {
   darkMode: false,
 };
 
+const createThemeMock = (): CoreTheme => {
+  return { ...mockTheme };
+};
+
+const createTheme$Mock = () => {
+  return of(createThemeMock());
+};
+
 const createThemeSetupMock = () => {
   const setupMock: jest.Mocked<ThemeServiceSetup> = {
-    theme$: of(mockTheme),
+    theme$: createTheme$Mock(),
   };
   return setupMock;
 };
 
 const createThemeStartMock = () => {
   const startMock: jest.Mocked<ThemeServiceStart> = {
-    theme$: of(mockTheme),
+    theme$: createTheme$Mock(),
   };
   return startMock;
 };
@@ -48,4 +56,6 @@ export const themeServiceMock = {
   create: createServiceMock,
   createSetupContract: createThemeSetupMock,
   createStartContract: createThemeStartMock,
+  createTheme: createThemeMock,
+  createTheme$: createTheme$Mock,
 };

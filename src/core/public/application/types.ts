@@ -521,8 +521,27 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+
   /**
-   * TODO: documentation
+   * An observable emitting {@link CoreTheme | Core's theme}.
+   * Should be used when mounting the application to include theme information.
+   *
+   * @example
+   * When mounting a react application:
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   *
+   * import { AppMountParameters } from 'src/core/public';
+   * import { wrapWithTheme } from 'src/plugins/kibana_react';
+   * import { MyApp } from './app';
+   *
+   * export renderApp = ({ element, theme$ }: AppMountParameters) => {
+   *    ReactDOM.render(wrapWithTheme(<MyApp/>, theme$), element);
+   *    return () => ReactDOM.unmountComponentAtNode(element);
+   * }
+   * ```
    */
   theme$: Observable<CoreTheme>;
 }

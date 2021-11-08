@@ -25,9 +25,11 @@ describe('renderApp', () => {
     basePath = new BasePath();
     element = document.createElement('div');
     history = createMemoryHistory();
-    const scopedHistory = new ScopedHistory(history, '/');
     unmount = renderApp(
-      applicationServiceMock.createAppMountParameters({ element, history: scopedHistory }),
+      applicationServiceMock.createAppMountParameters({
+        element,
+        history: new ScopedHistory(history, '/'),
+      }),
       {
         basePath,
       }
