@@ -6,4 +6,4 @@
  */
 
 require('../../../../../src/setup_node_env');
-require('./resolver_generator_script');
+require('./detections_generator_script');

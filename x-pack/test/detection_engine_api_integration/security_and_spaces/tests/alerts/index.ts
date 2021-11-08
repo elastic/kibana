@@ -14,6 +14,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./alerts_compatibility'));
+      loadTestFile(require.resolve('./detection_rules_generations'));
     });
   });
 };
