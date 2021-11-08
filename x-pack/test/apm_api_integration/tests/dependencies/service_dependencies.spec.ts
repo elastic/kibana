@@ -62,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(status).to.be(200);
           expect(
-            body.serviceDependencies.map(({ location }: BackendNode) => location.backendName)
+            body.serviceDependencies.map(({ location }) => (location as BackendNode).backendName)
           ).to.eql([backendName]);
 
           const currentStatsLatencyValues =
@@ -101,7 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(status).to.be(200);
           expect(
-            body.serviceDependencies.map(({ location }: BackendNode) => location.backendName)
+            body.serviceDependencies.map(({ location }) => (location as BackendNode).backendName)
           ).to.eql([backendName]);
 
           const currentStatsLatencyValues =
