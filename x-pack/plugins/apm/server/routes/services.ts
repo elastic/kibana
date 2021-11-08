@@ -191,18 +191,9 @@ const serviceAgentRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
-      start,
-      end,
-      kuery: '',
-    });
-
     return getServiceAgent({
       serviceName,
       setup,
-      searchAggregatedTransactions,
       start,
       end,
     });

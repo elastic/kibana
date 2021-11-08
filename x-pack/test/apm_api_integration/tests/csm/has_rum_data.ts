@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   registry.when('has_rum_data without data', { config: 'trial', archives: [] }, () => {
