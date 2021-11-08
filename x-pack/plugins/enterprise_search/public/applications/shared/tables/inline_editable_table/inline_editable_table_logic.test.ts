@@ -29,7 +29,7 @@ describe('InlineEditableTableLogic', () => {
   const DEFAULT_VALUES = {
     editingItemId: null,
     editingItemValue: null,
-    formErrors: {},
+    fieldErrors: {},
     isEditing: false,
   };
 
@@ -91,7 +91,7 @@ describe('InlineEditableTableLogic', () => {
           isEditing: true,
           editingItemId: 1,
           editingItemValue: {},
-          formErrors: { foo: 'I am error' },
+          fieldErrors: { foo: 'I am error for foo' },
         });
         logic.actions.doneEditing();
         expect(logicValuesWithoutSelectors(logic)).toEqual(DEFAULT_VALUES);
@@ -152,29 +152,29 @@ describe('InlineEditableTableLogic', () => {
       });
     });
 
-    describe('setFormErrors', () => {
-      it('sets formErrors', () => {
-        const formErrors = {
+    describe('setFieldErrors', () => {
+      it('sets fieldErrors', () => {
+        const fieldErrors = {
           bar: 'I am an error',
         };
         const logic = mountLogic();
-        logic.actions.setFormErrors(formErrors);
+        logic.actions.setFieldErrors(fieldErrors);
         expect(logicValuesWithoutSelectors(logic)).toEqual({
           ...DEFAULT_VALUES,
-          formErrors,
+          fieldErrors,
         });
       });
     });
 
     describe('setEditingItemValue', () => {
-      it('updates the state of the item currently being edited and resets form errors', () => {
+      it('updates the state of the item currently being edited and resets field errors', () => {
         const logic = mountLogic({
           editingItemValue: {
             id: 1,
             foo: '',
             bar: '',
           },
-          formErrors: { foo: 'I am error' },
+          fieldErrors: { foo: 'I am error for foo' },
         });
         logic.actions.setEditingItemValue({
           id: 1,
@@ -188,7 +188,7 @@ describe('InlineEditableTableLogic', () => {
             foo: 'blah blah',
             bar: '',
           },
-          formErrors: {},
+          fieldErrors: {},
         });
       });
     });
@@ -297,20 +297,20 @@ describe('InlineEditableTableLogic', () => {
         );
       });
 
-      it('will set form errors and not call the provided onUpdate callback if the item being edited does not validate', () => {
+      it('will set field errors and not call the provided onUpdate callback if the item being edited does not validate', () => {
         const editingItemValue = {};
-        const formErrors = {
+        const fieldErrors = {
           foo: 'some error',
         };
-        DEFAULT_LOGIC_PARAMS.validateItem.mockReturnValue(formErrors);
+        DEFAULT_LOGIC_PARAMS.validateItem.mockReturnValue(fieldErrors);
         const logic = mountLogic({
           ...DEFAULT_VALUES,
           editingItemValue,
         });
-        jest.spyOn(logic.actions, 'setFormErrors');
+        jest.spyOn(logic.actions, 'setFieldErrors');
         logic.actions.saveExistingItem();
         expect(DEFAULT_LOGIC_PARAMS.onUpdate).not.toHaveBeenCalled();
-        expect(logic.actions.setFormErrors).toHaveBeenCalledWith(formErrors);
+        expect(logic.actions.setFieldErrors).toHaveBeenCalledWith(fieldErrors);
       });
 
       it('will do neither if no value is currently being edited', () => {
@@ -319,10 +319,10 @@ describe('InlineEditableTableLogic', () => {
           ...DEFAULT_VALUES,
           editingItemValue,
         });
-        jest.spyOn(logic.actions, 'setFormErrors');
+        jest.spyOn(logic.actions, 'setFieldErrors');
         logic.actions.saveExistingItem();
         expect(DEFAULT_LOGIC_PARAMS.onUpdate).not.toHaveBeenCalled();
-        expect(logic.actions.setFormErrors).not.toHaveBeenCalled();
+        expect(logic.actions.setFieldErrors).not.toHaveBeenCalled();
       });
 
       it('will always call the provided onUpdate callback if no validateItem param was provided', () => {
@@ -382,20 +382,20 @@ describe('InlineEditableTableLogic', () => {
         );
       });
 
-      it('will set form errors and not call the provided onAdd callback if the item being edited does not validate', () => {
+      it('will set field errors and not call the provided onAdd callback if the item being edited does not validate', () => {
         const editingItemValue = {};
-        const formErrors = {
+        const fieldErrors = {
           foo: 'some error',
         };
-        DEFAULT_LOGIC_PARAMS.validateItem.mockReturnValue(formErrors);
+        DEFAULT_LOGIC_PARAMS.validateItem.mockReturnValue(fieldErrors);
         const logic = mountLogic({
           ...DEFAULT_VALUES,
           editingItemValue,
         });
-        jest.spyOn(logic.actions, 'setFormErrors');
+        jest.spyOn(logic.actions, 'setFieldErrors');
         logic.actions.saveNewItem();
         expect(DEFAULT_LOGIC_PARAMS.onAdd).not.toHaveBeenCalled();
-        expect(logic.actions.setFormErrors).toHaveBeenCalledWith(formErrors);
+        expect(logic.actions.setFieldErrors).toHaveBeenCalledWith(fieldErrors);
       });
 
       it('will do nothing if no value is currently being edited', () => {
@@ -404,10 +404,10 @@ describe('InlineEditableTableLogic', () => {
           ...DEFAULT_VALUES,
           editingItemValue,
         });
-        jest.spyOn(logic.actions, 'setFormErrors');
+        jest.spyOn(logic.actions, 'setFieldErrors');
         logic.actions.saveNewItem();
         expect(DEFAULT_LOGIC_PARAMS.onAdd).not.toHaveBeenCalled();
-        expect(logic.actions.setFormErrors).not.toHaveBeenCalled();
+        expect(logic.actions.setFieldErrors).not.toHaveBeenCalled();
       });
 
       it('will always call the provided onAdd callback if no validateItem param was provided', () => {

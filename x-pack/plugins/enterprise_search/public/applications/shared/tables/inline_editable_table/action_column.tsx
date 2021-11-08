@@ -41,7 +41,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
   lastItemWarning,
   uneditableItems,
 }: ActionColumnProps<Item>) => {
-  const { doesEditingItemValueContainEmptyProperty, formErrors, isEditingUnsavedItem } =
+  const { doesEditingItemValueContainEmptyProperty, fieldErrors, isEditingUnsavedItem } =
     useValues(InlineEditableTableLogic);
   const { editExistingItem, deleteItem, doneEditing, saveExistingItem, saveNewItem } =
     useActions(InlineEditableTableLogic);
@@ -61,7 +61,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
             onClick={isEditingUnsavedItem ? saveNewItem : saveExistingItem}
             disabled={
               isLoading ||
-              Object.keys(formErrors).length > 0 ||
+              Object.keys(fieldErrors).length > 0 ||
               doesEditingItemValueContainEmptyProperty
             }
           >
