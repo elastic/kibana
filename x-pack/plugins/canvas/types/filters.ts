@@ -46,7 +46,7 @@ export type ComplexFilterViewField<FilterValue> = (
 
 export interface SimpleFilterViewField {
   label: string;
-  formatter?: (value?: unknown) => string;
+  formatter?: (value?: unknown) => string | null;
   component?: FC<any>;
 }
 

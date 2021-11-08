@@ -60,6 +60,30 @@ storiesOf('components/WorkpadFilters/WorkpadFiltersComponent', module)
   .add('default', () => (
     <WorkpadFilters filtersGroups={filtersGroups} onGroupByChange={action('onGroupByChange')} />
   ))
+  .add('Filters groups without name', () => (
+    <WorkpadFilters
+      filtersGroups={[
+        {
+          name: null,
+          filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
+        },
+      ]}
+      groupFiltersByField={'column'}
+      onGroupByChange={action('onGroupByChange')}
+    />
+  ))
+  .add('Filters groups without group name', () => (
+    <WorkpadFilters
+      filtersGroups={[
+        {
+          name: null,
+          filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
+        },
+      ]}
+      groupFiltersByField={'filterGroup'}
+      onGroupByChange={action('onGroupByChange')}
+    />
+  ))
   .add('Filters groups without name and filters', () => (
     <WorkpadFilters
       filtersGroups={[{ name: null, filters: [] }]}

@@ -21,6 +21,10 @@ const strings = {
     i18n.translate('xpack.canvas.workpad_filters.timeFilter.typeLabel', {
       defaultMessage: 'Time',
     }),
+  getWithoutGroupLabel: () =>
+    i18n.translate('xpack.canvas.workpad_filters.filters_group.withoutGroup', {
+      defaultMessage: 'Without group',
+    }),
 };
 
 const formatType = (type: unknown) => {
@@ -28,12 +32,10 @@ const formatType = (type: unknown) => {
     exactly: strings.getExactlyFilterTypeLabel(),
     time: strings.getTimeFilterTypeLabel(),
   };
-
-  const formattedType = typeof type === 'string' ? types[type] : strings.getBlankLabel();
-  return formattedType ?? strings.getBlankLabel();
+  return typeof type === 'string' ? types[type] ?? type : null;
 };
 
-const formatters: Partial<Record<FilterField, (value: unknown) => string>> = {
+const formatters: Partial<Record<FilterField, (value?: unknown) => string | null>> = {
   type: formatType,
 };
 
