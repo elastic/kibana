@@ -34,7 +34,7 @@ import {
   updateDataProviderKqlQuery,
   updateDataProviderType,
   updateEventType,
-  updateIndexNames,
+  updateDataView,
   updateIsFavorite,
   updateIsLive,
   updateKqlMode,
@@ -326,12 +326,13 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     insertTimeline,
   }))
-  .case(updateIndexNames, (state, { id, indexNames }) => ({
+  .case(updateDataView, (state, { id, dataViewId, indexNames }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
       [id]: {
         ...state.timelineById[id],
+        dataViewId,
         indexNames,
       },
     },

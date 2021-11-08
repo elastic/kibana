@@ -80,7 +80,7 @@ export const getFieldsToRequest = (): string[] => [
   'destination.ip',
   'user.name',
   '@timestamp',
-  'signal.status',
+  'kibana.alert.workflow_status',
   'signal.group.id',
   'signal.original_time',
   'signal.rule.building_block_type',

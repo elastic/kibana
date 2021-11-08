@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -43,11 +43,33 @@ export const CurationsSettings: React.FC = () => {
     curationsSettings: { enabled, mode },
     dataLoading,
   } = useValues(CurationsSettingsLogic);
-  const { toggleCurationsEnabled, toggleCurationsMode } = useActions(CurationsSettingsLogic);
+  const {
+    loadCurationsSettings,
+    onSkipLoadingCurationsSettings,
+    toggleCurationsEnabled,
+    toggleCurationsMode,
+  } = useActions(CurationsSettingsLogic);
 
   const { isLogRetentionUpdating, logRetention } = useValues(LogRetentionLogic);
+  const { fetchLogRetention } = useActions(LogRetentionLogic);
 
   const analyticsDisabled = !logRetention?.[LogRetentionOptions.Analytics].enabled;
+
+  useEffect(() => {
+    if (hasPlatinumLicense) {
+      fetchLogRetention();
+    }
+  }, [hasPlatinumLicense]);
+
+  useEffect(() => {
+    if (logRetention) {
+      if (!analyticsDisabled) {
+        loadCurationsSettings();
+      } else {
+        onSkipLoadingCurationsSettings();
+      }
+    }
+  }, [logRetention]);
 
   if (!hasPlatinumLicense)
     return (
@@ -57,7 +79,7 @@ export const CurationsSettings: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.curations.settings.licenseUpgradeCTATitle',
               {
-                defaultMessage: 'Introducing automated curations',
+                defaultMessage: 'Introducing curations powered by adaptive relevance',
               }
             )}
           </h2>
@@ -65,7 +87,7 @@ export const CurationsSettings: React.FC = () => {
         subtitle={
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.curations.settings.licenseUpgradeCTASubtitle"
-            defaultMessage="Upgrade to a {platinumLicenseName} license to harness the power of machine learning. By analyzing your engine's analytics, App Search is able to suggest new or updated curations. Effortlessly help your users find exactly what they're looking for. Start a free trial today."
+            defaultMessage="Upgrade to a {platinumLicenseName} subscription to harness the power of machine learning. By analyzing your engine's analytics, App Search is able to suggest new or updated curations. Effortlessly help your users find exactly what they're looking for. Start a free trial today."
             values={{
               platinumLicenseName: (
                 <strong>
@@ -113,7 +135,7 @@ export const CurationsSettings: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.curations.settings.automaticCurationsTitle',
                 {
-                  defaultMessage: 'Automated Curations',
+                  defaultMessage: 'Curations powered by adaptive relevance',
                 }
               )}
             </h2>
@@ -137,7 +159,7 @@ export const CurationsSettings: React.FC = () => {
                 'xpack.enterpriseSearch.appSearch.curations.settings.analyticsDisabledCalloutDescription',
                 {
                   defaultMessage:
-                    'Automated curations require analytics to be enabled on your account.',
+                    'Adaptive relevance requires analytics to be enabled on your account.',
                 }
               )}
             </p>
@@ -156,7 +178,7 @@ export const CurationsSettings: React.FC = () => {
           'xpack.enterpriseSearch.appSearch.curations.settings.automaticCurationsDescription',
           {
             defaultMessage:
-              "Suggested curations will monitor your engine's analytics and make automatic suggestions to help you deliver the most relevant results. Each suggested curation can be accepted, rejected, or modified.",
+              "App Search will monitor your engine's analytics and suggest changes to your curations to help you deliver the most relevant results. Each suggestion can be accepted, rejected, or modified.",
           }
         )}
       </EuiText>
@@ -167,7 +189,7 @@ export const CurationsSettings: React.FC = () => {
             label={i18n.translate(
               'xpack.enterpriseSearch.appSearch.curations.settings.enableautomaticCurationsSwitchLabel',
               {
-                defaultMessage: 'Enable automation suggestions',
+                defaultMessage: 'Enable suggestions',
               }
             )}
             checked={enabled}

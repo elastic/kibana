@@ -237,6 +237,7 @@ readonly links: {
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
             datastreamsILM: string;
+            beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
@@ -266,6 +267,9 @@ readonly links: {
             readonly pythonGuide: string;
             readonly rubyOverview: string;
             readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
         };
     };
 ```

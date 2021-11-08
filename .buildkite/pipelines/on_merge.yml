@@ -10,8 +10,6 @@ steps:
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Default Build and Metrics
-    env:
-      BAZEL_CACHE_MODE: read-write
     agents:
       queue: c2-8
     timeout_in_minutes: 60

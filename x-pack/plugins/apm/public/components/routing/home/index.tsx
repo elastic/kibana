@@ -20,6 +20,7 @@ import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
+import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
 
 function page<TPath extends string>({
   path,
@@ -68,6 +69,8 @@ export const home = {
       t.partial({
         refreshPaused: t.union([t.literal('true'), t.literal('false')]),
         refreshInterval: t.string,
+        comparisonEnabled: toBooleanRt,
+        comparisonType: comparisonTypeRt,
       }),
     ]),
   }),
@@ -109,9 +112,18 @@ export const home = {
       children: [
         {
           path: '/backends/{backendName}/overview',
-          element: <BackendDetailOverview />,
+          element: <RedirectToBackendOverviewRouteView />,
           params: t.type({
             path: t.type({
+              backendName: t.string,
+            }),
+          }),
+        },
+        {
+          path: '/backends/overview',
+          element: <BackendDetailOverview />,
+          params: t.type({
+            query: t.type({
               backendName: t.string,
             }),
           }),

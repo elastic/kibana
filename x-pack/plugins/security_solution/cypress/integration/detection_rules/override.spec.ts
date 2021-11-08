@@ -99,7 +99,7 @@ describe('Detection rules, override', () => {
     });
   });
 
-  it('Creates and activates a new custom rule with override option', function () {
+  it.skip('Creates and activates a new custom rule with override option', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();

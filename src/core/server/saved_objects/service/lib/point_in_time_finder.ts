@@ -38,6 +38,13 @@ export interface PointInTimeFinderDependencies
   logger: Logger;
 }
 
+/**
+ * @internal
+ */
+export type CreatePointInTimeFinderFn = <T = unknown, A = unknown>(
+  findOptions: SavedObjectsCreatePointInTimeFinderOptions
+) => ISavedObjectsPointInTimeFinder<T, A>;
+
 /** @public */
 export interface ISavedObjectsPointInTimeFinder<T, A> {
   /**

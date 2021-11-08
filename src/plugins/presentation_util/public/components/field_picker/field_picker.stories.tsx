@@ -9,59 +9,8 @@
 import React from 'react';
 
 import { FieldPicker } from './field_picker';
-
-import { DataView, DataViewField, IIndexPatternFieldList } from '../../../../data_views/common';
-
-// TODO: we probably should remove this once the PR is merged that has better data views for stories
-const flightFieldNames: string[] = [
-  'AvgTicketPrice',
-  'Cancelled',
-  'Carrier',
-  'dayOfWeek',
-  'Dest',
-  'DestAirportID',
-  'DestCityName',
-  'DestCountry',
-  'DestLocation',
-  'DestRegion',
-  'DestWeather',
-  'DistanceKilometers',
-  'DistanceMiles',
-  'FlightDelay',
-  'FlightDelayMin',
-  'FlightDelayType',
-  'FlightNum',
-  'FlightTimeHour',
-  'FlightTimeMin',
-  'Origin',
-  'OriginAirportID',
-  'OriginCityName',
-  'OriginCountry',
-  'OriginLocation',
-  'OriginRegion',
-  'OriginWeather',
-  'timestamp',
-];
-const flightFieldByName: { [key: string]: DataViewField } = {};
-flightFieldNames.forEach(
-  (flightFieldName) =>
-    (flightFieldByName[flightFieldName] = {
-      name: flightFieldName,
-      type: 'string',
-    } as unknown as DataViewField)
-);
-
-// Change some types manually for now
-flightFieldByName.Cancelled = { name: 'Cancelled', type: 'boolean' } as DataViewField;
-flightFieldByName.timestamp = { name: 'timestamp', type: 'date' } as DataViewField;
-
-const flightFields: DataViewField[] = Object.values(flightFieldByName);
-const storybookFlightsDataView: DataView = {
-  id: 'demoDataFlights',
-  title: 'demo data flights',
-  fields: flightFields as unknown as IIndexPatternFieldList,
-  getFieldByName: (name: string) => flightFieldByName[name],
-} as unknown as DataView;
+import { DataViewField } from '../../../../data_views/common';
+import { storybookFlightsDataView } from '../controls/__stories__/fixtures/flights';
 
 export default {
   component: FieldPicker,
@@ -85,5 +34,5 @@ export const FieldPickerWithFilter = () => {
 };
 
 export const FieldPickerWithoutIndexPattern = () => {
-  return <FieldPicker dataView={null} />;
+  return <FieldPicker />;
 };

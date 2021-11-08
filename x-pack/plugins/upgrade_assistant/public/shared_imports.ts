@@ -9,8 +9,11 @@ export {
   sendRequest,
   SendRequestConfig,
   SendRequestResponse,
-  useRequest,
   UseRequestConfig,
+} from '../../../../src/plugins/es_ui_shared/public/';
+export {
+  sendRequest,
+  useRequest,
   SectionLoading,
   GlobalFlyout,
   WithPrivileges,
@@ -28,6 +31,6 @@ export {
   reactRouterNavigate,
 } from '../../../../src/plugins/kibana_react/public';
 
-export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+export type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
