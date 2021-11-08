@@ -31,7 +31,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../lib/kibana'); // , () => ({
+jest.mock('../../lib/kibana');
 
 describe('source/index.tsx', () => {
   describe('getBrowserFields', () => {
@@ -40,11 +40,11 @@ describe('source/index.tsx', () => {
       expect(fields).toEqual({});
     });
 
-    test('it returns the same input with the same title', () => {
-      getBrowserFields('title 1', []);
-      // Since it is memoized it will return the same output which is empty object given 'title 1' a second time
-      const fields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
-      expect(fields).toEqual({});
+    test('it returns the same input given the same title and same fields length', () => {
+      const oldFields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
+      const newFields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
+      // Since it is memoized it will return the same object instance
+      expect(newFields).toBe(oldFields);
     });
 
     test('it transforms input into output as expected', () => {

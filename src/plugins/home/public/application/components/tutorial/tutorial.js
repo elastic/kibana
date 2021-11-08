@@ -421,6 +421,7 @@ class TutorialUi extends React.Component {
             iconType={icon}
             isBeta={this.state.tutorial.isBeta}
             notices={this.renderModuleNotices()}
+            basePath={getServices().http.basePath}
           />
 
           {this.renderInstructionSetsToggle()}
