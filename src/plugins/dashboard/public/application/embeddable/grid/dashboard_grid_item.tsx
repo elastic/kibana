@@ -10,9 +10,10 @@ import React, { useState, useRef, useEffect, FC } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { EmbeddableChildPanel } from '../../../services/embeddable';
+import { EmbeddableChildPanel, ViewMode } from '../../../services/embeddable';
 import { useLabs } from '../../../services/presentation_util';
 import { DashboardPanelState } from '../types';
+import { DashboardContainer } from '..';
 
 type PanelProps = Pick<EmbeddableChildPanel, 'container' | 'PanelComponent'>;
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
@@ -20,6 +21,7 @@ type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'
 interface Props extends PanelProps, DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   type: DashboardPanelState['type'];
+  container: DashboardContainer;
   focusedPanelId?: string;
   expandedPanelId?: string;
   key: string;
@@ -52,6 +54,8 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       'dshDashboardGrid__item--expanded': expandPanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       'dshDashboardGrid__item--hidden': hidePanel,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
 
     return (
@@ -116,7 +120,8 @@ export const ObservedItem: FC<Props> = (props: Props) => {
 
 export const DashboardGridItem: FC<Props> = (props: Props) => {
   const { isProjectEnabled } = useLabs();
-  const isEnabled = isProjectEnabled('labs:dashboard:deferBelowFold');
+  const isPrintMode = props.container.getInput().viewMode === ViewMode.PRINT;
+  const isEnabled = !isPrintMode && isProjectEnabled('labs:dashboard:deferBelowFold');
 
   return isEnabled ? <ObservedItem {...props} /> : <Item {...props} />;
 };
