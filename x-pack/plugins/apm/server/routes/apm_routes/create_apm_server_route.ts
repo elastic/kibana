@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { APMRouteCreateOptions, APMRouteHandlerResources } from './typings';
+import { APMRouteCreateOptions, APMRouteHandlerResources } from '../typings';
 
 export const createApmServerRoute = createServerRouteFactory<
   APMRouteHandlerResources,

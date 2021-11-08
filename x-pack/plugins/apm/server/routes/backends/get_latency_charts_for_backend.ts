@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EventOutcome } from '../../../common/event_outcome';
 import {
-  EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { Setup } from '../helpers/setup_request';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
+import { Setup } from '../../lib/helpers/setup_request';
+import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
-export async function getErrorRateChartsForBackend({
+export async function getLatencyChartsForBackend({
   backendName,
   setup,
   start,
@@ -42,7 +42,7 @@ export async function getErrorRateChartsForBackend({
     offset,
   });
 
-  const response = await apmEventClient.search('get_error_rate_for_backend', {
+  const response = await apmEventClient.search('get_latency_for_backend', {
     apm: {
       events: [ProcessorEvent.metric],
     },
@@ -55,11 +55,6 @@ export async function getErrorRateChartsForBackend({
             ...kqlQuery(kuery),
             ...rangeQuery(startWithOffset, endWithOffset),
             { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
-            {
-              terms: {
-                [EVENT_OUTCOME]: [EventOutcome.success, EventOutcome.failure],
-              },
-            },
           ],
         },
       },
@@ -71,11 +66,14 @@ export async function getErrorRateChartsForBackend({
             metricsInterval: 60,
           }),
           aggs: {
-            failures: {
-              filter: {
-                term: {
-                  [EVENT_OUTCOME]: EventOutcome.failure,
-                },
+            latency_sum: {
+              sum: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+              },
+            },
+            latency_count: {
+              sum: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
               },
             },
           },
@@ -86,12 +84,9 @@ export async function getErrorRateChartsForBackend({
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {
-      const totalCount = bucket.doc_count;
-      const failureCount = bucket.failures.doc_count;
-
       return {
         x: bucket.key + offsetInMs,
-        y: failureCount / totalCount,
+        y: (bucket.latency_sum.value ?? 0) / (bucket.latency_count.value ?? 0),
       };
     }) ?? []
   );
