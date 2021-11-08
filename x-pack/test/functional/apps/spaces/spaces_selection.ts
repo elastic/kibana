@@ -23,15 +23,18 @@ export default function spaceSelectorFunctionalTests({
   ]);
 
   describe('Spaces', function () {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
+    });
+    after(
+      async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
+    );
+
     this.tags('includeFirefox');
     describe('Space Selector', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
         await PageObjects.security.forceLogout();
       });
-      after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
-      );
 
       afterEach(async () => {
         await PageObjects.security.forceLogout();
@@ -70,7 +73,6 @@ export default function spaceSelectorFunctionalTests({
       };
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
         await PageObjects.security.login(undefined, undefined, {
           expectSpaceSelector: true,
         });
@@ -96,7 +98,6 @@ export default function spaceSelectorFunctionalTests({
         });
         await PageObjects.home.removeSampleDataSet('logs');
         await PageObjects.security.forceLogout();
-        await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector');
       });
 
       describe('displays separate data for each space', () => {

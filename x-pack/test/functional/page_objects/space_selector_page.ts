@@ -21,6 +21,7 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async clickSpaceCard(spaceId: string) {
+    await this.common.sleep(10000);
     return await this.retry.try(async () => {
       this.log.info(`SpaceSelectorPage:clickSpaceCard(${spaceId})`);
       await this.testSubjects.click(`space-card-${spaceId}`);
