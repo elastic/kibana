@@ -8,7 +8,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiFlyout, EuiFlyoutSize } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutSize, EuiOverlayMaskProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -87,6 +87,7 @@ export interface OverlayFlyoutOpenOptions {
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;
+  maskProps?: EuiOverlayMaskProps;
   /**
    * EuiFlyout onClose handler.
    * If provided the consumer is responsible for calling flyout.close() to close the flyout;
