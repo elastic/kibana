@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { fromKueryExpression } from '@kbn/es-query';
 import { CreateRulesSchema } from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import rule22 from '../../../../../plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/command_and_control_dns_directly_to_the_internet.json';
-import { fromKueryExpression } from '../../../../../../../../../../private/var/tmp/_bazel_garrettspong/a2009d763940a925f0063278083ebbc8/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-es-query';
 import { createEventFromKueryNode } from '../../../../../plugins/security_solution/scripts/detections/create_source_event_from_query';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
