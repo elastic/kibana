@@ -9,9 +9,12 @@
 import { Observable } from 'rxjs';
 
 /**
+ * Contains all the required information to apply Kibana's theme at the various levels it can be used.
+ *
  * @public
  */
 export interface CoreTheme {
+  /** is dark mode enabled or not */
   darkMode: boolean;
 }
 

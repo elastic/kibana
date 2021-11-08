@@ -58,7 +58,7 @@ describe('accountManagementApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
-      theme$: themeServiceMock.createSetupContract().theme$,
+      theme$: themeServiceMock.createTheme$(),
     });
 
     expect(coreStartMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);

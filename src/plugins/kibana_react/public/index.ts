@@ -30,7 +30,7 @@ export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { toMountPoint, MountPointPortal } from './util';
 export { RedirectAppLinks } from './app_links';
-export { wrapWithTheme } from './theme';
+export { wrapWithTheme, KibanaThemeProvider } from './theme';
 
 /** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {

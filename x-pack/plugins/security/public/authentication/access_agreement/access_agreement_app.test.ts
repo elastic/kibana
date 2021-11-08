@@ -51,7 +51,7 @@ describe('accessAgreementApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
-      theme$: themeServiceMock.createStartContract().theme$,
+      theme$: themeServiceMock.createTheme$(),
     });
 
     const mockRenderApp = jest.requireMock('./access_agreement_page').renderAccessAgreementPage;

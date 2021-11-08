@@ -49,7 +49,7 @@ describe('loggedOutApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
-      theme$: themeServiceMock.createStartContract().theme$,
+      theme$: themeServiceMock.createTheme$(),
     });
 
     const mockRenderApp = jest.requireMock('./logged_out_page').renderLoggedOutPage;

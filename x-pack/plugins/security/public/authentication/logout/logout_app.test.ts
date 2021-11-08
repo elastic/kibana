@@ -55,7 +55,7 @@ describe('logoutApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
-      theme$: themeServiceMock.createStartContract().theme$,
+      theme$: themeServiceMock.createTheme$(),
     });
 
     expect(window.sessionStorage.clear).toHaveBeenCalledTimes(1);

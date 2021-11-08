@@ -54,7 +54,7 @@ describe('loginApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
-      theme$: themeServiceMock.createStartContract().theme$,
+      theme$: themeServiceMock.createTheme$(),
     });
 
     const mockRenderApp = jest.requireMock('./login_page').renderLoginPage;
