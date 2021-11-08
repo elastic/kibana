@@ -16,38 +16,33 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
-import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
-import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../common/constants';
+import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
+import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
-  VectorLayer,
+  AbstractVectorLayer,
   VectorLayerArguments,
 } from '../vector_layer';
-import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
-import { DataRequestContext } from '../../../actions';
+import { ITiledSingleLayerVectorSource } from '../../../sources/tiled_single_layer_vector_source';
+import { DataRequestContext } from '../../../../actions';
 import {
   StyleMetaDescriptor,
   TileMetaFeature,
   Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types';
-import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
-import { ESSearchSource } from '../../sources/es_search_source';
-import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { CustomIconAndTooltipContent } from '../layer';
+} from '../../../../../common/descriptor_types';
+import { MVTSingleLayerVectorSourceConfig } from '../../../sources/mvt_single_layer_vector_source/types';
+import { ESSearchSource } from '../../../sources/es_search_source';
+import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
+import { CustomIconAndTooltipContent } from '../../layer';
 
 const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
 const ES_MVT_HITS_TOTAL_VALUE = 'hits.total.value';
 const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
 
-/*
- * MVT vector layer
- */
-export class TiledVectorLayer extends VectorLayer {
-  static type = LAYER_TYPE.TILED_VECTOR;
-
+export class MvtVectorLayer extends AbstractVectorLayer {
   static createDescriptor(
     descriptor: Partial<VectorLayerDescriptor>,
     mapColors?: string[]

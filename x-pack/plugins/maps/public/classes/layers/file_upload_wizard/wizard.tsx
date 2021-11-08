@@ -12,7 +12,7 @@ import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
 import { DEFAULT_MAX_RESULT_WINDOW, SCALING_TYPES } from '../../../../common/constants';
 import { GeoJsonFileSource } from '../../sources/geojson_file_source';
-import { VectorLayer } from '../../layers/vector_layer';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { FileUploadGeoResults } from '../../../../../file_upload/public';
@@ -113,7 +113,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
         : null,
       name,
     });
-    const layerDescriptor = VectorLayer.createDescriptor(
+    const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
       { sourceDescriptor },
       this.props.mapColors
     );

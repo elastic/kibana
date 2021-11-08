@@ -20,13 +20,11 @@ import { buildVectorRequestMeta } from '../build_vector_request_meta';
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__'; // unique name to store scaled value for weighting
 
 export class HeatmapLayer extends AbstractLayer {
-  static type = LAYER_TYPE.HEATMAP;
-
   private readonly _style: HeatmapStyle;
 
   static createDescriptor(options: Partial<HeatmapLayerDescriptor>) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
-    heatmapLayerDescriptor.type = HeatmapLayer.type;
+    heatmapLayerDescriptor.type = LAYER_TYPE.HEATMAP;
     heatmapLayerDescriptor.style = HeatmapStyle.createDescriptor();
     return heatmapLayerDescriptor;
   }

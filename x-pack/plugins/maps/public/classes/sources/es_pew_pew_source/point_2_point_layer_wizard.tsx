@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-import { VectorLayer } from '../../layers/vector_layer';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 // @ts-ignore
 import { ESPewPewSource, sourceTitle } from './es_pew_pew_source';
 import { VectorStyle } from '../../styles/vector/vector_style';
@@ -40,7 +40,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
       }
 
       const defaultDynamicProperties = getDefaultDynamicProperties();
-      const layerDescriptor = VectorLayer.createDescriptor({
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({
         sourceDescriptor: ESPewPewSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
           [VECTOR_STYLES.LINE_COLOR]: {
