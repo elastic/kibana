@@ -22,13 +22,13 @@ import {
 } from '@elastic/eui';
 import { ProcessTree } from '../ProcessTree';
 import { getStart, getEnd, getEvent } from '../../../common/test/mock_data';
-import { IProcess } from '../../hooks/use_process_tree';
+import { Process } from '../../hooks/use_process_tree';
 
 import {
   INTERNAL_TEST_ROUTE,
 } from '../../../common/constants';
 
-interface ISessionViewDeps {
+interface SessionViewDeps {
   sessionId: string;
 }
 
@@ -42,10 +42,10 @@ interface ISessionViewDeps {
  * - Search results navigation
  * - Settings menu (needs design)
  */
-export const SessionView = ({ sessionId }: ISessionViewDeps) => {
+export const SessionView = ({ sessionId }: SessionViewDeps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [data, setData] = useState<any[]>([]);
-  const [selectedProcess, setSelectedProcess] = useState<IProcess | null>(null);
+  const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
 
   const { http } = useKibana<CoreStart>().services;
 
@@ -53,7 +53,7 @@ export const SessionView = ({ sessionId }: ISessionViewDeps) => {
     height: 300px;
   `;
 
-  const onProcessSelected = (process: IProcess) => {
+  const onProcessSelected = (process: Process) => {
     if (selectedProcess !== process) {
       setSelectedProcess(process);
     }

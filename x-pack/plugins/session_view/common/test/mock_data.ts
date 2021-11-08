@@ -5,7 +5,7 @@
  * 2.0.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Action, IProcessEvent } from '../../public/hooks/use_process_tree';
+import { Action, ProcessEvent } from '../../public/hooks/use_process_tree';
 import uuid from 'uuid';
 
 export const getStart = () => {
@@ -481,7 +481,7 @@ export const getEnd = () => {
   ];
 }
 
-export const mockData: IProcessEvent[] = [
+export const mockData: ProcessEvent[] = [
   {
     '@timestamp': 'Thu Oct 14 2021 12: 06: 48 GMT-0700 (Pacific Daylight Time)',
     event: {

@@ -5,27 +5,27 @@
  * 2.0.
  */
 import React, { useRef, useLayoutEffect, useCallback } from 'react';
-import { useEuiTheme } from '@elastic/eui';
-import { Process } from '../Process';
-import { useProcessTree, IProcessEvent, IProcess } from '../../hooks/use_process_tree';
+import { ProcessTreeNode } from '../ProcessTreeNode';
+import { useProcessTree, ProcessEvent, Process } from '../../hooks/use_process_tree';
 import { useScroll } from '../../hooks/use_scroll';
+import { useStyles } from './styles';
 
-interface IProcessTreeDeps {
+interface ProcessTreeDeps {
   // process.entity_id to act as root node
   sessionId: string;
 
   // bi-directional paging support. allows us to load
   // processes before and after a particular process.entity_id
   // implementation in-complete. see use_process_tree.js
-  forward: IProcessEvent[]; // load next
-  backward?: IProcessEvent[]; // load previous
+  forward: ProcessEvent[]; // load next
+  backward?: ProcessEvent[]; // load previous
 
   // plain text search query (only searches "process.working_directory process.args.join(' ')"
   searchQuery?: string;
 
   // currently selected process
-  selectedProcess: IProcess | null;
-  onProcessSelected(process: IProcess): void;
+  selectedProcess: Process | null;
+  onProcessSelected(process: Process): void;
 }
 
 export const ProcessTree = ({
@@ -35,8 +35,9 @@ export const ProcessTree = ({
   searchQuery,
   selectedProcess,
   onProcessSelected,
-}: IProcessTreeDeps) => {
-  const { euiTheme } = useEuiTheme();
+}: ProcessTreeDeps) => {
+  const styles = useStyles();
+
   const { sessionLeader, orphans, searchResults } = useProcessTree({
     sessionId,
     forward,
@@ -65,7 +66,7 @@ export const ProcessTree = ({
    * highlights a process in the tree
    * we do it this way to avoid state changes on potentially thousands of <Process> components
    */
-  const selectProcess = useCallback((process: IProcess) => {
+  const selectProcess = useCallback((process: Process) => {
     if (!selectionAreaRef || !scrollerRef) {
       return;
     }
@@ -101,31 +102,6 @@ export const ProcessTree = ({
     }
   }, [selectedProcess, selectProcess]);
 
-  const defaultSelectionColor = euiTheme.colors.accent;
-  const padding = euiTheme.size.s;
-
-  const scrollerCSS = `
-    font-family: ${euiTheme.font.familyCode};
-    overflow: auto;
-    height: 100%;
-    background-color: ${euiTheme.colors.lightestShade};
-    padding-top: ${padding};
-    padding-left: ${padding};
-    display: flex;
-    flex-direction: column;
-  `;
-
-  const selectionAreaCSS = `
-    position: absolute;
-    display: none;
-    margin-left: -50%;
-    width: 150%;
-    height: 100%;
-    background-color: ${defaultSelectionColor};
-    pointer-events:none;
-    opacity: .1;
-  `;
-
   // TODO: processes without parents.
   // haven't decided whether to just add to session leader
   // or some other UX treatment (reparenting to init?)
@@ -137,11 +113,15 @@ export const ProcessTree = ({
   console.log(searchResults);
 
   return (
-    <div ref={scrollerRef} css={scrollerCSS}>
+    <div ref={scrollerRef} css={styles.scroller}>
       {sessionLeader && (
-        <Process isSessionLeader process={sessionLeader} onProcessSelected={onProcessSelected} />
+        <ProcessTreeNode
+          isSessionLeader
+          process={sessionLeader}
+          onProcessSelected={onProcessSelected}
+        />
       )}
-      <div ref={selectionAreaRef} css={selectionAreaCSS} />
+      <div ref={selectionAreaRef} css={styles.selectionArea} />
     </div>
   );
 };
