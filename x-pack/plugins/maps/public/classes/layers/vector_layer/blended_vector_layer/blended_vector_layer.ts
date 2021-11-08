@@ -172,7 +172,6 @@ export interface BlendedVectorLayerArguments {
 }
 
 export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLayer {
-
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
     mapColors: string[]

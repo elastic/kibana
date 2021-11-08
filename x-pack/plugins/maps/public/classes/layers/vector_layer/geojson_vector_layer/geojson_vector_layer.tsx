@@ -46,7 +46,6 @@ import { buildVectorRequestMeta } from '../../build_vector_request_meta';
 export const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
 export class GeoJsonVectorLayer extends AbstractVectorLayer {
-
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
