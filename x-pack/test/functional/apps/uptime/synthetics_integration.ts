@@ -8,8 +8,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FullAgentPolicy } from '../../../../plugins/fleet/common';
+import { skipIfNoDockerRegistry } from '../../helpers';
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getPageObjects, getService } = providerContext;
   const monitorName = 'Sample Synthetics integration';
 
   const uptimePage = getPageObjects(['syntheticsIntegration']);
@@ -130,6 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   });
   // Failing: See https://github.com/elastic/kibana/issues/116980
   describe.skip('When on the Synthetics Integration Policy Create Page', function () {
+    skipIfNoDockerRegistry(providerContext);
     this.tags(['ciGroup10']);
     const basicConfig = {
       name: monitorName,
