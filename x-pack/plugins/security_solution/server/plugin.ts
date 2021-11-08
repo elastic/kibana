@@ -244,7 +244,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataService,
       logger,
       ruleDataClient,
-      ruleOptions
+      ruleOptions,
+      core.getStartServices
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
