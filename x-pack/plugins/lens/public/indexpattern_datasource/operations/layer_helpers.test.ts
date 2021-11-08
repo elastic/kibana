@@ -15,6 +15,7 @@ import {
   deleteColumn,
   updateLayerIndexPattern,
   getErrorMessages,
+  hasTermsWithManyBuckets,
 } from './layer_helpers';
 import { operationDefinitionMap, OperationType } from '../operations';
 import { TermsIndexPatternColumn } from './definitions/terms';
@@ -3003,6 +3004,81 @@ describe('state_helpers', () => {
         indexPattern,
         operationDefinitionMap
       );
+    });
+  });
+
+  describe('hasTermsWithManyBuckets', () => {
+    it('should return false for a bucketed non terms operation', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'fieldD',
+            params: {
+              interval: 'd',
+            },
+          },
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeFalsy();
+    });
+
+    it('should return false if all terms operation have a lower size', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'My Op',
+            customLabel: true,
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            sourceField: 'dest',
+            params: {
+              size: 5,
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+            },
+          },
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeFalsy();
+    });
+
+    it('should return true if the size is high', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'My Op',
+            customLabel: true,
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            sourceField: 'dest',
+            params: {
+              size: 15,
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+            },
+          },
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeTruthy();
     });
   });
 });
