@@ -12,14 +12,6 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { DataProviders } from '.';
 
-jest.mock('../../../../common/hooks/use_selector', () => {
-  const actual = jest.requireActual('../../../../common/hooks/use_selector');
-  return {
-    ...actual,
-    useDeepEqualSelector: jest.fn().mockReturnValue([]),
-  };
-});
-
 describe('DataProviders', () => {
   const mount = useMountAppended();
 
