@@ -292,6 +292,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickNewDashboard(continueEditing = false) {
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    if (!continueEditing && discardButtonExists) {
+      this.log.debug('found discard button');
+      await this.testSubjects.click('discardDashboardPromptButton');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      if (confirmation) {
+        await this.common.clickConfirmOnModal();
+      }
+    }
     await this.listingTable.clickNewButton('createDashboardPromptButton');
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
@@ -305,6 +314,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickNewDashboardExpectWarning(continueEditing = false) {
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    if (!continueEditing && discardButtonExists) {
+      this.log.debug('found discard button');
+      await this.testSubjects.click('discardDashboardPromptButton');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      if (confirmation) {
+        await this.common.clickConfirmOnModal();
+      }
+    }
     await this.listingTable.clickNewButton('createDashboardPromptButton');
     await this.testSubjects.existOrFail('dashboardCreateConfirm');
     if (continueEditing) {
