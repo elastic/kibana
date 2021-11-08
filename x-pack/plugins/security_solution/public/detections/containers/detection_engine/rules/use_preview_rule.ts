@@ -24,18 +24,24 @@ const emptyPreviewRule: PreviewResponse = {
   warnings: [],
 };
 
-const invocationCounts = {
-  h: 1,
-  d: 24,
-  w: 168,
-};
-
 export const usePreviewRule = (timeframe: Unit = 'h') => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
-  const invocationCount = invocationCounts[timeframe];
+  let invocationCount = 1; // Defaults to an hour
+
+  switch (timeframe) {
+    case 'd':
+      invocationCount = 24;
+      break;
+    case 'w':
+      invocationCount = 168;
+      break;
+    case 'M':
+      invocationCount = 720;
+      break;
+  }
 
   useEffect(() => {
     if (!rule) {
