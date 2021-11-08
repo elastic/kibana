@@ -10,7 +10,6 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   echo "--- Upload Artifacts"
   buildkite-agent artifact upload 'target/junit/**/*'
   buildkite-agent artifact upload 'target/kibana-*'
-  buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
   buildkite-agent artifact upload 'target/kibana-security-solution/**/*.png'
   buildkite-agent artifact upload 'target/test-metrics/*'
   buildkite-agent artifact upload 'target/test-suites-ci-plan.json'
@@ -24,6 +23,13 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'x-pack/test/functional/apps/reporting/reports/session/*.pdf'
   buildkite-agent artifact upload 'x-pack/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload '.es/**/*.hprof'
+
+  if (env.CODE_COVERAGE) {
+    sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
+    buildkite-agent artifact upload 'kibana-coverage.tar.gz'
+  } else {
+    buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
+  }
 
   echo "--- Run Failed Test Reporter"
   node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'
