@@ -22,6 +22,7 @@ import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from 
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
+import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -36,6 +37,7 @@ export interface DataVisualizerStartDependencies {
   share: SharePluginStart;
   lens?: LensPublicStart;
   indexPatternFieldEditor?: IndexPatternFieldEditorStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
