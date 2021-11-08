@@ -9,6 +9,7 @@ import React from 'react';
 import { mount, render } from 'enzyme';
 import { FieldValueSelection } from './field_value_selection';
 import { EuiButton, EuiSelectableList } from '@elastic/eui';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 const values = [
   { label: 'elastic co frontend', count: 1 },
@@ -32,16 +33,19 @@ describe('FieldValueSelection', () => {
 
     expect(btn.text()).toBe('Service name');
   });
+
   it('renders a list on click', async () => {
     const wrapper = mount(
-      <FieldValueSelection
-        label="Service name"
-        values={values}
-        onChange={() => {}}
-        selectedValue={[]}
-        loading={false}
-        setQuery={() => {}}
-      />
+      <EuiThemeProvider>
+        <FieldValueSelection
+          label="Service name"
+          values={values}
+          onChange={() => {}}
+          selectedValue={[]}
+          loading={false}
+          setQuery={() => {}}
+        />
+      </EuiThemeProvider>
     );
 
     const btn = wrapper.find(EuiButton);
