@@ -30,7 +30,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     it('Shows experimental disclaimer', async () => {
-      await testSubjects.existOrFail('o11y-experimental-disclaimer');
+      await observability.alerts.common.getExperimentalDisclaimer();
     });
 
     it('Dismiss experimental disclaimer', async () => {

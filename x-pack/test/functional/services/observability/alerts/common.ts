@@ -71,10 +71,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getExperimentalDisclaimer = async () => {
-    return await testSubjects.find('experimentalDisclaimer');
-  };
-  const getExperimentalDisclaimerDismissButton = async () => {
-    return await testSubjects.find('experimentalDisclaimerDismissButton');
+    return testSubjects.existOrFail('o11y-experimental-disclaimer');
   };
 
   const getTableCellsInRows = async () => {
@@ -254,6 +251,5 @@ export function ObservabilityAlertsCommonProvider({
     getTimeRange,
     navigateWithoutFilter,
     getExperimentalDisclaimer,
-    getExperimentalDisclaimerDismissButton,
   };
 }
