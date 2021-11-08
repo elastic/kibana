@@ -10,9 +10,6 @@ import React from 'react';
 import moment from 'moment';
 import { FiltersGroup } from '../filters_group';
 import { FiltersGroup as FiltersGroupType } from '../types';
-import { prepareFilterViews } from './utils';
-
-prepareFilterViews();
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 
@@ -45,9 +42,4 @@ const filtersGroup: FiltersGroupType = {
 storiesOf('components/WorkpadFilters/FiltersGroup', module)
   .addDecorator((story) => <div className="canvasLayout__sidebar">{story()}</div>)
   .add('default', () => <FiltersGroup filtersGroup={filtersGroup} />)
-  .add('group name is empty', () => (
-    <FiltersGroup
-      filtersGroup={{ name: null, filters: [{ ...filtersGroup.filters[0], column: null }] }}
-    />
-  ))
   .add('empty group', () => <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} />);

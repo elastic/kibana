@@ -11,10 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import { WorkpadFilters } from '../workpad_filters.component';
 import { FiltersGroup as FiltersGroupType } from '../types';
-import { prepareFilterViews } from './utils';
 import { Filter } from '../../../../types';
-
-prepareFilterViews();
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 
@@ -62,6 +59,30 @@ storiesOf('components/WorkpadFilters/WorkpadFiltersComponent', module)
   ))
   .add('default', () => (
     <WorkpadFilters filtersGroups={filtersGroups} onGroupByChange={action('onGroupByChange')} />
+  ))
+  .add('Filters groups without name', () => (
+    <WorkpadFilters
+      filtersGroups={[
+        {
+          name: null,
+          filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
+        },
+      ]}
+      groupFiltersByField={'column'}
+      onGroupByChange={action('onGroupByChange')}
+    />
+  ))
+  .add('Filters groups without group name', () => (
+    <WorkpadFilters
+      filtersGroups={[
+        {
+          name: null,
+          filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
+        },
+      ]}
+      groupFiltersByField={'filterGroup'}
+      onGroupByChange={action('onGroupByChange')}
+    />
   ))
   .add('Filters groups without name and filters', () => (
     <WorkpadFilters

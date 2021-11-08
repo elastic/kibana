@@ -6,10 +6,10 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSelect } from '@elastic/eui';
-import { FilterViewSpec } from '../../../public/filter_view_types';
-import { FilterFieldProps } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import { FilterFieldProps, FilterViewSpec } from '../../../../types';
+import { formatByKey } from '../utils';
 
 const strings = {
   getTypeLabel: () =>
@@ -33,6 +33,7 @@ const strings = {
       defaultMessage: 'No group',
     }),
 };
+
 const NO_GROUP = 'no_group';
 
 const GroupComponent: FC<FilterFieldProps> = ({ filter, filterGroups, updateFilter }) => {
@@ -60,10 +61,10 @@ const GroupComponent: FC<FilterFieldProps> = ({ filter, filterGroups, updateFilt
 
 export const defaultFilter: FilterViewSpec = {
   name: 'default',
-  view: () => ({
-    type: { label: strings.getTypeLabel() },
+  view: {
     column: { label: strings.getColumnLabel() },
-    filterGroup: { label: strings.getFilterGroupLabel(), component: GroupComponent },
     value: { label: strings.getValueLabel() },
-  }),
+    type: { label: strings.getTypeLabel(), formatter: formatByKey('type') },
+    filterGroup: { label: strings.getFilterGroupLabel(), component: GroupComponent },
+  },
 };

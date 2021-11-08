@@ -7,8 +7,8 @@
 
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { FilterType } from '../../../types';
-import { FilterViewSpec } from '../../../public/filter_view_types';
+import { FilterType, FilterViewSpec, SimpleFilterViewField } from '../../../../types';
+import { formatByKey } from '../utils';
 import { defaultFilter } from './default_filter';
 
 export interface TimeFilterValue {
@@ -34,7 +34,7 @@ const strings = {
     }),
 };
 
-const defConfig = defaultFilter.view();
+const { column, type, filterGroup } = defaultFilter.view;
 
 const formatTime = (str: string, roundUp: boolean) => {
   const moment = dateMath.parse(str, { roundUp });
@@ -47,8 +47,8 @@ const formatTime = (str: string, roundUp: boolean) => {
 
 export const timeFilter: FilterViewSpec<TimeFilterValue> = {
   name: FilterType.time,
-  view: () => ({
-    ...defConfig,
+  view: {
+    column,
     value: ({ to, from }) => ({
       from: {
         label: strings.getFromLabel(),
@@ -59,5 +59,10 @@ export const timeFilter: FilterViewSpec<TimeFilterValue> = {
         formatter: () => formatTime(to, true),
       },
     }),
-  }),
+    type: {
+      label: (type as SimpleFilterViewField).label,
+      formatter: formatByKey('type'),
+    },
+    filterGroup,
+  },
 };

@@ -6,10 +6,10 @@
  */
 
 import { EuiAccordion } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { formatFilter } from '../../lib/filter';
+import { createFilledFilterView } from '../../lib/filter';
 import { Filter } from './filter';
+import { filterViews } from './filter_views';
 import { FiltersGroup as FiltersGroupType } from './types';
 
 interface Props {
@@ -20,22 +20,18 @@ const panelStyle = {
   paddingTop: '15px',
 };
 
-const strings = {
-  getBlankValueLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.filters_group.blankValue', {
-      defaultMessage: '(Blank)',
-    }),
-};
-
 export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
   const { name, filters: groupFilters } = filtersGroup;
 
-  const filtersWithViews = groupFilters.map((filter) => ({
-    filter,
-    filterView: formatFilter(filter),
-  }));
+  const filledFilterViews = groupFilters.map((filter) => {
+    const filterView = filterViews[filter.type] ?? filterViews.default;
+    return {
+      filter,
+      filterView: createFilledFilterView(filterView.view, filter),
+    };
+  });
 
-  const filtersComponents = filtersWithViews.map((filterWithView, index) => (
+  const filtersComponents = filledFilterViews.map((filterWithView, index) => (
     <Filter key={`filter-${name}-${index}`} {...filterWithView} />
   ));
 
@@ -43,7 +39,7 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
     <div className="canvasSidebar__expandable">
       <EuiAccordion
         id="canvas-element-stats"
-        buttonContent={name ?? strings.getBlankValueLabel()}
+        buttonContent={name}
         initialIsOpen={true}
         className="canvasSidebar__accordion filtersSidebar__accordion"
         style={{ marginLeft: '0px' }}

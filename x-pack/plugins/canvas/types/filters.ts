@@ -51,7 +51,7 @@ export type ComplexFilterViewField<FilterValue> = (
 
 export interface SimpleFilterViewField {
   label: string;
-  formatter?: (value?: unknown) => string;
+  formatter?: (value?: unknown) => string | null;
   component?: FC<any>;
 }
 
@@ -66,10 +66,15 @@ export type FilterViewInstance<FilterValue = unknown> = Record<
   SimpleFilterViewField | ComplexFilterViewField<FilterValue>
 >;
 
+export interface FilterViewSpec<FilterValue = unknown> {
+  name: string;
+  view: FilterViewInstance<FilterValue>;
+}
+
 export type FlattenFilterViewInstance = Record<string, SimpleFilterViewField>;
 export type FormattedFilterViewInstance = Record<string, FormattedFilterViewField>;
 
-export type FilterField = keyof Filter;
+export type FilterField = 'column' | 'type' | 'filterGroup';
 
 export interface FilterFieldProps {
   value: string;
