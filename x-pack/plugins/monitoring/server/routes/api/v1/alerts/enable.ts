@@ -44,7 +44,7 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
 
           if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
             server.log.info(
-              `Skipping alert creation for "${context.infra.spaceId}" space; Stack Monitoring alerts require API keys to be enabled and an encryption key to be configured.`
+              `Skipping rule creation for "${context.infra.spaceId}" space; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
             );
             return response.ok({
               body: {
