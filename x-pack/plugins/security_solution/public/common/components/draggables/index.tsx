@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiToolTip, IconType, ToolTipPositions } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import type { IconType, ToolTipPositions } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
