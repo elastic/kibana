@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../flash_messages';
+import { toastAPIErrors } from '../../flash_messages';
 import { getErrorsFromHttpResponse } from '../../flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../http';
@@ -166,7 +166,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onSuccess();
       } catch (e) {
         onReorder(oldItems);
-        flashAPIErrors(e);
+        toastAPIErrors(e);
       }
 
       actions.clearLoading();
