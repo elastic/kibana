@@ -11,11 +11,10 @@ import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../.
 import { TileStyle } from '../../styles/tile/tile_style';
 
 export class TileLayer extends AbstractLayer {
-  static type = LAYER_TYPE.TILE;
 
   static createDescriptor(options, mapColors) {
     const tileLayerDescriptor = super.createDescriptor(options, mapColors);
-    tileLayerDescriptor.type = TileLayer.type;
+    tileLayerDescriptor.type = LAYER_TYPE.TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;

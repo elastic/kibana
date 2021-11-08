@@ -43,8 +43,7 @@ const ES_MVT_HITS_TOTAL_VALUE = 'hits.total.value';
 const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
 
 export class MvtVectorLayer extends AbstractVectorLayer {
-  static type = LAYER_TYPE.TILED_VECTOR;
-
+  
   static createDescriptor(
     descriptor: Partial<VectorLayerDescriptor>,
     mapColors?: string[]

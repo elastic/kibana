@@ -172,7 +172,6 @@ export interface BlendedVectorLayerArguments {
 }
 
 export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLayer {
-  static type = LAYER_TYPE.BLENDED_VECTOR;
 
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
