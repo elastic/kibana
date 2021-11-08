@@ -16,7 +16,10 @@ export const isUrlInvalid = (url: string | null | undefined) => {
         return false;
       } else {
         const urlParsed = new URL(url);
-        if (allowedSchemes.includes(urlParsed.protocol)) {
+        if (
+          allowedSchemes.includes(urlParsed.protocol) &&
+          url.startsWith(`${urlParsed.protocol}//`)
+        ) {
           return false;
         }
       }
