@@ -45,7 +45,7 @@ export const waitForIndexStatusYellow =
         wait_for_status: 'yellow',
         timeout,
         // @ts-expect-error
-        return_200_for_cluster_health_timeout: true // opt-in to the 8.0 breaking behaviour to prevent a deprecation log
+        return_200_for_cluster_health_timeout: true, // opt-in to the 8.0 breaking behaviour to prevent a deprecation log
       })
       .then((res) => {
         if (res.body.timed_out === true) {
