@@ -9744,7 +9744,6 @@
     "xpack.enterpriseSearch.appSearch.logRetention.callout.disabledSinceTitle": "{logsTitle}は、{disabledDate}以降に無効にされました。",
     "xpack.enterpriseSearch.appSearch.logRetention.callout.disabledTitle": "{logsTitle}は無効です。",
     "xpack.enterpriseSearch.appSearch.logRetention.customPolicy": "カスタム{logsType}ログ保持ポリシーがあります。",
-    "xpack.enterpriseSearch.appSearch.logRetention.ilmDisabled": "App Search は{logsType}ログ保持を管理していません。",
     "xpack.enterpriseSearch.appSearch.logRetention.noLogging": "すべてのエンジンの{logsType}ログが無効です。",
     "xpack.enterpriseSearch.appSearch.logRetention.noLogging.collected": "前回の{logsType}ログは{disabledAtDate}に収集されました。",
     "xpack.enterpriseSearch.appSearch.logRetention.noLogging.notCollected": "収集された{logsType}ログはありません。",

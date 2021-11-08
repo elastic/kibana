@@ -19,15 +19,27 @@ import { setEmsTmsDefaultModes } from '../common/migrations/set_ems_tms_default_
  */
 export const embeddableMigrations = {
   '7.14.0': (state: SerializableRecord) => {
-    return {
-      ...state,
-      attributes: moveAttribution(state as { attributes: MapSavedObjectAttributes }),
-    } as SerializableRecord;
+    try {
+      return {
+        ...state,
+        attributes: moveAttribution(state as { attributes: MapSavedObjectAttributes }),
+      } as SerializableRecord;
+    } catch (e) {
+      // Do not fail migration for invalid layerListJSON
+      // Maps application can display invalid layerListJSON error when saved object is viewed
+      return state;
+    }
   },
   '8.0.0': (state: SerializableRecord) => {
-    return {
-      ...state,
-      attributes: setEmsTmsDefaultModes(state as { attributes: MapSavedObjectAttributes }),
-    } as SerializableRecord;
+    try {
+      return {
+        ...state,
+        attributes: setEmsTmsDefaultModes(state as { attributes: MapSavedObjectAttributes }),
+      } as SerializableRecord;
+    } catch (e) {
+      // Do not fail migration for invalid layerListJSON
+      // Maps application can display invalid layerListJSON error when saved object is viewed
+      return state;
+    }
   },
 };
