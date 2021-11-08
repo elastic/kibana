@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is loaded', () => {
         before(async () => {
-          await generateData({ synthtraceEsClient, backendName, start, end });
+          await generateData({ synthtraceEsClient, start, end });
         });
         after(() => synthtraceEsClient.clean());
 

@@ -35,22 +35,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  async function callBreakdownApi() {
-    return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
-      params: {
-        path: { serviceName },
-        query: {
-          environment: 'production',
-          numBuckets: 20,
-          offset: '1d',
-          start: new Date(start).toISOString(),
-          end: new Date(end).toISOString(),
-        },
-      },
-    });
-  }
-
   registry.when(
     'Dependency for service when data is not loaded',
     { config: 'basic', archives: [] },
@@ -70,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is loaded', () => {
         before(async () => {
-          await generateData({ synthtraceEsClient, backendName, start, end });
+          await generateData({ synthtraceEsClient, start, end });
         });
         after(() => synthtraceEsClient.clean());
 
@@ -109,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is loaded', () => {
         before(async () => {
-          await generateData({ synthtraceEsClient, backendName, start, end });
+          await generateData({ synthtraceEsClient, start, end });
         });
         after(() => synthtraceEsClient.clean());
 
