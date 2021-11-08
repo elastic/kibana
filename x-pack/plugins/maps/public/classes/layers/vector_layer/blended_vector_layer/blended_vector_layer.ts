@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IVectorLayer, VectorLayer } from '../vector_layer';
-import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import { IStyleProperty } from '../../styles/vector/properties/style_property';
+import { IVectorLayer } from '../vector_layer';
+import { GeoJsonVectorLayer } from '../geojson_vector_layer';
+import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
+import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
+import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
+import { IStyleProperty } from '../../../styles/vector/properties/style_property';
 import {
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
@@ -21,13 +22,13 @@ import {
   VECTOR_STYLES,
   LAYER_STYLE_TYPE,
   FIELD_ORIGIN,
-} from '../../../../common/constants';
-import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
-import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { IESSource } from '../../sources/es_source';
-import { ISource } from '../../sources/source';
-import { DataRequestContext } from '../../../actions';
-import { DataRequestAbortError } from '../../util/data_request';
+} from '../../../../../common/constants';
+import { ESGeoGridSource } from '../../../sources/es_geo_grid_source/es_geo_grid_source';
+import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
+import { IESSource } from '../../../sources/es_source';
+import { ISource } from '../../../sources/source';
+import { DataRequestContext } from '../../../../actions';
+import { DataRequestAbortError } from '../../../util/data_request';
 import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
@@ -37,11 +38,11 @@ import {
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStylePropertiesDescriptor,
-} from '../../../../common/descriptor_types';
-import { IVectorSource } from '../../sources/vector_source';
-import { LICENSED_FEATURES } from '../../../licensed_features';
-import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
-import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
+} from '../../../../../common/descriptor_types';
+import { IVectorSource } from '../../../sources/vector_source';
+import { LICENSED_FEATURES } from '../../../../licensed_features';
+import { ESSearchSource } from '../../../sources/es_search_source/es_search_source';
+import { isSearchSourceAbortError } from '../../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -170,14 +171,12 @@ export interface BlendedVectorLayerArguments {
   layerDescriptor: VectorLayerDescriptor;
 }
 
-export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
-  static type = LAYER_TYPE.BLENDED_VECTOR;
-
+export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLayer {
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
     mapColors: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = VectorLayer.createDescriptor(options, mapColors);
+    const layerDescriptor = GeoJsonVectorLayer.createDescriptor(options, mapColors);
     layerDescriptor.type = LAYER_TYPE.BLENDED_VECTOR;
     return layerDescriptor;
   }
