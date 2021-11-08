@@ -13,6 +13,6 @@ export * from './mappings';
 
 export * from './templates';
 
-export { DataStreamFromEs, Health, DataStream, DataStreamIndex } from './data_streams';
+export type { DataStreamFromEs, Health, DataStream, DataStreamIndex } from './data_streams';
 
 export * from './component_templates';

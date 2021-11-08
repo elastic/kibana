@@ -12,4 +12,5 @@ export type { TimelineModel } from './timelines/store/timeline/model';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
-export { Plugin, PluginSetup };
+export type { PluginSetup };
+export { Plugin };
