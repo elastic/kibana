@@ -7,13 +7,14 @@
 
 import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldNumber, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FontValue } from 'src/plugins/expressions';
 
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';
-import { fontSizes } from './font_sizes';
+
+const MIN_FONT_SIZE = 0;
 
 const strings = {
   getAlignCenterOption: () =>
@@ -134,11 +135,6 @@ export const TextStylePicker: FC<Props> = ({
     ['underline']: Boolean(underline),
   };
 
-  if (!isNaN(size) && fontSizes.indexOf(Number(size)) === -1) {
-    fontSizes.push(Number(size));
-    fontSizes.sort((a, b) => a - b);
-  }
-
   const doChange = (propName: keyof StyleProps, value: string | boolean | number) => {
     const newStyle = { ...style, [propName]: value };
     setStyle(newStyle);
@@ -171,19 +167,19 @@ export const TextStylePicker: FC<Props> = ({
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSelect
+          <EuiFieldNumber
             compressed
             value={size}
             onChange={(e) => doChange('size', Number(e.target.value))}
-            options={fontSizes.map((fontSize) => ({ text: String(fontSize), value: fontSize }))}
             prepend="Size"
+            min={MIN_FONT_SIZE}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false} style={{ fontSize: 0 }}>
           <ColorPickerPopover
             value={color}
@@ -192,7 +188,7 @@ export const TextStylePicker: FC<Props> = ({
             ariaLabel={strings.getFontColorLabel()}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiButtonGroup
             options={styleButtons}
             buttonSize="compressed"
@@ -204,7 +200,7 @@ export const TextStylePicker: FC<Props> = ({
             legend={strings.getStyleOptionsControlLegend()}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiButtonGroup
             options={alignmentButtons}
             buttonSize="compressed"
