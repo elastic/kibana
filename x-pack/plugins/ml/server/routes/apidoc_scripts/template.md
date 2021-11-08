@@ -3,7 +3,7 @@
 <% } -%>
 
 <a name="top"></a>
-## <%= project.name %> v<%= project.version %>
+v<%= project.version %>
 
 <%= project.description %>
 
@@ -12,10 +12,10 @@
 <% } -%>
 <% data.forEach(group => { -%>
 
-### <a name='<%= toLink(group.name) %>'></a> <%= group.name %>
+## <a name='<%= toLink(group.name) %>'></a> <%= group.name %>
 <% group.subs.forEach(sub => { -%>
 
-#### <a name='<%= toLink(sub.title) %>'></a> <%= sub.title %>
+### <a name='<%= toLink(sub.title) %>'></a> <%= sub.title %>
 [Back to top](#top)
 
 <%- sub.description ? `${sub.description}\n\n` : '' -%>
