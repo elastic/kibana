@@ -22,7 +22,7 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
 import * as helpers from '../helpers';
@@ -102,7 +102,7 @@ describe('Timeline', () => {
     ]);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
-    (useSourcererScope as jest.Mock).mockReturnValue(mockSourcererScope);
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     props = {
       columns: defaultHeaders,
@@ -187,7 +187,7 @@ describe('Timeline', () => {
     });
 
     test('it does render the timeline table when the source is loading with no events', () => {
-      (useSourcererScope as jest.Mock).mockReturnValue({
+      (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
         docValueFields: [],
         loading: true,

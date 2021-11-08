@@ -25,7 +25,7 @@ import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 
 import { getNestedProperty } from '../../../../../util/object_utils';
 
-import { getIndexPatternAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
+import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 8;
 
@@ -57,8 +57,8 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
     if (type === 'index-pattern') {
       dataViewName = getNestedProperty(savedObject, 'attributes.title');
     } else if (type === 'search') {
-      const indexPatternAndSavedSearch = await getIndexPatternAndSavedSearch(id);
-      dataViewName = indexPatternAndSavedSearch.indexPattern?.title ?? '';
+      const dataViewAndSavedSearch = await getDataViewAndSavedSearch(id);
+      dataViewName = dataViewAndSavedSearch.dataView?.title ?? '';
     }
 
     if (isCcsIndexPattern(dataViewName)) {

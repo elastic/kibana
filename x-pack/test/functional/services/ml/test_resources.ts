@@ -128,6 +128,20 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return createResponse.id;
     },
 
+    async createBulkSavedObjects(body: object[]): Promise<string> {
+      log.debug(`Creating bulk saved objects'`);
+
+      const createResponse = await supertest
+        .post(`/api/saved_objects/_bulk_create`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(body)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      log.debug(` > Created bulk saved objects'`);
+      return createResponse;
+    },
+
     async createIndexPatternIfNeeded(title: string, timeFieldName?: string): Promise<string> {
       const indexPatternId = await this.getIndexPatternId(title);
       if (indexPatternId !== undefined) {
@@ -494,6 +508,19 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
       log.debug(` > found version '${packageVersion}'`);
       return packageVersion;
+    },
+
+    async setAdvancedSettingProperty(
+      propertyName: string,
+      propertyValue: string | number | boolean
+    ) {
+      await kibanaServer.uiSettings.update({
+        [propertyName]: propertyValue,
+      });
+    },
+
+    async clearAdvancedSettingProperty(propertyName: string) {
+      await kibanaServer.uiSettings.unset(propertyName);
     },
   };
 }
