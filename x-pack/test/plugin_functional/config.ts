@@ -17,6 +17,7 @@ import { pageObjects } from './page_objects';
 // that returns an object with the projects config values
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const registryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT;
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
@@ -49,6 +50,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'test/plugin_functional/plugins/core_provider_plugin'
         )}`,
         ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
+        ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
       ],
     },
     uiSettings: xpackFunctionalConfig.get('uiSettings'),
