@@ -18,7 +18,13 @@ export function migrateSymbolStyleDescriptor({ attributes }) {
     return attributes;
   }
 
-  const layerList = JSON.parse(attributes.layerListJSON);
+  let layerList = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layerDescriptor) => {
     if (!isVectorLayer(layerDescriptor) || !_.has(layerDescriptor, 'style.properties')) {
       return;
