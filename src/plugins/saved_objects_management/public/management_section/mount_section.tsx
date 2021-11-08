@@ -99,6 +99,7 @@ export const mountManagementSection = async ({
   );
 
   return () => {
+    coreStart.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

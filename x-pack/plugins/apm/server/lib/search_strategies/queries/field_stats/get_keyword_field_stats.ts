@@ -66,7 +66,7 @@ export const fetchKeywordFieldStats = async (
     termFilters
   );
   const { body } = await esClient.search(request);
-  const aggregations = body.aggregations as {
+  const aggregations = body.aggregations as unknown as {
     sample: {
       sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
     };
