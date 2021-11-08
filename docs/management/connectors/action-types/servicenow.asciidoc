@@ -9,7 +9,7 @@ The ServiceNow ITSM connector uses the https://docs.servicenow.com/bundle/orland
 
 [float]
 [[servicenow-itsm-connector-prerequisites]]
-=== Prerequisites
+==== Prerequisites
 After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow ITSM connector or <<servicenow-itsm-connector-update, updating an existing one>>:
 
 * Install Elastic for ITSM from the https://store.servicenow.com/sn_appstore_store.do#!/store/home[ServiceNow Store].
@@ -45,7 +45,7 @@ A CORS rule is required for communication between the Elastic and ServiceNow. To
 
 [float]
 [[servicenow-itsm-connector-update]]
-=== Update a deprecated ServiceNow ITSM connector
+==== Update a deprecated ServiceNow ITSM connector
 
 ServiceNow ITSM connectors created in 7.15 or earlier are marked as deprecated after you upgrade to 7.16. Deprecated connectors have a yellow icon after their name and display a warning message when you select them.
 
