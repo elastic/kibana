@@ -19974,7 +19974,6 @@
     "xpack.security.management.users.changePasswordFlyout.confirmButton": "{isSubmitting, select, true{パスワードを変更しています…} other{パスワードの変更}}",
     "xpack.security.management.users.changePasswordFlyout.confirmPasswordInvalidError": "パスワードが一致していません。",
     "xpack.security.management.users.changePasswordFlyout.confirmPasswordLabel": "パスワードの確認",
-    "xpack.security.management.users.changePasswordFlyout.confirmPasswordRequiredError": "パスワードが一致していません。",
     "xpack.security.management.users.changePasswordFlyout.confirmSystemPasswordButton": "{isSubmitting, select, true{パスワードを変更しています…} other{パスワードの変更}}",
     "xpack.security.management.users.changePasswordFlyout.currentPasswordInvalidError": "無効なパスワードです。",
     "xpack.security.management.users.changePasswordFlyout.currentPasswordLabel": "現在のパスワード",
