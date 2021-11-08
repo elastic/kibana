@@ -68,7 +68,6 @@ export const EndpointDetailsFlyoutTabs = memo(
     return (
       <>
         <EndpointDetailsFlyoutHeader hostname={hostname} hasBorder>
-          <EuiSpacer size="s" />
           <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
         </EndpointDetailsFlyoutHeader>
         <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">

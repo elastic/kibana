@@ -25,7 +25,7 @@ import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/end
 import { useEndpointSelector } from '../hooks';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
-import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
+import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { EndpointPolicyLink } from '../components/endpoint_policy_link';
@@ -73,7 +73,7 @@ export const EndpointDetailsContent = memo(
           title: i18n.translate('xpack.securitySolution.endpoint.details.os', {
             defaultMessage: 'OS',
           }),
-          description: <EuiText>{details.host.os.full}</EuiText>,
+          description: <EuiText size="xs">{details.host.os.full}</EuiText>,
         },
         {
           title: i18n.translate('xpack.securitySolution.endpoint.details.agentStatus', {
@@ -86,9 +86,9 @@ export const EndpointDetailsContent = memo(
             defaultMessage: 'Last Seen',
           }),
           description: (
-            <EuiText>
+            <EuiText size="xs">
               {' '}
-              <FormattedDateAndTime date={new Date(details['@timestamp'])} />
+              <FormattedDate value={details['@timestamp']} fieldName="" />
             </EuiText>
           ),
         },
@@ -99,7 +99,7 @@ export const EndpointDetailsContent = memo(
           description: (
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiText>
+                <EuiText size="xs">
                   <EndpointPolicyLink
                     policyId={details.Endpoint.policy.applied.id}
                     data-test-subj="policyDetailsValue"
@@ -146,7 +146,7 @@ export const EndpointDetailsContent = memo(
               color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}
             >
               <EuiLink onClick={policyStatusClickHandler} data-test-subj="policyStatusValue">
-                <EuiText size="m">
+                <EuiText size="xs">
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.details.policyStatusValue"
                     defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
@@ -161,7 +161,7 @@ export const EndpointDetailsContent = memo(
           title: i18n.translate('xpack.securitySolution.endpoint.details.endpointVersion', {
             defaultMessage: 'Endpoint Version',
           }),
-          description: <EuiText>{details.agent.version}</EuiText>,
+          description: <EuiText size="xs">{details.agent.version}</EuiText>,
         },
         {
           title: i18n.translate('xpack.securitySolution.endpoint.details.ipAddress', {
