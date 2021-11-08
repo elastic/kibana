@@ -32,7 +32,7 @@ const showApiKeyAndEncryptionError = () => {
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionError', {
-            defaultMessage: `Stack Monitoring alerts require API keys to be enabled and an encryption key to be configured.`,
+            defaultMessage: `Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`,
           })}
         </p>
         <EuiSpacer size="xs" />
