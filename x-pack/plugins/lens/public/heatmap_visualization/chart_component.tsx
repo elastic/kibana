@@ -16,6 +16,8 @@ import {
   HeatmapSpec,
   ScaleType,
   Settings,
+  ESFixedIntervalUnit,
+  ESCalendarIntervalUnit,
 } from '@elastic/charts';
 import type { CustomPaletteState } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../visualization_container';
@@ -172,7 +174,18 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     if (esInterval) {
       xScale = {
         type: ScaleType.Time,
-        interval: { type: esInterval.type, unit: esInterval.unit, value: esInterval.value },
+        interval:
+          esInterval.type === 'fixed'
+            ? {
+                type: 'fixed',
+                unit: esInterval.unit as ESFixedIntervalUnit,
+                value: esInterval.value,
+              }
+            : {
+                type: 'calendar',
+                unit: esInterval.unit as ESCalendarIntervalUnit,
+                value: esInterval.value,
+              },
         timeZone,
       };
     }
@@ -334,7 +347,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     brushArea: {
       stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
     },
-    timeZone,
   };
 
   if (!chartData || !chartData.length) {
