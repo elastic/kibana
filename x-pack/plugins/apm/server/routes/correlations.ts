@@ -141,16 +141,18 @@ const fieldValuePairsRoute = createApmServerRoute({
 
     const { fieldCandidates, ...params } = resources.params.body;
 
-    return withApmSpan('get_correlations_field_value_pairs', async () => ({
-      fieldValuePairs: await fetchTransactionDurationFieldValuePairs(
-        esClient,
-        {
-          ...params,
-          index: indices.transaction,
-        },
-        fieldCandidates
-      ),
-    }));
+    return withApmSpan(
+      'get_correlations_field_value_pairs',
+      async () =>
+        await fetchTransactionDurationFieldValuePairs(
+          esClient,
+          {
+            ...params,
+            index: indices.transaction,
+          },
+          fieldCandidates
+        )
+    );
   },
 });
 

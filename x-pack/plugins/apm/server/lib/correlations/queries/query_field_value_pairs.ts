@@ -15,6 +15,8 @@ import type {
 } from '../../../../common/correlations/types';
 import { TERMS_SIZE } from '../../../../common/correlations/constants';
 
+import { splitAllSettledPromises } from '../utils';
+
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
@@ -73,12 +75,14 @@ export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: CorrelationsParams,
   fieldCandidates: string[]
-): Promise<FieldValuePair[]> => {
-  const responses = await Promise.all(
-    fieldCandidates.map((fieldCandidate) =>
-      fetchTransactionDurationFieldTerms(esClient, params, fieldCandidate)
+): Promise<{ fieldValuePairs: FieldValuePair[]; errors: any[] }> => {
+  const { fulfilled: responses, rejected: errors } = splitAllSettledPromises(
+    await Promise.allSettled(
+      fieldCandidates.map((fieldCandidate) =>
+        fetchTransactionDurationFieldTerms(esClient, params, fieldCandidate)
+      )
     )
   );
 
-  return responses.flat();
+  return { fieldValuePairs: responses.flat(), errors };
 };
