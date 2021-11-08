@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { CreateRulesSchema } from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import rule22 from '../../../../../plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/command_and_control_dns_directly_to_the_internet.json';
 import { fromKueryExpression } from '../../../../../../../../../../private/var/tmp/_bazel_garrettspong/a2009d763940a925f0063278083ebbc8/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-es-query';
 import { createEventFromKueryNode } from '../../../../../plugins/security_solution/scripts/detections/create_source_event_from_query';
@@ -22,8 +23,9 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
+  const log = getService('log');
   const es = getService('es');
 
   describe('Alerts are created for all Detection Rules', () => {
@@ -43,12 +45,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
     });
 
     describe('load detection rules, generate source events from query, and verify signals', () => {
@@ -72,10 +74,10 @@ export default ({ getService }: FtrProviderContext) => {
           refresh: 'wait_for',
         });
 
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        const { id } = await createRule(supertest, log, rule as CreateRulesSchema);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         expect(signalsOpen.hits.hits.length).to.eql(1);
       });
     });

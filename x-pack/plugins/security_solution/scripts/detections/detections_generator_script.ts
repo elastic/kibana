@@ -10,6 +10,8 @@ import yargs from 'yargs';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { QueryRuleParams } from '../../server/lib/detection_engine/schemas/rule_schemas';
 import { createEventFromKueryNode } from './create_source_event_from_query';
 
 main();
@@ -27,15 +29,18 @@ async function main() {
       type: 'string',
     },
   }).argv;
-
-  let query;
-  const kqlRules = rawRules.filter((r) => r.type === 'query');
+  //
+  let query = '';
+  const rules = rawRules as unknown as Array<
+    QueryRuleParams & { rule_id: string; name: string; type: string }
+  >;
+  const kqlRules = rules.filter((r) => r.type === 'query');
   if (argv.ruleId) {
-    query = kqlRules.find((r) => r.rule_id === argv.ruleId)?.query;
+    query = kqlRules.find((r) => r.rule_id === argv.ruleId)?.query ?? '';
   }
   if (argv.ruleName) {
     console.log(argv.ruleName);
-    query = kqlRules.find((r) => r.name === argv.ruleName)?.query;
+    query = kqlRules.find((r) => r.name === argv.ruleName)?.query ?? '';
   }
 
   // DNS Activity to the Internet
