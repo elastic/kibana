@@ -60,7 +60,7 @@ To update a deprecated connector:
 . Select the deprecated connector to open the connector Edit flyout.
 . In the warning message, click *Update this connector*.
 . Complete the guided steps in the Edit connector flyout.
-.. Install Elastic for Security Operations (SecOps) from the https://store.servicenow.com/sn_appstore_store.do#!/store/home[ServiceNow Store] and complete the <<servicenow-sir-connector-prerequisites, required prerequisites>>.
+.. Install [Elastic for Security Operations (SecOps)] https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f from the ServiceNow Store and complete the <<servicenow-sir-connector-prerequisites, required prerequisites>>.
 .. Enter the URL of your ServiceNow instance.
 .. Enter the username and password of your ServiceNow instance.
 . Click *Update*.
