@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './field_icon';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-react-field'],
+};
