@@ -231,6 +231,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         isDisabled={isDateRangeInvalid}
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
+        fill={false}
         data-test-subj="querySubmitButton"
       />
     );
