@@ -77,5 +77,41 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
         export const foo2 = 'bar'
       `,
     },
+    /**
+     * Given this tree:
+     * x-pack/
+     *  - common/
+     *    - foo.ts <-- the target import
+     *    - other/
+     *      - folder/
+     *        - bar.ts <-- the linted fle
+     *
+     * import "x-pack/common/foo" should be
+     * import ../../foo
+     */
+    {
+      code: dedent`
+        import "x-pack/common/foo"
+      `,
+      filename: 'x-pack/common/other/folder/bar',
+      options: [
+        [
+          {
+            from: 'x-pack',
+            to: 'foo',
+            toRelative: 'x-pack',
+          },
+        ],
+      ],
+      errors: [
+        {
+          line: 1,
+          message: 'Imported module "x-pack/common/foo" should be "../../foo"',
+        },
+      ],
+      output: dedent`
+        import '../../foo'
+      `,
+    },
   ],
 });
