@@ -12,9 +12,9 @@ import { isEmpty, orderBy, uniq } from 'lodash';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
   const supertestAsApmReadUserWithoutMlAccess = getService(
     'legacySupertestAsApmReadUserWithoutMlAccess'
@@ -298,8 +298,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             "avgErrorRate": 0,
             "avgMemoryUsage": 0.202572668763642,
             "transactionStats": Object {
-              "avgRequestsPerMinute": 7.13333333333333,
-              "avgTransactionDuration": 53147.5747663551,
+              "avgRequestsPerMinute": 5.2,
+              "avgTransactionDuration": 53906.6603773585,
             },
           }
         `);
