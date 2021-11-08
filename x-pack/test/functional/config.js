@@ -23,7 +23,6 @@ export const dockerImage =
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
   const registryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-  console.warn('registry PORT', process.env.FLEET_PACKAGE_REGISTRY_PORT);
 
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
