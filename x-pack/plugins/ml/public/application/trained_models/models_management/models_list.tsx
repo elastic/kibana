@@ -567,6 +567,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'Type',
       }),
       sortable: true,
+      truncateText: true,
       align: 'left',
       render: (types: string[]) => (
         <EuiFlexGroup gutterSize={'xs'} wrap>
@@ -587,6 +588,7 @@ export const ModelsList: FC = () => {
       }),
       sortable: (item) => item.stats?.deployment_stats?.state,
       align: 'left',
+      truncateText: true,
       render: (model: ModelItem) => {
         const state = model.stats?.deployment_stats?.state;
         return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
