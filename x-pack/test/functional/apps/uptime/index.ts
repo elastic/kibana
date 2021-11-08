@@ -41,7 +41,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const server = getService('kibanaServer');
   const uptime = getService('uptime');
 
-  describe.only('Uptime app', function () {
+  describe('Uptime app', function () {
     this.tags('ciGroup10');
 
     beforeEach('delete settings', async () => {
@@ -62,7 +62,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./synthetics_integration'));
     });
 
-    describe.only('with generated data but no data reset', () => {
+    describe('with generated data but no data reset', () => {
       loadTestFile(require.resolve('./ping_redirects'));
     });
 
