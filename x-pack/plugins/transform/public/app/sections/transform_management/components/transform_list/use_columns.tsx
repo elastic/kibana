@@ -151,7 +151,7 @@ export const useColumns = (
             {transformId}
             &nbsp;
             <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
-              {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.managedBadgeLabel', {
+              {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
                 defaultMessage: 'Managed',
               })}
             </EuiBadge>
