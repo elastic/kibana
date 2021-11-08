@@ -12,7 +12,6 @@ import { jsx } from '@emotion/react';
 import {
   EuiButton,
   EuiFieldText,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,

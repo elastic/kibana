@@ -32,6 +32,11 @@ interface SessionViewDeps {
   sessionId: string;
 }
 
+interface MockESReturnData {
+  hits: any[]
+  length: number
+}
+
 /**
  * The main wrapper component for the session view.
  * Currently has mock data and only renders the process_tree component
@@ -80,8 +85,8 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
 
   const {
     data: getData
-  } = useQuery(['process-tree', 'process_tree'], () =>
-    http.get(INTERNAL_TEST_ROUTE, {
+  } = useQuery<MockESReturnData, Error>(['process-tree', 'process_tree'], () =>
+    http.get<MockESReturnData>(INTERNAL_TEST_ROUTE, {
       query: {
         index: 'process_tree',
       },
