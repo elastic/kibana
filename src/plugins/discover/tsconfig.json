@@ -26,6 +26,7 @@
     { "path": "../index_pattern_field_editor/tsconfig.json"},
     { "path": "../field_formats/tsconfig.json" },
     { "path": "../data_views/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" }
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/trigger_actions_ui/tsconfig.json" }
   ]
 }

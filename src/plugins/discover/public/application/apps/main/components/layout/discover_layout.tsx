@@ -45,6 +45,7 @@ import {
 } from '../../../../../saved_searches';
 import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
 import { VIEW_MODE } from '../view_mode_toggle';
+import { DiscoverAlertButton } from '../alert';
 
 /**
  * Local storage key for sidebar persistence state
@@ -262,6 +263,12 @@ export function DiscoverLayout({
                 'dscPageContent--emptyPrompt': resultState === 'none',
               })}
             >
+              {indexPattern.timeFieldName === true && (
+                <DiscoverAlertButton
+                  index={indexPattern.title}
+                  timeField={indexPattern.timeFieldName}
+                />
+              )}
               {resultState === 'none' && (
                 <DiscoverNoResults
                   timeFieldName={timeField}

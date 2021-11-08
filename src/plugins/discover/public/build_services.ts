@@ -17,6 +17,8 @@ import {
   IUiSettingsClient,
   PluginInitializerContext,
   HttpStart,
+  ApplicationStart,
+  NotificationsStart,
 } from 'kibana/public';
 import {
   FilterManager,
@@ -40,8 +42,10 @@ import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
 export interface DiscoverServices {
+  application: ApplicationStart;
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
   chrome: ChromeStart;
@@ -57,6 +61,7 @@ export interface DiscoverServices {
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
+  notifications: NotificationsStart;
   share?: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
@@ -64,6 +69,7 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   http: HttpStart;
   storage: Storage;
@@ -79,6 +85,7 @@ export function buildServices(
   const storage = new Storage(localStorage);
 
   return {
+    application: core.application,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
@@ -96,6 +103,7 @@ export function buildServices(
       branch: context.env.packageInfo.branch,
     },
     navigation: plugins.navigation,
+    notifications: core.notifications,
     share: plugins.share,
     kibanaLegacy: plugins.kibanaLegacy,
     urlForwarding: plugins.urlForwarding,
@@ -104,6 +112,7 @@ export function buildServices(
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
+    triggersActionsUi: plugins.triggersActionsUi,
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
