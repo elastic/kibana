@@ -66,12 +66,12 @@ const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
   if (statusCode === 500) {
     titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailable400500CalloutTitle', {
       defaultMessage:
-        'Kibana encounters an error connecting to the Elastic Package Registry, which provides Elastic Agent integrations.\n',
+        'Kibana cannot connect to the Elastic Package Registry, which provides Elastic Agent integrations\n',
     });
     descriptionMessage = (
       <FormattedMessage
         id="xpack.fleet.epmList.eprUnavailableCallout400500TitleMessage"
-        defaultMessage="Please ensure the {registryproxy} or {onpremregistry} is configured correctly, or try again later."
+        defaultMessage="Ensure the {registryproxy} or {onpremregistry} is configured correctly, or try again later."
         values={{
           registryproxy: <ProxyLink />,
           onpremregistry: <OnPremLink />,
@@ -81,7 +81,7 @@ const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
   } else {
     titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailableBadGatewayCalloutTitle', {
       defaultMessage:
-        'Kibana cannot reach the Elastic Package Registry, which provides Elastic Agent integrations.\n',
+        'Kibana cannot reach the Elastic Package Registry, which provides Elastic Agent integrations\n',
     });
     descriptionMessage = (
       <FormattedMessage
