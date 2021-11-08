@@ -88,6 +88,11 @@ module.exports = {
           exclude: USES_STYLED_COMPONENTS,
           disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in @kbn/dev-utils/src/babel.ts.`
         },
+        {
+          from: '@kbn/io-ts-utils',
+          to: false,
+          disallowedMessage: `Import individual io-ts-utils directly from \`@kbn/io-ts-utils/*\` submodules.`
+        },
       ],
     ],
 
