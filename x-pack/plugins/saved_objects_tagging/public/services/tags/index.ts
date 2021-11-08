@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { TagsClient, ITagInternalClient } from './tags_client';
-export { TagsCache, ITagsChangeListener, ITagsCache } from './tags_cache';
-export { isServerValidationError, TagServerValidationError } from './errors';
+export type { ITagInternalClient } from './tags_client';
+export { TagsClient } from './tags_client';
+export type { ITagsChangeListener, ITagsCache } from './tags_cache';
+export { TagsCache } from './tags_cache';
+export type { TagServerValidationError } from './errors';
+export { isServerValidationError } from './errors';
