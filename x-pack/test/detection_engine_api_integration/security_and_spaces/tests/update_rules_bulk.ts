@@ -117,8 +117,8 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const [rule1, rule2] = await Promise.all([
-          createRule(supertest, { ...getSimpleRule('rule-1'), actions: [action1] }),
-          createRule(supertest, { ...getSimpleRule('rule-2'), actions: [action1] }),
+          createRule(supertest, log, { ...getSimpleRule('rule-1'), actions: [action1] }),
+          createRule(supertest, log, { ...getSimpleRule('rule-2'), actions: [action1] }),
         ]);
         await Promise.all([
           createLegacyRuleAction(supertest, rule1.id, connector.body.id),
@@ -183,8 +183,8 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const [rule1, rule2] = await Promise.all([
-          createRule(supertest, { ...getSimpleRule('rule-1'), actions: [action1] }),
-          createRule(supertest, { ...getSimpleRule('rule-2'), actions: [action1] }),
+          createRule(supertest, log, { ...getSimpleRule('rule-1'), actions: [action1] }),
+          createRule(supertest, log, { ...getSimpleRule('rule-2'), actions: [action1] }),
         ]);
         await Promise.all([
           createLegacyRuleAction(supertest, rule1.id, connector.body.id),
