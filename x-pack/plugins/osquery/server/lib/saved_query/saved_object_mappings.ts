@@ -54,7 +54,6 @@ export const savedQueryType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
   management: {
-    defaultSearchField: 'id',
     importableAndExportable: true,
     getTitle: (savedObject) => savedObject.attributes.id,
   },
