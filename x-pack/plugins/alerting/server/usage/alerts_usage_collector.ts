@@ -50,23 +50,25 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
-const byReasonSchema: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_per_day'] = {
-  // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
-  DYNAMIC_KEY: { type: 'long' },
-  read: { type: 'long' },
-  decrypt: { type: 'long' },
-  license: { type: 'long' },
-  unknown: { type: 'long' },
-};
+const byReasonSchema: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_per_day'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: { type: 'long' },
+    read: { type: 'long' },
+    decrypt: { type: 'long' },
+    license: { type: 'long' },
+    unknown: { type: 'long' },
+  };
 
-const byReasonSchemaByType: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] = {
-  // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
-  DYNAMIC_KEY: byTypeSchema,
-  read: byTypeSchema,
-  decrypt: byTypeSchema,
-  license: byTypeSchema,
-  unknown: byTypeSchema,
-};
+const byReasonSchemaByType: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: byTypeSchema,
+    read: byTypeSchema,
+    decrypt: byTypeSchema,
+    license: byTypeSchema,
+    unknown: byTypeSchema,
+  };
 
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
