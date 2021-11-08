@@ -231,7 +231,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // From https://github.com/elastic/kibana/issues/59588 edit view became read-only json view
       // test description changed from "edit" to "inspect"
       // Skipping the test to allow code owners to delete or modify the test.
-      describe('inspect visualization', () => {
+      //
+      // FLAKY: https://github.com/elastic/kibana/issues/116048
+      describe.skip('inspect visualization', () => {
         before(async () => {
           await PageObjects.settings.navigateTo();
           await PageObjects.settings.clickKibanaSavedObjects();

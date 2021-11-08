@@ -140,7 +140,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     });
 
     lens?.navigateToPrefilledEditor(undefined, {
-      originatingApp: currentAppId!,
+      originatingApp: currentAppId,
       originatingPath,
     });
   }, [
@@ -174,7 +174,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
             }
           : undefined,
         {
-          originatingApp: currentAppId!,
+          originatingApp: currentAppId,
           originatingPath,
         }
       );
@@ -310,7 +310,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
       if (draftComment) {
         handleAdd(incomingEmbeddablePackage?.input.attributes, newTimeRange);
-        return;
       }
     }
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);
