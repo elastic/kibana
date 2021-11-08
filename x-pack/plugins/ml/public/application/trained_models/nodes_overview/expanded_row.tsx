@@ -15,12 +15,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NodeItemWithStats } from './nodes_list';
+import { NodeItem } from './nodes_list';
 import { formatToListItems } from '../models_management/expanded_row';
 import { AllocatedModels } from './allocated_models';
 
 interface ExpandedRowProps {
-  item: NodeItemWithStats;
+  item: NodeItem;
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
