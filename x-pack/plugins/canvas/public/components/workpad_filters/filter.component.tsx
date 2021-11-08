@@ -6,13 +6,17 @@
  */
 
 import React, { FC } from 'react';
-import { EuiDescriptionList, EuiPanel } from '@elastic/eui';
+import { EuiDescriptionList, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedFilterViewInstance } from '../../../types';
+
+import './filter.scss';
 
 interface Props {
   filter: FormattedFilterViewInstance;
   updateFilter?: (value: any) => void;
 }
+
+type CustomComponentProps = Omit<Props, 'filter'> & { value: string };
 
 const titleStyle = {
   width: '40%',
@@ -21,8 +25,6 @@ const titleStyle = {
 const descriptionStyle = {
   width: '60%',
 };
-
-type CustomComponentProps = Omit<Props, 'filter'> & { value: string };
 
 const renderElement = (
   Component: FC<
@@ -34,17 +36,26 @@ const renderElement = (
 };
 
 export const Filter: FC<Props> = ({ filter, ...restProps }) => {
-  const filterView = Object.values(filter).map((filterValue) => ({
-    title: filterValue.label,
-    description: filterValue.component
+  const filterView = Object.values(filter).map((filterValue) => {
+    const description = filterValue.component
       ? renderElement(filterValue.component, { value: filterValue.formattedValue, ...restProps })
-      : filterValue.formattedValue,
-  }));
+      : filterValue.formattedValue;
+
+    return {
+      title: (
+        <EuiText size="xs">
+          <h4>{filterValue.label}</h4>
+        </EuiText>
+      ),
+      description: <EuiText size="xs">{description}</EuiText>,
+    };
+  });
 
   return (
-    <EuiPanel grow={false} hasShadow={false}>
+    <EuiPanel grow={false} hasShadow={false} paddingSize="m">
       <EuiDescriptionList
         type="column"
+        className="workpadFilter"
         listItems={filterView}
         titleProps={{ style: titleStyle, className: 'eui-textBreakWord' }}
         descriptionProps={{ style: descriptionStyle, className: 'eui-textBreakWord' }}
