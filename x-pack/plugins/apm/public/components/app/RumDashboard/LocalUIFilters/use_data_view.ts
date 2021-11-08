@@ -27,6 +27,7 @@ export function useDataView() {
     if (dataView?.title) {
       return dataViews.create({
         pattern: dataView?.title,
+        title: dataView?.title,
       } as DataViewSpec);
     }
   }, [dataView?.title, dataViews]);
