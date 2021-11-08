@@ -256,7 +256,6 @@ describe('TelemetrySender', () => {
     });
 
     it('does not increase the retry counter on successful send', async () => {
-      // this now all needs to go into a new test for `sendUsageData`
       const mockTelemetryUrl = 'telemetry_cluster_url';
       const mockTelemetryPayload = ['hashed_cluster_usage_data1'];
 

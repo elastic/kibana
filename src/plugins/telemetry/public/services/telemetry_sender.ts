@@ -93,7 +93,7 @@ export class TelemetrySender {
       // ignore err and try again but after a longer wait period.
       this.retryCount = this.retryCount + 1;
       if (this.retryCount < 20) {
-        // try once again at 60s, then exponentially backoff the time between subsequent retries
+        // exponentially backoff the time between subsequent retries to up to 19 attempts, after which we give up until the next report is due
         window.setTimeout(this.sendUsageData, this.delayRetrySend());
       }
     }
