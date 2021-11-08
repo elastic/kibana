@@ -14,8 +14,12 @@ const LOCAL_STORAGE_KEY_MSG_ACK = 'xpack.observability.alert.ack.experimental.me
 
 export function AlertsDisclaimer() {
   const getCurrentExperimentalMsgAckState = () => {
-    const isExperimentalMsgAck = localStorage.getItem(LOCAL_STORAGE_KEY_MSG_ACK);
-    return isExperimentalMsgAck === 'true';
+    try {
+      const isExperimentalMsgAck = localStorage.getItem(LOCAL_STORAGE_KEY_MSG_ACK);
+      return isExperimentalMsgAck && JSON.parse(isExperimentalMsgAck) === true;
+    } catch {
+      return false;
+    }
   };
 
   const [experimentalMsgAck, setExperimentalMsgAck] = useState(getCurrentExperimentalMsgAckState);
