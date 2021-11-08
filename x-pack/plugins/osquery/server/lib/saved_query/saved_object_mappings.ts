@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { produce } from 'immer';
 import { SavedObjectsType } from '../../../../../../src/core/server';
-
 import { savedQuerySavedObjectType, packSavedObjectType } from '../../../common/types';
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
@@ -56,6 +56,11 @@ export const savedQueryType: SavedObjectsType = {
   management: {
     importableAndExportable: true,
     getTitle: (savedObject) => savedObject.attributes.id,
+    getEditUrl: (savedObject) => `/saved_queries/${savedObject.id}/edit`,
+    getInAppUrl: (savedObject) => ({
+      path: `/app/saved_queries/${savedObject.id}`,
+      uiCapabilitiesPath: 'osquery.read',
+    }),
   },
 };
 
@@ -116,6 +121,19 @@ export const packType: SavedObjectsType = {
   management: {
     defaultSearchField: 'name',
     importableAndExportable: true,
-    getTitle: (savedObject) => savedObject.attributes.name,
+    getTitle: (savedObject) => `Pack: ${savedObject.attributes.name}`,
+    getEditUrl: (savedObject) => `/packs/${savedObject.id}/edit`,
+    getInAppUrl: (savedObject) => ({
+      path: `/app/packs/${savedObject.id}`,
+      uiCapabilitiesPath: 'osquery.read',
+    }),
+    onExport: (context, objects) =>
+      produce(objects, (draft) => {
+        draft.forEach((packSO) => {
+          packSO.references = [];
+        });
+
+        return draft;
+      }),
   },
 };
