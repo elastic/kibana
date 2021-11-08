@@ -38,18 +38,19 @@ export default function ({ getService }: FtrProviderContext) {
     );
   };
 
+  const spacesSharedObjectsArchive =
+    'x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces';
+
   describe('Exports and Spaces', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces'); // multiple spaces with different config settings
+      await esArchiver.load(spacesSharedObjectsArchive); // multiple spaces with different config settings
+      await reportingAPI.initEcommerce();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces'
-      );
+      await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+      await esArchiver.unload(spacesSharedObjectsArchive);
     });
 
     describe('CSV saved search export', () => {

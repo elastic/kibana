@@ -61,7 +61,7 @@ describe('event filters selectors', () => {
     previousStateWhileLoading = previousState;
 
     // will be fixed when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error TS2345
     initialState.listPage.data = createLoadingResourceState(previousState);
   };
 
@@ -204,8 +204,8 @@ describe('event filters selectors', () => {
       expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Loading
-      // ts-ignore will be fixed when AsyncResourceState is refactored (#830)
-      // @ts-ignore
+      // will be fixed when AsyncResourceState is refactored (#830)
+      // @ts-expect-error TS2345
       initialState.listPage.dataExist = createLoadingResourceState(initialState.listPage.dataExist);
       expect(getListPageDoesDataExist(initialState)).toBe(false);
 
