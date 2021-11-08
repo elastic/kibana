@@ -158,5 +158,5 @@ export const initRoutes = (
   createSourcererDataViewRoute(router, getStartServices);
 
   // CSP Routes
-  createCSPRoutes(router);
+  createCSPRoutes(router, logger);
 };
