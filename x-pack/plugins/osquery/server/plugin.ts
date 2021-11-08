@@ -231,7 +231,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
     };
 
-    initSavedObjects(core.savedObjects, osqueryContext);
+    initSavedObjects(core.savedObjects);
     initUsageCollectors({
       core,
       osqueryContext,
