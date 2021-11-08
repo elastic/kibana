@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MockSyncContext } from '../__fixtures__/mock_sync_context';
+import { MockSyncContext } from '../../__fixtures__/mock_sync_context';
 import sinon from 'sinon';
 import url from 'url';
 
-jest.mock('../../../kibana_services', () => {
+jest.mock('../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;
@@ -20,14 +20,14 @@ jest.mock('../../../kibana_services', () => {
 import { shallow } from 'enzyme';
 
 import { Feature } from 'geojson';
-import { MVTSingleLayerVectorSource } from '../../sources/mvt_single_layer_vector_source';
+import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
 import {
   DataRequestDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
-} from '../../../../common/descriptor_types';
-import { SOURCE_TYPES } from '../../../../common/constants';
-import { TiledVectorLayer } from './tiled_vector_layer';
+} from '../../../../../common/descriptor_types';
+import { SOURCE_TYPES } from '../../../../../common/constants';
+import { MvtVectorLayer } from './mvt_vector_layer';
 
 const defaultConfig = {
   urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
@@ -41,7 +41,7 @@ function createLayer(
   sourceOptions: Partial<TiledSingleLayerVectorSourceDescriptor> = {},
   isTimeAware: boolean = false,
   includeToken: boolean = false
-): TiledVectorLayer {
+): MvtVectorLayer {
   const sourceDescriptor: TiledSingleLayerVectorSourceDescriptor = {
     type: SOURCE_TYPES.MVT_SINGLE_LAYER,
     ...defaultConfig,
@@ -76,28 +76,28 @@ function createLayer(
     ...layerOptions,
     sourceDescriptor,
   };
-  const layerDescriptor = TiledVectorLayer.createDescriptor(defaultLayerOptions);
-  return new TiledVectorLayer({ layerDescriptor, source: mvtSource });
+  const layerDescriptor = MvtVectorLayer.createDescriptor(defaultLayerOptions);
+  return new MvtVectorLayer({ layerDescriptor, source: mvtSource });
 }
 
 describe('visiblity', () => {
   it('should get minzoom from source', async () => {
-    const layer: TiledVectorLayer = createLayer({}, {});
+    const layer: MvtVectorLayer = createLayer({}, {});
     expect(layer.getMinZoom()).toEqual(4);
   });
   it('should get maxzoom from default', async () => {
-    const layer: TiledVectorLayer = createLayer({}, {});
+    const layer: MvtVectorLayer = createLayer({}, {});
     expect(layer.getMaxZoom()).toEqual(24);
   });
   it('should get maxzoom from layer options', async () => {
-    const layer: TiledVectorLayer = createLayer({ maxZoom: 10 }, {});
+    const layer: MvtVectorLayer = createLayer({ maxZoom: 10 }, {});
     expect(layer.getMaxZoom()).toEqual(10);
   });
 });
 
 describe('getCustomIconAndTooltipContent', () => {
   it('Layers with non-elasticsearch sources should display icon', async () => {
-    const layer: TiledVectorLayer = createLayer({}, {});
+    const layer: MvtVectorLayer = createLayer({}, {});
 
     const iconAndTooltipContent = layer.getCustomIconAndTooltipContent();
     const component = shallow(iconAndTooltipContent.icon);
@@ -107,7 +107,7 @@ describe('getCustomIconAndTooltipContent', () => {
 
 describe('getFeatureById', () => {
   it('should return null feature', async () => {
-    const layer: TiledVectorLayer = createLayer({}, {});
+    const layer: MvtVectorLayer = createLayer({}, {});
     const feature = layer.getFeatureById('foobar') as Feature;
     expect(feature).toEqual(null);
   });
@@ -115,7 +115,7 @@ describe('getFeatureById', () => {
 
 describe('syncData', () => {
   it('Should sync with source-params', async () => {
-    const layer: TiledVectorLayer = createLayer({}, {});
+    const layer: MvtVectorLayer = createLayer({}, {});
 
     const syncContext = new MockSyncContext({ dataFilters: {} });
 
@@ -138,7 +138,7 @@ describe('syncData', () => {
       data: { ...defaultConfig },
       dataId: 'source',
     };
-    const layer: TiledVectorLayer = createLayer(
+    const layer: MvtVectorLayer = createLayer(
       {
         __dataRequests: [dataRequestDescriptor],
       },
@@ -157,7 +157,7 @@ describe('syncData', () => {
       data: { ...defaultConfig },
       dataId: 'source',
     };
-    const layer: TiledVectorLayer = createLayer(
+    const layer: MvtVectorLayer = createLayer(
       {
         __dataRequests: [dataRequestDescriptor],
       },
@@ -187,7 +187,7 @@ describe('syncData', () => {
           data: defaultConfig,
           dataId: 'source',
         };
-        const layer: TiledVectorLayer = createLayer(
+        const layer: MvtVectorLayer = createLayer(
           {
             __dataRequests: [dataRequestDescriptor],
           },
@@ -217,7 +217,7 @@ describe('syncData', () => {
     const uuidRegex = /\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b/;
 
     it(`should add token in url`, async () => {
-      const layer: TiledVectorLayer = createLayer({}, {}, false, true);
+      const layer: MvtVectorLayer = createLayer({}, {}, false, true);
 
       const syncContext = new MockSyncContext({ dataFilters: {} });
 
