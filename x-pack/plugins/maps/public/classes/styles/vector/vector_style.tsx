@@ -91,9 +91,9 @@ export interface IVectorStyle extends IStyle {
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   isTimeAware(): boolean;
-  getIcon(): ReactElement<any>;
+  getIcon(): ReactElement;
   hasLegendDetails: () => Promise<boolean>;
-  renderLegendDetails: () => ReactElement<any>;
+  renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
   setFeatureStateAndStyleProps: (
     featureCollection: FeatureCollection,
@@ -700,7 +700,10 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  _getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
+  getIcon() {
+    const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this._getIsPointsOnly();
+    
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -729,12 +732,6 @@ export class VectorStyle implements IVectorStyle {
         fillColor={fillColor}
       />
     );
-  }
-
-  getIcon() {
-    const isLinesOnly = this._getIsLinesOnly();
-    const isPointsOnly = this._getIsPointsOnly();
-    return this._getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
   }
 
   _getLegendDetailStyleProperties = () => {

@@ -35,7 +35,7 @@ import {
 import { MVTSingleLayerVectorSourceConfig } from '../../../sources/mvt_single_layer_vector_source/types';
 import { ESSearchSource } from '../../../sources/es_search_source';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import { CustomIconAndTooltipContent } from '../../layer';
+import { LayerIcon } from '../../layer';
 
 const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
@@ -79,7 +79,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this._descriptor.__metaFromTiles || [];
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
+  getLayerIcon(): LayerIcon {
     const icon = this.getCurrentStyle().getIcon();
     if (!this.getSource().isESSource()) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources

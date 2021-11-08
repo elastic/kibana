@@ -97,14 +97,14 @@ export interface ILayer {
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+  getLayerIcon(): LayerIcon;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
   getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
   isBasemap(order: number): boolean;
 }
 
-export type CustomIconAndTooltipContent = {
+export type LayerIcon = {
   icon: ReactElement;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
@@ -243,7 +243,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
+  getLayerIcon(): LayerIcon {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };

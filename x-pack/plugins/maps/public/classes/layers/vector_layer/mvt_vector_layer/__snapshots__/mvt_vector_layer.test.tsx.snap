@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getCustomIconAndTooltipContent Layers with non-elasticsearch sources should display icon 1`] = `
+exports[`getLayerIcon Layers with non-elasticsearch sources should display icon 1`] = `
 <PolygonIcon
   style={
     Object {

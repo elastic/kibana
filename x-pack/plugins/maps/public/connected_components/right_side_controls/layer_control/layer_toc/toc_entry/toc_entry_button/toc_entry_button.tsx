@@ -100,7 +100,7 @@ export class TOCEntryButton extends Component<Props, State> {
         values: { minZoom, maxZoom },
       });
     } else {
-      const customIconAndTooltipContent = this.props.layer.getCustomIconAndTooltipContent();
+      const customIconAndTooltipContent = this.props.layer.getLayerIcon();
       if (customIconAndTooltipContent) {
         icon = customIconAndTooltipContent.icon;
         if (!customIconAndTooltipContent.areResultsTrimmed) {
