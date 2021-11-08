@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { BrowserField } from '../../../containers/source';
 import { OverflowField } from '../../tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
@@ -24,6 +25,14 @@ export interface FieldValueCellProps {
   values: string[] | null | undefined;
 }
 
+const EuiFlexItemMaxWidth100 = euiStyled(EuiFlexItem)`
+  max-width: 100%;
+`;
+
+const EuiFlexGroupMaxWidth100 = euiStyled(EuiFlexGroup)`
+  max-width: 100%;
+`;
+
 export const FieldValueCell = React.memo(
   ({
     contextId,
@@ -36,7 +45,7 @@ export const FieldValueCell = React.memo(
     values,
   }: FieldValueCellProps) => {
     return (
-      <EuiFlexGroup
+      <EuiFlexGroupMaxWidth100
         alignItems="flexStart"
         data-test-subj={`event-field-${data.field}`}
         direction="column"
@@ -46,15 +55,15 @@ export const FieldValueCell = React.memo(
           values.map((value, i) => {
             if (fieldFromBrowserField == null) {
               return (
-                <EuiFlexItem grow={false} key={`${i}-${value}`}>
+                <EuiFlexItemMaxWidth100 grow={false} key={`${i}-${value}`}>
                   <EuiText size="xs" key={`${i}-${value}`}>
                     {value}
                   </EuiText>
-                </EuiFlexItem>
+                </EuiFlexItemMaxWidth100>
               );
             }
             return (
-              <EuiFlexItem
+              <EuiFlexItemMaxWidth100
                 className="eventFieldsTable__fieldValue"
                 grow={false}
                 key={`${i}-${value}`}
@@ -74,10 +83,10 @@ export const FieldValueCell = React.memo(
                     linkValue={(getLinkValue && getLinkValue(data.field)) ?? linkValue}
                   />
                 )}
-              </EuiFlexItem>
+              </EuiFlexItemMaxWidth100>
             );
           })}
-      </EuiFlexGroup>
+      </EuiFlexGroupMaxWidth100>
     );
   }
 );
