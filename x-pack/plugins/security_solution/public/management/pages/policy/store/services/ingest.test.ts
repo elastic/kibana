@@ -12,7 +12,12 @@ import {
   sendGetEndpointSpecificPackagePolicies,
 } from './ingest';
 import { httpServiceMock } from '../../../../../../../../../src/core/public/mocks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../fleet/common';
+import {
+  EPM_API_ROUTES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_API_ROOT,
+  PACKAGE_POLICY_API_ROUTES,
+} from '../../../../../../../fleet/common';
 import { policyListApiPathHandlers } from '../test_mock_utils';
 
 describe('ingest service', () => {
@@ -25,7 +30,7 @@ describe('ingest service', () => {
   describe('sendGetEndpointSpecificPackagePolicies()', () => {
     it('auto adds kuery to api request', async () => {
       await sendGetEndpointSpecificPackagePolicies(http);
-      expect(http.get).toHaveBeenCalledWith('/api/fleet/package_policies', {
+      expect(http.get).toHaveBeenCalledWith(`${PACKAGE_POLICY_API_ROUTES.LIST_PATTERN}`, {
         query: {
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         },
@@ -35,7 +40,7 @@ describe('ingest service', () => {
       await sendGetEndpointSpecificPackagePolicies(http, {
         query: { kuery: 'someValueHere', page: 1, perPage: 10 },
       });
-      expect(http.get).toHaveBeenCalledWith('/api/fleet/package_policies', {
+      expect(http.get).toHaveBeenCalledWith(`${PACKAGE_POLICY_API_ROUTES.LIST_PATTERN}`, {
         query: {
           kuery: `someValueHere and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           perPage: 10,
@@ -48,11 +53,11 @@ describe('ingest service', () => {
   describe('sendGetPackagePolicy()', () => {
     it('builds correct API path', async () => {
       await sendGetPackagePolicy(http, '123');
-      expect(http.get).toHaveBeenCalledWith('/api/fleet/package_policies/123', undefined);
+      expect(http.get).toHaveBeenCalledWith(`${PACKAGE_POLICY_API_ROOT}/123`, undefined);
     });
     it('supports http options', async () => {
       await sendGetPackagePolicy(http, '123', { query: { page: 1 } });
-      expect(http.get).toHaveBeenCalledWith('/api/fleet/package_policies/123', {
+      expect(http.get).toHaveBeenCalledWith(`${PACKAGE_POLICY_API_ROOT}/123`, {
         query: {
           page: 1,
         },
@@ -66,7 +71,7 @@ describe('ingest service', () => {
         Promise.resolve(policyListApiPathHandlers()[INGEST_API_EPM_PACKAGES]())
       );
       await sendGetEndpointSecurityPackage(http);
-      expect(http.get).toHaveBeenCalledWith('/api/fleet/epm/packages', {
+      expect(http.get).toHaveBeenCalledWith(`${EPM_API_ROUTES.LIST_PATTERN}`, {
         query: { category: 'security' },
       });
     });
