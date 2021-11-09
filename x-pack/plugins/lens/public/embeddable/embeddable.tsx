@@ -513,10 +513,11 @@ export class Embeddable
     if (isLensEditEvent(event) && this.onEditAction) {
       if (!this.savedVis) return;
 
-      this.savedVis.state.visualization = this.onEditAction(
-        this.savedVis.state.visualization,
-        event
-      );
+      // have to dance since this.savedVis.state is readonly
+      const newVis = JSON.parse(JSON.stringify(this.savedVis));
+      newVis.state.visualization = this.onEditAction(newVis.state.visualization, event);
+      this.savedVis = newVis as Document;
+
       const { expression, errors } = await getExpressionFromDocument(
         this.savedVis,
         this.deps.documentToExpression
