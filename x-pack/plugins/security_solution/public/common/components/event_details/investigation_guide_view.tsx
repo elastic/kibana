@@ -25,7 +25,9 @@ const InvestigationGuideViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
 }> = ({ data }) => {
   const ruleId = useMemo(() => {
-    const item = data.find((d) => d.field === 'signal.rule.id');
+    const item = data.find(
+      (d) => d.field === 'signal.rule.id' || d.field === 'kibana.alert.rule.id'
+    );
     return Array.isArray(item?.originalValue)
       ? item?.originalValue[0]
       : item?.originalValue ?? null;

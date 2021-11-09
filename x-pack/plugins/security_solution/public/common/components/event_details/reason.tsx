@@ -33,15 +33,17 @@ export const ReasonComponent: React.FC<Props> = ({ eventId, data }) => {
   const { navigateToApp } = useKibana().services.application;
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
-  const reason = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.reason' }, data),
-    [data]
-  );
+  const reason = useMemo(() => {
+    const siemSignalsReason = getFieldValue({ category: 'signal', field: 'signal.reason' }, data);
+    const aadReason = getFieldValue({ category: 'kibana', field: 'kibana.alert.reason' }, data);
+    return aadReason.length > 0 ? aadReason : siemSignalsReason;
+  }, [data]);
 
-  const ruleId = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data),
-    [data]
-  );
+  const ruleId = useMemo(() => {
+    const siemSignalsRuleId = getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data);
+    const aadRuleId = getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data);
+    return aadRuleId.length > 0 ? aadRuleId : siemSignalsRuleId;
+  }, [data]);
 
   if (!eventId) {
     return <EuiTextColor color="subdued">{EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;

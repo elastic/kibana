@@ -38,6 +38,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               id,
               name: tactic,
               kqlQuery: '',
+              // TODO: fix below ref?
               queryMatch: {
                 field: 'signal.rule.threat.tactic.name',
                 value: tactic,

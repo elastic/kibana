@@ -46,6 +46,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
 
     switch (columnId) {
       case 'signal.rule.severity':
+      case 'kibana.alert.rule.severity':
         return (
           <DefaultDraggable
             data-test-subj="custom-severity"
@@ -57,6 +58,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
           </DefaultDraggable>
         );
       case 'signal.reason':
+      case 'kibana.alert.reason':
         return <TruncatableText data-test-subj="custom-reason">{reason}</TruncatableText>;
       default:
         return (

@@ -350,7 +350,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={'sortRight'} />
                 </EuiFlexItem>
-                <EuiFlexItem>{'signal.rule.risk_score'}</EuiFlexItem>
+                <EuiFlexItem>{'kibana.alert.rule.risk_score'}</EuiFlexItem>
               </EuiFlexGroup>
             ),
           };

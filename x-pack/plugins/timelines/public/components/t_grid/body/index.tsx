@@ -152,9 +152,10 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
 const FIELDS_WITHOUT_CELL_ACTIONS = [
   '@timestamp',
   'signal.rule.risk_score',
+  'kibana.alert.rule.risk_score',
   'signal.reason',
-  'kibana.alert.duration.us',
   'kibana.alert.reason',
+  'kibana.alert.duration.us',
 ];
 const hasCellActions = (columnId?: string) =>
   columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;

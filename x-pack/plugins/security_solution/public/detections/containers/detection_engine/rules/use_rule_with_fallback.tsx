@@ -46,7 +46,17 @@ const useFetchRule = () => useAsync(fetchWithOptionslSignal);
 const buildLastAlertQuery = (ruleId: string) => ({
   query: {
     bool: {
-      filter: [{ match: { 'signal.rule.id': ruleId } }],
+      filter: [
+        {
+          bool: {
+            should: [
+              { match: { 'signal.rule.id': ruleId } },
+              { match: { 'kibana.alert.rule.uuid': ruleId } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ],
     },
   },
   size: 1,

@@ -9,7 +9,7 @@ import moment from 'moment';
 import React from 'react';
 
 import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
-import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
@@ -48,14 +48,18 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
       })?.reduce((x) => x[0]) ?? '';
 
     switch (columnId) {
-      case ALERT_STATUS:
+      case ALERT_WORKFLOW_STATUS:
+      case 'signal.status':
         return (
           <Status data-test-subj="alert-status" status={random(0, 1) ? 'recovered' : 'active'} />
         );
       case ALERT_DURATION:
+      case 'signal.alert.duration.us':
         return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
-      case 'signal.rule.severity':
+      case 'kibana.alert.rule.severity':
+      case 'signal.alert.rule.severity':
         return <Severity data-test-subj="rule-severity" severity={value} />;
+      case 'kibana.alert.reason':
       case 'signal.reason':
         return (
           <EuiLink data-test-subj="reason">

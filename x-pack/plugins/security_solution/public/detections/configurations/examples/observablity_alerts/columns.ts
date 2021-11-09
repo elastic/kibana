@@ -48,6 +48,6 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
-    id: 'signal.reason',
+    id: 'kibana.alert.reason',
   },
 ];

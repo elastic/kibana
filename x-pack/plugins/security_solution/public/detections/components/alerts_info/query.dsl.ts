@@ -27,7 +27,10 @@ export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
                 ...queryFilter,
                 {
                   bool: {
-                    should: [{ match: { 'signal.rule.id': ruleId } }],
+                    should: [
+                      { match: { 'signal.rule.id': ruleId } },
+                      { match: { 'kibana.alert.rule.uuid': ruleId } },
+                    ],
                     minimum_should_match: 1,
                   },
                 },

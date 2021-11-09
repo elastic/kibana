@@ -145,7 +145,7 @@ export const prepareExceptionItemsForBulkClose = (
         return {
           ...itemEntry,
           field: itemEntry.field.startsWith('event.')
-            ? itemEntry.field.replace(/^event./, 'signal.original_event.')
+            ? itemEntry.field.replace(/^event./, 'kibana.alert.original_event.')
             : itemEntry.field,
         };
       });
