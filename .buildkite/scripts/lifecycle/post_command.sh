@@ -24,12 +24,12 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'x-pack/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload '.es/**/*.hprof'
 
-  if (env.CODE_COVERAGE) {
+  if [[ "$CODE_COVERAGE" == "1" ]]; then
     sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
     buildkite-agent artifact upload 'kibana-coverage.tar.gz'
-  } else {
+  else
     buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
-  }
+  fi
 
   echo "--- Run Failed Test Reporter"
   node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'
