@@ -111,7 +111,7 @@ Metrics::
 * Adds track_total_hits to Metric Threshold query to support alerts with over 10K documents {kibana-pull}115465[#115465]
 Uptime::
 * TLS and TLS legacy alert translation mismatch {kibana-pull}116113[#116113]
-Osquery Managger::
+Osquery Manager::
 * Fixes the bug that caused the live query search to return irrelevant results for agents {kibana-pull}116332[#116332]
 * Improves Osquery SQL query parser logic {kibana-pull}114932[#114932]
 
@@ -127,7 +127,7 @@ Breaking changes can prevent your application from optimal operation and perform
 
 To review the breaking changes in previous versions, refer to the following:
 
-{kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] |
 {kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] |
 {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] |
 {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
