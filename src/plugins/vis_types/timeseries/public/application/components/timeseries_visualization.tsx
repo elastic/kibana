@@ -16,6 +16,7 @@ import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { PersistedState } from 'src/plugins/visualizations/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 
+import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
 import { isVisTableData } from '../../../common/vis_data_utils';
@@ -155,12 +156,8 @@ function TimeseriesVisualization({
   const [firstSeries] =
     (isVisTableData(visData) ? visData.series : visData[model.id]?.series) ?? [];
 
-  if (!VisComponent || !palettesService || indexPattern === null) {
-    return (
-      <div className="visChart__spinner">
-        <EuiLoadingChart mono size="l" />
-      </div>
-    );
+  if (!VisComponent || palettesService === null || indexPattern === null) {
+    return <TimeseriesLoading />;
   }
 
   return (
