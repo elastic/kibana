@@ -169,11 +169,9 @@ export const EndpointDetailsContent = memo(
           }),
           description: (
             <EuiListGroup flush>
-              <EuiText size="xs">
-                {details.host.ip.map((ip: string, index: number) => (
-                  <HostIds key={index} label={ip} />
-                ))}
-              </EuiText>
+              {details.host.ip.map((ip: string, index: number) => (
+                <HostIds size="xs" key={index} label={ip} />
+              ))}
             </EuiListGroup>
           ),
         },
