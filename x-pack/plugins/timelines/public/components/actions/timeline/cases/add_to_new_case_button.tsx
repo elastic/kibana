@@ -18,6 +18,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
 }) => {
   const { addNewCaseClick, isDisabled, userCanCrud } = useAddToCase({
@@ -25,6 +26,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     useInsertTimeline,
     casePermissions,
     appId,
+    owner,
     onClose,
   });
 
@@ -33,7 +35,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       {userCanCrud && (
         <EuiContextMenuItem
           aria-label={ariaLabel}
-          data-test-subj="attach-alert-to-case-button"
+          data-test-subj="add-new-case-item"
           onClick={addNewCaseClick}
           // needs forced size="s" since it is lazy loaded and the EuiContextMenuPanel can not initialize the size
           size="s"

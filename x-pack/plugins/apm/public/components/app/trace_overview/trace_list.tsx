@@ -20,7 +20,7 @@ import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 
-type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
+type TraceGroup = APIReturnType<'GET /internal/apm/traces'>['items'][0];
 
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};

@@ -251,7 +251,7 @@ export const resolve = async (
     }
 
     const {
-      saved_object: savedObject,
+      saved_object: resolvedSavedObject,
       ...resolveData
     }: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase({
       unsecuredSavedObjectsClient,
@@ -262,8 +262,8 @@ export const resolve = async (
       operation: Operations.resolveCase,
       entities: [
         {
-          id: savedObject.id,
-          owner: savedObject.attributes.owner,
+          id: resolvedSavedObject.id,
+          owner: resolvedSavedObject.attributes.owner,
         },
       ],
     });
@@ -272,7 +272,7 @@ export const resolve = async (
     if (ENABLE_CASE_CONNECTOR) {
       const subCasesForCaseId = await caseService.findSubCasesByCaseId({
         unsecuredSavedObjectsClient,
-        ids: [id],
+        ids: [resolvedSavedObject.id],
       });
       subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
     }
@@ -281,7 +281,7 @@ export const resolve = async (
       return CaseResolveResponseRt.encode({
         ...resolveData,
         case: flattenCaseSavedObject({
-          savedObject,
+          savedObject: resolvedSavedObject,
           subCaseIds,
         }),
       });
@@ -289,7 +289,7 @@ export const resolve = async (
 
     const theComments = await caseService.getAllCaseComments({
       unsecuredSavedObjectsClient,
-      id,
+      id: resolvedSavedObject.id,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',
@@ -300,11 +300,11 @@ export const resolve = async (
     return CaseResolveResponseRt.encode({
       ...resolveData,
       case: flattenCaseSavedObject({
-        savedObject,
+        savedObject: resolvedSavedObject,
         subCaseIds,
         comments: theComments.saved_objects,
         totalComment: theComments.total,
-        totalAlerts: countAlertsForID({ comments: theComments, id }),
+        totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
       }),
     });
   } catch (error) {

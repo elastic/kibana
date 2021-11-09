@@ -71,7 +71,7 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
+          endpoint: 'GET /internal/apm/services/{serviceName}/metadata/icons',
           params: {
             path: { serviceName },
             query: { start, end },
@@ -87,7 +87,7 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
       if (selectedIconPopover && serviceName && start && end) {
         return callApmApi({
           isCachable: true,
-          endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
+          endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
           params: {
             path: { serviceName },
             query: { start, end },

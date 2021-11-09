@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
-import { XOR } from './common';
+import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
+import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import type { XOR } from './common';
+import type { DeploymentState } from '../constants/trained_models';
 
 export interface IngestStats {
   count: number;
@@ -17,8 +18,8 @@ export interface IngestStats {
 }
 
 export interface TrainedModelStat {
-  model_id: string;
-  pipeline_count: number;
+  model_id?: string;
+  pipeline_count?: number;
   inference_stats?: {
     failure_count: number;
     inference_count: number;
@@ -44,6 +45,7 @@ export interface TrainedModelStat {
       }
     >;
   };
+  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
 }
 
 type TreeNode = object;
@@ -95,9 +97,13 @@ export interface TrainedModelConfigResponse {
     model_aliases?: string[];
   } & Record<string, unknown>;
   model_id: string;
+  model_type: 'tree_ensemble' | 'pytorch' | 'lang_ident';
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
   pipelines?: Record<string, PipelineDefinition> | null;
 }
 
@@ -116,4 +122,94 @@ export interface ModelPipelines {
  */
 export interface InferenceConfigResponse {
   trained_model_configs: TrainedModelConfigResponse[];
+}
+
+export interface TrainedModelDeploymentStatsResponse {
+  model_id: string;
+  model_size_bytes: number;
+  inference_threads: number;
+  model_threads: number;
+  state: DeploymentState;
+  allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
+  nodes: Array<{
+    node: Record<
+      string,
+      {
+        transport_address: string;
+        roles: string[];
+        name: string;
+        attributes: {
+          'ml.machine_memory': string;
+          'xpack.installed': string;
+          'ml.max_open_jobs': string;
+          'ml.max_jvm_size': string;
+        };
+        ephemeral_id: string;
+      }
+    >;
+    inference_count: number;
+    routing_state: { routing_state: string };
+    average_inference_time_ms: number;
+    last_access: number;
+  }>;
+}
+
+export interface AllocatedModel {
+  inference_threads: number;
+  allocation_status: {
+    target_allocation_count: number;
+    state: string;
+    allocation_count: number;
+  };
+  model_id: string;
+  state: string;
+  model_threads: number;
+  model_size_bytes: number;
+  node: {
+    average_inference_time_ms: number;
+    inference_count: number;
+    routing_state: {
+      routing_state: string;
+      reason?: string;
+    };
+    last_access?: number;
+  };
+}
+
+export interface NodeDeploymentStatsResponse {
+  id: string;
+  name: string;
+  transport_address: string;
+  attributes: Record<string, string>;
+  roles: string[];
+  allocated_models: AllocatedModel[];
+  memory_overview: {
+    machine_memory: {
+      /** Total machine memory in bytes */
+      total: number;
+      jvm: number;
+    };
+    /** Open anomaly detection jobs + hardcoded overhead */
+    anomaly_detection: {
+      /** Total size in bytes */
+      total: number;
+    };
+    /** DFA jobs currently in training + hardcoded overhead */
+    dfa_training: {
+      total: number;
+    };
+    /** Allocated trained models */
+    trained_models: {
+      total: number;
+      by_model: Array<{
+        model_id: string;
+        model_size: number;
+      }>;
+    };
+  };
+}
+
+export interface NodesOverviewResponse {
+  count: number;
+  nodes: NodeDeploymentStatsResponse[];
 }

@@ -11,12 +11,12 @@ const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const { REPO_ROOT } = require('@kbn/utils');
-
 const UiSharedDepsNpm = require('./src/index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
+
+const REPO_ROOT = Path.resolve(__dirname, '..', '..');
 
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
@@ -38,20 +38,41 @@ module.exports = (_, argv) => {
         'whatwg-fetch',
         'symbol-observable',
 
+        /**
+         * babel runtime helpers referenced from entry chunks
+         * determined by running:
+         *
+         *  node scripts/build_kibana_platform_plugins --dist --profile
+         *  node scripts/find_babel_runtime_helpers_in_use.js
+         */
+        '@babel/runtime/helpers/assertThisInitialized',
+        '@babel/runtime/helpers/classCallCheck',
+        '@babel/runtime/helpers/classPrivateFieldGet',
+        '@babel/runtime/helpers/classPrivateFieldSet',
+        '@babel/runtime/helpers/createSuper',
+        '@babel/runtime/helpers/defineProperty',
+        '@babel/runtime/helpers/extends',
+        '@babel/runtime/helpers/inherits',
+        '@babel/runtime/helpers/interopRequireDefault',
+        '@babel/runtime/helpers/interopRequireWildcard',
+        '@babel/runtime/helpers/objectSpread2',
+        '@babel/runtime/helpers/objectWithoutPropertiesLoose',
+        '@babel/runtime/helpers/slicedToArray',
+        '@babel/runtime/helpers/toArray',
+        '@babel/runtime/helpers/toConsumableArray',
+        '@babel/runtime/helpers/typeof',
+        '@babel/runtime/helpers/wrapNativeSuper',
+
         // modules from npm
         '@elastic/charts',
-        '@elastic/datemath',
         '@elastic/eui',
         '@elastic/eui/dist/eui_charts_theme',
         '@elastic/eui/lib/services',
         '@elastic/eui/lib/services/format',
-        '@elastic/eui/dist/eui_theme_light.json',
-        '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/eui/dist/eui_theme_amsterdam_light.json',
         '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
         '@elastic/numeral',
         '@emotion/react',
-        'angular',
         'classnames',
         'fflate',
         'history',
@@ -73,8 +94,6 @@ module.exports = (_, argv) => {
         'styled-components',
         'tslib',
       ],
-      'kbn-ui-shared-deps-npm.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
-      'kbn-ui-shared-deps-npm.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
       'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
       'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
     },

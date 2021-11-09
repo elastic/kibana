@@ -45,17 +45,14 @@ export const CreateEditField = withRouter(
             name: undefined,
           } as unknown as IndexPatternField);
 
-    const url = `/patterns/${indexPattern.id}`;
+    const url = `/dataView/${indexPattern.id}`;
 
     if (mode === 'edit' && !spec) {
-      const message = i18n.translate(
-        'indexPatternManagement.editIndexPattern.scripted.noFieldLabel',
-        {
-          defaultMessage:
-            "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
-          values: { indexPatternTitle: indexPattern.title, fieldName },
-        }
-      );
+      const message = i18n.translate('indexPatternManagement.editDataView.scripted.noFieldLabel', {
+        defaultMessage:
+          "'{dataViewTitle}' data view doesn't have a scripted field called '{fieldName}'",
+        values: { dataViewTitle: indexPattern.title, fieldName },
+      });
       notifications.toasts.addWarning(message);
       history.push(url);
     }

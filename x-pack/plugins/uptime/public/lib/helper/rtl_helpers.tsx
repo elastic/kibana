@@ -29,6 +29,7 @@ import { stringifyUrlParams } from './stringify_url_params';
 import { ClientPluginsStart } from '../../apps/plugin';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -82,7 +83,7 @@ const createMockStore = () => {
 const mockAppUrls: Record<string, string> = {
   uptime: '/app/uptime',
   observability: '/app/observability',
-  '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
+  '/integrations/detail/synthetics/overview': '/integrations/detail/synthetics/overview',
 };
 
 /* default mock core */
@@ -129,9 +130,13 @@ export function MockKibanaProvider<ExtraCore>({
   };
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
-      <EuiThemeProvider darkMode={false}>
-        <I18nProvider>{children}</I18nProvider>
-      </EuiThemeProvider>
+      <UptimeRefreshContextProvider>
+        <UptimeStartupPluginsContextProvider data={(coreOptions as any).data}>
+          <EuiThemeProvider darkMode={false}>
+            <I18nProvider>{children}</I18nProvider>
+          </EuiThemeProvider>
+        </UptimeStartupPluginsContextProvider>
+      </UptimeRefreshContextProvider>
     </KibanaContextProvider>
   );
 }

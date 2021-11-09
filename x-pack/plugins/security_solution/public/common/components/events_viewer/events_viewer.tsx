@@ -11,6 +11,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { useDispatch } from 'react-redux';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
@@ -30,12 +32,7 @@ import {
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -123,7 +120,7 @@ interface Props {
   headerFilterGroup?: React.ReactNode;
   id: TimelineId;
   indexNames: string[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;
@@ -133,6 +130,7 @@ interface Props {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  runtimeMappings: MappingRuntimeFields;
   start: string;
   sort: Sort[];
   showTotalCount?: boolean;
@@ -162,6 +160,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   query,
   renderCellValue,
   rowRenderers,
+  runtimeMappings,
   start,
   sort,
   showTotalCount = true,
@@ -236,10 +235,11 @@ const EventsViewerComponent: React.FC<Props> = ({
     useTimelineEvents({
       docValueFields,
       fields,
-      filterQuery: combinedQueries!.filterQuery,
+      filterQuery: combinedQueries?.filterQuery,
       id,
       indexNames,
       limit: itemsPerPage,
+      runtimeMappings,
       sort: sortField,
       startDate: start,
       endDate: end,
@@ -300,7 +300,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-              isInspectDisabled={combinedQueries!.filterQuery === undefined}
+              isInspectDisabled={combinedQueries?.filterQuery === undefined}
             >
               {HeaderSectionContent}
             </HeaderSection>

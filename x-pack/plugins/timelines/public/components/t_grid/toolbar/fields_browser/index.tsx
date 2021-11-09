@@ -34,6 +34,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   timelineId,
   columnHeaders,
   browserFields,
+  createFieldComponent,
   width,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -100,7 +101,9 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
                   (selected, category) =>
                     newFilteredBrowserFields[category].fields != null &&
                     newFilteredBrowserFields[selected].fields != null &&
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     Object.keys(newFilteredBrowserFields[category].fields!).length >
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       Object.keys(newFilteredBrowserFields[selected].fields!).length
                       ? category
                       : selected,
@@ -138,6 +141,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       {show && (
         <FieldsBrowser
           browserFields={browserFieldsWithDefaultCategory}
+          createFieldComponent={createFieldComponent}
           columnHeaders={columnHeaders}
           filteredBrowserFields={
             filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory

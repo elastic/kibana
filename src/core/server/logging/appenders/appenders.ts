@@ -10,10 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { assertNever } from '@kbn/std';
 import { DisposableAppender } from '@kbn/logging';
 
-import {
-  LegacyAppender,
-  LegacyAppenderConfig,
-} from '../../legacy/logging/appenders/legacy_appender';
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender, ConsoleAppenderConfig } from './console/console_appender';
 import { FileAppender, FileAppenderConfig } from './file/file_appender';
@@ -32,7 +28,6 @@ import {
 export const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
-  LegacyAppender.configSchema,
   RewriteAppender.configSchema,
   RollingFileAppender.configSchema,
 ]);
@@ -41,7 +36,6 @@ export const appendersSchema = schema.oneOf([
 export type AppenderConfigType =
   | ConsoleAppenderConfig
   | FileAppenderConfig
-  | LegacyAppenderConfig
   | RewriteAppenderConfig
   | RollingFileAppenderConfig;
 
@@ -64,8 +58,6 @@ export class Appenders {
         return new RewriteAppender(config);
       case 'rolling-file':
         return new RollingFileAppender(config);
-      case 'legacy-appender':
-        return new LegacyAppender(config.legacyLoggingConfig);
 
       default:
         return assertNever(config);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 /**
  * Retrieves the count of documents in a given index
@@ -23,9 +23,12 @@ export const getIndexCount = async ({
   esClient: ElasticsearchClient;
   index: string;
 }): Promise<number> => {
-  const response = await esClient.count<{ count: number }>({
-    index,
-  });
+  const response = await esClient.count<{ count: number }>(
+    {
+      index,
+    },
+    { meta: true }
+  );
 
   return response.body.count;
 };

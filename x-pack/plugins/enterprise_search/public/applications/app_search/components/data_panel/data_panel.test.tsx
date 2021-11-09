@@ -34,7 +34,11 @@ describe('DataPanel', () => {
 
     wrapper.setProps({ children: 'hello world' });
 
-    expect(wrapper.find(EuiSpacer)).toHaveLength(1);
+    expect(wrapper.find(EuiSpacer).prop('size')).toEqual('s');
+
+    wrapper.setProps({ filled: true });
+
+    expect(wrapper.find(EuiSpacer).prop('size')).toEqual('l');
   });
 
   describe('components', () => {

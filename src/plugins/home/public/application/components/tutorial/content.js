@@ -8,19 +8,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Markdown } from '../../../../../kibana_react/public';
-
-const whiteListedRules = ['backticks', 'emphasis', 'link', 'list'];
+import { EuiMarkdownFormat } from '@elastic/eui';
 
 export function Content({ text }) {
-  return (
-    <Markdown
-      className="euiText"
-      markdown={text}
-      openLinksInNewTab={true}
-      whiteListedRules={whiteListedRules}
-    />
-  );
+  return <EuiMarkdownFormat>{text}</EuiMarkdownFormat>;
 }
 
 Content.propTypes = {

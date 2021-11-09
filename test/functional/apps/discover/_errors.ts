@@ -12,7 +12,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const toasts = getService('toasts');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
     before(async function () {
@@ -31,6 +32,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toast = await toasts.getToastElement(1);
         const painlessStackTrace = await toast.findByTestSubject('painlessStackTrace');
         expect(painlessStackTrace).not.to.be(undefined);
+      });
+    });
+
+    describe('not found', () => {
+      it('should redirect to main page when trying to access invalid route', async () => {
+        await PageObjects.common.navigateToUrl('discover', '#/invalid-route', {
+          useActualUrl: true,
+        });
+        await PageObjects.header.awaitKibanaChrome();
+
+        const invalidLink = await testSubjects.find('invalidRouteMessage');
+        expect(await invalidLink.getVisibleText()).to.be(
+          `Discover application doesn't recognize this route: /invalid-route`
+        );
       });
     });
   });

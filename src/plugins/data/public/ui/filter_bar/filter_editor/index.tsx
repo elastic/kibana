@@ -9,8 +9,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
-  EuiCodeEditor,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,6 +31,7 @@ import {
 } from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
+import { XJsonLang } from '@kbn/monaco';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -47,6 +46,7 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { getIndexPatternFromFilter } from '../../../query';
 import { IIndexPattern, IFieldType } from '../../..';
+import { CodeEditor } from '../../../../../kibana_react/public';
 
 export interface Props {
   filter: Filter;
@@ -328,13 +328,16 @@ class FilterEditorUI extends Component<Props, State> {
           defaultMessage: 'Elasticsearch Query DSL',
         })}
       >
-        <EuiCodeEditor
+        <CodeEditor
+          languageId={XJsonLang.ID}
+          width="100%"
+          height={'250px'}
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
-          mode="json"
-          width="100%"
-          height="250px"
           data-test-subj="customEditorInput"
+          aria-label={i18n.translate('data.filter.filterEditor.queryDslAriaLabel', {
+            defaultMessage: 'Elasticsearch Query DSL editor',
+          })}
         />
       </EuiFormRow>
     );

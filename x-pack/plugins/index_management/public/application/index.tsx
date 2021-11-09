@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 
 import { CoreStart, CoreSetup } from '../../../../../src/core/public';
 
@@ -93,4 +93,5 @@ const useKibana = () => {
   return useKibanaReactPlugin<KibanaReactContextServices>();
 };
 
-export { AppDependencies, useKibana };
+export type { AppDependencies };
+export { useKibana };

@@ -6,19 +6,19 @@
  */
 
 import _ from 'lodash';
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { MigrationDeprecationInfoResponse } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getESUpgradeStatus } from './es_deprecations_status';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
-const asApiResponse = <T>(body: T): RequestEvent<T> =>
+const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
     body,
-  } as RequestEvent<T>);
+  } as TransportResult<T>);
 
 describe('getESUpgradeStatus', () => {
   const resolvedIndices = {
@@ -32,12 +32,31 @@ describe('getESUpgradeStatus', () => {
   };
 
   // @ts-expect-error mock data is too loosely typed
-  const deprecationsResponse: MigrationDeprecationInfoResponse = _.cloneDeep(fakeDeprecations);
+  const deprecationsResponse: estypes.MigrationDeprecationsResponse = _.cloneDeep(fakeDeprecations);
 
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
 
   esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
     asApiResponse(deprecationsResponse)
+  );
+
+  esClient.asCurrentUser.transport.request.mockResolvedValue(
+    asApiResponse({
+      features: [
+        {
+          feature_name: 'machine_learning',
+          minimum_index_version: '7.1.1',
+          migration_status: 'MIGRATION_NEEDED',
+          indices: [
+            {
+              index: '.ml-config',
+              version: '7.1.1',
+            },
+          ],
+        },
+      ],
+      migration_status: 'MIGRATION_NEEDED',
+    })
   );
 
   // @ts-expect-error not full interface of response
@@ -85,5 +104,31 @@ describe('getESUpgradeStatus', () => {
       'totalCriticalDeprecations',
       0
     );
+  });
+
+  it('filters out system indices returned by upgrade system indices API', async () => {
+    esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      asApiResponse({
+        cluster_settings: [],
+        node_settings: [],
+        ml_settings: [],
+        index_settings: {
+          '.ml-config': [
+            {
+              level: 'critical',
+              message: 'Index created before 7.0',
+              url: 'https://',
+              details: '...',
+              resolve_during_rolling_upgrade: false,
+            },
+          ],
+        },
+      })
+    );
+
+    const upgradeStatus = await getESUpgradeStatus(esClient);
+
+    expect(upgradeStatus.deprecations).toHaveLength(0);
+    expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 });

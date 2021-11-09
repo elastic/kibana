@@ -8,7 +8,6 @@
 
 import type { EventEmitter } from 'events';
 import type { History } from 'history';
-
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import type {
@@ -38,13 +37,15 @@ import type {
 import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import type { Query, Filter, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import type { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
+import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import type { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import type { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
+import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 import type { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../../usage_collection/public';
+import type { SavedSearch } from '../../../discover/public';
 
 import { PureVisState } from '../../common/types';
 
@@ -94,7 +95,6 @@ export interface VisualizeServices extends CoreStart {
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   visualizations: VisualizationsStart;
   savedObjectsPublic: SavedObjectsStart;
-  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   restorePreviousUrl: () => void;
@@ -105,22 +105,18 @@ export interface VisualizeServices extends CoreStart {
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
+  spaces?: SpacesPluginStart;
 }
 
-export interface SavedVisInstance {
+export interface VisInstance {
   vis: Vis;
   savedVis: VisSavedObject;
-  savedSearch?: SavedObject;
+  savedSearch?: SavedSearch;
   embeddableHandler: VisualizeEmbeddableContract;
 }
 
-export interface ByValueVisInstance {
-  vis: Vis;
-  savedVis: VisSavedObject;
-  savedSearch?: SavedObject;
-  embeddableHandler: VisualizeEmbeddableContract;
-}
-
+export type SavedVisInstance = VisInstance;
+export type ByValueVisInstance = VisInstance;
 export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
 
 export type VisEditorConstructor<TVisParams = VisParams> = new (
@@ -141,7 +137,7 @@ export interface EditorRenderProps {
   filters: Filter[];
   timeRange: TimeRange;
   query?: Query;
-  savedSearch?: SavedObject;
+  savedSearch?: SavedSearch;
   uiState: PersistedState;
   /**
    * Flag to determine if visualiztion is linked to the saved search
@@ -149,4 +145,4 @@ export interface EditorRenderProps {
   linked: boolean;
 }
 
-export { PureVisState };
+export type { PureVisState };

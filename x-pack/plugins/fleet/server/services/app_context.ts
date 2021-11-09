@@ -22,7 +22,7 @@ import type {
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
 
-import type { SecurityPluginStart } from '../../../security/server';
+import type { SecurityPluginStart, SecurityPluginSetup } from '../../../security/server';
 import type { FleetConfigType } from '../../common';
 import type {
   ExternalCallback,
@@ -33,13 +33,15 @@ import type {
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { CloudSetup } from '../../../cloud/server';
+import type { TelemetryEventsSender } from '../telemetry/sender';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
-  private security: SecurityPluginStart | undefined;
+  private securitySetup: SecurityPluginSetup | undefined;
+  private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
@@ -50,13 +52,15 @@ class AppContextService {
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
+  private telemetryEventsSender: TelemetryEventsSender | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
-    this.security = appContext.security;
+    this.securitySetup = appContext.securitySetup;
+    this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
@@ -64,6 +68,7 @@ class AppContextService {
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
+    this.telemetryEventsSender = appContext.telemetryEventsSender;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -92,14 +97,21 @@ class AppContextService {
   }
 
   public getSecurity() {
-    if (!this.security) {
+    if (!this.hasSecurity()) {
       throw new Error('Security service not set.');
     }
-    return this.security;
+    return this.securityStart!;
+  }
+
+  public getSecurityLicense() {
+    if (!this.hasSecurity()) {
+      throw new Error('Security service not set.');
+    }
+    return this.securitySetup!.license;
   }
 
   public hasSecurity() {
-    return !!this.security;
+    return !!this.securitySetup && !!this.securityStart;
   }
 
   public getCloud() {
@@ -193,6 +205,10 @@ class AppContextService {
           : PutPackagePolicyUpdateCallback
       >;
     }
+  }
+
+  public getTelemetryEventsSender() {
+    return this.telemetryEventsSender;
   }
 }
 

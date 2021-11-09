@@ -34,7 +34,6 @@ describe('Actions Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,
@@ -253,7 +252,6 @@ describe('Actions Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,

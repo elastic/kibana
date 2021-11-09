@@ -12,12 +12,15 @@ import {
   EuiFlexGroup,
   EuiFormRow,
   EuiFieldPassword,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { IErrorObject } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { nullableString } from './email_connector';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface ExchangeFormFieldsProps {
   action: EmailActionConnector;
@@ -34,6 +37,7 @@ const ExchangeFormFields: React.FunctionComponent<ExchangeFormFieldsProps> = ({
   errors,
   readOnly,
 }) => {
+  const { docLinks } = useKibana().services;
   const { tenantId, clientId } = action.config;
   const { clientSecret } = action.secrets;
 
@@ -61,6 +65,14 @@ const ExchangeFormFields: React.FunctionComponent<ExchangeFormFieldsProps> = ({
                 defaultMessage: 'Tenant ID',
               }
             )}
+            helpText={
+              <EuiLink href={docLinks.links.alerting.emailExchangeClientIdConfig} target="_blank">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.email.exchangeForm.tenantIdHelpLabel"
+                  defaultMessage="Configure Tenant ID"
+                />
+              </EuiLink>
+            }
           >
             <EuiFieldText
               fullWidth
@@ -69,6 +81,7 @@ const ExchangeFormFields: React.FunctionComponent<ExchangeFormFieldsProps> = ({
               data-test-subj="emailTenantId"
               readOnly={readOnly}
               value={tenantId || ''}
+              placeholder={'00000000-0000-0000-0000-000000000000'}
               onChange={(e) => {
                 editActionConfig('tenantId', nullableString(e.target.value));
               }}
@@ -92,6 +105,14 @@ const ExchangeFormFields: React.FunctionComponent<ExchangeFormFieldsProps> = ({
                 defaultMessage: 'Client ID',
               }
             )}
+            helpText={
+              <EuiLink href={docLinks.links.alerting.emailExchangeClientIdConfig} target="_blank">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.email.exchangeForm.clientIdHelpLabel"
+                  defaultMessage="Configure Client ID"
+                />
+              </EuiLink>
+            }
           >
             <EuiFieldText
               fullWidth
@@ -99,6 +120,7 @@ const ExchangeFormFields: React.FunctionComponent<ExchangeFormFieldsProps> = ({
               name="clientId"
               data-test-subj="emailClientId"
               readOnly={readOnly}
+              placeholder={'00000000-0000-0000-0000-000000000000'}
               value={clientId || ''}
               onChange={(e) => {
                 editActionConfig('clientId', nullableString(e.target.value));
@@ -136,6 +158,17 @@ const ExchangeFormFields: React.FunctionComponent<ExchangeFormFieldsProps> = ({
                 defaultMessage: 'Client Secret',
               }
             )}
+            helpText={
+              <EuiLink
+                href={docLinks.links.alerting.emailExchangeClientSecretConfig}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.email.exchangeForm.clientSecretHelpLabel"
+                  defaultMessage="Configure Client Secret"
+                />
+              </EuiLink>
+            }
           >
             <EuiFieldPassword
               fullWidth
