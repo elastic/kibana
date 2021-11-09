@@ -47,7 +47,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.indexSettings.resolutionTooltipLabel',
     {
       defaultMessage:
-        'Resolve this deprecation by removing settings from this index. This is an automated resolution.',
+        'Resolve this issue by removing settings from this index. This issue can be resolved automatically.',
     }
   ),
 };
