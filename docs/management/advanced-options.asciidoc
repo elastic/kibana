@@ -388,7 +388,7 @@ A custom image to use in the footer of the PDF.
 
 [horizontal]
 [[rollups-enabledataviews]]`rollups:enableDataViews`::
-Enables the creation of data Views that capture rollup indices, which in
+Enables the creation of data views that capture rollup indices, which in
 turn enables visualizations based on rollup data. Refresh the page to apply the
 changes.
 
