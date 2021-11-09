@@ -18,12 +18,8 @@ import { SetupPlugins } from '../../../../../plugin';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import {
-  buildFrameworkRequest,
-  CustomBadRequestError,
-  escapeHatch,
-  throwErrors,
-} from '../../../utils/common';
+import { CustomBadRequestError } from '../../../../../utils/custom_bad_request_error';
+import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/common';
 import { getAllTimeline } from '../../../saved_object/timelines';
 import { getTimelinesQuerySchema } from '../../../schemas/timelines';
 
@@ -43,7 +39,7 @@ export const getTimelinesRoute = (
       },
     },
     async (context, request, response) => {
-      const customBadRequestError = new CustomBadRequestError('bad request error').get;
+      const customBadRequestError = (message: string) => new CustomBadRequestError(message);
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const queryParams = pipe(

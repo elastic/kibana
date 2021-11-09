@@ -24,7 +24,7 @@ import { getAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { CustomBadRequestError } from '../../timeline/utils/common';
+import { CustomBadRequestError } from '../../../utils/custom_bad_request_error';
 
 let rulesClient: ReturnType<typeof rulesClientMock.create>;
 

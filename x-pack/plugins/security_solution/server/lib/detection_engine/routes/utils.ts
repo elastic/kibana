@@ -19,7 +19,7 @@ import { RulesClient } from '../../../../../alerting/server';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 import { RuleParams } from '../schemas/rule_schemas';
-import { CustomBadRequestError } from '../../timeline/utils/common';
+import { CustomBadRequestError } from '../../../utils/custom_bad_request_error';
 
 export interface OutputError {
   message: string;
