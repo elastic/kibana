@@ -14,6 +14,7 @@ import type { ChromeStart } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface BreadcrumbsContext {
+  originalParents: BreadcrumbProps[];
   parents: BreadcrumbProps[];
   onMount(breadcrumbs: BreadcrumbProps[]): void;
   onUnmount(breadcrumbs: BreadcrumbProps[]): void;
@@ -91,6 +92,7 @@ export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = 
   return (
     <BreadcrumbsContext.Provider
       value={{
+        originalParents: [],
         parents: [],
         onMount: (breadcrumbs) => {
           if (breadcrumbs.length > breadcrumbsRef.current.length) {
@@ -119,8 +121,14 @@ export const InnerBreadcrumb: FunctionComponent<InnerBreadcrumbProps> = ({
   breadcrumb,
   children,
 }) => {
-  const { parents, onMount, onUnmount } = useContext(BreadcrumbsContext)!;
-  const nextParents = [...parents, breadcrumb];
+  const { originalParents, parents, onMount, onUnmount } = useContext(BreadcrumbsContext)!;
+  const nextOriginalParents = [...originalParents, breadcrumb];
+  const nextParents = [...parents, breadcrumb].map((item, index) => {
+    if (index === nextOriginalParents.length - 1) {
+      return { ...item, href: undefined };
+    }
+    return { ...item, href: nextOriginalParents[index].href };
+  });
 
   useEffect(() => {
     onMount(nextParents);
@@ -128,7 +136,9 @@ export const InnerBreadcrumb: FunctionComponent<InnerBreadcrumbProps> = ({
   }, [breadcrumb.text, breadcrumb.href]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <BreadcrumbsContext.Provider value={{ parents: nextParents, onMount, onUnmount }}>
+    <BreadcrumbsContext.Provider
+      value={{ originalParents: nextOriginalParents, parents: nextParents, onMount, onUnmount }}
+    >
       {children}
     </BreadcrumbsContext.Provider>
   );

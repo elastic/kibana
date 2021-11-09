@@ -54,7 +54,7 @@ export const spacesManagementApp = Object.freeze({
         chrome.docTitle.change(title);
 
         const SpacesGridPageWithBreadcrumbs = () => {
-          setBreadcrumbs(spacesBreadcrumbs);
+          setBreadcrumbs([{ text: title }]);
           return (
             <SpacesGridPage
               capabilities={application.capabilities}
@@ -74,7 +74,6 @@ export const spacesManagementApp = Object.freeze({
               text: i18n.translate('xpack.spaces.management.createSpaceBreadcrumb', {
                 defaultMessage: 'Create',
               }),
-              href: '/create',
             },
           ]);
 
@@ -97,7 +96,6 @@ export const spacesManagementApp = Object.freeze({
               ...spacesBreadcrumbs,
               {
                 text: space.name,
-                href: `/edit/${encodeURIComponent(space.id)}`,
               },
             ]);
           };
