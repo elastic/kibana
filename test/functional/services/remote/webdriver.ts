@@ -32,6 +32,7 @@ import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
+import { NETWORK_PROFILES } from './network_profiles';
 
 const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
 const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
@@ -288,20 +289,22 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
-    const latency: number = +(process.env.KBN_TEST_NETWORK_LATENCY ?? 100);
-    const downloadThroughput: number = +(process.env.KBN_TEST_DOWNLOAD_THROUGHPUT ?? 1024 * 5); // 5120 bytes
-    const uploadThroughput: number = +(process.env.KBN_TEST_UPLOAD_THROUGHPUT ?? 1024); // 1024 bytes
+    const {
+      DOWNLOAD: downloadThroughput,
+      UPLOAD: uploadThroughput,
+      LATENCY: latency,
+    } = NETWORK_PROFILES[process.env.KBN_NETWORK_TEST_PROFILE ?? 'DEFAULT'];
 
     // Only chrome supports this option.
     log.debug(
-      `NETWORK THROTTLED: ${downloadThroughput}k down, ${uploadThroughput}k up, ${latency} latency.`
+      `NETWORK THROTTLED: ${downloadThroughput}kb/s down, ${uploadThroughput}kb/s up, ${latency} ms latency.`
     );
 
     (session as any).setNetworkConditions({
       offline: false,
-      latency, // Additional latency (ms).
-      download_throughput: downloadThroughput * 1024, // These speeds are in bites per second, not kilobytes.
-      upload_throughput: uploadThroughput * 1024,
+      latency,
+      download_throughput: downloadThroughput,
+      upload_throughput: uploadThroughput,
     });
   }
 
