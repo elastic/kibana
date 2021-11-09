@@ -21,7 +21,14 @@ interface Props {
   symbolId?: string;
 }
 
-export function VectorIcon({ borderStyle = {}, fillColor, isPointsOnly, isLinesOnly, strokeColor, symbolId }: Props) {
+export function VectorIcon({
+  borderStyle = {},
+  fillColor,
+  isPointsOnly,
+  isLinesOnly,
+  strokeColor,
+  symbolId,
+}: Props) {
   if (isLinesOnly) {
     const style = {
       stroke: strokeColor,

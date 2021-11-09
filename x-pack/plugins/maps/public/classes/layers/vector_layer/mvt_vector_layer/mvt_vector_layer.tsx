@@ -345,7 +345,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
         ['==', ['get', ES_MVT_HITS_TOTAL_RELATION], 'gte'],
         ['>=', ['get', ES_MVT_HITS_TOTAL_VALUE], maxResultWindow + 1],
       ]);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', this.getCurrentStyle().getPrimaryColor());
+      mbMap.setPaintProperty(
+        tooManyFeaturesLayerId,
+        'line-color',
+        this.getCurrentStyle().getPrimaryColor()
+      );
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 3);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());

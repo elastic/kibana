@@ -702,17 +702,16 @@ export class VectorStyle implements IVectorStyle {
   }
 
   getPrimaryColor() {
-    const primaryColorKey = this._getIsLinesOnly() ? VECTOR_STYLES.LINE_COLOR : VECTOR_STYLES.FILL_COLOR;
-    return extractColorFromStyleProperty(
-      this._descriptor.properties[primaryColorKey],
-      'grey'
-    );
+    const primaryColorKey = this._getIsLinesOnly()
+      ? VECTOR_STYLES.LINE_COLOR
+      : VECTOR_STYLES.FILL_COLOR;
+    return extractColorFromStyleProperty(this._descriptor.properties[primaryColorKey], 'grey');
   }
 
   getIcon(areResultsTrimmed) {
     const isLinesOnly = this._getIsLinesOnly();
     const isPointsOnly = this._getIsPointsOnly();
-    
+
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
