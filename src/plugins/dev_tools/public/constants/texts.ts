@@ -10,19 +10,19 @@ import { i18n } from '@kbn/i18n';
 
 export const i18Texts = {
   breadcrumbs: {
-    home: i18n.translate('xpack.devtools.breadcrumb.homeLabel', {
+    home: i18n.translate('devTools.breadcrumb.homeLabel', {
       defaultMessage: 'Dev Tools',
     }),
-    console: i18n.translate('xpack.upgradeAssistant.breadcrumb.consoleLabel', {
+    console: i18n.translate('devTools.breadcrumb.consoleLabel', {
       defaultMessage: 'Console',
     }),
-    searchProfiler: i18n.translate('xpack.upgradeAssistant.breadcrumb.searchProfilerLabel', {
+    searchprofiler: i18n.translate('devTools.breadcrumb.searchProfilerLabel', {
       defaultMessage: 'Search Profiler',
     }),
-    grokDebugger: i18n.translate('xpack.upgradeAssistant.breadcrumb.grokDebuggerLabel', {
+    grokdebugger: i18n.translate('devTools.breadcrumb.grokDebuggerLabel', {
       defaultMessage: 'Grok Debugger',
     }),
-    painlessLab: i18n.translate('xpack.upgradeAssistant.breadcrumb.painlessLabLabel', {
+    painless_lab: i18n.translate('devTools.breadcrumb.painlessLabLabel', {
       defaultMessage: 'Painless Lab',
     }),
   },

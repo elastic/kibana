@@ -44,7 +44,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
     });
 
     const devTool = devTools.register({
-      id: 'painlessLab',
+      id: 'painless_lab',
       order: 7,
       title: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

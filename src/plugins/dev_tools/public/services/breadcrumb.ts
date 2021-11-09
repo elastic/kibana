@@ -19,21 +19,22 @@ export class BreadcrumbService {
       href?: string;
     }>;
   } = {
+    home: [{ text: i18Texts.breadcrumbs.home }],
     console: [
       { text: i18Texts.breadcrumbs.home, href: '#/' },
       { text: i18Texts.breadcrumbs.console },
     ],
-    searchProfiler: [
+    searchprofiler: [
       { text: i18Texts.breadcrumbs.home, href: '#/' },
-      { text: i18Texts.breadcrumbs.searchProfiler },
+      { text: i18Texts.breadcrumbs.searchprofiler },
     ],
-    grokDebugger: [
+    grokdebugger: [
       { text: i18Texts.breadcrumbs.home, href: '#/' },
-      { text: i18Texts.breadcrumbs.grokDebugger },
+      { text: i18Texts.breadcrumbs.grokdebugger },
     ],
-    painlessLab: [
+    painless_lab: [
       { text: i18Texts.breadcrumbs.home, href: '#/' },
-      { text: i18Texts.breadcrumbs.painlessLab },
+      { text: i18Texts.breadcrumbs.painless_lab },
     ],
   };
 

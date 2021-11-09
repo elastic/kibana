@@ -2306,8 +2306,6 @@
     "devTools.badge.readOnly.text": "只读",
     "devTools.badge.readOnly.tooltip": "无法保存",
     "devTools.devToolsTitle": "开发工具",
-    "devTools.k7BreadcrumbsDevToolsLabel": "开发工具",
-    "devTools.pageTitle": "开发工具",
     "discover.advancedSettings.context.defaultSizeText": "要在上下文视图中显示的周围条目数目",
     "discover.advancedSettings.context.defaultSizeTitle": "上下文大小",
     "discover.advancedSettings.context.sizeStepText": "递增或递减上下文大小的步进大小",

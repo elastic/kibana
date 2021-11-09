@@ -2284,8 +2284,6 @@
     "devTools.badge.readOnly.text": "読み取り専用",
     "devTools.badge.readOnly.tooltip": "を保存できませんでした",
     "devTools.devToolsTitle": "開発ツール",
-    "devTools.k7BreadcrumbsDevToolsLabel": "開発ツール",
-    "devTools.pageTitle": "開発ツール",
     "discover.advancedSettings.context.defaultSizeText": "コンテキストビューに表示される周りのエントリーの数",
     "discover.advancedSettings.context.defaultSizeTitle": "コンテキストサイズ",
     "discover.advancedSettings.context.sizeStepText": "コンテキストサイズを増減させる際の最低単位です",
