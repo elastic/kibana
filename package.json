@@ -62,7 +62,8 @@
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
     "storybook": "node scripts/storybook",
     "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html",
-    "cover:functional:merge": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report/functional --reporter=json-summary"
+    "cover:functional:merge": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report/functional --reporter=json-summary",
+    "postinstall": "node scripts/kbn patch_native_modules"
   },
   "repository": {
     "type": "git",
@@ -139,6 +140,7 @@
     "@kbn/logging": "link:bazel-bin/packages/kbn-logging",
     "@kbn/mapbox-gl": "link:bazel-bin/packages/kbn-mapbox-gl",
     "@kbn/monaco": "link:bazel-bin/packages/kbn-monaco",
+    "@kbn/react-field": "link:bazel-bin/packages/kbn-react-field",
     "@kbn/rule-data-utils": "link:bazel-bin/packages/kbn-rule-data-utils",
     "@kbn/securitysolution-autocomplete": "link:bazel-bin/packages/kbn-securitysolution-autocomplete",
     "@kbn/securitysolution-es-utils": "link:bazel-bin/packages/kbn-securitysolution-es-utils",
