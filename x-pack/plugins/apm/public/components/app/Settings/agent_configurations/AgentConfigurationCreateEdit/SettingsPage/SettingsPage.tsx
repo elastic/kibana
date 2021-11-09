@@ -31,8 +31,8 @@ import {
   settingDefinitions,
   validateSetting,
 } from '../../../../../../../common/agent_configuration/setting_definitions';
-import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
-import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+import { useKibanaServicesContext } from '../../../../../../context/kibana_services/use_kibana_services_context';
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './saveConfig';
 import { SettingFormRow } from './SettingFormRow';
@@ -63,7 +63,7 @@ export function SettingsPage({
   const history = useHistory();
   // get a telemetry UI event tracker
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const { toasts } = useApmPluginContext().core.notifications;
+  const { toasts } = useKibanaServicesContext().notifications;
   const [isSaving, setIsSaving] = useState(false);
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;

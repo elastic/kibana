@@ -18,15 +18,15 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../../hooks/use_theme';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
+import { useKibanaServicesContext } from '../../../../../context/kibana_services/use_kibana_services_context';
 
 type Config =
   APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
@@ -42,8 +42,8 @@ export function AgentConfigurationList({
   configurations,
   refetch,
 }: Props) {
-  const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const { application } = useKibanaServicesContext();
+  const canSave = application.capabilities.apm.save;
   const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null

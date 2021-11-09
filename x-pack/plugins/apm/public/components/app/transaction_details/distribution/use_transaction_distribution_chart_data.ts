@@ -14,7 +14,6 @@ import { RawSearchStrategyClientParams } from '../../../../../common/search_stra
 import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
 
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -24,6 +23,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { TransactionDistributionChartData } from '../../../shared/charts/transaction_distribution_chart';
 
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 function hasRequiredParams(params: RawSearchStrategyClientParams) {
   const { serviceName, environment, start, end } = params;
@@ -33,9 +33,7 @@ function hasRequiredParams(params: RawSearchStrategyClientParams) {
 export const useTransactionDistributionChartData = () => {
   const { serviceName, transactionType } = useApmServiceContext();
 
-  const {
-    core: { notifications },
-  } = useApmPluginContext();
+  const { notifications } = useKibanaServicesContext();
 
   const { urlParams } = useLegacyUrlParams();
   const { transactionName } = urlParams;

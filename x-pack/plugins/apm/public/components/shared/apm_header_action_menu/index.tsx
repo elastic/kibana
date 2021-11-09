@@ -15,12 +15,13 @@ import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 export function ApmHeaderActionMenu() {
-  const { core, pluginsSetup } = useApmPluginContext();
+  const { application, http } = useKibanaServicesContext();
+  const { pluginsSetup } = useApmPluginContext();
   const serviceName = useServiceName();
   const { search } = window.location;
-  const { application, http } = core;
   const { basePath } = http;
   const { capabilities } = application;
   const canAccessML = !!capabilities.ml?.canAccessML;

@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import type { NotificationsStart } from 'kibana/public';
 import moment from 'moment';
 import { useLocalStorage } from '../../../../hooks/useLocalStorage';
 import { SchemaOverview } from './schema_overview';
@@ -17,7 +17,7 @@ import {
   callApmApi,
   APIReturnType,
 } from '../../../../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 type FleetMigrationCheckResponse =
   APIReturnType<'GET /internal/apm/fleet/migration_check'>;
@@ -34,7 +34,7 @@ export function Schema() {
       APM_DATA_STREAMS_MIGRATION_STATUS_LS
     );
 
-  const { toasts } = useApmPluginContext().core.notifications;
+  const { toasts } = useKibanaServicesContext().notifications;
   const [isSwitchActive, setIsSwitchActive] = useState(false);
   const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);
   const [unsupportedConfigs, setUnsupportedConfigs] = useState<

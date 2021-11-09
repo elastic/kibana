@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 export const Breadcrumb = ({
   title,
@@ -17,9 +17,7 @@ export const Breadcrumb = ({
   href: string;
   children: React.ReactElement;
 }) => {
-  const {
-    services: { http },
-  } = useKibana();
+  const { http } = useKibanaServicesContext();
   useBreadcrumb({ title, href: http.basePath.prepend('/app/apm' + href) });
 
   return children;

@@ -14,7 +14,7 @@ import { enableInspectEsQueries } from '../../../../../../observability/common/u
 import { useInspectorContext } from '../../../../../../observability/public';
 
 export function UxInspectorHeaderLink() {
-  const { inspector } = useApmPluginContext();
+  const { inspector } = useApmPluginContext().pluginsStart;
   const { inspectorAdapters } = useInspectorContext();
   const {
     services: { uiSettings },

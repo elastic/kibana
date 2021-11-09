@@ -21,10 +21,10 @@ import {
   isJRubyAgent,
   isRumAgentName,
 } from '../../../../../common/agent_name';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { useKibanaConfigContext } from '../../../../context/kibana_config/use_kibana_config_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -155,7 +155,7 @@ export function isJVMsTabHidden({
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config } = useApmPluginContext();
+  const { profilingEnabled } = useKibanaConfigContext();
 
   const router = useApmRouter();
 
@@ -267,7 +267,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         },
         query,
       }),
-      hidden: !config.profilingEnabled,
+      hidden: !profilingEnabled,
       label: (
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiFlexItem>

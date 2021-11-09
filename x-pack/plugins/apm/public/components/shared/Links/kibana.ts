@@ -5,34 +5,30 @@
  * 2.0.
  */
 
-import { IBasePath } from '../../../../../../../src/core/public';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import type { IBasePath } from '../../../../../../../src/core/public';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 export function getUpgradeAssistantHref(basePath: IBasePath) {
   return basePath.prepend('/app/management/stack/upgrade_assistant');
 }
 
 export function useUpgradeAssistantHref() {
-  const { core } = useApmPluginContext();
+  const { http } = useKibanaServicesContext();
 
-  return getUpgradeAssistantHref(core.http.basePath);
+  return getUpgradeAssistantHref(http.basePath);
 }
 
 export function useFleetCloudAgentPolicyHref() {
   const {
-    core: {
-      http: { basePath },
-    },
-  } = useApmPluginContext();
+    http: { basePath },
+  } = useKibanaServicesContext();
   return basePath.prepend('/app/fleet#/policies/policy-elastic-agent-on-cloud');
 }
 
 export function useUpgradeApmPackagePolicyHref(packagePolicyId = '') {
   const {
-    core: {
-      http: { basePath },
-    },
-  } = useApmPluginContext();
+    http: { basePath },
+  } = useKibanaServicesContext();
   return basePath.prepend(
     `/app/fleet/policies/policy-elastic-agent-on-cloud/upgrade-package-policy/${packagePolicyId}?from=integrations-policy-list`
   );

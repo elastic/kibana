@@ -7,11 +7,11 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import type { NotificationsStart } from 'kibana/public';
 import React, { useState } from 'react';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../../../../hooks/use_theme';
+import { useKibanaServicesContext } from '../../../../../../context/kibana_services/use_kibana_services_context';
 
 interface Props {
   onDelete: () => void;
@@ -20,7 +20,7 @@ interface Props {
 
 export function DeleteButton({ onDelete, customLinkId }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const { toasts } = useApmPluginContext().core.notifications;
+  const { toasts } = useKibanaServicesContext().notifications;
   const theme = useTheme();
 
   return (

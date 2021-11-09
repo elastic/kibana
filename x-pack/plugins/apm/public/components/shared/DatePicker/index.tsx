@@ -10,9 +10,10 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 import { clearCache } from '../../../services/rest/callApi';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { TimePickerQuickRange } from './typings';
+import type { TimePickerQuickRange } from './typings';
 
 export function DatePicker({
   rangeFrom,
@@ -29,9 +30,10 @@ export function DatePicker({
 }) {
   const history = useHistory();
   const location = useLocation();
-  const { core, pluginsSetup } = useApmPluginContext();
+  const { uiSettings } = useKibanaServicesContext();
+  const { pluginsSetup } = useApmPluginContext();
 
-  const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
+  const timePickerQuickRanges = uiSettings.get<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
   );
 

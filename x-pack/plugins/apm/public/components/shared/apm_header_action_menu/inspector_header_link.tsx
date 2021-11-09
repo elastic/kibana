@@ -8,20 +8,18 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   enableInspectEsQueries,
   useInspectorContext,
 } from '../../../../../observability/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 export function InspectorHeaderLink() {
   const { inspector } = useApmPluginContext().pluginsStart;
   const { inspectorAdapters } = useInspectorContext();
-  const {
-    services: { uiSettings },
-  } = useKibana();
-  const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
+  const { uiSettings } = useKibanaServicesContext();
+  const isInspectorEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const inspect = () => {
     inspector.open(inspectorAdapters);

@@ -8,14 +8,13 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import type { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route as ReactRouterRoute } from 'react-router-dom';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -29,8 +28,7 @@ import {
 } from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
-import { ConfigSchema } from '../index';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticDataView } from '../services/rest/data_view';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
@@ -39,7 +37,6 @@ import {
   InspectorContextProvider,
   useBreadcrumbs,
 } from '../../../observability/public';
-import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
 export const uxRoutes: APMRouteDefinition[] = [
@@ -51,11 +48,10 @@ export const uxRoutes: APMRouteDefinition[] = [
   },
 ];
 
-function UxApp() {
+function UxApp({ coreStart }: { coreStart: CoreStart }) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  const { core } = useApmPluginContext();
-  const basePath = core.http.basePath.get();
+  const basePath = coreStart.http.basePath.get();
 
   useBreadcrumbs([
     {
@@ -95,47 +91,38 @@ const uxRouter = createRouter([]);
 
 export function UXAppRoot({
   appMountParameters,
-  core,
-  deps,
-  config,
-  corePlugins: { embeddable, inspector, maps, observability, data },
-  observabilityRuleTypeRegistry,
+  coreStart,
+  pluginsSetup,
+  pluginsStart,
 }: {
   appMountParameters: AppMountParameters;
-  core: CoreStart;
-  deps: ApmPluginSetupDeps;
-  config: ConfigSchema;
-  corePlugins: ApmPluginStartDeps;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  coreStart: CoreStart;
+  pluginsSetup: ApmPluginSetupDeps;
+  pluginsStart: ApmPluginStartDeps;
 }) {
   const { history } = appMountParameters;
-  const i18nCore = core.i18n;
-  const plugins = { ...deps, maps };
+  const i18nCore = coreStart.i18n;
+  const { embeddable, data } = pluginsStart;
   const apmPluginContextValue = {
-    appMountParameters,
-    config,
-    core,
-    inspector,
-    plugins,
-    observability,
-    observabilityRuleTypeRegistry,
+    pluginsSetup,
+    pluginsStart,
   };
 
   return (
     <RedirectAppLinks
       className={APP_WRAPPER_CLASS}
-      application={core.application}
+      application={coreStart.application}
     >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider
-          services={{ ...core, ...plugins, embeddable, data }}
+          services={{ ...coreStart, ...pluginsStart, embeddable, data }}
         >
           <i18nCore.Context>
             <RouterProvider history={history} router={uxRouter}>
               <InspectorContextProvider>
                 <UrlParamsProvider>
                   <EuiErrorBoundary>
-                    <UxApp />
+                    <UxApp coreStart={coreStart} />
                   </EuiErrorBoundary>
                   <UXActionMenu appMountParameters={appMountParameters} />
                 </UrlParamsProvider>
@@ -153,23 +140,19 @@ export function UXAppRoot({
  */
 
 export const renderApp = ({
-  core,
-  deps,
   appMountParameters,
-  config,
-  corePlugins,
-  observabilityRuleTypeRegistry,
+  coreStart,
+  pluginsSetup,
+  pluginsStart,
 }: {
-  core: CoreStart;
-  deps: ApmPluginSetupDeps;
   appMountParameters: AppMountParameters;
-  config: ConfigSchema;
-  corePlugins: ApmPluginStartDeps;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  coreStart: CoreStart;
+  pluginsSetup: ApmPluginSetupDeps;
+  pluginsStart: ApmPluginStartDeps;
 }) => {
   const { element } = appMountParameters;
 
-  createCallApmApi(core);
+  createCallApmApi(coreStart);
 
   // Automatically creates static data view and stores as saved object
   createStaticDataView().catch((e) => {
@@ -180,11 +163,9 @@ export const renderApp = ({
   ReactDOM.render(
     <UXAppRoot
       appMountParameters={appMountParameters}
-      core={core}
-      deps={deps}
-      config={config}
-      corePlugins={corePlugins}
-      observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+      coreStart={coreStart}
+      pluginsSetup={pluginsSetup}
+      pluginsStart={pluginsStart}
     />,
     element
   );

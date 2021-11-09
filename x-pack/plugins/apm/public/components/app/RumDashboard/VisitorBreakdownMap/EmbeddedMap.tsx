@@ -148,8 +148,8 @@ export function EmbeddedMapComponent() {
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        const basemapLayerDescriptor = apmPluginContext.plugins.maps
-          ? await apmPluginContext.plugins.maps.createLayerDescriptors.createBasemapLayerDescriptor()
+        const basemapLayerDescriptor = apmPluginContext.pluginsStart.maps
+          ? await apmPluginContext.pluginsStart.maps.createLayerDescriptors.createBasemapLayerDescriptor()
           : null;
         if (basemapLayerDescriptor) {
           layerList.unshift(basemapLayerDescriptor);

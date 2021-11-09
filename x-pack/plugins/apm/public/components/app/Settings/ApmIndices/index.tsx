@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import type { CoreStart } from '../../../../../../../../src/core/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { clearCache } from '../../../../services/rest/callApi';
 import {
@@ -93,8 +94,8 @@ type ApiResponse =
 const INITIAL_STATE: ApiResponse = { apmIndexSettings: [] };
 
 export function ApmIndices() {
-  const { core } = useApmPluginContext();
-  const { notifications, application } = core;
+  const { services } = useKibana<CoreStart>();
+  const { notifications, application } = services;
   const canSave = application.capabilities.apm.save;
 
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});

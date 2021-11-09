@@ -25,7 +25,6 @@ import {
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../common/service_nodes';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -35,6 +34,7 @@ import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 const INITIAL_DATA = {
   host: '',
@@ -100,7 +100,7 @@ export function ServiceNodeMetrics() {
     [kuery, serviceName, serviceNodeName, start, end]
   );
 
-  const { docLinks } = useApmPluginContext().core;
+  const { docLinks } = useKibanaServicesContext();
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAggregatedData = serviceNodeName === SERVICE_NODE_NAME_MISSING;
 

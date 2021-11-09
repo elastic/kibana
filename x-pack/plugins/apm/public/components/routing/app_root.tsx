@@ -15,7 +15,6 @@ import {
 } from '../../../../../../src/core/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import {
-  KibanaContextProvider,
   RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../../src/plugins/kibana_react/public';
@@ -37,6 +36,7 @@ import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
 import { KibanaConfigContext } from '../../context/kibana_config/kibana_config_context';
+import { KibanaServicesContextProvider } from '../../context/kibana_services/kibana_services_context';
 
 export interface ApmAppRootProps {
   appMountParameters: AppMountParameters;
@@ -65,7 +65,12 @@ export function ApmAppRoot({
     >
       <KibanaConfigContext.Provider value={config}>
         <ApmPluginContext.Provider value={{ pluginsSetup, pluginsStart }}>
-          <KibanaContextProvider services={{ ...coreStart }}>
+          <KibanaServicesContextProvider
+            value={{
+              ...coreStart,
+              triggersActionsUi: pluginsStart.triggersActionsUi,
+            }}
+          >
             <I18nContextProvider>
               <TimeRangeIdContextProvider>
                 <RouterProvider history={history} router={apmRouter as any}>
@@ -95,7 +100,7 @@ export function ApmAppRoot({
                 </RouterProvider>
               </TimeRangeIdContextProvider>
             </I18nContextProvider>
-          </KibanaContextProvider>
+          </KibanaServicesContextProvider>
         </ApmPluginContext.Provider>
       </KibanaConfigContext.Provider>
     </RedirectAppLinks>

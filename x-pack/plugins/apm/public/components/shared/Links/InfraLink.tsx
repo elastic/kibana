@@ -6,11 +6,11 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { IBasePath } from 'kibana/public';
+import type { IBasePath } from 'kibana/public';
 import React from 'react';
 import url from 'url';
-import { InfraAppId } from '../../../../../infra/public';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import type { InfraAppId } from '../../../../../infra/public';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 import { fromQuery } from './url_helpers';
 
 interface InfraQueryParams {
@@ -46,7 +46,12 @@ export const getInfraHref = ({
 };
 
 export function InfraLink({ app, path, query = {}, ...rest }: Props) {
-  const { core } = useApmPluginContext();
-  const href = getInfraHref({ app, basePath: core.http.basePath, query, path });
+  const { http } = useKibanaServicesContext();
+  const href = getInfraHref({
+    app,
+    basePath: http.basePath,
+    query,
+    path,
+  });
   return <EuiLink {...rest} href={href} />;
 }

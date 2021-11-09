@@ -9,8 +9,8 @@ import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMLinkExtendProps, getLegacyApmHref } from './APMLink';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -23,14 +23,14 @@ export function useTransactionsOverviewHref({
   latencyAggregationType,
   transactionType,
 }: Props) {
-  const { core } = useApmPluginContext();
+  const { http } = useKibanaServicesContext();
   const location = useLocation();
   const { search } = location;
 
   const query = { latencyAggregationType, transactionType };
 
   return getLegacyApmHref({
-    basePath: core.http.basePath,
+    basePath: http.basePath,
     path: `/services/${serviceName}/transactions`,
     query: removeUndefinedProps(query),
     search,

@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../observability/public';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/elasticsearch_fieldnames';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../../../context/kibana_services/use_kibana_services_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { pushNewItemToKueryBar } from '../../../../shared/kuery_bar/utils';
 import { useMetricOverviewHref } from '../../../../shared/Links/apm/MetricOverviewLink';
@@ -40,7 +40,7 @@ export function InstanceActionsMenu({
   kuery,
   onClose,
 }: Props) {
-  const { core } = useApmPluginContext();
+  const { http } = useKibanaServicesContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
     serviceNodeName,
@@ -89,7 +89,7 @@ export function InstanceActionsMenu({
 
   const sections = getMenuSections({
     instanceDetails: data,
-    basePath: core.http.basePath,
+    basePath: http.basePath,
     onFilterByInstanceClick: handleFilterByInstanceClick,
     metricsHref,
   });

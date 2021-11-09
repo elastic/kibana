@@ -8,15 +8,15 @@
 import { EuiCallOut, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { useApmPluginContext } from '../../../../../../../context/apm_plugin/use_apm_plugin_context';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { useKibanaServicesContext } from '../../../../../../../context/kibana_services/use_kibana_services_context';
 
 export function DroppedSpansWarning({
   transactionDoc,
 }: {
   transactionDoc: Transaction;
 }) {
-  const { docLinks } = useApmPluginContext().core;
+  const { docLinks } = useKibanaServicesContext();
   const dropped = transactionDoc.transaction.span_count?.dropped;
   if (!dropped) {
     return null;

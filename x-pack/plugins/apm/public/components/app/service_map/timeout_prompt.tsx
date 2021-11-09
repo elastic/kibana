@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 export function TimeoutPrompt({
   isGlobalServiceMap,
@@ -44,7 +44,7 @@ export function TimeoutPrompt({
 }
 
 function ApmSettingsDocLink() {
-  const { docLinks } = useApmPluginContext().core;
+  const { docLinks } = useKibanaServicesContext();
   return (
     <EuiLink href={docLinks.links.apm.kibanaSettings}>
       {i18n.translate('xpack.apm.serviceMap.timeoutPrompt.docsLink', {

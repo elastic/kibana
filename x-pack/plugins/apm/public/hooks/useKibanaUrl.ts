@@ -6,12 +6,12 @@
  */
 
 import url from 'url';
-import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../context/kibana_services/use_kibana_services_context';
 
 export function useKibanaUrl(path: string, urlObject?: url.UrlObject) {
-  const { core } = useApmPluginContext();
+  const { http } = useKibanaServicesContext();
   return url.format({
     ...urlObject,
-    pathname: core.http.basePath.prepend(path),
+    pathname: http.basePath.prepend(path),
   });
 }

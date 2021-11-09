@@ -8,13 +8,13 @@
 import React, { useState } from 'react';
 import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { LicensePrompt } from '../../../shared/license_prompt';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 export type AnomalyDetectionApiResponse =
   APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;
@@ -25,8 +25,8 @@ const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
 };
 
 export function AnomalyDetection() {
-  const plugin = useApmPluginContext();
-  const canGetJobs = !!plugin.core.application.capabilities.ml?.canGetJobs;
+  const { application } = useKibanaServicesContext();
+  const canGetJobs = !!application.capabilities.ml?.canGetJobs;
   const license = useLicenseContext();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 

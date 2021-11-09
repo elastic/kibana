@@ -8,7 +8,6 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { createExploratoryViewUrl } from '../../../../../../observability/public';
 import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
 import {
@@ -25,6 +24,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 
 function getEnvironmentDefinition(environment: string) {
@@ -39,14 +39,14 @@ function getEnvironmentDefinition(environment: string) {
 
 export function AnalyzeDataButton() {
   const { agentName, serviceName } = useApmServiceContext();
-  const { services } = useKibana();
+  const { application, http } = useKibanaServicesContext();
 
   const {
     query: { rangeFrom, rangeTo, environment },
   } = useApmParams('/services/{serviceName}');
 
-  const basepath = services.http?.basePath.get();
-  const canShowDashboard = services.application?.capabilities.dashboard.show;
+  const basepath = http.basePath.get();
+  const canShowDashboard = application.capabilities.dashboard.show;
 
   if (
     (isRumAgentName(agentName) || isIosAgentName(agentName)) &&

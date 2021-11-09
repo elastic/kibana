@@ -6,18 +6,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   AlertType,
   APM_SERVER_FEATURE_ID,
 } from '../../../../common/alert_types';
 import { getInitialAlertValues } from '../get_initial_alert_values';
-import { ApmPluginStartDeps } from '../../../plugin';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { AlertMetadata } from '../helper';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 interface Props {
   addFlyoutVisible: boolean;
@@ -41,7 +40,7 @@ export function AlertingFlyout(props: Props) {
   const transactionType =
     'transactionType' in query ? query.transactionType : undefined;
 
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const services = useKibanaServicesContext();
   const initialValues = getInitialAlertValues(alertType, serviceName);
 
   const onCloseAddFlyout = useCallback(

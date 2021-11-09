@@ -12,9 +12,9 @@ import { pickBy, identity } from 'lodash';
 import { getLegacyApmHref, APMLinkExtendProps } from './APMLink';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { APMQueryParams } from '../url_helpers';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { TimeRangeComparisonType } from '../../../../../common/runtime_types/comparison_type_rt';
+import type { APMQueryParams } from '../url_helpers';
+import type { TimeRangeComparisonType } from '../../../../../common/runtime_types/comparison_type_rt';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -46,10 +46,10 @@ export function TransactionDetailLink({
   ...rest
 }: Props) {
   const { urlParams } = useLegacyUrlParams();
-  const { core } = useApmPluginContext();
+  const { http } = useKibanaServicesContext();
   const location = useLocation();
   const href = getLegacyApmHref({
-    basePath: core.http.basePath,
+    basePath: http.basePath,
     path: `/services/${serviceName}/transactions/view`,
     query: {
       traceId,

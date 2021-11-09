@@ -16,15 +16,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateAgentInstructions } from './agent_instructions_mappings';
-import {
-  Markdown,
-  useKibana,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { Markdown } from '../../../../../../../src/plugins/kibana_react/public';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AgentIcon } from '../../shared/agent_icon';
 import { NewPackagePolicy } from '../apm_policy_form/typings';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
 import { replaceTemplateStrings } from './replace_template_strings';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 function AccordionButtonContent({
   agentName,
@@ -111,7 +109,7 @@ export function AgentInstructionsAccordion({
   createAgentInstructions,
   variantId,
 }: Props) {
-  const docLinks = useKibana().services.docLinks;
+  const { docLinks } = useKibanaServicesContext();
   const vars = newPolicy?.inputs?.[0]?.vars;
   const apmServerUrl = vars?.url.value;
   const secretToken = vars?.secret_token.value;

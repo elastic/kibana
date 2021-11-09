@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMLink } from '../../Links/apm/APMLink';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 export function CustomLinkToolbar({
   onClickCreate,
@@ -25,8 +25,8 @@ export function CustomLinkToolbar({
   onClickCreate: () => void;
   showCreateButton?: boolean;
 }) {
-  const { core } = useApmPluginContext();
-  const canSave = !!core.application.capabilities.apm.save;
+  const { application } = useKibanaServicesContext();
+  const canSave = !!application.capabilities.apm.save;
 
   return (
     <EuiFlexGroup>

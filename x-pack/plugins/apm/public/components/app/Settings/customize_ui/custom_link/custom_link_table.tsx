@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../../../context/kibana_services/use_kibana_services_context';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
@@ -29,8 +29,8 @@ interface Props {
 
 export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
-  const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const { application } = useKibanaServicesContext();
+  const canSave = application.capabilities.apm.save;
 
   const columns: Array<ITableColumn<CustomLink>> = [
     {

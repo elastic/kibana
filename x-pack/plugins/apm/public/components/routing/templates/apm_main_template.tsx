@@ -8,13 +8,10 @@
 import { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  useKibana,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { getNoDataConfig } from './no_data_config';
 
@@ -42,13 +39,12 @@ export function ApmMainTemplate({
 } & KibanaPageTemplateProps) {
   const location = useLocation();
 
-  const { services } = useKibana<ApmPluginStartDeps>();
-  const { pluginsSetup } = useApmPluginContext();
-  const { http, docLinks } = services;
+  const { http, docLinks } = useKibanaServicesContext();
+  const { pluginsStart } = useApmPluginContext();
   const basePath = http?.basePath.get();
 
   const ObservabilityPageTemplate =
-    pluginsSetup.observability.navigation.PageTemplate;
+    pluginsStart.observability.navigation.PageTemplate;
 
   const { data } = useFetcher((callApmApi) => {
     return callApmApi({ endpoint: 'GET /internal/apm/has_data' });

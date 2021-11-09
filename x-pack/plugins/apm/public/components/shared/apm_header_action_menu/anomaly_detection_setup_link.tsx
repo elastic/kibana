@@ -18,12 +18,12 @@ import {
   getEnvironmentLabel,
 } from '../../../../common/environment_filter_values';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { getLegacyApmHref } from '../Links/apm/APMLink';
 
 export type AnomalyDetectionApiResponse =
@@ -37,11 +37,11 @@ export function AnomalyDetectionSetupLink() {
   const environment =
     ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
 
-  const { core } = useApmPluginContext();
-  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
+  const { application, http } = useKibanaServicesContext();
+  const canGetJobs = !!application.capabilities.ml?.canGetJobs;
   const license = useLicenseContext();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
-  const { basePath } = core.http;
+  const { basePath } = http;
   const theme = useTheme();
 
   return (

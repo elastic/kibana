@@ -10,13 +10,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useMlHref } from '../../../../../../ml/public';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 export function LegacyJobsCallout() {
   const {
-    core,
-    plugins: { ml },
+    pluginsSetup: { ml },
   } = useApmPluginContext();
-  const mlADLink = useMlHref(ml, core.http.basePath.get(), {
+  const { http } = useKibanaServicesContext();
+  const mlADLink = useMlHref(ml, http.basePath.get(), {
     page: 'jobs',
     pageState: {
       jobId: 'high_mean_response_time',

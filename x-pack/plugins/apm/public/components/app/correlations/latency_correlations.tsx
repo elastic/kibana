@@ -38,7 +38,6 @@ import {
 import { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
 import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 
@@ -59,15 +58,14 @@ import { CorrelationsProgressControls } from './progress_controls';
 import { useTransactionColors } from './use_transaction_colors';
 import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const transactionColors = useTransactionColors();
 
-  const {
-    core: { notifications, uiSettings },
-  } = useApmPluginContext();
+  const { notifications, uiSettings } = useKibanaServicesContext();
 
-  const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
+  const displayLog = uiSettings?.get<boolean>(enableInspectEsQueries);
 
   const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
@@ -91,7 +89,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   useEffect(() => {
     if (isErrorMessage(progress.error)) {
-      notifications.toasts.addDanger({
+      notifications?.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.correlations.latencyCorrelations.errorTitle',
           {
@@ -101,7 +99,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         text: progress.error.toString(),
       });
     }
-  }, [progress.error, notifications.toasts]);
+  }, [progress.error, notifications?.toasts]);
 
   const [pinnedSignificantTerm, setPinnedSignificantTerm] =
     useState<LatencyCorrelation | null>(null);

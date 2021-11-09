@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { CytoscapeContext } from './Cytoscape';
 import { useTheme } from '../../../hooks/use_theme';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 const EmptyBannerContainer = euiStyled.div`
   margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
@@ -28,7 +28,7 @@ export function EmptyBanner() {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [nodeCount, setNodeCount] = useState(0);
-  const { docLinks } = useApmPluginContext().core;
+  const { docLinks } = useKibanaServicesContext();
 
   useEffect(() => {
     const handler: cytoscape.EventHandler = (event) =>

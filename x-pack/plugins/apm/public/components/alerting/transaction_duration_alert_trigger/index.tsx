@@ -9,11 +9,10 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
 import React, { useEffect } from 'react';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import {
@@ -70,11 +69,11 @@ interface Props {
 }
 
 export function TransactionDurationAlertTrigger(props: Props) {
-  const { services } = useKibana();
+  const services = useKibanaServicesContext();
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
   useEffect(() => {
-    createCallApmApi(services as CoreStart);
+    createCallApmApi(services);
   }, [services]);
 
   const params = defaults(

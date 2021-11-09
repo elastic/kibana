@@ -21,7 +21,7 @@ import type { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-d
 import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { i18n } from '@kbn/i18n';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { AlertType } from '../../../../../common/alert_types';
@@ -31,6 +31,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
   ALERT_RULE_TYPE_ID_NON_TYPED;
@@ -45,7 +46,7 @@ interface Props {
 }
 
 export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
-  const { core } = useApmPluginContext();
+  const { uiSettings } = useKibanaServicesContext();
   const theme = useTheme();
 
   const { urlParams } = useLegacyUrlParams();
@@ -87,7 +88,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
     undefined
   );
 
-  const timeZone = getTimeZone(core.uiSettings);
+  const timeZone = getTimeZone(uiSettings);
 
   return (
     <>

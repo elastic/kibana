@@ -18,9 +18,9 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { AgentConfigurationList } from './List';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 const INITIAL_DATA = { configurations: [] };
 
@@ -77,9 +77,9 @@ export function AgentConfigurations() {
 function CreateConfigurationButton() {
   const href = useApmRouter().link('/settings/agent-configuration/create');
 
-  const { core } = useApmPluginContext();
+  const { application } = useKibanaServicesContext();
 
-  const canSave = core.application.capabilities.apm.save;
+  const canSave = application.capabilities.apm.save;
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">

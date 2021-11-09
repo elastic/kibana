@@ -9,7 +9,6 @@ import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -17,6 +16,7 @@ import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 const ControlsContainer = euiStyled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
@@ -99,8 +99,8 @@ function useDebugDownloadUrl(cy?: cytoscape.Core) {
 }
 
 export function Controls() {
-  const { core } = useApmPluginContext();
-  const { basePath } = core.http;
+  const { http } = useKibanaServicesContext();
+  const { basePath } = http;
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useLegacyUrlParams();

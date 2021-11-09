@@ -10,11 +10,10 @@ import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AgentEnrollmentFlyoutFinalStepExtension } from '../../../../fleet/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { ApmPluginStartDeps } from '../../plugin';
+import { useKibanaServicesContext } from '../../context/kibana_services/use_kibana_services_context';
 
 function StepComponent() {
-  const { http } = useKibana<ApmPluginStartDeps>().services;
+  const { http } = useKibanaServicesContext();
   const installApmAgentLink = http?.basePath.prepend('/app/home#/tutorial/apm');
 
   return (

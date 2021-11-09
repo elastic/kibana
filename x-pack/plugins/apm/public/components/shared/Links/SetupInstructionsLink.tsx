@@ -8,7 +8,7 @@
 import { EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 const SETUP_INSTRUCTIONS_LABEL = i18n.translate(
   'xpack.apm.setupInstructionsButtonLabel',
@@ -27,9 +27,9 @@ export function SetupInstructionsLink({
 }: {
   buttonFill?: boolean;
 }) {
-  const { core } = useApmPluginContext();
+  const { http } = useKibanaServicesContext();
   return (
-    <EuiLink href={core.http.basePath.prepend('/app/home#/tutorial/apm')}>
+    <EuiLink href={http.basePath.prepend('/app/home#/tutorial/apm')}>
       {buttonFill ? (
         <EuiButton size="s" color="primary" fill={buttonFill} iconType="help">
           {SETUP_INSTRUCTIONS_LABEL}

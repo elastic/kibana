@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { composeStories } from '@storybook/testing-react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { renderWithTheme } from '../../../utils/testHelpers';
-import { FrameHeading } from './frame_heading';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import * as stories from './frame_heading.stories';
+
+const { Example } = composeStories(stories);
 
 function getRenderedStackframeText(
   stackframe: Stackframe,
   codeLanguage: string
 ) {
-  const result = renderWithTheme(
-    <FrameHeading
+  render(
+    <Example
       codeLanguage={codeLanguage}
       isLibraryFrame={false}
       stackframe={stackframe}
     />
   );
 
-  return result.getByTestId('FrameHeading').textContent;
+  return screen.getByTestId('FrameHeading').textContent;
 }
 
 describe('FrameHeading', () => {

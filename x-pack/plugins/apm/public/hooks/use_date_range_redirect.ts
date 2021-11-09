@@ -7,17 +7,15 @@
 import qs from 'query-string';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { TimePickerTimeDefaults } from '../components/shared/DatePicker/typings';
+import type { TimePickerTimeDefaults } from '../components/shared/DatePicker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../context/kibana_services/use_kibana_services_context';
 
 export function useDateRangeRedirect() {
   const history = useHistory();
   const location = useLocation();
   const query = qs.parse(location.search);
-  const {
-    services: { uiSettings },
-  } = useKibana();
+  const { uiSettings } = useKibanaServicesContext();
   const { pluginsSetup } = useApmPluginContext();
 
   const timePickerTimeDefaults = uiSettings.get<TimePickerTimeDefaults>(

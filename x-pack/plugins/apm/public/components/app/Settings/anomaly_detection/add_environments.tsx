@@ -20,13 +20,13 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { createJobs } from './create_jobs';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 interface Props {
   currentEnvironments: string[];
@@ -43,7 +43,7 @@ export function AddEnvironments({
   onCreateJobSuccess,
   onCancel,
 }: Props) {
-  const { notifications, application } = useApmPluginContext().core;
+  const { notifications, application } = useKibanaServicesContext();
   const { anomalyDetectionJobsRefetch } = useAnomalyDetectionJobsContext();
   const canCreateJob = !!application.capabilities.ml.canCreateJob;
   const { toasts } = notifications;

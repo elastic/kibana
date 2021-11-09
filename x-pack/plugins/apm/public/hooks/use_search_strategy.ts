@@ -14,7 +14,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 import type { RawSearchStrategyClientParams } from '../../common/search_strategies/types';
 import type { RawResponseBase } from '../../common/search_strategies/types';
@@ -33,10 +32,9 @@ import {
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 
-import { ApmPluginStartDeps } from '../plugin';
-
 import { useApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 interface SearchStrategyProgress {
   error?: Error;
@@ -95,8 +93,8 @@ export function useSearchStrategy<
   searchStrategyParams?: TParams
 ): SearchStrategyReturnBase<TRawResponse> {
   const {
-    services: { data },
-  } = useKibana<ApmPluginStartDeps>();
+    pluginsStart: { data },
+  } = useApmPluginContext();
 
   const { serviceName, transactionType } = useApmServiceContext();
   const {

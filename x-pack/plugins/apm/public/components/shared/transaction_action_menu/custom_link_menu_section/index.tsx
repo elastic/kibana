@@ -27,8 +27,8 @@ import {
   CustomLink,
   Filter,
 } from '../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { CreateEditCustomLinkFlyout } from '../../../app/Settings/customize_ui/custom_link/create_edit_custom_link_flyout';
 import { convertFiltersToQuery } from '../../../app/Settings/customize_ui/custom_link/create_edit_custom_link_flyout/helper';
@@ -152,8 +152,8 @@ function BottomSection({
   toggleShowAll: () => void;
   onClickCreate: () => void;
 }) {
-  const { core } = useApmPluginContext();
-  const canSave = !!core.application.capabilities.apm.save;
+  const { application } = useKibanaServicesContext();
+  const canSave = !!application.capabilities.apm.save;
 
   if (status === FETCH_STATUS.LOADING) {
     return <LoadingStatePrompt />;

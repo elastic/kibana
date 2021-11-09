@@ -7,13 +7,14 @@
 
 import { useMemo } from 'react';
 import { callApi } from '../../../../services/rest/callApi';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { FetchOptions } from '../../../../../common/fetch_options';
+import type { FetchOptions } from '../../../../../common/fetch_options';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { CoreStart } from '../../../../../../../../src/core/public';
 
 export function useCallApi() {
-  const { core } = useApmPluginContext();
+  const { services } = useKibana<CoreStart>();
 
   return useMemo(() => {
-    return <T = void>(options: FetchOptions) => callApi<T>(core, options);
-  }, [core]);
+    return <T = void>(options: FetchOptions) => callApi<T>(services, options);
+  }, [services]);
 }

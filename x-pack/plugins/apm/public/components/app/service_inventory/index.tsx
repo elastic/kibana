@@ -16,7 +16,7 @@ import React, { useEffect } from 'react';
 import uuid from 'uuid';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -50,7 +50,7 @@ function useServicesFetcher() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { core } = useApmPluginContext();
+  const { notifications } = useKibanaServicesContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
 
   const { offset } = getTimeRangeComparison({
@@ -119,7 +119,7 @@ function useServicesFetcher() {
     if (mainStatisticsData.hasLegacyData && !hasDisplayedToast) {
       hasDisplayedToast = true;
 
-      core.notifications.toasts.addWarning({
+      notifications.toasts.addWarning({
         title: i18n.translate('xpack.apm.serviceInventory.toastTitle', {
           defaultMessage:
             'Legacy data was detected within the selected time range',
@@ -146,7 +146,7 @@ function useServicesFetcher() {
   }, [
     mainStatisticsData.hasLegacyData,
     upgradeAssistantHref,
-    core.notifications.toasts,
+    notifications.toasts,
   ]);
 
   return {
@@ -157,7 +157,7 @@ function useServicesFetcher() {
 }
 
 export function ServiceInventory() {
-  const { core } = useApmPluginContext();
+  const { application } = useKibanaServicesContext();
 
   const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
     useServicesFetcher();
@@ -170,7 +170,7 @@ export function ServiceInventory() {
     false
   );
 
-  const canCreateJob = !!core.application.capabilities.ml?.canCreateJob;
+  const canCreateJob = !!application.capabilities.ml?.canCreateJob;
 
   const displayMlCallout =
     anomalyDetectionJobsStatus === FETCH_STATUS.SUCCESS &&

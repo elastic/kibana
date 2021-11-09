@@ -9,11 +9,11 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NO_PERMISSION_LABEL } from '../../../../../../common/custom_link';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../../../context/kibana_services/use_kibana_services_context';
 
 export function CreateCustomLinkButton({ onClick }: { onClick: () => void }) {
-  const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const { application } = useKibanaServicesContext();
+  const canSave = application.capabilities.apm.save;
   return (
     <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
       <EuiButton

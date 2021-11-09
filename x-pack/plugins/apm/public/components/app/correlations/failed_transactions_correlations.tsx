@@ -42,7 +42,6 @@ import {
 } from '../../../../common/search_strategies/constants';
 import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
@@ -67,6 +66,7 @@ import { CorrelationsProgressControls } from './progress_controls';
 import { useTransactionColors } from './use_transaction_colors';
 import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -76,12 +76,10 @@ export function FailedTransactionsCorrelations({
   const euiTheme = useTheme();
   const transactionColors = useTransactionColors();
 
-  const {
-    core: { notifications, uiSettings },
-  } = useApmPluginContext();
+  const { notifications, uiSettings } = useKibanaServicesContext();
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
-  const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
+  const inspectEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
 
   const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
@@ -369,7 +367,7 @@ export function FailedTransactionsCorrelations({
 
   useEffect(() => {
     if (isErrorMessage(progress.error)) {
-      notifications.toasts.addDanger({
+      notifications?.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.correlations.failedTransactions.errorTitle',
           {
@@ -380,7 +378,7 @@ export function FailedTransactionsCorrelations({
         text: progress.error.toString(),
       });
     }
-  }, [progress.error, notifications.toasts]);
+  }, [progress.error, notifications?.toasts]);
 
   const [sortField, setSortField] =
     useState<keyof FailedTransactionsCorrelation>('normalizedScore');

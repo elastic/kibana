@@ -6,13 +6,13 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { IBasePath } from 'kibana/public';
+import type { IBasePath } from 'kibana/public';
 import { pick } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import url from 'url';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
 
@@ -47,7 +47,7 @@ export function useAPMHref({
   query?: APMQueryParams;
 }) {
   const { urlParams } = useLegacyUrlParams();
-  const { basePath } = useApmPluginContext().core.http;
+  const { basePath } = useKibanaServicesContext().http;
   const { search } = useLocation();
   const nextQuery = {
     ...pickKeys(urlParams as APMQueryParams, ...(persistedFilters ?? [])),
@@ -85,9 +85,9 @@ export function getLegacyApmHref({
 }
 
 export function APMLink({ path = '', query, mergeQuery, ...rest }: Props) {
-  const { core } = useApmPluginContext();
+  const { http } = useKibanaServicesContext();
   const { search } = useLocation();
-  const { basePath } = core.http;
+  const { basePath } = http;
 
   const mergedQuery = mergeQuery ? mergeQuery(query ?? {}) : query;
 

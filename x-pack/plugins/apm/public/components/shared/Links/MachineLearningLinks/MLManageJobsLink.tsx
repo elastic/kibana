@@ -11,7 +11,8 @@ import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { TimePickerRefreshInterval } from '../../DatePicker/typings';
+import type { TimePickerRefreshInterval } from '../../DatePicker/typings';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 interface Props {
   children?: React.ReactNode;
@@ -19,15 +20,15 @@ interface Props {
 }
 
 export function MLManageJobsLink({ children, external }: Props) {
+  const { http, uiSettings } = useKibanaServicesContext();
   const {
-    core,
     pluginsSetup: { ml },
   } = useApmPluginContext();
 
   const { urlParams } = useLegacyUrlParams();
 
   const timePickerRefreshIntervalDefaults =
-    core.uiSettings.get<TimePickerRefreshInterval>(
+    uiSettings.get<TimePickerRefreshInterval>(
       UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
     );
 
@@ -39,7 +40,7 @@ export function MLManageJobsLink({ children, external }: Props) {
     refreshPaused = timePickerRefreshIntervalDefaults.pause,
   } = urlParams;
 
-  const mlADLink = useMlHref(ml, core.http.basePath.get(), {
+  const mlADLink = useMlHref(ml, http.basePath.get(), {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     pageState: {
       groupIds: ['apm'],

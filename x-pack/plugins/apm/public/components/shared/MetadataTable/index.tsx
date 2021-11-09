@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -19,14 +20,13 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { HeightRetainer } from '../HeightRetainer';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { filterSectionsByTerm } from './helper';
 import { Section } from './Section';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { SectionDescriptor } from './types';
+import type { SectionDescriptor } from './types';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 interface Props {
   sections: SectionDescriptor[];
@@ -38,7 +38,7 @@ export function MetadataTable({ sections, isLoading }: Props) {
   const location = useLocation();
   const { urlParams } = useLegacyUrlParams();
   const { searchTerm = '' } = urlParams;
-  const { docLinks } = useApmPluginContext().core;
+  const { docLinks } = useKibanaServicesContext();
 
   const filteredSections = filterSectionsByTerm(sections, searchTerm);
 

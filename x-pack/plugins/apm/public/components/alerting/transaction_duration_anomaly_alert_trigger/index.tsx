@@ -8,17 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import {
   EnvironmentField,
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata } from '../helper';
+import type { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 import {
@@ -47,11 +46,11 @@ interface Props {
 }
 
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
-  const { services } = useKibana();
+  const services = useKibanaServicesContext();
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
   useEffect(() => {
-    createCallApmApi(services as CoreStart);
+    createCallApmApi(services);
   }, [services]);
 
   const params = defaults(

@@ -8,12 +8,12 @@
 import { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { History } from 'history';
+import type { History } from 'history';
 import { useHistory } from 'react-router-dom';
-import { CoreStart } from 'kibana/public';
+import type { CoreStart } from 'kibana/public';
 import { ApmMainTemplate } from './apm_main_template';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -31,9 +31,9 @@ interface Props {
 }
 
 export function SettingsTemplate({ children, selectedTab }: Props) {
-  const { core } = useApmPluginContext();
+  const services = useKibanaServicesContext();
   const history = useHistory();
-  const tabs = getTabs({ history, core, selectedTab });
+  const tabs = getTabs({ history, services, selectedTab });
 
   return (
     <ApmMainTemplate
@@ -52,15 +52,15 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
 
 function getTabs({
   history,
-  core,
+  services,
   selectedTab,
 }: {
   history: History;
-  core: CoreStart;
+  services: CoreStart;
   selectedTab: Tab['key'];
 }) {
-  const { basePath } = core.http;
-  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
+  const { basePath } = services.http;
+  const canAccessML = !!services.application.capabilities.ml?.canAccessML;
   const { search } = history.location;
 
   const tabs: Tab[] = [

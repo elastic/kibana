@@ -5,21 +5,22 @@
  * 2.0.
  */
 
+import { composeStories } from '@storybook/testing-react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { renderWithTheme } from '../../../utils/testHelpers';
-import { LibraryStacktrace } from './library_stacktrace';
+import * as stories from './library_stacktrace.stories';
+
+const { Example } = composeStories(stories);
 
 describe('LibraryStacktrace', () => {
   describe('render', () => {
     describe('with no stack frames', () => {
       it('renders null', () => {
         const props = { id: 'testId', stackframes: [] };
-        const { queryByTestId } = renderWithTheme(
-          <LibraryStacktrace {...props} />
-        );
+        render(<Example {...props} />);
 
         expect(
-          queryByTestId('LibraryStacktraceAccordion')
+          screen.queryByTestId('LibraryStacktraceAccordion')
         ).not.toBeInTheDocument();
       });
     });
@@ -30,11 +31,11 @@ describe('LibraryStacktrace', () => {
           id: 'testId',
           stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
-        const { queryByTestId } = renderWithTheme(
-          <LibraryStacktrace {...props} />
-        );
+        render(<Example {...props} />);
 
-        expect(queryByTestId('LibraryStacktraceAccordion')).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('LibraryStacktraceAccordion')
+        ).toBeInTheDocument();
       });
     });
   });

@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../../../../context/kibana_services/use_kibana_services_context';
 
 interface Props {
   label: string;
 }
 
 export function Documentation({ label }: Props) {
-  const { docLinks } = useApmPluginContext().core;
+  const { docLinks } = useKibanaServicesContext();
   return <EuiLink href={docLinks.links.apm.customLinks}>{label}</EuiLink>;
 }

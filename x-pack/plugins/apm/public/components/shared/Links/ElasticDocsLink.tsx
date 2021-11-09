@@ -7,7 +7,7 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 
 // union type constisting of valid guide sections that we link to
 type DocsSection =
@@ -24,7 +24,7 @@ interface Props extends EuiLinkAnchorProps {
 }
 
 export function ElasticDocsLink({ section, path, children, ...rest }: Props) {
-  const { docLinks } = useApmPluginContext().core;
+  const { docLinks } = useKibanaServicesContext();
   const baseUrl = docLinks.ELASTIC_WEBSITE_URL;
   const version = section === '/cloud' ? 'current' : docLinks.DOC_LINK_VERSION;
   const href = `${baseUrl}guide/en${section}/${version}${path}`;

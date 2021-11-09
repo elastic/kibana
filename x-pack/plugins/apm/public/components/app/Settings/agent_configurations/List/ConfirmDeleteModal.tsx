@@ -7,14 +7,14 @@
 
 import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { NotificationsStart } from 'kibana/public';
+import type { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import {
   APIReturnType,
   callApmApi,
 } from '../../../../../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaServicesContext } from '../../../../../context/kibana_services/use_kibana_services_context';
 
 type Config =
   APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
@@ -27,7 +27,7 @@ interface Props {
 
 export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const { toasts } = useApmPluginContext().core.notifications;
+  const { toasts } = useKibanaServicesContext().notifications;
 
   return (
     <EuiConfirmModal

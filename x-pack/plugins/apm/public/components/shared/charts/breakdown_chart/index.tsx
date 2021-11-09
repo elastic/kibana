@@ -24,14 +24,14 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Annotation } from '../../../../../common/annotations';
+import type { Annotation } from '../../../../../common/annotations';
 import { useChartTheme } from '../../../../../../observability/public';
 import {
   asAbsoluteDateTime,
   asPercent,
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -44,8 +44,8 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimeZone } from '../helper/timezone';
+import { useKibanaServicesContext } from '../../../../context/kibana_services/use_kibana_services_context';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -68,7 +68,7 @@ export function BreakdownChart({
 }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
-  const { core } = useApmPluginContext();
+  const { uiSettings } = useKibanaServicesContext();
   const { chartRef, setPointerEvent } = useChartPointerEventContext();
   const {
     query: { rangeFrom, rangeTo },
@@ -91,7 +91,7 @@ export function BreakdownChart({
       ? getResponseTimeTickFormatter(getDurationFormatter(maxY))
       : asPercentBound;
 
-  const timeZone = getTimeZone(core.uiSettings);
+  const timeZone = getTimeZone(uiSettings);
 
   return (
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>

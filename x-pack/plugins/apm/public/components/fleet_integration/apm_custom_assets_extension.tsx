@@ -12,11 +12,10 @@ import {
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
 } from '../../../../fleet/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { ApmPluginStartDeps } from '../../plugin';
+import { useKibanaServicesContext } from '../../context/kibana_services/use_kibana_services_context';
 
 export function ApmCustomAssetsExtension() {
-  const { http } = useKibana<ApmPluginStartDeps>().services;
+  const { http } = useKibanaServicesContext();
   const basePath = http?.basePath.get();
 
   const views: CustomAssetsAccordionProps['views'] = [

@@ -15,14 +15,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { Filter } from '../../../../../../../common/custom_link/custom_link_types';
-import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import type { Filter } from '../../../../../../../common/custom_link/custom_link_types';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
 import { LinkSection } from './LinkSection';
 import { saveCustomLink } from './saveCustomLink';
 import { LinkPreview } from './link_preview';
 import { Documentation } from './Documentation';
+import { useKibanaServicesContext } from '../../../../../../context/kibana_services/use_kibana_services_context';
 
 interface Props {
   onClose: () => void;
@@ -45,7 +45,7 @@ export function CreateEditCustomLinkFlyout({
   defaults,
   customLinkId,
 }: Props) {
-  const { toasts } = useApmPluginContext().core.notifications;
+  const { toasts } = useKibanaServicesContext().notifications;
   const [isSaving, setIsSaving] = useState(false);
 
   const [label, setLabel] = useState(defaults?.label || '');

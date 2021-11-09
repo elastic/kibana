@@ -18,8 +18,8 @@ import {
   SectionSubtitle,
   SectionTitle,
 } from '../../../../../observability/public';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { useKibanaServicesContext } from '../../../context/kibana_services/use_kibana_services_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
@@ -43,7 +43,7 @@ export function TransactionActionMenu({ transaction }: Props) {
   const license = useLicenseContext();
   const hasGoldLicense = license?.isActive && license?.hasAtLeast('gold');
 
-  const { core } = useApmPluginContext();
+  const { http } = useKibanaServicesContext();
   const location = useLocation();
   const { urlParams } = useLegacyUrlParams();
 
@@ -51,7 +51,7 @@ export function TransactionActionMenu({ transaction }: Props) {
 
   const sections = getSections({
     transaction,
-    basePath: core.http.basePath,
+    basePath: http.basePath,
     location,
     urlParams,
   });

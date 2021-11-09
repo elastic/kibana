@@ -15,18 +15,24 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaPageTemplateProps,
+  useKibana,
+} from '../../../../../../../src/plugins/kibana_react/public';
 import { useHasRumData } from './hooks/useHasRumData';
 import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
+import type { CoreStart } from '../../../../../../../src/core/public';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'Dashboard',
 });
 
 export function RumHome() {
-  const { core, observability } = useApmPluginContext();
-  const PageTemplateComponent = observability.navigation.PageTemplate;
+  const { services } = useKibana<CoreStart>();
+  const { pluginsStart } = useApmPluginContext();
+  const PageTemplateComponent =
+    pluginsStart.observability.navigation.PageTemplate;
 
   const { data: rumHasData, status } = useHasRumData();
 
@@ -48,10 +54,10 @@ export function RumHome() {
                     'Enable RUM with the APM agent to collect user experience data.',
                 }
               ),
-              href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
+              href: services.http.basePath.prepend(`/app/home#/tutorial/apm`),
             },
           },
-          docsLink: core.docLinks.links.observability.guide,
+          docsLink: services.docLinks.links.observability.guide,
         }
       : undefined;
 
