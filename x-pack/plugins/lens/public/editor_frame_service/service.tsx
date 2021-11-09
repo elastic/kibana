@@ -73,7 +73,7 @@ export class EditorFrameService {
   public documentToExpression = async (doc: Document) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       this.loadDatasources(),
-      this.loadVisualizations()
+      this.loadVisualizations(),
     ]);
 
     const { persistedStateToExpression } = await import('../async_services');
@@ -96,7 +96,7 @@ export class EditorFrameService {
     const createInstance = async (): Promise<EditorFrameInstance> => {
       const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
         this.loadDatasources(),
-        this.loadVisualizations()
+        this.loadVisualizations(),
       ]);
 
       const { EditorFrame } = await import('../async_services');

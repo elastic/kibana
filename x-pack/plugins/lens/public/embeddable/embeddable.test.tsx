@@ -1040,23 +1040,22 @@ describe('embeddable', () => {
   it('handles edit actions ', async () => {
     const editedVisualizationState = { value: 'edited' };
     const onEditActionMock = jest.fn().mockReturnValue(editedVisualizationState);
-    const documentToExpressionMock = jest.fn()
-      .mockImplementation(async (document) => {
-        const isStateEdited = document.state.visualization.value === 'edited';
-        return {
-          ast: {
-            type: 'expression',
-            chain: [
-              { 
-                type: 'function', 
-                function: isStateEdited ? 'edited' : 'not_edited', 
-                arguments: {} 
-              }
-            ]
-          },
-          errors: undefined,
-        };
-      });
+    const documentToExpressionMock = jest.fn().mockImplementation(async (document) => {
+      const isStateEdited = document.state.visualization.value === 'edited';
+      return {
+        ast: {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: isStateEdited ? 'edited' : 'not_edited',
+              arguments: {},
+            },
+          ],
+        },
+        errors: undefined,
+      };
+    });
 
     const visDocument: Document = {
       state: {
@@ -1068,7 +1067,7 @@ describe('embeddable', () => {
       references: [],
       title: 'My title',
       visualizationType: 'lensDatatable',
-    }
+    };
 
     const embeddable = new Embeddable(
       {
@@ -1083,10 +1082,12 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
-        visualizationMap: { 
-          [visDocument.visualizationType as string]: { onEditAction: onEditActionMock } as unknown as Visualization 
+        visualizationMap: {
+          [visDocument.visualizationType as string]: {
+            onEditAction: onEditActionMock,
+          } as unknown as Visualization,
         },
-        documentToExpression: documentToExpressionMock
+        documentToExpression: documentToExpressionMock,
       },
       { id: '123' } as unknown as LensEmbeddableInput
     );
@@ -1094,8 +1095,8 @@ describe('embeddable', () => {
     // SETUP FRESH STATE
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
-    
-    await new Promise(resolve => setTimeout(resolve, 0));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
     expect(expressionRenderer.mock.calls[0][0]!.expression).toBe(`not_edited`);

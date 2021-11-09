@@ -53,7 +53,7 @@ import {
   LensFilterEvent,
   LensTableRowContextMenuEvent,
   VisualizationMap,
-  Visualization
+  Visualization,
 } from '../types';
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
@@ -113,13 +113,16 @@ export interface LensEmbeddableDeps {
   spaces?: SpacesPluginStart;
 }
 
-const getExpressionFromDocument = async (document: Document, documentToExpression: LensEmbeddableDeps['documentToExpression']) => {
+const getExpressionFromDocument = async (
+  document: Document,
+  documentToExpression: LensEmbeddableDeps['documentToExpression']
+) => {
   const { ast, errors } = await documentToExpression(document);
   return {
     expression: ast ? toExpression(ast) : null,
-    errors
+    errors,
   };
-}
+};
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
@@ -272,7 +275,10 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
-  private maybeAddConflictError (errors: ErrorMessage[], sharingSavedObjectProps?: SharingSavedObjectProps) {
+  private maybeAddConflictError(
+    errors: ErrorMessage[],
+    sharingSavedObjectProps?: SharingSavedObjectProps
+  ) {
     const ret = [...errors];
 
     if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
@@ -286,7 +292,7 @@ export class Embeddable
             sourceId={sharingSavedObjectProps.sourceId!}
           />
         ),
-      })
+      });
     }
 
     return ret;
@@ -311,7 +317,10 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
-    const { expression, errors } = await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+    const { expression, errors } = await getExpressionFromDocument(
+      this.savedVis,
+      this.deps.documentToExpression
+    );
     this.expression = expression;
     this.errors = errors && this.maybeAddConflictError(errors, sharingSavedObjectProps);
 
@@ -452,7 +461,7 @@ export class Embeddable
     return output;
   }
 
-  private get onEditAction (): Visualization['onEditAction'] { 
+  private get onEditAction(): Visualization['onEditAction'] {
     const visType = this.savedVis?.visualizationType;
 
     if (!visType) {
@@ -504,8 +513,14 @@ export class Embeddable
     if (isLensEditEvent(event) && this.onEditAction) {
       if (!this.savedVis) return;
 
-      this.savedVis.state.visualization = this.onEditAction(this.savedVis.state.visualization, event);
-      const { expression, errors } = await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+      this.savedVis.state.visualization = this.onEditAction(
+        this.savedVis.state.visualization,
+        event
+      );
+      const { expression, errors } = await getExpressionFromDocument(
+        this.savedVis,
+        this.deps.documentToExpression
+      );
       this.expression = expression;
       this.errors = errors;
 
