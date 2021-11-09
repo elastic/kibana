@@ -37,13 +37,15 @@ import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
+} from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const log = getService('log');
+
   const siemModule = 'siem_auditbeat';
   const mlJobId = 'linux_anomalous_network_activity_ecs';
   const testRule: MachineLearningCreateSchema = {
@@ -102,12 +104,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest);
+      await deleteAllAlerts(supertest, log);
     });
 
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
-      const createdRule = await createRule(supertest, testRule);
-      const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+      const createdRule = await createRule(supertest, log, testRule);
+      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(1);
       const signal = signalsOpen.hits.hits[0];
       if (!signal._source) {
@@ -208,17 +210,17 @@ export default ({ getService }: FtrProviderContext) => {
         ...testRule,
         anomaly_threshold: 20,
       };
-      const createdRule = await createRule(supertest, rule);
-      const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+      const createdRule = await createRule(supertest, log, rule);
+      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(7);
     });
 
     describe('with non-value list exception', () => {
       afterEach(async () => {
-        await deleteAllExceptions(supertest);
+        await deleteAllExceptions(supertest, log);
       });
       it('generates no signals when an exception is added for an ML rule', async () => {
-        const createdRule = await createRuleWithExceptionEntries(supertest, testRule, [
+        const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
           [
             {
               field: 'host.name',
@@ -228,25 +230,25 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
     });
 
     describe('with value list exception', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
-        await deleteAllExceptions(supertest);
+        await deleteListsIndex(supertest, log);
+        await deleteAllExceptions(supertest, log);
       });
 
       it('generates no signals when a value list exception is added for an ML rule', async () => {
         const valueListId = 'value-list-id';
-        await importFile(supertest, 'keyword', ['mothra'], valueListId);
-        const createdRule = await createRuleWithExceptionEntries(supertest, testRule, [
+        await importFile(supertest, log, 'keyword', ['mothra'], valueListId);
+        const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
           [
             {
               field: 'host.name',
@@ -259,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
     });
