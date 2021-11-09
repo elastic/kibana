@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError } from 'src/core/public';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -209,7 +209,7 @@ export function useFailedTransactionsCorrelations() {
       setResponse.flush();
     } catch (e) {
       if (!abortCtrl.current.signal.aborted) {
-        const err = e as Error | IHttpFetchError<ResponseErrorBody>;
+        const err = e as Error | IHttpFetchError;
         setResponse({
           error:
             'response' in err
