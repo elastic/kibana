@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/run_build_docs_cli').runBuildDocsCli();
+import React from 'react';
+import { EuiLoadingChart } from '@elastic/eui';
+
+export const TimeseriesLoading = () => (
+  <div className="visChart__spinner">
+    <EuiLoadingChart mono size="l" />
+  </div>
+);
