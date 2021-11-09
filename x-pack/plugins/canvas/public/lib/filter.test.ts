@@ -299,10 +299,10 @@ describe('getFiltersByGroups', () => {
   const group2 = 'Group 2';
 
   const filters = [
-    `exactly value="x-pack" column="project1" filterGroup="${group1}"`,
-    `exactly value="beats" column="project1" filterGroup="${group2}"`,
-    `exactly value="machine-learning" column="project1"`,
-    `exactly value="kibana" column="project2" filterGroup="${group2}"`,
+    { id: '0', filter: `exactly value="x-pack" column="project1" filterGroup="${group1}"` },
+    { id: '1', filter: `exactly value="beats" column="project1" filterGroup="${group2}"` },
+    { id: '2', filter: `exactly value="machine-learning" column="project1"` },
+    { id: '3', filter: `exactly value="kibana" column="project2" filterGroup="${group2}"` },
   ];
 
   it('returns all filters related to a specified groups', () => {

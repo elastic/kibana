@@ -16,8 +16,9 @@ import { Filter } from '../../../../types';
 const timeFormat = 'MM.dd.YYYY HH:mm';
 
 const filters: Filter[] = [
-  { type: 'exactly', column: 'project', value: 'kibana', filterGroup: 'Group 1' },
+  { id: '0', type: 'exactly', column: 'project', value: 'kibana', filterGroup: 'Group 1' },
   {
+    id: '1',
     type: 'time',
     column: '@timestamp',
     value: {
@@ -26,8 +27,9 @@ const filters: Filter[] = [
     },
     filterGroup: 'Group 1',
   },
-  { type: 'exactly', column: 'country', value: 'US', filterGroup: 'Group 2' },
+  { id: '2', type: 'exactly', column: 'country', value: 'US', filterGroup: 'Group 2' },
   {
+    id: '3',
     type: 'time',
     column: 'time',
     value: {

@@ -20,10 +20,18 @@ describe('adaptCanvasFilter', () => {
     },
   };
 
-  it('returns filter when AST arguments consists of arrays with one element', () => {
-    const resultFilter = { type: 'exactly', column: 'project', filterGroup: null, value: 'kibana' };
+  const id = '0';
 
-    const filter = adaptCanvasFilter(filterAST);
+  it('returns filter when AST arguments consists of arrays with one element', () => {
+    const resultFilter = {
+      id,
+      type: 'exactly',
+      column: 'project',
+      filterGroup: null,
+      value: 'kibana',
+    };
+
+    const filter = adaptCanvasFilter(filterAST, id);
     expect(filter).toEqual(resultFilter);
   });
 
@@ -33,13 +41,14 @@ describe('adaptCanvasFilter', () => {
     const newFilterAST = { ...filterAST, arguments: { ...rest, ...additionalArguments } };
 
     const resultFilter = {
+      id,
       type: 'exactly',
       column: 'project',
       filterGroup: null,
       value: { value1: 'value1', value2: 'value2' },
     };
 
-    const filter = adaptCanvasFilter(newFilterAST);
+    const filter = adaptCanvasFilter(newFilterAST, id);
     expect(filter).toEqual(resultFilter);
   });
 
@@ -47,13 +56,14 @@ describe('adaptCanvasFilter', () => {
     const { arguments: args, ...rest } = filterAST;
 
     const resultFilter = {
+      id,
       type: 'exactly',
       column: null,
       filterGroup: null,
       value: null,
     };
 
-    const filter = adaptCanvasFilter({ ...rest, arguments: {} });
+    const filter = adaptCanvasFilter({ ...rest, arguments: {} }, id);
     expect(filter).toEqual(resultFilter);
   });
 });

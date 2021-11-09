@@ -39,13 +39,13 @@ const component: FC<any> = ({ value }) => (
 );
 
 storiesOf('components/WorkpadFilters/FilterComponent', module)
-  .add('default', () => <Filter filter={filter} />)
+  .add('default', () => <Filter filterView={filter} />)
   .add('with component field', () => (
-    <Filter filter={{ ...filter, value: { ...filter.value, component } }} />
+    <Filter filterView={{ ...filter, value: { ...filter.value, component } }} />
   ))
   .add('with custom filter fields', () => (
     <Filter
-      filter={{
+      filterView={{
         ...filter,
         customField: { label: 'Custom Field', formattedValue: 'Some unknown field' },
       }}

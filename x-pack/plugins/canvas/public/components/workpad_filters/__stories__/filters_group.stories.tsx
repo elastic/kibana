@@ -16,8 +16,9 @@ const timeFormat = 'MM.dd.YYYY HH:mm';
 const filtersGroup: FiltersGroupType = {
   name: 'Group 1',
   filters: [
-    { type: 'exactly', column: 'project', value: 'kibana', filterGroup: 'Group 1' },
+    { id: '0', type: 'exactly', column: 'project', value: 'kibana', filterGroup: 'Group 1' },
     {
+      id: '0',
       type: 'time',
       column: '@timestamp',
       value: {
@@ -26,8 +27,9 @@ const filtersGroup: FiltersGroupType = {
       },
       filterGroup: 'Group 1',
     },
-    { type: 'exactly', column: 'country', value: 'US', filterGroup: 'Group 1' },
+    { id: '0', type: 'exactly', column: 'country', value: 'US', filterGroup: 'Group 1' },
     {
+      id: '0',
       type: 'time',
       column: 'time',
       value: {
