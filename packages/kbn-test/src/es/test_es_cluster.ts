@@ -266,21 +266,19 @@ export function createTestEsCluster<
 
     async stop() {
       await this.getClient()
-        .search<{ message: string }>(
+        .search<{ message: string; 'elasticsearch.http.request.x_opaque_id': string }>(
           { index: '.logs-deprecation.elasticsearch-default', ignore_unavailable: true, size: 100 },
           { ignore: [404] }
         )
         .then((res) => {
           const deps = res.body.hits.hits
+            .filter(
+              (d) => d._source!['elasticsearch.http.request.x_opaque_id'] !== 'kbn-test-client'
+            )
             .map((d) => {
               return d._source!.message;
-            })
-            .filter(
-              (m) =>
-                !m?.match(
-                  /this request accesses system indices: \[\.kibana_.*\], but in a future major version, direct access to system indices will be prevented by default/
-                )
-            );
+            });
+
           if (deps.length > 0) {
             log.error(`Found ${deps.length} deprecation warnings.`);
           }
@@ -312,6 +310,7 @@ export function createTestEsCluster<
     getClient(): KibanaClient {
       return new Client({
         node: this.getHostUrls()[0],
+        headers: { 'X-Opaque-Id': 'kbn-test-client' },
       });
     }
 
