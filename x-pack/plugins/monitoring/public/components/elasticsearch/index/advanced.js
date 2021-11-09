@@ -23,8 +23,6 @@ import { AlertsCallout } from '../../../alerts/callout';
 
 export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {
   const metricsToShow = [
-    metrics.index_1,
-    metrics.index_2,
     metrics.index_3,
     metrics.index_4,
     metrics.index_total,
