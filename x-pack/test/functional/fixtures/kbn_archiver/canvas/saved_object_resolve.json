@@ -1,0 +1,282 @@
+{
+  "attributes": {
+    "@created": "2018-11-19T19:17:12.646Z",
+    "@timestamp": "2018-11-19T19:36:28.499Z",
+    "assets": {},
+    "colors": [
+      "#37988d",
+      "#c19628",
+      "#b83c6f",
+      "#3f9939",
+      "#1785b0",
+      "#ca5f35",
+      "#45bdb0",
+      "#f2bc33",
+      "#e74b8b",
+      "#4fbf48",
+      "#1ea6dc",
+      "#fd7643",
+      "#72cec3",
+      "#f5cc5d",
+      "#ec77a8",
+      "#7acf74",
+      "#4cbce4",
+      "#fd986f",
+      "#a1ded7",
+      "#f8dd91",
+      "#f2a4c5",
+      "#a6dfa2",
+      "#86d2ed",
+      "#fdba9f",
+      "#000000",
+      "#444444",
+      "#777777",
+      "#BBBBBB",
+      "#FFFFFF",
+      "rgba(255,255,255,0)"
+    ],
+    "height": 920,
+    "isWriteable": true,
+    "name": "Alias Match Workpad",
+    "page": 0,
+    "pages": [
+      {
+        "elements": [
+          {
+            "expression": "markdown \n  \"### Welcome to Canvas\n\nEnjoy your stay!\n\n- Green: Markdown, Browser function\n- Blue: SQL, Server function\n- Pink: CSV, Common function\n- Orange: Timelion, Server function\"\n| render \n  containerStyle={containerStyle padding=\"8px\" opacity=\"1\" backgroundColor=\"#7acf74\"}",
+            "id": "element-8f64a10a-01f3-4a71-a682-5b627cbe4d0e",
+            "position": {
+              "angle": 0,
+              "height": 238,
+              "left": 33.5,
+              "top": 20,
+              "width": 338
+            }
+          },
+          {
+            "expression": "filters\n| essql query=\"SELECT extension,bytes FROM \\\"logstash*\\\" LIMIT 10\"\n| table\n| render \n  containerStyle={containerStyle padding=\"4px\" opacity=\"0.7\" backgroundColor=\"#4cbce4\"}",
+            "id": "element-d3bf91e2-7e8c-4884-942e-d4e9006aef09",
+            "position": {
+              "angle": 0,
+              "height": 345,
+              "left": 439,
+              "top": 20,
+              "width": 367
+            }
+          },
+          {
+            "expression": "csv \"desc,price\nred fish,100\nblue fish,200\"\n| render \n  containerStyle={containerStyle backgroundColor=\"#ec77a8\" padding=\"4px\" opacity=\"0.7\"}",
+            "id": "element-223fe2b3-ffb4-4070-ae61-3e06b8052abb",
+            "position": {
+              "angle": 0,
+              "height": 132,
+              "left": 25,
+              "top": 390,
+              "width": 207
+            }
+          },
+          {
+            "expression": "filters\n| timelion query=\".es(index=logstash*,q=extension:jpg)\" interval=\"1M\" from=\"2017-01-01\" to=\"2017-12-31\"\n| table perPage=200\n| render containerStyle={containerStyle backgroundColor=\"#fd986f\" opacity=\"0.7\"}",
+            "id": "element-3c905696-8258-4e9c-ab58-89018681f79f",
+            "position": {
+              "angle": 0,
+              "height": 397,
+              "left": 263.5,
+              "top": 390,
+              "width": 533
+            }
+          }
+        ],
+        "id": "page-c38cd459-10fe-45f9-847b-2cbd7ec74319",
+        "style": {
+          "background": "#fff"
+        },
+        "transition": {}
+      }
+    ],
+    "width": 840
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "workpad-1705f884-6224-47de-ba49-ca224fe6ec31-new-id",
+  "migrationVersion": {
+    "canvas-workpad": "7.0.0"
+  },
+  "references": [],
+  "type": "canvas-workpad",
+  "updated_at": "2018-11-19T19:36:28.511Z",
+  "version": "WzUsMl0="
+}
+
+{
+  "attributes": {
+    "@created": "2018-11-19T19:17:12.646Z",
+    "@timestamp": "2018-11-19T19:36:28.499Z",
+    "assets": {},
+    "colors": [
+      "#37988d",
+      "#c19628",
+      "#b83c6f",
+      "#3f9939",
+      "#1785b0",
+      "#ca5f35",
+      "#45bdb0",
+      "#f2bc33",
+      "#e74b8b",
+      "#4fbf48",
+      "#1ea6dc",
+      "#fd7643",
+      "#72cec3",
+      "#f5cc5d",
+      "#ec77a8",
+      "#7acf74",
+      "#4cbce4",
+      "#fd986f",
+      "#a1ded7",
+      "#f8dd91",
+      "#f2a4c5",
+      "#a6dfa2",
+      "#86d2ed",
+      "#fdba9f",
+      "#000000",
+      "#444444",
+      "#777777",
+      "#BBBBBB",
+      "#FFFFFF",
+      "rgba(255,255,255,0)"
+    ],
+    "height": 920,
+    "isWriteable": true,
+    "name": "Conflict Alternate Workpad",
+    "page": 0,
+    "pages": [
+      {
+        "elements": [
+          {
+            "expression": "markdown \n  \"### Welcome to Canvas\n\nEnjoy your stay!\n\n- Green: Markdown, Browser function\n- Blue: SQL, Server function\n- Pink: CSV, Common function\n- Orange: Timelion, Server function\"\n| render \n  containerStyle={containerStyle padding=\"8px\" opacity=\"1\" backgroundColor=\"#7acf74\"}",
+            "id": "element-8f64a10a-01f3-4a71-a682-5b627cbe4d0e",
+            "position": {
+              "angle": 0,
+              "height": 238,
+              "left": 33.5,
+              "top": 20,
+              "width": 338
+            }
+          },
+          {
+            "expression": "filters\n| essql query=\"SELECT extension,bytes FROM \\\"logstash*\\\" LIMIT 10\"\n| table\n| render \n  containerStyle={containerStyle padding=\"4px\" opacity=\"0.7\" backgroundColor=\"#4cbce4\"}",
+            "id": "element-d3bf91e2-7e8c-4884-942e-d4e9006aef09",
+            "position": {
+              "angle": 0,
+              "height": 345,
+              "left": 439,
+              "top": 20,
+              "width": 367
+            }
+          },
+          {
+            "expression": "csv \"desc,price\nred fish,100\nblue fish,200\"\n| render \n  containerStyle={containerStyle backgroundColor=\"#ec77a8\" padding=\"4px\" opacity=\"0.7\"}",
+            "id": "element-223fe2b3-ffb4-4070-ae61-3e06b8052abb",
+            "position": {
+              "angle": 0,
+              "height": 132,
+              "left": 25,
+              "top": 390,
+              "width": 207
+            }
+          },
+          {
+            "expression": "filters\n| timelion query=\".es(index=logstash*,q=extension:jpg)\" interval=\"1M\" from=\"2017-01-01\" to=\"2017-12-31\"\n| table perPage=200\n| render containerStyle={containerStyle backgroundColor=\"#fd986f\" opacity=\"0.7\"}",
+            "id": "element-3c905696-8258-4e9c-ab58-89018681f79f",
+            "position": {
+              "angle": 0,
+              "height": 397,
+              "left": 263.5,
+              "top": 390,
+              "width": 533
+            }
+          }
+        ],
+        "id": "page-c38cd459-10fe-45f9-847b-2cbd7ec74319",
+        "style": {
+          "background": "#fff"
+        },
+        "transition": {}
+      }
+    ],
+    "width": 840
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-new",
+  "migrationVersion": {
+    "canvas-workpad": "7.0.0"
+  },
+  "references": [],
+  "type": "canvas-workpad",
+  "updated_at": "2018-11-19T19:36:28.511Z",
+  "version": "WzUsMl0="
+}
+
+{
+  "attributes": {
+    "@created": "2018-11-19T19:17:12.646Z",
+    "@timestamp": "2018-11-19T19:36:28.499Z",
+    "assets": {},
+    "colors": [
+      "#37988d",
+      "#c19628",
+      "#b83c6f",
+      "#3f9939",
+      "#1785b0",
+      "#ca5f35",
+      "#45bdb0",
+      "#f2bc33",
+      "#e74b8b",
+      "#4fbf48",
+      "#1ea6dc",
+      "#fd7643",
+      "#72cec3",
+      "#f5cc5d",
+      "#ec77a8",
+      "#7acf74",
+      "#4cbce4",
+      "#fd986f",
+      "#a1ded7",
+      "#f8dd91",
+      "#f2a4c5",
+      "#a6dfa2",
+      "#86d2ed",
+      "#fdba9f",
+      "#000000",
+      "#444444",
+      "#777777",
+      "#BBBBBB",
+      "#FFFFFF",
+      "rgba(255,255,255,0)"
+    ],
+    "height": 920,
+    "isWriteable": true,
+    "name": "Conflict Match Workpad",
+    "page": 0,
+    "pages": [
+      {
+        "elements": [
+        ],
+        "id": "page-c38cd459-10fe-45f9-847b-2cbd7ec74319",
+        "style": {
+          "background": "#fff"
+        },
+        "transition": {}
+      }
+    ],
+    "width": 840
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old",
+  "migrationVersion": {
+    "canvas-workpad": "7.0.0"
+  },
+  "references": [],
+  "type": "canvas-workpad",
+  "updated_at": "2018-11-19T19:36:28.511Z",
+  "version": "WzUsMl0="
+}

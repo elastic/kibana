@@ -8,7 +8,7 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { DashboardEnhancedPlugin } from './plugin';
 
-export {
+export type {
   SetupContract as DashboardEnhancedSetupContract,
   SetupDependencies as DashboardEnhancedSetupDependencies,
   StartContract as DashboardEnhancedStartContract,

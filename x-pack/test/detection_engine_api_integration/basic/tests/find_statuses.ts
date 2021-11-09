@@ -24,6 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const log = getService('log');
 
   describe('find_statuses', () => {
     before(async () => {
@@ -35,13 +36,13 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
-      await deleteAllRulesStatuses(es);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
+      await deleteAllRulesStatuses(es, log);
     });
 
     it('should return an empty find statuses body correctly if no statuses are loaded', async () => {
@@ -55,9 +56,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a single rule status when a single rule is loaded from a find status with defaults added', async () => {
-      const resBody = await createRule(supertest, getSimpleRule('rule-1', true));
+      const resBody = await createRule(supertest, log, getSimpleRule('rule-1', true));
 
-      await waitForRuleSuccessOrStatus(supertest, resBody.id);
+      await waitForRuleSuccessOrStatus(supertest, log, resBody.id);
 
       // query the single rule from _find
       const { body } = await supertest
