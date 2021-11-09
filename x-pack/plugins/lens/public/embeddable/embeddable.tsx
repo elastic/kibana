@@ -52,6 +52,8 @@ import {
   LensBrushEvent,
   LensFilterEvent,
   LensTableRowContextMenuEvent,
+  VisualizationMap,
+  Visualization
 } from '../types';
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
@@ -98,6 +100,7 @@ export interface LensEmbeddableDeps {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  visualizationMap: VisualizationMap;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
@@ -449,6 +452,16 @@ export class Embeddable
     return output;
   }
 
+  private get onEditAction (): Visualization['onEditAction'] { 
+    const visType = this.savedVis?.visualizationType;
+
+    if (!visType) {
+      return;
+    }
+
+    return this.deps.visualizationMap[visType].onEditAction;
+  }
+
   handleEvent = async (event: ExpressionRendererEvent) => {
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
@@ -486,27 +499,14 @@ export class Embeddable
       }
     }
 
-    // TODO - inject this from datatable_visualization/visualization
-    const onEditAction = (state, event) => {
-      switch (event.data.action) {
-        case 'sort':
-          return {
-            ...state,
-            sorting: {
-              columnId: event.data.columnId,
-              direction: event.data.direction,
-            },
-          };
-        };
-    };
-
-    if (isLensEditEvent(event)) {
+    // We allow for edit actions in the Embeddable for display purposes only (e.g. changing the datatable sort order).
+    // No state changes made here with an edit action are persisted.
+    if (isLensEditEvent(event) && this.onEditAction) {
       if (!this.savedVis) return;
 
       const newSavedVis = JSON.parse(JSON.stringify(this.savedVis));
-      newSavedVis.state.visualization = onEditAction(this.savedVis.state.visualization, event);
-      
-      const { expression, errors } = await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+      newSavedVis.state.visualization = this.onEditAction(this.savedVis.state.visualization, event);
+      const { expression, errors } = await getExpressionFromDocument(newSavedVis, this.deps.documentToExpression);
       this.expression = expression;
       this.errors = errors;
 
@@ -514,7 +514,7 @@ export class Embeddable
     }
   };
 
-  async reload() {
+  reload() {
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
