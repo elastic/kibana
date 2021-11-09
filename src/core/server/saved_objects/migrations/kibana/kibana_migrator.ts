@@ -63,8 +63,8 @@ export class KibanaMigrator {
     status: 'waiting_to_start',
   });
   private readonly activeMappings: IndexMapping;
-  private readonly kibanaVersion: string;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
+  public readonly kibanaVersion: string;
 
   /**
    * Creates an instance of KibanaMigrator.
