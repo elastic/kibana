@@ -63,22 +63,7 @@ const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
 }) => {
   let titleMessage;
   let descriptionMessage;
-  if (statusCode === 500) {
-    titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailable400500CalloutTitle', {
-      defaultMessage:
-        'Kibana cannot connect to the Elastic Package Registry, which provides Elastic Agent integrations\n',
-    });
-    descriptionMessage = (
-      <FormattedMessage
-        id="xpack.fleet.epmList.eprUnavailableCallout400500TitleMessage"
-        defaultMessage="Ensure the {registryproxy} or {onpremregistry} is configured correctly, or try again later."
-        values={{
-          registryproxy: <ProxyLink />,
-          onpremregistry: <OnPremLink />,
-        }}
-      />
-    );
-  } else {
+  if (statusCode === 502) {
     titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailableBadGatewayCalloutTitle', {
       defaultMessage:
         'Kibana cannot reach the Elastic Package Registry, which provides Elastic Agent integrations\n',
@@ -87,6 +72,21 @@ const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
       <FormattedMessage
         id="xpack.fleet.epmList.eprUnavailableCallouBdGatewaytTitleMessage"
         defaultMessage="To view these integrations, configure a  {registryproxy} or host {onpremregistry}."
+        values={{
+          registryproxy: <ProxyLink />,
+          onpremregistry: <OnPremLink />,
+        }}
+      />
+    );
+  } else {
+    titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailable400500CalloutTitle', {
+      defaultMessage:
+        'Kibana cannot connect to the Elastic Package Registry, which provides Elastic Agent integrations\n',
+    });
+    descriptionMessage = (
+      <FormattedMessage
+        id="xpack.fleet.epmList.eprUnavailableCallout400500TitleMessage"
+        defaultMessage="Ensure the {registryproxy} or {onpremregistry} is configured correctly, or try again later."
         values={{
           registryproxy: <ProxyLink />,
           onpremregistry: <OnPremLink />,
