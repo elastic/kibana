@@ -14,7 +14,7 @@ export default function enterSpaceFunctonalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/100570
+  // Failing: See https://github.com/elastic/kibana/issues/100570
   describe.skip('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
@@ -26,6 +26,7 @@ export default function enterSpaceFunctonalTests({
     );
 
     afterEach(async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
 
