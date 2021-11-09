@@ -74,7 +74,12 @@ export const registerRulePreviewPrivilegeDeprecations = ({
         }
 
         rolesWhichReadSignals =
-          roles?.filter((role) => roleIsExternal(role) && roleHasReadAccess(role)) ?? [];
+          roles?.filter(
+            (role) =>
+              roleIsExternal(role) &&
+              roleHasReadAccess(role) &&
+              !roleHasReadAccess(role, PREVIEW_INDEX_PREFIX)
+          ) ?? [];
       }
 
       if (rolesWhichReadSignals.length === 0) {

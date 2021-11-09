@@ -109,6 +109,24 @@ describe('rule preview privileges deprecation', () => {
       expect(result).toEqual([]);
     });
 
+    it('returns no deprecation when a role also has read access to the previews index', async () => {
+      mockDependencies.getKibanaRoles.mockResolvedValue({
+        roles: [
+          getRoleMock(
+            [
+              {
+                names: ['other-index', '.siem-signals-*', '.preview.alerts-security.alerts-*'],
+                privileges: ['all'],
+              },
+            ],
+            'roleWithCorrectAccess'
+          ),
+        ],
+      });
+      const result = await deprecationHandler.getDeprecations(mockContext);
+      expect(result).toEqual([]);
+    });
+
     it('returns no deprecation if all roles found are internal', async () => {
       const internalRoleMock = {
         ...getRoleMock(
@@ -142,6 +160,15 @@ describe('rule preview privileges deprecation', () => {
               },
             ],
             'irrelevantRole'
+          ),
+          getRoleMock(
+            [
+              {
+                names: ['other-index', '.siem-signals-*', '.preview.alerts-security.alerts-*'],
+                privileges: ['all'],
+              },
+            ],
+            'roleWithCorrectAccess'
           ),
           getRoleMock(
             [
