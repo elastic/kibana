@@ -121,35 +121,33 @@ export const EndpointDetailsContent = memo(
             </ColumnTitle>
           ),
           description: (
-            <>
-              <EuiText size="xs" className={'eui-textBreakWord'}>
-                <EndpointPolicyLink
-                  policyId={details.Endpoint.policy.applied.id}
-                  data-test-subj="policyDetailsValue"
-                  style={{ paddingRight: '5px' }}
+            <EuiText size="xs" className={'eui-textBreakWord'}>
+              <EndpointPolicyLink
+                policyId={details.Endpoint.policy.applied.id}
+                data-test-subj="policyDetailsValue"
+                style={{ paddingRight: '5px' }}
+              >
+                {details.Endpoint.policy.applied.name}
+              </EndpointPolicyLink>
+              {details.Endpoint.policy.applied.endpoint_policy_version && (
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  className={'eui-displayInlineBlock'}
+                  style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}
+                  data-test-subj="policyDetailsRevNo"
                 >
-                  {details.Endpoint.policy.applied.name}
-                </EndpointPolicyLink>
-                {details.Endpoint.policy.applied.endpoint_policy_version && (
-                  <EuiText
-                    color="subdued"
-                    size="xs"
-                    className={'eui-displayInlineBlock'}
-                    style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}
-                    data-test-subj="policyDetailsRevNo"
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
-                      defaultMessage="rev. {revNumber}"
-                      values={{
-                        revNumber: details.Endpoint.policy.applied.endpoint_policy_version,
-                      }}
-                    />
-                  </EuiText>
-                )}
-                {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && <OutOfDate />}
-              </EuiText>
-            </>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
+                    defaultMessage="rev. {revNumber}"
+                    values={{
+                      revNumber: details.Endpoint.policy.applied.endpoint_policy_version,
+                    }}
+                  />
+                </EuiText>
+              )}
+              {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && <OutOfDate />}
+            </EuiText>
           ),
         },
         {
