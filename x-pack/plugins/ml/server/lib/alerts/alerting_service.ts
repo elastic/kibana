@@ -152,6 +152,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                   'job_id',
                   'detector_index',
                   'bucket_span',
+                  'typical',
+                  'actual',
                 ],
               },
               size: 3,
