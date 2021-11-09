@@ -42,7 +42,7 @@ steps:
     label: 'OSS CI Group'
     parallelism: 11
     agents:
-      queue: n2-2
+      queue: ci-group-4
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
@@ -54,7 +54,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_accessibility.sh
     label: 'OSS Accessibility Tests'
     agents:
-      queue: n2-2
+      queue: ci-group-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -65,7 +65,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_accessibility.sh
     label: 'Default Accessibility Tests'
     agents:
-      queue: ci-group-6
+      queue: ci-group-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -88,7 +88,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_firefox.sh
     label: 'Default Firefox Tests'
     agents:
-      queue: ci-group-6
+      queue: ci-group-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -99,7 +99,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/oss_misc.sh
     label: 'OSS Misc Functional Tests'
     agents:
-      queue: ci-group-6
+      queue: ci-group-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -110,7 +110,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/xpack_saved_object_field_metrics.sh
     label: 'Saved Object Field Metrics'
     agents:
-      queue: ci-group-6
+      queue: ci-group-4
     depends_on: build
     timeout_in_minutes: 120
     retry:
