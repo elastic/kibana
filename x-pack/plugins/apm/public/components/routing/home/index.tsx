@@ -69,6 +69,8 @@ export const home = {
       t.partial({
         refreshPaused: t.union([t.literal('true'), t.literal('false')]),
         refreshInterval: t.string,
+        comparisonEnabled: toBooleanRt,
+        comparisonType: comparisonTypeRt,
       }),
     ]),
   }),

@@ -6,6 +6,18 @@
  * Side Public License, v 1.
  */
 
+export interface EsDoc {
+  _id: string;
+  _index: string;
+  _source: TestDoc;
+}
+
+export interface TestDoc {
+  title: string;
+  subTitle: string;
+  description: string;
+}
+
 interface PreviewErrorArgs {
   reason: string;
   scriptStack?: string[];
@@ -23,3 +35,33 @@ export const createPreviewError = ({
     script_stack: scriptStack,
   };
 };
+
+export const mockDocuments: EsDoc[] = [
+  {
+    _id: '001',
+    _index: 'testIndex',
+    _source: {
+      title: 'First doc - title',
+      subTitle: 'First doc - subTitle',
+      description: 'First doc - description',
+    },
+  },
+  {
+    _id: '002',
+    _index: 'testIndex',
+    _source: {
+      title: 'Second doc - title',
+      subTitle: 'Second doc - subTitle',
+      description: 'Second doc - description',
+    },
+  },
+  {
+    _id: '003',
+    _index: 'testIndex',
+    _source: {
+      title: 'Third doc - title',
+      subTitle: 'Third doc - subTitle',
+      description: 'Third doc - description',
+    },
+  },
+];

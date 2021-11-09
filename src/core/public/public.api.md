@@ -15,6 +15,7 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiOverlayMaskProps } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
@@ -477,6 +478,9 @@ export interface DocLinksStart {
     readonly links: {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -600,7 +604,11 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+            readonly remoteReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
@@ -727,6 +735,9 @@ export interface DocLinksStart {
             readonly pythonGuide: string;
             readonly rubyOverview: string;
             readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
         };
     };
 }
@@ -1047,6 +1058,8 @@ export interface OverlayFlyoutOpenOptions {
     closeButtonAriaLabel?: string;
     // (undocumented)
     hideCloseButton?: boolean;
+    // (undocumented)
+    maskProps?: EuiOverlayMaskProps;
     // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;

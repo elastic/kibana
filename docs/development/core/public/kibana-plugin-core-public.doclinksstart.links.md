@@ -10,6 +10,9 @@
 readonly links: {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -133,7 +136,11 @@ readonly links: {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+            readonly remoteReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
@@ -260,6 +267,9 @@ readonly links: {
             readonly pythonGuide: string;
             readonly rubyOverview: string;
             readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
         };
     };
 ```
