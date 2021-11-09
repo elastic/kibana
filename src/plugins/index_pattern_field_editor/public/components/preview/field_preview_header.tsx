@@ -7,18 +7,12 @@
  */
 
 import React from 'react';
-import {
-  EuiTitle,
-  EuiText,
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiTitle, EuiText, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from './field_preview_context';
+import { IsUpdatingIndicator } from './is_updating_indicator';
 
 const i18nTexts = {
   title: i18n.translate('indexPatternFieldEditor.fieldPreview.title', {
@@ -27,20 +21,14 @@ const i18nTexts = {
   customData: i18n.translate('indexPatternFieldEditor.fieldPreview.subTitle.customData', {
     defaultMessage: 'Custom data',
   }),
-  updatingLabel: i18n.translate('indexPatternFieldEditor.fieldPreview.updatingPreviewLabel', {
-    defaultMessage: 'Updating...',
-  }),
 };
 
 export const FieldPreviewHeader = () => {
   const { indexPattern } = useFieldEditorContext();
   const {
     from,
-    isLoadingPreview,
-    currentDocument: { isLoading },
+    currentDocument: { isLoading: isFetchingDocument },
   } = useFieldPreviewContext();
-
-  const isUpdating = isLoadingPreview || isLoading;
 
   return (
     <div>
@@ -50,15 +38,9 @@ export const FieldPreviewHeader = () => {
             <h2 data-test-subj="title">{i18nTexts.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
-
-        {isUpdating && (
-          <EuiFlexItem data-test-subj="isUpdatingIndicator">
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{i18nTexts.updatingLabel}</EuiFlexItem>
-            </EuiFlexGroup>
+        {isFetchingDocument && (
+          <EuiFlexItem data-test-subj="isFetchingDocumentIndicator">
+            <IsUpdatingIndicator />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
