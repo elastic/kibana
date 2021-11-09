@@ -61,13 +61,6 @@ describe('field_stats', () => {
               aggs: { actual_stats: { stats: { field: 'url.path' } } },
               filter: { exists: { field: 'url.path' } },
             },
-            sampled_percentiles: {
-              percentiles: {
-                field: 'url.path',
-                keyed: false,
-                percents: [50],
-              },
-            },
             sampled_top: {
               terms: {
                 field: 'url.path',
@@ -76,7 +69,7 @@ describe('field_stats', () => {
               },
             },
           },
-          sampler: { shard_size: 5000 },
+          sampler: { shard_size: 10000 },
         },
       };
       expect(req).toEqual(getExpectedQuery(expectedAggs));
@@ -88,7 +81,7 @@ describe('field_stats', () => {
 
       const expectedAggs = {
         sample: {
-          sampler: { shard_size: 5000 },
+          sampler: { shard_size: 10000 },
           aggs: {
             sampled_top: {
               terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
@@ -105,7 +98,7 @@ describe('field_stats', () => {
 
       const expectedAggs = {
         sample: {
-          sampler: { shard_size: 5000 },
+          sampler: { shard_size: 10000 },
           aggs: {
             sampled_value_count: {
               filter: { exists: { field: 'url.path' } },

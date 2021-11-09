@@ -194,6 +194,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             body: {
               ...getOptions(),
               fieldsToSample: [...fieldsToSample],
+              samplerShardSize: 5000,
             },
           },
         });
