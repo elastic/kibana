@@ -69,6 +69,24 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/domains',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        query: schema.object({
+          'page[current]': schema.number(),
+          'page[size]': schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains',
+    })
+  );
+
   router.post(
     {
       path: '/internal/app_search/engines/{name}/crawler/domains',

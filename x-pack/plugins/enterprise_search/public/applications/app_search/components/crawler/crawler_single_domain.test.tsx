@@ -28,9 +28,6 @@ const MOCK_VALUES = {
   domain: {
     url: 'https://elastic.co',
   },
-  // CrawlerOverviewLogic
-  domains: [],
-  crawlRequests: [],
 };
 
 const MOCK_ACTIONS = {
