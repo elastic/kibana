@@ -55,7 +55,7 @@ process, but rather for the initial exploration of your data.
 
 . To upload a file, you’ll need the following privileges,
 which you can manage in **{stack-manage-app}**.
-+
+* [ ] `Data Views Management: All` {kib} feature privileges
 * `all` {kib} privileges for *Discover*
 * `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
 * `create`, `create_index`, `manage`, and `read` index privileges for the index
