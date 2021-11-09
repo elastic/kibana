@@ -18,7 +18,12 @@ describe('buildTimelineDetailsQuery', () => {
       { field: 'agent.name' },
     ];
 
-    const query = buildTimelineDetailsQuery(indexName, eventId, docValueFields);
+    const query = buildTimelineDetailsQuery({
+      indexName,
+      id: eventId,
+      docValueFields,
+      runtimeMappings: {},
+    });
 
     expect(query).toMatchInlineSnapshot(`
       Object {
@@ -52,6 +57,7 @@ describe('buildTimelineDetailsQuery', () => {
               ],
             },
           },
+          "runtime_mappings": Object {},
         },
         "ignore_unavailable": true,
         "index": ".siem-signals-default",
