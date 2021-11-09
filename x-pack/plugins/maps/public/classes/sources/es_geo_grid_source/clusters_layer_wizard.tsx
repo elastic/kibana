@@ -11,7 +11,7 @@ import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { VectorLayer } from '../../layers/vector_layer';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import {
   ESGeoGridSourceDescriptor,
   ColorDynamicOptions,
@@ -45,7 +45,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
       }
 
       const defaultDynamicProperties = getDefaultDynamicProperties();
-      const layerDescriptor = VectorLayer.createDescriptor({
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({
         sourceDescriptor: ESGeoGridSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
           // @ts-ignore
