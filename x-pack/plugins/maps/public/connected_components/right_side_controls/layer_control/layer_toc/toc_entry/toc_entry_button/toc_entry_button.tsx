@@ -13,7 +13,7 @@ import { ILayer } from '../../../../../../classes/layers/layer';
 import { IVectorSource } from '../../../../../../classes/sources/vector_source';
 
 interface Footnote {
-  icon?: ReactNode;
+  icon: ReactNode;
   message?: string | null;
 }
 
