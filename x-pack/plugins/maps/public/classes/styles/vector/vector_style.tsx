@@ -708,7 +708,7 @@ export class VectorStyle implements IVectorStyle {
     return extractColorFromStyleProperty(this._descriptor.properties[primaryColorKey], 'grey');
   }
 
-  getIcon(areResultsTrimmed) {
+  getIcon(areResultsTrimmed: boolean) {
     const isLinesOnly = this._getIsLinesOnly();
     const isPointsOnly = this._getIsPointsOnly();
 
