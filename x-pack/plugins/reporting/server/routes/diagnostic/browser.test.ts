@@ -30,7 +30,6 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';
 
-// FLAKY: https://github.com/elastic/kibana/issues/89369
 describe('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
