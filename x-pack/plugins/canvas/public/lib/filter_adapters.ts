@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { Ast, ExpressionFunctionAST, toExpression } from '@kbn/interpreter/common';
 import { identity } from 'lodash';
 import { ExpressionAstArgument, Filter, FilterType } from '../../types';
 
@@ -54,22 +54,31 @@ export function adaptCanvasFilter(filter: ExpressionFunctionAST, id: string | nu
   };
 }
 
-const tranformObjectToExpression = (obj: Record<string, unknown>) =>
-  Object.keys(obj)
-    .map((key) => {
-      const value = obj[key];
-      const strValue = typeof value === 'number' || value === null ? `${value}` : `"${value}"`;
-      return `${key}=${strValue}`;
-    })
-    .join(' ');
+export const tranformObjectToArgs = (obj: Record<string, unknown>) =>
+  Object.keys(obj).reduce<Record<string, Array<string | number>>>((args, key) => {
+    const value = obj[key];
+    const adaptedValue = Array.isArray(value) ? value : [value];
+    return { ...args, [key]: adaptedValue };
+  }, {});
 
 export function adaptFilterToExpression(filter: Filter) {
   const { type, id, value, ...rest } = filter;
-  const restOfExpression = tranformObjectToExpression({ ...rest });
+  const restOfExpression = tranformObjectToArgs({ ...rest });
   const valueArgs =
     value !== null && typeof value === 'object'
-      ? tranformObjectToExpression({ ...value })
-      : tranformObjectToExpression({ value });
+      ? tranformObjectToArgs({ ...value })
+      : tranformObjectToArgs({ value });
 
-  return `${filterToFunction[type]} ${restOfExpression} ${valueArgs}`;
+  const exprAst: Ast = {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: filterToFunction[type],
+        arguments: { ...restOfExpression, ...valueArgs },
+      },
+    ],
+  };
+
+  return toExpression(exprAst);
 }
