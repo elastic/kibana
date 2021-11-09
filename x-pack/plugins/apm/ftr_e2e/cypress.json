@@ -2,7 +2,7 @@
   "fileServerFolder": "./cypress",
   "fixturesFolder": "./cypress/fixtures",
   "integrationFolder": "./cypress/integration",
-  "pluginsFile": "./cypress/plugins/index.js",
+  "pluginsFile": "./cypress/plugins/index.ts",
   "screenshotsFolder": "./cypress/screenshots",
   "supportFile": "./cypress/support/index.ts",
   "videosFolder": "./cypress/videos",

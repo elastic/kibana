@@ -91,7 +91,7 @@ export const deleteWatches = async (watchIds: string[]) => {
   const body = JSON.stringify({
     watchIds,
   });
-  const { results } = await getHttpClient().post(`${basePath}/watches/delete`, { body });
+  const { results } = await getHttpClient().post<any>(`${basePath}/watches/delete`, { body });
   return results;
 };
 
@@ -110,7 +110,7 @@ export const activateWatch = async (id: string) => {
 };
 
 export const loadWatch = async (id: string) => {
-  const { watch } = await getHttpClient().get(`${basePath}/watch/${id}`);
+  const { watch } = await getHttpClient().get<any>(`${basePath}/watch/${id}`);
   return Watch.fromUpstreamJson(watch);
 };
 
@@ -122,12 +122,12 @@ export const getMatchingIndices = async (pattern: string) => {
     pattern = `${pattern}*`;
   }
   const body = JSON.stringify({ pattern });
-  const { indices } = await getHttpClient().post(`${basePath}/indices`, { body });
+  const { indices } = await getHttpClient().post<any>(`${basePath}/indices`, { body });
   return indices;
 };
 
 export const fetchFields = async (indexes: string[]) => {
-  const { fields } = await getHttpClient().post(`${basePath}/fields`, {
+  const { fields } = await getHttpClient().post<any>(`${basePath}/fields`, {
     body: JSON.stringify({ indexes }),
   });
   return fields;
@@ -190,7 +190,7 @@ export const useLoadSettings = () => {
 };
 
 export const ackWatchAction = async (watchId: string, actionId: string) => {
-  const { watchStatus } = await getHttpClient().put(
+  const { watchStatus } = await getHttpClient().put<any>(
     `${basePath}/watch/${watchId}/action/${actionId}/acknowledge`
   );
   return WatchStatus.fromUpstreamJson(watchStatus);

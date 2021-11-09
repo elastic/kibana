@@ -189,19 +189,15 @@ export default ({ getService }: FtrProviderContext) => {
             await alertStatusCell.moveMouseTo();
             await retry.waitFor(
               'cell actions visible',
-              async () => await observability.alerts.common.copyToClipboardButtonExists()
+              async () => await observability.alerts.common.filterForValueButtonExists()
             );
           });
         });
 
         afterEach(async () => {
           await observability.alerts.common.clearQueryBar();
-        });
-
-        it('Copy button works', async () => {
-          // NOTE: We don't have access to the clipboard in a headless environment,
-          // so we'll just check the button is clickable in the functional tests.
-          await (await observability.alerts.common.getCopyToClipboardButton()).click();
+          // Reset the query bar by hiding the dropdown
+          await observability.alerts.common.submitQuery('');
         });
 
         it('Filter for value works', async () => {
@@ -216,6 +212,29 @@ export default ({ getService }: FtrProviderContext) => {
             expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
           });
         });
+      });
+    });
+
+    describe('Actions Button', () => {
+      before(async () => {
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            observabilityCases: ['read'],
+            logs: ['read'],
+          })
+        );
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await observability.users.restoreDefaultTestUserRole();
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
+      it('Is disabled when a user has only read privilages', async () => {
+        const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+        expect(await actionsButton.getAttribute('disabled')).to.be('true');
       });
     });
   });

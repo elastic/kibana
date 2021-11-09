@@ -52,7 +52,6 @@ interface LegendControlOptions {
 export const Layout = React.memo(
   ({ shouldLoadDefault, currentView, reload, interval, nodes, loading }: Props) => {
     const [showLoading, setShowLoading] = useState(true);
-    const { source } = useSourceContext();
     const {
       metric,
       groupBy,
@@ -79,7 +78,6 @@ export const Layout = React.memo(
       legend: createLegend(legendPalette, legendSteps, legendReverseColors),
       metric,
       sort,
-      fields: source?.configuration?.fields,
       groupBy,
     };
 
