@@ -101,7 +101,7 @@ export class TOCEntryButton extends Component<Props, State> {
       });
     } else {
       const { icon: layerIcon, tooltipContent: layerTooltipContent } =
-        this.props.layer.getLayerIcon();
+        this.props.layer.getLayerIcon(true);
       icon = layerIcon;
       if (layerTooltipContent) {
         tooltipContent = layerTooltipContent;

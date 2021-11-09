@@ -99,7 +99,7 @@ describe('getLayerIcon', () => {
   it('Layers with non-elasticsearch sources should display icon', async () => {
     const layer: MvtVectorLayer = createLayer({}, {});
 
-    const iconAndTooltipContent = layer.getLayerIcon();
+    const iconAndTooltipContent = layer.getLayerIcon(false);
     const component = shallow(iconAndTooltipContent.icon);
     expect(component).toMatchSnapshot();
   });

@@ -78,7 +78,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       : super.getBounds(syncContext);
   }
 
-  getLayerIcon(): LayerIcon {
+  getLayerIcon(showIncompleteIndicator: boolean): LayerIcon {
     const featureCollection = this._getSourceFeatureCollection();
 
     if (!featureCollection || featureCollection.features.length === 0) {
@@ -106,7 +106,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />
       ) : (
-        this.getCurrentStyle().getIcon(areResultsTrimmed)
+        this.getCurrentStyle().getIcon(showIncompleteIndicator && areResultsTrimmed)
       ),
       tooltipContent,
       areResultsTrimmed,

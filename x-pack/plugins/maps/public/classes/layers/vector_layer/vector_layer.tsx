@@ -270,7 +270,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return true;
   }
 
-  getLayerIcon(): LayerIcon {
+  getLayerIcon(showIncompleteIndicator: boolean): LayerIcon {
     throw new Error('Should implement AbstractVectorLayer#getLayerIcon');
   }
 

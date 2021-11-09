@@ -97,7 +97,12 @@ export interface ILayer {
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  getLayerIcon(): LayerIcon;
+
+  /*
+   * ILayer.getLayerIcon returns layer icon and associated state.
+   * Set showIncompleteIndicator to true to have icon include indication when layer is showing incomplete results
+   */
+  getLayerIcon(showIncompleteIndicator: boolean): LayerIcon;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
   getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
@@ -243,7 +248,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getLayerIcon(): LayerIcon {
+  getLayerIcon(showIncompleteIndicator: boolean): LayerIcon {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };

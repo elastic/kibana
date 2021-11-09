@@ -50,7 +50,7 @@ export class Header extends Component<Props, State> {
       return;
     }
     const layerName = await layer.getDisplayName();
-    const { icon } = layer.getLayerIcon();
+    const { icon } = layer.getLayerIcon(false);
     if (this._isMounted) {
       this.setState({ layerIcon: icon, layerName });
     }

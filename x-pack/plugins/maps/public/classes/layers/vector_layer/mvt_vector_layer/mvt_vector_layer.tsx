@@ -78,7 +78,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this._descriptor.__metaFromTiles || [];
   }
 
-  getLayerIcon(): LayerIcon {
+  getLayerIcon(showIncompleteIndicator: boolean): LayerIcon {
     if (!this.getSource().isESSource()) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
       return {
@@ -134,7 +134,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     });
 
     return {
-      icon: this.getCurrentStyle().getIcon(areResultsTrimmed),
+      icon: this.getCurrentStyle().getIcon(showIncompleteIndicator && areResultsTrimmed),
       tooltipContent: areResultsTrimmed
         ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
             defaultMessage: `Results limited to {count} documents.`,
