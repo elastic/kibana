@@ -13,6 +13,8 @@ import { TemplateContext } from '../template_context';
 function generator({
   imageTag,
   imageFlavor,
+  dockerPush,
+  dockerTagQualifier,
   version,
   dockerTargetFilename,
   baseOSImage,
@@ -54,10 +56,12 @@ function generator({
   retry_docker_pull ${baseOSImage}
 
   echo "Building: kibana${imageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}:${version} -f Dockerfile . || exit 1;
+  docker build -t ${imageTag}${imageFlavor}:${version}${dockerTagQualifier} -f Dockerfile . || exit 1;
 
-  docker save ${imageTag}${imageFlavor}:${version} | gzip -c > ${dockerTargetFilename}
+  docker save ${imageTag}${imageFlavor}:${version}${dockerTagQualifier} | gzip -c > ${dockerTargetFilename}
 
+  echo "Pushing: ${imageTag}${imageFlavor}:${version}${dockerTagQualifier}"; \\
+  ${dockerPush} && docker image push ${imageTag}${imageFlavor}:${version}${dockerTagQualifier} || exit 1;
   exit 0
   `);
 }
