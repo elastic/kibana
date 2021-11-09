@@ -21,6 +21,8 @@ export const roleHasReadAccess = (role: Role, indexPrefix = DEFAULT_SIGNALS_INDE
       index.privileges.some((indexPrivilege) => READ_PRIVILEGES.includes(indexPrivilege))
   );
 
+export const roleIsExternal = (role: Role): boolean => role.metadata?._reserved !== true;
+
 const buildManualSteps = (roleNames: string[]): string[] => {
   const baseSteps = [
     i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep1', {
@@ -71,7 +73,8 @@ export const registerRulePreviewPrivilegeDeprecations = ({
           return errors;
         }
 
-        rolesWhichReadSignals = roles?.filter((role) => roleHasReadAccess(role)) ?? [];
+        rolesWhichReadSignals =
+          roles?.filter((role) => roleIsExternal(role) && roleHasReadAccess(role)) ?? [];
       }
 
       if (rolesWhichReadSignals.length === 0) {

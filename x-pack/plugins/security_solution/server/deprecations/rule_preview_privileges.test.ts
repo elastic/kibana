@@ -109,6 +109,28 @@ describe('rule preview privileges deprecation', () => {
       expect(result).toEqual([]);
     });
 
+    it('returns no deprecation if all roles found are internal', async () => {
+      const internalRoleMock = {
+        ...getRoleMock(
+          [
+            {
+              names: ['other-index', '.siem-signals-*'],
+              privileges: ['all'],
+            },
+          ],
+          'internalRole'
+        ),
+        metadata: {
+          _reserved: true,
+        },
+      };
+      mockDependencies.getKibanaRoles.mockResolvedValue({
+        roles: [internalRoleMock],
+      });
+      const result = await deprecationHandler.getDeprecations(mockContext);
+      expect(result).toEqual([]);
+    });
+
     it('returns an appropriate deprecation if roles are found', async () => {
       mockDependencies.getKibanaRoles.mockResolvedValue({
         roles: [
