@@ -8,23 +8,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'react-vis/dist/style.css';
-import { ConfigSchema } from '../';
-import {
-  AppMountParameters,
-  CoreStart,
-  APP_WRAPPER_CLASS,
-} from '../../../../../src/core/public';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { ApmAppRoot, ApmAppRootProps } from '../components/routing/app_root';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticDataView } from '../services/rest/data_view';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
-import { ApmAppRoot, ApmAppRootProps } from '../components/routing/app_root';
 
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
-
 export const renderApp = (props: ApmAppRootProps) => {
   const { appMountParameters, coreStart } = props;
   const { element } = appMountParameters;

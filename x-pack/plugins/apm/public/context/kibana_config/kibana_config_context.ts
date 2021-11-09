@@ -6,11 +6,8 @@
  */
 
 import { createContext } from 'react';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
+import { ConfigSchema } from '../..';
 
-export interface ApmPluginContextValue {
-  pluginsSetup: ApmPluginSetupDeps;
-  pluginsStart: ApmPluginStartDeps;
-}
-
-export const ApmPluginContext = createContext({} as ApmPluginContextValue);
+export const KibanaConfigContext = createContext<ConfigSchema>(
+  {} as ConfigSchema
+);

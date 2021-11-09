@@ -283,10 +283,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         ]);
 
         return renderApp({
-          coreStart,
-          pluginsSetup,
           appMountParameters,
           config,
+          coreStart,
+          pluginsSetup,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
         });
       },
