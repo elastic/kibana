@@ -35,7 +35,6 @@ const createMigrator = (
   } = { types: defaultSavedObjectTypes }
 ) => {
   const mockMigrator: jest.Mocked<IKibanaMigrator> = {
-    kibanaVersion: '8.0.0-testing',
     soMigrationsConfig: {
       batchSize: 100,
       maxBatchSizeBytes: ByteSizeValue.parse('30kb'),
