@@ -20,7 +20,7 @@ const mockKibanaDeprecations: DomainDeprecationDetails[] = [
         'Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.',
       ],
     },
-    deprecationType: 'config',
+    deprecationType: 'feature',
     documentationUrl: 'testDocUrl',
     level: 'critical',
     message: 'testMessage',

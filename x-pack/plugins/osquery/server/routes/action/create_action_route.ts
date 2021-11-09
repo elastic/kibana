@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { pickBy, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
@@ -68,10 +69,15 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           input_type: 'osquery',
           agents: selectedAgents,
           user_id: currentUser,
-          data: {
-            id: uuid.v4(),
-            query: request.body.query,
-          },
+          data: pickBy(
+            {
+              id: uuid.v4(),
+              query: request.body.query,
+              saved_query_id: request.body.saved_query_id,
+              ecs_mapping: request.body.ecs_mapping,
+            },
+            (value) => !isEmpty(value)
+          ),
         };
         const actionResponse = await esClient.index<{}, {}>({
           index: '.fleet-actions',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
@@ -78,7 +78,7 @@ export const tasks: TelemetryTask[] = [
         };
 
         const params = {
-          index: [indices['apm_oss.transactionIndices']],
+          index: [indices.transaction],
           body: {
             size: 0,
             timeout,
@@ -138,7 +138,7 @@ export const tasks: TelemetryTask[] = [
       // fixed date range for reliable results
       const lastTransaction = (
         await search({
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           body: {
             query: {
               bool: {
@@ -253,10 +253,10 @@ export const tasks: TelemetryTask[] = [
 
       const response = await search({
         index: [
-          indices['apm_oss.errorIndices'],
-          indices['apm_oss.metricsIndices'],
-          indices['apm_oss.spanIndices'],
-          indices['apm_oss.transactionIndices'],
+          indices.error,
+          indices.metric,
+          indices.span,
+          indices.transaction,
         ],
         body: {
           size: 0,
@@ -310,10 +310,10 @@ export const tasks: TelemetryTask[] = [
 
       const response = await search({
         index: [
-          indices['apm_oss.errorIndices'],
-          indices['apm_oss.metricsIndices'],
-          indices['apm_oss.spanIndices'],
-          indices['apm_oss.transactionIndices'],
+          indices.error,
+          indices.metric,
+          indices.span,
+          indices.transaction,
         ],
         body: {
           size: 0,
@@ -345,7 +345,7 @@ export const tasks: TelemetryTask[] = [
     name: 'environments',
     executor: async ({ indices, search }) => {
       const response = await search({
-        index: [indices['apm_oss.transactionIndices']],
+        index: [indices.transaction],
         body: {
           query: {
             bool: {
@@ -426,12 +426,12 @@ export const tasks: TelemetryTask[] = [
     name: 'processor_events',
     executor: async ({ indices, search }) => {
       const indicesByProcessorEvent = {
-        error: indices['apm_oss.errorIndices'],
-        metric: indices['apm_oss.metricsIndices'],
-        span: indices['apm_oss.spanIndices'],
-        transaction: indices['apm_oss.transactionIndices'],
-        onboarding: indices['apm_oss.onboardingIndices'],
-        sourcemap: indices['apm_oss.sourcemapIndices'],
+        error: indices.error,
+        metric: indices.metric,
+        span: indices.span,
+        transaction: indices.transaction,
+        onboarding: indices.onboarding,
+        sourcemap: indices.sourcemap,
       };
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
@@ -549,10 +549,10 @@ export const tasks: TelemetryTask[] = [
           return prevJob.then(async (data) => {
             const response = await search({
               index: [
-                indices['apm_oss.errorIndices'],
-                indices['apm_oss.spanIndices'],
-                indices['apm_oss.metricsIndices'],
-                indices['apm_oss.transactionIndices'],
+                indices.error,
+                indices.span,
+                indices.metric,
+                indices.transaction,
               ],
               body: {
                 size: 0,
@@ -598,12 +598,8 @@ export const tasks: TelemetryTask[] = [
     name: 'versions',
     executor: async ({ search, indices }) => {
       const response = await search({
-        index: [
-          indices['apm_oss.transactionIndices'],
-          indices['apm_oss.spanIndices'],
-          indices['apm_oss.errorIndices'],
-        ],
-        terminateAfter: 1,
+        index: [indices.transaction, indices.span, indices.error],
+        terminate_after: 1,
         body: {
           query: {
             exists: {
@@ -647,7 +643,7 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ search, indices }) => {
       const errorGroupsCount = (
         await search({
-          index: indices['apm_oss.errorIndices'],
+          index: indices.error,
           body: {
             size: 0,
             timeout,
@@ -683,7 +679,7 @@ export const tasks: TelemetryTask[] = [
 
       const transactionGroupsCount = (
         await search({
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           body: {
             size: 0,
             timeout,
@@ -719,7 +715,7 @@ export const tasks: TelemetryTask[] = [
 
       const tracesPerDayCount = (
         await search({
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           body: {
             query: {
               bool: {
@@ -741,11 +737,7 @@ export const tasks: TelemetryTask[] = [
 
       const servicesCount = (
         await search({
-          index: [
-            indices['apm_oss.transactionIndices'],
-            indices['apm_oss.errorIndices'],
-            indices['apm_oss.metricsIndices'],
-          ],
+          index: [indices.transaction, indices.error, indices.metric],
           body: {
             size: 0,
             timeout,
@@ -811,11 +803,7 @@ export const tasks: TelemetryTask[] = [
         const data = await prevJob;
 
         const response = await search({
-          index: [
-            indices['apm_oss.errorIndices'],
-            indices['apm_oss.metricsIndices'],
-            indices['apm_oss.transactionIndices'],
-          ],
+          index: [indices.error, indices.metric, indices.transaction],
           body: {
             size: 0,
             timeout,
@@ -1006,12 +994,12 @@ export const tasks: TelemetryTask[] = [
       const response = await indicesStats({
         index: [
           indices.apmAgentConfigurationIndex,
-          indices['apm_oss.errorIndices'],
-          indices['apm_oss.metricsIndices'],
-          indices['apm_oss.onboardingIndices'],
-          indices['apm_oss.sourcemapIndices'],
-          indices['apm_oss.spanIndices'],
-          indices['apm_oss.transactionIndices'],
+          indices.error,
+          indices.metric,
+          indices.onboarding,
+          indices.sourcemap,
+          indices.span,
+          indices.transaction,
         ],
       });
 

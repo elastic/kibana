@@ -36,7 +36,11 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
     async ({ flags, log }) => {
       log.debug('Global config:\n', constants);
 
-      const staticDir = [UiSharedDepsNpm.distDir, UiSharedDepsSrc.distDir];
+      const staticDir = [
+        UiSharedDepsNpm.distDir,
+        UiSharedDepsSrc.distDir,
+        'src/plugins/kibana_react/public/assets:plugins/kibanaReact/assets',
+      ];
       const config: Record<string, any> = {
         configDir,
         mode: flags.site ? 'static' : 'dev',

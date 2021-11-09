@@ -9,6 +9,7 @@ import { Pagination } from '@elastic/eui';
 import {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/endpoint/types';
@@ -20,6 +21,7 @@ import {
 import {
   getLastLoadedResourceState,
   isFailedResourceState,
+  isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../state/async_resource_state';
 import { HostIsolationExceptionsPageState } from '../types';
@@ -45,6 +47,13 @@ export const getListItems: HostIsolationExceptionsSelector<Immutable<ExceptionLi
   createSelector(getListApiSuccessResponse, (apiResponseData) => {
     return apiResponseData?.data || [];
   });
+
+export const getTotalListItems: HostIsolationExceptionsSelector<Immutable<number>> = createSelector(
+  getListApiSuccessResponse,
+  (apiResponseData) => {
+    return apiResponseData?.total || 0;
+  }
+);
 
 export const getListPagination: HostIsolationExceptionsSelector<Pagination> = createSelector(
   getListApiSuccessResponse,
@@ -73,3 +82,52 @@ export const getListFetchError: HostIsolationExceptionsSelector<
 export const getCurrentLocation: HostIsolationExceptionsSelector<StoreState['location']> = (
   state
 ) => state.location;
+
+export const getDeletionState: HostIsolationExceptionsSelector<StoreState['deletion']> =
+  createSelector(getCurrentListPageState, (listState) => listState.deletion);
+
+export const showDeleteModal: HostIsolationExceptionsSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ item }) => {
+    return Boolean(item);
+  }
+);
+
+export const getItemToDelete: HostIsolationExceptionsSelector<StoreState['deletion']['item']> =
+  createSelector(getDeletionState, ({ item }) => item);
+
+export const isDeletionInProgress: HostIsolationExceptionsSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadingResourceState(status);
+  }
+);
+
+export const wasDeletionSuccessful: HostIsolationExceptionsSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadedResourceState(status);
+  }
+);
+
+export const getDeleteError: HostIsolationExceptionsSelector<ServerApiError | undefined> =
+  createSelector(getDeletionState, ({ status }) => {
+    if (isFailedResourceState(status)) {
+      return status.error;
+    }
+  });
+
+const getFormState: HostIsolationExceptionsSelector<StoreState['form']> = (state) => {
+  return state.form;
+};
+
+export const getFormStatusFailure: HostIsolationExceptionsSelector<ServerApiError | undefined> =
+  createSelector(getFormState, (form) => {
+    if (isFailedResourceState(form.status)) {
+      return form.status.error;
+    }
+  });
+
+export const getExceptionToEdit: HostIsolationExceptionsSelector<
+  UpdateExceptionListItemSchema | undefined
+> = (state) => (state.form.entry ? (state.form.entry as UpdateExceptionListItemSchema) : undefined);

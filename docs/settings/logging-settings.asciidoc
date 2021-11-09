@@ -12,16 +12,6 @@
 
 Refer to the <<log-settings-examples, examples>> for common configuration use cases. To learn more about possible configuration values, go to {kibana-ref}/logging-service.html[{kib}'s Logging service].
 
-[[log-settings-compatibility]]
-==== Backwards compatibility
-Compatibility with the legacy logging system is assured until the end of the `v7` version.
-All log messages handled by `root` context (default) are forwarded to the legacy logging service.
-The logging configuration is validated against the predefined schema and if there are
-any issues with it, {kib} will fail to start with the detailed error message.
-
-NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats. 
-These will be removed when the `default` appender is no longer required.
-
 [[log-settings-examples]]
 ==== Examples
 Here are some configuration examples for the most common logging use cases:
@@ -41,7 +31,7 @@ logging:
       layout:
         type: pattern
   root:
-    appenders: [default, file]
+    appenders: [file]
 ----
 
 [[log-in-json-ECS-example]]
@@ -59,7 +49,7 @@ logging:
       layout:
         type: json
   root:
-    appenders: [default, json-layout]
+    appenders: [json-layout]
 ----
 
 [[log-with-meta-to-stdout]]
@@ -77,7 +67,7 @@ logging:
         type: pattern
         pattern: "[%date] [%level] [%logger] [%meta] %message"
   root:
-    appenders: [default, console-meta]
+    appenders: [console-meta]
 ----
 
 [[log-elasticsearch-queries]]
@@ -93,7 +83,7 @@ logging:
         type: pattern
         highlight: true
   root:
-    appenders: [default, console_appender]
+    appenders: [console_appender]
     level: warn
   loggers:
     - name: elasticsearch.query
@@ -138,7 +128,7 @@ logging:
         type: json
 
   root:
-    appenders: [default, console, file]
+    appenders: [console, file]
     level: error
 
   loggers:

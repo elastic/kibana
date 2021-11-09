@@ -99,10 +99,10 @@ export function getHealthColor(status: AlertExecutionStatuses) {
     case 'error':
       return 'danger';
     case 'ok':
-      return 'subdued';
+      return 'primary';
     case 'pending':
       return 'accent';
     default:
-      return 'warning';
+      return 'subdued';
   }
 }

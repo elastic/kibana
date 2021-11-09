@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -450,7 +450,7 @@ function withIndex(
   client.tasks.get.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       completed: true,
-    } as estypes.TaskGetResponse)
+    } as estypes.TasksGetResponse)
   );
   client.search.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0) as any)

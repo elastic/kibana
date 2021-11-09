@@ -54,7 +54,8 @@ export {
 export { ES_CLIENT_TOTAL_HITS_RELATION } from '../common/types/es_client';
 
 export { ANOMALY_SEVERITY } from '../common';
-export { useMlHref, ML_PAGES, MlLocator, MlLocatorDefinition } from './locator';
+export type { MlLocator } from './locator';
+export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 
 // Bundled shared exports
 // Exported this way so the code doesn't end up in ML's page load bundle
@@ -64,3 +65,5 @@ export const getMlSharedImports = async () => {
 // Helper to get Type returned by getMlSharedImports.
 type AwaitReturnType<T> = T extends PromiseLike<infer U> ? U : T;
 export type GetMlSharedImportsReturnType = AwaitReturnType<ReturnType<typeof getMlSharedImports>>;
+
+export { MLJobsAwaitingNodeWarning } from './application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared';

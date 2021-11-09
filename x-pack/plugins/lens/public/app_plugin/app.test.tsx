@@ -812,7 +812,7 @@ describe('Lens App', () => {
 
       await runInspect(instance);
 
-      expect(services.inspector.open).toHaveBeenCalledTimes(1);
+      expect(services.inspector.inspect).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1139,6 +1139,27 @@ describe('Lens App', () => {
         lens: expect.objectContaining({
           searchSessionId: `sessionId-4`,
         }),
+      });
+    });
+
+    it('dispatches update to searchSessionId and dateRange when the user hits refresh', async () => {
+      const { instance, services, lensStore } = await mountWith({});
+      act(() =>
+        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-7d', to: 'now' },
+        })
+      );
+
+      instance.update();
+      expect(lensStore.dispatch).toHaveBeenCalledWith({
+        type: 'lens/setState',
+        payload: {
+          resolvedDateRange: {
+            fromDate: '2021-01-10T04:00:00.000Z',
+            toDate: '2021-01-10T08:00:00.000Z',
+          },
+          searchSessionId: 'sessionId-2',
+        },
       });
     });
 

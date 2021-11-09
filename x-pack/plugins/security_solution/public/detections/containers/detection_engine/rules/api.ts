@@ -6,7 +6,10 @@
  */
 
 import { camelCase } from 'lodash';
-import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import {
+  FullResponseSchema,
+  PreviewResponse,
+} from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -15,6 +18,8 @@ import {
   DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
   DETECTION_ENGINE_TAGS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_PREVIEW,
+  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
 import {
   UpdateRulesProps,
@@ -36,6 +41,7 @@ import {
   PatchRuleProps,
   BulkActionProps,
   BulkActionResponse,
+  PreviewRulesProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -88,6 +94,21 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
   KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
     body: JSON.stringify(ruleProperties),
+    signal,
+  });
+
+/**
+ * Preview provided Rule
+ *
+ * @param rule CreateRulesSchema to add
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
+  KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
+    method: 'POST',
+    body: JSON.stringify(rule),
     signal,
   });
 
@@ -352,9 +373,9 @@ export const getRuleStatusById = async ({
   id: string;
   signal: AbortSignal;
 }): Promise<RuleStatusResponse> =>
-  KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
+  KibanaServices.get().http.fetch<RuleStatusResponse>(INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL, {
     method: 'POST',
-    body: JSON.stringify({ ids: [id] }),
+    body: JSON.stringify({ ruleId: id }),
     signal,
   });
 

@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const setPolicy = async (
   esClient: ElasticsearchClient,
-  policy: string,
+  name: string,
   body: Record<string, unknown>
 ): Promise<unknown> => {
   return (
-    await esClient.transport.request({
-      path: `/_ilm/policy/${policy}`,
-      method: 'PUT',
-      body,
-    })
+    await esClient.ilm.putLifecycle(
+      {
+        name,
+        body,
+      },
+      { meta: true }
+    )
   ).body;
 };

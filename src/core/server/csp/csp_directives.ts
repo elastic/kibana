@@ -22,7 +22,7 @@ export type CspDirectiveName =
   | 'report-to';
 
 /**
- * The default rules that are always applied
+ * The default directives rules that are always applied
  */
 export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
   'script-src': [`'unsafe-eval'`, `'self'`],
@@ -58,21 +58,18 @@ export class CspDirectives {
   }
 
   getCspHeader() {
-    return this.getRules().join('; ');
-  }
-
-  getRules() {
-    return [...this.directives.entries()].map(([name, values]) => {
-      return [name, ...values].join(' ');
-    });
+    return [...this.directives.entries()]
+      .map(([name, values]) => {
+        return [name, ...values].join(' ');
+      })
+      .join('; ');
   }
 
   static fromConfig(config: CspConfigType): CspDirectives {
     const cspDirectives = new CspDirectives();
 
-    // adding `csp.rules` or `default` rules
-    const initialRules = config.rules ? parseRules(config.rules) : { ...defaultRules };
-    Object.entries(initialRules).forEach(([key, values]) => {
+    // combining `default` directive configurations
+    Object.entries(defaultRules).forEach(([key, values]) => {
       values?.forEach((value) => {
         cspDirectives.addDirectiveValue(key as CspDirectiveName, value);
       });
@@ -90,15 +87,6 @@ export class CspDirectives {
     return cspDirectives;
   }
 }
-
-const parseRules = (rules: string[]): Partial<Record<CspDirectiveName, string[]>> => {
-  const directives: Partial<Record<CspDirectiveName, string[]>> = {};
-  rules.forEach((rule) => {
-    const [name, ...values] = rule.replace(/\s+/g, ' ').trim().split(' ');
-    directives[name as CspDirectiveName] = values;
-  });
-  return directives;
-};
 
 const parseConfigDirectives = (cspConfig: CspConfigType): Map<CspDirectiveName, string[]> => {
   const map = new Map<CspDirectiveName, string[]>();

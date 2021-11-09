@@ -12,7 +12,7 @@ import React from 'react';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 type ServiceDetailsReturnType =
-  APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/details'>;
 
 interface Props {
   service: ServiceDetailsReturnType['service'];

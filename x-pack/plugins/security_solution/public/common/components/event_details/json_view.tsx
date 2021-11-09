@@ -6,15 +6,13 @@
  */
 
 import { EuiCodeBlock } from '@elastic/eui';
-import { set } from '@elastic/safer-lodash-set/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { omitTypenameAndEmpty } from '../../../timelines/components/timeline/body/helpers';
 
 interface Props {
-  data: TimelineEventsDetailsItem[];
+  rawEventData: object | undefined;
 }
 
 const EuiCodeEditorContainer = styled.div`
@@ -23,15 +21,15 @@ const EuiCodeEditorContainer = styled.div`
   }
 `;
 
-export const JsonView = React.memo<Props>(({ data }) => {
+export const JsonView = React.memo<Props>(({ rawEventData }) => {
   const value = useMemo(
     () =>
       JSON.stringify(
-        buildJsonView(data),
+        rawEventData,
         omitTypenameAndEmpty,
         2 // indent level
       ),
-    [data]
+    [rawEventData]
   );
 
   return (
@@ -50,16 +48,3 @@ export const JsonView = React.memo<Props>(({ data }) => {
 });
 
 JsonView.displayName = 'JsonView';
-
-export const buildJsonView = (data: TimelineEventsDetailsItem[]) =>
-  data
-    .sort((a, b) => a.field.localeCompare(b.field))
-    .reduce(
-      (accumulator, item) =>
-        set(
-          item.field,
-          Array.isArray(item.originalValue) ? item.originalValue.join() : item.originalValue,
-          accumulator
-        ),
-      {}
-    );

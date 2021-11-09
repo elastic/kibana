@@ -27,13 +27,14 @@ check_rules_nodejs_version(minimum_version_string = "3.8.0")
 # we can update that rule.
 node_repositories(
   node_repositories = {
-    "14.17.6-darwin_amd64": ("node-v14.17.6-darwin-x64.tar.gz", "node-v14.17.6-darwin-x64", "e3e4c02240d74fb1dc8a514daa62e5de04f7eaee0bcbca06a366ece73a52ad88"),
-    "14.17.6-linux_arm64": ("node-v14.17.6-linux-arm64.tar.xz", "node-v14.17.6-linux-arm64", "9c4f3a651e03cd9b5bddd33a80e8be6a6eb15e518513e410bb0852a658699156"),
-    "14.17.6-linux_s390x": ("node-v14.17.6-linux-s390x.tar.xz", "node-v14.17.6-linux-s390x", "3677f35b97608056013b5368f86eecdb044bdccc1b3976c1d4448736c37b6a0c"),
-    "14.17.6-linux_amd64": ("node-v14.17.6-linux-x64.tar.xz", "node-v14.17.6-linux-x64", "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b"),
-    "14.17.6-windows_amd64": ("node-v14.17.6-win-x64.zip", "node-v14.17.6-win-x64", "b83e9ce542fda7fc519cec6eb24a2575a84862ea4227dedc171a8e0b5b614ac0"),
+    "16.13.0-darwin_amd64": ("node-v16.13.0-darwin-x64.tar.gz", "node-v16.13.0-darwin-x64", "37e09a8cf2352f340d1204c6154058d81362fef4ec488b0197b2ce36b3f0367a"),
+    "16.13.0-darwin_arm64": ("node-v16.13.0-darwin-arm64.tar.gz", "node-v16.13.0-darwin-arm64", "46d83fc0bd971db5050ef1b15afc44a6665dee40bd6c1cbaec23e1b40fa49e6d"),
+    "16.13.0-linux_arm64": ("node-v16.13.0-linux-arm64.tar.xz", "node-v16.13.0-linux-arm64", "93a0d03f9f802353cb7052bc97a02cd9642b49fa985671cdc16c99936c86d7d2"),
+    "16.13.0-linux_s390x": ("node-v16.13.0-linux-s390x.tar.xz", "node-v16.13.0-linux-s390x", "49e972bf3e969d621157df4c8f2fa18ff748c167d5ebd0efc87e1b9f0c6541cc"),
+    "16.13.0-linux_amd64": ("node-v16.13.0-linux-x64.tar.xz", "node-v16.13.0-linux-x64", "a876ce787133149abd1696afa54b0b5bc5ce3d5ae359081d407ff776e39b7ba8"),
+    "16.13.0-windows_amd64": ("node-v16.13.0-win-x64.zip", "node-v16.13.0-win-x64", "5a39ec5d4786c2814a6c04488bebac6423c2aaa12832b24f0882456f2e4674e1"),
   },
-  node_version = "14.17.6",
+  node_version = "16.13.0",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],

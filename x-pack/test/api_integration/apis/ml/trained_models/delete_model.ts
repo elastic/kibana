@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('DELETE trained_models', () => {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await ml.api.createdTestTrainedModels('regression', 2);
+      await ml.api.createTestTrainedModels('regression', 2);
     });
 
     after(async () => {

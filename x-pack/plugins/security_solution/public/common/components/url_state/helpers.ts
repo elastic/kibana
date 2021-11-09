@@ -24,7 +24,7 @@ import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
-import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
@@ -156,9 +156,18 @@ export const makeMapStateToProps = () => {
     }
     const sourcerer = getSourcererScopes(state);
     const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-    const selectedPatterns: SourcererScopePatterns = activeScopes
+    const selectedPatterns: SourcererUrlState = activeScopes
       .filter((scope) => scope === SourcererScopeName.default)
-      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
+      .reduce(
+        (acc, scope) => ({
+          ...acc,
+          [scope]: {
+            id: sourcerer[scope]?.selectedDataViewId,
+            selectedPatterns: sourcerer[scope]?.selectedPatterns,
+          },
+        }),
+        {}
+      );
 
     return {
       urlState: {
@@ -199,8 +208,11 @@ export const updateTimerangeUrl = (
   return timeRange;
 };
 
-export const isQueryStateEmpty = (queryState: ValueUrlState | null, urlKey: KeyUrlState) =>
-  queryState === null ||
+export const isQueryStateEmpty = (
+  queryState: ValueUrlState | undefined | null,
+  urlKey: KeyUrlState
+): boolean =>
+  queryState == null ||
   (urlKey === CONSTANTS.appQuery && isEmpty((queryState as Query).query)) ||
   (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
   (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');

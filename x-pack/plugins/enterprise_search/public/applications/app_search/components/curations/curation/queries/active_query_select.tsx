@@ -23,6 +23,12 @@ export const ActiveQuerySelect: React.FC = () => {
       label={i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.activeQueryLabel', {
         defaultMessage: 'Active query',
       })}
+      helpText={i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.curations.activeQueryHelpText',
+        {
+          defaultMessage: 'Select a query to view the organic search results for them',
+        }
+      )}
       fullWidth
     >
       <EuiSelect

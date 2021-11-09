@@ -20,7 +20,7 @@ interface BootstrapArgs {
 }
 
 export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
-  const log = new CliLog(!!cliArgs.quiet, !!cliArgs.silent);
+  const log = new CliLog(!!cliArgs.silent);
 
   const env = Env.createDefault(REPO_ROOT, {
     configs,

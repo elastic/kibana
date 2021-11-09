@@ -37,7 +37,7 @@ import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { CustomTooltip } from './custom_tooltip';
 
 type ApiResponseMainStats =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 
 export interface InstancesLatencyDistributionChartProps {
   height: number;

@@ -136,16 +136,41 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.identify).not.toHaveBeenCalled();
       });
 
-      it('calls FS.event when security is available', async () => {
-        const { initContext } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
+      describe('with memory', () => {
+        beforeAll(() => {
+          // @ts-expect-error 2339
+          window.performance.memory = {
+            get jsHeapSizeLimit() {
+              return 3;
+            },
+            get totalJSHeapSize() {
+              return 2;
+            },
+            get usedJSHeapSize() {
+              return 1;
+            },
+          };
         });
 
-        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
-          kibana_version_str: initContext.env.packageInfo.version,
+        afterAll(() => {
+          // @ts-expect-error 2339
+          delete window.performance.memory;
+        });
+
+        it('calls FS.event when security is available', async () => {
+          const { initContext } = await setupPlugin({
+            config: { full_story: { enabled: true, org_id: 'foo' } },
+            currentUserProps: {
+              username: '1234',
+            },
+          });
+
+          expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
+            kibana_version_str: initContext.env.packageInfo.version,
+            memory_js_heap_size_limit_int: 3,
+            memory_js_heap_size_total_int: 2,
+            memory_js_heap_size_used_int: 1,
+          });
         });
       });
 
@@ -323,7 +348,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "euiIconType": "arrowLeft",
+            "euiIconType": "logoCloud",
             "href": "https://cloud.elastic.co/abc123",
             "title": "Manage this deployment",
           },
@@ -345,7 +370,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "euiIconType": "arrowLeft",
+            "euiIconType": "logoCloud",
             "href": "https://cloud.elastic.co/abc123",
             "title": "Manage this deployment",
           },

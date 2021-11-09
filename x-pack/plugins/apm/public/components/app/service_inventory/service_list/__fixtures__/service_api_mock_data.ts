@@ -7,7 +7,7 @@
 
 import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 
-type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
+type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
 
 export const items: ServiceListAPIResponse['items'] = [
   {

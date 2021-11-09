@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const getTemplateExists = async (
   esClient: ElasticsearchClient,
   template: string
 ): Promise<boolean> => {
   return (
-    await esClient.indices.existsTemplate({
-      name: template,
-    })
+    await esClient.indices.existsTemplate(
+      {
+        name: template,
+      },
+      { meta: true }
+    )
   ).body;
 };

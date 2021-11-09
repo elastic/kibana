@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
@@ -65,6 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const log = getService('log');
 
   describe('patch_cases', () => {
     afterEach(async () => {
@@ -590,10 +593,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should be no change in their status since syncing is disabled
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
             CaseStatuses.open
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
             CaseStatuses.open
           );
 
@@ -624,10 +627,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should still be no change in their status since syncing is disabled
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
             CaseStatuses.open
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
             CaseStatuses.open
           );
 
@@ -653,10 +656,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // alerts should be updated now that the
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
             CaseStatuses.closed
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
             'acknowledged'
           );
         });
@@ -725,10 +728,10 @@ export default ({ getService }: FtrProviderContext): void => {
           let signals = await getSignals();
           // There should be no change in their status since syncing is disabled
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
 
           const updatedIndWithStatus: CasesResponse = (await setStatus({
@@ -749,10 +752,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // There should still be no change in their status since syncing is disabled
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
 
           // turn on the sync settings
@@ -774,15 +777,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // alerts should be updated now that the
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.closed);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.closed);
 
           // the duplicate signal id in the other index should not be affect (so its status should be open)
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source?.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
         });
       });
@@ -790,12 +793,12 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('detections rule', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest);
+          await createSignalsIndex(supertest, log);
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(supertest);
+          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
@@ -803,13 +806,13 @@ export default ({ getService }: FtrProviderContext): void => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const postedCase = await createCase(supertest, postCaseReq);
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source?.signal.status).eql('open');
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -850,7 +853,9 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('acknowledged');
+          expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
+            'acknowledged'
+          );
         });
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
@@ -861,13 +866,13 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source?.signal.status).eql('open');
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -903,7 +908,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('open');
+          expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql('open');
         });
 
         it('it updates alert status when syncAlerts is turned on', async () => {
@@ -914,13 +919,13 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source?.signal.status).eql('open');
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -974,20 +979,22 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('acknowledged');
+          expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
+            'acknowledged'
+          );
         });
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
 
           const postedCase = await createCase(supertest, postCaseReq);
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source?.signal.status).eql('open');
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -1038,7 +1045,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+          expect(updatedAlert.hits.hits[0]._source['kibana.alert.workflow_status']).eql('open');
         });
       });
     });

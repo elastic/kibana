@@ -66,7 +66,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
             "deprecated": false
@@ -177,7 +183,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
             "deprecated": false
@@ -390,7 +402,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false
@@ -761,7 +779,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/boolean.ts",
@@ -958,7 +982,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
@@ -1106,7 +1136,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false
@@ -2166,9 +2202,21 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
               {
                 "pluginId": "fieldFormats",
@@ -2191,7 +2239,13 @@
                   "- the field type"
                 ],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2207,7 +2261,13 @@
                   "- Array of ES data types"
                 ],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2312,9 +2372,21 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
               {
                 "pluginId": "fieldFormats",
@@ -2336,7 +2408,13 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2352,7 +2430,13 @@
                   "- Array of ES data types"
                 ],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2375,9 +2459,21 @@
             ],
             "signature": [
               "(esTypes: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               " | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2393,7 +2489,13 @@
                   "- Array of ES data types"
                 ],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2416,13 +2518,37 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined) => ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               " | ",
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
@@ -2435,7 +2561,13 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2449,7 +2581,13 @@
                 "label": "esTypes",
                 "description": [],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2541,9 +2679,21 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined, params?: ",
               {
                 "pluginId": "fieldFormats",
@@ -2572,7 +2722,13 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2586,7 +2742,13 @@
                 "label": "esTypes",
                 "description": [],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2629,9 +2791,21 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[]) => string"
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2645,7 +2819,13 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2659,7 +2839,13 @@
                 "label": "esTypes",
                 "description": [],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2682,7 +2868,13 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -2704,7 +2896,13 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2726,9 +2924,21 @@
             ],
             "signature": [
               "(fieldType: ",
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               ", esTypes?: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               "[] | undefined, params?: ",
               {
                 "pluginId": "fieldFormats",
@@ -2757,7 +2967,13 @@
                 "label": "fieldType",
                 "description": [],
                 "signature": [
-                  "KBN_FIELD_TYPES"
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.KBN_FIELD_TYPES",
+                    "text": "KBN_FIELD_TYPES"
+                  }
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2771,7 +2987,13 @@
                 "label": "esTypes",
                 "description": [],
                 "signature": [
-                  "ES_FIELD_TYPES",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.ES_FIELD_TYPES",
+                    "text": "ES_FIELD_TYPES"
+                  },
                   "[] | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2981,7 +3203,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
             "deprecated": false
@@ -3147,7 +3375,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/ip.ts",
             "deprecated": false
@@ -3478,7 +3712,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/relative_date.ts",
             "deprecated": false
@@ -3580,7 +3820,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/source.tsx",
             "deprecated": false
@@ -3611,65 +3857,6 @@
                 "path": "src/plugins/field_formats/common/converters/source.tsx",
                 "deprecated": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SourceFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(value: string, options?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/plugins/field_formats/common/converters/source.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.SourceFormat.htmlConvert.$1",
-                "type": "string",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/field_formats/common/converters/source.tsx",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.SourceFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/plugins/field_formats/common/converters/source.tsx",
-                "deprecated": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3741,7 +3928,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
@@ -3859,7 +4052,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
@@ -4049,7 +4248,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES"
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              }
             ],
             "path": "src/plugins/field_formats/common/converters/truncate.ts",
             "deprecated": false
@@ -4151,7 +4356,13 @@
             "label": "fieldType",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.KBN_FIELD_TYPES",
+                "text": "KBN_FIELD_TYPES"
+              },
               "[]"
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
@@ -4606,19 +4817,6 @@
           },
           {
             "parentPluginId": "fieldFormats",
-            "id": "def-common.HtmlContextTypeOptions.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [],
-            "signature": [
-              "{ formatHit: (hit: { highlight: Record<string, string[]>; }) => Record<string, string>; } | undefined"
-            ],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
             "id": "def-common.HtmlContextTypeOptions.hit",
             "type": "Object",
             "tags": [],
@@ -4915,9 +5113,21 @@
             "text": "FormatFactory"
           },
           "; getDefaultConfig: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -4943,9 +5153,21 @@
             "text": "FieldFormatInstanceType"
           },
           " | undefined; getDefaultType: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -4955,17 +5177,53 @@
             "text": "FieldFormatInstanceType"
           },
           " | undefined; getTypeNameByEsTypes: (esTypes: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           " | undefined; getDefaultTypeName: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           " | ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           "; getInstance: (formatId: string, params?: ",
           {
             "pluginId": "fieldFormats",
@@ -4983,9 +5241,21 @@
             "text": "FieldFormat"
           },
           "; getDefaultInstancePlain: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined, params?: ",
           {
             "pluginId": "fieldFormats",
@@ -5003,11 +5273,29 @@
             "text": "FieldFormat"
           },
           "; getDefaultInstanceCacheResolver: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[]) => string; getByFieldType: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5017,9 +5305,21 @@
             "text": "FieldFormatInstanceType"
           },
           "[]; getDefaultInstance: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined, params?: ",
           {
             "pluginId": "fieldFormats",
@@ -5261,9 +5561,21 @@
             "text": "FieldFormatInstanceType"
           },
           "[]) => void; getDefaultConfig: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -5289,9 +5601,21 @@
             "text": "FieldFormatInstanceType"
           },
           " | undefined; getDefaultType: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -5301,17 +5625,53 @@
             "text": "FieldFormatInstanceType"
           },
           " | undefined; getTypeNameByEsTypes: (esTypes: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           " | undefined; getDefaultTypeName: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined) => ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           " | ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           "; getInstance: (formatId: string, params?: ",
           {
             "pluginId": "fieldFormats",
@@ -5329,9 +5689,21 @@
             "text": "FieldFormat"
           },
           "; getDefaultInstancePlain: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined, params?: ",
           {
             "pluginId": "fieldFormats",
@@ -5349,11 +5721,29 @@
             "text": "FieldFormat"
           },
           "; getDefaultInstanceCacheResolver: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[]) => string; getByFieldType: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5363,9 +5753,21 @@
             "text": "FieldFormatInstanceType"
           },
           "[]; getDefaultInstance: (fieldType: ",
-          "KBN_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
           ", esTypes?: ",
-          "ES_FIELD_TYPES",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
           "[] | undefined, params?: ",
           {
             "pluginId": "fieldFormats",

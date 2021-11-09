@@ -11,6 +11,17 @@ import _ from 'lodash';
 import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
+function collapseLiteralStrings(xjson: string) {
+  const tripleQuotes = '"""';
+  const splitData = xjson.split(tripleQuotes);
+
+  for (let idx = 1; idx < splitData.length - 1; idx += 2) {
+    splitData[idx] = JSON.stringify(splitData[idx]);
+  }
+
+  return splitData.join('');
+}
+
 export class JsonParamType extends BaseParamType {
   constructor(config: Record<string, any>) {
     super(config);
@@ -26,9 +37,8 @@ export class JsonParamType extends BaseParamType {
           return;
         }
 
-        // handle invalid Json input
         try {
-          paramJson = JSON.parse(param);
+          paramJson = JSON.parse(collapseLiteralStrings(param));
         } catch (err) {
           return;
         }

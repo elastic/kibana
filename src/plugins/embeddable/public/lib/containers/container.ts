@@ -46,6 +46,7 @@ export abstract class Container<
     parent?: Container
   ) {
     super(input, output, parent);
+    this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
     this.subscription = this.getInput$()
       // At each update event, get both the previous and current state
       .pipe(startWith(input), pairwise())

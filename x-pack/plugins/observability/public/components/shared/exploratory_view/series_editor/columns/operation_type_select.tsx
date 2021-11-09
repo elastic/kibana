@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
@@ -30,12 +30,21 @@ export function OperationTypeSelect({
     setSeries(seriesId, { ...series, operationType: value });
   };
 
-  useEffect(() => {
-    setSeries(seriesId, { ...series, operationType: operationType || defaultOperationType });
-    // We only want to call this when defaultOperationType changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultOperationType]);
+  return (
+    <OperationTypeComponent
+      onChange={onChange}
+      operationType={operationType || defaultOperationType}
+    />
+  );
+}
 
+export function OperationTypeComponent({
+  operationType,
+  onChange,
+}: {
+  operationType?: OperationType;
+  onChange: (value: OperationType) => void;
+}) {
   const options = [
     {
       value: 'average' as OperationType,
@@ -53,6 +62,12 @@ export function OperationTypeSelect({
       value: 'sum' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.sum', {
         defaultMessage: 'Sum',
+      }),
+    },
+    {
+      value: 'last_value' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.lastValue', {
+        defaultMessage: 'Last value',
       }),
     },
     {
@@ -85,7 +100,7 @@ export function OperationTypeSelect({
     <EuiSuperSelect
       fullWidth
       data-test-subj="operationTypeSelect"
-      valueOfSelected={operationType || defaultOperationType}
+      valueOfSelected={operationType}
       options={options}
       onChange={onChange}
     />

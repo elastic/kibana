@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { BuilderItem } from '../types';
 import { SeriesActions } from './columns/series_actions';
@@ -27,6 +28,10 @@ const StyledAccordion = styled(EuiAccordion)`
     flex-grow: 1;
     flex-shrink: 1;
   }
+
+  .euiAccordion__childWrapper {
+    overflow: visible;
+  }
 `;
 
 interface Props {
@@ -42,11 +47,20 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
     seriesId: id,
   };
 
+  const [isExapndedOnce, setIsExapndedOnce] = useState(false);
+
+  useEffect(() => {
+    if (isExpanded) {
+      setIsExapndedOnce(true);
+    }
+  }, [isExpanded]);
+
   return (
     <EuiPanel hasBorder={true} data-test-subj={`exploratoryViewSeriesPanel${0}`}>
       <StyledAccordion
         id={`exploratoryViewSeriesAccordion${id}`}
         forceState={isExpanded ? 'open' : 'closed'}
+        aria-label={ACCORDION_LABEL}
         onToggle={toggleExpanded}
         arrowDisplay={!seriesProps.series.dataType ? 'none' : undefined}
         extraAction={
@@ -85,9 +99,16 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
       >
         <EuiSpacer size="s" />
         <EuiPanel color="subdued">
-          <ExpandedSeriesRow {...seriesProps} />
+          {isExapndedOnce && <ExpandedSeriesRow {...seriesProps} />}
         </EuiPanel>
       </StyledAccordion>
     </EuiPanel>
   );
 }
+
+export const ACCORDION_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.accordion.label',
+  {
+    defaultMessage: 'Toggle series information',
+  }
+);

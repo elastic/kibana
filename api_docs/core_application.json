@@ -1664,7 +1664,7 @@
             "tags": [],
             "label": "euiIconType",
             "description": [
-              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precendence over the `icon` property."
+              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precedence over the `icon` property."
             ],
             "signature": [
               "string | undefined"
@@ -2263,7 +2263,7 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"id\" | \"title\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
+          "<unknown>, \"status\" | \"id\" | \"title\" | \"order\" | \"capabilities\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
           {
             "pluginId": "core",
             "scope": "public",

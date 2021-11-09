@@ -31,7 +31,11 @@ describe('WaterfallChartWrapper', () => {
 
   it('renders the correct sidebar items', () => {
     const { getAllByTestId } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
+      <WaterfallChartWrapper
+        data={extractItems(NETWORK_EVENTS.events)}
+        total={1000}
+        markerItems={[{ id: 'domContentLoaded', offset: 2352353 }]}
+      />
     );
 
     const sideBarItems = getAllByTestId('middleTruncatedTextSROnly');
