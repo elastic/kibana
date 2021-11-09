@@ -218,6 +218,14 @@ function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEv
   };
 }
 
+function sendEvent(telemetryEvent: PackageUpdateEvent) {
+  sendTelemetryEvents(
+    appContextService.getLogger(),
+    appContextService.getTelemetryEventsSender(),
+    telemetryEvent
+  );
+}
+
 async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
@@ -287,7 +295,12 @@ async function installPackageFromRegistry({
     const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
     if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
-      return { error: new Error(`Requires ${packageInfo.license} license`), installType };
+      const err = new Error(`Requires ${packageInfo.license} license`);
+      sendEvent({
+        ...telemetryEvent,
+        errorMessage: err.message,
+      });
+      return { error: err, installType };
     }
 
     // try installing the package, if there was an error, call error handler and rethrow
@@ -307,7 +320,10 @@ async function installPackageFromRegistry({
           pkgName: packageInfo.name,
           currentVersion: packageInfo.version,
         });
-        telemetryEvent.status = 'success';
+        sendEvent({
+          ...telemetryEvent,
+          status: 'success',
+        });
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
@@ -320,20 +336,21 @@ async function installPackageFromRegistry({
           installedPkg,
           esClient,
         });
-
+        sendEvent({
+          ...telemetryEvent,
+          errorMessage: err.message,
+        });
         return { error: err, installType };
       });
   } catch (e) {
+    sendEvent({
+      ...telemetryEvent,
+      errorMessage: e.message,
+    });
     return {
       error: e,
       installType,
     };
-  } finally {
-    sendTelemetryEvents(
-      appContextService.getLogger(),
-      appContextService.getTelemetryEventsSender(),
-      telemetryEvent
-    );
   }
 }
 
@@ -399,20 +416,25 @@ async function installPackageByUpload({
       installSource,
     })
       .then((assets) => {
-        telemetryEvent.status = 'success';
+        sendEvent({
+          ...telemetryEvent,
+          status: 'success',
+        });
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
+        sendEvent({
+          ...telemetryEvent,
+          errorMessage: err.message,
+        });
         return { error: err, installType };
       });
   } catch (e) {
+    sendEvent({
+      ...telemetryEvent,
+      errorMessage: e.message,
+    });
     return { error: e, installType };
-  } finally {
-    sendTelemetryEvents(
-      appContextService.getLogger(),
-      appContextService.getTelemetryEventsSender(),
-      telemetryEvent
-    );
   }
 }
 

@@ -16,7 +16,7 @@ export interface PackageUpdateEvent {
   newVersion: string;
   status: 'success' | 'failure';
   dryRun?: boolean;
-  errorMessage?: string[];
+  errorMessage?: string[] | string;
   error?: UpgradeError[];
   eventType: UpdateEventType;
   installType?: InstallType;
@@ -50,7 +50,7 @@ export function sendTelemetryEvents(
       {
         ...upgradeEvent,
         error: upgradeEvent.error ? cappedErrors : undefined,
-        errorMessage: makeErrorGeneric(cappedErrors),
+        errorMessage: upgradeEvent.errorMessage || makeErrorGeneric(cappedErrors),
       },
     ]);
   } catch (exc) {
