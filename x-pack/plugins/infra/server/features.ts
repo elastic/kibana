@@ -24,49 +24,69 @@ export const METRICS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+  alerting: [
+    METRIC_THRESHOLD_ALERT_TYPE_ID,
+    METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+    LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+  ],
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops', 'metrics'],
-      api: ['infra'],
+      api: ['infra', 'rac'],
       savedObject: {
         all: ['infrastructure-ui-source'],
         read: ['index-pattern'],
       },
       alerting: {
         rule: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+          ],
         },
         alert: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+          ],
         },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show', 'configureSource', 'save'],
+      ui: ['show', 'configureSource', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
       app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops', 'metrics'],
-      api: ['infra'],
+      api: ['infra', 'rac'],
       savedObject: {
         all: [],
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
       alerting: {
         rule: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          read: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+          ],
         },
         alert: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          read: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+          ],
         },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show'],
+      ui: ['show', 'alerting:show'],
     },
   },
 };
