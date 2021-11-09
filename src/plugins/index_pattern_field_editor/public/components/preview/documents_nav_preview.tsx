@@ -21,22 +21,11 @@ import { useFieldPreviewContext } from './field_preview_context';
 export const DocumentsNavPreview = () => {
   const {
     currentDocument: { id: documentId, isCustomId },
-    documents: { loadSingle, loadFromCluster },
+    documents: { loadSingle, loadFromCluster, fetchDocError },
     navigation: { prev, next },
-    error,
   } = useFieldPreviewContext();
 
-  const errorMessage =
-    error !== null && error.code === 'DOC_NOT_FOUND'
-      ? i18n.translate(
-          'indexPatternFieldEditor.fieldPreview.documentIdField.documentNotFoundError',
-          {
-            defaultMessage: 'Document not found',
-          }
-        )
-      : null;
-
-  const isInvalid = error !== null && error.code === 'DOC_NOT_FOUND';
+  const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';
 
   // We don't display the nav button when the user has entered a custom
   // document ID as at that point there is no more reference to what's "next"
@@ -58,13 +47,12 @@ export const DocumentsNavPreview = () => {
             label={i18n.translate('indexPatternFieldEditor.fieldPreview.documentIdField.label', {
               defaultMessage: 'Document ID',
             })}
-            error={errorMessage}
             isInvalid={isInvalid}
             fullWidth
           >
             <EuiFieldText
               isInvalid={isInvalid}
-              value={documentId}
+              value={documentId ?? ''}
               onChange={onDocumentIdChange}
               fullWidth
               data-test-subj="documentIdField"

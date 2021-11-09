@@ -12,27 +12,25 @@ import { i18n } from '@kbn/i18n';
 import { useFieldPreviewContext } from './field_preview_context';
 
 export const FieldPreviewError = () => {
-  const { error } = useFieldPreviewContext();
+  const {
+    documents: { fetchDocError },
+  } = useFieldPreviewContext();
 
-  if (error === null) {
+  if (fetchDocError === null) {
     return null;
   }
 
   return (
     <EuiCallOut
       title={i18n.translate('indexPatternFieldEditor.fieldPreview.errorCallout.title', {
-        defaultMessage: 'Preview error',
+        defaultMessage: 'Error fetching document',
       })}
       color="danger"
-      iconType="cross"
+      iconType="alert"
       role="alert"
-      data-test-subj="previewError"
+      data-test-subj="fetchDocError"
     >
-      {error.code === 'PAINLESS_SCRIPT_ERROR' ? (
-        <p data-test-subj="reason">{error.error.reason}</p>
-      ) : (
-        <p data-test-subj="title">{error.error.message}</p>
-      )}
+      <p data-test-subj="title">{fetchDocError.error.message ?? fetchDocError.error.reason}</p>
     </EuiCallOut>
   );
 };

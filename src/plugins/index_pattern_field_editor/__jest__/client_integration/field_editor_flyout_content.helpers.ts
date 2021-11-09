@@ -15,10 +15,11 @@ import {
 } from '../../public/components/field_editor_flyout_content';
 import { WithFieldEditorDependencies, getCommonActions } from './helpers';
 
+export { waitForUpdates, waitForDocumentsAndPreviewUpdate } from './helpers';
+
 const defaultProps: Props = {
   onSave: () => {},
   onCancel: () => {},
-  runtimeFieldValidator: () => Promise.resolve(null),
   isSavingField: false,
 };
 

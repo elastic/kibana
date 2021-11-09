@@ -11,4 +11,4 @@ export { useField } from './use_field';
 export { useForm } from './use_form';
 export { useFormData } from './use_form_data';
 export { useFormIsModified } from './use_form_is_modified';
-export { useAsyncValidationData } from './use_async_validation_data';
+export { useBehaviorSubject } from './utils';
