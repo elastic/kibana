@@ -126,6 +126,7 @@ export const EndpointDetailsContent = memo(
                 <EndpointPolicyLink
                   policyId={details.Endpoint.policy.applied.id}
                   data-test-subj="policyDetailsValue"
+                  style={{ paddingRight: '5px' }}
                 >
                   {details.Endpoint.policy.applied.name}
                 </EndpointPolicyLink>
@@ -133,7 +134,8 @@ export const EndpointDetailsContent = memo(
                   <EuiText
                     color="subdued"
                     size="xs"
-                    style={{ whiteSpace: 'nowrap', display: 'inline-block', paddingLeft: '5px' }}
+                    className={'eui-displayInlineBlock'}
+                    style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}
                     data-test-subj="policyDetailsRevNo"
                   >
                     <FormattedMessage
@@ -145,9 +147,7 @@ export const EndpointDetailsContent = memo(
                     />
                   </EuiText>
                 )}
-                {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && (
-                  <OutOfDate style={{ display: 'inline-block', paddingLeft: '5px' }} />
-                )}
+                {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && <OutOfDate />}
               </EuiText>
             </>
           ),
