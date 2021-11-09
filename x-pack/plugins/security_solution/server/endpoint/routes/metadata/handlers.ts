@@ -64,7 +64,13 @@ export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
 };
 
-const errorHandler = <E extends Error>(res: KibanaResponseFactory, error: E): IKibanaResponse => {
+const errorHandler = <E extends Error>(
+  logger: Logger,
+  res: KibanaResponseFactory,
+  error: E
+): IKibanaResponse => {
+  logger.error(error);
+
   if (error instanceof NotFoundError) {
     return res.notFound({ body: error });
   }
@@ -124,7 +130,8 @@ export const getMetadataListRequestHandler = function (
 };
 
 export const getMetadataRequestHandler = function (
-  endpointAppContext: EndpointAppContext
+  endpointAppContext: EndpointAppContext,
+  logger: Logger
 ): RequestHandler<
   TypeOf<typeof GetMetadataRequestSchema.params>,
   unknown,
@@ -142,7 +149,7 @@ export const getMetadataRequestHandler = function (
         ),
       });
     } catch (error) {
-      return errorHandler(response, error);
+      return errorHandler(logger, response, error);
     }
   };
 };
