@@ -337,6 +337,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
       },
       ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
+      timeZone: 'UTC',
     };
 
     return config;
@@ -478,7 +479,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                             // adding a fallback to 1m bucket
                             value: xDomain?.minInterval ?? 1000 * 60,
                           },
-                          timeZone: 'UTC',
                         }}
                         ySortPredicate="dataIndex"
                         config={swimLaneConfig}

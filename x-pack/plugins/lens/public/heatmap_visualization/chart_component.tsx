@@ -186,7 +186,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
                 unit: esInterval.unit as ESCalendarIntervalUnit,
                 value: esInterval.value,
               },
-        timeZone,
       };
     }
   }
@@ -347,6 +346,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     brushArea: {
       stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
     },
+    timeZone,
   };
 
   if (!chartData || !chartData.length) {
