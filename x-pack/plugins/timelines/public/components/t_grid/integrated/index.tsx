@@ -14,6 +14,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
@@ -34,13 +36,7 @@ import type {
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import {
-  esQuery,
-  Filter,
-  IIndexPattern,
-  Query,
-  DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery, DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
@@ -119,7 +115,7 @@ export interface TGridIntegratedProps {
   height?: number;
   id: TimelineId;
   indexNames: string[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;
@@ -130,6 +126,7 @@ export interface TGridIntegratedProps {
   query: Query;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  runtimeMappings: MappingRuntimeFields;
   setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch) => void;
   sort: Sort[];
   start: string;
@@ -168,6 +165,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   query,
   renderCellValue,
   rowRenderers,
+  runtimeMappings,
   setQuery,
   sort,
   start,
@@ -241,6 +239,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       id,
       indexNames,
       limit: itemsPerPage,
+      runtimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,

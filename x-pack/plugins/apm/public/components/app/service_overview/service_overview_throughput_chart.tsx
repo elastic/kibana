@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
@@ -30,7 +30,6 @@ import {
 const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
-  throughputUnit: 'minute' as const,
 };
 
 export function ServiceOverviewThroughputChart({
@@ -48,7 +47,7 @@ export function ServiceOverviewThroughputChart({
 
   const {
     urlParams: { comparisonEnabled, comparisonType },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo },
