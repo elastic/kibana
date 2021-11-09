@@ -7,6 +7,7 @@
  */
 
 import { set as lodashSet } from '@elastic/safer-lodash-set';
+import apm from 'elastic-apm-node';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
@@ -199,6 +200,11 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
+    const serverAvailableTransaction = apm.startTransaction(
+      opts.dev ? 'dev_server_available' : 'server_available',
+      'kibana_platform'
+    );
+
     if (opts.dev && opts.devConfig !== false) {
       try {
         const kbnDevConfig = fromRoot('config/kibana.dev.yml');
@@ -245,6 +251,7 @@ export default function (program) {
       configs,
       cliArgs,
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
+      serverAvailableTransaction,
     });
   });
 }

@@ -21,6 +21,7 @@ import {
   concatMap,
   takeUntil,
 } from 'rxjs/operators';
+import { Transaction } from 'elastic-apm-node';
 import { CliArgs } from '@kbn/config';
 import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
 
@@ -59,23 +60,6 @@ export type SomeCliArgs = Pick<
   | 'basePath'
 >;
 
-export interface CliDevModeOptions {
-  basePathProxy?: BasePathProxyServer;
-  log?: Log;
-
-  // cli flags
-  dist: boolean;
-  oss: boolean;
-  runExamples: boolean;
-  pluginPaths: string[];
-  pluginScanDirs: string[];
-  disableOptimizer: boolean;
-  quiet: boolean;
-  silent: boolean;
-  watch: boolean;
-  cache: boolean;
-}
-
 const getValue$ = <T>(source: Rx.BehaviorSubject<T>): Rx.Observable<T> =>
   source.isStopped ? Rx.of(source.getValue()) : source;
 
@@ -85,6 +69,13 @@ const firstAllTrue = (...sources: Array<Rx.BehaviorSubject<boolean>>) =>
     take(1),
     mapTo(undefined)
   );
+
+interface CliDevModeOptions {
+  cliArgs: SomeCliArgs;
+  config: CliDevConfig;
+  log?: Log;
+  serverAvailableTransaction?: Transaction;
+}
 
 /**
  * setup and manage the parent process of the dev server:
@@ -103,10 +94,11 @@ export class CliDevMode {
   private readonly watcher: Watcher;
   private readonly devServer: DevServer;
   private readonly optimizer: Optimizer;
+  private readonly serverAvailableTransaction?: Transaction;
   private startTime?: number;
   private subscription?: Rx.Subscription;
 
-  constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
+  constructor({ cliArgs, config, log, serverAvailableTransaction }: CliDevModeOptions) {
     this.log = log || new CliLog(!!cliArgs.silent);
 
     if (cliArgs.basePath) {
@@ -276,6 +268,18 @@ export class CliDevMode {
         )
         .subscribe(this.observer('dev server'))
     );
+
+    if (this.serverAvailableTransaction) {
+      this.subscription.add(
+        this.getStarted$()
+          .pipe(
+            tap(() => {
+              this.serverAvailableTransaction?.end('success');
+            })
+          )
+          .subscribe(this.observer('end server available transaction'))
+      );
+    }
   }
 
   private reportTimings(reporter: CiStatsReporter) {

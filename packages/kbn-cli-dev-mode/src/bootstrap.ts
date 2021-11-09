@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Transaction } from 'elastic-apm-node';
 import { REPO_ROOT } from '@kbn/utils';
 import { CliArgs, Env, RawConfigAdapter } from '@kbn/config';
 import { CliDevMode } from './cli_dev_mode';
@@ -17,9 +18,15 @@ interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
   applyConfigOverrides: RawConfigAdapter;
+  serverAvailableTransaction?: Transaction;
 }
 
-export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
+export async function bootstrapDevMode({
+  configs,
+  cliArgs,
+  applyConfigOverrides,
+  serverAvailableTransaction,
+}: BootstrapArgs) {
   const log = new CliLog(!!cliArgs.silent);
 
   const env = Env.createDefault(REPO_ROOT, {
@@ -37,6 +44,7 @@ export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides 
     cliArgs,
     config,
     log,
+    serverAvailableTransaction,
   });
 
   await cliDevMode.start();

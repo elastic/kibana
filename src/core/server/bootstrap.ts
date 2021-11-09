@@ -7,6 +7,9 @@
  */
 
 import chalk from 'chalk';
+import { Transaction } from 'elastic-apm-node';
+import { tap, filter } from 'rxjs/operators';
+import { firstValueFrom } from '@kbn/std';
 import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
@@ -15,6 +18,7 @@ interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
   applyConfigOverrides: (config: Record<string, any>) => Record<string, any>;
+  serverAvailableTransaction?: Transaction;
 }
 
 /**
@@ -22,7 +26,12 @@ interface BootstrapArgs {
  * @internal
  * @param param0 - options
  */
-export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
+export async function bootstrap({
+  configs,
+  cliArgs,
+  applyConfigOverrides,
+  serverAvailableTransaction,
+}: BootstrapArgs) {
   if (cliArgs.optimize) {
     // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
     return;
@@ -98,12 +107,23 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
       }
     }
 
-    await root.setup();
+    const coreSetup = await root.setup();
     await root.start();
 
     // Notify parent process if we haven't done that yet during preboot stage.
     if (process.send && !isSetupOnHold) {
       process.send(['SERVER_LISTENING']);
+    }
+
+    if (serverAvailableTransaction) {
+      await firstValueFrom(
+        coreSetup.status.overall$.pipe(
+          filter((status) => status.level.toString() === 'available'),
+          tap(() => {
+            serverAvailableTransaction.end();
+          })
+        )
+      );
     }
   } catch (err) {
     await shutdown(err);
