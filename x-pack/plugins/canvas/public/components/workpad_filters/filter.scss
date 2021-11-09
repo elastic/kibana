@@ -10,4 +10,9 @@
   &.euiDescriptionList.euiDescriptionList--responsiveColumn > * {
     margin-top: 10px;
   }
+
+  & .euiSelect {
+    line-height: 25px;
+    height: 25px;
+  }
 }
