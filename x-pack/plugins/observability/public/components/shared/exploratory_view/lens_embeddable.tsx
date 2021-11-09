@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import styled from 'styled-components';
 import { TypedLensByValueInput } from '../../../../../lens/public';
+import { useUiTracker } from '../../../hooks/use_track_metric';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useExpViewTimeRange } from './hooks/use_time_range';
 import { parseRelativeDate } from './components/date_range_picker';
+import { trackTelemetryOnLoad } from './utils/telemetry';
 import type { ChartTimeRange } from './header/last_updated';
 
 interface Props {
@@ -23,26 +25,36 @@ interface Props {
 
 export function LensEmbeddable(props: Props) {
   const { lensAttributes, setChartTimeRangeContext } = props;
-
   const {
     services: { lens, notifications },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const { firstSeries, setSeries, reportType } = useSeriesStorage();
+  const { firstSeries, setSeries, reportType, lastRefresh } = useSeriesStorage();
 
   const firstSeriesId = 0;
 
   const timeRange = useExpViewTimeRange();
 
-  const onLensLoad = useCallback(() => {
-    setChartTimeRangeContext({
-      lastUpdated: Date.now(),
-      to: parseRelativeDate(timeRange?.to || '').valueOf(),
-      from: parseRelativeDate(timeRange?.from || '').valueOf(),
-    });
-  }, [setChartTimeRangeContext, timeRange]);
+  const trackEvent = useUiTracker();
+
+  const onLensLoad = useCallback(
+    (isLoading) => {
+      const timeLoaded = Date.now();
+
+      setChartTimeRangeContext({
+        lastUpdated: timeLoaded,
+        to: parseRelativeDate(timeRange?.to || '').valueOf(),
+        from: parseRelativeDate(timeRange?.from || '').valueOf(),
+      });
+
+      if (!isLoading) {
+        trackTelemetryOnLoad(trackEvent, lastRefresh, timeLoaded);
+      }
+    },
+    [setChartTimeRangeContext, timeRange, lastRefresh, trackEvent]
+  );
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
@@ -65,7 +77,7 @@ export function LensEmbeddable(props: Props) {
     [reportType, setSeries, firstSeries, notifications?.toasts]
   );
 
-  if (!timeRange || !firstSeries) {
+  if (!timeRange || !lensAttributes) {
     return null;
   }
 

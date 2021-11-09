@@ -189,7 +189,7 @@ Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
 to apply the setting.
 
 [[theme-version]]`theme:version`::
-Specifies the {kib} theme. If you change the setting, refresh the page to apply the setting.
+Kibana only ships with the v8 theme now, so this setting can no longer be edited.
 
 [[timepicker-quickranges]]`timepicker:quickRanges`::
 The list of ranges to show in the Quick section of the time filter. This should
@@ -515,6 +515,9 @@ Enables the legacy charts library for timelion charts in Visualize.
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in charts using the *Compatibility* palette.
+
+[[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
+Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.

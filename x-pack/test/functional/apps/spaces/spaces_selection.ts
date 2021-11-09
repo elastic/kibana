@@ -22,8 +22,7 @@ export default function spaceSelectorFunctionalTests({
     'spaceSelector',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/99581
-  describe.skip('Spaces', function () {
+  describe('Spaces', function () {
     this.tags('includeFirefox');
     describe('Space Selector', () => {
       before(async () => {
@@ -35,6 +34,7 @@ export default function spaceSelectorFunctionalTests({
       );
 
       afterEach(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 

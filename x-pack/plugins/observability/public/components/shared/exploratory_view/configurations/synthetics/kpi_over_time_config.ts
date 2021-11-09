@@ -16,13 +16,13 @@ import {
 import {
   CLS_LABEL,
   DCL_LABEL,
-  DOCUMENT_ONLOAD_LABEL,
   DOWN_LABEL,
   FCP_LABEL,
   LCP_LABEL,
   MONITORS_DURATION_LABEL,
   STEP_DURATION_LABEL,
   UP_LABEL,
+  PAGE_LOAD_TIME_LABEL,
 } from '../constants/labels';
 import {
   MONITOR_DURATION_US,
@@ -128,7 +128,7 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
         columnFilters: getStepMetricColumnFilter(SYNTHETICS_DCL),
       },
       {
-        label: DOCUMENT_ONLOAD_LABEL,
+        label: PAGE_LOAD_TIME_LABEL,
         field: SYNTHETICS_DOCUMENT_ONLOAD,
         id: SYNTHETICS_DOCUMENT_ONLOAD,
         columnType: OPERATION_COLUMN,

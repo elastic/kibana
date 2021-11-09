@@ -86,7 +86,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const { data, isLoading, mutateAsync, isError, isSuccess } = useMutation(
     (payload: Record<string, unknown>) =>
-      http.post('/internal/osquery/action', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      http.post<any>('/internal/osquery/action', {
         body: JSON.stringify(payload),
       }),
     {
@@ -137,11 +138,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       type: FIELD_TYPES.JSON,
       validations: [],
     },
-    hidden: {
-      defaultValue: false,
-      type: FIELD_TYPES.TOGGLE,
-      validations: [],
-    },
   };
 
   const { form } = useForm({
@@ -152,10 +148,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       if (isValid) {
         try {
-          await mutateAsync({
-            ...formData,
-            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
-          });
+          await mutateAsync(
+            pickBy(
+              {
+                ...formData,
+                ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
+              },
+              (value) => !isEmpty(value)
+            )
+          );
           // eslint-disable-next-line no-empty
         } catch (e) {}
       }
@@ -163,10 +164,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     options: {
       stripEmptyFields: false,
     },
-    serializer: ({ savedQueryId, hidden, ...formData }) => ({
-      ...pickBy({ ...formData, saved_query_id: savedQueryId }),
-      ...(hidden != null && hidden ? { hidden } : {}),
-    }),
+    serializer: ({ savedQueryId, ...formData }) =>
+      pickBy({ ...formData, saved_query_id: savedQueryId }, (value) => !isEmpty(value)),
     defaultValue: deepMerge(
       {
         agentSelection: {
@@ -177,7 +176,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         },
         query: '',
         savedQueryId: null,
-        hidden: false,
       },
       defaultValue ?? {}
     ),
@@ -419,9 +417,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     if (defaultValue?.query) {
       setFieldValue('query', defaultValue?.query);
     }
-    if (defaultValue?.hidden) {
-      setFieldValue('hidden', defaultValue?.hidden);
-    }
     // TODO: Set query and ECS mapping from savedQueryId object
     if (defaultValue?.savedQueryId) {
       setFieldValue('savedQueryId', defaultValue?.savedQueryId);
@@ -436,7 +431,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       <Form form={form}>
         {formType === 'steps' ? <EuiSteps steps={formSteps} /> : simpleForm}
         <UseField path="savedQueryId" component={GhostFormField} />
-        <UseField path="hidden" component={GhostFormField} />
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
