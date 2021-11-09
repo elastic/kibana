@@ -263,7 +263,7 @@ export function DiscoverLayout({
                 'dscPageContent--emptyPrompt': resultState === 'none',
               })}
             >
-              {indexPattern.timeFieldName === true && (
+              {indexPattern.timeFieldName && (
                 <DiscoverAlertButton
                   index={indexPattern.title}
                   timeField={indexPattern.timeFieldName}
