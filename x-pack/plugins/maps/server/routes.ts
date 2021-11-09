@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { INDEX_SETTINGS_API_PATH, FONTS_API_PATH } from '../common/constants';
-import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
+import { CoreSetup, IRouter, Logger } from 'kibana/server';
+import { INDEX_SETTINGS_API_PATH, FONTS_API_PATH } from '../common/constants';
+import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { initMVTRoutes } from './mvt/mvt_routes';
 import { initIndexingRoutes } from './data_indexing/indexing_routes';
+import { StartDeps, SetupDeps } from './types';
+import { DataRequestHandlerContext } from '../../../../src/plugins/data/server';
 
-export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, logger) {
-  const router = core.http.createRouter();
-  const [, { data: dataPlugin }] = await core.getStartServices();
+export async function initRoutes(core: CoreSetup, logger: Logger): Promise<void> {
+  const router: IRouter<DataRequestHandlerContext> = core.http.createRouter();
+  const [, { data: dataPlugin }]: [SetupDeps, StartDeps] =
+    (await core.getStartServices()) as unknown as [SetupDeps, StartDeps];
 
   router.get(
     {
@@ -80,7 +84,7 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
         logger.warn(
           `Cannot load index settings for data view '${query.indexPatternTitle}', error: ${error.message}.`
         );
-        response.custom({
+        return response.custom({
           body: 'Error loading index settings',
           statusCode: 400,
         });

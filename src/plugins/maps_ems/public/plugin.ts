@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-// @ts-ignore
 import { setKibanaVersion, setMapsEmsConfig } from './kibana_services';
-// @ts-ignore
 import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
 import type { MapsEmsConfig } from '../config';
 import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
-import { EMSSettings } from './index';
+import { EMSSettings } from '../common';
+import { IEMSConfig } from '../common/ems_settings';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -42,9 +40,11 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginSt
     setMapsEmsConfig(config);
 
     return {
-      getServiceSettings,
       config,
-      EMSSettings,
+      getServiceSettings,
+      createEMSSettings: (emsConfig: IEMSConfig, getIsEnterPrisePlus: () => boolean) => {
+        return new EMSSettings(emsConfig, getIsEnterPrisePlus);
+      },
     };
   }
 

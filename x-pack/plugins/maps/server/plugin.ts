@@ -14,7 +14,6 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 // @ts-ignore
@@ -27,41 +26,21 @@ import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
 import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
-// @ts-ignore
 import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
-import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/server';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { embeddableMigrations } from './embeddable_migrations';
-
-interface SetupDeps {
-  features: FeaturesPluginSetupContract;
-  usageCollection?: UsageCollectionSetup;
-  home?: HomeServerPluginSetup;
-  licensing: LicensingPluginSetup;
-  mapsEms: MapsEmsPluginSetup;
-  embeddable: EmbeddableSetup;
-}
-
-export interface StartDeps {
-  data: DataPluginStart;
-}
+import { StartDeps, SetupDeps } from './types';
 
 export class MapsPlugin implements Plugin {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
   private readonly _logger: Logger;
-  private readonly kibanaVersion: string;
 
   constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
     this._logger = initializerContext.logger.get();
     this._initializerContext = initializerContext;
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   _initHomeData(
@@ -163,15 +142,13 @@ export class MapsPlugin implements Plugin {
     const config$ = this._initializerContext.config.create();
 
     let isEnterprisePlus = false;
-    let lastLicenseId: string | undefined;
-    const emsSettings = new plugins.mapsEms.EMSSettings(mapsEms.config, () => isEnterprisePlus);
+    const emsSettings = plugins.mapsEms.createEMSSettings(mapsEms.config, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
       const enterprise = license.check(APP_ID, 'enterprise');
       isEnterprisePlus = enterprise.state === 'valid';
-      lastLicenseId = license.uid;
     });
 
-    initRoutes(core, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
+    initRoutes(core, this._logger);
 
     if (home) {
       this._initHomeData(home, core.http.basePath.prepend, emsSettings);

@@ -14,6 +14,7 @@ import {
 } from 'src/core/server';
 import { MapsEmsConfig, emsConfigSchema } from '../config';
 import { EMSSettings } from '../common';
+import { IEMSConfig } from '../common/ems_settings';
 export type { EMSSettings } from '../common';
 
 export const config: PluginConfigDescriptor<MapsEmsConfig> = {
@@ -32,7 +33,7 @@ export const config: PluginConfigDescriptor<MapsEmsConfig> = {
 
 export interface MapsEmsPluginSetup {
   config: MapsEmsConfig;
-  EMSSettings: EMSSettings;
+  createEMSSettings: (config: IEMSConfig, getIsEnterPrisePlus: () => boolean) => EMSSettings;
 }
 
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup> {
@@ -46,7 +47,9 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup> {
     const emsPluginConfig = this._initializerContext.config.get();
     return {
       config: emsPluginConfig,
-      EMSSettings,
+      createEMSSettings: (emsConfig: IEMSConfig, getIsEnterPrisePlus: () => boolean) => {
+        return new EMSSettings(emsConfig, getIsEnterPrisePlus);
+      },
     };
   }
 

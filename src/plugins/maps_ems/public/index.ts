@@ -11,6 +11,7 @@ import { MapsEmsPlugin } from './plugin';
 import { IServiceSettings } from './service_settings';
 import type { MapsEmsConfig } from '../config';
 import { EMSSettings } from '../common';
+import { IEMSConfig } from '../common/ems_settings';
 
 /** @public */
 export type {
@@ -31,7 +32,7 @@ export type { MapsEmsConfig } from '../config';
 
 export interface MapsEmsPluginSetup {
   config: MapsEmsConfig;
-  getServiceSettings: () => Promise<IServiceSettings>;
-  EMSSettings: EMSSettings;
+  getServiceSettings(): Promise<IServiceSettings>;
+  createEMSSettings(config: IEMSConfig, getIsEnterPrisePlus: () => boolean): EMSSettings;
 }
 export type MapsEmsPluginStart = ReturnType<MapsEmsPlugin['start']>;

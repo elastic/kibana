@@ -41,6 +41,6 @@
     "kibanaReact",
     "kibanaUtils",
     "usageCollection",
-    "home",
+    "home"
   ]
 }

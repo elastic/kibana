@@ -147,7 +147,7 @@ export class MapsPlugin
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
-    const emsSettings = new plugins.mapsEms.EMSSettings(
+    const emsSettings = plugins.mapsEms.createEMSSettings(
       plugins.mapsEms.config,
       getIsEnterprisePlus
     );

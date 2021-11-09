@@ -9,7 +9,7 @@ import type { CoreStart } from 'kibana/public';
 import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
-import type { EMSSettings } from '../common/ems_settings';
+import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';
 import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
 
 let kibanaVersion: string;
