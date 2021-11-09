@@ -135,6 +135,8 @@ export const serviceDetail = {
               t.partial({
                 traceId: t.string,
                 transactionId: t.string,
+                comparisonEnabled: toBooleanRt,
+                comparisonType: comparisonTypeRt,
               }),
             ]),
           }),
