@@ -78,14 +78,13 @@ export const LegendControls = ({
   const buttonComponent = (
     <EuiButtonIcon
       iconType="color"
-      color="primary"
+      color="text"
       display="base"
-      size="m"
+      size="s"
       aria-label={i18n.translate('xpack.infra.legendControls.buttonLabel', {
         defaultMessage: 'configure legend',
       })}
       onClick={() => setPopoverState(true)}
-      style={{ width: 50 }}
     />
   );
 

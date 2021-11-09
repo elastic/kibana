@@ -47,7 +47,6 @@ export const BottomDrawer: React.FC<{
   return (
     <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen} outerWidth={width}>
       <BottomActionTopBar ref={isOpen ? null : measureRef}>
-        <LeftSideSpacer />
         <EuiFlexItem grow={false}>
           <ShowHideButton
             aria-expanded={isOpen}
@@ -87,6 +86,6 @@ const ShowHideButton = euiStyled(EuiButtonEmpty).attrs({ size: 's' })`
   width: 140px;
 `;
 
-const LeftSideSpacer = euiStyled(EuiSpacer).attrs({ size: 'xs' })`
+const RightSideSpacer = euiStyled(EuiSpacer).attrs({ size: 'xs' })`
   width: 140px;
 `;
