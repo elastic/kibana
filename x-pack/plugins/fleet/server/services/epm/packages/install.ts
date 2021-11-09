@@ -41,6 +41,9 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 
+import type { PackageUpdateEvent } from '../../upgrade_sender';
+import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
+
 import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
@@ -203,6 +206,18 @@ interface InstallRegistryPackageParams {
   force?: boolean;
 }
 
+function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
+  return {
+    packageName: pkgName,
+    currentVersion: 'unknown',
+    newVersion: pkgVersion,
+    status: 'failure',
+    dryRun: false,
+    eventType: UpdateEventType.PACKAGE_INSTALL,
+    installType: 'unknown',
+  };
+}
+
 async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
@@ -215,6 +230,8 @@ async function installPackageFromRegistry({
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
+
+  const telemetryEvent: PackageUpdateEvent = getTelemetryEvent(pkgName, pkgVersion);
 
   try {
     // get the currently installed package
@@ -247,6 +264,9 @@ async function installPackageFromRegistry({
         };
       }
     }
+
+    telemetryEvent.installType = installType;
+    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
     // if the requested version is out-of-date of the latest package version, check if we allow it
     // if we don't allow it, return an error
@@ -287,6 +307,7 @@ async function installPackageFromRegistry({
           pkgName: packageInfo.name,
           currentVersion: packageInfo.version,
         });
+        telemetryEvent.status = 'success';
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
@@ -299,6 +320,7 @@ async function installPackageFromRegistry({
           installedPkg,
           esClient,
         });
+
         return { error: err, installType };
       });
   } catch (e) {
@@ -306,6 +328,12 @@ async function installPackageFromRegistry({
       error: e,
       installType,
     };
+  } finally {
+    sendTelemetryEvents(
+      appContextService.getLogger(),
+      appContextService.getTelemetryEventsSender(),
+      telemetryEvent
+    );
   }
 }
 
@@ -324,6 +352,7 @@ async function installPackageByUpload({
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
+  const telemetryEvent: PackageUpdateEvent = getTelemetryEvent('', '');
   try {
     const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
 
@@ -333,6 +362,12 @@ async function installPackageByUpload({
     });
 
     installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+
+    telemetryEvent.packageName = packageInfo.name;
+    telemetryEvent.newVersion = packageInfo.version;
+    telemetryEvent.installType = installType;
+    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
+
     if (installType !== 'install') {
       throw new PackageOperationNotSupportedError(
         `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
@@ -364,6 +399,7 @@ async function installPackageByUpload({
       installSource,
     })
       .then((assets) => {
+        telemetryEvent.status = 'success';
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
@@ -371,6 +407,12 @@ async function installPackageByUpload({
       });
   } catch (e) {
     return { error: e, installType };
+  } finally {
+    sendTelemetryEvents(
+      appContextService.getLogger(),
+      appContextService.getTelemetryEventsSender(),
+      telemetryEvent
+    );
   }
 }
 

@@ -8,6 +8,7 @@
 import type { Logger } from 'src/core/server';
 
 import type { TelemetryEventsSender } from '../telemetry/sender';
+import type { InstallType } from '../types';
 
 export interface PackageUpdateEvent {
   packageName: string;
@@ -18,7 +19,7 @@ export interface PackageUpdateEvent {
   errorMessage?: string[];
   error?: UpgradeError[];
   eventType: UpdateEventType;
-  installType?: string;
+  installType?: InstallType;
 }
 
 export enum UpdateEventType {
