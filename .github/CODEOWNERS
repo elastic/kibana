@@ -61,6 +61,7 @@
 /examples/partial_results_example/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
+/packages/kbn-react-field/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
 /src/plugins/data_views/ @elastic/kibana-app-services
@@ -232,6 +233,7 @@
 /src/core/  @elastic/kibana-core
 /src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core
+/typings/ @elastic/kibana-core
 /x-pack/plugins/banners/  @elastic/kibana-core
 /x-pack/plugins/features/  @elastic/kibana-core
 /x-pack/plugins/licensing/  @elastic/kibana-core

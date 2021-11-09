@@ -237,11 +237,11 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should display the forecast modal with enabled run button'
             );
-            await ml.singleMetricViewer.assertForecastButtonExists();
-            await ml.singleMetricViewer.assertForecastButtonEnabled(true);
-            await ml.singleMetricViewer.openForecastModal();
-            await ml.singleMetricViewer.assertForecastModalRunButtonEnabled(true);
-            await ml.singleMetricViewer.closeForecastModal();
+            await ml.forecast.assertForecastButtonExists();
+            await ml.forecast.assertForecastButtonEnabled(true);
+            await ml.forecast.openForecastModal();
+            await ml.forecast.assertForecastModalRunButtonEnabled(true);
+            await ml.forecast.closeForecastModal();
           });
 
           it('should display elements on Anomaly Explorer page correctly', async () => {
