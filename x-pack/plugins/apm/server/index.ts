@@ -119,11 +119,11 @@ export const plugin = (initContext: PluginInitializerContext) =>
 
 export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
 export { APMPlugin } from './plugin';
-export { APMPluginSetup } from './types';
-export {
+export type { APMPluginSetup } from './types';
+export type {
   APMServerRouteRepository,
   APIEndpoint,
 } from './routes/get_global_apm_server_route_repository';
-export { APMRouteHandlerResources } from './routes/typings';
+export type { APMRouteHandlerResources } from './routes/typings';
 
 export type { ProcessorEvent } from '../common/processor_event';

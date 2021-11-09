@@ -6,9 +6,9 @@
  */
 import url from 'url';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { getServiceNodeIds } from './get_service_node_ids';
 import { createApmApiClient } from '../../common/apm_api_supertest';
@@ -17,6 +17,7 @@ type ServiceOverviewInstanceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
   const apmApiSupertest = createApmApiClient(supertest);
 
@@ -77,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('return the correct data', () => {
-          expectSnapshot(response.body).toMatch();
+          expectSnapshot(omit(response.body, '@timestamp')).toMatch();
         });
       });
     }

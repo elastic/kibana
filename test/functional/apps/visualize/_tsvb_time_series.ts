@@ -361,6 +361,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(chartData).to.eql(expectedChartData);
         });
 
+        describe('Hiding series', () => {
+          it('should hide series by legend item click', async () => {
+            await visualBuilder.clickDataTab('timeSeries');
+            await visualBuilder.setMetricsGroupByTerms('@tags.raw');
+
+            let areasCount = (await visualBuilder.getChartItems())?.length;
+            expect(areasCount).to.be(6);
+
+            await visualBuilder.clickSeriesLegendItem('success');
+            await visualBuilder.clickSeriesLegendItem('info');
+            await visualBuilder.clickSeriesLegendItem('error');
+
+            areasCount = (await visualBuilder.getChartItems())?.length;
+            expect(areasCount).to.be(3);
+          });
+
+          it('should keep series hidden after refresh', async () => {
+            await visualBuilder.clickDataTab('timeSeries');
+            await visualBuilder.setMetricsGroupByTerms('extension.raw');
+
+            let legendNames = await visualBuilder.getLegendNames();
+            expect(legendNames).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
+
+            await visualBuilder.clickSeriesLegendItem('png');
+            await visualBuilder.clickSeriesLegendItem('php');
+            legendNames = await visualBuilder.getLegendNames();
+            expect(legendNames).to.eql(['jpg', 'css', 'gif']);
+
+            await visualize.clickRefresh(true);
+            legendNames = await visualBuilder.getLegendNames();
+            expect(legendNames).to.eql(['jpg', 'css', 'gif']);
+          });
+        });
+
         describe('Query filter', () => {
           it('should display correct chart data for applied series filter', async () => {
             const expectedChartData = [

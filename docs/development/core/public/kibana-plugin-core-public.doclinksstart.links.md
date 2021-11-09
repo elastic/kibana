@@ -268,5 +268,8 @@ readonly links: {
             readonly rubyOverview: string;
             readonly rustGuide: string;
         };
+        readonly endpoints: {
+            readonly troubleshooting: string;
+        };
     };
 ```

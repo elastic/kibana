@@ -58,7 +58,8 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 
-export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
+export type { OperationType, IndexPatternColumn } from './operations';
+export { deleteColumn } from './operations';
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
@@ -270,6 +271,7 @@ export function getIndexPatternDatasource({
 
     isValidColumn: (state: IndexPatternPrivateState, layerId: string, columnId: string) => {
       const layer = state.layers[layerId];
+
       return !isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId]);
     },
 
@@ -449,21 +451,23 @@ export function getIndexPatternDatasource({
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
-        (
-          getErrorMessages(
-            layer,
-            state.indexPatterns[layer.indexPatternId],
-            state,
-            layerId,
-            core
-          ) ?? []
-        ).map((message) => ({
-          shortMessage: '', // Not displayed currently
-          longMessage: typeof message === 'string' ? message : message.message,
-          fixAction: typeof message === 'object' ? message.fixAction : undefined,
-        }))
-      );
+      const layerErrors = Object.entries(state.layers)
+        .filter(([_, layer]) => !!state.indexPatterns[layer.indexPatternId])
+        .map(([layerId, layer]) =>
+          (
+            getErrorMessages(
+              layer,
+              state.indexPatterns[layer.indexPatternId],
+              state,
+              layerId,
+              core
+            ) ?? []
+          ).map((message) => ({
+            shortMessage: '', // Not displayed currently
+            longMessage: typeof message === 'string' ? message : message.message,
+            fixAction: typeof message === 'object' ? message.fixAction : undefined,
+          }))
+        );
 
       // Single layer case, no need to explain more
       if (layerErrors.length <= 1) {

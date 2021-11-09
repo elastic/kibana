@@ -49,7 +49,7 @@ export function getSortingParams(
         {
           [sortField]: {
             order: sortOrder,
-            unmapped_type: rootField.type,
+            unmapped_type: rootField.type as estypes.MappingFieldType,
           },
         },
       ],
@@ -73,7 +73,7 @@ export function getSortingParams(
       {
         [key]: {
           order: sortOrder,
-          unmapped_type: field.type,
+          unmapped_type: field.type as estypes.MappingFieldType,
         },
       },
     ],
