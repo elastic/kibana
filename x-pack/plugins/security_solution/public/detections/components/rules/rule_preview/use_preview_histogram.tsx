@@ -13,6 +13,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { QUERY_PREVIEW_ERROR } from './translations';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { FieldValueThreshold } from '../threshold_input';
+import { FieldValueQueryBar } from '../query_bar';
 
 interface PreviewHistogramParams {
   previewId: string | undefined;
@@ -20,6 +21,7 @@ interface PreviewHistogramParams {
   startDate: string;
   spaceId: string;
   threshold?: FieldValueThreshold;
+  query: FieldValueQueryBar;
 }
 
 export const usePreviewHistogram = ({
@@ -28,8 +30,10 @@ export const usePreviewHistogram = ({
   endDate,
   spaceId,
   threshold,
+  query,
 }: PreviewHistogramParams) => {
   const { uiSettings } = useKibana().services;
+  const { query: queryString, filters } = query;
 
   const [filterQuery] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
@@ -42,8 +46,11 @@ export const usePreviewHistogram = ({
       ],
       title: 'Preview',
     },
-    queries: [{ query: `signal.rule.id:${previewId}`, language: 'kuery' }],
-    filters: [],
+    queries: [
+      { query: `signal.rule.id:${previewId}`, language: 'kuery' },
+      { query: queryString, language: 'kuery' },
+    ],
+    filters,
   });
 
   const matrixHistogramRequest = useMemo(() => {

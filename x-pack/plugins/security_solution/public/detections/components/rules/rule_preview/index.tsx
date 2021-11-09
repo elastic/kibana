@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Unit } from '@elastic/datemath';
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
@@ -121,7 +121,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       </EuiFormRow>
       <EuiSpacer size="s" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
-      {!isPreviewRequestInProgress && previewId && spaceId && (
+      {!isPreviewRequestInProgress && previewId && spaceId && query && (
         <PreviewHistogram
           ruleType={ruleType}
           timeFrame={timeFrame}
@@ -129,6 +129,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
           threshold={threshold}
+          query={query}
         />
       )}
       <CalloutGroup items={errors} isError />
