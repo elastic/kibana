@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldStats } from '../../../../../common/search_strategies/field_stats_types';
+import { FieldStats } from '../../../../../common/correlations/field_stats_types';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 

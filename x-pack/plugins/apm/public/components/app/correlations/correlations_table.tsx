@@ -14,7 +14,7 @@ import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_tab
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
-import type { FieldValuePair } from '../../../../common/search_strategies/types';
+import type { FieldValuePair } from '../../../../common/correlations/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 

@@ -25,22 +25,15 @@ import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/tab
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  enableInspectEsQueries,
-  useUiTracker,
-} from '../../../../../observability/public';
+import { useUiTracker } from '../../../../../observability/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
-import {
-  APM_SEARCH_STRATEGIES,
-  DEFAULT_PERCENTILE_THRESHOLD,
-} from '../../../../common/search_strategies/constants';
-import { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
-import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
+import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 
 import {
   TransactionDistributionChart,
@@ -50,33 +43,24 @@ import { push } from '../../shared/Links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
-import { isErrorMessage } from './utils/is_error_message';
 import { getOverallHistogram } from './utils/get_overall_histogram';
-import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
 import { useTransactionColors } from './use_transaction_colors';
 import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
+import { useLatencyCorrelations } from './use_latency_correlations';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const transactionColors = useTransactionColors();
 
   const {
-    core: { notifications, uiSettings },
+    core: { notifications },
   } = useApmPluginContext();
 
-  const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
-
-  const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
-    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
-    {
-      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      analyzeCorrelations: true,
-    }
-  );
-  const progressNormalized = progress.loaded / progress.total;
+  const { progress, response, startFetch, cancelFetch } =
+    useLatencyCorrelations();
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
     progress.isRunning
@@ -90,7 +74,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   }, [response?.fieldStats]);
 
   useEffect(() => {
-    if (isErrorMessage(progress.error)) {
+    if (progress.error) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.correlations.latencyCorrelations.errorTitle',
@@ -98,7 +82,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             defaultMessage: 'An error occurred fetching correlations',
           }
         ),
-        text: progress.error.toString(),
+        text: progress.error,
       });
     }
   }, [progress.error, notifications.toasts]);
@@ -288,8 +272,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const showCorrelationsTable = progress.isRunning || histogramTerms.length > 0;
   const showCorrelationsEmptyStatePrompt =
-    histogramTerms.length < 1 &&
-    (progressNormalized === 1 || !progress.isRunning);
+    histogramTerms.length < 1 && (progress.loaded === 1 || !progress.isRunning);
 
   const transactionDistributionChartData: TransactionDistributionChartData[] =
     [];
@@ -382,7 +365,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <EuiSpacer size="s" />
 
       <CorrelationsProgressControls
-        progress={progressNormalized}
+        progress={progress.loaded}
         isRunning={progress.isRunning}
         onRefresh={startFetch}
         onCancel={cancelFetch}
@@ -415,7 +398,6 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         )}
         {showCorrelationsEmptyStatePrompt && <CorrelationsEmptyStatePrompt />}
       </div>
-      {displayLog && <CorrelationsLog logMessages={response.log ?? []} />}
     </div>
   );
 }

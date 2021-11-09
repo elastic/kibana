@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useUiTracker } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/search_strategies/constants';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -165,7 +165,7 @@ export function TransactionDistribution({
       <EuiText color="subdued" size="xs">
         <FormattedMessage
           id="xpack.apm.transactionDetails.tabs.transactionDistributionChartDescription"
-          defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {allTransactions} and {allFailedTransactions}."
+          defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {allTransactions} and {failedTransactions}."
           values={{
             allTransactions: (
               <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
@@ -175,13 +175,13 @@ export function TransactionDistribution({
                 />
               </span>
             ),
-            allFailedTransactions: (
+            failedTransactions: (
               <span
                 style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
               >
                 <FormattedMessage
-                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartAllFailedTransactions"
-                  defaultMessage="all failed transactions"
+                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartFailedTransactions"
+                  defaultMessage="failed transactions"
                 />
               </span>
             ),

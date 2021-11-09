@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LatencyCorrelationsRawResponse } from '../../../../../common/search_strategies/latency_correlations/types';
+import type { LatencyCorrelationsResponse } from '../../../../../common/correlations/latency_correlations/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
@@ -13,7 +13,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 // of fetching more data such as correlation results. That's why we have to determine
 // the `status` of the data for the latency chart separately.
 export function getOverallHistogram(
-  data: LatencyCorrelationsRawResponse,
+  data: LatencyCorrelationsResponse,
   isRunning: boolean
 ) {
   const overallHistogram =

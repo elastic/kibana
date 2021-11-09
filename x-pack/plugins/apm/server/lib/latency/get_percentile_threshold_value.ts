@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ProcessorEvent } from '../../../common/processor_event';
 
-import { getTransactionDurationPercentilesRequest } from '../search_strategies/queries/query_percentiles';
+import { getTransactionDurationPercentilesRequest } from '../correlations/queries/query_percentiles';
 
 import type { OverallLatencyDistributionOptions } from './types';
 
