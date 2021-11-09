@@ -50,23 +50,8 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
 
   private isEmbeddableCompatible(context: EmbeddableContext) {
     if (!isEnhancedEmbeddable(context.embeddable)) return false;
-    const supportedTriggers = context.embeddable.supportedTriggers();
-    if (!supportedTriggers || !supportedTriggers.length) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
-
-    /**
-     * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
-     * and triggers that current embeddable supports
-     */
-    const allPossibleTriggers = this.params
-      .start()
-      .plugins.uiActionsEnhanced.getActionFactories()
-      .map((factory) => factory.supportedTriggers())
-      .reduce((res, next) => res.concat(next), []);
-
-    return ensureNestedTriggers(supportedTriggers).some((trigger) =>
-      allPossibleTriggers.includes(trigger)
-    );
+    return true;
   }
 
   public async isCompatible(context: EmbeddableContext) {
