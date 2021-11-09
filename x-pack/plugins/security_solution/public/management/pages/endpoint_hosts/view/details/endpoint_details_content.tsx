@@ -121,43 +121,35 @@ export const EndpointDetailsContent = memo(
             </ColumnTitle>
           ),
           description: (
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" className={'eui-textBreakWord'}>
-                  <EndpointPolicyLink
-                    policyId={details.Endpoint.policy.applied.id}
-                    data-test-subj="policyDetailsValue"
-                  >
-                    {details.Endpoint.policy.applied.name}
-                  </EndpointPolicyLink>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="baseline">
+            <>
+              <EuiText size="xs" className={'eui-textBreakWord'}>
+                <EndpointPolicyLink
+                  policyId={details.Endpoint.policy.applied.id}
+                  data-test-subj="policyDetailsValue"
+                >
+                  {details.Endpoint.policy.applied.name}
+                </EndpointPolicyLink>
                 {details.Endpoint.policy.applied.endpoint_policy_version && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText
-                      color="subdued"
-                      size="xs"
-                      style={{ whiteSpace: 'nowrap' }}
-                      data-test-subj="policyDetailsRevNo"
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
-                        defaultMessage="rev. {revNumber}"
-                        values={{
-                          revNumber: details.Endpoint.policy.applied.endpoint_policy_version,
-                        }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
+                  <EuiText
+                    color="subdued"
+                    size="xs"
+                    style={{ whiteSpace: 'nowrap', display: 'inline-block', paddingLeft: '5px' }}
+                    data-test-subj="policyDetailsRevNo"
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
+                      defaultMessage="rev. {revNumber}"
+                      values={{
+                        revNumber: details.Endpoint.policy.applied.endpoint_policy_version,
+                      }}
+                    />
+                  </EuiText>
                 )}
                 {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && (
-                  <EuiFlexItem grow={false}>
-                    <OutOfDate />
-                  </EuiFlexItem>
+                  <OutOfDate style={{ display: 'inline-block', paddingLeft: '5px' }} />
                 )}
-              </EuiFlexGroup>
-            </EuiFlexGroup>
+              </EuiText>
+            </>
           ),
         },
         {
