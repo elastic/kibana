@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
 
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { DEFAULT_RELATIVE_DATE_THRESHOLD } from '../../../../../../../common/constants';
 import { FormatUrl } from '../../../../../../common/components/link_to';
 import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
 
@@ -88,7 +89,7 @@ export const getAllExceptionListsColumns = (
     width: '14%',
     render: (value: ExceptionListInfo['created_at']) => (
       <FormattedRelativePreferenceDate
-        relativeThresholdInHrs={24}
+        relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
         value={value}
         tooltipFieldName={i18n.LIST_DATE_CREATED_TITLE}
         tooltipAnchorClassName="eui-textTruncate"
@@ -103,7 +104,7 @@ export const getAllExceptionListsColumns = (
     width: '14%',
     render: (value: ExceptionListInfo['updated_at']) => (
       <FormattedRelativePreferenceDate
-        relativeThresholdInHrs={24}
+        relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
         value={value}
         tooltipFieldName={i18n.LIST_DATE_UPDATED_TITLE}
         tooltipAnchorClassName="eui-textTruncate"

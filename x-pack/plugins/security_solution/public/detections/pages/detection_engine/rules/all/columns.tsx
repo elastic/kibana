@@ -41,7 +41,11 @@ import { getToolTipContent, canEditRuleWithActions } from '../../../../../common
 import { PopoverTooltip } from './popover_tooltip';
 import { TagsDisplay } from './tag_display';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
-import { APP_UI_ID, SecurityPageName } from '../../../../../../common/constants';
+import {
+  APP_UI_ID,
+  SecurityPageName,
+  DEFAULT_RELATIVE_DATE_THRESHOLD,
+} from '../../../../../../common/constants';
 import { DocLinksStart, NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
 export const getActions = (
@@ -201,7 +205,7 @@ export const getColumns = ({
         ) : (
           <FormattedRelativePreferenceDate
             tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
-            relativeThresholdInHrs={24}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
             value={value}
             tooltipAnchorClassName="eui-textTruncate"
           />
@@ -232,7 +236,7 @@ export const getColumns = ({
         ) : (
           <FormattedRelativePreferenceDate
             tooltipFieldName={i18n.COLUMN_LAST_UPDATE}
-            relativeThresholdInHrs={24}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
             value={value}
             tooltipAnchorClassName="eui-textTruncate"
           />
@@ -417,7 +421,7 @@ export const getMonitoringColumns = (
         ) : (
           <FormattedRelativePreferenceDate
             tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
-            relativeThresholdInHrs={24}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
             value={value}
             tooltipAnchorClassName="eui-textTruncate"
           />

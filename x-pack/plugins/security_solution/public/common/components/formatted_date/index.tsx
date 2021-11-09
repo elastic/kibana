@@ -148,13 +148,17 @@ export const FormattedRelativePreferenceDate = React.memo<FormattedRelativePrefe
       return getOrEmptyTagFromValue(value);
     }
     const date = maybeDate.toDate();
+    const shouldDisplayPreferenceTime = moment(date)
+      .add(relativeThresholdInHrs, 'hours')
+      .isBefore(new Date());
+
     return (
       <LocalizedDateTooltip
         date={date}
         fieldName={tooltipFieldName}
         className={tooltipAnchorClassName}
       >
-        {moment(date).add(relativeThresholdInHrs, 'hours').isBefore(new Date()) ? (
+        {shouldDisplayPreferenceTime ? (
           <PreferenceFormattedDate
             data-test-subj="preference-time"
             value={date}
