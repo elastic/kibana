@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, ResponseHeaders } from 'src/core/server';
-import bluebird from 'bluebird';
+import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
@@ -57,7 +57,7 @@ export const getAgentPoliciesHandler: RequestHandler<
       perPage,
     };
 
-    await bluebird.map(
+    await pMap(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
         getAgentsByKuery(esClient, {
