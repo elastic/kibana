@@ -51,7 +51,7 @@ export default function chainRunner(tlConfig) {
             const itemFunctionDef = tlConfig.getFunction(item.function);
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
-              return Bluebird.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
+              return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
             return invoke(item.function, item.arguments);
           }
