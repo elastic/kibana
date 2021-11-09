@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
@@ -91,7 +91,8 @@ export interface IVectorStyle extends IStyle {
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   isTimeAware(): boolean;
-  getIcon(): ReactElement;
+  getPrimaryColor(): string;
+  getIcon(areResultsTrimmed: boolean): ReactElement;
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -700,7 +701,15 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  getIcon() {
+  getPrimaryColor() {
+    const primaryColorKey = this._getIsLinesOnly() ? VECTOR_STYLES.LINE_COLOR : VECTOR_STYLES.FILL_COLOR;
+    return extractColorFromStyleProperty(
+      this._descriptor.properties[primaryColorKey],
+      'grey'
+    );
+  }
+
+  getIcon(areResultsTrimmed) {
     const isLinesOnly = this._getIsLinesOnly();
     const isPointsOnly = this._getIsPointsOnly();
     
@@ -723,8 +732,17 @@ export class VectorStyle implements IVectorStyle {
           'grey'
         );
 
+    const borderStyle: CSSProperties = areResultsTrimmed
+      ? {
+          borderColor: this.getPrimaryColor(),
+          borderStyle: 'dashed',
+          borderWidth: '1px',
+        }
+      : {};
+
     return (
       <VectorIcon
+        borderStyle={borderStyle}
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         symbolId={this._getSymbolId()}

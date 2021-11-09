@@ -106,7 +106,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />
       ) : (
-        this.getCurrentStyle().getIcon()
+        this.getCurrentStyle().getIcon(areResultsTrimmed)
       ),
       tooltipContent,
       areResultsTrimmed,
