@@ -7,17 +7,23 @@
 
 import React, { createContext } from 'react';
 import type { CoreStart } from '../../../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 
 /**
  * The context value for Kibana services.
  *
  * The default for `useKibana` is `Partial<CoreStart>`, but we also need
- * `triggersActionsUi` where we load APM code into the alert creation flyouts.
+ * `triggersActionsUi` where we load APM code into the alert creation flyouts,
+ * and `usageCollection` for `useTrackMetric` from the observability plugin.
+ * The LogStream component from infra depends on the `data` plugin.
  */
 export type KibanaServicesContextValue = CoreStart & {
+  data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection?: UsageCollectionSetup;
 };
 
 export const KibanaServicesContext = createContext<KibanaServicesContextValue>(

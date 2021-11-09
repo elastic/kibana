@@ -7,7 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from 'src/plugins/usage_collection/public';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -24,7 +27,7 @@ import type {
 } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
+import type { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
@@ -54,8 +57,8 @@ import { getLazyApmAgentsTabExtension } from './components/fleet_integration/laz
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
-export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
+export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
@@ -68,6 +71,7 @@ export interface ApmPluginSetupDeps {
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -82,6 +86,7 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -321,18 +326,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       ],
       async mount(appMountParameters: AppMountParameters) {
         // Load application bundle and Get start service
-        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
+        const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application/uxApp'),
           coreSetup.getStartServices(),
         ]);
 
         return renderApp({
-          core: coreStart,
-          deps: pluginsSetup,
           appMountParameters,
-          config,
-          corePlugins: corePlugins as ApmPluginStartDeps,
-          observabilityRuleTypeRegistry,
+          coreStart,
+          pluginsSetup,
+          pluginsStart: pluginsStart as ApmPluginStartDeps,
         });
       },
     });

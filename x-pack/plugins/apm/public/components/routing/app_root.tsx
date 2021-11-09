@@ -68,7 +68,9 @@ export function ApmAppRoot({
           <KibanaServicesContextProvider
             value={{
               ...coreStart,
+              data: pluginsStart.data,
               triggersActionsUi: pluginsStart.triggersActionsUi,
+              usageCollection: pluginsSetup.usageCollection,
             }}
           >
             <I18nContextProvider>
