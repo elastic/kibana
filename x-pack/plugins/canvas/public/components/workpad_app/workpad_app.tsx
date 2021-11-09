@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { MouseEventHandler, useCallback } from 'react';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { MouseEventHandler } from 'react';
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 // @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';
 import { canUserWrite } from '../../state/selectors/app';
@@ -19,28 +20,17 @@ export { WORKPAD_CONTAINER_ID } from './workpad_app.component';
 
 const WorkpadAppComponent = withElementsLoadedTelemetry(Component);
 
-export const WorkpadApp: React.FC = () => {
-  const isWriteableProp = useSelector(
-    (state: State) => isWriteable(state) && canUserWrite(state),
-    shallowEqual
-  );
+const mapDispatchToProps = (dispatch: Dispatch): { deselectElement: MouseEventHandler } => ({
+  deselectElement: (ev) => {
+    ev.stopPropagation();
+    dispatch(selectToplevelNodes([]));
+  },
+});
 
-  const workpad = useSelector((state: State) => getWorkpad(state), shallowEqual);
-  const dispatch = useDispatch();
-
-  const deselectElement: MouseEventHandler = useCallback(
-    (ev) => {
-      ev.stopPropagation();
-      dispatch(selectToplevelNodes([]));
-    },
-    [dispatch]
-  );
-
-  return (
-    <WorkpadAppComponent
-      workpad={workpad}
-      isWriteable={isWriteableProp}
-      deselectElement={deselectElement}
-    />
-  );
-};
+export const WorkpadApp = connect(
+  (state: State) => ({
+    isWriteable: isWriteable(state) && canUserWrite(state),
+    workpad: getWorkpad(state),
+  }),
+  mapDispatchToProps
+)(WorkpadAppComponent);
