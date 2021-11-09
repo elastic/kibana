@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { AggregationsDateInterval } from '@elastic/elasticsearch/lib/api/types';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
-import { calculateThroughputWithInterval } from '../helpers/calculate_throughput';
 
 interface Options {
   environment: string;
@@ -49,30 +52,27 @@ export async function getThroughput({
 }: Options) {
   const { apmEventClient } = setup;
 
-  const filter: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
-    ...environmentQuery(environment),
-    ...kqlQuery(kuery),
-  ];
-
-  if (transactionName) {
-    filter.push({
-      term: {
-        [TRANSACTION_NAME]: transactionName,
-      },
-    });
-  }
-
   const params = {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
-      query: { bool: { filter } },
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
+            ...getDocumentTypeFilterForTransactions(
+              searchAggregatedTransactions
+            ),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+          ],
+        },
+      },
       aggs: {
         timeseries: {
           date_histogram: {
@@ -80,6 +80,11 @@ export async function getThroughput({
             fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
+          },
+          aggs: {
+            throughput: {
+              rate: { unit: 'minute' as AggregationsDateInterval },
+            },
           },
         },
       },
@@ -95,10 +100,7 @@ export async function getThroughput({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: calculateThroughputWithInterval({
-          bucketSize,
-          value: bucket.doc_count,
-        }),
+        y: bucket.throughput.value,
       };
     }) ?? []
   );

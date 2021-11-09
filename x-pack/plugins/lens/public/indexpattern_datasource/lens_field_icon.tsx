@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FieldIcon, FieldIconProps } from '../../../../../src/plugins/kibana_react/public';
+import { FieldIcon, FieldIconProps } from '@kbn/react-field/field_icon';
 import { DataType } from '../types';
 import { normalizeOperationDataType } from './utils';
 
