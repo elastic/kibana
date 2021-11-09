@@ -14,12 +14,8 @@ fi
 if [[ "${GITHUB_PR_LABELS:-}" == *"ci:deploy-cloud"* ]]; then
   echo "--- Build and push Kibana Cloud Distribution"
 
-  DOCKER_USERNAME="$(vault read -field=username secret/kibana-issues/dev/container-registry)"
-  DOCKER_PASSWORD="$(vault read -field=password secret/kibana-issues/dev/container-registry)"
-  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.elastic.co
+  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
   trap 'docker logout docker.elastic.co' EXIT
-  unset DOCKER_USERNAME
-  unset DOCKER_PASSWORD
 
   node scripts/build \
     --skip-initialize \
