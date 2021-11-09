@@ -24,7 +24,7 @@ export type HasDataMap = Record<
   DataContextApps,
   {
     status: FETCH_STATUS;
-    hasData?: boolean | Alert[];
+    hasData?: boolean;
     indices?: string | ApmIndicesConfig;
     serviceName?: string;
   }
@@ -123,7 +123,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
         setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
-            hasData: alerts,
+            hasData: alerts.length > 0,
             status: FETCH_STATUS.SUCCESS,
           },
         }));
