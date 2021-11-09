@@ -32,7 +32,7 @@ export const useStyles = ({ depth }: StylesDeps) => {
 
     const children: CSSObject = {
       position: 'relative',
-      color: 'white',
+      color: colors.ghost,
       marginLeft: '16px',
       paddingLeft: '8px',
       borderLeft: `3px dotted ${colors.lightShade}`,
