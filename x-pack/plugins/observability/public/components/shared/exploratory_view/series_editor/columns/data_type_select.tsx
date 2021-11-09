@@ -63,17 +63,6 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
 
 const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
 
-export const getInitialSeriesName = (
-  dataType: AppDataType,
-  seriesId: number,
-  selectedMetric?: string
-) => {
-  if (selectedMetric) {
-    return `${dataType}-${selectedMetric.toLowerCase().replaceAll(' ', '-')}-${seriesId + 1}`;
-  }
-  return `${dataType}-${seriesId + 1}`;
-};
-
 export function DataTypesSelect({ seriesId, series }: Props) {
   const { setSeries, reportType } = useSeriesStorage();
   const [showOptions, setShowOptions] = useState(false);
@@ -83,7 +72,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       setSeries(seriesId, {
         dataType,
         time: series.time,
-        name: getInitialSeriesName(dataType, seriesId),
+        name: `${dataType}-series-${seriesId + 1}`,
       });
     }
   };

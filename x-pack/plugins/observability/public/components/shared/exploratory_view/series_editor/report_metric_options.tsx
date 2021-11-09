@@ -22,7 +22,6 @@ import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
-import { getInitialSeriesName } from './columns/data_type_select';
 
 interface Props {
   seriesId: number;
@@ -39,13 +38,8 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const { indexPatterns, loading } = useAppIndexPatternContext();
 
   const onChange = (value?: string) => {
-    let currName = series.name;
-    if (currName === getInitialSeriesName(series.dataType, seriesId) && value) {
-      currName = getInitialSeriesName(series.dataType, seriesId, seriesConfig?.labels[value]);
-    }
     setSeries(seriesId, {
       ...series,
-      name: currName,
       selectedMetricField: value,
     });
   };
