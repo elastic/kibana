@@ -17,8 +17,15 @@ export const getChangePointRequest = (
   params: ChangePointParams & CorrelationsParams,
   fieldName: string
 ): estypes.SearchRequest => {
-  const { environment, kuery, serviceName, transactionType, transactionName } =
-    params;
+  const {
+    environment,
+    kuery,
+    serviceName,
+    transactionType,
+    transactionName,
+    start,
+    end,
+  } = params;
 
   const correlationFilters = getCorrelationsFilters({
     environment,
@@ -26,6 +33,8 @@ export const getChangePointRequest = (
     serviceName,
     transactionType,
     transactionName,
+    start,
+    end,
   });
 
   const query = {

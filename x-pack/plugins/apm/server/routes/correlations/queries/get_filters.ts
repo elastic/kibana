@@ -17,12 +17,6 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { CorrelationsClientParams } from '../../../../common/correlations/types';
 
-type CorrelationsFiltersParams = Omit<
-  CorrelationsClientParams,
-  'start' | 'end'
-> &
-  Partial<Pick<CorrelationsClientParams, 'start' | 'end'>>;
-
 export function getCorrelationsFilters({
   environment,
   kuery,
@@ -31,7 +25,7 @@ export function getCorrelationsFilters({
   transactionName,
   start,
   end,
-}: CorrelationsFiltersParams) {
+}: CorrelationsClientParams) {
   const correlationsFilters: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     ...(start && end ? rangeQuery(start, end) : []),
