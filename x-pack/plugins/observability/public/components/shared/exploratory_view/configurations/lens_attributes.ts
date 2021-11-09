@@ -407,7 +407,7 @@ export class LensAttributes {
     const { type: fieldType } = fieldMeta ?? {};
 
     if (columnType === TERMS_COLUMN) {
-      return this.getTermsColumn(fieldName, columnLabel || label);
+      return this.getTermsColumn(fieldName, label || columnLabel);
     }
 
     if (fieldName === RECORDS_FIELD || columnType === FILTER_RECORDS) {
@@ -439,14 +439,14 @@ export class LensAttributes {
         columnType,
         columnFilter: columnFilters?.[0],
         operationType,
-        label: columnLabel || label,
+        label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
       });
     }
     if (operationType === 'unique_count') {
       return this.getCardinalityColumn({
         sourceField: fieldName,
-        label: columnLabel || label,
+        label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
       });
     }
