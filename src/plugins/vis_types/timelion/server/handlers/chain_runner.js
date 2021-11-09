@@ -7,7 +7,6 @@
  */
 
 import _ from 'lodash';
-import Bluebird from 'bluebird';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
@@ -158,22 +157,22 @@ export default function chainRunner(tlConfig) {
       })
       .value();
 
-    return Bluebird.settle(promises).then(function (resolvedDatasources) {
+    return Promise.allSettled(promises).then(function (resolvedDatasources) {
       stats.queryTime = new Date().getTime();
 
       _.each(queries, function (query, i) {
         const functionDef = tlConfig.getFunction(query.function);
         const resolvedDatasource = resolvedDatasources[i];
 
-        if (resolvedDatasource.isRejected()) {
-          if (resolvedDatasource.reason().isBoom) {
-            throw resolvedDatasource.reason();
+        if (resolvedDatasource.status === 'rejected') {
+          if (resolvedDatasource.reason.isBoom) {
+            throw resolvedDatasource.reason;
           } else {
-            throwWithCell(query.cell, resolvedDatasource.reason());
+            throwWithCell(query.cell, resolvedDatasource.reason);
           }
         }
 
-        queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value();
+        queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value;
       });
 
       stats.cacheCount = _.keys(queryCache).length;
