@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import { getOverallLatencyDistribution } from '../lib/latency/get_overall_latency_distribution';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { createApmServerRoute } from './create_apm_server_route';

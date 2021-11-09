@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt } from '@kbn/io-ts-utils/iso_to_epoch_rt';
 
 export { environmentRt } from '../../common/environment_rt';
 
