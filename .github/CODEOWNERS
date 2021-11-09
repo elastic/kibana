@@ -405,6 +405,12 @@
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 
+## Security Solution sub teams - security-engineering-productivity
+x-pack/plugins/security_solution/cypress/ccs_integration
+x-pack/plugins/security_solution/cypress/upgrade_integration
+x-pack/plugins/security_solution/cypress/README.md
+x-pack/test/security_solution_cypress
+
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 
