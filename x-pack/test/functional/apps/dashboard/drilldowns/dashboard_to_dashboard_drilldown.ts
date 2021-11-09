@@ -156,8 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/83824
-    describe.skip('Copy to space', () => {
+    describe('Copy to space', () => {
       const destinationSpaceId = 'custom_space';
       before(async () => {
         await spaces.create({
