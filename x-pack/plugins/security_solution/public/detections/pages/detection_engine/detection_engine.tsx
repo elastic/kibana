@@ -355,6 +355,13 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup wrap>
+                <EuiFlexItem grow={1}>
+                  <AlertsCountPanel
+                    filters={alertsHistogramDefaultFilters}
+                    query={query}
+                    signalIndexName={signalIndexName}
+                  />
+                </EuiFlexItem>
                 <EuiFlexItem grow={2}>
                   <AlertsHistogramPanel
                     chartHeight={CHART_HEIGHT}
@@ -364,14 +371,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                     titleSize={'s'}
                     signalIndexName={signalIndexName}
                     updateDateRange={updateDateRangeCallback}
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={1}>
-                  <AlertsCountPanel
-                    filters={alertsHistogramDefaultFilters}
-                    query={query}
-                    signalIndexName={signalIndexName}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
