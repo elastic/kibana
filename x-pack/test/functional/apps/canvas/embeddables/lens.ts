@@ -38,5 +38,19 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
       await PageObjects.lens.assertMetric('Maximum of bytes', '16,788');
     });
+
+    describe('by-reference', () => {
+      it('renders embeddable with using savedLens expression', () => {});
+
+      it('adds existing visualize embeddable from the visualize library', async () => {});
+
+      it('edits visualize by-reference embeddable', async () => {});
+    });
+
+    describe('by-value', () => {
+      it('creates new lens embeddable', () => {});
+
+      it('edits lens by-value embeddable', () => {});
+    });
   });
 }
