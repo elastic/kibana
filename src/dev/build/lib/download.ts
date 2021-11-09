@@ -34,14 +34,15 @@ interface DownloadOptions {
   log: ToolingLog;
   url: string;
   destination: string;
-  sha256: string;
+  shaChecksum: string;
+  shaAlgorithm: string;
   retries?: number;
 }
 export async function download(options: DownloadOptions): Promise<void> {
-  const { log, url, destination, sha256, retries = 0 } = options;
+  const { log, url, destination, shaChecksum, shaAlgorithm, retries = 0 } = options;
 
-  if (!sha256) {
-    throw new Error(`sha256 checksum of ${url} not provided, refusing to download.`);
+  if (!shaChecksum) {
+    throw new Error(`${shaAlgorithm} checksum of ${url} not provided, refusing to download.`);
   }
 
   // mkdirp and open file outside of try/catch, we don't retry for those errors
@@ -50,7 +51,7 @@ export async function download(options: DownloadOptions): Promise<void> {
 
   let error;
   try {
-    log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
+    log.debug(`Attempting download of ${url}`, chalk.dim(shaAlgorithm));
 
     const response = await Axios.request({
       url,
@@ -62,7 +63,7 @@ export async function download(options: DownloadOptions): Promise<void> {
       throw new Error(`Unexpected status code ${response.status} when downloading ${url}`);
     }
 
-    const hash = createHash('sha256');
+    const hash = createHash(shaAlgorithm);
     await new Promise((resolve, reject) => {
       response.data.on('data', (chunk: Buffer) => {
         hash.update(chunk);
@@ -73,10 +74,10 @@ export async function download(options: DownloadOptions): Promise<void> {
       response.data.on('end', resolve);
     });
 
-    const downloadedSha256 = hash.digest('hex');
-    if (downloadedSha256 !== sha256) {
+    const downloadedSha = hash.digest('hex');
+    if (downloadedSha !== shaChecksum) {
       throw new Error(
-        `Downloaded checksum ${downloadedSha256} does not match the expected sha256 checksum.`
+        `Downloaded checksum ${downloadedSha} does not match the expected ${shaAlgorithm} checksum.`
       );
     }
   } catch (_error) {

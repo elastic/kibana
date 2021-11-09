@@ -21,7 +21,8 @@ export const DownloadNodeBuilds: GlobalTask = {
         await download({
           log,
           url,
-          sha256: shasums[downloadName],
+          shaChecksum: shasums[downloadName],
+          shaAlgorithm: 'sha256',
           destination: downloadPath,
           retries: 3,
         });
