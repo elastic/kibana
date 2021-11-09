@@ -25,6 +25,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
       await testSubjects.click('savedObjectTitleGarbage');
       await testSubjects.moveMouseTo('euiFlyoutCloseButton');
+      await testSubjects.setValue('savedObjectFinderSearchInput', 'todo');
       await flyout.ensureClosed('dashboardAddPanel');
       const tasks = await testSubjects.getVisibleTextAll('todoEmbeddableTask');
       expect(tasks).to.eql(['Goes out on Wednesdays!', 'Take the garbage out']);
