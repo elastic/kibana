@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -40,15 +41,12 @@ export default function ({ getService, getPageObjects }) {
             },
           ],
         },
-        kibana: {
-          global: ['all'],
-        },
       });
       const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('myroleEast');
       expect(roles.myroleEast.reserved).to.be(false);
-      screenshot.take('Security_Roles');
+      await screenshot.take('Security_Roles');
     });
 
     it('should add new user userEAST ', async function () {
@@ -78,6 +76,7 @@ export default function ({ getService, getPageObjects }) {
       expect(rowData).to.contain('EAST');
     });
     after('logout', async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
   });

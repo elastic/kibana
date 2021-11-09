@@ -57,11 +57,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await PageObjects.security.forceLogout();
+
         await security.role.delete('data_analyst');
         await security.user.delete('analyst');
 
         await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/session_in_space');
-        await PageObjects.security.forceLogout();
       });
 
       it('Saves and restores a session', async () => {
@@ -130,11 +132,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await PageObjects.security.forceLogout();
+
         await security.role.delete('data_analyst');
         await security.user.delete('analyst');
 
         await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/session_in_space');
-        await PageObjects.security.forceLogout();
       });
 
       it("Doesn't allow to store a session", async () => {
