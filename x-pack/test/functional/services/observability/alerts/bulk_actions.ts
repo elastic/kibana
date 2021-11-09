@@ -7,7 +7,8 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 const CHECKBOX_SELECTOR = 'select-event';
-const CHECKBOX_PRODUCER_SELECTOR = 'select-event-rule-producer-';
+const CHECKBOX_PRODUCER_SELECTOR = 'select-event-rule-producer';
+const BULK_ACTIONS_CONTAINER = 'bulk-actions-button-container';
 
 export function ObservabilityAlertsBulkActionsProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
@@ -23,13 +24,23 @@ export function ObservabilityAlertsBulkActionsProvider({ getService }: FtrProvid
 
   const getCheckboxSelectorPerProducer = async (producer: string) => {
     return await find.allByCssSelector(
-      testSubjects.getCssSelector(`~select-event-rule-producer-${producer}`)
+      testSubjects.getCssSelector(`~${CHECKBOX_PRODUCER_SELECTOR}-${producer}`)
     );
+  };
+
+  const getBulkActionsContainer = async () => {
+    return await testSubjects.find(BULK_ACTIONS_CONTAINER);
+  };
+
+  const getBulkActionsContainerOrFail = async () => {
+    return await testSubjects.existOrFail(BULK_ACTIONS_CONTAINER);
   };
 
   return {
     getCheckboxSelector,
     getCheckboxSelectorPerProducer,
     missingCheckboxSelectorOrFail,
+    getBulkActionsContainer,
+    getBulkActionsContainerOrFail,
   };
 }

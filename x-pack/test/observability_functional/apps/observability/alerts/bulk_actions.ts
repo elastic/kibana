@@ -66,13 +66,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      describe.skip('when checkbox is clicked', async () => {
+      describe('when checkbox is clicked', async () => {
         it('shows bulk actions container', async () => {
-          await retry.try(async () => {
-            const checkbox =
-              await observability.alerts.bulkActions.getCheckboxSelectorForFirstRow();
-            await checkbox.click();
-          });
+          const logsCheckboxes =
+            await observability.alerts.bulkActions.getCheckboxSelectorPerProducer('logs');
+          await logsCheckboxes[0].click();
+          await observability.alerts.bulkActions.getBulkActionsContainerOrFail();
         });
 
         describe('when selected bulk action button is clicked', async () => {
@@ -105,13 +104,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      describe.skip('when checkbox is clicked', async () => {
+      describe('when checkbox is clicked', async () => {
         it('shows bulk actions container', async () => {
-          await retry.try(async () => {
-            const checkbox =
-              await observability.alerts.bulkActions.getCheckboxSelectorForFirstRow();
-            await checkbox.click();
-          });
+          const apmCheckboxes =
+            await observability.alerts.bulkActions.getCheckboxSelectorPerProducer('apm');
+          await apmCheckboxes[0].click();
+          await observability.alerts.bulkActions.getBulkActionsContainerOrFail();
         });
 
         describe('when selected bulk action button is clicked', async () => {
