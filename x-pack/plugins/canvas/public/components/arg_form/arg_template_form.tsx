@@ -48,7 +48,7 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
   const [mounted, setMounted] = useState(false);
   const prevError = usePrevious(error);
   const prevMounted = usePrevious(mounted);
-  const mountedArgumentRef = useRef<UpdatePropsRef>();
+  const mountedArgumentRef = useRef<UpdatePropsRef<ArgTemplateFormProps['argumentProps']>>();
 
   const domNodeRef = useRef<HTMLElement>();
 
