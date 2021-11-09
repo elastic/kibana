@@ -11,7 +11,6 @@ import {
 } from '../../tasks/login';
 
 import { HOSTS_URL } from '../../urls/navigation';
-import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 import {
   isKibanaDataViewOption,
   isDataViewSelection,
@@ -26,8 +25,9 @@ import {
   addIndexToDefault,
   isNotSourcererSelection,
   deselectSourcererOption,
+  openDataViewSelection,
 } from '../../tasks/sourcerer';
-import { cleanKibana, postDataView } from '../../tasks/common';
+import { cleanKibana, postDataView, waitForPageToBeLoaded } from '../../tasks/common';
 import { createUsersAndRoles, secReadCasesAll, secReadCasesAllUser } from '../../tasks/privileges';
 import { TOASTER } from '../../screens/configure_cases';
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
@@ -68,32 +68,41 @@ describe('Sourcerer', () => {
       isSourcererOptions(DEFAULT_INDEX_PATTERN.filter((pattern) => pattern !== 'auditbeat-*'));
     });
 
-    it('can do so many tasks and modified badge updates correctly', () => {
-      cy.get(SOURCERER.badgeModified).should(`not.exist`);
-      openSourcerer();
-      cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
-      isKibanaDataViewOption(dataViews);
-      cy.get(SOURCERER.selectListDefaultOption).should(`contain`, siemDataViewTitle);
-      cy.get(SOURCERER.selectListOption).contains(dataViews[1]).click();
-      isDataViewSelection(dataViews[1]);
-      saveSourcerer();
-      cy.get(SOURCERER.badgeModified).should(`not.exist`);
-      openSourcerer();
-      cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
-      isDataViewSelection(dataViews[1]);
-      openAdvancedSettings();
-      const patterns = dataViews[1].split(',');
-      deselectSourcererOptions([patterns[0]]);
-      saveSourcerer();
-      cy.get(SOURCERER.badgeModified).should(`exist`);
-      openSourcerer();
-      cy.get(SOURCERER.badgeModifiedOption).should(`exist`);
-      resetSourcerer();
-      saveSourcerer();
-      cy.get(SOURCERER.badgeModified).should(`not.exist`);
-      openSourcerer();
-      cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
-      isDataViewSelection(siemDataViewTitle);
+    describe('Modified badge', () => {
+      it('Selecting new data view does not add a modified badge', () => {
+        cy.get(SOURCERER.badgeModified).should(`not.exist`);
+        openSourcerer();
+        cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
+        openDataViewSelection();
+        isKibanaDataViewOption(dataViews);
+        cy.get(SOURCERER.selectListDefaultOption).should(`contain`, siemDataViewTitle);
+        cy.get(SOURCERER.selectListOption).contains(dataViews[1]).click();
+        isDataViewSelection(dataViews[1]);
+        saveSourcerer();
+        cy.get(SOURCERER.badgeModified).should(`not.exist`);
+        openSourcerer();
+        cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
+      });
+
+      it('shows modified badge when index patterns change and removes when reset', () => {
+        openSourcerer();
+        openDataViewSelection();
+        cy.get(SOURCERER.selectListOption).contains(dataViews[1]).click();
+        isDataViewSelection(dataViews[1]);
+        openAdvancedSettings();
+        const patterns = dataViews[1].split(',');
+        deselectSourcererOptions([patterns[0]]);
+        saveSourcerer();
+        cy.get(SOURCERER.badgeModified).should(`exist`);
+        openSourcerer();
+        cy.get(SOURCERER.badgeModifiedOption).should(`exist`);
+        resetSourcerer();
+        saveSourcerer();
+        cy.get(SOURCERER.badgeModified).should(`not.exist`);
+        openSourcerer();
+        cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
+        isDataViewSelection(siemDataViewTitle);
+      });
     });
 
     it('disables save when no patterns are selected', () => {
@@ -111,10 +120,9 @@ describe('Sourcerer', () => {
       addIndexToDefault('beats*');
       isHostsStatValue('4 ');
       openSourcerer();
+      openAdvancedSettings();
       isSourcererSelection(`auditbeat-*`);
       isSourcererSelection('beats*');
-      deselectSourcererOption(`auditbeat-*`);
-      isHostsStatValue('0 ');
     });
   });
 });

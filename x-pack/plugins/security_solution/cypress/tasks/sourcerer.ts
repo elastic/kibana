@@ -42,8 +42,8 @@ export const isDataViewSelection = (dataView: string) => {
   return cy.get(SOURCERER.selectActiveOption).should('contain', dataView);
 };
 
+export const openDataViewSelection = () => cy.get(SOURCERER.selectActiveOption).click();
 export const isKibanaDataViewOption = (dataViews: string[]) => {
-  cy.get(SOURCERER.selectActiveOption).click();
   return dataViews.every((dataView) => {
     return cy.get(SOURCERER.selectListOption).should(`contain`, dataView);
   });
