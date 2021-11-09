@@ -20,9 +20,9 @@ import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { ChromiumArchivePaths } from '../paths';
 import { args } from './args';
+import { getBrowserLaunchTime } from './constants';
 
 const paths = new ChromiumArchivePaths();
-const browserLaunchTimeToWait = 5 * 1000;
 
 // Default args used by pptr
 // https://github.com/puppeteer/puppeteer/blob/13ea347/src/node/Launcher.ts#L168
@@ -121,7 +121,7 @@ export const browserStartLogs = (
   // logs as sometimes it's "bind" successfully for remote connections, but later emit
   // a log indicative of an issue (for example, no default font found).
   return merge(exit$, error$, log$).pipe(
-    takeUntil(timer(browserLaunchTimeToWait)),
+    takeUntil(timer(getBrowserLaunchTime())),
     reduce((acc, curr) => `${acc}${curr}\n`, ''),
     tap(() => {
       if (browserProcess && browserProcess.pid && !browserProcess.killed) {

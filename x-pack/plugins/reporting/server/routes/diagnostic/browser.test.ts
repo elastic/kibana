@@ -19,7 +19,9 @@ import {
 } from '../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../types';
 import { registerDiagnoseBrowser } from './browser';
+import { getBrowserLaunchTime } from '../../browsers/chromium/driver_factory/constants';
 
+jest.mock('../../browsers/chromium/driver_factory/constants');
 jest.mock('child_process');
 jest.mock('readline');
 
@@ -29,7 +31,7 @@ const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';
 
 // FLAKY: https://github.com/elastic/kibana/issues/89369
-describe.skip('POST /diagnose/browser', () => {
+describe('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   const mockLogger = createMockLevelLogger();
@@ -46,6 +48,8 @@ describe.skip('POST /diagnose/browser', () => {
   });
 
   beforeEach(async () => {
+    (getBrowserLaunchTime as jest.Mock).mockReturnValue(500);
+
     ({ server, httpSetup } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
