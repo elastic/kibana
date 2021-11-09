@@ -82,10 +82,12 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   });
 
   if (indexPatternError && !indexPattern && !loading) {
+    // TODO: Add a link to docs to explain how to add index patterns
     return (
       <EuiText color="danger" className="eui-textNoWrap">
-        {indexPatternError.body.message},{' '}
-        {indexPatternError.body.error === 'Forbidden' && NO_PERMISSIONS}
+        {indexPatternError.body.error === 'Forbidden'
+          ? NO_PERMISSIONS
+          : indexPatternError.body.message}
       </EuiText>
     );
   }
@@ -164,5 +166,6 @@ const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEdit
 });
 
 const NO_PERMISSIONS = i18n.translate('xpack.observability.expView.seriesEditor.noPermissions', {
-  defaultMessage: "you don't have required permissions.",
+  defaultMessage:
+    "Unable to create index pattern. You don't have the required permission, please contact your admin.",
 });
