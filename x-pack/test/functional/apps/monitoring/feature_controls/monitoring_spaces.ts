@@ -21,9 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
-      await PageObjects.common.navigateToApp('home');
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('space with no features disabled', () => {
