@@ -145,7 +145,8 @@ async function executor(
   }
 
   if (subAction === 'fieldsByIssueType') {
-    const getFieldsByIssueTypeParams = subActionParams as ExecutorSubActionGetFieldsByIssueTypeParams;
+    const getFieldsByIssueTypeParams =
+      subActionParams as ExecutorSubActionGetFieldsByIssueTypeParams;
     data = await api.fieldsByIssueType({
       externalService,
       params: getFieldsByIssueTypeParams,

@@ -22,7 +22,7 @@ describe('List Custom Links', () => {
   it('fetches all custom links', async () => {
     mock = await inspectSearchParams((setup) =>
       listCustomLinks({
-        setup: (setup as unknown) as Setup,
+        setup: setup as unknown as Setup,
       })
     );
 
@@ -37,7 +37,7 @@ describe('List Custom Links', () => {
     mock = await inspectSearchParams((setup) =>
       listCustomLinks({
         filters,
-        setup: (setup as unknown) as Setup,
+        setup: setup as unknown as Setup,
       })
     );
 

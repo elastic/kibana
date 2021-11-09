@@ -33,9 +33,8 @@ const RecentCasesComponent = ({
   hasWritePermissions,
 }: Omit<RecentCasesProps, 'owner'>) => {
   const currentUser = useCurrentUser();
-  const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
-    'recentlyCreated'
-  );
+  const [recentCasesFilterBy, setRecentCasesFilterBy] =
+    useState<RecentCasesFilterMode>('recentlyCreated');
 
   const recentCasesFilterOptions = useMemo(
     () =>
@@ -49,7 +48,7 @@ const RecentCasesComponent = ({
               },
             ],
           }
-        : {},
+        : { reporters: [] },
     [currentUser, recentCasesFilterBy]
   );
 
@@ -100,6 +99,8 @@ export const RecentCases: React.FC<RecentCasesProps> = React.memo((props) => {
     </OwnerProvider>
   );
 });
+
+RecentCases.displayName = 'RecentCases';
 
 // eslint-disable-next-line import/no-default-export
 export { RecentCases as default };

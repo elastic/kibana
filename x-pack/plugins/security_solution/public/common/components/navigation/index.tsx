@@ -14,7 +14,7 @@ import { useKibana } from '../../lib/kibana';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { makeMapStateToProps } from '../url_state/helpers';
-import { setBreadcrumbs } from './breadcrumbs';
+import { useSetBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 
@@ -39,8 +39,10 @@ export const TabNavigationComponent: React.FC<
   }) => {
     const {
       chrome,
-      application: { getUrlForApp },
+      application: { getUrlForApp, navigateToUrl },
     } = useKibana().services;
+
+    const setBreadcrumbs = useSetBreadcrumbs();
 
     useEffect(() => {
       if (pathName || pageName) {
@@ -62,7 +64,8 @@ export const TabNavigationComponent: React.FC<
             timerange: urlState.timerange,
           },
           chrome,
-          getUrlForApp
+          getUrlForApp,
+          navigateToUrl
         );
       }
     }, [
@@ -77,6 +80,8 @@ export const TabNavigationComponent: React.FC<
       flowTarget,
       tabName,
       getUrlForApp,
+      navigateToUrl,
+      setBreadcrumbs,
     ]);
 
     return (
@@ -112,16 +117,17 @@ export const SecuritySolutionTabNavigationRedux = compose<
   )
 );
 
-export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> = React.memo(
-  (props) => {
-    const [routeProps] = useRouteSpy();
-    const stateNavReduxProps: RouteSpyState & SecuritySolutionTabNavigationProps = {
-      ...routeProps,
-      ...props,
-    };
+export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> =
+  React.memo(
+    (props) => {
+      const [routeProps] = useRouteSpy();
+      const stateNavReduxProps: RouteSpyState & SecuritySolutionTabNavigationProps = {
+        ...routeProps,
+        ...props,
+      };
 
-    return <SecuritySolutionTabNavigationRedux {...stateNavReduxProps} />;
-  },
-  (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
-);
+      return <SecuritySolutionTabNavigationRedux {...stateNavReduxProps} />;
+    },
+    (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
+  );
 SecuritySolutionTabNavigation.displayName = 'SecuritySolutionTabNavigation';

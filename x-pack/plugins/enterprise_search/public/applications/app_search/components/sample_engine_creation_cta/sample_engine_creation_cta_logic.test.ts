@@ -47,13 +47,15 @@ describe('SampleEngineCreationCtaLogic', () => {
 
   describe('listeners', () => {
     describe('createSampleEngine', () => {
-      it('POSTS to /api/app_search/engines', () => {
+      it('POSTS to /internal/app_search/engines', () => {
         const body = JSON.stringify({
           seed_sample_engine: true,
         });
         SampleEngineCreationCtaLogic.actions.createSampleEngine();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/onboarding_complete', { body });
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/onboarding_complete', {
+          body,
+        });
       });
 
       it('calls onSampleEngineCreationSuccess on valid submission', async () => {

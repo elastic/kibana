@@ -5,12 +5,24 @@
  * 2.0.
  */
 
+import { ResponseErrorAttributes } from 'kibana/server';
+import { DataViewBase } from '@kbn/es-query';
+import { FieldSpec } from '../../../../../src/plugins/data_views/common';
+
 export interface ServerApiError {
   statusCode: number;
   error: string;
   message: string;
+  attributes?: ResponseErrorAttributes | undefined;
 }
 
 export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
+}
+
+/**
+ * DataViewBase with enhanced index fields used in timelines
+ */
+export interface SecuritySolutionDataViewBase extends DataViewBase {
+  fields: FieldSpec[];
 }

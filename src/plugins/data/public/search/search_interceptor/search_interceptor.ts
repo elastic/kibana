@@ -188,6 +188,9 @@ export class SearchInterceptor {
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
     if (combined.isStored !== undefined) serializableOptions.isStored = combined.isStored;
+    if (combined.executionContext !== undefined) {
+      serializableOptions.executionContext = combined.executionContext;
+    }
 
     return serializableOptions;
   }
@@ -349,8 +352,14 @@ export class SearchInterceptor {
             );
           }),
           tap((response) => {
-            if (this.deps.session.isRestore() && response.isRestored === false) {
-              this.showRestoreWarning(this.deps.session.getSessionId());
+            const isSearchInScopeOfSession =
+              sessionId && sessionId === this.deps.session.getSessionId();
+            if (
+              isSearchInScopeOfSession &&
+              this.deps.session.isRestore() &&
+              response.isRestored === false
+            ) {
+              this.showRestoreWarning(sessionId);
             }
           }),
           finalize(() => {

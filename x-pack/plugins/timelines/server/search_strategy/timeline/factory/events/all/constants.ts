@@ -5,61 +5,64 @@
  * 2.0.
  */
 
+import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 // import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
 // TODO: share with security_solution/common/cti/constants.ts
-export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
+export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
 export const MATCHED_TYPE = 'matched.type';
 export const INDICATOR_MATCH_SUBFIELDS = [MATCHED_ATOMIC, MATCHED_FIELD, MATCHED_TYPE];
 
-export const INDICATOR_MATCHED_ATOMIC = `${INDICATOR_DESTINATION_PATH}.${MATCHED_ATOMIC}`;
-export const INDICATOR_MATCHED_FIELD = `${INDICATOR_DESTINATION_PATH}.${MATCHED_FIELD}`;
-export const INDICATOR_MATCHED_TYPE = `${INDICATOR_DESTINATION_PATH}.${MATCHED_TYPE}`;
+export const INDICATOR_MATCHED_ATOMIC = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_ATOMIC}`;
+export const INDICATOR_MATCHED_FIELD = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_FIELD}`;
+export const INDICATOR_MATCHED_TYPE = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_TYPE}`;
 
 export const EVENT_DATASET = 'event.dataset';
-export const EVENT_REFERENCE = 'event.reference';
-export const PROVIDER = 'provider';
-export const FIRSTSEEN = 'first_seen';
 
-export const INDICATOR_DATASET = `${INDICATOR_DESTINATION_PATH}.${EVENT_DATASET}`;
-export const INDICATOR_EVENT_URL = `${INDICATOR_DESTINATION_PATH}.event.url`;
-export const INDICATOR_FIRSTSEEN = `${INDICATOR_DESTINATION_PATH}.${FIRSTSEEN}`;
-export const INDICATOR_LASTSEEN = `${INDICATOR_DESTINATION_PATH}.last_seen`;
-export const INDICATOR_PROVIDER = `${INDICATOR_DESTINATION_PATH}.${PROVIDER}`;
-export const INDICATOR_REFERENCE = `${INDICATOR_DESTINATION_PATH}.${EVENT_REFERENCE}`;
+export const FIRST_SEEN = 'indicator.first_seen';
+export const LAST_SEEN = 'indicator.last_seen';
+export const PROVIDER = 'indicator.provider';
+export const REFERENCE = 'indicator.reference';
+
+export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
+export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;
+export const INDICATOR_PROVIDER = `${ENRICHMENT_DESTINATION_PATH}.${PROVIDER}`;
+export const INDICATOR_REFERENCE = `${ENRICHMENT_DESTINATION_PATH}.${REFERENCE}`;
 
 export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_MATCHED_ATOMIC,
   INDICATOR_MATCHED_FIELD,
   INDICATOR_MATCHED_TYPE,
-  INDICATOR_DATASET,
   INDICATOR_REFERENCE,
   INDICATOR_PROVIDER,
 ];
 
 export const TIMELINE_EVENTS_FIELDS = [
+  ALERT_RULE_CONSUMER,
   '@timestamp',
-  'signal.status',
-  'signal.group.id',
-  'signal.original_time',
-  'signal.rule.filters',
-  'signal.rule.from',
-  'signal.rule.language',
-  'signal.rule.query',
-  'signal.rule.name',
-  'signal.rule.to',
-  'signal.rule.id',
-  'signal.rule.index',
-  'signal.rule.type',
-  'signal.original_event.kind',
-  'signal.original_event.module',
-  'signal.rule.version',
-  'signal.rule.severity',
-  'signal.rule.risk_score',
-  'signal.threshold_result',
+  'kibana.alert.workflow_status',
+  'kibana.alert.group.id',
+  'kibana.alert.original_time',
+  'kibana.alert.reason',
+  'kibana.alert.rule.filters',
+  'kibana.alert.rule.from',
+  'kibana.alert.rule.language',
+  'kibana.alert.rule.query',
+  'kibana.alert.rule.name',
+  'kibana.alert.rule.to',
+  'kibana.alert.rule.uuid',
+  'kibana.alert.rule.index',
+  'kibana.alert.rule.type',
+  'kibana.alert.original_event.kind',
+  'kibana.alert.original_event.module',
+  'kibana.alert.rule.version',
+  'kibana.alert.rule.severity',
+  'kibana.alert.rule.risk_score',
+  'kibana.alert.threshold_result',
+  'kibana.alert.building_block_type',
   'event.code',
   'event.module',
   'event.action',
@@ -170,14 +173,14 @@ export const TIMELINE_EVENTS_FIELDS = [
   'endgame.target_domain_name',
   'endgame.target_logon_id',
   'endgame.target_user_name',
-  'signal.rule.saved_id',
-  'signal.rule.timeline_id',
-  'signal.rule.timeline_title',
-  'signal.rule.output_index',
-  'signal.rule.note',
-  'signal.rule.threshold',
-  'signal.rule.exceptions_list',
-  'signal.rule.building_block_type',
+  'kibana.alert.rule.saved_id',
+  'kibana.alert.rule.timeline_id',
+  'kibana.alert.rule.timeline_title',
+  'kibana.alert.rule.output_index',
+  'kibana.alert.rule.note',
+  'kibana.alert.rule.threshold',
+  'kibana.alert.rule.exceptions_list',
+  'kibana.alert.rule.building_block_type',
   'suricata.eve.proto',
   'suricata.eve.flow_id',
   'suricata.eve.alert.signature',

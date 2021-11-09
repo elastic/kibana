@@ -126,7 +126,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
   const defaultSorting = {
     sort: {
       field: 'timestamp' as const,
-      direction: 'asc' as const,
+      direction: 'desc' as const,
     },
   };
 

@@ -22,8 +22,11 @@ import {
 
 import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
+import {
+  SetEventsDeleted,
+  SetEventsLoading,
+  TimelineTabs,
+} from '../../../../../common/types/timeline';
 import type {
   ActionProps,
   CellValueElementProps,
@@ -70,6 +73,8 @@ interface DataDrivenColumnProps {
   timelineId: string;
   trailingControlColumns: ControlColumnProps[];
   leadingControlColumns: ControlColumnProps[];
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
 }
 
 const SPACE = ' ';
@@ -135,12 +140,14 @@ const TgridActionTdCell = ({
   rowIndex,
   hasRowRenderers,
   onRuleChange,
-  selectedEventIds,
+  selectedEventIds = {},
   showCheckboxes,
   showNotes = false,
   tabType,
   timelineId,
   toggleShowNotes,
+  setEventsLoading,
+  setEventsDeleted,
 }: ActionProps & {
   columnId: string;
   hasRowRenderers: boolean;
@@ -190,6 +197,8 @@ const TgridActionTdCell = ({
                 showNotes={showNotes}
                 timelineId={timelineId}
                 toggleShowNotes={toggleShowNotes}
+                setEventsLoading={setEventsLoading}
+                setEventsDeleted={setEventsDeleted}
               />
             )}
           </>
@@ -267,12 +276,14 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
     hasRowRenderers,
     onRuleChange,
     renderCellValue,
-    selectedEventIds,
+    selectedEventIds = {},
     showCheckboxes,
     tabType,
     timelineId,
     trailingControlColumns,
     leadingControlColumns,
+    setEventsLoading,
+    setEventsDeleted,
   }) => {
     const trailingActionCells = useMemo(
       () =>
@@ -313,6 +324,8 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
                 selectedEventIds={selectedEventIds}
                 tabType={tabType}
                 timelineId={timelineId}
+                setEventsLoading={setEventsLoading}
+                setEventsDeleted={setEventsDeleted}
               />
             )
           );
@@ -337,6 +350,8 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
         tabType,
         timelineId,
         trailingActionCells,
+        setEventsLoading,
+        setEventsDeleted,
       ]
     );
     const ColumnHeaders = useMemo(

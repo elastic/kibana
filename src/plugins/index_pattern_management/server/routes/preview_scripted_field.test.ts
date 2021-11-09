@@ -42,7 +42,7 @@ describe('preview_scripted_field route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
@@ -98,7 +98,7 @@ describe('preview_scripted_field route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
@@ -152,7 +152,7 @@ describe('preview_scripted_field route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.search).toBeCalled();
     expect(mockResponse.customError).toBeCalled();

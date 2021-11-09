@@ -35,19 +35,12 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
-  const {
-    name,
-    createdAt,
-    serviceType,
-    serviceName,
-    isFederatedSource,
-    supportedByLicense,
-  } = contentSource;
+  const { name, createdAt, serviceType, isFederatedSource, supportedByLicense } = contentSource;
 
   const pageHeader = (
     <>
       <SourceInfoCard
-        sourceName={serviceName}
+        sourceName={name}
         sourceType={serviceType}
         dateCreated={moment(createdAt).format('MMMM D, YYYY')}
         isFederatedSource={isFederatedSource}

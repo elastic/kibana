@@ -6,6 +6,7 @@
  */
 
 import { EventEcs } from '../event';
+import { UrlEcs } from '../url';
 
 interface ThreatMatchEcs {
   atomic?: string[];
@@ -15,13 +16,27 @@ interface ThreatMatchEcs {
   type?: string[];
 }
 
-export interface ThreatIndicatorEcs {
+export interface LegacyThreatIndicatorEcs {
+  domain?: string[];
   matched?: ThreatMatchEcs;
   event?: EventEcs & { reference?: string[] };
   provider?: string[];
   type?: string[];
 }
 
+export interface ThreatIndicatorEcs {
+  url?: UrlEcs;
+  provider?: string[];
+  reference?: string[];
+  type?: string[];
+}
+
+export interface ThreatEnrichmentEcs {
+  indicator?: ThreatIndicatorEcs;
+  matched?: ThreatMatchEcs;
+}
+
 export interface ThreatEcs {
-  indicator: ThreatIndicatorEcs[];
+  indicator?: LegacyThreatIndicatorEcs[];
+  enrichments?: ThreatEnrichmentEcs[];
 }

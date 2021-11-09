@@ -10,38 +10,31 @@
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
-  AGG_TYPE,
-  FIELD_ORIGIN,
   LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
-  SOURCE_TYPES,
-  STYLE_TYPE,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
-  AggDescriptor,
   Attribution,
-  ESTermSourceDescriptor,
-  JoinDescriptor,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
   Timeslice,
+  StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
 import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
-import { getJoinAggKey } from '../../../common/get_agg_key';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 
@@ -70,13 +63,18 @@ export interface ILayer {
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
   isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
+
+  /*
+   * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
+   */
   getMbLayerIds(): string[];
+
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
@@ -84,7 +82,7 @@ export interface ILayer {
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): LAYER_TYPE | undefined;
+  getType(): LAYER_TYPE;
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
@@ -96,18 +94,18 @@ export interface ILayer {
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
-  showJoinEditor(): boolean;
-  getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
+  getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
+  isBasemap(order: number): boolean;
 }
 
 export type CustomIconAndTooltipContent = {
-  icon: ReactNode;
+  icon: ReactElement;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
@@ -174,68 +172,11 @@ export class AbstractLayer implements ILayer {
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
-
-    if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
-        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-          throw new Error(
-            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
-          );
-        }
-        const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right as ESTermSourceDescriptor;
-
-        // todo: must tie this to generic thing
-        const originalJoinId = joinDescriptor.right.id!;
-
-        // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
-
-        // Update all data driven styling properties using join fields
-        if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
-          const metrics =
-            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
-              ? termSourceDescriptor.metrics
-              : [{ type: AGG_TYPE.COUNT }];
-          metrics.forEach((metricsDescriptor: AggDescriptor) => {
-            const originalJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: originalJoinId,
-            });
-            const newJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: joinDescriptor.right.id!,
-            });
-
-            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
-              const styleProp = clonedDescriptor.style.properties[key];
-              if (
-                styleProp.type === STYLE_TYPE.DYNAMIC &&
-                styleProp.options.field &&
-                styleProp.options.field.origin === FIELD_ORIGIN.JOIN &&
-                styleProp.options.field.name === originalJoinKey
-              ) {
-                styleProp.options.field.name = newJoinKey;
-              }
-            });
-          });
-        }
-      });
-    }
     return clonedDescriptor;
   }
 
   makeMbLayerId(layerNameSuffix: string): string {
     return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
-  }
-
-  showJoinEditor(): boolean {
-    return this.getSource().showJoinEditor();
-  }
-
-  getJoinsDisabledReason() {
-    return this.getSource().getJoinsDisabledReason();
   }
 
   isPreviewLayer(): boolean {
@@ -389,9 +330,8 @@ export class AbstractLayer implements ILayer {
     return await source.getImmutableProperties();
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
-    const source = this.getSourceForEditing();
-    return source.renderSourceSettingsEditor({ onChange, currentLayerType: this._descriptor.type });
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
+    return this.getSourceForEditing().renderSourceSettingsEditor(sourceEditorArgs);
   }
 
   getPrevRequestToken(dataId: string): symbol | undefined {
@@ -501,7 +441,7 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): LAYER_TYPE | undefined {
+  getType(): LAYER_TYPE {
     return this._descriptor.type as LAYER_TYPE;
   }
 
@@ -520,5 +460,13 @@ export class AbstractLayer implements ILayer {
   getGeoFieldNames(): string[] {
     const source = this.getSource();
     return source.isESSource() ? [(source as IESSource).getGeoFieldName()] : [];
+  }
+
+  async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
+    return null;
+  }
+
+  isBasemap(order: number): boolean {
+    return false;
   }
 }

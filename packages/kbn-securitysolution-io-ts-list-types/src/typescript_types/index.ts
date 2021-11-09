@@ -40,9 +40,10 @@ export interface UseExceptionListsProps {
   http: HttpStart;
   namespaceTypes: NamespaceType[];
   notifications: NotificationsStart;
-  pagination?: Pagination;
+  initialPagination?: Pagination;
   showTrustedApps: boolean;
   showEventFilters: boolean;
+  showHostIsolationExceptions: boolean;
 }
 
 export interface UseExceptionListProps {

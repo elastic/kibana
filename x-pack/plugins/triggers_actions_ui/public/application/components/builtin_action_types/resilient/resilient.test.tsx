@@ -62,7 +62,7 @@ describe('resilient connector validation', () => {
   });
 
   test('connector validation fails when connector config is not valid', async () => {
-    const actionConnector = ({
+    const actionConnector = {
       secrets: {
         apiKeyId: 'user',
       },
@@ -70,7 +70,7 @@ describe('resilient connector validation', () => {
       actionTypeId: '.jira',
       name: 'jira',
       config: {},
-    } as unknown) as ResilientActionConnector;
+    } as unknown as ResilientActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {

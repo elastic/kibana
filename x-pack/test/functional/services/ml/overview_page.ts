@@ -40,5 +40,13 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
         }')`
       );
     },
+
+    async assertJobSyncRequiredWarningExists() {
+      await testSubjects.existOrFail('mlJobSyncRequiredWarning', { timeout: 5000 });
+    },
+
+    async assertJobSyncRequiredWarningNotExists() {
+      await testSubjects.missingOrFail('mlJobSyncRequiredWarning', { timeout: 5000 });
+    },
   };
 }

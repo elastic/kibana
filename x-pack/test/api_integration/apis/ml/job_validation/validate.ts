@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.length).to.eql(
         expectedResponse.length,
-        `Response body should have ${expectedResponse.length} entries (got ${body})`
+        `Response body should have ${expectedResponse.length} entries (got ${JSON.stringify(body)})`
       );
       for (const entry of expectedResponse) {
         const responseEntry = body.find((obj: any) => obj.id === entry.id);

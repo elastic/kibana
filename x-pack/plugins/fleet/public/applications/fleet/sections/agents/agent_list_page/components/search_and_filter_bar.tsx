@@ -136,7 +136,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       onClick={() => setIsStatutsFilterOpen(!isStatusFilterOpen)}
                       isSelected={isStatusFilterOpen}
                       hasActiveFilters={selectedStatus.length > 0}
-                      numActiveFilters={selectedStatus.length}
                       disabled={agentPolicies.length === 0}
                     >
                       <FormattedMessage
@@ -225,6 +224,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 fill
                 iconType="plusInCircle"
                 onClick={() => setIsEnrollmentFlyoutOpen(true)}
+                data-test-subj="addAgentButton"
               >
                 <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
               </EuiButton>

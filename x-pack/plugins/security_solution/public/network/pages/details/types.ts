@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
@@ -21,7 +21,7 @@ export interface OwnProps {
   type: NetworkType;
   startDate: string;
   endDate: string;
-  filterQuery: string | ESTermQuery;
+  filterQuery?: string | ESTermQuery;
   ip: string;
   indexNames: string[];
   skip: boolean;
@@ -38,5 +38,5 @@ export type TlsQueryTableComponentProps = OwnProps & {
 
 export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
   flowTarget: FlowTargetSourceDest;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
 };

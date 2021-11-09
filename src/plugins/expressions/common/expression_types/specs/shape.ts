@@ -11,7 +11,7 @@ import { ExpressionValueRender } from './render';
 
 const name = 'shape';
 
-export const shape: ExpressionTypeDefinition<typeof name, ExpressionValueRender<any>> = {
+export const shape: ExpressionTypeDefinition<typeof name, ExpressionValueRender<unknown>> = {
   name: 'shape',
   to: {
     render: (input) => {

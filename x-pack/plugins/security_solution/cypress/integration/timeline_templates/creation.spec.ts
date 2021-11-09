@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 
 import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
   NOTES,
   NOTES_TAB_BUTTON,
-  // NOTES_COUNT,
   NOTES_TEXT_AREA,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
@@ -52,16 +51,15 @@ import { TIMELINES_URL } from '../../urls/navigation';
 describe('Timeline Templates', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
-
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
   it('Creates a timeline template', async () => {
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();
     populateTimeline();
-    addFilter(timeline.filter);
+    addFilter(getTimeline().filter);
     cy.get(PIN_EVENT).should(
       'have.attr',
       'aria-label',
@@ -69,21 +67,21 @@ describe('Timeline Templates', () => {
     );
     cy.get(LOCKED_ICON).should('be.visible');
 
-    addNameToTimeline(timeline.title);
+    addNameToTimeline(getTimeline().title);
 
     cy.wait('@timeline').then(({ response }) => {
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
 
-      addDescriptionToTimeline(timeline.description);
-      addNotesToTimeline(timeline.notes);
+      addDescriptionToTimeline(getTimeline().description);
+      addNotesToTimeline(getTimeline().notes);
       markAsFavorite();
       waitForTimelineChanges();
       createNewTimelineTemplate();
       closeTimeline();
       openTimelineTemplateFromSettings(timelineId);
 
-      cy.contains(timeline.title).should('exist');
-      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
+      cy.contains(getTimeline().title).should('exist');
+      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', getTimeline().description);
       cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
       cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
       cy.get(TIMELINES_FAVORITE).first().should('exist');
@@ -91,33 +89,28 @@ describe('Timeline Templates', () => {
       openTimeline(timelineId);
 
       cy.get(FAVORITE_TIMELINE).should('exist');
-      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
-      cy.get(TIMELINE_QUERY).should('have.text', timeline.query);
+      cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
+      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+      cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
       // Comments this assertion until we agreed what to do with the filters.
       // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
       // cy.get(NOTES_COUNT).should('have.text', '1');
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
-      cy.get(NOTES).should('have.text', timeline.notes);
+      cy.get(NOTES).should('have.text', getTimeline().notes);
     });
   });
 
   it('Create template from timeline', () => {
+    createTimeline(getTimeline());
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
+    expandEventAction();
+    clickingOnCreateTemplateFromTimelineBtn();
 
-    createTimeline(timeline).then(() => {
-      expandEventAction();
-      clickingOnCreateTemplateFromTimelineBtn();
-      cy.wait('@timeline', { timeout: 100000 }).then(({ request }) => {
-        expect(request.body.timeline).to.haveOwnProperty('templateTimelineId');
-        expect(request.body.timeline).to.haveOwnProperty('description', timeline.description);
-        expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
-          'expression',
-          timeline.query
-        );
-        cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-      });
-    });
+    cy.wait('@timeline', { timeout: 100000 });
+    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
   });
 });

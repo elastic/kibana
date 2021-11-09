@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'kibana/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
-import type { AgentStatus, Agent, EsAssetReference } from '../types';
+import type { AgentStatus } from '../types';
+
+import type { GetAgentStatusResponse } from '../../common';
 
 import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
+import type { getInstallation, ensureInstalledPackage } from './epm/packages';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
@@ -33,10 +35,8 @@ export interface ESIndexPatternService {
  */
 
 export interface PackageService {
-  getInstalledEsAssetReferences(
-    savedObjectsClient: SavedObjectsClientContract,
-    pkgName: string
-  ): Promise<EsAssetReference[]>;
+  getInstallation: typeof getInstallation;
+  ensureInstalledPackage: typeof ensureInstalledPackage;
 }
 
 /**
@@ -48,16 +48,17 @@ export interface AgentService {
    */
   getAgent: typeof getAgentById;
   /**
-   * Authenticate an agent with access toekn
-   */
-  authenticateAgentWithAccessToken(
-    esClient: ElasticsearchClient,
-    request: KibanaRequest
-  ): Promise<Agent>;
-  /**
    * Return the status by the Agent's id
    */
   getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
+  /**
+   * Return the status by the Agent's Policy id
+   */
+  getAgentStatusForAgentPolicy(
+    esClient: ElasticsearchClient,
+    agentPolicyId?: string,
+    filterKuery?: string
+  ): Promise<GetAgentStatusResponse['results']>;
   /**
    * List agents
    */
@@ -69,6 +70,7 @@ export interface AgentPolicyServiceInterface {
   list: typeof agentPolicyService['list'];
   getDefaultAgentPolicyId: typeof agentPolicyService['getDefaultAgentPolicyId'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
+  getByIds: typeof agentPolicyService['getByIDs'];
 }
 
 // Saved object services

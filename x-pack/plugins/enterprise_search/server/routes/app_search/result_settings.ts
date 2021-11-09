@@ -17,7 +17,7 @@ export function registerResultSettingsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/result_settings/details',
+      path: '/internal/app_search/engines/{engineName}/result_settings/details',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -31,7 +31,7 @@ export function registerResultSettingsRoutes({
 
   router.put(
     skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/result_settings',
+      path: '/internal/app_search/engines/{engineName}/result_settings',
       validate: {
         params: schema.object({
           engineName: schema.string(),

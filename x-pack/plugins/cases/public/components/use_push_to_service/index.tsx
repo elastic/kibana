@@ -6,18 +6,23 @@
  */
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { CaseCallOut } from './callout';
-import { getLicenseError, getKibanaConfigError } from './helpers';
+import {
+  getLicenseError,
+  getKibanaConfigError,
+  getConnectorMissingInfo,
+  getDeletedConnectorError,
+  getCaseClosedInfo,
+} from './helpers';
 import * as i18n from './translations';
 import { Case, CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { CasesNavigation } from '../links';
-import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './callout/types';
+import { ErrorMessage } from './callout/types';
 
 export interface UsePushToService {
   caseId: string;
@@ -54,6 +59,7 @@ export const usePushToService = ({
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
+  const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
 
   const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
@@ -69,7 +75,7 @@ export const usePushToService = ({
   }, [caseId, connector, pushCaseToExternalService, updateCase]);
 
   const errorsMsg = useMemo(() => {
-    let errors: ErrorMessage[] = [];
+    const errors: ErrorMessage[] = [];
 
     // these message require that the user do some sort of write action as a result of the message, readonly users won't
     // be able to perform such an action so let's not display the error to the user in that situation
@@ -77,63 +83,38 @@ export const usePushToService = ({
       return errors;
     }
 
-    if (actionLicense != null && !actionLicense.enabledInLicense) {
-      errors = [...errors, getLicenseError()];
-    }
+    /**
+     * We show only one message to the user depending the scenario. The messages have a priority of importance.
+     * Messages with higher priority are being shown first. The priority is defined by the order each message is returned.
+     *
+     * By priority of importance:
+     * 1. Show license error.
+     * 2. Show configuration error.
+     * 3. Show connector configuration error if the connector is set to none or no connectors have been created.
+     * 4. Show an error message if the connector has been deleted or the user does not have access to it.
+     * 5. Show case closed message.
+     */
 
-    if (connectors.length === 0 && connector.id === 'none' && !loadingLicense) {
-      errors = [
-        ...errors,
-        {
-          id: 'connector-missing-error',
-          title: '',
-          description: i18n.CONFIGURE_CONNECTOR,
-        },
-      ];
-    } else if (connector.id === 'none' && !loadingLicense) {
-      errors = [
-        ...errors,
-        {
-          id: 'connector-not-selected-error',
-          title: '',
-          description: i18n.CONFIGURE_CONNECTOR,
-        },
-      ];
-    } else if (!isValidConnector && !loadingLicense) {
-      errors = [
-        ...errors,
-        {
-          id: 'connector-deleted-error',
-          title: '',
-          description: (
-            <FormattedMessage
-              defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
-              id="xpack.cases.caseView.pushToServiceDisableByInvalidConnector"
-            />
-          ),
-          errorType: 'danger',
-        },
-      ];
-    }
-    if (caseStatus === CaseStatuses.closed) {
-      errors = [
-        ...errors,
-        {
-          id: CLOSED_CASE_PUSH_ERROR_ID,
-          title: '',
-          description: (
-            <FormattedMessage
-              defaultMessage="Closed cases cannot be sent to external systems. Reopen the case if you want to open or update it in an external system."
-              id="xpack.cases.caseView.pushToServiceDisableBecauseCaseClosedDescription"
-            />
-          ),
-        },
-      ];
+    if (hasLicenseError) {
+      return [getLicenseError()];
     }
 
     if (actionLicense != null && !actionLicense.enabledInConfig) {
-      errors = [...errors, getKibanaConfigError()];
+      return [getKibanaConfigError()];
     }
+
+    if (connector.id === 'none' && !loadingLicense && !hasLicenseError) {
+      return [getConnectorMissingInfo()];
+    }
+
+    if (!isValidConnector && !loadingLicense && !hasLicenseError) {
+      return [getDeletedConnectorError()];
+    }
+
+    if (caseStatus === CaseStatuses.closed) {
+      return [getCaseClosedInfo()];
+    }
+
     return errors;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, userCanCrud]);
@@ -196,6 +177,7 @@ export const usePushToService = ({
           <CaseCallOut
             configureCasesNavigation={configureCasesNavigation}
             hasConnectors={connectors.length > 0}
+            hasLicenseError={hasLicenseError}
             messages={errorsMsg}
             onEditClick={onEditClick}
           />
@@ -207,6 +189,7 @@ export const usePushToService = ({
       connectors.length,
       errorsMsg,
       hasDataToPush,
+      hasLicenseError,
       onEditClick,
       pushToServiceButton,
     ]

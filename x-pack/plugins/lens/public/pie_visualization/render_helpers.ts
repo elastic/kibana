@@ -10,10 +10,8 @@ import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import { LensFilterEvent } from '../types';
 
 export function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
-  if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
-    return d[metricColumn.id];
-  }
-  return Number.EPSILON;
+  const value = d[metricColumn.id];
+  return Number.isFinite(value) && value >= 0 ? value : 0;
 }
 
 export function getFilterContext(

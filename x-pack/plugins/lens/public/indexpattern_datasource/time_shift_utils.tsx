@@ -81,12 +81,6 @@ export const timeShiftOptions = [
     }),
     value: '1y',
   },
-  {
-    label: i18n.translate('xpack.lens.indexPattern.timeShift.previous', {
-      defaultMessage: 'Previous time range',
-    }),
-    value: 'previous',
-  },
 ];
 
 export const timeShiftOptionOrder = timeShiftOptions.reduce<{ [key: string]: number }>(
@@ -156,9 +150,13 @@ export function getStateTimeShiftWarningMessages(
   if (!state) return;
   const warningMessages: React.ReactNode[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
+    const layerIndexPattern = state.indexPatterns[layer.indexPatternId];
+    if (!layerIndexPattern) {
+      return;
+    }
     const dateHistogramInterval = getDateHistogramInterval(
       layer,
-      state.indexPatterns[layer.indexPatternId],
+      layerIndexPattern,
       activeData,
       layerId
     );

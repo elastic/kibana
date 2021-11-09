@@ -7,7 +7,6 @@
 
 export const DEFAULT_INITIAL_APP_DATA = {
   readOnlyMode: false,
-  ilmEnabled: true,
   searchOAuth: {
     clientId: 'someUID',
     redirectUrl: 'http://localhost:3002/ws/search_callback',
@@ -55,9 +54,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
       id: 'some-id-string',
       groups: ['Default', 'Cats'],
       isAdmin: true,
-      canCreatePersonalSources: true,
-      canCreateInvitations: true,
-      isCurated: false,
+      canCreatePrivateSources: true,
       viewedOnboardingPage: true,
     },
   },

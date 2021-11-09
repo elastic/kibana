@@ -15,6 +15,7 @@ import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
 import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
 import { getMobileKPIDistributionConfig } from './mobile/distribution_config';
 import { getMobileDeviceDistributionConfig } from './mobile/device_distribution_config';
+import { DataTypes, ReportTypes } from './constants';
 
 interface Props {
   reportType: ReportViewType;
@@ -24,24 +25,24 @@ interface Props {
 
 export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props) => {
   switch (dataType) {
-    case 'ux':
-      if (reportType === 'data-distribution') {
+    case DataTypes.UX:
+      if (reportType === ReportTypes.DISTRIBUTION) {
         return getRumDistributionConfig({ indexPattern });
       }
-      if (reportType === 'core-web-vitals') {
+      if (reportType === ReportTypes.CORE_WEB_VITAL) {
         return getCoreWebVitalsConfig({ indexPattern });
       }
       return getKPITrendsLensConfig({ indexPattern });
-    case 'synthetics':
-      if (reportType === 'data-distribution') {
+    case DataTypes.SYNTHETICS:
+      if (reportType === ReportTypes.DISTRIBUTION) {
         return getSyntheticsDistributionConfig({ indexPattern });
       }
       return getSyntheticsKPIConfig({ indexPattern });
-    case 'mobile':
-      if (reportType === 'data-distribution') {
+    case DataTypes.MOBILE:
+      if (reportType === ReportTypes.DISTRIBUTION) {
         return getMobileKPIDistributionConfig({ indexPattern });
       }
-      if (reportType === 'device-data-distribution') {
+      if (reportType === ReportTypes.DEVICE_DISTRIBUTION) {
         return getMobileDeviceDistributionConfig({ indexPattern });
       }
       return getMobileKPIConfig({ indexPattern });

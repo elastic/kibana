@@ -8,7 +8,7 @@
 import { SerializedEvent } from './types';
 
 /**
- * This interface represents the state of @type {DynamicActionManager} at any
+ * This interface represents the state of @type {DynamicActionManager} at every
  * point in time.
  */
 export interface State {
@@ -66,12 +66,14 @@ export const transitions: Transitions = {
     events,
   }),
 
-  failFetching: (state) => ({ message }) => ({
-    ...state,
-    isFetchingEvents: false,
-    fetchCount: state.fetchCount + 1,
-    fetchError: { message },
-  }),
+  failFetching:
+    (state) =>
+    ({ message }) => ({
+      ...state,
+      isFetchingEvents: false,
+      fetchCount: state.fetchCount + 1,
+      fetchError: { message },
+    }),
 
   addEvent: (state) => (event: SerializedEvent) => ({
     ...state,

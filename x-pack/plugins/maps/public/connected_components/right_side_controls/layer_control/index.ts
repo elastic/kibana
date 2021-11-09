@@ -19,7 +19,7 @@ import {
 } from '../../../selectors/ui_selectors';
 import { getLayerList } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';
-import { DRAW_MODE } from '../../../../common';
+import { DRAW_MODE } from '../../../../common/constants';
 
 function mapStateToProps(state: MapStoreState) {
   return {

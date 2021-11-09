@@ -67,7 +67,7 @@ You can report new metrics by using the `CiStatsReporter` class provided by the 
 
 In order to prevent the page load bundles from growing unexpectedly large we limit the `page load asset size` metric for each plugin. When a PR increases this metric beyond the limit defined for that plugin in {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits.yml`] a failed commit status is set and the PR author needs to decide how to resolve this issue before the PR can be merged.
 
-In most cases the limit should be high enough that PRs shouldn't trigger overages, but when they do make sure it's clear what is cuasing the overage by trying the following:
+In most cases the limit should be high enough that PRs shouldn't trigger overages, but when they do make sure it's clear what is causing the overage by trying the following:
 
 1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{pluginId}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited and is the main way that we <<plugin-performance, reduce the size of page load chunks>>.
 +
@@ -107,7 +107,7 @@ prettier -w {pluginDir}/target/public/{pluginId}.plugin.js
 
 Once you've identified the files which were added to the build you likely just need to stick them behind an async import as described in <<plugin-performance, Plugin performance>>.
 
-In the case that the bundle size is not being bloated by anything obvious, but it's still larger than the limit, you can raise the limit in your PR. Do this either by editting the {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits.yml` file] manually or by running the following to have the limit updated to the current size + 15kb
+In the case that the bundle size is not being bloated by anything obvious, but it's still larger than the limit, you can raise the limit in your PR. Do this either by editing the {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits.yml` file] manually or by running the following to have the limit updated to the current size + 15kb
 
 [source,shell]
 -----------

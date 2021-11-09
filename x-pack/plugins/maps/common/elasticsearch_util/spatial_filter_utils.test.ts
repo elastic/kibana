@@ -542,8 +542,7 @@ describe('extractFeaturesFromFilters', () => {
 
     const features = extractFeaturesFromFilters([spatialFilter]);
     expect((features[0].geometry as Polygon).coordinates[0][0]).toEqual([
-      -89.87125,
-      63.35109118642093,
+      -89.87125, 63.35109118642093,
     ]);
     expect(features[0].properties).toEqual({
       filter: 'within 1096km of -89.87125, 53.49454',
@@ -559,8 +558,7 @@ describe('extractFeaturesFromFilters', () => {
 
     const features = extractFeaturesFromFilters([spatialFilter]);
     expect((features[0].geometry as Polygon).coordinates[0][0]).toEqual([
-      -89.87125,
-      63.35109118642093,
+      -89.87125, 63.35109118642093,
     ]);
     expect(features[0].properties).toEqual({
       filter: 'within 1096km of -89.87125, 53.49454',

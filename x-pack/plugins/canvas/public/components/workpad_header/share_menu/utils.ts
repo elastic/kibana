@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import { IBasePath } from 'kibana/public';
-import moment from 'moment-timezone';
-import rison from 'rison-node';
-import { BaseParams } from '../../../../../reporting/common/types';
+import type { RedirectOptions } from 'src/plugins/share/public';
+import { CANVAS_APP_LOCATOR } from '../../../../common/locator';
+import { CanvasAppLocatorParams } from '../../../../common/locator';
 import { CanvasWorkpad } from '../../../../types';
+import { JobAppParamsPDFV2 } from '../../../../../reporting/public';
 
 export interface CanvasWorkpadSharingData {
   workpad: Pick<CanvasWorkpad, 'id' | 'name' | 'height' | 'width'>;
   pageCount: number;
 }
 
-// TODO: get the correct type from Reporting plugin
-type JobParamsPDF = BaseParams & { relativeUrls: string[] };
-
 export function getPdfJobParams(
   { workpad: { id, name: title, width, height }, pageCount }: CanvasWorkpadSharingData,
-  basePath: IBasePath
-): JobParamsPDF {
-  const urlPrefix = basePath.get().replace(basePath.serverBasePath, ''); // for Spaces prefix, which is included in basePath.get()
-  const canvasEntry = `${urlPrefix}/app/canvas#`;
-
+  version: string
+): JobAppParamsPDFV2 {
   // The viewport in Reporting by specifying the dimensions. In order for things to work,
   // we need a viewport that will include all of the pages in the workpad. The viewport
   // also needs to include any offset values from the 0,0 position, otherwise the cropped
@@ -37,19 +31,27 @@ export function getPdfJobParams(
   // viewport size.
 
   // build a list of all page urls for exporting, they are captured one at a time
-  const workpadUrls = [];
+
+  const locatorParams: Array<RedirectOptions<CanvasAppLocatorParams>> = [];
   for (let i = 1; i <= pageCount; i++) {
-    workpadUrls.push(rison.encode(`${canvasEntry}/export/workpad/pdf/${id}/page/${i}`));
+    locatorParams.push({
+      id: CANVAS_APP_LOCATOR,
+      version,
+      params: {
+        view: 'workpadPDF',
+        id,
+        page: i,
+      },
+    });
   }
 
   return {
-    browserTimezone: moment.tz.guess(),
     layout: {
       dimensions: { width, height },
       id: 'canvas',
     },
     objectType: 'canvas workpad',
-    relativeUrls: workpadUrls,
+    locatorParams,
     title,
   };
 }

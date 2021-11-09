@@ -20,8 +20,11 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       defaultActionGroupId,
       minimumLicenseRequired,
       isExportable,
+      ruleTaskTimeout,
       actionVariables,
       authorizedConsumers,
+      minimumScheduleInterval,
+      defaultScheduleInterval,
       ...rest
     }) => ({
       ...rest,
@@ -31,8 +34,11 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       default_action_group_id: defaultActionGroupId,
       minimum_license_required: minimumLicenseRequired,
       is_exportable: isExportable,
+      rule_task_timeout: ruleTaskTimeout,
       action_variables: actionVariables,
       authorized_consumers: authorizedConsumers,
+      minimum_schedule_interval: minimumScheduleInterval,
+      default_schedule_interval: defaultScheduleInterval,
     })
   );
 };
@@ -48,7 +54,7 @@ export const ruleTypesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const ruleTypes = Array.from(await context.alerting.getAlertsClient().listAlertTypes());
+        const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
         return res.ok({
           body: rewriteBodyRes(ruleTypes),
         });

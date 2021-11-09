@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -23,6 +23,7 @@ import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
+jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
@@ -117,5 +118,15 @@ describe('CreateCaseForm', () => {
         ).toBeTruthy();
       });
     });
+  });
+
+  it('hides the sync alerts toggle', () => {
+    const { queryByText } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm disableAlerts />
+      </MockHookWrapperComponent>
+    );
+
+    expect(queryByText('Sync alert')).not.toBeInTheDocument();
   });
 });

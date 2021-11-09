@@ -26,9 +26,11 @@ describe('Session index', () => {
     const sessionIndexOptions = {
       logger: loggingSystemMock.createLogger(),
       kibanaIndexName: '.kibana_some_tenant',
-      config: createConfig(ConfigSchema.validate({}), loggingSystemMock.createLogger(), {
-        isTLSEnabled: false,
-      }),
+      config: createConfig(
+        ConfigSchema.validate({ session: { idleTimeout: null, lifespan: null } }),
+        loggingSystemMock.createLogger(),
+        { isTLSEnabled: false }
+      ),
       elasticsearchClient: mockElasticsearchClient,
     };
 
@@ -239,7 +241,7 @@ describe('Session index', () => {
         logger: loggingSystemMock.createLogger(),
         kibanaIndexName: '.kibana_some_tenant',
         config: createConfig(
-          ConfigSchema.validate({ session: { lifespan: 456 } }),
+          ConfigSchema.validate({ session: { idleTimeout: null, lifespan: 456 } }),
           loggingSystemMock.createLogger(),
           { isTLSEnabled: false }
         ),
@@ -315,7 +317,7 @@ describe('Session index', () => {
         logger: loggingSystemMock.createLogger(),
         kibanaIndexName: '.kibana_some_tenant',
         config: createConfig(
-          ConfigSchema.validate({ session: { idleTimeout } }),
+          ConfigSchema.validate({ session: { idleTimeout, lifespan: null } }),
           loggingSystemMock.createLogger(),
           { isTLSEnabled: false }
         ),

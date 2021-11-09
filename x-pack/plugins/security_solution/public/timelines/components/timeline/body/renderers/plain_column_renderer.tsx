@@ -7,6 +7,7 @@
 
 import { head } from 'lodash/fp';
 import React from 'react';
+import { Filter } from '../../../../../../../../../src/plugins/data/public';
 
 import { ColumnHeaderOptions } from '../../../../../../common';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
@@ -21,19 +22,23 @@ export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[
 export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
     dataExistsAtColumn(columnName, data),
-
   renderColumn: ({
+    asPlainText,
     columnName,
     eventId,
     field,
+    isDraggable = true,
     timelineId,
     truncate,
     values,
     linkValues,
   }: {
+    asPlainText?: boolean;
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    globalFilters?: Filter[];
+    isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
@@ -42,15 +47,17 @@ export const plainColumnRenderer: ColumnRenderer = {
     values != null
       ? values.map((value, i) => (
           <FormattedFieldValue
-            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+            asPlainText={asPlainText}
             contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
             eventId={eventId}
             fieldFormat={field.format || ''}
             fieldName={columnName}
             fieldType={field.type || ''}
-            value={parseValue(value)}
-            truncate={truncate}
+            isDraggable={isDraggable}
+            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
             linkValue={head(linkValues)}
+            truncate={truncate}
+            value={parseValue(value)}
           />
         ))
       : getEmptyTagValue(),

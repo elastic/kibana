@@ -42,12 +42,24 @@
         {
           "id": "T1114",
           "name": "Email Collection",
-          "reference": "https://attack.mitre.org/techniques/T1114/"
+          "reference": "https://attack.mitre.org/techniques/T1114/",
+          "subtechnique": [
+            {
+              "id": "T1114.002",
+              "name": "Remote Email Collection",
+              "reference": "https://attack.mitre.org/techniques/T1114/002/"
+            }
+          ]
+        },
+        {
+          "id": "T1005",
+          "name": "Data from Local System",
+          "reference": "https://attack.mitre.org/techniques/T1005/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 5
 }

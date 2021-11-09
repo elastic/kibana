@@ -174,6 +174,26 @@ describe('EPM template', () => {
     expect(template).toMatchSnapshot(path.basename(ymlPath));
   });
 
+  it('tests processing long field with index false', () => {
+    const longWithIndexFalseYml = `
+- name: longIndexFalse
+  type: long
+  index: false
+`;
+    const longWithIndexFalseMapping = {
+      properties: {
+        longIndexFalse: {
+          type: 'long',
+          index: false,
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(longWithIndexFalseYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(longWithIndexFalseMapping);
+  });
+
   it('tests processing text field with multi fields', () => {
     const textWithMultiFieldsLiteralYml = `
 - name: textWithMultiFields

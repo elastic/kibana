@@ -18,6 +18,19 @@ import { FindFileStructureResponse } from '../../../../../../file_upload/common'
 import type { FileUploadPluginStart } from '../../../../../../file_upload/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
+type LinkType = 'file' | 'index';
+
+export interface ResultLink {
+  id: string;
+  type: LinkType;
+  title: string;
+  icon: string;
+  description: string;
+  getUrl(params?: any): Promise<string>;
+  canDisplay(params?: any): Promise<boolean>;
+  dataTestSubj?: string;
+}
+
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];
   index: string;
@@ -25,6 +38,7 @@ interface Props {
   timeFieldName?: string;
   createIndexPattern: boolean;
   showFilebeatFlyout(): void;
+  additionalLinks: ResultLink[];
 }
 
 interface GlobalState {
@@ -41,9 +55,16 @@ export const ResultsLinks: FC<Props> = ({
   timeFieldName,
   createIndexPattern,
   showFilebeatFlyout,
+  additionalLinks,
 }) => {
   const {
-    services: { fileUpload },
+    services: {
+      fileUpload,
+      application: { getUrlForApp, capabilities },
+      share: {
+        urlGenerators: { getUrlGenerator },
+      },
+    },
   } = useDataVisualizerKibana();
 
   const [duration, setDuration] = useState({
@@ -55,15 +76,7 @@ export const ResultsLinks: FC<Props> = ({
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [indexPatternManagementLink, setIndexPatternManagementLink] = useState('');
-
-  const {
-    services: {
-      application: { getUrlForApp, capabilities },
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
-    },
-  } = useDataVisualizerKibana();
+  const [generatedLinks, setGeneratedLinks] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let unmounted = false;
@@ -100,15 +113,35 @@ export const ResultsLinks: FC<Props> = ({
 
     getDiscoverUrl();
 
+    Promise.all(
+      additionalLinks.map(async ({ canDisplay, getUrl }) => {
+        if ((await canDisplay({ indexPatternId })) === false) {
+          return null;
+        }
+        return getUrl({ globalState, indexPatternId });
+      })
+    ).then((urls) => {
+      const linksById = urls.reduce((acc, url, i) => {
+        if (url !== null) {
+          acc[additionalLinks[i].id] = url;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+      setGeneratedLinks(linksById);
+    });
+
     if (!unmounted) {
       setIndexManagementLink(
         getUrlForApp('management', { path: '/data/index_management/indices' })
       );
-      setIndexPatternManagementLink(
-        getUrlForApp('management', {
-          path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
-        })
-      );
+
+      if (capabilities.indexPatterns.save === true) {
+        setIndexPatternManagementLink(
+          getUrlForApp('management', {
+            path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
+          })
+        );
+      }
     }
 
     return () => {
@@ -208,8 +241,8 @@ export const ResultsLinks: FC<Props> = ({
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.resultsLinks.indexPatternManagementTitle"
-                defaultMessage="Index Pattern Management"
+                id="xpack.dataVisualizer.file.resultsLinks.dataViewManagementTitle"
+                defaultMessage="Data View Management"
               />
             }
             description=""
@@ -231,6 +264,19 @@ export const ResultsLinks: FC<Props> = ({
           onClick={showFilebeatFlyout}
         />
       </EuiFlexItem>
+      {additionalLinks
+        .filter(({ id }) => generatedLinks[id] !== undefined)
+        .map((link) => (
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type={link.icon} />}
+              data-test-subj="fileDataVisLink"
+              title={link.title}
+              description={link.description}
+              href={generatedLinks[link.id]}
+            />
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
   );
 };

@@ -33,13 +33,13 @@ import { DISPLAY } from './display_select';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import { EMSFileSource } from '../../../sources/ems_file_source';
 import { ESGeoGridSource } from '../../../sources/es_geo_grid_source';
-import { VectorLayer } from '../../vector_layer';
+import { GeoJsonVectorLayer } from '../../vector_layer';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 
 // redefining APM constant to avoid making maps app depend on APM plugin
 export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
-export const APM_INDEX_PATTERN_TITLE = 'apm-*';
+export const APM_INDEX_PATTERN_TITLE = 'traces-apm*,logs-apm*,metrics-apm*,apm-*';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
@@ -164,7 +164,7 @@ export function createLayerDescriptor({
       aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
       rightSourceId: joinId,
     });
-    return VectorLayer.createDescriptor({
+    return GeoJsonVectorLayer.createDescriptor({
       label,
       joins: [
         {
@@ -179,6 +179,7 @@ export function createLayerDescriptor({
             whereQuery: apmSourceQuery,
             applyGlobalQuery: true,
             applyGlobalTime: true,
+            applyForceRefresh: true,
           },
         },
       ],
@@ -243,7 +244,7 @@ export function createLayerDescriptor({
     },
   };
 
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label,
     query: apmSourceQuery,
     sourceDescriptor: geoGridSourceDescriptor,

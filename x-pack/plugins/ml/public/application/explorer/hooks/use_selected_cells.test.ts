@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { renderHook } from '@testing-library/react-hooks';
 import { useSelectedCells } from './use_selected_cells';
-import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
+import { ExplorerAppState } from '../../../../common/types/locator';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 
 import { useTimefilter } from '../../contexts/kibana';

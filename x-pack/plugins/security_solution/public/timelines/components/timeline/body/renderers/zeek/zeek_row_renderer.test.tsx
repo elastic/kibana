@@ -23,7 +23,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -44,6 +43,7 @@ describe('zeek_row_renderer', () => {
     const children = zeekRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonZeek,
+      isDraggable: true,
       timelineId: 'test',
     });
 
@@ -63,6 +63,7 @@ describe('zeek_row_renderer', () => {
     const children = zeekRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: zeek,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(

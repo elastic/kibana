@@ -11,15 +11,6 @@
         "count_total": {
           "type": "long"
         },
-        "count_active_total": {
-          "type": "long"
-        },
-        "count_active_alert_history_connectors": {
-          "type": "long",
-          "_meta": {
-            "description": "The total number of preconfigured alert history connectors used by rules."
-          }
-        },
         "count_by_type": {
           "properties": {
             "DYNAMIC_KEY": {
@@ -60,7 +51,173 @@
             }
           }
         },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_active_alert_history_connectors": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of preconfigured alert history connectors used by rules."
+          }
+        },
         "count_active_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_executions_per_day": {
+          "type": "long"
+        },
+        "count_actions_executions_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_email_connectors_by_service_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "exchange_server": {
+              "type": "long"
+            },
+            "gmail": {
+              "type": "long"
+            },
+            "outlook365": {
+              "type": "long"
+            },
+            "elastic_cloud": {
+              "type": "long"
+            },
+            "other": {
+              "type": "long"
+            },
+            "ses": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_namespaces": {
+          "type": "long"
+        },
+        "count_actions_executions_failed_per_day": {
+          "type": "long"
+        },
+        "count_actions_executions_failed_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_execution_time_per_day": {
+          "type": "long"
+        },
+        "avg_execution_time_by_type_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
@@ -126,6 +283,19 @@
             }
           }
         },
+        "throttle_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
         "schedule_time": {
           "properties": {
             "min": {
@@ -136,6 +306,19 @@
             },
             "max": {
               "type": "keyword"
+            }
+          }
+        },
+        "schedule_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
             }
           }
         },
@@ -163,6 +346,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -226,7 +412,10 @@
             "__geo-containment": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_alert": {
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
@@ -242,6 +431,9 @@
             "__es-query": {
               "type": "long"
             },
+            "transform_health": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -305,7 +497,640 @@
             "__geo-containment": {
               "type": "long"
             },
-            "xpack_ml_anomaly_detection_alert": {
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_namespaces": {
+          "type": "long"
+        },
+        "count_rules_executions_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_executions_failured_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_failured_by_reason_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "read": {
+              "type": "long"
+            },
+            "decrypt": {
+              "type": "long"
+            },
+            "license": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_executions_failured_by_reason_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "read": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "decrypt": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "license": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "unknown": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "avg_execution_time_per_day": {
+          "type": "long"
+        },
+        "avg_execution_time_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
@@ -317,6 +1142,9 @@
         "services_per_agent": {
           "properties": {
             "dotnet": {
+              "type": "long"
+            },
+            "iOS/swift": {
               "type": "long"
             },
             "go": {
@@ -373,6 +1201,9 @@
             "opentelemetry/ruby": {
               "type": "long"
             },
+            "opentelemetry/swift": {
+              "type": "long"
+            },
             "opentelemetry/webjs": {
               "type": "long"
             }
@@ -381,6 +1212,90 @@
         "agents": {
           "properties": {
             "dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "iOS/swift": {
               "properties": {
                 "agent": {
                   "properties": {
@@ -2190,9 +3105,17 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "error_fix_action": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user used the fix action of an error displayed in the workspace."
+              }
+            },
             "open_formula_popover": {
               "type": "long",
-              "_meta": { "description": "Number of times the user opened the in-product formula help popover." }
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
             },
             "toggle_fullscreen_formula": {
               "type": "long",
@@ -2429,9 +3352,17 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "error_fix_action": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user used the fix action of an error displayed in the workspace."
+              }
+            },
             "open_formula_popover": {
               "type": "long",
-              "_meta": { "description": "Number of times the user opened the in-product formula help popover." }
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
             },
             "toggle_fullscreen_formula": {
               "type": "long",
@@ -2837,13 +3768,6 @@
     },
     "maps": {
       "properties": {
-        "settings": {
-          "properties": {
-            "showMapVisualizationTypes": {
-              "type": "boolean"
-            }
-          }
-        },
         "indexPatternsWithGeoFieldCount": {
           "type": "long"
         },
@@ -3112,34 +4036,6 @@
                   "type": "long",
                   "_meta": {
                     "description": "total number of es track layers in cluster"
-                  }
-                }
-              }
-            },
-            "kbn_region": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of kbn region layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of kbn region layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of kbn region layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of kbn region layers in cluster"
                   }
                 }
               }
@@ -3705,6 +4601,38 @@
                   }
                 }
               }
+            },
+            "xpack.ml.anomaly_detection_jobs_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "datafeed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started datafeed health check"
+                      }
+                    },
+                    "mml": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the model memory limit health check"
+                      }
+                    },
+                    "delayedData": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the delayed data health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error messages health check"
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -3938,39 +4866,40 @@
             },
             "total": {
               "type": "long"
-            }
-          }
-        },
-        "csv_searchsource": {
-          "properties": {
-            "available": {
-              "type": "boolean"
             },
-            "total": {
+            "deprecated": {
               "type": "long"
-            }
-          }
-        },
-        "PNG": {
-          "properties": {
-            "available": {
-              "type": "boolean"
             },
-            "total": {
-              "type": "long"
-            }
-          }
-        },
-        "printable_pdf": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
             },
             "app": {
               "properties": {
+                "search": {
+                  "type": "long"
+                },
                 "canvas workpad": {
                   "type": "long"
                 },
@@ -3984,6 +4913,411 @@
             },
             "layout": {
               "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "csv_searchsource": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "csv_searchsource_immediate": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "PNG": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "PNGV2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "printable_pdf": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "printable_pdf_v2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "sizes": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
                 "print": {
                   "type": "long"
                 },
@@ -3999,9 +5333,6 @@
         },
         "status": {
           "properties": {
-            "cancelled": {
-              "type": "long"
-            },
             "completed": {
               "type": "long"
             },
@@ -4021,66 +5352,13 @@
         },
         "statuses": {
           "properties": {
-            "cancelled": {
-              "properties": {
-                "csv": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "completed": {
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4094,6 +5372,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4107,6 +5404,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4120,6 +5436,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4137,6 +5472,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4150,6 +5488,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4163,6 +5520,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4176,6 +5552,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4193,6 +5588,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4206,6 +5604,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4219,6 +5636,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4232,6 +5668,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4249,6 +5704,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4262,6 +5720,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4275,6 +5752,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4288,6 +5784,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4305,6 +5820,9 @@
               "properties": {
                 "csv": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4318,6 +5836,25 @@
                 },
                 "csv_searchsource": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4331,6 +5868,25 @@
                 },
                 "PNG": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "PNGV2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4344,6 +5900,25 @@
                 },
                 "printable_pdf": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4356,6 +5931,31 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "output_size": {
+          "properties": {
+            "1.0": {
+              "type": "long"
+            },
+            "5.0": {
+              "type": "long"
+            },
+            "25.0": {
+              "type": "long"
+            },
+            "50.0": {
+              "type": "long"
+            },
+            "75.0": {
+              "type": "long"
+            },
+            "95.0": {
+              "type": "long"
+            },
+            "99.0": {
+              "type": "long"
             }
           }
         },
@@ -4377,39 +5977,40 @@
                 },
                 "total": {
                   "type": "long"
-                }
-              }
-            },
-            "csv_searchsource": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
                 },
-                "total": {
+                "deprecated": {
                   "type": "long"
-                }
-              }
-            },
-            "PNG": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
                 },
-                "total": {
-                  "type": "long"
-                }
-              }
-            },
-            "printable_pdf": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
+                    "search": {
+                      "type": "long"
+                    },
                     "canvas workpad": {
                       "type": "long"
                     },
@@ -4423,6 +6024,411 @@
                 },
                 "layout": {
                   "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_searchsource": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_searchsource_immediate": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "PNG": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "PNGV2": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "printable_pdf": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "printable_pdf_v2": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "sizes": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
                     "print": {
                       "type": "long"
                     },
@@ -4438,9 +6444,6 @@
             },
             "status": {
               "properties": {
-                "cancelled": {
-                  "type": "long"
-                },
                 "completed": {
                   "type": "long"
                 },
@@ -4460,66 +6463,13 @@
             },
             "statuses": {
               "properties": {
-                "cancelled": {
-                  "properties": {
-                    "csv": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
                 "completed": {
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4533,6 +6483,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4546,6 +6515,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4559,6 +6547,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4576,6 +6583,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4589,6 +6599,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4602,6 +6631,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4615,6 +6663,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4632,6 +6699,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4645,6 +6715,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4658,6 +6747,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4671,6 +6779,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4688,6 +6815,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4701,6 +6831,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4714,6 +6863,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4727,6 +6895,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4744,6 +6931,9 @@
                   "properties": {
                     "csv": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4757,6 +6947,25 @@
                     },
                     "csv_searchsource": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4770,6 +6979,25 @@
                     },
                     "PNG": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "PNGV2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4783,6 +7011,25 @@
                     },
                     "printable_pdf": {
                       "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
                         "canvas workpad": {
                           "type": "long"
                         },
@@ -4795,6 +7042,31 @@
                       }
                     }
                   }
+                }
+              }
+            },
+            "output_size": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
                 }
               }
             }
@@ -5429,79 +7701,6 @@
               }
             }
           }
-        },
-        "endpoints": {
-          "properties": {
-            "total_installed": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of installed endpoints"
-              }
-            },
-            "active_within_last_24_hours": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of active endpoints"
-              }
-            },
-            "os": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "full_name": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "Full name of the operating system"
-                    }
-                  },
-                  "platform": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "OS Platform. eg Centos, Ubuntu"
-                    }
-                  },
-                  "version": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)"
-                    }
-                  },
-                  "count": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The total number of endpoints from that platform"
-                    }
-                  }
-                }
-              }
-            },
-            "policies": {
-              "properties": {
-                "malware": {
-                  "properties": {
-                    "active": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of active malware policies"
-                      }
-                    },
-                    "inactive": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of inactive malware policies"
-                      }
-                    },
-                    "failure": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of failing malware policies"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -5547,6 +7746,24 @@
             "_meta": {
               "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
             }
+          }
+        },
+        "sessionIdleTimeoutInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionLifespanInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionCleanupInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
           }
         }
       }
@@ -5646,12 +7863,6 @@
               }
             },
             "savedObjectsManagement": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of spaces which have this feature disabled."
-              }
-            },
-            "timelion": {
               "type": "long",
               "_meta": {
                 "description": "The number of spaces which have this feature disabled."
@@ -5805,6 +8016,80 @@
         }
       }
     },
+    "task_manager": {
+      "properties": {
+        "ephemeral_tasks_enabled": {
+          "type": "boolean"
+        },
+        "ephemeral_request_capacity": {
+          "type": "short"
+        },
+        "ephemeral_stats": {
+          "properties": {
+            "status": {
+              "type": "keyword"
+            },
+            "queued_tasks": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            },
+            "load": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            },
+            "executions_per_cycle": {
+              "properties": {
+                "p50": {
+                  "type": "long"
+                },
+                "p90": {
+                  "type": "long"
+                },
+                "p95": {
+                  "type": "long"
+                },
+                "p99": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "task_type_exclusion": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "failed_tasks": {
+          "type": "long"
+        }
+      }
+    },
     "upgrade-assistant-telemetry": {
       "properties": {
         "features": {
@@ -5818,50 +8103,6 @@
                   }
                 }
               }
-            }
-          }
-        },
-        "ui_open": {
-          "properties": {
-            "cluster": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
-              }
-            },
-            "indices": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
-              }
-            },
-            "overview": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the Overview page."
-              }
-            },
-            "kibana": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Kibana deprecations"
-              }
-            }
-          }
-        },
-        "ui_reindex": {
-          "properties": {
-            "close": {
-              "type": "long"
-            },
-            "open": {
-              "type": "long"
-            },
-            "start": {
-              "type": "long"
-            },
-            "stop": {
-              "type": "long"
             }
           }
         }

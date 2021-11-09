@@ -54,10 +54,10 @@ export function compareTimeKeys(
   return timeComparison;
 }
 
-export const compareToTimeKey = <Value>(
-  keyAccessor: (value: Value) => TimeKey,
-  compareValues?: Comparator
-) => (value: Value, key: TimeKey) => compareTimeKeys(keyAccessor(value), key, compareValues);
+export const compareToTimeKey =
+  <Value>(keyAccessor: (value: Value) => TimeKey, compareValues?: Comparator) =>
+  (value: Value, key: TimeKey) =>
+    compareTimeKeys(keyAccessor(value), key, compareValues);
 
 export const getIndexAtTimeKey = <Value>(
   keyAccessor: (value: Value) => TimeKey,

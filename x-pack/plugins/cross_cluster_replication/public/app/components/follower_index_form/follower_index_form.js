@@ -73,22 +73,26 @@ const getEmptyFollowerIndex = (remoteClusterName = '') => ({
 /**
  * State transitions: fields update
  */
-export const updateFields = (fields) => ({ followerIndex }) => ({
-  followerIndex: {
-    ...followerIndex,
-    ...fields,
-  },
-});
+export const updateFields =
+  (fields) =>
+  ({ followerIndex }) => ({
+    followerIndex: {
+      ...followerIndex,
+      ...fields,
+    },
+  });
 
 /**
  * State transitions: errors update
  */
-export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
-  fieldsErrors: {
-    ...fieldsErrors,
-    ...errors,
-  },
-});
+export const updateFormErrors =
+  (errors) =>
+  ({ fieldsErrors }) => ({
+    fieldsErrors: {
+      ...fieldsErrors,
+      ...errors,
+    },
+  });
 
 export class FollowerIndexForm extends PureComponent {
   static propTypes = {

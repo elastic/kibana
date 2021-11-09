@@ -18,7 +18,8 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IBasePath } from 'src/core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -51,8 +52,8 @@ export function PromptPage({
   const uiPublicURL = `${basePath.serverBasePath}/ui`;
   const regularBundlePath = `${basePath.serverBasePath}/${buildNumber}/bundles`;
   const styleSheetPaths = [
-    `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
-    `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+    `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
+    `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename('v8')}`,
     `${basePath.serverBasePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
     `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
   ];

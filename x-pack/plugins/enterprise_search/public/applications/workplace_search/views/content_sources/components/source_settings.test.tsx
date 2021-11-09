@@ -110,7 +110,7 @@ describe('SourceSettings', () => {
       const wrapper = shallow(<SourceSettings />);
 
       expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/api/workplace_search/org/sources/123/download_diagnostics'
+        '/internal/workplace_search/org/sources/123/download_diagnostics'
       );
     });
 
@@ -122,7 +122,17 @@ describe('SourceSettings', () => {
       const wrapper = shallow(<SourceSettings />);
 
       expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/api/workplace_search/account/sources/123/download_diagnostics'
+        '/internal/workplace_search/account/sources/123/download_diagnostics'
+      );
+    });
+
+    it('renders with the correct download file name', () => {
+      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => new Date('1970-01-01').valueOf());
+
+      const wrapper = shallow(<SourceSettings />);
+
+      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('download')).toEqual(
+        '123_custom_0_diagnostics.json'
       );
     });
   });

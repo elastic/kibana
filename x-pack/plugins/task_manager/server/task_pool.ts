@@ -11,13 +11,11 @@
  */
 import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
-import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
 import { Logger } from '../../../../src/core/server';
 import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
-import { TaskManagerStat, asTaskManagerStatEvent } from './task_events';
-import { asOk } from './lib/result_type';
+import { TaskManagerStat } from './task_events';
 
 interface Opts {
   maxWorkers$: Observable<number>;
@@ -84,10 +82,6 @@ export class TaskPool {
    * Gets how many workers are currently available.
    */
   public get availableWorkers() {
-    // emit load whenever we check how many available workers there are
-    // this should happen less often than the actual changes to the worker queue
-    // so is lighter than emitting the load every time we add/remove a task from the queue
-    this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
     // cancel expired task whenever a call is made to check for capacity
     // this ensures that we don't end up with a queue of hung tasks causing both
     // the poller and the pool from hanging due to lack of capacity
@@ -116,7 +110,6 @@ export class TaskPool {
   public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
-      performance.mark('attemptToRun_start');
       await Promise.all(
         tasksToRun
           .filter((taskRunner) => !this.tasksInPool.has(taskRunner.id))
@@ -135,9 +128,6 @@ export class TaskPool {
               .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err));
           })
       );
-
-      performance.mark('attemptToRun_stop');
-      performance.measure('taskPool.attemptToRun', 'attemptToRun_start', 'attemptToRun_stop');
     }
 
     if (leftOverTasks.length) {
@@ -174,7 +164,9 @@ export class TaskPool {
           this.logger.warn(errorLogLine);
         }
       })
-      .then(() => this.tasksInPool.delete(taskRunner.id));
+      .then(() => {
+        this.tasksInPool.delete(taskRunner.id);
+      });
   }
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {

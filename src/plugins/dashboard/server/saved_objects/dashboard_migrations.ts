@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import semver from 'semver';
-import { get, flow, identity } from 'lodash';
+import { Serializable } from '@kbn/utility-types';
+import { get, flow, mapValues } from 'lodash';
 import {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
@@ -26,7 +26,11 @@ import {
 } from '../../common/embeddable/embeddable_saved_object_converters';
 import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
-import { SerializableValue } from '../../../kibana_utils/common';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
@@ -130,7 +134,7 @@ function createExtractPanelReferencesMigration(
 
     const injectedAttributes = injectReferences(
       {
-        attributes: (doc.attributes as unknown) as SavedObjectAttributes,
+        attributes: doc.attributes as unknown as SavedObjectAttributes,
         references,
       },
       { embeddablePersistableStateService: deps.embeddable }
@@ -150,64 +154,64 @@ function createExtractPanelReferencesMigration(
 }
 
 type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
-  attributes?: SerializableValue;
-  savedVis?: SerializableValue;
+  attributes?: Serializable;
+  savedVis?: Serializable;
 };
 
 // Runs the embeddable migrations on each panel
-const migrateByValuePanels = (
-  deps: DashboardSavedObjectTypeMigrationsDeps,
-  version: string
-): SavedObjectMigrationFn => (doc: any) => {
-  const { attributes } = doc;
-  // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
-  // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
-  // object has panelsJSON in all previous versions of kibana.
-  if (typeof attributes?.panelsJSON !== 'string') {
-    return doc;
-  }
-  const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
-  // Same here, prevent failing saved object import if ever panels aren't an array.
-  if (!Array.isArray(panels)) {
-    return doc;
-  }
-  const newPanels: SavedDashboardPanel[] = [];
-  panels.forEach((panel) => {
-    // Convert each panel into a state that can be passed to EmbeddablesSetup.migrate
-    const originalPanelState = convertSavedDashboardPanelToPanelState<ValueOrReferenceInput>(panel);
+const migrateByValuePanels =
+  (migrate: MigrateFunction, version: string): SavedObjectMigrationFn =>
+  (doc: any) => {
+    const { attributes } = doc;
+    // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
+    // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
+    // object has panelsJSON in all previous versions of kibana.
+    if (typeof attributes?.panelsJSON !== 'string') {
+      return doc;
+    }
+    const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
+    // Same here, prevent failing saved object import if ever panels aren't an array.
+    if (!Array.isArray(panels)) {
+      return doc;
+    }
+    const newPanels: SavedDashboardPanel[] = [];
+    panels.forEach((panel) => {
+      // Convert each panel into a state that can be passed to EmbeddablesSetup.migrate
+      const originalPanelState =
+        convertSavedDashboardPanelToPanelState<ValueOrReferenceInput>(panel);
 
-    // saved vis is used to store by value input for Visualize. This should eventually be renamed to `attributes` to align with Lens and Maps
-    if (originalPanelState.explicitInput.attributes || originalPanelState.explicitInput.savedVis) {
-      // If this panel is by value, migrate the state using embeddable migrations
-      const migratedInput = deps.embeddable.migrate(
-        {
+      // saved vis is used to store by value input for Visualize. This should eventually be renamed to `attributes` to align with Lens and Maps
+      if (
+        originalPanelState.explicitInput.attributes ||
+        originalPanelState.explicitInput.savedVis
+      ) {
+        // If this panel is by value, migrate the state using embeddable migrations
+        const migratedInput = migrate({
           ...originalPanelState.explicitInput,
           type: originalPanelState.type,
-        },
-        version
-      );
-      // Convert the embeddable state back into the panel shape
-      newPanels.push(
-        convertPanelStateToSavedDashboardPanel(
-          {
-            ...originalPanelState,
-            explicitInput: { ...migratedInput, id: migratedInput.id as string },
-          },
-          version
-        )
-      );
-    } else {
-      newPanels.push(panel);
-    }
-  });
-  return {
-    ...doc,
-    attributes: {
-      ...attributes,
-      panelsJSON: JSON.stringify(newPanels),
-    },
+        });
+        // Convert the embeddable state back into the panel shape
+        newPanels.push(
+          convertPanelStateToSavedDashboardPanel(
+            {
+              ...originalPanelState,
+              explicitInput: { ...migratedInput, id: migratedInput.id as string },
+            },
+            version
+          )
+        );
+      } else {
+        newPanels.push(panel);
+      }
+    });
+    return {
+      ...doc,
+      attributes: {
+        ...attributes,
+        panelsJSON: JSON.stringify(newPanels),
+      },
+    };
   };
-};
 
 export interface DashboardSavedObjectTypeMigrationsDeps {
   embeddable: EmbeddableSetup;
@@ -216,16 +220,12 @@ export interface DashboardSavedObjectTypeMigrationsDeps {
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = Object.fromEntries(
-    deps.embeddable
-      .getMigrationVersions()
-      .filter((version) => semver.gt(version, '7.12.0'))
-      .map((version): [string, SavedObjectMigrationFn] => {
-        return [version, migrateByValuePanels(deps, version)];
-      })
-  );
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
+    deps.embeddable.getAllMigrations(),
+    migrateByValuePanels
+  ) as MigrateFunctionsObject;
 
-  return {
+  const dashboardMigrations = {
     /**
      * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
      * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already
@@ -242,14 +242,14 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.9.3': flow(migrateMatchAllQuery),
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
 
-    ...embeddableMigrations,
-
     /**
      * Any dashboard saved object migrations that come after this point will have to be wary of
      * potentially overwriting embeddable migrations. An example of how to mitigate this follows:
      */
     // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'] ?? identity),
 
-    '7.14.0': flow(replaceIndexPatternReference, embeddableMigrations['7.14.0'] ?? identity),
+    '7.14.0': flow(replaceIndexPatternReference),
   };
+
+  return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
 };

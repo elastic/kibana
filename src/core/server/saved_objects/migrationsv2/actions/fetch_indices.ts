@@ -28,10 +28,11 @@ export interface FetchIndicesParams {
  * Fetches information about the given indices including aliases, mappings and
  * settings.
  */
-export const fetchIndices = ({
-  client,
-  indices,
-}: FetchIndicesParams): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
+export const fetchIndices =
+  ({
+    client,
+    indices,
+  }: FetchIndicesParams): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
   // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   () => {
     return client.indices

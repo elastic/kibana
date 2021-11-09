@@ -10,13 +10,13 @@ import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'sr
 import { httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   core: {
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
 const path = `api/canvas/workpad/find`;
 

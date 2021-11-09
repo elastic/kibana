@@ -102,9 +102,8 @@ describe('Create Follower index', () => {
         autoFollowPatternAddComponent.update();
 
         const remoteClusterFormFieldFollowerIndex = component.find(RemoteClustersFormField);
-        const remoteClusterFormFieldAutoFollowPattern = autoFollowPatternAddComponent.find(
-          RemoteClustersFormField
-        );
+        const remoteClusterFormFieldAutoFollowPattern =
+          autoFollowPatternAddComponent.find(RemoteClustersFormField);
 
         expect(remoteClusterFormFieldFollowerIndex.length).toBe(1);
         expect(remoteClusterFormFieldAutoFollowPattern.length).toBe(1);

@@ -43,14 +43,13 @@ import {
   TimelineId,
   TimelineType,
   TimelineStatus,
-  TimelineTabs,
   KueryFilterQueryKind,
 } from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
-import { getTimeline } from '../../containers/api';
+import { resolveTimeline } from '../../containers/api';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -73,6 +72,57 @@ jest.mock('../../../common/utils/default_date_settings', () => {
 });
 
 jest.mock('../../containers/api');
+
+const columns = [
+  {
+    columnHeaderType: 'not-filtered',
+    id: '@timestamp',
+    type: 'number',
+    initialWidth: 190,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'message',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'event.category',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'event.action',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.name',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'source.ip',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'destination.ip',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.name',
+    initialWidth: 180,
+  },
+];
+const defaultTimeline = {
+  ...timelineDefaults,
+  columns,
+  version: '1',
+  savedObjectId: 'savedObject-1',
+  id: 'savedObject-1',
+};
 
 describe('helpers', () => {
   let mockResults: OpenTimelineResult[];
@@ -245,103 +295,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
-        activeTab: TimelineTabs.query,
-        prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
-        dataProviders: [],
-        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
-        description: '',
-        deletedEventIds: [],
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          tiebreakerField: '',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
-        eventIdToNoteIds: {},
-        eventType: 'all',
-        excludedRowRendererIds: [],
-        expandedDetail: {},
-        filters: [],
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        id: 'savedObject-1',
-        indexNames: [],
-        isFavorite: false,
-        isLive: false,
-        isSelectAllChecked: false,
-        isLoading: false,
-        isSaving: false,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: null,
-        },
-        loadingEventIds: [],
-        noteIds: [],
-        pinnedEventIds: {},
-        pinnedEventsSaveObject: {},
-        savedObjectId: 'savedObject-1',
-        selectedEventIds: {},
-        show: false,
-        showCheckboxes: false,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'number',
-            sortDirection: 'desc',
-          },
-        ],
-        status: TimelineStatus.draft,
-        title: '',
-        timelineType: TimelineType.default,
-        templateTimelineId: null,
-        templateTimelineVersion: null,
-        version: '1',
+        ...defaultTimeline,
       });
     });
 
@@ -356,103 +310,8 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
-        activeTab: TimelineTabs.query,
-        prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
-        dataProviders: [],
-        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
-        description: '',
-        deletedEventIds: [],
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          tiebreakerField: '',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
-        eventIdToNoteIds: {},
-        eventType: 'all',
-        excludedRowRendererIds: [],
-        expandedDetail: {},
-        filters: [],
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        id: 'savedObject-1',
-        indexNames: [],
-        isFavorite: false,
-        isLive: false,
-        isSelectAllChecked: false,
-        isLoading: false,
-        isSaving: false,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: null,
-        },
-        loadingEventIds: [],
-        noteIds: [],
-        pinnedEventIds: {},
-        pinnedEventsSaveObject: {},
-        savedObjectId: 'savedObject-1',
-        selectedEventIds: {},
-        show: false,
-        showCheckboxes: false,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'number',
-            sortDirection: 'desc',
-          },
-        ],
-        status: TimelineStatus.draft,
-        title: '',
+        ...defaultTimeline,
         timelineType: TimelineType.template,
-        templateTimelineId: null,
-        templateTimelineVersion: null,
-        version: '1',
       });
     });
 
@@ -467,103 +326,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
-        activeTab: TimelineTabs.query,
-        prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
-        dataProviders: [],
-        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
-        description: '',
-        deletedEventIds: [],
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          tiebreakerField: '',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
-        eventIdToNoteIds: {},
-        eventType: 'all',
-        excludedRowRendererIds: [],
-        expandedDetail: {},
-        filters: [],
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        id: 'savedObject-1',
-        indexNames: [],
-        isFavorite: false,
-        isLive: false,
-        isSelectAllChecked: false,
-        isLoading: false,
-        isSaving: false,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: null,
-        },
-        loadingEventIds: [],
-        noteIds: [],
-        pinnedEventIds: {},
-        pinnedEventsSaveObject: {},
-        savedObjectId: 'savedObject-1',
-        selectedEventIds: {},
-        show: false,
-        showCheckboxes: false,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'number',
-            sortDirection: 'desc',
-          },
-        ],
-        status: TimelineStatus.draft,
-        title: '',
-        timelineType: TimelineType.default,
-        templateTimelineId: null,
-        templateTimelineVersion: null,
-        version: '1',
+        ...defaultTimeline,
       });
     });
 
@@ -576,255 +339,34 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
-        activeTab: TimelineTabs.query,
-        prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
-        dataProviders: [],
-        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
-        description: '',
-        deletedEventIds: [],
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          tiebreakerField: '',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
-        eventIdToNoteIds: {},
-        eventType: 'all',
-        excludedRowRendererIds: [],
-        expandedDetail: {},
-        filters: [],
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        indexNames: [],
-        id: 'savedObject-1',
-        isFavorite: false,
-        isLive: false,
-        isSelectAllChecked: false,
-        isLoading: false,
-        isSaving: false,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: null,
-        },
-        loadingEventIds: [],
-        noteIds: [],
-        pinnedEventIds: {},
-        pinnedEventsSaveObject: {},
-        savedObjectId: 'savedObject-1',
-        selectedEventIds: {},
-        show: false,
-        showCheckboxes: false,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'number',
-            sortDirection: 'desc',
-          },
-        ],
-        status: TimelineStatus.draft,
-        title: '',
-        timelineType: TimelineType.default,
-        templateTimelineId: null,
-        templateTimelineVersion: null,
-        version: '1',
+        ...defaultTimeline,
       });
     });
 
     test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
+      const columnsWithoutEventAction = timelineDefaults.columns.filter(
+        (column) => column.id !== 'event.action'
+      );
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
+        columns: columnsWithoutEventAction,
         version: '1',
       };
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
-        activeTab: TimelineTabs.query,
-        prevActiveTab: TimelineTabs.query,
-        savedObjectId: 'savedObject-1',
-        columns: [
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: '@timestamp',
-            placeholder: undefined,
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'message',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'event.category',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'host.name',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'source.ip',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'destination.ip',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-          {
-            aggregatable: undefined,
-            category: undefined,
-            columnHeaderType: 'not-filtered',
-            description: undefined,
-            example: undefined,
-            id: 'user.name',
-            placeholder: undefined,
-            type: undefined,
-            initialWidth: 180,
-          },
-        ],
-        version: '1',
-        dataProviders: [],
-        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
-        description: '',
-        deletedEventIds: [],
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          tiebreakerField: '',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
-        eventIdToNoteIds: {},
-        eventType: 'all',
-        excludedRowRendererIds: [],
-        expandedDetail: {},
-        filters: [],
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        indexNames: [],
-        isFavorite: false,
-        isLive: false,
-        isSelectAllChecked: false,
-        isLoading: false,
-        isSaving: false,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: null,
-        },
-        loadingEventIds: [],
-        title: '',
-        timelineType: TimelineType.default,
-        templateTimelineId: null,
-        templateTimelineVersion: null,
-        noteIds: [],
-        pinnedEventIds: {},
-        pinnedEventsSaveObject: {},
-        selectedEventIds: {},
-        show: false,
-        showCheckboxes: false,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'number',
-            sortDirection: 'desc',
-          },
-        ],
-        status: TimelineStatus.draft,
-        id: 'savedObject-1',
+        ...defaultTimeline,
+        columns: columnsWithoutEventAction,
       });
     });
 
     test('should merge filters object back with json object', () => {
+      const columnsWithoutEventAction = timelineDefaults.columns.filter(
+        (column) => column.id !== 'event.action'
+      );
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
+        columns: columnsWithoutEventAction,
         filters: [
           {
             meta: {
@@ -861,64 +403,10 @@ describe('helpers', () => {
       };
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
+
       expect(newTimeline).toEqual({
-        activeTab: TimelineTabs.query,
-        prevActiveTab: TimelineTabs.query,
-        savedObjectId: 'savedObject-1',
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
-        version: '1',
-        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
-        dataProviders: [],
-        description: '',
-        deletedEventIds: [],
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          tiebreakerField: '',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
-        eventIdToNoteIds: {},
-        eventType: 'all',
-        excludedRowRendererIds: [],
-        expandedDetail: {},
+        ...defaultTimeline,
+        columns: columnsWithoutEventAction,
         filters: [
           {
             $state: {
@@ -963,40 +451,6 @@ describe('helpers', () => {
             },
           },
         ],
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        indexNames: [],
-        isFavorite: false,
-        isLive: false,
-        isSelectAllChecked: false,
-        isLoading: false,
-        isSaving: false,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: null,
-        },
-        loadingEventIds: [],
-        title: '',
-        timelineType: TimelineType.default,
-        templateTimelineId: null,
-        templateTimelineVersion: null,
-        noteIds: [],
-        pinnedEventIds: {},
-        pinnedEventsSaveObject: {},
-        selectedEventIds: {},
-        show: false,
-        showCheckboxes: false,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'number',
-            sortDirection: 'desc',
-          },
-        ],
-        status: TimelineStatus.draft,
-        id: 'savedObject-1',
       });
     });
 
@@ -1011,103 +465,11 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
-        activeTab: TimelineTabs.query,
-        prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
-        dataProviders: [],
+        ...defaultTimeline,
         dateRange: { end: '2020-10-28T11:37:31.655Z', start: '2020-10-27T11:37:31.655Z' },
-        description: '',
-        deletedEventIds: [],
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          tiebreakerField: '',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
-        eventIdToNoteIds: {},
-        eventType: 'all',
-        excludedRowRendererIds: [],
-        expandedDetail: {},
-        filters: [],
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        id: 'savedObject-1',
-        indexNames: [],
-        isFavorite: false,
-        isLive: false,
-        isSelectAllChecked: false,
-        isLoading: false,
-        isSaving: false,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: null,
-        },
-        loadingEventIds: [],
-        noteIds: [],
-        pinnedEventIds: {},
-        pinnedEventsSaveObject: {},
-        savedObjectId: 'savedObject-1',
-        selectedEventIds: {},
-        show: false,
-        showCheckboxes: false,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'number',
-            sortDirection: 'desc',
-          },
-        ],
         status: TimelineStatus.immutable,
-        title: 'Awesome Timeline',
         timelineType: TimelineType.template,
-        templateTimelineId: null,
-        templateTimelineVersion: null,
-        version: '1',
+        title: 'Awesome Timeline',
       });
     });
 
@@ -1122,119 +484,55 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
-        activeTab: TimelineTabs.query,
-        prevActiveTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            type: 'number',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
-        dataProviders: [],
+        ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
-        description: '',
-        deletedEventIds: [],
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          tiebreakerField: '',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
-        eventIdToNoteIds: {},
-        eventType: 'all',
-        excludedRowRendererIds: [],
-        expandedDetail: {},
-        filters: [],
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        id: 'savedObject-1',
-        indexNames: [],
-        isFavorite: false,
-        isLive: false,
-        isSelectAllChecked: false,
-        isLoading: false,
-        isSaving: false,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        kqlMode: 'filter',
-        kqlQuery: {
-          filterQuery: null,
-        },
-        loadingEventIds: [],
-        noteIds: [],
-        pinnedEventIds: {},
-        pinnedEventsSaveObject: {},
-        savedObjectId: 'savedObject-1',
-        selectedEventIds: {},
-        show: false,
-        showCheckboxes: false,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'number',
-            sortDirection: 'desc',
-          },
-        ],
         status: TimelineStatus.active,
         title: 'Awesome Timeline',
-        timelineType: TimelineType.default,
-        templateTimelineId: null,
-        templateTimelineVersion: null,
-        version: '1',
       });
     });
   });
 
   describe('queryTimelineById', () => {
+    describe('encounters failure when retrieving a timeline', () => {
+      const onError = jest.fn();
+      const mockError = new Error('failed');
+
+      const args = {
+        timelineId: '123',
+        onError,
+        updateIsLoading: jest.fn(),
+        updateTimeline: jest.fn(),
+      };
+
+      beforeAll(async () => {
+        (resolveTimeline as jest.Mock).mockRejectedValue(mockError);
+        queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      test('calls onError with the error', () => {
+        expect(onError).toHaveBeenCalledWith(mockError, '123');
+      });
+    });
+
     describe('open a timeline', () => {
-      const updateIsLoading = jest.fn();
       const selectedTimeline = {
         ...mockSelectedTimeline,
       };
+
+      const updateIsLoading = jest.fn();
       const onOpenTimeline = jest.fn();
+      const onError = jest.fn();
+
       const args = {
         duplicate: false,
         graphEventId: '',
         timelineId: '',
         timelineType: TimelineType.default,
+        onError,
         onOpenTimeline,
         openTimeline: true,
         updateIsLoading,
@@ -1242,8 +540,8 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (getTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {
@@ -1258,12 +556,16 @@ describe('helpers', () => {
       });
 
       test('get timeline by Id', () => {
-        expect(getTimeline).toHaveBeenCalled();
+        expect(resolveTimeline).toHaveBeenCalled();
+      });
+
+      test('it does not call onError when an error does not occur', () => {
+        expect(onError).not.toHaveBeenCalled();
       });
 
       test('Do not override daterange if TimelineStatus is active', () => {
         const { timeline } = formatTimelineResultToModel(
-          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', selectedTimeline)),
+          omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
           args.duplicate,
           args.timelineType
         );
@@ -1296,8 +598,8 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (getTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {
@@ -1312,12 +614,12 @@ describe('helpers', () => {
       });
 
       test('get timeline by Id', () => {
-        expect(getTimeline).toHaveBeenCalled();
+        expect(resolveTimeline).toHaveBeenCalled();
       });
 
       test('should not override daterange if TimelineStatus is active', () => {
         const { timeline } = formatTimelineResultToModel(
-          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', selectedTimeline)),
+          omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
           args.duplicate,
           args.timelineType
         );
@@ -1337,6 +639,10 @@ describe('helpers', () => {
           to: '2020-07-08T08:20:18.966Z',
           notes: [],
           id: TimelineId.active,
+          resolveTimelineConfig: {
+            outcome: 'exactMatch',
+            alias_target_id: undefined,
+          },
         });
       });
 
@@ -1364,12 +670,12 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (getTimeline as jest.Mock).mockResolvedValue(template);
-        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+        (resolveTimeline as jest.Mock).mockResolvedValue(template);
+        await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {
-        (getTimeline as jest.Mock).mockReset();
+        (resolveTimeline as jest.Mock).mockReset();
         jest.clearAllMocks();
       });
 
@@ -1381,12 +687,12 @@ describe('helpers', () => {
       });
 
       test('get timeline by Id', () => {
-        expect(getTimeline).toHaveBeenCalled();
+        expect(resolveTimeline).toHaveBeenCalled();
       });
 
       test('override daterange if TimelineStatus is immutable', () => {
         const { timeline } = formatTimelineResultToModel(
-          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', template)),
+          omitTypenameInTimeline(getOr({}, 'data.timeline', template)),
           args.duplicate,
           args.timelineType
         );
@@ -1437,6 +743,15 @@ describe('helpers', () => {
     let clock: sinon.SinonFakeTimers;
     let timelineDispatch: DispatchUpdateTimeline;
 
+    const defaultArgs = {
+      duplicate: true,
+      id: TimelineId.active,
+      from: '2020-03-26T14:35:56.356Z',
+      to: '2020-03-26T14:41:56.356Z',
+      notes: [],
+      timeline: mockTimelineModel,
+    };
+
     beforeEach(() => {
       jest.clearAllMocks();
 
@@ -1449,14 +764,7 @@ describe('helpers', () => {
     });
 
     test('it invokes date range picker dispatch', () => {
-      timelineDispatch({
-        duplicate: true,
-        id: TimelineId.active,
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
-        notes: [],
-        timeline: mockTimelineModel,
-      })();
+      timelineDispatch(defaultArgs)();
 
       expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
         from: '2020-03-26T14:35:56.356Z',
@@ -1465,14 +773,7 @@ describe('helpers', () => {
     });
 
     test('it invokes add timeline dispatch', () => {
-      timelineDispatch({
-        duplicate: true,
-        id: TimelineId.active,
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
-        notes: [],
-        timeline: mockTimelineModel,
-      })();
+      timelineDispatch(defaultArgs)();
 
       expect(dispatchAddTimeline).toHaveBeenCalledWith({
         id: TimelineId.active,
@@ -1482,27 +783,13 @@ describe('helpers', () => {
     });
 
     test('it does not invoke kql filter query dispatches if timeline.kqlQuery.filterQuery is null', () => {
-      timelineDispatch({
-        duplicate: true,
-        id: TimelineId.active,
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
-        notes: [],
-        timeline: mockTimelineModel,
-      })();
+      timelineDispatch(defaultArgs)();
 
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
     });
 
     test('it does not invoke notes dispatch if duplicate is true', () => {
-      timelineDispatch({
-        duplicate: true,
-        id: TimelineId.active,
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
-        notes: [],
-        timeline: mockTimelineModel,
-      })();
+      timelineDispatch(defaultArgs)();
 
       expect(dispatchAddNotes).not.toHaveBeenCalled();
     });
@@ -1518,11 +805,7 @@ describe('helpers', () => {
         },
       };
       timelineDispatch({
-        duplicate: true,
-        id: TimelineId.active,
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
-        notes: [],
+        ...defaultArgs,
         timeline: mockTimeline,
       })();
 
@@ -1540,11 +823,7 @@ describe('helpers', () => {
         },
       };
       timelineDispatch({
-        duplicate: true,
-        id: TimelineId.active,
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
-        notes: [],
+        ...defaultArgs,
         timeline: mockTimeline,
       })();
 
@@ -1562,10 +841,8 @@ describe('helpers', () => {
 
     test('it invokes dispatchAddNotes if duplicate is false', () => {
       timelineDispatch({
+        ...defaultArgs,
         duplicate: false,
-        id: TimelineId.active,
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
         notes: [
           {
             created: 1585233356356,
@@ -1574,7 +851,6 @@ describe('helpers', () => {
             note: 'I am a note',
           },
         ],
-        timeline: mockTimelineModel,
       })();
 
       expect(dispatchAddGlobalTimelineNote).not.toHaveBeenCalled();
@@ -1598,12 +874,7 @@ describe('helpers', () => {
 
     test('it invokes dispatch to create a timeline note if duplicate is true and ruleNote exists', () => {
       timelineDispatch({
-        duplicate: true,
-        id: TimelineId.active,
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
-        notes: [],
-        timeline: mockTimelineModel,
+        ...defaultArgs,
         ruleNote: '# this would be some markdown',
       })();
       const expectedNote: Note = {

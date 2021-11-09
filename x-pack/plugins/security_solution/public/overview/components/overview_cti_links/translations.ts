@@ -51,9 +51,10 @@ export const DANGER_TITLE = i18n.translate(
 );
 
 export const DANGER_BODY = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardDangerPanelBody',
+  'xpack.securitySolution.overview.ctiDashboardEnableThreatIntel',
   {
-    defaultMessage: 'You need to enable module in order to view data from different sources.',
+    defaultMessage:
+      'You need to enable the filebeat threatintel module in order to view data from different sources.',
   }
 );
 
@@ -63,3 +64,11 @@ export const DANGER_BUTTON = i18n.translate(
     defaultMessage: 'Enable Module',
   }
 );
+
+export const PANEL_TITLE = i18n.translate('xpack.securitySolution.overview.ctiDashboardTitle', {
+  defaultMessage: 'Threat Intelligence',
+});
+
+export const VIEW_DASHBOARD = i18n.translate('xpack.securitySolution.overview.ctiViewDasboard', {
+  defaultMessage: 'View dashboard',
+});

@@ -32,6 +32,10 @@ const MyDescriptionList = styled(EuiDescriptionList)`
     & {
       padding-right: ${theme.eui.euiSizeL};
       border-right: ${theme.eui.euiBorderThin};
+      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
+        padding-right: 0;
+        border-right: 0;
+      }
     }
   `}
 `;
@@ -80,9 +84,9 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
       <EuiFlexItem grow={false}>
         <MyDescriptionList compressed>
-          <EuiFlexGroup>
+          <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
             {caseData.type !== CaseType.collection && (
-              <EuiFlexItem grow={false} data-test-subj="case-view-status">
+              <EuiFlexItem data-test-subj="case-view-status">
                 <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   <StatusContextMenu
@@ -107,11 +111,21 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed>
-          <EuiFlexGroup gutterSize="l" alignItems="center">
+          <EuiFlexGroup
+            gutterSize="l"
+            alignItems="center"
+            responsive={false}
+            justifyContent="spaceBetween"
+          >
             {userCanCrud && !disableAlerting && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiDescriptionListTitle>
-                  <EuiFlexGroup component="span" alignItems="center" gutterSize="xs">
+                  <EuiFlexGroup
+                    component="span"
+                    alignItems="center"
+                    gutterSize="xs"
+                    responsive={false}
+                  >
                     <EuiFlexItem grow={false}>
                       <span>{i18n.SYNC_ALERTS}</span>
                     </EuiFlexItem>
@@ -129,10 +143,17 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             )}
-            <EuiFlexItem>
-              <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
-                {i18n.CASE_REFRESH}
-              </EuiButtonEmpty>
+            <EuiFlexItem grow={false}>
+              <span>
+                <EuiButtonEmpty
+                  data-test-subj="case-refresh"
+                  flush="left"
+                  iconType="refresh"
+                  onClick={onRefresh}
+                >
+                  {i18n.CASE_REFRESH}
+                </EuiButtonEmpty>
+              </span>
             </EuiFlexItem>
             {userCanCrud && (
               <EuiFlexItem grow={false} data-test-subj="case-view-actions">

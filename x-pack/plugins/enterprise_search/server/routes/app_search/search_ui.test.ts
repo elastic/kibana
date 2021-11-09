@@ -14,10 +14,10 @@ describe('reference application routes', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /api/app_search/engines/{engineName}/search_settings/details', () => {
+  describe('GET /internal/app_search/engines/{engineName}/search_settings/details', () => {
     const mockRouter = new MockRouter({
       method: 'get',
-      path: '/api/app_search/engines/{engineName}/search_ui/field_config',
+      path: '/internal/app_search/engines/{engineName}/search_ui/field_config',
     });
 
     beforeEach(() => {

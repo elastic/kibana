@@ -18,7 +18,7 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
-import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
+import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import {
   DESTINATION_BYTES_FIELD_NAME,
   DESTINATION_PACKETS_FIELD_NAME,
@@ -55,7 +55,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });

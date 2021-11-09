@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,7 +26,6 @@ import { Error } from '../../../components';
 import type { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';
 import {
-  useGetPackageInfoByKey,
   useGetAgentPolicies,
   sendGetOneAgentPolicy,
   useCapabilities,
@@ -41,19 +40,17 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
 `;
 
 export const StepSelectAgentPolicy: React.FunctionComponent<{
-  pkgkey: string;
-  updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
+  packageInfo?: PackageInfo;
   defaultAgentPolicyId?: string;
   agentPolicy: AgentPolicy | undefined;
   updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
-  setIsLoadingSecondStep: (isLoading: boolean) => void;
+  setHasAgentPolicyError: (hasError: boolean) => void;
 }> = ({
-  pkgkey,
-  updatePackageInfo,
+  packageInfo,
   agentPolicy,
   updateAgentPolicy,
-  setIsLoadingSecondStep,
   defaultAgentPolicyId,
+  setHasAgentPolicyError,
 }) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
@@ -65,17 +62,8 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   // Create new agent policy flyout state
   const hasWriteCapabilites = useCapabilities().write;
-  const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] = useState<boolean>(
-    false
-  );
-
-  // Fetch package info
-  const {
-    data: packageInfoData,
-    error: packageInfoError,
-    isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgkey);
-  const isLimitedPackage = (packageInfoData && isPackageLimited(packageInfoData.response)) || false;
+  const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] =
+    useState<boolean>(false);
 
   // Fetch agent policies info
   const {
@@ -102,18 +90,19 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     }, {});
   }, [agentPolicies]);
 
-  // Update parent package state
-  useEffect(() => {
-    if (packageInfoData && packageInfoData.response) {
-      updatePackageInfo(packageInfoData.response);
-    }
-  }, [packageInfoData, updatePackageInfo]);
+  const doesAgentPolicyHaveLimitedPackage = useCallback(
+    (policy: AgentPolicy, pkgInfo: PackageInfo) => {
+      return policy
+        ? isPackageLimited(pkgInfo) && doesAgentPolicyAlreadyIncludePackage(policy, pkgInfo.name)
+        : false;
+    },
+    []
+  );
 
   // Update parent selected agent policy state
   useEffect(() => {
     const fetchAgentPolicyInfo = async () => {
       if (selectedPolicyId) {
-        setIsLoadingSecondStep(true);
         const { data, error } = await sendGetOneAgentPolicy(selectedPolicyId);
         if (error) {
           setSelectedAgentPolicyError(error);
@@ -126,39 +115,36 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         setSelectedAgentPolicyError(undefined);
         updateAgentPolicy(undefined);
       }
-      setIsLoadingSecondStep(false);
     };
     if (!agentPolicy || selectedPolicyId !== agentPolicy.id) {
       fetchAgentPolicyInfo();
     }
-  }, [selectedPolicyId, agentPolicy, updateAgentPolicy, setIsLoadingSecondStep]);
+  }, [selectedPolicyId, agentPolicy, updateAgentPolicy]);
 
   const agentPolicyOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
-      packageInfoData
+      packageInfo
         ? agentPolicies.map((agentConf) => {
-            const alreadyHasLimitedPackage =
-              (isLimitedPackage &&
-                doesAgentPolicyAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
-              false;
             return {
               label: agentConf.name,
               value: agentConf.id,
-              disabled: alreadyHasLimitedPackage,
+              disabled: doesAgentPolicyHaveLimitedPackage(agentConf, packageInfo),
               'data-test-subj': 'agentPolicyItem',
             };
           })
         : [],
-    [agentPolicies, isLimitedPackage, packageInfoData]
+    [agentPolicies, doesAgentPolicyHaveLimitedPackage, packageInfo]
   );
 
-  const selectedAgentPolicyOption = agentPolicyOptions.find(
-    (option) => option.value === selectedPolicyId
+  const selectedAgentPolicyOption = useMemo(
+    () => agentPolicyOptions.find((option) => option.value === selectedPolicyId),
+    [agentPolicyOptions, selectedPolicyId]
   );
 
   // Try to select default agent policy
   useEffect(() => {
     if (!selectedPolicyId && agentPolicies.length && agentPolicyOptions.length) {
+      const firstEnabledOption = agentPolicyOptions.find((option) => !option.disabled);
       const defaultAgentPolicy = agentPolicies.find((policy) => policy.is_default);
       if (defaultAgentPolicy) {
         const defaultAgentPolicyOption = agentPolicyOptions.find(
@@ -166,25 +152,33 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         );
         if (defaultAgentPolicyOption && !defaultAgentPolicyOption.disabled) {
           setSelectedPolicyId(defaultAgentPolicy.id);
+        } else {
+          if (firstEnabledOption) {
+            setSelectedPolicyId(firstEnabledOption.value);
+          }
         }
+      } else if (firstEnabledOption) {
+        setSelectedPolicyId(firstEnabledOption.value);
       }
     }
   }, [agentPolicies, agentPolicyOptions, selectedPolicyId]);
 
-  // Display package error if there is one
-  if (packageInfoError) {
-    return (
-      <Error
-        title={
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle"
-            defaultMessage="Error loading package information"
-          />
-        }
-        error={packageInfoError}
-      />
-    );
-  }
+  // Bubble up any issues with agent policy selection
+  useEffect(() => {
+    if (
+      selectedPolicyId &&
+      !selectedAgentPolicyError &&
+      selectedAgentPolicyOption &&
+      !selectedAgentPolicyOption.disabled
+    ) {
+      setHasAgentPolicyError(false);
+    } else setHasAgentPolicyError(true);
+  }, [
+    selectedAgentPolicyError,
+    selectedAgentPolicyOption,
+    selectedPolicyId,
+    setHasAgentPolicyError,
+  ]);
 
   // Display agent policies list error if there is one
   if (agentPoliciesError) {
@@ -277,6 +271,27 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   />
                 ) : null
               }
+              isInvalid={Boolean(
+                !selectedPolicyId ||
+                  !packageInfo ||
+                  doesAgentPolicyHaveLimitedPackage(
+                    agentPoliciesById[selectedPolicyId],
+                    packageInfo
+                  )
+              )}
+              error={
+                !selectedPolicyId ? (
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.noPolicySelectedError"
+                    defaultMessage="An agent policy is required."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError"
+                    defaultMessage="This integration can only be added once per agent policy."
+                  />
+                )
+              }
             >
               <EuiComboBox
                 placeholder={i18n.translate(
@@ -288,7 +303,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
                 fullWidth={true}
-                isLoading={isAgentPoliciesLoading || isPackageInfoLoading}
+                isLoading={isAgentPoliciesLoading || !packageInfo}
                 options={agentPolicyOptions}
                 selectedOptions={selectedAgentPolicyOption ? [selectedAgentPolicyOption] : []}
                 onChange={(options) => {

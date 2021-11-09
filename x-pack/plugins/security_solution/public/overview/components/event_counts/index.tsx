@@ -9,19 +9,17 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { ID as OverviewHostQueryId } from '../../containers/overview_host';
 import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
 import { filterHostData } from '../../../hosts/pages/navigation/alerts_query_tab_body';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { filterNetworkData } from '../../../network/pages/navigation/alerts_query_tab_body';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const HorizontalSpacer = styled(EuiFlexItem)`
   width: 24px;
@@ -30,7 +28,7 @@ const HorizontalSpacer = styled(EuiFlexItem)`
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters: Filter[];
   indexNames: string[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   query: Query;
 }
 
@@ -45,7 +43,7 @@ const EventCountsComponent: React.FC<Props> = ({
 }) => {
   const { uiSettings } = useKibana().services;
 
-  const hostFilterQuery = useMemo(
+  const [hostFilterQuery, hostKqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -56,7 +54,7 @@ const EventCountsComponent: React.FC<Props> = ({
     [filters, indexPattern, query, uiSettings]
   );
 
-  const networkFilterQuery = useMemo(
+  const [networkFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -66,6 +64,15 @@ const EventCountsComponent: React.FC<Props> = ({
       }),
     [filters, indexPattern, uiSettings, query]
   );
+
+  useInvalidFilterQuery({
+    id: OverviewHostQueryId,
+    filterQuery: hostFilterQuery || networkFilterQuery,
+    kqlError: hostKqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">

@@ -1,33 +1,34 @@
 Set of utilities for merging between `_source` and `fields` are within this folder as well as strategies for merging between these two.
 
-See `strategies` for the strategies for merging between `_source` and `fields`. See the `utils` folder for the different utilities
+See the `strategies` folder for the strategies for merging between `_source` and `fields`. See the `utils` folder for the different utilities
 which the strategies utilize for help in building their merged documents.
 
-If we run into problems such as ambiguities, uncertainties, or data type contradictions then we will prefer the value within
-"doc.fields" when we can. If "doc.fields" contradicts its self or is too ambiguous, then we assume that
-there a problem within "doc.fields" due to a malformed runtime field definition and omit the last seen
-contradiction. In some cases we might have to omit the merging of the field altogether and instead utilize
-the value from "doc._source"
+The `strategies/merge_all_fields_with_source` strategy will try to merge as much from `fields` as it can into `_source`. This includes
+  * Data in only `fields` such as `constant_keyword`, `copy_to`, `field alias`, etc...
+  * It will try to merge data from `fields` into `_source` and overwrite `_source` when it can, which can include data coercion, or different overridden values from runtime fields, etc...
+  * It will take non-multifield values such as `host.name` from `fields` instead of `host.name.keyword` and merge that as the truth data even though `_source` might have a different original value that is not preserved correctly in `fields` as its choice of which one to take.
+  * If we run into problems such as ambiguities, uncertainties, or data type contradictions then we will prefer the value within `fields` if we can, but not in all cases.
+  * It compares and unboxes arrays where it can.
 
-Hence, these are labeled as "best effort" since we could run into conditions where we should have taken the value
-from "doc.fields" but instead did not and took the value from "doc._source".
+The `strategies/merge_missing_fields_with_source` strategy is lighter weight and will only merge from `fields` into `_source` when it these conditions
+  * The value in `_source` is missing but exists in `fields` such as a `constant_keyword`, `copy_to`, `field alias`, etc...
+  * The value in `fields` is a primitive value and not a nested field or an object type such as a geo-point.
+  * If we run into problems such as ambiguities, uncertainties, or data type contradictions, then the `fields` value is skipped altogether.
 
-If "doc.fields" does not exist we return "doc._source" untouched as-is. If "doc._source" does not exist but
-"doc.fields" does exist then we will do a "best effort" to merge "doc.fields" into a fully functional object as
-if it was a "doc._source". But again, if we run into contradictions or ambiguities from the
-"doc.fields" we will remove that field or omit one of the contradictions.
+Hence, these are labeled as "best effort" since we could run into conditions where we should have taken the value from `fields` but instead did not and took the value from 
+`_source`. If `fields` does not exist we return `_source` untouched as-is for all strategies. If `_source` does not exist but
+`fields` does exist then we will do a "best effort" to merge `fields` into a fully functional object as
+if it was a `_source` for `strategies/merge_all_fields_with_source` For `strategies/merge_missing_fields_with_source` we will only merge primitive values. In both
+strategies if we run into contradictions or ambiguities from `fields` we will remove that field or omit one of the contradictions.
 
-If a "doc.field" is found that does not exist in "doc._source" then we merge that "doc.field" into our
-return object.
-
-If we find that a "field" contradicts the "doc._source" object in which we cannot create a regular
+In all strategies If we find that a `field` contradicts the `_source` object in which we cannot create a regular
 JSON such as a keyword trying to override an object or an object trying to override a keyword:
 
 ```
 "fields": { 'foo': 'value_1', foo.bar': 'value_2' } <-- Foo cannot be both an object and a value
 ```
-Then you will get an object such as
 
+Then you will get an object such as
 ```
 { "foo": "value_1" }
 ```
@@ -37,33 +38,33 @@ This happens when we have multiFields since multiFields are represented in field
 fields tries to add multiple overrides or invalid multiFields.
 
 Invalid field names such as ".", "..", ".foo", "foo.", ".foo." will be skipped as those cause errors if
-we tried to insert them into Elasticsearch as a new field.
+we tried to insert them into Elasticsearch as a new field in all strategies
 
-If we encounter an array within "doc._source" that contains an object with more than 1 value and a "field"
-tries to add a new element we will not merge that in as we do not know which array to merge that value into.
+For `strategies/merge_all_fields_with_source` if we encounter an array within `_source` that contains
+an object with more than 1 value and a "field" tries to add a new element we will not merge that in
+as we do not know which array to merge that value into.
 
-If we encounter a flattened array in the fields object which is not a nested fields such as:
+For `strategies/merge_all_fields_with_source` if we encounter a flattened array in the fields object which is not a nested fields such as:
 ```
 "fields": { "object_name.first" : [ "foo", "bar" ], "object_name.second" : [ "mars", "bar" ] }
 ```
 
-and no "doc._source" with the name "object_name", the assumption is that we these are not related and we construct the object as this:
-
+and no `_source` with the name `object_name`, the assumption is that we these are not related and we construct the object as this:
 ```
 { "object.name": { "first": ["foo", "bar" }, "second": ["mars", "bar"] }
 ```
 
-If we detect a "doc._source with a single flattened array sub objects we will prefer the "fields" flattened
+For `strategies/merge_all_fields_with_source` if we detect a `_source` with a single flattened array sub objects we will prefer the `fields` flattened
 array elements and copy them over as-is, which means we could be subtracting elements, adding elements, or
 completely changing the items from the array.
 
-If we detect an object within the "doc._source" inside of the array, we will not take anything from the
-"fields" flattened array elements even if they exist as it is ambiguous where we would put those elements
+For `strategies/merge_all_fields_with_source` if we detect an object within the `_source` inside of the array, we will not take anything from the
+`fields` flattened array elements even if they exist as it is ambiguous where we would put those elements
 within the ""doc._source" as an override.
 
-It is best to feed this both the "doc._source" and "doc.fields" values to get the best chances of merging the document correctly.
+It is best to feed these strategies both the `_source` and `fields` values to get the best chances of merging the document correctly.
 
-Using these strategies will get you these value types merged that you would otherwise not get directly on your
+Using both of these strategies will get you these value types merged that you would otherwise not get directly on your
 ```
 "doc._source":
   - constant_keyword field
@@ -86,7 +87,7 @@ Ambiguities and issues
 
 Existing bugs and ambiguities
 ---
-* We currently filter out the geo data points by looking at "type" on the object and filter it out. We could transform it to be valid input at some point.
+* For `strategies/merge_all_fields_with_source` we currently filter out the geo data points by looking at "type" on the object and filter it out. We could transform it to be valid input at some point.
 
 Tests
 ---
@@ -130,7 +131,7 @@ f_[{}1]
 f_[{}1, ...1]
 ```
 
-fields arrays can contain the following values:
+`fields` arrays can contain the following values:
 ```
 undefined
 f_[]
@@ -203,7 +204,7 @@ undefined  | f_[{}2]       | {}           <-- We have an empty object since we o
 undefined  | f_[{}2, ...2] | {}           <-- We have an empty object since we only merge primitives
 ```
 
-When source key is either a primitive key or a flattened object key with a primitive value (p_p1 or f_p1),
+For the `merge_all_fields_with_source` when source key is either a primitive key or a flattened object key with a primitive value (p_p1 or f_p1),
 then we overwrite source value with fields value as an unboxed value array if fields value is a
 single array element (f_[p2] or f[{}2]), otherwise we overwrite source as an array.
 
@@ -221,7 +222,7 @@ f_p1          | f_[{}2]       | f_{}2         <-- Unboxed from array
 f_p1          | f_[{}2, ...2] | f_[{}2, ...2]
 ```
 
-For the `merge_missing_fields_with_source` none of these will be merged since the source has values such as
+For both strategies none of these will be merged since the source has values such as
 
 ```
 source        | fields        | value after merge
@@ -237,7 +238,7 @@ f_p1          | f_[{}2]       | f_p1
 f_p1          | f_[{}2, ...2] | f_p1
 ```
 
-When source key is a primitive key or a flattened object key and the source value is any
+For the `merge_all_fields_with_source` when source key is a primitive key or a flattened object key and the source value is any
 type of array (p_[], p_p[p1], or p_p[p1, ...1]) of primitives then we always copy the
 fields value as is and keep the source key as it was originally (primitive or flattened)
 
@@ -311,10 +312,10 @@ f_[p1, ...1]  | f_[{}2]       | f_[p1, ...1]
 f_[p1, ...1]  | f_[{}2, ...2] | f_[p1, ...1]
 ```
 
-When source key is a primitive key or flattened key and the source value is an object (p_{}1, f_{}1) or
-an array containing objects ([p_{1}], f_{}1, p_[{}1, ...1], f_[{}1, ...1]), we only copy the
-field value if we detect that field value is also an object meaning that it is a nested field,
-(f_[{}]2 or f[{}2, ...2]). We never allow a field to convert an object back into a value.
+For the `merge_all_fields_with_source` when source key is a primitive key or flattened key and
+the source value is an object (p_{}1, f_{}1) or an array containing objects ([p_{1}], f_{}1, p_[{}1, ...1],
+f_[{}1, ...1]), we only copy the field value if we detect that field value is also an object meaning
+that it is a nested field, (f_[{}]2 or f[{}2, ...2]). We never allow a field to convert an object back into a value.
 We never try to merge field values into the array either since they're flattened in the fields and we
 will have too many ambiguities and issues between the flattened array values and the source objects.
 

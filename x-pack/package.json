@@ -1,6 +1,6 @@
 {
   "name": "x-pack",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
@@ -24,8 +24,5 @@
   },
   "engines": {
     "yarn": "^1.21.1"
-  },
-  "devDependencies": {
-    "@kbn/test": "link:../packages/kbn-test"
   }
 }

@@ -37,6 +37,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        // retrieve rules from the filesystem but not from fleet for Cypress tests
+        '--xpack.securitySolution.prebuiltRulesFromFileSystem=true',
+        '--xpack.securitySolution.prebuiltRulesFromSavedObjects=false',
+        '--xpack.ruleRegistry.write.enabled=true',
+        '--xpack.ruleRegistry.write.cache.enabled=false',
+        '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
+        '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'riskyHostsEnabled',
+          'ruleRegistryEnabled',
+        ])}`,
+        `--home.disableWelcomeScreen=true`,
       ],
     },
   };

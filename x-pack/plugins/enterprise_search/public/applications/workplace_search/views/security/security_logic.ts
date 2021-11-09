@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 
 import {
   clearFlashMessages,
-  setSuccessMessage,
+  flashSuccessToast,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -60,7 +60,7 @@ interface SecurityActions {
   resetState(): void;
 }
 
-const route = '/api/workplace_search/org/security/source_restrictions';
+const route = '/internal/workplace_search/org/security/source_restrictions';
 
 export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>({
   path: ['enterprise_search', 'workplace_search', 'security_logic'],
@@ -138,7 +138,7 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
       const { http } = HttpLogic.values;
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<SecurityServerProps>(route);
         actions.setServerProps(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -151,9 +151,9 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
       const { http } = HttpLogic.values;
 
       try {
-        const response = await http.patch(route, { body });
+        const response = await http.patch<SecurityServerProps>(route, { body });
         actions.setSourceRestrictionsUpdated(response);
-        setSuccessMessage(SOURCE_RESTRICTIONS_SUCCESS_MESSAGE);
+        flashSuccessToast(SOURCE_RESTRICTIONS_SUCCESS_MESSAGE);
         AppLogic.actions.setSourceRestriction(isEnabled);
       } catch (e) {
         flashAPIErrors(e);

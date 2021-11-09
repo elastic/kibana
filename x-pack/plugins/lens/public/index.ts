@@ -10,26 +10,24 @@ import { LensPlugin } from './plugin';
 export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
-} from './editor_frame_service/embeddable/embeddable_component';
-export type {
-  XYState,
-  AxesSettingsConfig,
-  XYLayerConfig,
-  LegendConfig,
-  SeriesType,
-  ValueLabelConfig,
-  YAxisMode,
-  XYCurveType,
-  YConfig,
-} from './xy_visualization/types';
+} from './embeddable/embeddable_component';
+export type { XYState } from './xy_visualization/types';
 export type { DataType, OperationMetadata } from './types';
 export type {
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
-} from './pie_visualization/types';
+  MetricState,
+  AxesSettingsConfig,
+  XYLayerConfig,
+  LegendConfig,
+  SeriesType,
+  YAxisMode,
+  XYCurveType,
+  YConfig,
+} from '../common/expressions';
+export type { ValueLabelConfig } from '../common/types';
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { MetricState } from './metric_visualization/types';
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
@@ -58,8 +56,8 @@ export type {
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
 } from './indexpattern_datasource/types';
-export type { LensEmbeddableInput } from './editor_frame_service/embeddable';
+export type { LensEmbeddableInput } from './embeddable';
 
-export { LensPublicStart } from './plugin';
+export type { LensPublicStart } from './plugin';
 
 export const plugin = () => new LensPlugin();

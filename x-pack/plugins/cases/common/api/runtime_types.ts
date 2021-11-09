@@ -52,16 +52,15 @@ export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) =>
   throw createError(formatErrors(errors).join());
 };
 
-export const decodeOrThrow = <A, O, I>(
-  runtimeType: rt.Type<A, O, I>,
-  createError: ErrorFactory = createPlainError
-) => (inputValue: I) =>
-  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export const decodeOrThrow =
+  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
+  (inputValue: I) =>
+    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 const getExcessProps = (props: rt.Props, r: Record<string, unknown>): string[] => {
   const ex: string[] = [];
   for (const k of Object.keys(r)) {
-    if (!props.hasOwnProperty(k)) {
+    if (!Object.prototype.hasOwnProperty.call(props, k)) {
       ex.push(k);
     }
   }
@@ -90,5 +89,5 @@ export function excess<C extends rt.InterfaceType<rt.Props> | rt.PartialType<rt.
     codec.encode,
     codec.props
   );
-  return r as any;
+  return r as C;
 }

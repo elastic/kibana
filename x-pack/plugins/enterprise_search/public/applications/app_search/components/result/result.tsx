@@ -28,6 +28,7 @@ interface Props {
   result: ResultType;
   isMetaEngine: boolean;
   showScore?: boolean;
+  resultPosition?: number;
   shouldLinkToDetailPage?: boolean;
   schemaForTypeHighlights?: Schema;
   actions?: ResultAction[];
@@ -44,6 +45,7 @@ export const Result: React.FC<Props> = ({
   schemaForTypeHighlights,
   actions = [],
   dragHandleProps,
+  resultPosition,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -100,6 +102,7 @@ export const Result: React.FC<Props> = ({
           isMetaEngine={isMetaEngine}
           documentLink={documentLink}
           actions={actions}
+          resultPosition={resultPosition}
         />
         {resultFields
           .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)

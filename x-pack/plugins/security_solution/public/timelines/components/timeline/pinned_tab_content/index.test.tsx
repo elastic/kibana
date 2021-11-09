@@ -19,7 +19,7 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
 import { Direction } from '../../../../../common/search_strategy';
@@ -32,7 +32,6 @@ jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
 jest.mock('../body/events/index', () => ({
-  // eslint-disable-next-line react/display-name
   Events: () => <></>,
 }));
 
@@ -60,6 +59,7 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         timelines: {
           getLastUpdated: jest.fn(),
+          getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
       },
@@ -93,7 +93,7 @@ describe('PinnedTabContent', () => {
     ]);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
-    (useSourcererScope as jest.Mock).mockReturnValue(mockSourcererScope);
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     props = {
       columns: defaultHeaders,

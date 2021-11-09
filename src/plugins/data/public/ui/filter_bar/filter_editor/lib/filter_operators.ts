@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FILTERS } from '../../../../../common/es_query/filters';
+import { FILTERS } from '@kbn/es-query';
 
 export interface Operator {
   message: string;

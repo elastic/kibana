@@ -61,10 +61,10 @@ export const StatefulRowRenderer = ({
     rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
   });
 
-  const rowRenderer = useMemo(() => getRowRenderer(event.ecs, rowRenderers), [
-    event.ecs,
-    rowRenderers,
-  ]);
+  const rowRenderer = useMemo(
+    () => getRowRenderer(event.ecs, rowRenderers),
+    [event.ecs, rowRenderers]
+  );
 
   const content = useMemo(
     () =>
@@ -80,6 +80,7 @@ export const StatefulRowRenderer = ({
                 {rowRenderer.renderRow({
                   browserFields,
                   data: event.ecs,
+                  isDraggable: false,
                   timelineId,
                 })}
               </div>

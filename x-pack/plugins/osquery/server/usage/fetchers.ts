@@ -10,7 +10,7 @@ import {
   AggregationsTopHitsAggregate,
   AggregationsValueAggregate,
   SearchResponse,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PackagePolicyServiceInterface } from '../../../fleet/server';
 import { getRouteMetric } from '../routes/usage';
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';
@@ -45,6 +45,11 @@ export async function getPolicyLevelUsage(
   const agentResponse = await esClient.search({
     body: {
       size: 0,
+      query: {
+        match: {
+          active: true,
+        },
+      },
       aggs: {
         policied: {
           filter: {
@@ -87,7 +92,8 @@ export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy
   return packagePolicies.items.reduce(
     (acc, item) => {
       ++acc.queryGroups.total;
-      if (item.inputs.length === 0) {
+      const policyAgents = item.inputs.reduce((sum, input) => sum + input.streams.length, 0);
+      if (policyAgents === 0) {
         ++acc.queryGroups.empty;
       }
       return acc;

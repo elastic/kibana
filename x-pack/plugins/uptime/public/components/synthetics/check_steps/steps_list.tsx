@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
 import styled from 'styled-components';
@@ -147,8 +141,8 @@ export const StepsList = ({ data, error, loading }: Props) => {
   };
 
   return (
-    <EuiPanel>
-      <EuiTitle>
+    <>
+      <EuiTitle size="s">
         <h2>
           {statusMessage(
             steps.reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 }),
@@ -176,6 +170,6 @@ export const StepsList = ({ data, error, loading }: Props) => {
         tableLayout={'auto'}
         rowProps={getRowProps}
       />
-    </EuiPanel>
+    </>
   );
 };

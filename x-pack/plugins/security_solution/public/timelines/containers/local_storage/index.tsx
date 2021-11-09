@@ -85,11 +85,27 @@ export const addTimelineInStorage = (
   id: TimelineIdLiteral,
   timeline: TimelineModel
 ) => {
+  const timelineToStore = cleanStorageTimeline(timeline);
   const timelines = getAllTimelinesInStorage(storage);
   storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
     ...timelines,
-    [id]: timeline,
+    [id]: timelineToStore,
   });
+};
+
+const cleanStorageTimeline = (timeline: TimelineModel) => {
+  // discard unneeded fields to make sure the object serialization works
+  const {
+    documentType,
+    filterManager,
+    isLoading,
+    loadingText,
+    queryFields,
+    selectAll,
+    unit,
+    ...timelineToStore
+  } = timeline;
+  return timelineToStore;
 };
 
 export const useTimelinesStorage = (): TimelinesStorage => {
@@ -107,4 +123,4 @@ export const useTimelinesStorage = (): TimelinesStorage => {
   return { getAllTimelines, getTimelineById, addTimeline };
 };
 
-export { TimelinesStorage };
+export type { TimelinesStorage };

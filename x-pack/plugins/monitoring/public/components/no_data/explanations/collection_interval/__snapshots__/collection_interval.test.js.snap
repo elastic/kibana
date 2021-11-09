@@ -311,6 +311,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
     >
       <span
         className="euiTextColor euiTextColor--subdued"
+        style={Object {}}
       >
         <EuiText>
           <div
@@ -637,6 +638,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
     >
       <span
         className="euiTextColor euiTextColor--subdued"
+        style={Object {}}
       >
         <EuiText>
           <div

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import { FilterMeta, FILTERS } from '../../../../../src/plugins/data/common';
+import { FilterMeta, FILTERS } from '@kbn/es-query';
 import { MapExtent } from '../descriptor_types';
 import { ES_SPATIAL_RELATIONS } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';

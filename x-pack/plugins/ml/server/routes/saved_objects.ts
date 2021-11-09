@@ -12,10 +12,12 @@ import {
   jobsAndSpaces,
   jobsAndCurrentSpace,
   syncJobObjects,
+  syncCheckSchema,
   canDeleteJobSchema,
   jobTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
+import { JobType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -59,10 +61,10 @@ export function savedObjectsRoutes(
    *
    * @api {get} /api/ml/saved_objects/sync Sync job saved objects
    * @apiName SyncJobSavedObjects
-   * @apiDescription Create saved objects for jobs which are missing them.
-   *                 Delete saved objects for jobs which no longer exist.
-   *                 Update missing datafeed ids in saved objects for datafeeds which exist.
-   *                 Remove datafeed ids for datafeeds which no longer exist.
+   * @apiDescription Synchronizes saved objects for jobs. Saved objects will be created for jobs which are missing them,
+   *                 and saved objects will be deleted for jobs which no longer exist.
+   *                 Updates missing datafeed IDs in saved objects for datafeeds which exist, and
+   *                 removes datafeed IDs for datafeeds which no longer exist.
    *
    */
   router.get(
@@ -116,6 +118,39 @@ export function savedObjectsRoutes(
 
         return response.ok({
           body: savedObjects,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {get} /api/ml/saved_objects/sync_needed Check whether job saved objects need synchronizing
+   * @apiName SyncCheck
+   * @apiDescription Check whether job saved objects need synchronizing.
+   *
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/sync_check',
+      validate: {
+        body: syncCheckSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+      try {
+        const { jobType } = request.body;
+        const { isSyncNeeded } = syncSavedObjectsFactory(client, jobSavedObjectService);
+        const result = await isSyncNeeded(jobType as JobType);
+
+        return response.ok({
+          body: { result },
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -217,9 +252,9 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/jobs_spaces All spaces in all jobs
+   * @api {get} /api/ml/saved_objects/jobs_spaces Get all jobs and their spaces
    * @apiName JobsSpaces
-   * @apiDescription List all jobs and their spaces
+   * @apiDescription List all jobs and their spaces.
    *
    */
   router.get(

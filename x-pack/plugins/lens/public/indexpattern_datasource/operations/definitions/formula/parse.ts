@@ -35,7 +35,7 @@ function parseAndExtract(
   label?: string
 ) {
   const { root, error } = tryToParse(text, operationDefinitionMap);
-  if (error || !root) {
+  if (error || root == null) {
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid
@@ -101,10 +101,9 @@ function extractColumns(
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
 
-      const newCol = (nodeOperation as OperationDefinition<
-        IndexPatternColumn,
-        'field'
-      >).buildColumn(
+      const newCol = (
+        nodeOperation as OperationDefinition<IndexPatternColumn, 'field'>
+      ).buildColumn(
         {
           layer,
           indexPattern,
@@ -139,10 +138,9 @@ function extractColumns(
       }
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
-      const newCol = (nodeOperation as OperationDefinition<
-        IndexPatternColumn,
-        'fullReference'
-      >).buildColumn(
+      const newCol = (
+        nodeOperation as OperationDefinition<IndexPatternColumn, 'fullReference'>
+      ).buildColumn(
         {
           layer,
           indexPattern,

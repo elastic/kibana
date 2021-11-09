@@ -12,7 +12,7 @@ This has three major benefits:
 
 [IMPORTANT]
 ==============================================
-Task definitions for alerts and actions are stored in the index specified by <<task-manager-settings, `xpack.task_manager.index`>>. The default is `.kibana_task_manager`.
+Task definitions for alerts and actions are stored in the index called `.kibana_task_manager`.
  
 You must have at least one replica of this index for production deployments.
 
@@ -68,7 +68,7 @@ This means that you can expect a single {kib} instance to support up to 200 _tas
 
 In practice, a {kib} instance will only achieve the upper bound of `200/tpm` if the duration of task execution is below the polling rate of 3 seconds. For the most part, the duration of tasks is below that threshold, but it can vary greatly as {es} and {kib} usage grow and task complexity increases (such as alerts executing heavy queries across large datasets).
 
-By <<task-manager-rough-throughput-estimation, estimating a rough throughput requirment>>, you can estimate the number of {kib} instances required to reliably execute tasks in a timely manner. An appropriate number of {kib} instances can be estimated to match the required scale.
+By <<task-manager-rough-throughput-estimation, estimating a rough throughput requirement>>, you can estimate the number of {kib} instances required to reliably execute tasks in a timely manner. An appropriate number of {kib} instances can be estimated to match the required scale.
 
 For details on monitoring the health of {kib} Task Manager, follow the guidance in <<task-manager-health-monitoring>>.
 
@@ -149,7 +149,7 @@ When evaluating the proposed {kib} instance number under `proposed.provisioned_k
 
 By <<task-manager-health-evaluate-the-workload,evaluating the workload>>, you can make a rough estimate as to the required throughput as a _tasks per minute_ measurement.
 
-For example, suppose your current workload reveals a required throughput of `440/tpm`.  You can address this scale by provisioning 3 {kib} instances, with an upper throughput of `600/tpm`. This scale would provide aproximately 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
+For example, suppose your current workload reveals a required throughput of `440/tpm`.  You can address this scale by provisioning 3 {kib} instances, with an upper throughput of `600/tpm`. This scale would provide approximately 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
 
 Given a deployment of 100 recurring tasks, estimating the required throughput depends on the scheduled cadence.
 Suppose you expect to run 50 tasks at a cadence of `10s`, the other 50 tasks at `20m`. In addition, you expect a couple dozen non-recurring tasks every minute.

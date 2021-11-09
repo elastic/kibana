@@ -73,7 +73,8 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 
     async assertTotalFeatureImportanceEvaluatePanelExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-FeatureImportanceSummary');
-      await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 5000 });
+      await this.scrollFeatureImportanceIntoView();
+      await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 30 * 1000 });
     },
 
     async assertFeatureImportanceDecisionPathElementsExists() {
@@ -147,20 +148,39 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       });
     },
 
-    async openFeatureImportanceDecisionPathPopover() {
+    async assertFeatureImportancePopoverContent() {
+      // we have two different types of content depending on the number of features returned
+      // by the analysis: decision path view with chart and JSON tabs or a plain JSON only view
+      if (await testSubjects.exists('mlDFADecisionPathJSONViewer', { timeout: 1000 })) {
+        const jsonContent = await testSubjects.getVisibleText('mlDFADecisionPathJSONViewer');
+        expect(jsonContent.length).greaterThan(
+          0,
+          `Feature importance JSON popover content should not be empty`
+        );
+      } else if (await testSubjects.exists('mlDFADecisionPathPopover', { timeout: 1000 })) {
+        await this.assertFeatureImportanceDecisionPathElementsExists();
+        await this.assertFeatureImportanceDecisionPathChartElementsExists();
+      } else {
+        throw new Error('Expected either decision path popover or JSON viewer to exist.');
+      }
+    },
+
+    async openFeatureImportancePopover() {
       this.assertResultsTableNotEmpty();
 
-      const featureImportanceCell = await this.getFirstFeatureImportanceCell();
-      await featureImportanceCell.focus();
-      const interactionButton = await featureImportanceCell.findByTagName('button');
+      await retry.tryForTime(30 * 1000, async () => {
+        const featureImportanceCell = await this.getFirstFeatureImportanceCell();
+        await featureImportanceCell.focus();
+        const interactionButton = await featureImportanceCell.findByTagName('button');
 
-      // simulate hover and wait for button to appear
-      await featureImportanceCell.moveMouseTo();
-      await this.waitForInteractionButtonToDisplay(interactionButton);
+        // simulate hover and wait for button to appear
+        await featureImportanceCell.moveMouseTo();
+        await this.waitForInteractionButtonToDisplay(interactionButton);
 
-      // open popover
-      await interactionButton.click();
-      await testSubjects.existOrFail('mlDFADecisionPathPopover');
+        // open popover
+        await interactionButton.click();
+        await testSubjects.existOrFail('mlDFAFeatureImportancePopover', { timeout: 1000 });
+      });
     },
 
     async getFirstFeatureImportanceCell(): Promise<WebElementWrapper> {
@@ -193,6 +213,34 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
         const buttonVisible = await interactionButton.isDisplayed();
         expect(buttonVisible).to.equal(true, 'Expected data grid cell button to be visible');
       });
+    },
+
+    async scrollContentSectionIntoView(sectionId: string) {
+      await testSubjects.scrollIntoView(`mlDFExpandableSection-${sectionId}`);
+    },
+
+    async scrollAnalysisIntoView() {
+      await this.scrollContentSectionIntoView('analysis');
+    },
+
+    async scrollRegressionEvaluationIntoView() {
+      await this.scrollContentSectionIntoView('RegressionEvaluation');
+    },
+
+    async scrollClassificationEvaluationIntoView() {
+      await this.scrollContentSectionIntoView('ClassificationEvaluation');
+    },
+
+    async scrollFeatureImportanceIntoView() {
+      await this.scrollContentSectionIntoView('FeatureImportanceSummary');
+    },
+
+    async scrollScatterplotMatrixIntoView() {
+      await this.scrollContentSectionIntoView('splom');
+    },
+
+    async scrollResultsIntoView() {
+      await this.scrollContentSectionIntoView('results');
     },
   };
 }

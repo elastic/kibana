@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import SemVer from 'semver/classes/semver';
 import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public/';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 import { UIM_APP_NAME } from '../../common/constants';
@@ -50,7 +51,8 @@ export async function mountManagementSection(
   usageCollection: UsageCollectionSetup,
   params: ManagementAppMountParams,
   extensionsService: ExtensionsService,
-  isFleetEnabled: boolean
+  isFleetEnabled: boolean,
+  kibanaVersion: SemVer
 ) {
   const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -88,6 +90,7 @@ export async function mountManagementSection(
     uiSettings,
     url,
     docLinks,
+    kibanaVersion,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

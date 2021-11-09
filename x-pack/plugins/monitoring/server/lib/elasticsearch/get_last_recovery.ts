@@ -97,7 +97,7 @@ export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string
   const legacyParams = {
     index: esIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       _source: ['index_recovery.shards'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
@@ -107,7 +107,7 @@ export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string
   const mbParams = {
     index: esIndexPattern,
     size,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       _source: ['elasticsearch.index.recovery', '@timestamp'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },

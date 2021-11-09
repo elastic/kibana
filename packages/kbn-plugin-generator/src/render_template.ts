@@ -64,6 +64,10 @@ export async function renderTemplates({
     hasServer: !!answers.server,
     hasUi: !!answers.ui,
 
+    ownerName: answers.ownerName,
+    githubTeam: answers.githubTeam,
+    description: answers.description,
+
     camelCase,
     snakeCase,
     upperCamelCase,

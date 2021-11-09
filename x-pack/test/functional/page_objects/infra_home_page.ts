@@ -24,6 +24,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       );
       await datePickerInput.clearValueWithKeyboard({ charByChar: true });
       await datePickerInput.type([time, browser.keys.RETURN]);
+      await this.waitForLoading();
     },
 
     async getWaffleMap() {
@@ -140,7 +141,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getNoMetricsIndicesPrompt() {
-      return await testSubjects.find('noMetricsIndicesPrompt');
+      return await testSubjects.find('noDataPage');
     },
 
     async getNoMetricsDataPrompt() {
@@ -194,6 +195,38 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       );
       await thresholdInput.clearValueWithKeyboard({ charByChar: true });
       await thresholdInput.type([threshold]);
+    },
+
+    async clickAlertsAndRules() {
+      await testSubjects.click('infrastructure-alerts-and-rules');
+    },
+
+    async ensurePopoverOpened() {
+      await testSubjects.existOrFail('metrics-alert-menu');
+    },
+
+    async ensurePopoverClosed() {
+      await testSubjects.missingOrFail('metrics-alert-menu');
+    },
+
+    async openInventoryAlertFlyout() {
+      await testSubjects.click('infrastructure-alerts-and-rules');
+      await testSubjects.click('inventory-alerts-menu-option');
+      await testSubjects.click('inventory-alerts-create-rule');
+      await testSubjects.missingOrFail('inventory-alerts-create-rule');
+      await testSubjects.find('euiFlyoutCloseButton');
+    },
+
+    async openMetricsThresholdAlertFlyout() {
+      await testSubjects.click('infrastructure-alerts-and-rules');
+      await testSubjects.click('metrics-threshold-alerts-menu-option');
+      await testSubjects.click('metrics-threshold-alerts-create-rule');
+      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule');
+      await testSubjects.find('euiFlyoutCloseButton');
+    },
+
+    async closeAlertFlyout() {
+      await testSubjects.click('euiFlyoutCloseButton');
     },
   };
 }

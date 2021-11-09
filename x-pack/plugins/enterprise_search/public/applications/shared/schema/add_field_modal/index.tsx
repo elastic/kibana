@@ -99,7 +99,7 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
                 helpText={fieldNameNote}
                 fullWidth
                 data-test-subj="SchemaAddFieldNameRow"
-                error={addFieldFormErrors}
+                error={<span className="eui-textBreakAll">{addFieldFormErrors}</span>}
                 isInvalid={!!addFieldFormErrors}
               >
                 <EuiFieldText

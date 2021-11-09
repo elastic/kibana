@@ -9,13 +9,12 @@ import React, { FC, useCallback, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ShareToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
 import {
   JobType,
   ML_SAVED_OBJECT_TYPE,
   SavedObjectResult,
 } from '../../../../common/types/saved_objects';
-import type { SpacesPluginStart } from '../../../../../spaces/public';
+import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '../../../../../spaces/public';
 import { ml } from '../../services/ml_api_service';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
@@ -94,7 +93,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
   return (
     <>
-      <EuiButtonEmpty onClick={() => setShowFlyout(true)} style={{ height: 'auto' }}>
+      <EuiButtonEmpty
+        onClick={() => setShowFlyout(true)}
+        style={{ height: 'auto' }}
+        data-test-subj="mlJobListRowManageSpacesButton"
+      >
         <LazySpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
       </EuiButtonEmpty>
       {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}

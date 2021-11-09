@@ -21,7 +21,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -31,7 +30,13 @@ describe('Port', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
+      <Port
+        contextId="test"
+        eventId="abcd"
+        fieldName="destination.port"
+        isDraggable={true}
+        value="443"
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });
@@ -39,7 +44,13 @@ describe('Port', () => {
   test('it renders the port', () => {
     const wrapper = mount(
       <TestProviders>
-        <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
+        <Port
+          contextId="test"
+          eventId="abcd"
+          fieldName="destination.port"
+          isDraggable={true}
+          value="443"
+        />
       </TestProviders>
     );
 
@@ -51,7 +62,13 @@ describe('Port', () => {
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
     const wrapper = mount(
       <TestProviders>
-        <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
+        <Port
+          contextId="test"
+          eventId="abcd"
+          fieldName="destination.port"
+          isDraggable={true}
+          value="443"
+        />
       </TestProviders>
     );
 
@@ -65,7 +82,13 @@ describe('Port', () => {
   test('it renders only one external link icon', () => {
     const wrapper = mount(
       <TestProviders>
-        <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
+        <Port
+          contextId="test"
+          eventId="abcd"
+          fieldName="destination.port"
+          isDraggable={true}
+          value="443"
+        />
       </TestProviders>
     );
 

@@ -53,11 +53,7 @@ describe('Info session routes', () => {
 
       const request = httpServerMock.createKibanaRequest();
       await expect(
-        routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
-          request,
-          kibanaResponseFactory
-        )
+        routeHandler({} as unknown as SecurityRequestHandlerContext, request, kibanaResponseFactory)
       ).rejects.toThrowError(unhandledException);
 
       expect(session.get).toHaveBeenCalledWith(request);
@@ -142,7 +138,7 @@ describe('Info session routes', () => {
 
         await expect(
           routeHandler(
-            ({} as unknown) as SecurityRequestHandlerContext,
+            {} as unknown as SecurityRequestHandlerContext,
             httpServerMock.createKibanaRequest(),
             kibanaResponseFactory
           )
@@ -159,7 +155,7 @@ describe('Info session routes', () => {
 
       await expect(
         routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
+          {} as unknown as SecurityRequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           kibanaResponseFactory
         )

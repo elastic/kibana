@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 
 export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType) => {
@@ -21,7 +21,7 @@ export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) =
 
     if (factory) {
       const factoryResponse = factory.extract(state);
-      updatedInput = factoryResponse.state;
+      updatedInput = factoryResponse.state as EmbeddableStateWithType;
       refs.push(...factoryResponse.references);
     }
 
@@ -30,7 +30,7 @@ export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) =
       if (!enhancements[key]) return;
       const enhancementResult = embeddables
         .getEnhancement(key)
-        .extract(enhancements[key] as SerializableState);
+        .extract(enhancements[key] as SerializableRecord);
       refs.push(...enhancementResult.references);
       updatedInput.enhancements![key] = enhancementResult.state;
     });

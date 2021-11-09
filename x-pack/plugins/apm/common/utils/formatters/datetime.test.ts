@@ -165,6 +165,34 @@ describe('date time formatters', () => {
         'Dec 1, 2019, 13:00:00.000 (UTC+1)'
       );
     });
+
+    it('milliseconds', () => {
+      moment.tz.setDefault('Europe/Copenhagen');
+      expect(asAbsoluteDateTime(1559390400000, 'milliseconds')).toBe(
+        'Jun 1, 2019, 14:00:00.000 (UTC+2)'
+      );
+    });
+
+    it('seconds', () => {
+      moment.tz.setDefault('Europe/Copenhagen');
+      expect(asAbsoluteDateTime(1559390400000, 'seconds')).toBe(
+        'Jun 1, 2019, 14:00:00 (UTC+2)'
+      );
+    });
+
+    it('minutes', () => {
+      moment.tz.setDefault('Europe/Copenhagen');
+      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe(
+        'Jun 1, 2019, 14:00 (UTC+2)'
+      );
+    });
+
+    it('hours', () => {
+      moment.tz.setDefault('Europe/Copenhagen');
+      expect(asAbsoluteDateTime(1559390400000, 'hours')).toBe(
+        'Jun 1, 2019, 14 (UTC+2)'
+      );
+    });
   });
   describe('getDateDifference', () => {
     it('milliseconds', () => {

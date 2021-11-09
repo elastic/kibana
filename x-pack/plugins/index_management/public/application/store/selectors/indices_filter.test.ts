@@ -4,12 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import SemVer from 'semver/classes/semver';
 
+import { MAJOR_VERSION } from '../../../../common';
 import { ExtensionsService } from '../../../services';
 import { getFilteredIndices } from '.';
 // @ts-ignore
 import { defaultTableState } from '../reducers/table_state';
 import { setExtensionsService } from './extension_service';
+
+const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 describe('getFilteredIndices selector', () => {
   let extensionService: ExtensionsService;
@@ -33,10 +37,14 @@ describe('getFilteredIndices selector', () => {
   };
 
   it('filters out hidden indices', () => {
-    expect(getFilteredIndices(state, { location: { search: '' } })).toEqual([
-      { name: 'index2', hidden: false },
-      { name: 'index3' },
-    ]);
+    let expected = [{ name: 'index2', hidden: false }, { name: 'index3' }, { name: '.index4' }];
+
+    if (kibanaVersion.major < 8) {
+      // In 7.x index name starting with a dot are considered hidden indices
+      expected = [{ name: 'index2', hidden: false }, { name: 'index3' }];
+    }
+
+    expect(getFilteredIndices(state, { location: { search: '' } })).toEqual(expected);
   });
 
   it('includes hidden indices', () => {

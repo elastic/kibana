@@ -52,7 +52,7 @@ export class BfetchExplorerPlugin implements Plugin {
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/blob/master/src/plugins/bfetch/README.md',
+          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/bfetch/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

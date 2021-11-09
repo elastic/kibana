@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { StatefulTimeline } from '../../timeline';
@@ -23,12 +23,20 @@ interface FlyoutPaneComponentProps {
   visible?: boolean;
 }
 
-const EuiFlyoutContainer = styled.div`
-  .timeline-flyout {
-    z-index: ${({ theme }) => theme.eui.euiZLevel8};
-    min-width: 150px;
-    width: 100%;
-    animation: none;
+const StyledEuiFlyout = styled(EuiFlyout)<EuiFlyoutProps>`
+  animation: none;
+  min-width: 150px;
+  z-index: ${({ theme }) => theme.eui.euiZLevel4};
+`;
+
+// SIDE EFFECT: the following creates a global class selector
+const IndexPatternFieldEditorOverlayGlobalStyle = createGlobalStyle<{
+  theme: { eui: { euiZLevel5: number } };
+}>`
+  .indexPatternFieldEditorMaskOverlay {
+    ${({ theme }) => `
+    z-index: ${theme.eui.euiZLevel5};
+  `}
   }
 `;
 
@@ -43,27 +51,25 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   }, [dispatch, timelineId]);
 
   return (
-    <EuiFlyoutContainer
-      data-test-subj="flyout-pane"
-      style={{ visibility: visible ? 'visible' : 'hidden' }}
-    >
-      <EuiFlyout
+    <div data-test-subj="flyout-pane" style={{ visibility: visible ? 'visible' : 'hidden' }}>
+      <StyledEuiFlyout
         aria-label={i18n.TIMELINE_DESCRIPTION}
         className="timeline-flyout"
         data-test-subj="eui-flyout"
         hideCloseButton={true}
         onClose={handleClose}
-        size="l"
+        size="100%"
         ownFocus={false}
         style={{ visibility: visible ? 'visible' : 'hidden' }}
       >
+        <IndexPatternFieldEditorOverlayGlobalStyle />
         <StatefulTimeline
           renderCellValue={DefaultCellRenderer}
           rowRenderers={defaultRowRenderers}
           timelineId={timelineId}
         />
-      </EuiFlyout>
-    </EuiFlyoutContainer>
+      </StyledEuiFlyout>
+    </div>
   );
 };
 

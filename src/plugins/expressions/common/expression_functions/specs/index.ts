@@ -7,6 +7,7 @@
  */
 
 export * from './clog';
+export * from './create_table';
 export * from './font';
 export * from './var_set';
 export * from './var';
@@ -16,6 +17,9 @@ export * from './overall_metric';
 export * from './derivative';
 export * from './moving_average';
 export * from './ui_setting';
-export { mapColumn, MapColumnArguments } from './map_column';
-export { math, MathArguments, MathInput } from './math';
-export { mathColumn, MathColumnArguments } from './math_column';
+export type { MapColumnArguments } from './map_column';
+export { mapColumn } from './map_column';
+export type { MathArguments, MathInput } from './math';
+export { math } from './math';
+export type { MathColumnArguments } from './math_column';
+export { mathColumn } from './math_column';

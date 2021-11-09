@@ -59,6 +59,30 @@ export const createMigration = async ({
                   ctx._source.signal._meta = [:];
                 }
                 ctx._source.signal._meta.version = params.version;
+
+                // migrate enrichments before 7.15 to ECS 1.11
+                if (ctx._source.signal?.rule?.type == "threat_match" &&
+                ctx._source.threat?.indicator instanceof List &&
+                ctx._source.threat?.enrichments == null) {
+                  ctx._source.threat.enrichments = [];
+                  for (indicator in ctx._source.threat.indicator) {
+                    def enrichment = [:];
+                    enrichment.indicator = indicator;
+                    enrichment.indicator.reference = indicator.event?.reference;
+                    enrichment.matched = indicator.matched;
+                    enrichment.indicator.remove("matched");
+                    ctx._source.threat.enrichments.add(enrichment);
+                  }
+                  ctx._source.threat.remove("indicator");
+                }
+
+                // migrate status
+                if(ctx._source.signal?.status == "in-progress") {
+                  ctx._source.signal.status = "acknowledged";
+                }
+                if(ctx._source['kibana.alert.workflow_status'] == "in-progress") {
+                  ctx._source['kibana.alert.workflow_status'] = "acknowledged";
+                }
               `,
         params: {
           version,
@@ -73,7 +97,7 @@ export const createMigration = async ({
   return {
     destinationIndex: migrationIndex,
     sourceIndex: index,
-    taskId: String(response.body.task!),
+    taskId: String(response.body.task),
     version,
   };
 };

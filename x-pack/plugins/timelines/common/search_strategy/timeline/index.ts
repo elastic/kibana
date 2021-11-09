@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -16,6 +17,7 @@ import {
   TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
+  EntityType,
 } from './events';
 import {
   DocValueFields,
@@ -41,6 +43,8 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   defaultIndex: string[];
   docValueFields?: DocValueFields[];
   factoryQueryType?: TimelineFactoryQueryTypes;
+  entityType?: EntityType;
+  runtimeMappings: MappingRuntimeFields;
 }
 
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
@@ -53,29 +57,27 @@ export interface TimelineRequestOptionsPaginated<Field = string>
   sort: Array<TimelineRequestSortField<Field>>;
 }
 
-export type TimelineStrategyResponseType<
-  T extends TimelineFactoryQueryTypes
-> = T extends TimelineEventsQueries.all
-  ? TimelineEventsAllStrategyResponse
-  : T extends TimelineEventsQueries.details
-  ? TimelineEventsDetailsStrategyResponse
-  : T extends TimelineEventsQueries.kpi
-  ? TimelineKpiStrategyResponse
-  : T extends TimelineEventsQueries.lastEventTime
-  ? TimelineEventsLastEventTimeStrategyResponse
-  : never;
+export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =
+  T extends TimelineEventsQueries.all
+    ? TimelineEventsAllStrategyResponse
+    : T extends TimelineEventsQueries.details
+    ? TimelineEventsDetailsStrategyResponse
+    : T extends TimelineEventsQueries.kpi
+    ? TimelineKpiStrategyResponse
+    : T extends TimelineEventsQueries.lastEventTime
+    ? TimelineEventsLastEventTimeStrategyResponse
+    : never;
 
-export type TimelineStrategyRequestType<
-  T extends TimelineFactoryQueryTypes
-> = T extends TimelineEventsQueries.all
-  ? TimelineEventsAllRequestOptions
-  : T extends TimelineEventsQueries.details
-  ? TimelineEventsDetailsRequestOptions
-  : T extends TimelineEventsQueries.kpi
-  ? TimelineRequestBasicOptions
-  : T extends TimelineEventsQueries.lastEventTime
-  ? TimelineEventsLastEventTimeRequestOptions
-  : never;
+export type TimelineStrategyRequestType<T extends TimelineFactoryQueryTypes> =
+  T extends TimelineEventsQueries.all
+    ? TimelineEventsAllRequestOptions
+    : T extends TimelineEventsQueries.details
+    ? TimelineEventsDetailsRequestOptions
+    : T extends TimelineEventsQueries.kpi
+    ? TimelineRequestBasicOptions
+    : T extends TimelineEventsQueries.lastEventTime
+    ? TimelineEventsLastEventTimeRequestOptions
+    : never;
 
 export interface ColumnHeaderInput {
   aggregatable?: Maybe<boolean>;

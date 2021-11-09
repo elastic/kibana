@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { stubIndexPatternWithFields } from '../../stubs';
+import { stubIndexPattern } from '../../stubs';
 
 export const mockPersistedLog = {
   add: jest.fn(),
@@ -19,7 +19,7 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
 
 export const mockFetchIndexPatterns = jest
   .fn()
-  .mockReturnValue(Promise.resolve([stubIndexPatternWithFields]));
+  .mockReturnValue(Promise.resolve([stubIndexPattern]));
 
 jest.mock('../../query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,

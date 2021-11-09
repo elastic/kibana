@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
+/* eslint-disable no-process-exit */
+
 import yargs from 'yargs';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
@@ -18,6 +22,10 @@ import {
 } from '../../../common';
 import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
 import { ContextTypeGeneratedAlertType, createAlertsString } from '../../connectors';
+import {
+  getCreateConnectorUrl,
+  getExecuteConnectorUrl,
+} from '../../../common/utils/connectors_api';
 
 main();
 
@@ -71,7 +79,7 @@ async function handleGenGroupAlerts(argv: any) {
 
   try {
     const createdAction = await client.request<ActionResult>({
-      path: '/api/actions/action',
+      path: getCreateConnectorUrl(),
       method: 'POST',
       body: {
         name: 'A case connector',
@@ -121,7 +129,7 @@ async function handleGenGroupAlerts(argv: any) {
     };
 
     const executeResp = await client.request<ActionTypeExecutorResult<CaseResponse>>({
-      path: `/api/actions/action/${createdAction.data.id}/_execute`,
+      path: getExecuteConnectorUrl(createdAction.data.id),
       method: 'POST',
       body: {
         params: {

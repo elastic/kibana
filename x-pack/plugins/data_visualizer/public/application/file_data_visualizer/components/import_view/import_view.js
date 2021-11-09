@@ -31,7 +31,6 @@ import {
   addCombinedFieldsToMappings,
   getDefaultCombinedFields,
 } from '../../../common/components/combined_fields';
-import { ExperimentalBadge } from '../../../common/components/experimental_badge';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
@@ -77,7 +76,7 @@ export class ImportView extends Component {
   constructor(props) {
     super(props);
 
-    this.state = getDefaultState(DEFAULT_STATE, this.props.results);
+    this.state = getDefaultState(DEFAULT_STATE, this.props.results, this.props.capabilities);
     this.savedObjectsClient = props.savedObjectsClient;
   }
 
@@ -86,7 +85,7 @@ export class ImportView extends Component {
   }
 
   clickReset = () => {
-    const state = getDefaultState(this.state, this.props.results);
+    const state = getDefaultState(this.state, this.props.results, this.props.capabilities);
     this.setState(state, () => {
       this.loadIndexPatternNames();
     });
@@ -434,7 +433,7 @@ export class ImportView extends Component {
 
       this.setState({ indexPatternNames });
     } catch (error) {
-      console.error('failed to load index patterns', error);
+      console.error('failed to load data views', error);
     }
   }
 
@@ -509,15 +508,6 @@ export class ImportView extends Component {
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.importView.importDataTitle"
                   defaultMessage="Import data"
-                />
-                &nbsp;
-                <ExperimentalBadge
-                  tooltipContent={
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.experimentalFeatureTooltip"
-                      defaultMessage="Experimental feature. We'd love to hear your feedback."
-                    />
-                  }
                 />
               </h2>
             </EuiTitle>
@@ -601,6 +591,7 @@ export class ImportView extends Component {
                       timeFieldName={timeFieldName}
                       createIndexPattern={createIndexPattern}
                       showFilebeatFlyout={this.showFilebeatFlyout}
+                      additionalLinks={this.props.resultsLinks ?? []}
                     />
 
                     {isFilebeatFlyoutVisible && (
@@ -649,7 +640,7 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFie
   }
 }
 
-function getDefaultState(state, results) {
+function getDefaultState(state, results, capabilities) {
   const indexSettingsString =
     state.indexSettingsString === ''
       ? JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2)
@@ -675,6 +666,11 @@ function getDefaultState(state, results) {
 
   const timeFieldName = results.timestamp_field;
 
+  const createIndexPattern =
+    capabilities.savedObjectsManagement.edit === false && capabilities.indexPatterns.save === false
+      ? false
+      : state.createIndexPattern;
+
   return {
     ...DEFAULT_STATE,
     indexSettingsString,
@@ -682,6 +678,7 @@ function getDefaultState(state, results) {
     pipelineString,
     timeFieldName,
     combinedFields,
+    createIndexPattern,
   };
 }
 
@@ -713,8 +710,8 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   if (indexPatternNames.find((i) => i === name)) {
     return (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.importView.indexPatternNameAlreadyExistsErrorMessage"
-        defaultMessage="Index pattern name already exists"
+        id="xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage"
+        defaultMessage="Data view name already exists"
       />
     );
   }
@@ -729,8 +726,8 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
     // name should match index
     return (
       <FormattedMessage
-        id="xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchIndexNameErrorMessage"
-        defaultMessage="Index pattern does not match index name"
+        id="xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchDataViewErrorMessage"
+        defaultMessage="Data view does not match index name"
       />
     );
   }

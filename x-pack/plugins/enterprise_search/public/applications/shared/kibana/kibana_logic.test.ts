@@ -33,12 +33,6 @@ describe('KibanaLogic', () => {
       expect(KibanaLogic.values.config).toEqual({});
     });
 
-    it('gracefully handles disabled security', () => {
-      mountKibanaLogic({ ...mockKibanaValues, security: undefined } as any);
-
-      expect(KibanaLogic.values.security).toEqual({});
-    });
-
     it('gracefully handles non-cloud installs', () => {
       mountKibanaLogic({ ...mockKibanaValues, cloud: undefined } as any);
 

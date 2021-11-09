@@ -21,7 +21,8 @@ export interface ManagementSetup {
 }
 
 export class ManagementServerPlugin
-  implements Plugin<ManagementSetup, object, ManagementSetupDependencies> {
+  implements Plugin<ManagementSetup, object, ManagementSetupDependencies>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

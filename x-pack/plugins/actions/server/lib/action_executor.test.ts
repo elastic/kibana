@@ -187,10 +187,12 @@ test('successfully executes as a task', async () => {
 
   const scheduleDelay = 10000; // milliseconds
   const scheduled = new Date(Date.now() - scheduleDelay);
+  const attempts = 1;
   await actionExecutor.execute({
     ...executeParams,
     taskInfo: {
       scheduled,
+      attempts,
     },
   });
 
@@ -268,6 +270,45 @@ test('throws an error when config is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+  });
+});
+
+test('throws an error when connector is invalid', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    validate: {
+      connector: () => {
+        return 'error';
+      },
+    },
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  const result = await actionExecutor.execute(executeParams);
+  expect(result).toEqual({
+    actionId: '1',
+    status: 'error',
+    retry: false,
+    message: `error validating action type connector: error`,
   });
 });
 

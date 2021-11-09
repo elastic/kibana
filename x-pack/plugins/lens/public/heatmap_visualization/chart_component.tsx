@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   Chart,
   ElementClickListener,
+  BrushEndListener,
   Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
@@ -16,13 +17,19 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { euiPaletteForTemperature } from '@elastic/eui';
+import type { CustomPaletteState } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../visualization_container';
-import { HeatmapRenderProps } from './types';
+import type { HeatmapRenderProps } from './types';
 import './index.scss';
-import { LensBrushEvent, LensFilterEvent } from '../types';
-import { EmptyPlaceholder } from '../shared_components';
+import type { LensBrushEvent, LensFilterEvent } from '../types';
+import {
+  applyPaletteParams,
+  defaultPaletteParams,
+  EmptyPlaceholder,
+  findMinMaxByColumnId,
+} from '../shared_components';
 import { LensIconChartHeatmap } from '../assets/chart_heatmap';
+import { DEFAULT_PALETTE_NAME } from './constants';
 
 declare global {
   interface Window {
@@ -33,6 +40,76 @@ declare global {
   }
 }
 
+function getStops(
+  { colors, stops, range }: CustomPaletteState,
+  { min, max }: { min: number; max: number }
+) {
+  if (stops.length) {
+    return stops.slice(0, stops.length - 1);
+  }
+  // Do not use relative values here
+  const maxValue = range === 'percent' ? 100 : max;
+  const minValue = range === 'percent' ? 0 : min;
+  const step = (maxValue - minValue) / colors.length;
+  return colors.slice(0, colors.length - 1).map((_, i) => minValue + (i + 1) * step);
+}
+
+/**
+ * Heatmaps use a different convention than palettes (same convention as EuiColorStops)
+ * so stops need to be left shifted.
+ * Values normalization provides a percent => absolute array of values
+ */
+function shiftAndNormalizeStops(
+  params: CustomPaletteState,
+  { min, max }: { min: number; max: number }
+) {
+  // data min is the fallback in case of default options
+  const absMin = params.range === 'percent' ? 0 : min;
+  return [params.stops.length ? params.rangeMin : absMin, ...getStops(params, { min, max })].map(
+    (value) => {
+      let result = value;
+      if (params.range === 'percent') {
+        result = min + ((max - min) * value) / 100;
+      }
+      // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
+      if (Number.isNaN(result)) {
+        return 1;
+      }
+      return Number(result.toFixed(2));
+    }
+  );
+}
+
+function computeColorRanges(
+  paletteService: HeatmapRenderProps['paletteService'],
+  paletteParams: CustomPaletteState | undefined,
+  baseColor: string,
+  minMax: { min: number; max: number }
+) {
+  const paletteColors =
+    paletteParams?.colors ||
+    applyPaletteParams(paletteService, { type: 'palette', name: DEFAULT_PALETTE_NAME }, minMax).map(
+      ({ color }) => color
+    );
+  // Repeat the first color at the beginning to cover below and above the defined palette
+  const colors = [paletteColors[0], ...paletteColors];
+
+  const ranges = shiftAndNormalizeStops(
+    {
+      gradient: false,
+      range: defaultPaletteParams.rangeType,
+      rangeMin: defaultPaletteParams.rangeMin,
+      rangeMax: defaultPaletteParams.rangeMax,
+      stops: [],
+      ...paletteParams,
+      colors: colors.slice(1),
+    },
+    minMax
+  );
+
+  return { colors, ranges };
+}
+
 export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   data,
   args,
@@ -41,6 +118,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   chartsThemeService,
   onClickValue,
   onSelectRange,
+  paletteService,
 }) => {
   const chartTheme = chartsThemeService.useChartsTheme();
   const isDarkTheme = chartsThemeService.useDarkMode();
@@ -48,12 +126,19 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const tableId = Object.keys(data.tables)[0];
   const table = data.tables[tableId];
 
+  const paletteParams = args.palette?.params;
+
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
 
   const xAxisColumn = table.columns[xAxisColumnIndex];
   const yAxisColumn = table.columns[yAxisColumnIndex];
   const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
+
+  const minMaxByColumnId = useMemo(
+    () => findMinMaxByColumnId([args.valueAccessor!], table),
+    [args.valueAccessor, table]
+  );
 
   if (!xAxisColumn || !valueColumn) {
     // Chart is not ready
@@ -82,6 +167,24 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
+
+  const { colors, ranges } = computeColorRanges(
+    paletteService,
+    paletteParams,
+    isDarkTheme ? '#000' : '#fff',
+    minMaxByColumnId[args.valueAccessor!]
+  );
+
+  const bands = ranges.map((start, index, array) => {
+    return {
+      // with the default continuity:above the every range is left-closed
+      start,
+      // with the default continuity:above the last range is right-open
+      end: index === array.length - 1 ? Infinity : array[index + 1],
+      // the current colors array contains a duplicated color at the beginning that we need to skip
+      color: colors[index + 1],
+    };
+  });
 
   const onElementClick = ((e: HeatmapElementEvent[]) => {
     const cell = e[0][0];
@@ -168,7 +271,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const config: HeatmapSpec['config'] = {
-    onBrushEnd,
     grid: {
       stroke: {
         width:
@@ -186,6 +288,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       maxHeight: 'fill',
       label: {
         visible: args.gridConfig.isCellLabelVisible ?? false,
+        minFontSize: 8,
+        maxFontSize: 18,
+        useGlobalMinFontSize: true, // override the min if there's a different directive upstream
       },
       border: {
         strokeWidth: 0,
@@ -194,7 +299,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     yAxisLabel: {
       visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
       // eui color subdued
-      fill: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
+      textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
       padding: yAxisColumn?.name ? 8 : 0,
       name: yAxisColumn?.name ?? '',
       ...(yAxisColumn
@@ -206,7 +311,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     xAxisLabel: {
       visible: args.gridConfig.isXAxisLabelVisible,
       // eui color subdued
-      fill: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+      textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
       formatter: (v: number | string) => xValuesFormatter.convert(v),
       name: xAxisColumn.name,
     },
@@ -223,8 +328,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     return <EmptyPlaceholder icon={LensIconChartHeatmap} />;
   }
 
-  const colorPalette = euiPaletteForTemperature(5);
-
   return (
     <Chart>
       <Settings
@@ -232,12 +335,21 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         showLegend={args.legend.isVisible}
         legendPosition={args.legend.position}
         debugState={window._echDebugStateFlag ?? false}
+        theme={{
+          ...chartTheme,
+          legend: {
+            labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
+          },
+        }}
+        onBrushEnd={onBrushEnd as BrushEndListener}
       />
       <Heatmap
         id={tableId}
         name={valueColumn.name}
-        colorScale={ScaleType.Quantize}
-        colors={colorPalette}
+        colorScale={{
+          type: 'bands',
+          bands,
+        }}
         data={chartData}
         xAccessor={args.xAccessor}
         yAccessor={args.yAccessor || 'unifiedY'}
@@ -259,7 +371,7 @@ export function HeatmapChartReportable(props: HeatmapRenderProps) {
     isReady: false,
   });
 
-  // It takes a cycle for the XY chart to render. This prevents
+  // It takes a cycle for the chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setState({ isReady: true });

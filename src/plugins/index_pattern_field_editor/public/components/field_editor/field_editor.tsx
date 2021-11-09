@@ -9,6 +9,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { get } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,20 +18,20 @@ import {
   EuiCode,
   EuiCallOut,
 } from '@elastic/eui';
-import type { CoreStart } from 'src/core/public';
 
 import {
   Form,
   useForm,
   useFormData,
+  useFormIsModified,
   FormHook,
   UseField,
   TextField,
   RuntimeType,
-  IndexPattern,
-  DataPublicPluginStart,
 } from '../../shared_imports';
-import { Field, InternalFieldType, PluginStart } from '../../types';
+import { Field } from '../../types';
+import { useFieldEditorContext } from '../field_editor_context';
+import { useFieldPreviewContext } from '../preview';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
@@ -41,7 +42,6 @@ import {
   ScriptField,
   FormatField,
   PopularityField,
-  ScriptSyntaxError,
 } from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
@@ -49,6 +49,7 @@ import { AdvancedParametersSection } from './advanced_parameters_section';
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
+  isSubmitting: boolean;
   submit: FormHook<Field>['submit'];
 }
 
@@ -63,37 +64,12 @@ export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType'> 
 }
 
 export interface Props {
-  /** Link URLs to our doc site */
-  links: {
-    runtimePainless: string;
-  };
   /** Optional field to edit */
   field?: Field;
   /** Handler to receive state changes updates */
   onChange?: (state: FieldEditorFormState) => void;
-  indexPattern: IndexPattern;
-  fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
-  uiSettings: CoreStart['uiSettings'];
-  /** Context object */
-  ctx: {
-    /** The internal field type we are dealing with (concrete|runtime)*/
-    fieldTypeToProcess: InternalFieldType;
-    /**
-     * An array of field names not allowed.
-     * e.g we probably don't want a user to give a name of an existing
-     * runtime field (for that the user should edit the existing runtime field).
-     */
-    namesNotAllowed: string[];
-    /**
-     * An array of existing concrete fields. If the user gives a name to the runtime
-     * field that matches one of the concrete fields, a callout will be displayed
-     * to indicate that this runtime field will shadow the concrete field.
-     * It is also used to provide the list of field autocomplete suggestions to the code editor.
-     */
-    existingConcreteFields: Array<{ name: string; type: string }>;
-  };
-  syntaxError: ScriptSyntaxError;
+  /** Handler to receive update on the form "isModified" state */
+  onFormModifiedChange?: (isModified: boolean) => void;
 }
 
 const geti18nTexts = (): {
@@ -173,53 +149,77 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const FieldEditorComponent = ({
-  field,
-  onChange,
-  links,
-  indexPattern,
-  fieldFormatEditors,
-  fieldFormats,
-  uiSettings,
-  syntaxError,
-  ctx: { fieldTypeToProcess, namesNotAllowed, existingConcreteFields },
-}: Props) => {
+const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
+  const { links, namesNotAllowed, existingConcreteFields, fieldTypeToProcess } =
+    useFieldEditorContext();
+  const {
+    params: { update: updatePreviewParams },
+  } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
     schema,
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
-  const { submit, isValid: isFormValid, isSubmitted } = form;
-  const { clear: clearSyntaxError } = syntaxError;
-
-  const [{ type }] = useFormData<FieldFormInternal>({ form });
+  const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
 
+  const [formData] = useFormData<FieldFormInternal>({ form });
+  const isFormModified = useFormIsModified({
+    form,
+    discard: [
+      '__meta__.isCustomLabelVisible',
+      '__meta__.isValueVisible',
+      '__meta__.isFormatVisible',
+      '__meta__.isPopularityVisible',
+    ],
+  });
+
+  const {
+    name: updatedName,
+    type: updatedType,
+    script: updatedScript,
+    format: updatedFormat,
+  } = formData;
+  const { name: nameField, type: typeField } = getFields();
+  const nameHasChanged = (Boolean(field?.name) && nameField?.isModified) ?? false;
+  const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
+
+  const isValueVisible = get(formData, '__meta__.isValueVisible');
+
   useEffect(() => {
     if (onChange) {
-      onChange({ isValid: isFormValid, isSubmitted, submit });
+      onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit });
     }
-  }, [onChange, isFormValid, isSubmitted, submit]);
+  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit]);
 
   useEffect(() => {
-    // Whenever the field "type" changes we clear any possible painless syntax
-    // error as it is possibly stale.
-    clearSyntaxError();
-  }, [type, clearSyntaxError]);
+    updatePreviewParams({
+      name: Boolean(updatedName?.trim()) ? updatedName : null,
+      type: updatedType?.[0].value,
+      script:
+        isValueVisible === false || Boolean(updatedScript?.source.trim()) === false
+          ? null
+          : updatedScript,
+      format: updatedFormat?.id !== undefined ? updatedFormat : null,
+    });
+  }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
 
-  const [{ name: updatedName, type: updatedType }] = useFormData({ form });
-  const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
-  const typeHasChanged =
-    Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
+  useEffect(() => {
+    if (onFormModifiedChange) {
+      onFormModifiedChange(isFormModified);
+    }
+  }, [isFormModified, onFormModifiedChange]);
 
   return (
     <Form
       form={form}
       className="indexPatternFieldEditor__form"
-      data-test-subj={'indexPatternFieldEditorForm'}
+      data-test-subj="indexPatternFieldEditorForm"
+      isInvalid={isSubmitted && isFormValid === false}
+      error={form.getErrors()}
     >
       <EuiFlexGroup>
         {/* Name */}
@@ -280,11 +280,7 @@ const FieldEditorComponent = ({
           data-test-subj="valueRow"
           withDividerRule
         >
-          <ScriptField
-            existingConcreteFields={existingConcreteFields}
-            links={links}
-            syntaxError={syntaxError}
-          />
+          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
         </FormRow>
       )}
 
@@ -296,12 +292,7 @@ const FieldEditorComponent = ({
         data-test-subj="formatRow"
         withDividerRule
       >
-        <FormatField
-          indexPattern={indexPattern}
-          fieldFormatEditors={fieldFormatEditors}
-          fieldFormats={fieldFormats}
-          uiSettings={uiSettings}
-        />
+        <FormatField />
       </FormRow>
 
       {/* Advanced settings */}
@@ -320,4 +311,4 @@ const FieldEditorComponent = ({
   );
 };
 
-export const FieldEditor = React.memo(FieldEditorComponent);
+export const FieldEditor = React.memo(FieldEditorComponent) as typeof FieldEditorComponent;

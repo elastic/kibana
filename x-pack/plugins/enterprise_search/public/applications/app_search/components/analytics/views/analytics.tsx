@@ -25,6 +25,7 @@ import {
 import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
+import { SuggestedCurationsCallout } from '../../engine_overview/components/suggested_curations_callout';
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSection, AnalyticsTable, RecentQueriesTable } from '../components';
 import {
@@ -60,6 +61,7 @@ export const Analytics: React.FC = () => {
 
   return (
     <AnalyticsLayout isAnalyticsView title={ANALYTICS_TITLE}>
+      <SuggestedCurationsCallout />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={1}>
           <AnalyticsCards

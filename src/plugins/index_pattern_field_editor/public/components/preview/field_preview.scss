@@ -1,0 +1,19 @@
+.indexPatternFieldEditor {
+  &__previewPannel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  &__previewImageModal__wrapper {
+    padding: $euiSize;
+
+    img {
+      max-width: 100%;
+    }
+  }
+
+  &__previewEmptySearchResult__title {
+    font-weight: 400;
+  }
+}

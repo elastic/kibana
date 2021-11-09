@@ -29,9 +29,7 @@ describe('managed configuration', () => {
     clock = sinon.useFakeTimers();
 
     const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-      enabled: true,
       max_workers: 10,
-      index: 'foo',
       max_attempts: 9,
       poll_interval: 3000,
       version_conflict_threshold: 80,
@@ -51,11 +49,20 @@ describe('managed configuration', () => {
         },
         custom: {},
       },
+      ephemeral_tasks: {
+        enabled: true,
+        request_capacity: 10,
+      },
+      unsafe: {
+        exclude_task_types: [],
+      },
     });
     logger = context.logger.get('taskManager');
 
     const taskManager = new TaskManagerPlugin(context);
-    (await taskManager.setup(coreMock.createSetup())).registerTaskDefinitions({
+    (
+      await taskManager.setup(coreMock.createSetup(), { usageCollection: undefined })
+    ).registerTaskDefinitions({
       foo: {
         title: 'Foo',
         createTaskRunner: jest.fn(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -66,14 +66,9 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
     return (
       <EuiToolTip
         data-test-subj="timeline-stream-tool-tip"
-        content={
-          <>
-            <Updated date={date} prefix={prefix} updatedAt={updatedAt} />
-          </>
-        }
+        content={<Updated date={date} prefix={prefix} updatedAt={updatedAt} />}
       >
-        <EuiText size="s">
-          <EuiIcon data-test-subj="last-updated-at-clock-icon" type="clock" />
+        <EuiText color="subdued" size="xs">
           {updateText}
         </EuiText>
       </EuiToolTip>

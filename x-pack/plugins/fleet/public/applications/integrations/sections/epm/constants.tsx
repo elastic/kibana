@@ -6,6 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { ServiceName } from '../../types';
 import { ElasticsearchAssetType, KibanaAssetType } from '../../types';
@@ -19,23 +20,60 @@ export const DisplayedAssets: ServiceNameToAssetTypes = {
   elasticsearch: Object.values(ElasticsearchAssetType),
 };
 
-export type DisplayedAssetType = ElasticsearchAssetType | KibanaAssetType;
+export type DisplayedAssetType = ElasticsearchAssetType | KibanaAssetType | 'view';
 
 export const AssetTitleMap: Record<DisplayedAssetType, string> = {
-  dashboard: 'Dashboard',
-  ilm_policy: 'ILM Policy',
-  ingest_pipeline: 'Ingest Pipeline',
-  transform: 'Transform',
-  index_pattern: 'Index Pattern',
-  index_template: 'Index Template',
-  component_template: 'Component Template',
-  search: 'Saved Search',
-  visualization: 'Visualization',
-  map: 'Map',
-  data_stream_ilm_policy: 'Data Stream ILM Policy',
-  lens: 'Lens',
-  security_rule: 'Security Rule',
-  ml_module: 'ML Module',
+  dashboard: i18n.translate('xpack.fleet.epm.assetTitles.dashboards', {
+    defaultMessage: 'Dashboards',
+  }),
+  ilm_policy: i18n.translate('xpack.fleet.epm.assetTitles.ilmPolicies', {
+    defaultMessage: 'ILM policies',
+  }),
+  ingest_pipeline: i18n.translate('xpack.fleet.epm.assetTitles.ingestPipelines', {
+    defaultMessage: 'Ingest pipelines',
+  }),
+  transform: i18n.translate('xpack.fleet.epm.assetTitles.transforms', {
+    defaultMessage: 'Transforms',
+  }),
+  index_pattern: i18n.translate('xpack.fleet.epm.assetTitles.indexPatterns', {
+    defaultMessage: 'Index patterns',
+  }),
+  index_template: i18n.translate('xpack.fleet.epm.assetTitles.indexTemplates', {
+    defaultMessage: 'Index templates',
+  }),
+  component_template: i18n.translate('xpack.fleet.epm.assetTitles.componentTemplates', {
+    defaultMessage: 'Component templates',
+  }),
+  search: i18n.translate('xpack.fleet.epm.assetTitles.savedSearches', {
+    defaultMessage: 'Saved searches',
+  }),
+  visualization: i18n.translate('xpack.fleet.epm.assetTitles.visualizations', {
+    defaultMessage: 'Visualizations',
+  }),
+  map: i18n.translate('xpack.fleet.epm.assetTitles.maps', {
+    defaultMessage: 'Maps',
+  }),
+  data_stream_ilm_policy: i18n.translate('xpack.fleet.epm.assetTitles.dataStreamILM', {
+    defaultMessage: 'Data stream ILM policies',
+  }),
+  lens: i18n.translate('xpack.fleet.epm.assetTitles.lens', {
+    defaultMessage: 'Lens',
+  }),
+  security_rule: i18n.translate('xpack.fleet.epm.assetTitles.securityRules', {
+    defaultMessage: 'Security rules',
+  }),
+  ml_module: i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
+    defaultMessage: 'ML modules',
+  }),
+  ml_model: i18n.translate('xpack.fleet.epm.assetTitles.mlModels', {
+    defaultMessage: 'ML models',
+  }),
+  view: i18n.translate('xpack.fleet.epm.assetTitles.views', {
+    defaultMessage: 'Views',
+  }),
+  tag: i18n.translate('xpack.fleet.epm.assetTitles.tag', {
+    defaultMessage: 'Tag',
+  }),
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
@@ -52,6 +90,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   lens: 'lensApp',
   security_rule: 'securityApp',
   ml_module: 'mlApp',
+  tag: 'tagApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

@@ -13,10 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
 import {
   flashAPIErrors,
-  setSuccessMessage,
+  flashSuccessToast,
   setErrorMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
+import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
 import { HttpLogic } from '../../../../../shared/http';
 import {
   IndexJob,
@@ -43,13 +44,10 @@ interface SchemaActions {
   onSchemaSetSuccess(schemaProps: SchemaResponseProps): SchemaResponseProps;
   onSchemaSetFormErrors(errors: string[]): string[];
   updateNewFieldType(newFieldType: SchemaType): SchemaType;
-  onFieldUpdate({
-    schema,
-    formUnchanged,
-  }: {
+  onFieldUpdate({ schema, formUnchanged }: { schema: Schema; formUnchanged: boolean }): {
     schema: Schema;
     formUnchanged: boolean;
-  }): { schema: Schema; formUnchanged: boolean };
+  };
   onIndexingComplete(numDocumentsWithErrors: number): number;
   resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
   setFieldName(rawFieldName: string): string;
@@ -270,11 +268,13 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       } = SourceLogic.values;
 
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/schemas`
-        : `/api/workplace_search/account/sources/${sourceId}/schemas`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/schemas`
+        : `/internal/workplace_search/account/sources/${sourceId}/schemas`;
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<SchemaInitialData>(route);
+        // TODO: fix
+        // @ts-expect-error TS2783
         actions.onInitializeSchema({ sourceId, ...response });
       } catch (e) {
         flashAPIErrors(e);
@@ -284,12 +284,12 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const { isOrganization } = AppLogic.values;
       const { http } = HttpLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
-        : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
+        : `/internal/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
 
       try {
         await actions.initializeSchema();
-        const response = await http.get(route);
+        const response = await http.get<SchemaChangeErrorsProps>(route);
         actions.onInitializeSchemaFieldErrors({
           fieldCoercionErrors: response.fieldCoercionErrors,
         });
@@ -300,15 +300,15 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     addNewField: ({ fieldName, newFieldType }) => {
       if (fieldName in values.activeSchema) {
         window.scrollTo(0, 0);
-        setErrorMessage(
+        actions.onSchemaSetFormErrors([
           i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.newFieldExists.message',
             {
               defaultMessage: 'New field already exists: {fieldName}.',
               values: { fieldName },
             }
-          )
-        );
+          ),
+        ]);
       } else {
         const schema = cloneDeep(values.activeSchema);
         schema[fieldName] = newFieldType;
@@ -328,8 +328,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const { sourceId } = values;
       const successMessage = isAdding ? SCHEMA_FIELD_ADDED_MESSAGE : SCHEMA_UPDATED_MESSAGE;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/schemas`
-        : `/api/workplace_search/account/sources/${sourceId}/schemas`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/schemas`
+        : `/internal/workplace_search/account/sources/${sourceId}/schemas`;
 
       const emptyReindexJob = {
         percentageComplete: 100,
@@ -341,15 +341,17 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       actions.resetMostRecentIndexJob(emptyReindexJob);
 
       try {
-        const response = await http.post(route, {
+        const response = await http.post<SchemaResponseProps>(route, {
           body: JSON.stringify({ ...updatedSchema }),
         });
         actions.onSchemaSetSuccess(response);
-        setSuccessMessage(successMessage);
+        flashSuccessToast(successMessage);
       } catch (e) {
         window.scrollTo(0, 0);
         if (isAdding) {
-          actions.onSchemaSetFormErrors(e?.message);
+          // We expect body.attributes.errors to be a string[] for actions.onSchemaSetFormErrors
+          const message: string[] = e?.body?.attributes?.errors || [defaultErrorMessage];
+          actions.onSchemaSetFormErrors(message);
         } else {
           flashAPIErrors(e);
         }

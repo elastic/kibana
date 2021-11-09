@@ -70,7 +70,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setDefaultResponses = () => {
-    setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+    setLoadPolicies([getDefaultHotPhasePolicy()]);
     setLoadSnapshotPolicies([]);
     setListSnapshotRepos({ repositories: ['abc'] });
     setListNodes({

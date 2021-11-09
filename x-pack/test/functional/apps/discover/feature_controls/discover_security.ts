@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
+  const kibanaServer = getService('kibanaServer');
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -32,8 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover feature controls security', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/discover/feature_controls/security'
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
@@ -42,12 +43,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/discover/feature_controls/security'
-      );
-
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+      );
     });
 
     describe('global discover all privileges', () => {
@@ -90,7 +92,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link) => link.text)).to.eql([
-          'Overview',
           'Discover',
           'Stack Management', // because `global_discover_all_role` enables search sessions and reporting
         ]);
@@ -200,7 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Discover']);
+        expect(navLinks).to.eql(['Discover']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -225,12 +226,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.createShortUrlMissingOrFail();
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
-      it(`doesn't show CSV reports`, async () => {
-        await PageObjects.share.clickShareTopNavButton();
-        await testSubjects.missingOrFail('sharePanel-CSVReports');
         await PageObjects.share.clickShareTopNavButton();
       });
 
@@ -298,7 +293,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Discover']);
+        expect(navLinks).to.eql(['Discover']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -321,7 +316,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
         await PageObjects.share.clickShareTopNavButton();

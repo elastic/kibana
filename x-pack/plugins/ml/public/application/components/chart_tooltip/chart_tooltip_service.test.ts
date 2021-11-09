@@ -45,7 +45,7 @@ describe('ChartTooltipService', () => {
 
     expect(spy).toHaveBeenCalledWith({
       isTooltipVisible: false,
-      tooltipData: ([] as unknown) as TooltipData,
+      tooltipData: [] as unknown as TooltipData,
       offset: { x: 0, y: 0 },
       target: null,
     });

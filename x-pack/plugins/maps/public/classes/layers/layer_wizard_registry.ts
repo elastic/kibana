@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement, FunctionComponent } from 'react';
-import { LayerDescriptor } from '../../../common/descriptor_types';
+import type { LayerDescriptor } from '../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../common/constants';
 
 export type RenderWizardArguments = {
@@ -38,6 +38,7 @@ export type LayerWizard = {
   prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
+  showFeatureEditTools?: boolean;
 };
 
 export type LayerWizardWithMeta = LayerWizard & {

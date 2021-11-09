@@ -14,13 +14,14 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
@@ -50,7 +51,7 @@ import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
@@ -59,6 +60,7 @@ import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { defaultControlColumn } from '../body/control_columns';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -188,16 +190,29 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     docValueFields,
     loading: loadingSourcerer,
     indexPattern,
+    runtimeMappings,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.timeline);
-
+  } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
-  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? '')
+  );
+
+  const filterManager = useMemo(
+    () => activeFilterManager ?? new FilterManager(uiSettings),
+    [activeFilterManager, uiSettings]
+  );
+
   const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = { query: kqlQueryExpression, language: 'kuery' };
+  } = useMemo(
+    () => ({ query: kqlQueryExpression.trim(), language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -209,15 +224,31 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlMode,
   });
 
-  const isBlankTimeline: boolean =
-    isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query);
+  useInvalidFilterQuery({
+    id: timelineId,
+    filterQuery: combinedQueries?.filterQuery,
+    kqlError: combinedQueries?.kqlError,
+    query: kqlQuery,
+    startDate: start,
+    endDate: end,
+  });
 
-  const canQueryTimeline = () =>
-    combinedQueries != null &&
-    loadingSourcerer != null &&
-    !loadingSourcerer &&
-    !isEmpty(start) &&
-    !isEmpty(end);
+  const isBlankTimeline: boolean =
+    isEmpty(dataProviders) &&
+    isEmpty(filters) &&
+    isEmpty(kqlQuery.query) &&
+    combinedQueries?.filterQuery === undefined;
+
+  const canQueryTimeline = useMemo(
+    () =>
+      combinedQueries != null &&
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
+      !isEmpty(start) &&
+      !isEmpty(end) &&
+      combinedQueries?.filterQuery !== undefined,
+    [combinedQueries, end, loadingSourcerer, start]
+  );
 
   const getTimelineQueryFields = () => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -239,25 +270,24 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         id: timelineId,
       })
     );
-  }, [filterManager, timelineId, dispatch]);
+  }, [activeFilterManager, dispatch, filterManager, timelineId, uiSettings]);
 
-  const [
-    isQueryLoading,
-    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: end,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    fields: getTimelineQueryFields(),
-    language: kqlQuery.language,
-    limit: itemsPerPage,
-    filterQuery: combinedQueries?.filterQuery ?? '',
-    startDate: start,
-    skip: !canQueryTimeline(),
-    sort: timelineQuerySortField,
-    timerangeKind,
-  });
+  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: end,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      fields: getTimelineQueryFields(),
+      language: kqlQuery.language,
+      limit: itemsPerPage,
+      filterQuery: combinedQueries?.filterQuery,
+      runtimeMappings,
+      startDate: start,
+      skip: !canQueryTimeline,
+      sort: timelineQuerySortField,
+      timerangeKind,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, timelineId });
@@ -280,6 +310,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
+  const isDatePickerDisabled = useMemo(() => {
+    return (combinedQueries && combinedQueries.kqlError != null) || false;
+  }, [combinedQueries]);
+
   const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
   const trailingControlColumns: ControlColumnProps[] = [];
 
@@ -294,6 +328,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
+        skip={!canQueryTimeline}
       />
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
@@ -313,7 +348,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 />
               )}
               <DatePicker grow={1}>
-                <SuperDatePicker id="timeline" timelineId={timelineId} />
+                <SuperDatePicker
+                  id="timeline"
+                  timelineId={timelineId}
+                  disabled={isDatePickerDisabled}
+                />
               </DatePicker>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
@@ -391,6 +430,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}
                 timelineId={timelineId}
               />
@@ -425,7 +465,7 @@ const makeMapStateToProps = () => {
       status,
       timelineType,
     } = timeline;
-    const kqlQueryTimeline = getKqlQueryTimeline(state, timelineId)!;
+    const kqlQueryTimeline = getKqlQueryTimeline(state, timelineId);
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 
     // return events on empty search
@@ -464,13 +504,24 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+  updateEventTypeAndIndexesName: (
+    newEventType: TimelineEventsType,
+    newIndexNames: string[],
+    newDataViewId: string
+  ) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
     dispatch(
-      sourcererActions.setSelectedIndexPatterns({
+      timelineActions.updateDataView({
+        dataViewId: newDataViewId,
+        id: timelineId,
+        indexNames: newIndexNames,
+      })
+    );
+    dispatch(
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
         selectedPatterns: newIndexNames,
+        selectedDataViewId: newDataViewId,
       })
     );
   },

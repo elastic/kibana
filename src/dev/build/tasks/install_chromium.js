@@ -15,21 +15,20 @@ export const InstallChromium = {
   description: 'Installing Chromium',
 
   async run(config, log, build) {
-    if (build.isOss()) {
-      return;
-    } else {
-      for (const platform of config.getNodePlatforms()) {
-        log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
+    for (const platform of config.getNodePlatforms()) {
+      const target = `${platform.getName()}-${platform.getArchitecture()}`;
+      log.info(`Installing Chromium for ${target}`);
 
-        const { binaryPath$ } = installBrowser(
-          // TODO: https://github.com/elastic/kibana/issues/72496
-          log,
-          build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
-          platform.getName(),
-          platform.getArchitecture()
-        );
-        await binaryPath$.pipe(first()).toPromise();
-      }
+      // revert after https://github.com/elastic/kibana/issues/109949
+      if (target === 'darwin-arm64') continue;
+
+      const { binaryPath$ } = installBrowser(
+        log,
+        build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
+        platform.getName(),
+        platform.getArchitecture()
+      );
+      await binaryPath$.pipe(first()).toPromise();
     }
   },
 };

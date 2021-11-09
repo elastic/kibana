@@ -30,12 +30,12 @@ describe('When event filters delete modal is shown', () => {
   const getConfirmButton = () =>
     renderResult.baseElement.querySelector(
       '[data-test-subj="eventFilterDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
   const getCancelButton = () =>
     renderResult.baseElement.querySelector(
       '[data-test-subj="eventFilterDeleteModalCancelButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
   const getCurrentState = () => store.getState().management.eventFilters;
 
@@ -47,7 +47,7 @@ describe('When event filters delete modal is shown', () => {
       renderResult = mockedContext.render(<EventFilterDeleteModal />);
 
       await act(async () => {
-        history.push('/event_filters');
+        history.push('/administration/event_filters');
 
         await waitForAction('userChangedUrl');
 

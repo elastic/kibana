@@ -102,9 +102,11 @@ const TagsFilterPopoverComponent = ({
       ownFocus
       button={
         <EuiFilterButton
+          grow={true}
           data-test-subj={'tags-filter-popover-button'}
           iconType="arrowDown"
           onClick={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
+          numFilters={tags.length}
           isSelected={isTagPopoverOpen}
           hasActiveFilters={selectedTags.length > 0}
           numActiveFilters={selectedTags.length}

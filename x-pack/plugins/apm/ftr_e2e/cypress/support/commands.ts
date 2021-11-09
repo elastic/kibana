@@ -11,8 +11,8 @@ Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
 });
 
-Cypress.Commands.add('loginAsSuperUser', () => {
-  cy.loginAs({ username: 'elastic', password: 'changeme' });
+Cypress.Commands.add('loginAsPowerUser', () => {
+  cy.loginAs({ username: 'apm_power_user', password: 'changeme' });
 });
 
 Cypress.Commands.add(
@@ -21,6 +21,7 @@ Cypress.Commands.add(
     cy.log(`Logging in as ${username}`);
     const kibanaUrl = Cypress.env('KIBANA_URL');
     cy.request({
+      log: false,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
       body: {

@@ -19,6 +19,9 @@ import {
   CommentAttributes,
   CommentRequestUserType,
   CommentRequestAlertType,
+  CommentRequestActionsType,
+  CaseUserActionResponse,
+  isPush,
 } from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
@@ -54,21 +57,35 @@ export const getLatestPushInfo = (
   userActions: CaseUserActionsResponse
 ): { index: number; pushedInfo: CaseFullExternalService } | null => {
   for (const [index, action] of [...userActions].reverse().entries()) {
-    if (action.action === 'push-to-service' && action.new_value)
+    if (
+      isPush(action.action, action.action_field) &&
+      isValidNewValue(action) &&
+      connectorId === action.new_val_connector_id
+    ) {
       try {
         const pushedInfo = JSON.parse(action.new_value);
-        if (pushedInfo.connector_id === connectorId) {
-          // We returned the index of the element in the userActions array.
-          // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
-          return { index: userActions.length - index - 1, pushedInfo };
-        }
+        // We returned the index of the element in the userActions array.
+        // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
+        return {
+          index: userActions.length - index - 1,
+          pushedInfo: { ...pushedInfo, connector_id: connectorId },
+        };
       } catch (e) {
-        // Silence JSON parse errors
+        // ignore parse failures and check the next user action
       }
+    }
   }
 
   return null;
 };
+
+type NonNullNewValueAction = Omit<CaseUserActionResponse, 'new_value' | 'new_val_connector_id'> & {
+  new_value: string;
+  new_val_connector_id: string;
+};
+
+const isValidNewValue = (userAction: CaseUserActionResponse): userAction is NonNullNewValueAction =>
+  userAction.new_val_connector_id != null && userAction.new_value != null;
 
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
@@ -76,18 +93,69 @@ const getCommentContent = (comment: CommentResponse): string => {
   } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
+  } else if (
+    comment.type === CommentType.actions &&
+    (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
+  ) {
+    const firstHostname =
+      comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
+    const totalHosts = comment.actions.targets.length;
+    const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
+    const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
+
+    return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
   }
 
   return '';
 };
 
-const countAlerts = (comments: CaseResponse['comments']): number =>
-  comments?.reduce<number>((total, comment) => {
-    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
-      return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
-    }
-    return total;
-  }, 0) ?? 0;
+interface CountAlertsInfo {
+  totalComments: number;
+  pushed: number;
+  totalAlerts: number;
+}
+
+const getAlertsInfo = (
+  comments: CaseResponse['comments']
+): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
+  const countingInfo = { totalComments: 0, pushed: 0, totalAlerts: 0 };
+
+  const res =
+    comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
+      if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+        return {
+          totalComments: totalComments + 1,
+          pushed: comment.pushed_at != null ? pushed + 1 : pushed,
+          totalAlerts: totalAlerts + (Array.isArray(comment.alertId) ? comment.alertId.length : 1),
+        };
+      }
+      return { totalComments, pushed, totalAlerts };
+    }, countingInfo) ?? countingInfo;
+
+  return {
+    totalAlerts: res.totalAlerts,
+    hasUnpushedAlertComments: res.totalComments > res.pushed,
+  };
+};
+
+const addAlertMessage = (
+  caseId: string,
+  caseComments: CaseResponse['comments'],
+  comments: ExternalServiceComment[]
+): ExternalServiceComment[] => {
+  const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(caseComments);
+
+  const newComments = [...comments];
+
+  if (hasUnpushedAlertComments) {
+    newComments.push({
+      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
+      commentId: `${caseId}-total-alerts`,
+    });
+  }
+
+  return newComments;
+};
 
 export const createIncident = async ({
   actionsClient,
@@ -121,13 +189,13 @@ export const createIncident = async ({
 
   if (externalId) {
     try {
-      currentIncident = ((await actionsClient.execute({
+      currentIncident = (await actionsClient.execute({
         actionId: connector.id,
         params: {
           subAction: 'getIncident',
           subActionParams: { externalId },
         },
-      })) as unknown) as ExternalServiceParams | undefined;
+      })) as unknown as ExternalServiceParams | undefined;
     } catch (ex) {
       throw new Error(
         `Retrieving Incident by id ${externalId} from ${connector.actionTypeId} failed with exception: ${ex}`
@@ -161,10 +229,9 @@ export const createIncident = async ({
   const commentsToBeUpdated = caseComments?.filter(
     (comment) =>
       // We push only user's comments
-      comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
+      (comment.type === CommentType.user || comment.type === CommentType.actions) &&
+      commentsIdsToBeUpdated.has(comment.id)
   );
-
-  const totalAlerts = countAlerts(caseComments);
 
   let comments: ExternalServiceComment[] = [];
 
@@ -175,12 +242,7 @@ export const createIncident = async ({
     }
   }
 
-  if (totalAlerts > 0) {
-    comments.push({
-      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
-      commentId: `${theCase.id}-total-alerts`,
-    });
-  }
+  comments = addAlertMessage(theCase.id, caseComments, comments);
 
   return { incident, comments };
 };
@@ -322,7 +384,7 @@ export const isCommentAlertType = (
 
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType => {
+): CommentRequestUserType | CommentRequestAlertType | CommentRequestActionsType => {
   const owner = attributes.owner;
   switch (attributes.type) {
     case CommentType.user:
@@ -338,6 +400,16 @@ export const getCommentContextFromAttributes = (
         alertId: attributes.alertId,
         index: attributes.index,
         rule: attributes.rule,
+        owner,
+      };
+    case CommentType.actions:
+      return {
+        type: attributes.type,
+        comment: attributes.comment,
+        actions: {
+          targets: attributes.actions.targets,
+          type: attributes.actions.type,
+        },
         owner,
       };
     default:

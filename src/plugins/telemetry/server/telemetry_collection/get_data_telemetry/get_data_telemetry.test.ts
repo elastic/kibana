@@ -72,6 +72,8 @@ describe('get_data_telemetry', () => {
           { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
           { name: '.app-search-1234', docCount: 0 },
           { name: 'logs-endpoint.1234', docCount: 0 }, // Matching pattern with a dot in the name
+          { name: 'ml_host_risk_score_latest', docCount: 0 },
+          { name: 'ml_host_risk_score', docCount: 0 }, // This should not match
           // New Indexing strategy: everything can be inferred from the constant_keyword values
           {
             name: '.ds-logs-nginx.access-default-000001',
@@ -162,6 +164,11 @@ describe('get_data_telemetry', () => {
         {
           pattern_name: 'logs-endpoint',
           shipper: 'endpoint',
+          index_count: 1,
+          doc_count: 0,
+        },
+        {
+          pattern_name: 'host_risk_score',
           index_count: 1,
           doc_count: 0,
         },

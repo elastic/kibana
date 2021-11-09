@@ -7,35 +7,7 @@
  */
 import * as t from 'io-ts';
 import { mapValues } from 'lodash';
-
-type JSONSchemableValueType =
-  | t.StringType
-  | t.NumberType
-  | t.BooleanType
-  | t.ArrayType<t.Mixed>
-  | t.RecordC<t.Mixed, t.Mixed>
-  | t.DictionaryType<t.Mixed, t.Mixed>
-  | t.InterfaceType<t.Props>
-  | t.PartialType<t.Props>
-  | t.UnionType<t.Mixed[]>
-  | t.IntersectionType<t.Mixed[]>;
-
-const tags = [
-  'StringType',
-  'NumberType',
-  'BooleanType',
-  'ArrayType',
-  'DictionaryType',
-  'InterfaceType',
-  'PartialType',
-  'UnionType',
-  'IntersectionType',
-];
-
-const isSchemableValueType = (type: t.Mixed): type is JSONSchemableValueType => {
-  // @ts-ignore
-  return tags.includes(type._tag);
-};
+import { isParsableType } from '../parseable_types';
 
 interface JSONSchemaObject {
   type: 'object';
@@ -74,7 +46,7 @@ type JSONSchema =
   | JSONSchemaAnyOf;
 
 export const toJsonSchema = (type: t.Mixed): JSONSchema => {
-  if (isSchemableValueType(type)) {
+  if (isParsableType(type)) {
     switch (type._tag) {
       case 'ArrayType':
         return { type: 'array', items: toJsonSchema(type.type) };

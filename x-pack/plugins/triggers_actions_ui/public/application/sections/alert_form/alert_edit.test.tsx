@@ -16,14 +16,14 @@ import {
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
 import { useKibana } from '../../../common/lib/kibana';
 import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 jest.mock('../../lib/alert_api', () => ({
@@ -33,6 +33,23 @@ jest.mock('../../lib/alert_api', () => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
+}));
+
+jest.mock('./alert_errors', () => ({
+  getAlertActionErrors: jest.fn().mockImplementation(() => {
+    return [];
+  }),
+  getAlertErrors: jest.fn().mockImplementation(() => ({
+    alertParamsErrors: {},
+    alertBaseErrors: {},
+    alertErrors: {
+      name: new Array<string>(),
+      interval: new Array<string>(),
+      alertTypeId: new Array<string>(),
+      actionConnectors: new Array<string>(),
+    },
+  })),
+  isValidAlert: jest.fn(),
 }));
 
 jest.mock('../../../common/lib/health_api', () => ({
@@ -47,7 +64,7 @@ describe('alert_edit', () => {
     mockedCoreSetup = coreMock.createSetup();
   });
 
-  async function setup() {
+  async function setup(initialAlertFields = {}) {
     const [
       {
         application: { capabilities },
@@ -154,12 +171,13 @@ describe('alert_edit', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      ...initialAlertFields,
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
-    alertTypeRegistry.list.mockReturnValue([alertType]);
-    alertTypeRegistry.get.mockReturnValue(alertType);
-    alertTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.list.mockReturnValue([alertType]);
+    ruleTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
 
@@ -171,7 +189,7 @@ describe('alert_edit', () => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}
-        alertTypeRegistry={alertTypeRegistry}
+        ruleTypeRegistry={ruleTypeRegistry}
       />
     );
     // Wait for active space to resolve before requesting the component to update
@@ -188,7 +206,11 @@ describe('alert_edit', () => {
   });
 
   it('displays a toast message on save for server errors', async () => {
-    await setup();
+    const { isValidAlert } = jest.requireMock('./alert_errors');
+    (isValidAlert as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    await setup({ name: undefined });
 
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
@@ -196,5 +218,13 @@ describe('alert_edit', () => {
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
       'Fail message'
     );
+  });
+
+  it('should pass in the server alert type into `getAlertErrors`', async () => {
+    const { getAlertErrors } = jest.requireMock('./alert_errors');
+    await setup();
+    const lastCall = getAlertErrors.mock.calls[getAlertErrors.mock.calls.length - 1];
+    expect(lastCall[2]).toBeDefined();
+    expect(lastCall[2].id).toBe('my-alert-type');
   });
 });

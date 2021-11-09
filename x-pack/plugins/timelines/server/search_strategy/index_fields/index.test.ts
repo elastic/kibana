@@ -795,19 +795,56 @@ describe('Fields Provider', () => {
   describe('search', () => {
     const getFieldsForWildcardMock = jest.fn();
     const esClientSearchMock = jest.fn();
+    const esClientFieldCapsMock = jest.fn();
+    const mockPattern = {
+      title: 'coolbro',
+      fields: {
+        toSpec: () => ({
+          coolio: {
+            name: 'nameio',
+            type: 'typeio',
+            searchable: true,
+            aggregatable: true,
+          },
+        }),
+      },
+      toSpec: () => ({
+        runtimeFieldMap: { runtimeField: { type: 'keyword' } },
+      }),
+    };
+    const getStartServices = jest.fn().mockReturnValue([
+      null,
+      {
+        data: {
+          indexPatterns: {
+            indexPatternsServiceFactory: () => ({
+              get: jest.fn().mockReturnValue(mockPattern),
+            }),
+          },
+        },
+      },
+    ]);
 
-    const deps = ({
-      esClient: { asCurrentUser: { search: esClientSearchMock } },
-    } as unknown) as SearchStrategyDependencies;
+    const deps = {
+      esClient: { asCurrentUser: { search: esClientSearchMock, fieldCaps: esClientFieldCapsMock } },
+    } as unknown as SearchStrategyDependencies;
 
     beforeAll(() => {
       getFieldsForWildcardMock.mockResolvedValue([]);
+
+      esClientSearchMock.mockResolvedValue({
+        body: { hits: { total: { value: 123 } } },
+      });
+      esClientFieldCapsMock.mockResolvedValue({
+        body: { indices: ['value'] },
+      });
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 
     beforeEach(() => {
       getFieldsForWildcardMock.mockClear();
       esClientSearchMock.mockClear();
+      esClientFieldCapsMock.mockClear();
     });
 
     afterAll(() => {
@@ -821,10 +858,7 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
-
-      expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
-
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
       expect(response.indexFields).toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
     });
@@ -836,7 +870,7 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: false,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
 
@@ -844,36 +878,66 @@ describe('Fields Provider', () => {
       expect(response.indicesExist).toEqual(indices);
     });
 
+    it('should search index fields by data view id', async () => {
+      const dataViewId = 'id';
+      const request = {
+        dataViewId,
+        onlyCheckIfIndicesExist: false,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
+
+      expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
+
+      expect(response.indexFields).not.toHaveLength(0);
+      expect(response.indicesExist).toEqual(['coolbro']);
+    });
+
+    it('onlyCheckIfIndicesExist by data view id', async () => {
+      const dataViewId = 'id';
+      const request = {
+        dataViewId,
+        onlyCheckIfIndicesExist: true,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
+
+      expect(response.indexFields).toHaveLength(0);
+      expect(response.indicesExist).toEqual(['coolbro']);
+    });
+
     it('should search apm index fields', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: false,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
-      expect(esClientSearchMock).not.toHaveBeenCalled();
-
       expect(response.indexFields).not.toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
     });
 
     it('should check apm index exists with data', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValueOnce({
+      esClientSearchMock.mockResolvedValue({
         body: { hits: { total: { value: 1 } } },
       });
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
+        body: { query: { match_all: {} }, size: 0 },
+      });
+      expect(esClientSearchMock).toHaveBeenCalledWith({
+        index: indices[1],
         body: { query: { match_all: {} }, size: 0 },
       });
       expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
@@ -883,20 +947,24 @@ describe('Fields Provider', () => {
     });
 
     it('should check apm index exists with no data', async () => {
-      const indices = ['apm-*-transaction*'];
+      const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
         indices,
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValueOnce({
+      esClientSearchMock.mockResolvedValue({
         body: { hits: { total: { value: 0 } } },
       });
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
+        body: { query: { match_all: {} }, size: 0 },
+      });
+      expect(esClientSearchMock).toHaveBeenCalledWith({
+        index: indices[1],
         body: { query: { match_all: {} }, size: 0 },
       });
       expect(getFieldsForWildcardMock).not.toHaveBeenCalled();

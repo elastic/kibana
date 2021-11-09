@@ -10,7 +10,7 @@ import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
 import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
 import { DataFrameTaskStateType } from '../../../../../../../common/types/data_frame_analytics';
 export { DATA_FRAME_TASK_STATE };
-export { DataFrameTaskStateType };
+export type { DataFrameTaskStateType };
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 import {
@@ -18,7 +18,7 @@ import {
   DataFrameAnalyticsStats,
 } from '../../../../../../../common/types/data_frame_analytics';
 
-export { DataFrameAnalyticsStats } from '../../../../../../../common/types/data_frame_analytics';
+export type { DataFrameAnalyticsStats } from '../../../../../../../common/types/data_frame_analytics';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
@@ -71,9 +71,11 @@ export function getDataFrameAnalyticsProgress(stats: DataFrameAnalyticsStats) {
   return undefined;
 }
 
-export function getDataFrameAnalyticsProgressPhase(
-  stats: DataFrameAnalyticsStats
-): { currentPhase: number; progress: number; totalPhases: number } {
+export function getDataFrameAnalyticsProgressPhase(stats: DataFrameAnalyticsStats): {
+  currentPhase: number;
+  progress: number;
+  totalPhases: number;
+} {
   let phase = 0;
   let progress = 0;
 

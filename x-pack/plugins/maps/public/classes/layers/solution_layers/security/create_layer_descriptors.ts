@@ -22,7 +22,7 @@ import {
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { VectorLayer } from '../../vector_layer';
+import { GeoJsonVectorLayer } from '../../vector_layer';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 // @ts-ignore
 import { ESSearchSource } from '../../../sources/es_search_source';
@@ -35,7 +35,11 @@ const defaultDynamicProperties = getDefaultDynamicProperties();
 const euiVisColorPalette = euiPaletteColorBlind();
 
 function isApmIndex(indexPatternTitle: string) {
-  return minimatch(indexPatternTitle, APM_INDEX_PATTERN_TITLE);
+  return APM_INDEX_PATTERN_TITLE.split(',')
+    .map((pattern) => {
+      return minimatch(indexPatternTitle, pattern);
+    })
+    .some(Boolean);
 }
 
 function getSourceField(indexPatternTitle: string) {
@@ -89,7 +93,7 @@ function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: 
     [VECTOR_STYLES.ICON_SIZE]: { type: STYLE_TYPE.STATIC, options: { size: 8 } },
   };
 
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label: i18n.translate('xpack.maps.sescurity.sourceLayerLabel', {
       defaultMessage: '{indexPatternTitle} | Source Point',
       values: { indexPatternTitle },
@@ -142,7 +146,7 @@ function createDestinationLayerDescriptor(indexPatternId: string, indexPatternTi
     [VECTOR_STYLES.ICON_SIZE]: { type: STYLE_TYPE.STATIC, options: { size: 8 } },
   };
 
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label: i18n.translate('xpack.maps.sescurity.destinationLayerLabel', {
       defaultMessage: '{indexPatternTitle} | Destination point',
       values: { indexPatternTitle },
@@ -188,7 +192,7 @@ function createLineLayerDescriptor(indexPatternId: string, indexPatternTitle: st
     },
   };
 
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label: i18n.translate('xpack.maps.sescurity.lineLayerLabel', {
       defaultMessage: '{indexPatternTitle} | Line',
       values: { indexPatternTitle },

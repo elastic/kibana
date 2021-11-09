@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { IpOverview } from '../../../../network/components/details';
@@ -23,7 +24,7 @@ import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { OverviewEmpty } from '../../../../overview/components/overview_empty';
 import { esQuery } from '../../../../../../../../src/plugins/data/public';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useNetworkDetails } from '../../../../network/containers/details';
 import { networkModel } from '../../../../network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
@@ -65,7 +66,8 @@ export const ExpandableNetworkDetailsPageLink = ({
 export const ExpandableNetworkDetails = ({
   contextID,
   expandedNetwork,
-}: ExpandableNetworkProps & { contextID: string }) => {
+  isDraggable,
+}: ExpandableNetworkProps & { contextID: string; isDraggable?: boolean }) => {
   const { ip, flowTarget } = expandedNetwork;
   const dispatch = useDispatch();
   const { to, from, isInitializing } = useGlobalTime();
@@ -96,8 +98,8 @@ export const ExpandableNetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const filterQuery = convertToBuildEsQuery({
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
@@ -106,11 +108,13 @@ export const ExpandableNetworkDetails = ({
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
     docValueFields,
-    skip: isInitializing,
+    skip: isInitializing || filterQuery === undefined,
     filterQuery,
     indexNames: selectedPatterns,
     ip,
   });
+
+  useInvalidFilterQuery({ id, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(ip, flowTarget),
@@ -129,6 +133,7 @@ export const ExpandableNetworkDetails = ({
       loading={loading}
       isInDetailsSidePanel
       isLoadingAnomaliesData={isLoadingAnomaliesData}
+      isDraggable={isDraggable}
       type={type}
       flowTarget={flowTarget}
       startDate={from}

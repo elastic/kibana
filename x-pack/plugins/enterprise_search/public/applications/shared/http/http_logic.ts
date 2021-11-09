@@ -128,5 +128,5 @@ const isEnterpriseSearchApi = (httpResponse: HttpResponse) => {
   if (!httpResponse.response) return false; // Typically this means Kibana has stopped working, in which case we short-circuit early to prevent errors
 
   const { url } = httpResponse.response;
-  return url.includes('/api/app_search/') || url.includes('/api/workplace_search/');
+  return url.includes('/internal/app_search/') || url.includes('/internal/workplace_search/');
 };

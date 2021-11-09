@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { APMConfig } from '../..';
 import {
   INSTRUCTION_VARIANT,
   InstructionsSchema,
@@ -21,7 +22,7 @@ import {
   createPhpAgentInstructions,
   createRackAgentInstructions,
   createRailsAgentInstructions,
-} from '../instructions/apm_agent_instructions';
+} from '../../../common/tutorial/instructions/apm_agent_instructions';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,
@@ -30,20 +31,14 @@ import {
   createStartServerUnix,
   createStartServerUnixSysv,
   createWindowsServerInstructions,
-} from '../instructions/apm_server_instructions';
+} from '../../../common/tutorial/instructions/apm_server_instructions';
 
 export function onPremInstructions({
-  errorIndices,
-  transactionIndices,
-  metricsIndices,
-  sourcemapIndices,
-  onboardingIndices,
+  apmConfig,
+  isFleetPluginEnabled,
 }: {
-  errorIndices: string;
-  transactionIndices: string;
-  metricsIndices: string;
-  sourcemapIndices: string;
-  onboardingIndices: string;
+  apmConfig: APMConfig;
+  isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
   const START_SERVER_UNIX = createStartServerUnix();
@@ -69,12 +64,22 @@ export function onPremInstructions({
           iconType: 'alert',
         },
         instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.FLEET,
-            instructions: [
-              { customComponentName: 'TutorialFleetInstructions' },
-            ],
-          },
+          // hides fleet section when plugin is disabled
+          ...(isFleetPluginEnabled
+            ? [
+                {
+                  id: INSTRUCTION_VARIANT.FLEET,
+                  instructions: [
+                    {
+                      title: i18n.translate('xpack.apm.tutorial.fleet.title', {
+                        defaultMessage: 'Fleet',
+                      }),
+                      customComponentName: 'TutorialFleetInstructions',
+                    },
+                  ],
+                },
+              ]
+            : []),
           {
             id: INSTRUCTION_VARIANT.OSX,
             instructions: [
@@ -138,7 +143,7 @@ export function onPremInstructions({
             }
           ),
           esHitsCheck: {
-            index: onboardingIndices,
+            index: apmConfig.indices.onboarding,
             query: {
               bool: {
                 filter: [
@@ -231,22 +236,16 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              errorIndices,
-              transactionIndices,
-              metricsIndices,
-              sourcemapIndices,
+              apmConfig.indices.error,
+              apmConfig.indices.transaction,
+              apmConfig.indices.metric,
             ],
             query: {
               bool: {
                 filter: [
                   {
                     terms: {
-                      'processor.event': [
-                        'error',
-                        'transaction',
-                        'metric',
-                        'sourcemap',
-                      ],
+                      'processor.event': ['error', 'transaction', 'metric'],
                     },
                   },
                   { range: { 'observer.version_major': { gte: 7 } } },

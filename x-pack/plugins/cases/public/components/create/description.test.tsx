@@ -12,6 +12,7 @@ import { act } from '@testing-library/react';
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { Description } from './description';
 import { schema, FormProps } from './schema';
+jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 
 describe('Description', () => {
   let globalForm: FormHook;

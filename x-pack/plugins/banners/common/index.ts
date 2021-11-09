@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { BannerInfoResponse, BannerPlacement, BannerConfiguration } from './types';
+export type { BannerInfoResponse, BannerPlacement, BannerConfiguration } from './types';

@@ -7,6 +7,8 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
+import { PluginStartContract as AlertingPluginStartContract } from '../../alerting/server';
+import { SecurityPluginSetup } from '../../security/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TimelinesPluginUI {}
@@ -15,8 +17,10 @@ export interface TimelinesPluginStart {}
 
 export interface SetupPlugins {
   data: DataPluginSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface StartPlugins {
   data: DataPluginStart;
+  alerting: AlertingPluginStartContract;
 }

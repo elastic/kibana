@@ -30,7 +30,7 @@ describe('update_list_item', () => {
 
   test('it returns a list item as expected with the id changed out for the elastic id when there is a list item to update', async () => {
     const listItem = getListItemResponseMock();
-    ((getListItem as unknown) as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getUpdateListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.update.mockReturnValue(
@@ -43,7 +43,7 @@ describe('update_list_item', () => {
   });
 
   test('it returns null when there is not a list item to update', async () => {
-    ((getListItem as unknown) as jest.Mock).mockResolvedValueOnce(null);
+    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getUpdateListItemOptionsMock();
     const updatedList = await updateListItem(options);
     expect(updatedList).toEqual(null);
@@ -56,7 +56,7 @@ describe('update_list_item', () => {
       type: 'ip_range',
       value: '127.0.0.1',
     };
-    ((getListItem as unknown) as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getUpdateListItemOptionsMock();
     const updatedList = await updateListItem(options);
     expect(updatedList).toEqual(null);

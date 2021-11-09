@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
@@ -36,7 +34,7 @@ import {
 import {
   DESTINATION_PORT_FIELD_NAME,
   SOURCE_PORT_FIELD_NAME,
-} from '../../../../../../network/components/port';
+} from '../../../../../../network/components/port/helpers';
 import {
   NETWORK_BYTES_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
@@ -90,7 +88,7 @@ export const netflowRowRenderer: RowRenderer = {
   isInstance: (ecs) =>
     eventCategoryMatches(get(EVENT_CATEGORY_FIELD, ecs)) ||
     eventActionMatches(get(EVENT_ACTION_FIELD, ecs)),
-  renderRow: ({ data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <Details>
         <Netflow
@@ -116,6 +114,7 @@ export const netflowRowRenderer: RowRenderer = {
           eventId={get(ID_FIELD_NAME, data)}
           eventEnd={asArrayIfExists(get(EVENT_END_FIELD_NAME, data))}
           eventStart={asArrayIfExists(get(EVENT_START_FIELD_NAME, data))}
+          isDraggable={isDraggable}
           networkBytes={asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, data))}
           networkCommunityId={asArrayIfExists(get(NETWORK_COMMUNITY_ID_FIELD_NAME, data))}
           networkDirection={asArrayIfExists(get(NETWORK_DIRECTION_FIELD_NAME, data))}

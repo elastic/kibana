@@ -16,9 +16,9 @@ import { AnomalyResultsViewSelector } from './index';
 
 jest.mock('../../contexts/kibana', () => {
   return {
-    useMlUrlGenerator: () => ({
-      createUrl: jest.fn(),
-    }),
+    useMlLocator: () =>
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../../../../src/plugins/share/public/mocks').sharePluginMock.createLocator(),
     useNavigateToPath: () => jest.fn(),
   };
 });

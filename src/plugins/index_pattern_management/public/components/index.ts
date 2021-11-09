@@ -13,4 +13,3 @@ export {
   CreateEditField,
   CreateEditFieldContainer,
 } from './edit_index_pattern';
-export { CreateIndexPatternWizardWithRouter } from './create_index_pattern_wizard';

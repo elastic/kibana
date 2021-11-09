@@ -7,20 +7,17 @@
  */
 
 import React, { Fragment } from 'react';
-import { DurationFormat } from 'src/plugins/data/common';
+import { DurationFormat } from 'src/plugins/field_formats/common';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  DefaultFormatEditor,
-  defaultState,
-  FormatEditorProps,
-  FormatEditorState,
-} from '../default';
+import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
+import { formatId } from './constants';
+import { FormatEditorProps } from '../types';
 
 interface DurationFormatEditorState {
   hasDecimalError: boolean;
@@ -49,7 +46,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
   DurationFormatEditorFormatParams,
   DurationFormatEditorState
 > {
-  static formatId = 'duration';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [-123, 1, 12, 123, 658, 1988, 3857, 123292, 923528271],
@@ -106,8 +103,9 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           error={hasDecimalError ? null : error}
         >
           <EuiSelect
+            data-test-subj={'durationEditorInputFormat'}
             value={formatParams.inputFormat}
-            options={format.type.inputFormats.map((fmt: InputFormat) => {
+            options={(format.type as typeof DurationFormat).inputFormats.map((fmt: InputFormat) => {
               return {
                 value: fmt.kind,
                 text: fmt.text,
@@ -129,13 +127,16 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           isInvalid={!!error}
         >
           <EuiSelect
+            data-test-subj={'durationEditorOutputFormat'}
             value={formatParams.outputFormat}
-            options={format.type.outputFormats.map((fmt: OutputFormat) => {
-              return {
-                value: fmt.method,
-                text: fmt.text,
-              };
-            })}
+            options={(format.type as typeof DurationFormat).outputFormats.map(
+              (fmt: OutputFormat) => {
+                return {
+                  value: fmt.method,
+                  text: fmt.text,
+                };
+              }
+            )}
             onChange={(e) => {
               this.onChange({ outputFormat: e.target.value });
             }}

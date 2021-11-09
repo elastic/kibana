@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export {
-  // utility function
-  entries,
-  // Object types
+export type {
   Agent,
   AgentMetadata,
   AgentPolicy,
@@ -27,9 +24,8 @@ export {
   PackagePolicyPackage,
   Output,
   DataStream,
-  // API schema - misc setup, status
+  Settings,
   GetFleetStatusResponse,
-  // API schemas - Agent policy
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
@@ -43,15 +39,15 @@ export {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
-  // API schemas - Package policy
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
   GetPackagePoliciesResponse,
-  // API schemas - Data streams
+  DryRunPackagePolicy,
+  UpgradePackagePolicyResponse,
+  UpgradePackagePolicyDryRunResponse,
   GetDataStreamsResponse,
-  // API schemas - Agents
   GetAgentsResponse,
   GetAgentsRequest,
   GetOneAgentResponse,
@@ -71,24 +67,19 @@ export {
   PostBulkAgentReassignResponse,
   PostNewAgentActionResponse,
   PostNewAgentActionRequest,
-  // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
-  // API schemas - Outputs
   GetOutputsResponse,
   PutOutputRequest,
   PutOutputResponse,
-  // API schemas - Settings
   GetSettingsResponse,
   PutSettingsRequest,
   PutSettingsResponse,
-  // API schemas - app
   CheckPermissionsResponse,
   GenerateServiceTokenResponse,
-  // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
   AssetType,
@@ -96,8 +87,6 @@ export {
   CategoryId,
   CategorySummaryItem,
   CategorySummaryList,
-  ElasticsearchAssetType,
-  KibanaAssetType,
   PackageInfo,
   RegistryVarsEntry,
   RegistryInput,
@@ -119,13 +108,15 @@ export {
   InstallPackageResponse,
   DeletePackageResponse,
   DetailViewPanelName,
-  InstallStatus,
   InstallationStatus,
   Installable,
   RegistryRelease,
   PackageSpecCategory,
+  UpdatePackageRequest,
+  UpdatePackageResponse,
 } from '../../common';
+export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from '../../common';
 
 export * from './intra_app_route_state';
-
 export * from './ui_extensions';
+export * from './in_memory_package_policy';

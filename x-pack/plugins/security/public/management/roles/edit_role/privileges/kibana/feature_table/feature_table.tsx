@@ -266,10 +266,11 @@ export class FeatureTable extends Component<Props, {}> {
       return null;
     }
 
-    const selectedPrivilegeId = this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilegeId(
-      feature.id,
-      this.props.privilegeIndex
-    );
+    const selectedPrivilegeId =
+      this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilegeId(
+        feature.id,
+        this.props.privilegeIndex
+      );
 
     const options = primaryFeaturePrivileges.map((privilege) => {
       return {

@@ -98,7 +98,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // check that we drilled-down with filter from pie chart
         expect(await filterBar.getFilterCount()).to.be(1);
 
-        const originalTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        const originalTimeRangeDurationHours =
+          await PageObjects.timePicker.getTimeDurationInHours();
 
         // brush area chart and drilldown back to pie chat dashboard
         await brushAreaChart();
@@ -134,7 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard(
           dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
         );
-        const originalTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        const originalTimeRangeDurationHours =
+          await PageObjects.timePicker.getTimeDurationInHours();
         await brushAreaChart();
         await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
         await navigateWithinDashboard(async () => {
@@ -154,7 +156,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Copy to space', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/83824
+    describe.skip('Copy to space', () => {
       const destinationSpaceId = 'custom_space';
       before(async () => {
         await spaces.create({

@@ -1,8 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true
+    "outDir": "./target/types"
   },
   "include": [
     "index.ts",
@@ -13,6 +12,9 @@
   ],
   "exclude": [],
   "references": [
-    { "path": "../../src/core/tsconfig.json" }
+    { "path": "../../src/core/tsconfig.json" },
+    { "path": "../../src/plugins/share/tsconfig.json" },
+    { "path": "../locator_examples/tsconfig.json" },
+    { "path": "../developer_examples/tsconfig.json" },
   ]
 }

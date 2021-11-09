@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectedExportedRule, newRule } from '../../objects/rule';
+import { expectedExportedRule, getNewRule } from '../../objects/rule';
 import {
   goToManageAlertsDetectionRules,
   waitForAlertsIndexToBeCreated,
@@ -16,7 +16,7 @@ import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Export rules', () => {
   beforeEach(() => {
@@ -25,17 +25,17 @@ describe('Export rules', () => {
       'POST',
       '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule).as('ruleResponse');
+    createCustomRule(getNewRule()).as('ruleResponse');
   });
 
   it('Exports a custom rule', function () {
     goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedRule(this.ruleResponse));
+      cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
     });
   });
 });

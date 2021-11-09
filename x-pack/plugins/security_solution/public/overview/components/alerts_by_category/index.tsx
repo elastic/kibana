@@ -9,17 +9,13 @@ import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { Position } from '@elastic/charts';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsTableType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
@@ -33,6 +29,7 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -41,7 +38,7 @@ const DEFAULT_STACK_BY = 'event.module';
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters: Filter[];
   hideHeaderChildren?: boolean;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   indexNames: string[];
   query: Query;
 }
@@ -67,7 +64,8 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const goToHostAlerts = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.alerts, urlSearch),
       });
     },
@@ -100,7 +98,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     []
   );
 
-  const filterQuery = useMemo(
+  const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -110,6 +108,8 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
       }),
     [filters, indexPattern, uiSettings, query]
   );
+
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   useEffect(() => {
     return () => {

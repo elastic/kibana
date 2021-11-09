@@ -33,21 +33,6 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
   opacity: 1;
 }
 
-.c4 {
-  padding: 16px;
-  background: rgba(250,251,253,0.9);
-  bottom: 0;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 1000;
-}
-
-.c5 {
-  height: 100%;
-}
-
 .c2 dt {
   font-size: 12px !important;
 }
@@ -73,6 +58,21 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
   right: 12px;
   top: 6px;
   z-index: 2;
+}
+
+.c4 {
+  padding: 16px;
+  background: rgba(250,251,253,0.9);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.c5 {
+  height: 100%;
 }
 
 <ExpandableHostDetails
@@ -105,9 +105,18 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
       id="hostsDetailsQuery"
       indexNames={
         Array [
-          "IShouldBeUsed",
+          "-*elastic-cloud-logs-*",
+          "apm-*-transaction*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "traces-apm*",
+          "winlogbeat-*",
         ]
       }
+      isDraggable={false}
       isInDetailsSidePanel={true}
       isLoadingAnomaliesData={false}
       loading={true}
@@ -121,14 +130,17 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
           className="c0"
         >
           <OverviewWrapper
+            data-test-subj="host-overview"
             direction="column"
           >
             <EuiFlexGroup
               className="c1"
+              data-test-subj="host-overview"
               direction="column"
             >
               <div
                 className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+                data-test-subj="host-overview"
               >
                 <OverviewDescriptionList
                   descriptionList={
@@ -298,6 +310,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="host.ip"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           render={[Function]}
                           rowItems={Array []}
                         />,
@@ -307,6 +320,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="host.mac"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "MAC addresses",
@@ -315,6 +329,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="host.os.platform"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Platform",
@@ -336,6 +351,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="host.ip"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 render={[Function]}
                                 rowItems={Array []}
                               />,
@@ -345,6 +361,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="host.mac"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "MAC addresses",
@@ -353,6 +370,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="host.os.platform"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Platform",
@@ -368,6 +386,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="host.ip"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   render={[Function]}
                                   rowItems={Array []}
                                 />,
@@ -377,6 +396,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="host.mac"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "MAC addresses",
@@ -385,6 +405,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="host.os.platform"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Platform",
@@ -413,6 +434,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="host.ip"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   render={[Function]}
                                   rowItems={Array []}
                                 >
@@ -444,6 +466,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="host.mac"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -474,6 +497,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="host.os.platform"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -499,6 +523,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="host.os.name"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Operating system",
@@ -507,6 +532,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="host.os.family"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Family",
@@ -515,6 +541,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="host.os.version"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Version",
@@ -523,6 +550,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="host.architecture"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Architecture",
@@ -544,6 +572,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="host.os.name"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Operating system",
@@ -552,6 +581,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="host.os.family"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Family",
@@ -560,6 +590,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="host.os.version"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Version",
@@ -568,6 +599,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="host.architecture"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Architecture",
@@ -583,6 +615,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="host.os.name"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Operating system",
@@ -591,6 +624,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="host.os.family"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Family",
@@ -599,6 +633,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="host.os.version"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Version",
@@ -607,6 +642,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="host.architecture"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Architecture",
@@ -635,6 +671,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="host.os.name"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -665,6 +702,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="host.os.family"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -695,6 +733,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="host.os.version"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -725,6 +764,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="host.architecture"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -750,6 +790,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="cloud.provider"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Cloud provider",
@@ -758,6 +799,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="cloud.region"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Region",
@@ -766,6 +808,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="cloud.instance.id"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Instance ID",
@@ -774,6 +817,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                         "description": <Memo(DefaultFieldRenderer)
                           attrName="cloud.machine.type"
                           idPrefix="host-overview-text-context"
+                          isDraggable={false}
                           rowItems={Array []}
                         />,
                         "title": "Machine type",
@@ -795,6 +839,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="cloud.provider"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Cloud provider",
@@ -803,6 +848,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="cloud.region"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Region",
@@ -811,6 +857,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="cloud.instance.id"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Instance ID",
@@ -819,6 +866,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                               "description": <Memo(DefaultFieldRenderer)
                                 attrName="cloud.machine.type"
                                 idPrefix="host-overview-text-context"
+                                isDraggable={false}
                                 rowItems={Array []}
                               />,
                               "title": "Machine type",
@@ -834,6 +882,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="cloud.provider"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Cloud provider",
@@ -842,6 +891,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="cloud.region"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Region",
@@ -850,6 +900,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="cloud.instance.id"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Instance ID",
@@ -858,6 +909,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 "description": <Memo(DefaultFieldRenderer)
                                   attrName="cloud.machine.type"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 />,
                                 "title": "Machine type",
@@ -886,6 +938,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="cloud.provider"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -916,6 +969,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="cloud.region"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -946,6 +1000,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="cloud.instance.id"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>
@@ -976,6 +1031,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 <DefaultFieldRenderer
                                   attrName="cloud.machine.type"
                                   idPrefix="host-overview-text-context"
+                                  isDraggable={false}
                                   rowItems={Array []}
                                 >
                                   <EmptyWrapper>

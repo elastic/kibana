@@ -34,4 +34,8 @@ export const RUNTIME_FIELD_OPTIONS: Array<EuiComboBoxOptionOption<RuntimeType>> 
     label: 'Boolean',
     value: 'boolean',
   },
+  {
+    label: 'Geo point',
+    value: 'geo_point',
+  },
 ];

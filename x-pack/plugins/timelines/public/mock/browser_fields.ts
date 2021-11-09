@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DocValueFields } from '../../common/search_strategy';
 import type { BrowserFields } from '../../common/search_strategy/index_fields';
 
 const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
+  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
@@ -735,3 +737,12 @@ export const mockDocValueFields: DocValueFields[] = [
     format: 'date_time',
   },
 ];
+
+export const mockRuntimeMappings: MappingRuntimeFields = {
+  '@a.runtime.field': {
+    script: {
+      source: 'emit("Radical dude: " + doc[\'host.name\'].value)',
+    },
+    type: 'keyword',
+  },
+};

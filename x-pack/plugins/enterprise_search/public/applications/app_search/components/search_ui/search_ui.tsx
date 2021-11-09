@@ -24,7 +24,7 @@ import { SearchUILogic } from './search_ui_logic';
 
 export const SearchUI: React.FC = () => {
   const { loadFieldData } = useActions(SearchUILogic);
-  const { isEngineSchemaEmpty } = useValues(EngineLogic);
+  const { hasEmptySchema } = useValues(EngineLogic);
 
   useEffect(() => {
     loadFieldData();
@@ -34,7 +34,7 @@ export const SearchUI: React.FC = () => {
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([SEARCH_UI_TITLE])}
       pageHeader={{ pageTitle: SEARCH_UI_TITLE }}
-      isEmptyState={isEngineSchemaEmpty}
+      isEmptyState={hasEmptySchema}
       emptyState={<EmptyState />}
     >
       <EuiFlexGroup alignItems="flexStart">

@@ -6,8 +6,10 @@
  */
 
 import {
-  EuiDescribedFormGroup,
+  EuiTitle,
+  EuiText,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFormControlLayout,
   EuiFormRow,
 } from '@elastic/eui';
@@ -80,70 +82,75 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
   );
 
   return (
-    <EuiDescribedFormGroup
-      title={
-        <h3>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.infra.analysisSetup.timeRangeTitle"
+              defaultMessage="Choose a time range"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
           <FormattedMessage
-            id="xpack.infra.analysisSetup.timeRangeTitle"
-            defaultMessage="Choose a time range"
+            id="xpack.infra.analysisSetup.timeRangeDescription"
+            defaultMessage="By default, Machine Learning analyzes log messages in your log indices no older than four weeks, and continues indefinitely. You can specify a different date to begin, to end, or both."
           />
-        </h3>
-      }
-      description={
-        <FormattedMessage
-          id="xpack.infra.analysisSetup.timeRangeDescription"
-          defaultMessage="By default, Machine Learning analyzes log messages in your log indices no older than four weeks, and continues indefinitely. You can specify a different date to begin, to end, or both."
-        />
-      }
-    >
-      <EuiFormRow
-        error={startTimeValidationErrorMessages}
-        fullWidth
-        isInvalid={startTimeValidationErrorMessages.length > 0}
-        label={startTimeLabel}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFormControlLayout
-            clear={startTime && !disabled ? { onClick: () => setStartTime(undefined) } : undefined}
-            isDisabled={disabled}
-          >
-            <FixedDatePicker
-              disabled={disabled}
-              showTimeSelect
-              selected={startTimeValue}
-              onChange={(date) => setStartTime(selectedDateToParam(date))}
-              placeholder={startTimeDefaultDescription}
-              maxDate={now}
-            />
-          </EuiFormControlLayout>
-        </EuiFlexGroup>
-      </EuiFormRow>
-      <EuiFormRow
-        error={endTimeValidationErrorMessages}
-        fullWidth
-        isInvalid={endTimeValidationErrorMessages.length > 0}
-        label={endTimeLabel}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFormControlLayout
-            clear={endTime && !disabled ? { onClick: () => setEndTime(undefined) } : undefined}
-            isDisabled={disabled}
-          >
-            <FixedDatePicker
-              disabled={disabled}
-              showTimeSelect
-              selected={endTimeValue}
-              onChange={(date) => setEndTime(selectedDateToParam(date))}
-              placeholder={endTimeDefaultDescription}
-              openToDate={now}
-              minDate={startTimeValue}
-              minTime={selectedEndTimeIsToday ? now : moment().hour(0).minutes(0)}
-              maxTime={moment().hour(23).minutes(59)}
-            />
-          </EuiFormControlLayout>
-        </EuiFlexGroup>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          error={startTimeValidationErrorMessages}
+          fullWidth
+          isInvalid={startTimeValidationErrorMessages.length > 0}
+          label={startTimeLabel}
+        >
+          <EuiFlexGroup gutterSize="s">
+            <EuiFormControlLayout
+              clear={
+                startTime && !disabled ? { onClick: () => setStartTime(undefined) } : undefined
+              }
+              isDisabled={disabled}
+            >
+              <FixedDatePicker
+                disabled={disabled}
+                showTimeSelect
+                selected={startTimeValue}
+                onChange={(date) => setStartTime(selectedDateToParam(date))}
+                placeholder={startTimeDefaultDescription}
+                maxDate={now}
+              />
+            </EuiFormControlLayout>
+          </EuiFlexGroup>
+        </EuiFormRow>
+        <EuiFormRow
+          error={endTimeValidationErrorMessages}
+          fullWidth
+          isInvalid={endTimeValidationErrorMessages.length > 0}
+          label={endTimeLabel}
+        >
+          <EuiFlexGroup gutterSize="s">
+            <EuiFormControlLayout
+              clear={endTime && !disabled ? { onClick: () => setEndTime(undefined) } : undefined}
+              isDisabled={disabled}
+            >
+              <FixedDatePicker
+                disabled={disabled}
+                showTimeSelect
+                selected={endTimeValue}
+                onChange={(date) => setEndTime(selectedDateToParam(date))}
+                placeholder={endTimeDefaultDescription}
+                openToDate={now}
+                minDate={startTimeValue}
+                minTime={selectedEndTimeIsToday ? now : moment().hour(0).minutes(0)}
+                maxTime={moment().hour(23).minutes(59)}
+              />
+            </EuiFormControlLayout>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

@@ -6,4 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { DefaultFormatEditor, defaultState, FormatEditorProps, FormatEditorState } from './default';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { FormatEditorState } from './default';
+export { defaultState } from './default';
+export type { FormatEditorProps } from '../types';
+export type { DefaultFormatEditor } from './default';
+
+export const defaultFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./default').then((m) => m.DefaultFormatEditor);
+defaultFormatEditorFactory.formatId = formatId;

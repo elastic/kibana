@@ -18,45 +18,35 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerUpdateRoute({ router, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/index_templates/{name}'),
       validate: { body: bodySchema, params: paramsSchema },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { name } = req.params as typeof paramsSchema.type;
-      const template = req.body as TemplateDeserialized;
-      const {
-        _kbnMeta: { isLegacy },
-      } = template;
-
-      // Verify the template exists (ES will throw 404 if not)
-      const doesExist = await doesTemplateExist({ name, callAsCurrentUser, isLegacy });
-
-      if (!doesExist) {
-        return res.notFound();
-      }
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { name } = request.params as typeof paramsSchema.type;
+      const template = request.body as TemplateDeserialized;
 
       try {
-        // Next, update index template
-        const response = await saveTemplate({ template, callAsCurrentUser, isLegacy });
+        const {
+          _kbnMeta: { isLegacy },
+        } = template;
 
-        return res.ok({ body: response });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          const error = lib.parseEsError(e.response);
-          return res.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: error.message,
-              attributes: error,
-            },
-          });
+        // Verify the template exists (ES will throw 404 if not)
+        const { body: templateExists } = await doesTemplateExist({ name, client, isLegacy });
+
+        if (!templateExists) {
+          return response.notFound();
         }
-        // Case: default
-        throw e;
+
+        // Next, update index template
+        const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
+
+        return response.ok({ body: responseBody });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

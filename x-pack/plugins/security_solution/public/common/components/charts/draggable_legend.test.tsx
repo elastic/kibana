@@ -21,13 +21,9 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
-
-const allOthersDataProviderId =
-  'draggable-legend-item-527adabe-8e1c-4a1f-965c-2f3d65dda9e1-event_dataset-All others';
 
 const legendItems: LegendItem[] = [
   {
@@ -56,12 +52,6 @@ const legendItems: LegendItem[] = [
       'draggable-legend-item-25d5fcd6-87ba-46b5-893e-c655d7d504e3-event_dataset-esensor',
     field: 'event.dataset',
     value: 'esensor',
-  },
-  {
-    color: '#F37020',
-    dataProviderId: allOthersDataProviderId,
-    field: 'event.dataset',
-    value: 'All others',
   },
 ];
 
@@ -95,14 +85,7 @@ describe('DraggableLegend', () => {
     it('renders the legend items', () => {
       legendItems.forEach((item) =>
         expect(
-          wrapper
-            .find(
-              item.dataProviderId !== allOthersDataProviderId
-                ? `[data-test-subj="legend-item-${item.dataProviderId}"]`
-                : '[data-test-subj="all-others-legend-item"]'
-            )
-            .first()
-            .text()
+          wrapper.find(`[data-test-subj="legend-item-${item.dataProviderId}"]`).first().text()
         ).toEqual(item.value)
       );
     });

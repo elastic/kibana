@@ -42,7 +42,7 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
       appId: {
         type: 'keyword',
       },
-      urlGeneratorId: {
+      locatorId: {
         type: 'keyword',
       },
       initialState: {
@@ -64,6 +64,9 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
         type: 'keyword',
       },
       username: {
+        type: 'keyword',
+      },
+      version: {
         type: 'keyword',
       },
     },

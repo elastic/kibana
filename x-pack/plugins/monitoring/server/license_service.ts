@@ -6,7 +6,7 @@
  */
 
 import { Subscription } from 'rxjs';
-import { ILegacyCustomClusterClient } from 'kibana/server';
+import { ICustomClusterClient } from 'kibana/server';
 import { ILicense, LicenseFeature } from '../../licensing/common/types';
 import { LicensingPluginStart } from '../../licensing/server';
 import { MonitoringConfig } from './config';
@@ -15,7 +15,7 @@ import { MonitoringLicenseService } from './types';
 
 interface SetupDeps {
   licensing: LicensingPluginStart;
-  monitoringClient: ILegacyCustomClusterClient;
+  monitoringClient: ICustomClusterClient;
   config: MonitoringConfig;
   log: Logger;
 }

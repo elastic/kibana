@@ -33,11 +33,18 @@
         {
           "id": "T1070",
           "name": "Indicator Removal on Host",
-          "reference": "https://attack.mitre.org/techniques/T1070/"
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.004",
+              "name": "File Deletion",
+              "reference": "https://attack.mitre.org/techniques/T1070/004/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }

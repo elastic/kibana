@@ -23,7 +23,7 @@ import { renderApp, renderHeaderActions } from './';
 
 describe('renderApp', () => {
   const kibanaDeps = {
-    params: coreMock.createAppMountParamters(),
+    params: coreMock.createAppMountParameters(),
     core: coreMock.createStart(),
     plugins: {
       licensing: licensingMock.createStart(),
@@ -64,7 +64,7 @@ describe('renderApp', () => {
 
     it('renders EnterpriseSearch', () => {
       mount(EnterpriseSearch);
-      expect(mockContainer.querySelector('.enterpriseSearchOverview')).not.toBeNull();
+      expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
     });
 
     it('renders AppSearch', () => {

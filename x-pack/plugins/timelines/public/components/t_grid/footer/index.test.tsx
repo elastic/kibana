@@ -14,7 +14,6 @@ import { FooterComponent, PagingControlComponent } from './index';
 
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
-  const updatedAt = 1546878704036;
   const serverSideEventCount = 15546;
   const itemsCount = 2;
 
@@ -24,7 +23,6 @@ describe('Footer Timeline Component', () => {
         <TestProviders>
           <FooterComponent
             activePage={0}
-            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -46,7 +44,6 @@ describe('Footer Timeline Component', () => {
         <TestProviders>
           <FooterComponent
             activePage={0}
-            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -68,7 +65,6 @@ describe('Footer Timeline Component', () => {
         <TestProviders>
           <FooterComponent
             activePage={0}
-            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -120,7 +116,6 @@ describe('Footer Timeline Component', () => {
         <TestProviders>
           <FooterComponent
             activePage={0}
-            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -142,7 +137,6 @@ describe('Footer Timeline Component', () => {
         <TestProviders>
           <FooterComponent
             activePage={0}
-            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -167,7 +161,6 @@ describe('Footer Timeline Component', () => {
         <TestProviders>
           <FooterComponent
             activePage={0}
-            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}
@@ -215,7 +208,6 @@ describe('Footer Timeline Component', () => {
         <TestProviders>
           <FooterComponent
             activePage={0}
-            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={true}
@@ -238,7 +230,6 @@ describe('Footer Timeline Component', () => {
         <TestProviders>
           <FooterComponent
             activePage={0}
-            updatedAt={updatedAt}
             height={100}
             id={'timeline-id'}
             isLive={false}

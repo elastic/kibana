@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { unitSuffixesLong } from '../suffix_formatter';
-import type { TimeScaleUnit } from '../time_scale';
+import { unitSuffixesLong } from '../../../common/suffix_formatter';
+import type { TimeScaleUnit } from '../../../common/expressions';
 import type { IndexPatternLayer } from '../types';
 import type { IndexPatternColumn } from './definitions';
 

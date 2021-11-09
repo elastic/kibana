@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { Client } from '@elastic/elasticsearch';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { without, uniq } from 'lodash';
 import { SuperTest } from 'supertest';
 import {
@@ -35,6 +37,7 @@ export interface UpdateObjectsSpacesTestCase {
   objects: Array<{
     id: string;
     existingNamespaces: string[];
+    expectAliasDifference?: number;
     failure?: 400 | 404;
   }>;
   spacesToAdd: string[];
@@ -54,38 +57,67 @@ const getTestTitle = ({ objects, spacesToAdd, spacesToRemove }: UpdateObjectsSpa
   return `{objects: [${objStr}], spacesToAdd: [${addStr}], spacesToRemove: [${remStr}]}`;
 };
 
-export function updateObjectsSpacesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function updateObjectsSpacesTestSuiteFactory(
+  es: Client,
+  esArchiver: any,
+  supertest: SuperTest<any>
+) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
-  const expectResponseBody = (
-    testCase: UpdateObjectsSpacesTestCase,
-    statusCode: 200 | 403,
-    authorizedSpace?: string
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    if (statusCode === 403) {
-      await expectForbidden(TYPE)(response);
-    } else {
-      const { objects, spacesToAdd, spacesToRemove } = testCase;
-      const apiResponse = response.body as SavedObjectsUpdateObjectsSpacesResponse;
-      objects.forEach(({ id, existingNamespaces, failure }, i) => {
-        const object = apiResponse.objects[i];
-        if (failure === 404) {
-          const error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
-          expect(object.error).to.eql(error.output.payload);
-        } else {
-          // success
-          const expectedSpaces = without(
-            uniq([...existingNamespaces, ...spacesToAdd]),
-            ...spacesToRemove
-          ).map((x) => (authorizedSpace && x !== authorizedSpace && x !== '*' ? '?' : x));
+  const expectResponseBody =
+    (
+      testCase: UpdateObjectsSpacesTestCase,
+      statusCode: 200 | 403,
+      authorizedSpace?: string
+    ): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      if (statusCode === 403) {
+        await expectForbidden(TYPE)(response);
+      } else {
+        const { objects, spacesToAdd, spacesToRemove } = testCase;
+        const apiResponse = response.body as SavedObjectsUpdateObjectsSpacesResponse;
 
-          const result = apiResponse.objects[i];
-          expect(result.type).to.eql(TYPE);
-          expect(result.id).to.eql(id);
-          expect(result.spaces.sort()).to.eql(expectedSpaces.sort());
+        let hasRefreshed = false;
+        for (let i = 0; i < objects.length; i++) {
+          const { id, existingNamespaces, expectAliasDifference, failure } = objects[i];
+          const object = apiResponse.objects[i];
+          if (failure === 404) {
+            const error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
+            expect(object.error).to.eql(error.output.payload);
+          } else {
+            // success
+            const expectedSpaces = without(
+              uniq([...existingNamespaces, ...spacesToAdd]),
+              ...spacesToRemove
+            ).map((x) => (authorizedSpace && x !== authorizedSpace && x !== '*' ? '?' : x));
+
+            const result = apiResponse.objects[i];
+            expect(result.type).to.eql(TYPE);
+            expect(result.id).to.eql(id);
+            expect(result.spaces.sort()).to.eql(expectedSpaces.sort());
+
+            if (expectAliasDifference !== undefined) {
+              // if we deleted an object that had an alias pointing to it, the alias should have been deleted as well
+              if (!hasRefreshed) {
+                await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
+                hasRefreshed = true;
+              }
+              const searchResponse = await es.search({
+                index: '.kibana',
+                body: {
+                  size: 0,
+                  query: { terms: { type: ['legacy-url-alias'] } },
+                  track_total_hits: true,
+                },
+              });
+              expect((searchResponse.hits.total as SearchTotalHits).value).to.eql(
+                // Six aliases exist in the test fixtures
+                6 + expectAliasDifference
+              );
+            }
+          }
         }
-      });
-    }
-  };
+      }
+    };
   const createTestDefinitions = (
     testCases: UpdateObjectsSpacesTestCase | UpdateObjectsSpacesTestCase[],
     forbidden: boolean,
@@ -107,37 +139,36 @@ export function updateObjectsSpacesTestSuiteFactory(esArchiver: any, supertest: 
     }));
   };
 
-  const makeUpdateObjectsSpacesTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: UpdateObjectsSpacesTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeUpdateObjectsSpacesTest =
+    (describeFn: Mocha.SuiteFunction) =>
+    (description: string, definition: UpdateObjectsSpacesTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const requestBody = test.request;
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/spaces/_update_objects_spaces`)
-            .auth(user?.username, user?.password)
-            .send(requestBody)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const requestBody = test.request;
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/spaces/_update_objects_spaces`)
+              .auth(user?.username, user?.password)
+              .send(requestBody)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeUpdateObjectsSpacesTest(describe);
   // @ts-ignore

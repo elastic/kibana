@@ -22,16 +22,16 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
   function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
       name: $(row).findTestSubject('alertsTableCell-name').find('.euiTableCellContent').text(),
-      tagsText: $(row)
-        .findTestSubject('alertsTableCell-tagsText')
-        .find('.euiTableCellContent')
-        .text(),
-      alertType: $(row)
-        .findTestSubject('alertsTableCell-alertType')
+      duration: $(row)
+        .findTestSubject('alertsTableCell-duration')
         .find('.euiTableCellContent')
         .text(),
       interval: $(row)
         .findTestSubject('alertsTableCell-interval')
+        .find('.euiTableCellContent')
+        .text(),
+      tags: $(row)
+        .findTestSubject('alertsTableCell-tagsPopover')
         .find('.euiTableCellContent')
         .text(),
     };
@@ -190,8 +190,6 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     ) {
       await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
-        await testSubjects.click('collapsedItemActions');
-
         const switchControl = await testSubjects.find(switchName);
         const isChecked = await switchControl.getAttribute('aria-checked');
         expect(isChecked).to.eql(shouldBeCheckedAsString);

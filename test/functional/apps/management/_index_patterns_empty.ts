@@ -32,6 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         path: '/logstash-a',
         method: 'DELETE',
       });
+      await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
     });
 
     // create index pattern and return to verify list

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import semver from 'semver';
 import LRU from 'lru-cache';
-import { isEqual } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { ListResult } from '../../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
@@ -25,6 +26,7 @@ import {
   getEndpointEventFiltersList,
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
+  getHostIsolationExceptionsList,
   Manifest,
 } from '../../../lib/artifacts';
 import {
@@ -34,6 +36,9 @@ import {
 import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { InvalidInternalManifestError } from '../errors';
+import { wrapErrorIfNeeded } from '../../../utils';
+import { EndpointError } from '../../../errors';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -233,6 +238,46 @@ export class ManifestManager {
     );
   }
 
+  protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildHostIsolationExceptionForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(
+            await this.buildHostIsolationExceptionForOs(os, policyId)
+          );
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildHostIsolationExceptionForOs(
+    os: string,
+    policyId?: string
+  ): Promise<InternalArtifactCompleteSchema> {
+    return buildArtifact(
+      await getHostIsolationExceptionsList(
+        this.exceptionListClient,
+        this.schemaVersion,
+        os,
+        policyId
+      ),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME
+    );
+  }
+
   /**
    * Writes new artifact SO.
    *
@@ -282,7 +327,7 @@ export class ManifestManager {
           newManifest.replaceArtifact(fleetArtifact);
         }
       } else {
-        errors.push(new Error(`Incomplete artifact: ${getArtifactId(artifact)}`));
+        errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`, artifact));
       }
     }
     return errors;
@@ -310,8 +355,8 @@ export class ManifestManager {
   }
 
   /**
-   * Returns the last computed manifest based on the state of the
-   * user-artifact-manifest SO.
+   * Returns the last computed manifest based on the state of the user-artifact-manifest SO. If no
+   * artifacts have been created yet (ex. no Endpoint policies are in use), then method return `null`
    *
    * @returns {Promise<Manifest | null>} The last computed manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
@@ -321,7 +366,10 @@ export class ManifestManager {
       const manifestSo = await this.getManifestClient().getManifest();
 
       if (manifestSo.version === undefined) {
-        throw new Error('No version returned for manifest.');
+        throw new InvalidInternalManifestError(
+          'Internal Manifest map SavedObject is missing version',
+          manifestSo
+        );
       }
 
       const manifest = new Manifest({
@@ -334,16 +382,21 @@ export class ManifestManager {
         const artifact = await this.artifactClient.getArtifact(entry.artifactId);
 
         if (!artifact) {
-          throw new Error(`artifact id [${entry.artifactId}] not found!`);
+          this.logger.error(
+            new InvalidInternalManifestError(`artifact id [${entry.artifactId}] not found!`, {
+              entry,
+              action: 'removed from internal ManifestManger tracking map',
+            })
+          );
+        } else {
+          manifest.addEntry(artifact, entry.policyId);
         }
-
-        manifest.addEntry(artifact, entry.policyId);
       }
 
       return manifest;
     } catch (error) {
       if (!error.output || error.output.statusCode !== 404) {
-        throw error;
+        throw wrapErrorIfNeeded(error);
       }
       return null;
     }
@@ -369,6 +422,7 @@ export class ManifestManager {
       this.buildExceptionListArtifacts(),
       this.buildTrustedAppsArtifacts(),
       this.buildEventFiltersArtifacts(),
+      this.buildHostIsolationExceptionsArtifacts(),
     ]);
 
     const manifest = new Manifest({
@@ -381,7 +435,10 @@ export class ManifestManager {
       await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
         const artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
         if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
-          throw new Error(`Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`);
+          throw new EndpointError(
+            `Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`,
+            artifactToAdd
+          );
         }
 
         manifest.addEntry(artifactToAdd, policyId);
@@ -416,14 +473,19 @@ export class ManifestManager {
             const serializedManifest = manifest.toPackagePolicyManifest(packagePolicy.id);
 
             if (!manifestDispatchSchema.is(serializedManifest)) {
-              errors.push(new Error(`Invalid manifest for policy ${packagePolicy.id}`));
+              errors.push(
+                new EndpointError(
+                  `Invalid manifest for policy ${packagePolicy.id}`,
+                  serializedManifest
+                )
+              );
             } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
               newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
 
               try {
                 await this.packagePolicyService.update(
                   this.savedObjectsClient,
-                  // @ts-ignore
+                  // @ts-expect-error TS2345
                   undefined,
                   id,
                   newPackagePolicy
@@ -443,7 +505,9 @@ export class ManifestManager {
             this.logger.debug(`No change in manifest version for package policy: ${id}`);
           }
         } else {
-          errors.push(new Error(`Package Policy ${id} has no config.`));
+          errors.push(
+            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, newPackagePolicy)
+          );
         }
       }
     );
@@ -493,5 +557,76 @@ export class ManifestManager {
 
   public getArtifactsClient(): EndpointArtifactClientInterface {
     return this.artifactClient;
+  }
+
+  /**
+   * Cleanup .fleet-artifacts index if there are some orphan artifacts
+   */
+  public async cleanup(manifest: Manifest) {
+    try {
+      const fleetArtifacts = [];
+      const perPage = 100;
+      let page = 1;
+
+      let fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+        perPage,
+        page,
+      });
+      fleetArtifacts.push(...fleetArtifactsResponse.items);
+
+      while (
+        fleetArtifactsResponse.total > fleetArtifacts.length &&
+        !isEmpty(fleetArtifactsResponse.items)
+      ) {
+        page += 1;
+        fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+          perPage,
+          page,
+        });
+        fleetArtifacts.push(...fleetArtifactsResponse.items);
+      }
+
+      if (isEmpty(fleetArtifacts)) {
+        return;
+      }
+
+      const badArtifacts = [];
+
+      const manifestArtifactsIds = manifest
+        .getAllArtifacts()
+        .map((artifact) => getArtifactId(artifact));
+
+      for (const fleetArtifact of fleetArtifacts) {
+        const artifactId = getArtifactId(fleetArtifact);
+        const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
+
+        if (!isArtifactInManifest) {
+          badArtifacts.push(fleetArtifact);
+        }
+      }
+
+      if (isEmpty(badArtifacts)) {
+        return;
+      }
+
+      this.logger.error(
+        new EndpointError(`Cleaning up ${badArtifacts.length} orphan artifacts`, badArtifacts)
+      );
+
+      await pMap(
+        badArtifacts,
+        async (badArtifact) => this.artifactClient.deleteArtifact(getArtifactId(badArtifact)),
+        {
+          concurrency: 5,
+          /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
+           * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
+          stopOnError: false,
+        }
+      );
+
+      this.logger.info(`All orphan artifacts has been removed successfully`);
+    } catch (error) {
+      this.logger.error(new EndpointError('There was an error cleaning orphan artifacts', error));
+    }
   }
 }

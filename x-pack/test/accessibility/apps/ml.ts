@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await ml.securityUI.logout();
       });
 
@@ -59,8 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/103538
-      describe.skip('with data loaded', function () {
+      describe('with data loaded', function () {
         const adJobId = 'fq_single_a11y';
         const dfaOutlierJobId = 'iph_outlier_a11y';
         const calendarId = 'calendar_a11y';

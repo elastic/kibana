@@ -71,6 +71,8 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       }),
       pollInterval
     ).subscribe();
@@ -104,6 +106,8 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       }),
       pollInterval,
       retryDelay
@@ -148,6 +152,8 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       })
     ).toPromise();
 
@@ -178,6 +184,8 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       })
     ).toPromise();
 
@@ -208,11 +216,13 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       })
     ).toPromise();
 
-    expect(status.level).toEqual(ServiceStatusLevels.unavailable);
-    expect(status.summary).toEqual('Alerting framework is unavailable');
+    expect(status.level).toEqual(ServiceStatusLevels.degraded);
+    expect(status.summary).toEqual('Alerting framework is degraded');
     expect(status.meta).toBeUndefined();
   });
 
@@ -235,6 +245,8 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       }),
       retryDelay
     ).subscribe((status) => {
@@ -265,11 +277,13 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       }),
       retryDelay
     ).subscribe((status) => {
-      expect(status.level).toEqual(ServiceStatusLevels.unavailable);
-      expect(status.summary).toEqual('Alerting framework is unavailable');
+      expect(status.level).toEqual(ServiceStatusLevels.degraded);
+      expect(status.summary).toEqual('Alerting framework is degraded');
       expect(status.meta).toEqual({ error: err });
     });
 
@@ -301,6 +315,8 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       })
     ).toPromise();
 

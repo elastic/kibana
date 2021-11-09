@@ -15,9 +15,9 @@ export const queryToAst = (query: Query) => {
   if (query.language === 'kuery') {
     return buildExpression([
       buildExpressionFunction<ExpressionFunctionKql>('kql', { q: query.query as string }),
-    ]);
+    ]).toAst();
   }
   return buildExpression([
     buildExpressionFunction<ExpressionFunctionLucene>('lucene', { q: JSON.stringify(query.query) }),
-  ]);
+  ]).toAst();
 };

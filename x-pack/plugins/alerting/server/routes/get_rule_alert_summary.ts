@@ -8,12 +8,12 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
-import { GetAlertInstanceSummaryParams } from '../alerts_client';
+import { GetAlertSummaryParams } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
-  AlertInstanceSummary,
+  AlertSummary,
 } from '../types';
 
 const paramSchema = schema.object({
@@ -24,31 +24,31 @@ const querySchema = schema.object({
   date_start: schema.maybe(schema.string()),
 });
 
-const rewriteReq: RewriteRequestCase<GetAlertInstanceSummaryParams> = ({
+const rewriteReq: RewriteRequestCase<GetAlertSummaryParams> = ({
   date_start: dateStart,
   ...rest
 }) => ({
   ...rest,
   dateStart,
 });
-const rewriteBodyRes: RewriteResponseCase<AlertInstanceSummary> = ({
-  alertTypeId,
+const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
+  ruleTypeId,
   muteAll,
   statusStartDate,
   statusEndDate,
   errorMessages,
   lastRun,
-  instances: alerts,
+  executionDuration,
   ...rest
 }) => ({
   ...rest,
-  alerts,
-  rule_type_id: alertTypeId,
+  rule_type_id: ruleTypeId,
   mute_all: muteAll,
   status_start_date: statusStartDate,
   status_end_date: statusEndDate,
   error_messages: errorMessages,
   last_run: lastRun,
+  execution_duration: executionDuration,
 });
 
 export const getRuleAlertSummaryRoute = (
@@ -65,11 +65,9 @@ export const getRuleAlertSummaryRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
-        const summary = await alertsClient.getAlertInstanceSummary(
-          rewriteReq({ id, ...req.query })
-        );
+        const summary = await rulesClient.getAlertSummary(rewriteReq({ id, ...req.query }));
         return res.ok({ body: rewriteBodyRes(summary) });
       })
     )

@@ -1,0 +1,24 @@
+@import 'src/core/public/mixins';
+
+.dscDocsPage {
+  @include kibanaFullBodyHeight(54px); // action bar height
+}
+
+.dscDocsContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dscDocsGrid {
+  flex: 1 1 100%;
+  overflow: auto;
+
+  &__cell--highlight {
+    background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  }
+
+  .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
+    padding: 0;
+  }
+}

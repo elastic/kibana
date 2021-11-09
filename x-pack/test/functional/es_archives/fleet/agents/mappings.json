@@ -65,7 +65,6 @@
           "maps-telemetry": "bfd39d88aadadb4be597ea984d433dbe",
           "namespace": "2f4316de49999235636386fe51dc06c1",
           "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
-          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "config": "ae24d22d5986d04124cc6568f771066f",
           "tsvb-validation-telemetry": "3a37ef6c8700ae6fc97d5c7da00e9215"
@@ -190,27 +189,23 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
-              "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
-                }
-              }
+            "error": {
+              "type": "keyword"
+            },
+            "metric": {
+              "type": "keyword"
+            },
+            "onboarding": {
+              "type": "keyword"
+            },
+            "sourcemap": {
+              "type": "keyword"
+            },
+            "span": {
+              "type": "keyword"
+            },
+            "transaction": {
+              "type": "keyword"
             }
           }
         },
@@ -2843,47 +2838,6 @@
             },
             "userHasSeenNotice": {
               "type": "boolean"
-            }
-          }
-        },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
             }
           }
         },

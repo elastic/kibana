@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const security = getService('security');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
@@ -32,10 +33,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('dashboard filter bar', () => {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     describe('Add a filter bar', function () {
@@ -181,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
-        const isLegacyDefault = PageObjects.discover.useLegacyTable();
+        const isLegacyDefault = await PageObjects.discover.useLegacyTable();
         if (isLegacyDefault) {
           await testSubjects.click('docTableCellFilter');
         } else {

@@ -10,17 +10,19 @@ import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiButtonEmpty,
   EuiI18nNumber,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
+  EuiIconTip,
+  EuiLink,
+  EuiPortal,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
@@ -36,7 +38,7 @@ import {
   useFleetStatus,
   useIntraAppState,
 } from '../../../hooks';
-import { Loading, Error } from '../../../components';
+import { Loading, Error, AgentEnrollmentFlyout, AddAgentHelpPopover } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
@@ -58,7 +60,16 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const agentPolicyRequest = useGetOneAgentPolicy(policyId);
   const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentPolicy } = agentPolicyRequest;
+  const queryParams = new URLSearchParams(useLocation().search);
+  const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
+  const openAddAgentHelpPopoverOpenByDefault = queryParams.get('showAddAgentHelp') === 'true';
   const [redirectToAgentPolicyList] = useState<boolean>(false);
+  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
+    openEnrollmentFlyoutOpenByDefault
+  );
+  const [isAddAgentHelpPopoverOpen, setIsAddAgentHelpPopoverOpen] = useState<boolean>(
+    openAddAgentHelpPopoverOpenByDefault
+  );
   const agentStatusRequest = useGetAgentStatus(policyId);
   const { refreshAgentStatus } = agentStatusRequest;
   const {
@@ -66,8 +77,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   } = useStartServices();
   const routeState = useIntraAppState<AgentPolicyDetailsDeployAgentAction>();
   const agentStatus = agentStatusRequest.data?.results;
-  const queryParams = new URLSearchParams(useLocation().search);
-  const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
+
   const { isReady: isFleetReady } = useFleetStatus();
 
   const headerLeftContent = useMemo(
@@ -138,6 +148,25 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     [getHref, isLoading, agentPolicy, policyId]
   );
 
+  const onCancelEnrollment = useMemo(() => {
+    if (routeState && routeState.onDoneNavigateTo && isFleetReady) {
+      const [appId, options] = routeState.onDoneNavigateTo;
+      return () => navigateToApp(appId, options);
+    }
+
+    return undefined;
+  }, [isFleetReady, navigateToApp, routeState]);
+
+  const addAgentLink = (
+    <EuiLink
+      onClick={() => {
+        setIsAddAgentHelpPopoverOpen(false);
+        setIsEnrollmentFlyoutOpen(true);
+      }}
+    >
+      <FormattedMessage id="xpack.fleet.policyDetails.addAgentButton" defaultMessage="Add agent" />
+    </EuiLink>
+  );
   const headerRightContent = useMemo(
     () =>
       agentPolicy ? (
@@ -168,15 +197,25 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             { isDivider: true },
             {
               label: i18n.translate('xpack.fleet.policyDetails.summary.usedBy', {
-                defaultMessage: 'Used by',
+                defaultMessage: 'Agents',
               }),
-              content: (
-                <LinkedAgentCount
-                  count={(agentStatus && agentStatus.total) || 0}
-                  agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
-                  showAgentText
-                />
-              ),
+              content:
+                agentStatus && agentStatus!.total ? (
+                  <LinkedAgentCount
+                    count={agentStatus.total}
+                    agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
+                    showAgentText
+                  />
+                ) : (
+                  <AddAgentHelpPopover
+                    button={addAgentLink}
+                    isOpen={isAddAgentHelpPopoverOpen}
+                    offset={15}
+                    closePopover={() => {
+                      setIsAddAgentHelpPopoverOpen(false);
+                    }}
+                  />
+                ),
             },
             { isDivider: true },
             {
@@ -203,16 +242,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                   onCopySuccess={(newAgentPolicy: AgentPolicy) => {
                     history.push(getPath('policy_details', { policyId: newAgentPolicy.id }));
                   }}
-                  enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
-                  onCancelEnrollment={
-                    routeState && routeState.onDoneNavigateTo && isFleetReady
-                      ? () =>
-                          navigateToApp(
-                            routeState.onDoneNavigateTo![0],
-                            routeState.onDoneNavigateTo![1]
-                          )
-                      : undefined
-                  }
+                  onCancelEnrollment={onCancelEnrollment}
                 />
               ),
             },
@@ -237,7 +267,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         </EuiFlexGroup>
       ) : undefined,
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [agentPolicy, policyId, agentStatus]
+    [agentPolicy, policyId, agentStatus, isAddAgentHelpPopoverOpen]
   );
 
   const headerTabs = useMemo(() => {
@@ -303,8 +333,28 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
       );
     }
 
-    return <AgentPolicyDetailsContent agentPolicy={agentPolicy} />;
-  }, [agentPolicy, policyId, error, isLoading, redirectToAgentPolicyList]);
+    return (
+      <>
+        {isEnrollmentFlyoutOpen && (
+          <EuiPortal>
+            <AgentEnrollmentFlyout
+              agentPolicy={agentPolicy}
+              onClose={onCancelEnrollment || (() => setIsEnrollmentFlyoutOpen(false))}
+            />
+          </EuiPortal>
+        )}
+        <AgentPolicyDetailsContent agentPolicy={agentPolicy} />
+      </>
+    );
+  }, [
+    redirectToAgentPolicyList,
+    isLoading,
+    error,
+    agentPolicy,
+    isEnrollmentFlyoutOpen,
+    onCancelEnrollment,
+    policyId,
+  ]);
 
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshAgentPolicy }}>
@@ -312,7 +362,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <WithHeaderLayout
           leftColumn={headerLeftContent}
           rightColumn={headerRightContent}
-          tabs={(headerTabs as unknown) as EuiTabProps[]}
+          tabs={headerTabs as unknown as EuiTabProps[]}
         >
           {content}
         </WithHeaderLayout>

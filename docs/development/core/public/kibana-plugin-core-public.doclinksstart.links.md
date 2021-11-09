@@ -9,6 +9,18 @@
 ```typescript
 readonly links: {
         readonly settings: string;
+        readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
+        readonly apm: {
+            readonly kibanaSettings: string;
+            readonly supportedServiceMaps: string;
+            readonly customLinks: string;
+            readonly droppedTransactionSpans: string;
+            readonly upgrading: string;
+            readonly metaData: string;
+        };
         readonly canvas: {
             readonly guide: string;
         };
@@ -28,9 +40,13 @@ readonly links: {
             readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
+            readonly suricataModule: string;
+            readonly zeekModule: string;
         };
         readonly auditbeat: {
             readonly base: string;
+            readonly auditdModule: string;
+            readonly systemModule: string;
         };
         readonly metricbeat: {
             readonly base: string;
@@ -46,6 +62,9 @@ readonly links: {
         };
         readonly heartbeat: {
             readonly base: string;
+        };
+        readonly libbeat: {
+            readonly getStarted: string;
         };
         readonly logstash: {
             readonly base: string;
@@ -117,12 +136,25 @@ readonly links: {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+            readonly remoteReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
+            readonly privileges: string;
             readonly guide: string;
             readonly gettingStarted: string;
+            readonly ml: string;
+            readonly ruleChangeLog: string;
+            readonly detectionsReq: string;
+            readonly networkMap: string;
+            readonly troubleshootGaps: string;
+        };
+        readonly securitySolution: {
+            readonly trustedApps: string;
         };
         readonly query: {
             readonly eql: string;
@@ -130,6 +162,7 @@ readonly links: {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
+            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -167,7 +200,16 @@ readonly links: {
             timeUnits: string;
             updateTransform: string;
         }>;
-        readonly observability: Record<string, string>;
+        readonly observability: Readonly<{
+            guide: string;
+            infrastructureThreshold: string;
+            logsThreshold: string;
+            metricsThreshold: string;
+            monitorStatus: string;
+            monitorUptime: string;
+            tlsCertificate: string;
+            uptimeDurationAnomaly: string;
+        }>;
         readonly alerting: Record<string, string>;
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
@@ -176,6 +218,7 @@ readonly links: {
             clusterPrivileges: string;
             elasticsearchSettings: string;
             elasticsearchEnableSecurity: string;
+            elasticsearchEnableApiKeys: string;
             indicesPrivileges: string;
             kibanaTLS: string;
             kibanaPrivileges: string;
@@ -183,12 +226,18 @@ readonly links: {
             mappingRolesFieldRules: string;
             runAsPrivilege: string;
         }>;
+        readonly spaces: Readonly<{
+            kibanaLegacyUrlAliases: string;
+            kibanaDisableLegacyUrlAliasesApi: string;
+        }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
+            datastreamsILM: string;
+            beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
@@ -198,8 +247,29 @@ readonly links: {
             elasticAgent: string;
             datastreams: string;
             datastreamsNamingScheme: string;
+            installElasticAgent: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
+            learnMoreBlog: string;
+            apiKeysLearnMore: string;
         }>;
+        readonly ecs: {
+            readonly guide: string;
+        };
+        readonly clients: {
+            readonly guide: string;
+            readonly goOverview: string;
+            readonly javaIndex: string;
+            readonly jsIntro: string;
+            readonly netGuide: string;
+            readonly perlGuide: string;
+            readonly phpGuide: string;
+            readonly pythonGuide: string;
+            readonly rubyOverview: string;
+            readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
+        };
     };
 ```

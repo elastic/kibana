@@ -21,9 +21,14 @@ import {
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  EuiIcon,
 } from '@elastic/eui';
 
-import { TransformId } from '../../../../../../common/types/transform';
+import {
+  isLatestTransform,
+  isPivotTransform,
+  TransformId,
+} from '../../../../../../common/types/transform';
 import { TransformStats } from '../../../../../../common/types/transform_stats';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
@@ -91,7 +96,9 @@ export const useColumns = (
   const columns: [
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
@@ -137,6 +144,52 @@ export const useColumns = (
       sortable: true,
       truncateText: true,
       scope: 'row',
+      render: (transformId, item) => {
+        if (item.config?._meta?.managed !== true) return transformId;
+        return (
+          <>
+            {transformId}
+            &nbsp;
+            <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+              {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
+                defaultMessage: 'Managed',
+              })}
+            </EuiBadge>
+          </>
+        );
+      },
+    },
+    {
+      id: 'alertRule',
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            <FormattedMessage
+              id="xpack.transform.transformList.alertingRules.screenReaderDescription"
+              defaultMessage="This column displays an icon when there are alert rules associated with a transform"
+            />
+          </p>
+        </EuiScreenReaderOnly>
+      ),
+      width: '30px',
+      render: (item) => {
+        return Array.isArray(item.alerting_rules) ? (
+          <EuiToolTip
+            position="bottom"
+            content={
+              <FormattedMessage
+                id="xpack.transform.transformList.alertingRules.tooltipContent"
+                defaultMessage="Transform has {rulesCount} associated alert {rulesCount, plural, one { rule} other { rules}}"
+                values={{ rulesCount: item.alerting_rules.length }}
+              />
+            }
+          >
+            <EuiIcon type="bell" />
+          </EuiToolTip>
+        ) : (
+          <span />
+        );
+      },
     },
     {
       field: TRANSFORM_LIST_COLUMN.DESCRIPTION,
@@ -144,6 +197,27 @@ export const useColumns = (
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
       sortable: true,
       truncateText: true,
+    },
+    {
+      name: i18n.translate('xpack.transform.type', { defaultMessage: 'Type' }),
+      'data-test-subj': 'transformListColumnType',
+      sortable: (item: TransformListRow) => item.mode,
+      truncateText: true,
+      render(item: TransformListRow) {
+        let transformType = i18n.translate('xpack.transform.type.unknown', {
+          defaultMessage: 'unknown',
+        });
+        if (isPivotTransform(item.config) === true) {
+          transformType = i18n.translate('xpack.transform.type.pivot', { defaultMessage: 'pivot' });
+        }
+        if (isLatestTransform(item.config) === true) {
+          transformType = i18n.translate('xpack.transform.type.latest', {
+            defaultMessage: 'latest',
+          });
+        }
+        return <EuiBadge color="hollow">{transformType}</EuiBadge>;
+      },
+      width: '100px',
     },
     {
       name: i18n.translate('xpack.transform.status', { defaultMessage: 'Status' }),

@@ -8,7 +8,7 @@
 import React from 'react';
 import { VerticalGridLines, XYPlot } from 'react-vis';
 import { useTheme } from '../../../../hooks/use_theme';
-import { Mark } from '../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks';
+import { Mark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks';
 import { PlotValues } from './plotUtils';
 
 interface VerticalLinesProps {

@@ -6,7 +6,8 @@
  */
 
 export * from './empty_placeholder';
-export { ToolbarPopoverProps, ToolbarPopover } from './toolbar_popover';
+export type { ToolbarPopoverProps } from './toolbar_popover';
+export { ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend_settings_popover';
 export { PalettePicker } from './palette_picker';
 export { TooltipWrapper } from './tooltip_wrapper';
@@ -14,3 +15,5 @@ export * from './coloring';
 export { useDebouncedValue } from './debounced_value';
 export * from './helpers';
 export { LegendActionPopover } from './legend_action_popover';
+export { ValueLabelsSettings } from './value_labels_settings';
+export * from './static_header';

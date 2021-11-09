@@ -11,17 +11,15 @@ import { AlertNavigationHandler } from './types';
 
 const DEFAULT_HANDLER = Symbol('*');
 export class AlertNavigationRegistry {
-  private readonly alertNavigations: Map<
-    string,
-    Map<string | symbol, AlertNavigationHandler>
-  > = new Map();
+  private readonly alertNavigations: Map<string, Map<string | symbol, AlertNavigationHandler>> =
+    new Map();
 
   public has(consumer: string, alertType: AlertType) {
-    return this.hasTypedHandler(consumer, alertType) || this.hasDefaultHandler(consumer);
+    return this.hasTypedHandler(consumer, alertType.id) || this.hasDefaultHandler(consumer);
   }
 
-  public hasTypedHandler(consumer: string, alertType: AlertType) {
-    return this.alertNavigations.get(consumer)?.has(alertType.id) ?? false;
+  public hasTypedHandler(consumer: string, ruleTypeId: string) {
+    return this.alertNavigations.get(consumer)?.has(ruleTypeId) ?? false;
   }
 
   public hasDefaultHandler(consumer: string) {
@@ -52,14 +50,14 @@ export class AlertNavigationRegistry {
     consumerNavigations.set(DEFAULT_HANDLER, handler);
   }
 
-  public register(consumer: string, alertType: AlertType, handler: AlertNavigationHandler) {
-    if (this.hasTypedHandler(consumer, alertType)) {
+  public register(consumer: string, ruleTypeId: string, handler: AlertNavigationHandler) {
+    if (this.hasTypedHandler(consumer, ruleTypeId)) {
       throw new Error(
         i18n.translate('xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError', {
           defaultMessage:
             'Navigation for Alert type "{alertType}" within "{consumer}" is already registered.',
           values: {
-            alertType: alertType.id,
+            alertType: ruleTypeId,
             consumer,
           },
         })
@@ -69,7 +67,7 @@ export class AlertNavigationRegistry {
     const consumerNavigations =
       this.alertNavigations.get(consumer) ?? this.createConsumerNavigation(consumer);
 
-    consumerNavigations.set(alertType.id, handler);
+    consumerNavigations.set(ruleTypeId, handler);
   }
 
   public get(consumer: string, alertType: AlertType): AlertNavigationHandler {

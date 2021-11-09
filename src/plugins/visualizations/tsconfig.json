@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -24,5 +23,6 @@
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
   ]
 }

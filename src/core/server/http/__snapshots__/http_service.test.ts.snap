@@ -8,7 +8,7 @@ Array [
 ]
 `;
 
-exports[`spins up notReady server until started if configured with \`autoListen:true\`: 503 response 1`] = `
+exports[`spins up \`preboot\` server until started if configured with \`autoListen:true\`: 503 response 1`] = `
 Object {
   "body": Array [
     Array [

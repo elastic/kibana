@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiProgress } from '@elastic/eui';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { difference, head, isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import classnames from 'classnames';
@@ -29,7 +28,7 @@ import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
 import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
-import { Panel } from '../panel';
+
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
@@ -38,6 +37,7 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
+import { useConnectors } from '../../containers/configure/use_connectors';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -104,6 +104,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
+    const { connectors } = useConnectors({ toastPermissionsErrors: false });
 
     const sorting = useMemo(
       () => ({
@@ -113,6 +114,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     );
 
     const filterRefetch = useRef<() => void>();
+    const tableRef = useRef<EuiBasicTable>();
     const setFilterRefetch = useCallback(
       (refetchFilter: () => void) => {
         filterRefetch.current = refetchFilter;
@@ -182,10 +184,13 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
         ) {
           setQueryParams({ sortField: SortFieldCase.createdAt });
         }
+
+        setSelectedCases([]);
+        tableRef.current?.setSelection([]);
         setFilters(newFilterOptions);
         refreshCases(false);
       },
-      [refreshCases, setQueryParams, setFilters]
+      [setSelectedCases, setFilters, refreshCases, setQueryParams]
     );
 
     const showActions = userCanCrud && !isSelectorView;
@@ -198,7 +203,10 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       handleIsLoading,
       isLoadingCases: loading,
       refreshCases,
-      showActions,
+      // isSelectorView is boolean | undefined. We need to convert it to a boolean.
+      isSelectorView: !!isSelectorView,
+      userCanCrud,
+      connectors,
     });
 
     const itemIdToExpandedRowMap = useMemo(
@@ -231,8 +239,6 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     );
     const isCasesLoading = useMemo(() => loading.indexOf('cases') > -1, [loading]);
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
-
-    const TableWrap = useMemo(() => (isSelectorView ? 'span' : Panel), [isSelectorView]);
 
     const tableRowProps = useCallback(
       (theCase: Case) => {
@@ -281,47 +287,43 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
           className="essentialAnimation"
           $isShow={(isCasesLoading || isLoading || isCommentUpdating) && !isDataEmpty}
         />
-        <TableWrap
-          data-test-subj="table-wrap"
-          loading={!isSelectorView ? isCasesLoading : undefined}
-        >
-          <CasesTableFilters
-            countClosedCases={data.countClosedCases}
-            countOpenCases={data.countOpenCases}
-            countInProgressCases={data.countInProgressCases}
-            onFilterChanged={onFilterChangedCallback}
-            initial={{
-              search: filterOptions.search,
-              reporters: filterOptions.reporters,
-              tags: filterOptions.tags,
-              status: filterOptions.status,
-            }}
-            setFilterRefetch={setFilterRefetch}
-            hiddenStatuses={hiddenStatuses}
-          />
-          <CasesTable
-            columns={columns}
-            createCaseNavigation={createCaseNavigation}
-            data={data}
-            filterOptions={filterOptions}
-            goToCreateCase={goToCreateCase}
-            handleIsLoading={handleIsLoading}
-            isCasesLoading={isCasesLoading}
-            isCommentUpdating={isCommentUpdating}
-            isDataEmpty={isDataEmpty}
-            isSelectorView={isSelectorView}
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            onChange={tableOnChangeCallback}
-            pagination={pagination}
-            refreshCases={refreshCases}
-            selectedCases={selectedCases}
-            selection={euiBasicTableSelectionProps}
-            showActions={showActions}
-            sorting={sorting}
-            tableRowProps={tableRowProps}
-            userCanCrud={userCanCrud}
-          />
-        </TableWrap>
+        <CasesTableFilters
+          countClosedCases={data.countClosedCases}
+          countOpenCases={data.countOpenCases}
+          countInProgressCases={data.countInProgressCases}
+          onFilterChanged={onFilterChangedCallback}
+          initial={{
+            search: filterOptions.search,
+            reporters: filterOptions.reporters,
+            tags: filterOptions.tags,
+            status: filterOptions.status,
+          }}
+          setFilterRefetch={setFilterRefetch}
+          hiddenStatuses={hiddenStatuses}
+        />
+        <CasesTable
+          columns={columns}
+          createCaseNavigation={createCaseNavigation}
+          data={data}
+          filterOptions={filterOptions}
+          goToCreateCase={goToCreateCase}
+          handleIsLoading={handleIsLoading}
+          isCasesLoading={isCasesLoading}
+          isCommentUpdating={isCommentUpdating}
+          isDataEmpty={isDataEmpty}
+          isSelectorView={isSelectorView}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          onChange={tableOnChangeCallback}
+          pagination={pagination}
+          refreshCases={refreshCases}
+          selectedCases={selectedCases}
+          selection={euiBasicTableSelectionProps}
+          showActions={showActions}
+          sorting={sorting}
+          tableRef={tableRef}
+          tableRowProps={tableRowProps}
+          userCanCrud={userCanCrud}
+        />
       </>
     );
   }

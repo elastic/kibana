@@ -18,7 +18,7 @@ function fetchOptionsWithDebug(
 ) {
   const debugEnabled =
     inspectableEsQueriesEnabled &&
-    startsWith(fetchOptions.pathname, '/api/apm');
+    startsWith(fetchOptions.pathname, '/internal/apm');
 
   const { body, ...rest } = fetchOptions;
 
@@ -53,10 +53,11 @@ export async function callApi<T = void>(
     return cacheResponse;
   }
 
-  const { pathname, method = 'get', ...options } = fetchOptionsWithDebug(
-    fetchOptions,
-    inspectableEsQueriesEnabled
-  );
+  const {
+    pathname,
+    method = 'get',
+    ...options
+  } = fetchOptionsWithDebug(fetchOptions, inspectableEsQueriesEnabled);
 
   const lowercaseMethod = method.toLowerCase() as
     | 'get'
@@ -65,7 +66,7 @@ export async function callApi<T = void>(
     | 'delete'
     | 'patch';
 
-  const res = await http[lowercaseMethod](pathname, options);
+  const res = await http[lowercaseMethod]<T>(pathname, options);
 
   if (isCachable(fetchOptions)) {
     cache.set(cacheKey, res);

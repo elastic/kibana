@@ -32,7 +32,7 @@ describe('ProductCard', () => {
 
     const button = card.find(EuiButtonTo);
     expect(button.prop('to')).toEqual('/app/enterprise_search/app_search');
-    expect(button.prop('children')).toEqual('Launch App Search');
+    expect(button.prop('children')).toEqual('Open App Search');
 
     button.simulate('click');
     expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
@@ -50,7 +50,7 @@ describe('ProductCard', () => {
 
     const button = card.find(EuiButtonTo);
     expect(button.prop('to')).toEqual('/app/enterprise_search/workplace_search');
-    expect(button.prop('children')).toEqual('Launch Workplace Search');
+    expect(button.prop('children')).toEqual('Open Workplace Search');
 
     button.simulate('click');
     expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
@@ -66,6 +66,6 @@ describe('ProductCard', () => {
     const card = wrapper.find(EuiCard).dive().shallow();
     const button = card.find(EuiButtonTo);
 
-    expect(button.prop('children')).toEqual('Setup Workplace Search');
+    expect(button.prop('children')).toEqual('Set up Workplace Search');
   });
 });

@@ -17,10 +17,11 @@ import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const long: { type: 'long' } = { type: 'long' };
 
-const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> = {
-  expected_metric_document_count: long,
-  transaction_count: long,
-};
+const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> =
+  {
+    expected_metric_document_count: long,
+    transaction_count: long,
+  };
 
 const timeframeMap1dSchema: MakeSchemaFrom<TimeframeMap1d> = {
   '1d': long,
@@ -74,6 +75,7 @@ const apmPerAgentSchema: Pick<
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
     dotnet: long,
+    'iOS/swift': long,
     go: long,
     java: long,
     'js-base': long,
@@ -92,10 +94,12 @@ const apmPerAgentSchema: Pick<
     'opentelemetry/php': long,
     'opentelemetry/python': long,
     'opentelemetry/ruby': long,
+    'opentelemetry/swift': long,
     'opentelemetry/webjs': long,
   },
   agents: {
     dotnet: agentSchema,
+    'iOS/swift': agentSchema,
     go: agentSchema,
     java: agentSchema,
     'js-base': agentSchema,

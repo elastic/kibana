@@ -64,16 +64,14 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
           return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
         }
       } else {
-        if (options.fields) {
-          const { id } = findInventoryFields(nodeType, options.fields);
-          return {
-            label: <EuiCode>{id}</EuiCode>,
-            value: node.id,
-          };
-        }
+        const { id } = findInventoryFields(nodeType);
+        return {
+          label: <EuiCode>{id}</EuiCode>,
+          value: node.id,
+        };
       }
       return { label: '', value: '' };
-    }, [nodeType, node.ip, node.id, options.fields]);
+    }, [nodeType, node.ip, node.id]);
 
     const nodeLogsMenuItemLinkProps = useLinkProps(
       getNodeLogsUrl({
@@ -138,8 +136,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     };
 
     const createAlertMenuItem: SectionLinkProps = {
-      label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
-        defaultMessage: 'Create alert',
+      label: i18n.translate('xpack.infra.nodeContextMenu.createRuleLink', {
+        defaultMessage: 'Create inventory rule',
       }),
       onClick: () => {
         setFlyoutVisible(true);
@@ -184,11 +182,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
 
         {flyoutVisible && (
           <AlertFlyout
-            filter={
-              options.fields
-                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-                : ''
-            }
+            filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}
             options={options}
             nodeType={nodeType}
             setVisible={setFlyoutVisible}

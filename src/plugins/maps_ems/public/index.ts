@@ -13,7 +13,7 @@ import type { MapsEmsConfig } from '../config';
 import { EMSSettings } from '../common';
 
 /** @public */
-export {
+export type {
   VectorLayer,
   FileLayerField,
   FileLayer,
@@ -25,9 +25,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
 
-export type { MapsEmsConfig, LayerConfig } from '../config';
+export { TMS_IN_YML_ID } from '../common';
 
-export * from '../common';
+export type { MapsEmsConfig } from '../config';
 
 export interface MapsEmsPluginSetup {
   config: MapsEmsConfig;

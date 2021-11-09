@@ -88,8 +88,9 @@ describe('.execute() & getHref', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async () => [],
     });
+    const getLocationSpy = jest.spyOn(definition, 'getLocation');
     const drilldown = new EmbeddableToDashboardDrilldown({
-      start: ((() => ({
+      start: (() => ({
         core: {
           application: {
             navigateToApp,
@@ -110,7 +111,7 @@ describe('.execute() & getHref', () => {
           },
         },
         self: {},
-      })) as unknown) as StartServicesGetter<
+      })) as unknown as StartServicesGetter<
         Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'dashboard'>
       >,
     });
@@ -122,7 +123,7 @@ describe('.execute() & getHref', () => {
       ...config,
     };
 
-    const context = ({
+    const context = {
       filters: filtersFromEvent,
       embeddable: {
         getInput: () => ({
@@ -133,7 +134,7 @@ describe('.execute() & getHref', () => {
         }),
       },
       timeFieldName,
-    } as unknown) as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
+    } as unknown as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
 
     await drilldown.execute(completeConfig, context);
 
@@ -147,8 +148,13 @@ describe('.execute() & getHref', () => {
 
     return {
       href,
+      getLocationSpy,
     };
   }
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('navigates to correct dashboard', async () => {
     const testDashboardId = 'dashboardId';
@@ -183,7 +189,7 @@ describe('.execute() & getHref', () => {
   test('navigates with query if filters are enabled', async () => {
     const queryString = 'querystring';
     const queryLanguage = 'kuery';
-    const { href } = await setupTestBed(
+    const { getLocationSpy } = await setupTestBed(
       {
         useCurrentFilters: true,
       },
@@ -193,8 +199,12 @@ describe('.execute() & getHref', () => {
       []
     );
 
-    expect(href).toEqual(expect.stringContaining(queryString));
-    expect(href).toEqual(expect.stringContaining(queryLanguage));
+    const {
+      state: { query },
+    } = await getLocationSpy.mock.results[0].value;
+
+    expect(query.query).toBe(queryString);
+    expect(query.language).toBe(queryLanguage);
   });
 
   test('when user chooses to keep current filters, current filters are set on destination dashboard', async () => {
@@ -202,7 +212,7 @@ describe('.execute() & getHref', () => {
     const existingGlobalFilterKey = 'existingGlobalFilter';
     const newAppliedFilterKey = 'newAppliedFilter';
 
-    const { href } = await setupTestBed(
+    const { getLocationSpy } = await setupTestBed(
       {
         useCurrentFilters: true,
       },
@@ -212,9 +222,16 @@ describe('.execute() & getHref', () => {
       [getFilter(false, newAppliedFilterKey)]
     );
 
-    expect(href).toEqual(expect.stringContaining(existingAppFilterKey));
-    expect(href).toEqual(expect.stringContaining(existingGlobalFilterKey));
-    expect(href).toEqual(expect.stringContaining(newAppliedFilterKey));
+    const {
+      state: { filters },
+    } = await getLocationSpy.mock.results[0].value;
+
+    expect(filters.length).toBe(3);
+
+    const filtersString = JSON.stringify(filters);
+    expect(filtersString).toEqual(expect.stringContaining(existingAppFilterKey));
+    expect(filtersString).toEqual(expect.stringContaining(existingGlobalFilterKey));
+    expect(filtersString).toEqual(expect.stringContaining(newAppliedFilterKey));
   });
 
   test('when user chooses to remove current filters, current app filters are remove on destination dashboard', async () => {
@@ -222,7 +239,7 @@ describe('.execute() & getHref', () => {
     const existingGlobalFilterKey = 'existingGlobalFilter';
     const newAppliedFilterKey = 'newAppliedFilter';
 
-    const { href } = await setupTestBed(
+    const { getLocationSpy } = await setupTestBed(
       {
         useCurrentFilters: false,
       },
@@ -232,9 +249,16 @@ describe('.execute() & getHref', () => {
       [getFilter(false, newAppliedFilterKey)]
     );
 
-    expect(href).not.toEqual(expect.stringContaining(existingAppFilterKey));
-    expect(href).toEqual(expect.stringContaining(existingGlobalFilterKey));
-    expect(href).toEqual(expect.stringContaining(newAppliedFilterKey));
+    const {
+      state: { filters },
+    } = await getLocationSpy.mock.results[0].value;
+
+    expect(filters.length).toBe(2);
+
+    const filtersString = JSON.stringify(filters);
+    expect(filtersString).not.toEqual(expect.stringContaining(existingAppFilterKey));
+    expect(filtersString).toEqual(expect.stringContaining(existingGlobalFilterKey));
+    expect(filtersString).toEqual(expect.stringContaining(newAppliedFilterKey));
   });
 
   test('when user chooses to keep current time range, current time range is passed in url', async () => {
@@ -325,11 +349,13 @@ function getMockTimeRangeFilter(): RangeFilter {
       negate: false,
       alias: null,
     },
-    range: {
-      order_date: {
-        gte: '2020-03-23T13:10:29.665Z',
-        lt: '2020-03-23T13:10:36.736Z',
-        format: 'strict_date_optional_time',
+    query: {
+      range: {
+        order_date: {
+          gte: '2020-03-23T13:10:29.665Z',
+          lt: '2020-03-23T13:10:36.736Z',
+          format: 'strict_date_optional_time',
+        },
       },
     },
   };

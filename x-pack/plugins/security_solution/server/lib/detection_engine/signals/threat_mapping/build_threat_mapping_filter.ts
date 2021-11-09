@@ -6,7 +6,7 @@
  */
 
 import get from 'lodash/fp/get';
-import { Filter } from 'src/plugins/data/common';
+import { Filter } from '@kbn/es-query';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   BooleanFilter,

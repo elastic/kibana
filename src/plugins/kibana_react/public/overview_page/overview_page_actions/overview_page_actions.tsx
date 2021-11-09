@@ -13,24 +13,26 @@ import { ApplicationStart } from 'kibana/public';
 import { RedirectAppLinks } from '../../app_links';
 
 interface Props {
-  addBasePath: (path: string) => string;
+  addDataHref: string;
   application: ApplicationStart;
+  devToolsHref?: string;
   hidden?: boolean;
+  managementHref?: string;
   showDevToolsLink?: boolean;
   showManagementLink?: boolean;
 }
 
 export const overviewPageActions = ({
-  addBasePath,
+  addDataHref,
   application,
+  devToolsHref,
   hidden,
+  managementHref,
   showDevToolsLink,
   showManagementLink,
 }: Props) => {
-  const {
-    management: isManagementEnabled,
-    dev_tools: isDevToolsEnabled,
-  } = application.capabilities.navLinks;
+  const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+    application.capabilities.navLinks;
 
   const actionAddData = (
     <RedirectAppLinks application={application}>
@@ -38,8 +40,8 @@ export const overviewPageActions = ({
         data-test-subj="homeAddData"
         className="kbnOverviewPageHeader__actionButton"
         flush="both"
-        href={addBasePath('/app/home#/tutorial_directory')}
-        iconType="indexOpen"
+        href={addDataHref}
+        iconType="plusInCircle"
       >
         {i18n.translate('kibana-react.kbnOverviewPageHeader.addDataButtonLabel', {
           defaultMessage: 'Add data',
@@ -49,14 +51,14 @@ export const overviewPageActions = ({
   );
 
   const actionStackManagement =
-    showManagementLink && isManagementEnabled ? (
+    managementHref && showManagementLink && isManagementEnabled ? (
       <RedirectAppLinks application={application}>
         <EuiButtonEmpty
           data-test-subj="homeManage"
           className="kbnOverviewPageHeader__actionButton"
           flush="both"
           iconType="gear"
-          href={addBasePath('/app/management')}
+          href={managementHref}
         >
           {i18n.translate('kibana-react.kbnOverviewPageHeader.stackManagementButtonLabel', {
             defaultMessage: 'Manage',
@@ -66,14 +68,14 @@ export const overviewPageActions = ({
     ) : null;
 
   const actionDevTools =
-    showDevToolsLink && isDevToolsEnabled ? (
+    devToolsHref && showDevToolsLink && isDevToolsEnabled ? (
       <RedirectAppLinks application={application}>
         <EuiButtonEmpty
           data-test-subj="homeDevTools"
           className="kbnOverviewPageHeader__actionButton"
           flush="both"
           iconType="wrench"
-          href={addBasePath('/app/dev_tools#/console')}
+          href={devToolsHref}
         >
           {i18n.translate('kibana-react.kbnOverviewPageHeader.devToolsButtonLabel', {
             defaultMessage: 'Dev tools',

@@ -45,7 +45,7 @@
           "subtechnique": [
             {
               "id": "T1546.004",
-              "name": ".bash_profile and .bashrc",
+              "name": "Unix Shell Configuration Modification",
               "reference": "https://attack.mitre.org/techniques/T1546/004/"
             }
           ]
@@ -55,5 +55,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

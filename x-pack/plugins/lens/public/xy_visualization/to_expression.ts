@@ -8,9 +8,13 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { State, ValidLayer, XYLayerConfig } from './types';
+import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
+import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
+import { hasIcon } from './xy_config_panel/reference_line_panel';
+import { defaultReferenceLineColor } from './color_assignment';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -52,7 +56,21 @@ export function toPreviewExpression(
   return toExpression(
     {
       ...state,
-      layers: state.layers.map((layer) => ({ ...layer, hide: true })),
+      layers: state.layers.map((layer) =>
+        layer.layerType === layerTypes.DATA
+          ? { ...layer, hide: true }
+          : // cap the reference line to 1px
+            {
+              ...layer,
+              hide: true,
+              yConfig: layer.yConfig?.map(({ lineWidth, ...config }) => ({
+                ...config,
+                lineWidth: 1,
+                icon: undefined,
+                textVisibility: false,
+              })),
+            }
+      ),
       // hide legend for preview
       legend: {
         ...state.legend,
@@ -142,6 +160,20 @@ export const buildExpression = (
                       ? [state.legend.showSingleSeries]
                       : [],
                     position: [state.legend.position],
+                    isInside: state.legend.isInside ? [state.legend.isInside] : [],
+                    horizontalAlignment: state.legend.horizontalAlignment
+                      ? [state.legend.horizontalAlignment]
+                      : [],
+                    verticalAlignment: state.legend.verticalAlignment
+                      ? [state.legend.verticalAlignment]
+                      : [],
+                    // ensure that even if the user types more than 5 columns
+                    // we will only show 5
+                    floatingColumns: state.legend.floatingColumns
+                      ? [Math.min(5, state.legend.floatingColumns)]
+                      : [],
+                    maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
+                    shouldTruncate: [state.legend.shouldTruncate ?? true],
                   },
                 },
               ],
@@ -242,6 +274,22 @@ export const buildExpression = (
               ],
             },
           ],
+          labelsOrientation: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_labelsOrientationConfig',
+                  arguments: {
+                    x: [state?.labelsOrientation?.x ?? 0],
+                    yLeft: [state?.labelsOrientation?.yLeft ?? 0],
+                    yRight: [state?.labelsOrientation?.yRight ?? 0],
+                  },
+                },
+              ],
+            },
+          ],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
@@ -289,13 +337,28 @@ export const buildExpression = (
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
-                                color: yConfig.color ? [yConfig.color] : [],
+                                color:
+                                  layer.layerType === layerTypes.REFERENCELINE
+                                    ? [yConfig.color || defaultReferenceLineColor]
+                                    : yConfig.color
+                                    ? [yConfig.color]
+                                    : [],
+                                lineStyle: [yConfig.lineStyle || 'solid'],
+                                lineWidth: [yConfig.lineWidth || 1],
+                                fill: [yConfig.fill || 'none'],
+                                icon: hasIcon(yConfig.icon) ? [yConfig.icon] : [],
+                                iconPosition:
+                                  hasIcon(yConfig.icon) || yConfig.textVisibility
+                                    ? [yConfig.iconPosition || 'auto']
+                                    : ['auto'],
+                                textVisibility: [yConfig.textVisibility || false],
                               },
                             },
                           ],
                         }))
                       : [],
                     seriesType: [layer.seriesType],
+                    layerType: [layer.layerType || layerTypes.DATA],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
                     ...(layer.palette

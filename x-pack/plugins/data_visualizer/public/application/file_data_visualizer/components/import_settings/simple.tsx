@@ -14,6 +14,7 @@ import {
   CombinedField,
   CombinedFieldsReadOnlyForm,
 } from '../../../common/components/combined_fields';
+import { CreateDataViewToolTip } from './create_data_view_tooltip';
 
 interface Props {
   index: string;
@@ -23,6 +24,7 @@ interface Props {
   onCreateIndexPatternChange(): void;
   indexNameError: string;
   combinedFields: CombinedField[];
+  canCreateDataView: boolean;
 }
 
 export const SimpleSettings: FC<Props> = ({
@@ -33,6 +35,7 @@ export const SimpleSettings: FC<Props> = ({
   onCreateIndexPatternChange,
   indexNameError,
   combinedFields,
+  canCreateDataView,
 }) => {
   return (
     <React.Fragment>
@@ -69,19 +72,21 @@ export const SimpleSettings: FC<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiCheckbox
-        id="createIndexPattern"
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.simpleImportSettings.createIndexPatternLabel"
-            defaultMessage="Create index pattern"
-          />
-        }
-        checked={createIndexPattern === true}
-        disabled={initialized === true}
-        onChange={onCreateIndexPatternChange}
-        data-test-subj="dataVisualizerFileCreateIndexPatternCheckbox"
-      />
+      <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
+        <EuiCheckbox
+          id="createIndexPattern"
+          label={
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.simpleImportSettings.createDataViewLabel"
+              defaultMessage="Create data view"
+            />
+          }
+          checked={createIndexPattern === true}
+          disabled={initialized === true || canCreateDataView === false}
+          onChange={onCreateIndexPatternChange}
+          data-test-subj="dataVisualizerFileCreateIndexPatternCheckbox"
+        />
+      </CreateDataViewToolTip>
 
       <EuiSpacer size="m" />
 

@@ -8,7 +8,7 @@
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
@@ -352,7 +352,7 @@ export class DrilldownManagerState {
     const action: SerializedAction = {
       factoryId: template.factoryId,
       name,
-      config: (template.config || {}) as SerializableState,
+      config: (template.config || {}) as SerializableRecord,
     };
     await dynamicActionManager.createEvent(action, template.triggers);
   }
@@ -395,7 +395,7 @@ export class DrilldownManagerState {
     if (drilldownState) {
       drilldownState.setName(this.pickName(template.name));
       drilldownState.setTriggers(template.triggers);
-      drilldownState.setConfig(template.config as SerializableState);
+      drilldownState.setConfig(template.config as SerializableRecord);
     }
   };
 
@@ -468,7 +468,6 @@ export class DrilldownManagerState {
   // Below are convenience React hooks for consuming observables in connected
   // React components.
 
-  /* eslint-disable react-hooks/rules-of-hooks */
   public readonly useTitle = () => useObservable(this.title$, this.title$.getValue());
   public readonly useFooter = () => useObservable(this.footer$, this.footer$.getValue());
   public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
@@ -477,5 +476,4 @@ export class DrilldownManagerState {
   public readonly useActionFactory = () =>
     useObservable(this.actionFactory$, this.actionFactory$.getValue());
   public readonly useEvents = () => useObservable(this.events$, this.events$.getValue());
-  /* eslint-enable react-hooks/rules-of-hooks */
 }

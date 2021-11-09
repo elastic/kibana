@@ -66,18 +66,16 @@ const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDat
   };
 };
 
-const handleEventFiltersListPageDataExistChanges: CaseReducer<EventFiltersListPageDataExistsChanged> = (
-  state,
-  action
-) => {
-  return {
-    ...state,
-    listPage: {
-      ...state.listPage,
-      dataExist: action.payload,
-    },
+const handleEventFiltersListPageDataExistChanges: CaseReducer<EventFiltersListPageDataExistsChanged> =
+  (state, action) => {
+    return {
+      ...state,
+      listPage: {
+        ...state.listPage,
+        dataExist: action.payload,
+      },
+    };
   };
-};
 
 const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) => {
   return {
@@ -100,7 +98,7 @@ const eventFiltersChangeForm: CaseReducer<EventFiltersChangeForm> = (state, acti
     ...state,
     form: {
       ...state.form,
-      entry: action.payload.entry,
+      entry: action.payload.entry !== undefined ? action.payload.entry : state.form.entry,
       hasItemsError:
         action.payload.hasItemsError !== undefined
           ? action.payload.hasItemsError

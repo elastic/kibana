@@ -10,3 +10,5 @@ import { PluginInitializerContext } from 'src/core/server';
 import { TransformServerPlugin } from './plugin';
 
 export const plugin = (ctx: PluginInitializerContext) => new TransformServerPlugin(ctx);
+
+export { registerTransformHealthRuleType } from './lib/alerting';

@@ -8,14 +8,26 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 
 export const NotFoundPage = React.memo(() => (
   <SecuritySolutionPageWrapper>
-    <FormattedMessage
-      id="xpack.securitySolution.pages.fourohfour.noContentFoundDescription"
-      defaultMessage="No content found"
-    />
+    <EuiPageTemplate template="centeredContent">
+      <EuiEmptyPrompt
+        data-test-subj="notFoundPage"
+        iconColor="default"
+        iconType="logoElastic"
+        title={
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.pages.fourohfour.pageNotFoundDescription"
+              defaultMessage="Page not found"
+            />
+          </p>
+        }
+      />
+    </EuiPageTemplate>
   </SecuritySolutionPageWrapper>
 ));
 

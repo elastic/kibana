@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
+import type { VIEW_MODE } from './components/view_mode_toggle';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
-export interface DiscoverAppLocatorParams extends SerializableState {
+export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set saved search ID.
    */
@@ -33,7 +34,7 @@ export interface DiscoverAppLocatorParams extends SerializableState {
   /**
    * Optionally set the refresh interval.
    */
-  refreshInterval?: RefreshInterval & SerializableState;
+  refreshInterval?: RefreshInterval & SerializableRecord;
 
   /**
    * Optionally apply filters.
@@ -69,12 +70,20 @@ export interface DiscoverAppLocatorParams extends SerializableState {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort?: string[][] & SerializableState;
+  sort?: string[][];
 
   /**
    * id of the used saved query
    */
   savedQuery?: string;
+  /**
+   * Table view: Documents vs Field Statistics
+   */
+  viewMode?: VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Field Statistics mode
+   */
+  hideAggregatedPreview?: boolean;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -102,6 +111,8 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       savedQuery,
       sort,
       interval,
+      viewMode,
+      hideAggregatedPreview,
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -112,6 +123,8 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       interval?: string;
       sort?: string[][];
       savedQuery?: string;
+      viewMode?: string;
+      hideAggregatedPreview?: boolean;
     } = {};
     const queryState: QueryState = {};
 
@@ -128,6 +141,8 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (filters && filters.length)
       queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
+    if (viewMode) appState.viewMode = viewMode;
+    if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
 
     let path = `#/${savedSearchPath}`;
     path = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, path);

@@ -23,7 +23,7 @@ import {
   ESSearchSourceDescriptor,
 } from '../../../../common/descriptor_types';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { VectorLayer } from '../vector_layer';
+import { GeoJsonVectorLayer } from '../vector_layer';
 import { EMSFileSource } from '../../sources/ems_file_source';
 // @ts-ignore
 import { ESSearchSource } from '../../sources/es_search_source';
@@ -51,7 +51,7 @@ function createChoroplethLayerDescriptor({
     aggFieldName: '',
     rightSourceId: joinId,
   });
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     joins: [
       {
         leftField,
@@ -64,6 +64,7 @@ function createChoroplethLayerDescriptor({
           metrics: [metricsDescriptor],
           applyGlobalQuery: true,
           applyGlobalTime: true,
+          applyForceRefresh: true,
         },
       },
     ],
@@ -148,6 +149,8 @@ export function createEsChoroplethLayerDescriptor({
       scalingType: SCALING_TYPES.LIMIT,
       tooltipProperties: [leftJoinField],
       applyGlobalQuery: false,
+      applyGlobalTime: false,
+      applyForceRefresh: false,
     }),
     leftField: leftJoinField,
     rightIndexPatternId,

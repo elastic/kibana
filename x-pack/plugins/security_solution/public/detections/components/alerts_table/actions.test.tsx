@@ -26,6 +26,7 @@ import {
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
+import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -139,13 +140,16 @@ describe('alert actions', () => {
                 initialWidth: 180,
               },
             ],
+            defaultColumns: defaultHeaders,
             dataProviders: [],
+            dataViewId: '',
             dateRange: {
               end: '2018-11-05T19:03:25.937Z',
               start: '2018-11-05T18:58:25.937Z',
             },
             deletedEventIds: [],
             description: 'This is a sample rule description',
+            documentType: '',
             eqlOptions: {
               eventCategoryField: 'event.category',
               query: '',
@@ -202,7 +206,9 @@ describe('alert actions', () => {
             noteIds: [],
             pinnedEventIds: {},
             pinnedEventsSaveObject: {},
+            queryFields: [],
             savedObjectId: null,
+            selectAll: false,
             selectedEventIds: {},
             show: true,
             showCheckboxes: false,
@@ -285,7 +291,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               // @ts-expect-error
               timeline_id: null,
             },
@@ -312,7 +318,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               timeline_id: [''],
             },
           },
@@ -338,7 +344,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               type: ['eql'],
               timeline_id: [''],
             },
@@ -367,8 +373,7 @@ describe('alert actions', () => {
                 and: [],
                 enabled: true,
                 excluded: false,
-                id:
-                  'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
+                id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
                 kqlQuery: '',
                 name: '1',
                 queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },
@@ -383,7 +388,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               type: ['eql'],
               timeline_id: [''],
             },

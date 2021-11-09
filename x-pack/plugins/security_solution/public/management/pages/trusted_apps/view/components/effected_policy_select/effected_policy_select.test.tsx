@@ -44,6 +44,7 @@ describe('when using EffectedPolicySelect component', () => {
     componentProps = {
       options: [],
       isGlobal: true,
+      isPlatinumPlus: true,
       onChange: handleOnChange,
       'data-test-subj': 'test',
     };
@@ -56,7 +57,7 @@ describe('when using EffectedPolicySelect component', () => {
 
   describe('and no policy entries exist', () => {
     it('should display no options available message', () => {
-      const { getByTestId } = render();
+      const { getByTestId } = render({ isGlobal: false });
       expect(getByTestId('test-policiesSelectable').textContent).toEqual('No options available');
     });
   });
@@ -65,9 +66,15 @@ describe('when using EffectedPolicySelect component', () => {
     const policyId = 'abc123';
     const policyTestSubj = `policy-${policyId}`;
 
-    const toggleGlobalSwitch = () => {
+    const selectGlobalPolicy = () => {
       act(() => {
-        fireEvent.click(renderResult.getByTestId('test-globalSwitch'));
+        fireEvent.click(renderResult.getByTestId('globalPolicy'));
+      });
+    };
+
+    const selectPerPolicy = () => {
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('perPolicy'));
       });
     };
 
@@ -97,59 +104,41 @@ describe('when using EffectedPolicySelect component', () => {
     });
 
     it('should display policies', () => {
-      const { getByTestId } = render();
+      const { getByTestId } = render({ isGlobal: false });
       expect(getByTestId(policyTestSubj));
     });
 
-    it('should disable policy items if global is checked', () => {
-      const { getByTestId } = render();
-      expect(getByTestId(policyTestSubj).getAttribute('aria-disabled')).toEqual('true');
+    it('should hide policy items if global is checked', () => {
+      const { queryByTestId } = render({ isGlobal: true });
+      expect(queryByTestId(policyTestSubj)).toBeNull();
     });
 
     it('should enable policy items if global is unchecked', async () => {
-      const { getByTestId } = render();
-      toggleGlobalSwitch();
+      const { getByTestId } = render({ isGlobal: false });
+      selectPerPolicy();
       expect(getByTestId(policyTestSubj).getAttribute('aria-disabled')).toEqual('false');
     });
 
     it('should call onChange with selection when global is toggled', () => {
       render();
 
-      toggleGlobalSwitch();
+      selectPerPolicy();
       expect(handleOnChange.mock.calls[0][0]).toEqual({
         isGlobal: false,
         selected: [],
       });
 
-      toggleGlobalSwitch();
+      selectGlobalPolicy();
       expect(handleOnChange.mock.calls[1][0]).toEqual({
         isGlobal: true,
         selected: [],
       });
     });
 
-    it('should not allow clicking on policies when global is true', () => {
+    it('should maintain policies selection even if global was checked, and user switched back to per policy', () => {
       render();
 
-      clickOnPolicy();
-      expect(handleOnChange.mock.calls.length).toBe(0);
-
-      // Select a Policy, then switch back to global and try to click the policy again (should be disabled and trigger onChange())
-      toggleGlobalSwitch();
-      clickOnPolicy();
-      toggleGlobalSwitch();
-      clickOnPolicy();
-      expect(handleOnChange.mock.calls.length).toBe(3);
-      expect(handleOnChange.mock.calls[2][0]).toEqual({
-        isGlobal: true,
-        selected: [componentProps.options[0]],
-      });
-    });
-
-    it('should maintain policies selection even if global was checked', () => {
-      render();
-
-      toggleGlobalSwitch();
+      selectPerPolicy();
       clickOnPolicy();
       expect(handleOnChange.mock.calls[1][0]).toEqual({
         isGlobal: false,
@@ -157,7 +146,7 @@ describe('when using EffectedPolicySelect component', () => {
       });
 
       // Toggle isGlobal back to True
-      toggleGlobalSwitch();
+      selectGlobalPolicy();
       expect(handleOnChange.mock.calls[2][0]).toEqual({
         isGlobal: true,
         selected: [componentProps.options[0]],

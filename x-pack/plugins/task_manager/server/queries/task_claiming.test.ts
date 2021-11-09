@@ -102,6 +102,7 @@ describe('TaskClaiming', () => {
     new TaskClaiming({
       logger: taskManagerLogger,
       definitions,
+      excludedTaskTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
       getCapacity: () => 10,
@@ -119,11 +120,13 @@ describe('TaskClaiming', () => {
       taskClaimingOpts = {},
       hits = [generateFakeTasks(1)],
       versionConflicts = 2,
+      excludedTaskTypes = [],
     }: {
       storeOpts: Partial<StoreOpts>;
       taskClaimingOpts: Partial<TaskClaimingOpts>;
       hits?: ConcreteTaskInstance[][];
       versionConflicts?: number;
+      excludedTaskTypes?: string[];
     }) {
       const definitions = storeOpts.definitions ?? taskDefinitions;
       const store = taskStoreMock.create({ taskManagerId: storeOpts.taskManagerId });
@@ -151,6 +154,7 @@ describe('TaskClaiming', () => {
         logger: taskManagerLogger,
         definitions,
         taskStore: store,
+        excludedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
         ...taskClaimingOpts,
@@ -165,17 +169,20 @@ describe('TaskClaiming', () => {
       claimingOpts,
       hits = [generateFakeTasks(1)],
       versionConflicts = 2,
+      excludedTaskTypes = [],
     }: {
       storeOpts: Partial<StoreOpts>;
       taskClaimingOpts: Partial<TaskClaimingOpts>;
       claimingOpts: Omit<OwnershipClaimingOpts, 'size' | 'taskTypes'>;
       hits?: ConcreteTaskInstance[][];
       versionConflicts?: number;
+      excludedTaskTypes?: string[];
     }) {
       const getCapacity = taskClaimingOpts.getCapacity ?? (() => 10);
       const { taskClaiming, store } = initialiseTestClaiming({
         storeOpts,
         taskClaimingOpts,
+        excludedTaskTypes,
         hits,
         versionConflicts,
       });
@@ -264,6 +271,11 @@ describe('TaskClaiming', () => {
           maxAttempts: customMaxAttempts,
           createTaskRunner: jest.fn(),
         },
+        foobar: {
+          title: 'foobar',
+          maxAttempts: customMaxAttempts,
+          createTaskRunner: jest.fn(),
+        },
       });
 
       const [
@@ -282,6 +294,7 @@ describe('TaskClaiming', () => {
         claimingOpts: {
           claimOwnershipUntil: new Date(),
         },
+        excludedTaskTypes: ['foobar'],
       });
       expect(query).toMatchObject({
         bool: {
@@ -828,16 +841,18 @@ if (doc['task.runAt'].size()!=0) {
           )
         ).map(
           (result, index) =>
-            (store.updateByQuery.mock.calls[index][0] as {
-              query: MustNotCondition;
-              size: number;
-              sort: string | string[];
-              script: {
-                params: {
-                  [claimableTaskTypes: string]: string[];
+            (
+              store.updateByQuery.mock.calls[index][0] as {
+                query: MustNotCondition;
+                size: number;
+                sort: string | string[];
+                script: {
+                  params: {
+                    [claimableTaskTypes: string]: string[];
+                  };
                 };
-              };
-            }).script.params.claimableTaskTypes
+              }
+            ).script.params.claimableTaskTypes
         );
       }
 
@@ -1241,6 +1256,7 @@ if (doc['task.runAt'].size()!=0) {
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
         definitions,
+        excludedTaskTypes: [],
         taskStore,
         maxAttempts: 2,
         getCapacity,

@@ -10,8 +10,6 @@ import { useQuery } from 'react-query';
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
-import { packagePolicyRouteService, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
-import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useOsqueryPolicies = () => {
@@ -21,14 +19,11 @@ export const useOsqueryPolicies = () => {
   const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies = [] } = useQuery(
     ['osqueryPolicies'],
     () =>
-      http.get(packagePolicyRouteService.getListPath(), {
-        query: {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        },
-      }),
+      http.get<{ items: Array<{ policy_id: string }> }>(
+        '/internal/osquery/fleet_wrapper/package_policies'
+      ),
     {
-      select: (response) =>
-        uniq<string>(response.items.map((p: { policy_id: string }) => p.policy_id)),
+      select: (response) => uniq<string>(response.items.map((p) => p.policy_id)),
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
@@ -38,8 +33,8 @@ export const useOsqueryPolicies = () => {
         }),
     }
   );
-  return useMemo(() => ({ osqueryPoliciesLoading, osqueryPolicies }), [
-    osqueryPoliciesLoading,
-    osqueryPolicies,
-  ]);
+  return useMemo(
+    () => ({ osqueryPoliciesLoading, osqueryPolicies }),
+    [osqueryPoliciesLoading, osqueryPolicies]
+  );
 };

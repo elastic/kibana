@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110898
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { FileUploadPlugin } from './plugin';
 
 export function plugin() {
@@ -13,7 +16,7 @@ export function plugin() {
 
 export * from './importer/types';
 
-export { Props as IndexNameFormProps } from './components/geojson_upload_form/index_name_form';
+export type { Props as IndexNameFormProps } from './components/geojson_upload_form/index_name_form';
 
-export { FileUploadPluginStart } from './plugin';
-export { FileUploadComponentProps, FileUploadGeoResults } from './lazy_load_bundle';
+export type { FileUploadPluginStart } from './plugin';
+export type { FileUploadComponentProps, FileUploadGeoResults } from './lazy_load_bundle';

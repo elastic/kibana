@@ -14,7 +14,8 @@ import { AlertsStatus } from '../../../alerts/status';
 
 export function Status({ stat, formattedLeader, oldestStat, alerts = {} }) {
   const followerIndex = stat.follower_index || get(stat, 'follower.index');
-  const shardId = stat.shard_id || get(stat, 'follower.shard.number');
+  const shardId =
+    typeof stat.shard_id === 'number' ? stat.shard_id : get(stat, 'follower.shard.number');
   const operationsReceived = stat.operations_written || get(stat, 'follower.operations_written');
   const failedFetches = stat.failed_read_requests || get(stat, 'requests.failed.read.count');
   const oldestOperationsReceived =

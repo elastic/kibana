@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
+import { DataViewBase, FilterStateStore } from '@kbn/es-query';
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import {
@@ -14,15 +16,8 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '../../../common';
-import type {
-  EsQueryConfig,
-  Filter,
-  IIndexPattern,
-  Query,
-} from '../../../../../../src/plugins/data/public';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
@@ -138,6 +133,17 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
       return !index ? `(${queryMatch})` : `${globalQuery} or (${queryMatch})`;
     }, '');
 
+interface CombineQueries {
+  config: EsQueryConfig;
+  dataProviders: DataProvider[];
+  indexPattern: DataViewBase;
+  browserFields: BrowserFields;
+  filters: Filter[];
+  kqlQuery: Query;
+  kqlMode: string;
+  isEventViewer?: boolean;
+}
+
 export const combineQueries = ({
   config,
   dataProviders,
@@ -147,16 +153,7 @@ export const combineQueries = ({
   kqlQuery,
   kqlMode,
   isEventViewer,
-}: {
-  config: EsQueryConfig;
-  dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
-  browserFields: BrowserFields;
-  filters: Filter[];
-  kqlQuery: Query;
-  kqlMode: string;
-  isEventViewer?: boolean;
-}): { filterQuery: string } | null => {
+}: CombineQueries): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
@@ -187,6 +184,55 @@ export const combineQueries = ({
   return {
     filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
   };
+};
+
+export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
+  const combinedQuery = combineQueries(combineQueriesParams);
+  return combinedQuery?.filterQuery
+    ? {
+        filterQuery: combinedQuery.filterQuery,
+      }
+    : null;
+};
+
+export const buildTimeRangeFilter = (from: string, to: string): Filter =>
+  ({
+    range: {
+      '@timestamp': {
+        gte: from,
+        lt: to,
+        format: 'strict_date_optional_time',
+      },
+    },
+    meta: {
+      type: 'range',
+      disabled: false,
+      negate: false,
+      alias: null,
+      key: '@timestamp',
+      params: {
+        gte: from,
+        lt: to,
+        format: 'strict_date_optional_time',
+      },
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+  } as Filter);
+
+export const getCombinedFilterQuery = ({
+  from,
+  to,
+  filters,
+  ...combineQueriesParams
+}: CombineQueries & { from: string; to: string }): string | undefined => {
+  const combinedQueries = combineQueries({
+    ...combineQueriesParams,
+    filters: [...filters, buildTimeRangeFilter(from, to)],
+  });
+
+  return combinedQueries ? combinedQueries.filterQuery : undefined;
 };
 
 /**

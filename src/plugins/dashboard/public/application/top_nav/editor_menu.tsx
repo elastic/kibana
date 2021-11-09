@@ -39,13 +39,8 @@ interface FactoryGroup {
 }
 
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
-  const {
-    core,
-    embeddable,
-    visualizations,
-    usageCollection,
-    uiSettings,
-  } = useKibana<DashboardAppServices>().services;
+  const { core, embeddable, visualizations, usageCollection, uiSettings } =
+    useKibana<DashboardAppServices>().services;
 
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
@@ -133,7 +128,10 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       name: titleInWizard || title,
       icon: icon as string,
       onClick:
-        group === VisGroups.AGGBASED ? createNewAggsBasedVis(visType) : createNewVisType(visType),
+        // not all the agg-based visualizations need to be created via the wizard
+        group === VisGroups.AGGBASED && visType.options.showIndexSelection
+          ? createNewAggsBasedVis(visType)
+          : createNewVisType(visType),
       'data-test-subj': `visType-${name}`,
       toolTipContent: description,
     };
@@ -233,23 +231,25 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
     <SolutionToolbarPopover
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-        defaultMessage: 'All types',
+        defaultMessage: 'Select type',
       })}
       iconType="arrowDown"
       iconSide="right"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={editorMenuPanels}
-        className={`dshSolutionToolbar__editorContextMenu ${
-          IS_DARK_THEME
-            ? 'dshSolutionToolbar__editorContextMenu--dark'
-            : 'dshSolutionToolbar__editorContextMenu--light'
-        }`}
-        data-test-subj="dashboardEditorContextMenu"
-      />
+      {() => (
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={editorMenuPanels}
+          className={`dshSolutionToolbar__editorContextMenu ${
+            IS_DARK_THEME
+              ? 'dshSolutionToolbar__editorContextMenu--dark'
+              : 'dshSolutionToolbar__editorContextMenu--light'
+          }`}
+          data-test-subj="dashboardEditorContextMenu"
+        />
+      )}
     </SolutionToolbarPopover>
   );
 };

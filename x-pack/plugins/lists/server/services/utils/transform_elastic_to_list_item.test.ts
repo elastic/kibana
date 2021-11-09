@@ -37,8 +37,10 @@ describe('transform_elastic_to_list_item', () => {
 
     test('it transforms an elastic keyword type to a list item type', () => {
       const response = getSearchListItemMock();
-      response.hits.hits[0]._source.ip = undefined;
-      response.hits.hits[0]._source.keyword = 'host-name-example';
+      if (response.hits.hits[0]._source) {
+        response.hits.hits[0]._source.ip = undefined;
+        response.hits.hits[0]._source.keyword = 'host-name-example';
+      }
       const queryFilter = transformElasticToListItem({
         response,
         type: 'keyword',
@@ -68,8 +70,10 @@ describe('transform_elastic_to_list_item', () => {
       const {
         hits: { hits },
       } = getSearchListItemMock();
-      hits[0]._source.ip = undefined;
-      hits[0]._source.keyword = 'host-name-example';
+      if (hits[0]._source) {
+        hits[0]._source.ip = undefined;
+        hits[0]._source.keyword = 'host-name-example';
+      }
       const queryFilter = transformElasticHitsToListItem({
         hits,
         type: 'keyword',

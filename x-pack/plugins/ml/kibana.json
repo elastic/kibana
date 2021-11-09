@@ -8,6 +8,7 @@
   ],
   "requiredPlugins": [
     "data",
+    "dataViews",
     "cloud",
     "features",
     "dataVisualizer",
@@ -17,7 +18,8 @@
     "uiActions",
     "kibanaLegacy",
     "discover",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "fieldFormats"
   ],
   "optionalPlugins": [
     "alerting",
@@ -39,7 +41,8 @@
     "savedObjects",
     "home",
     "maps",
-    "usageCollection"
+    "usageCollection",
+    "fieldFormats"
   ],
   "extraPublicDirs": [
     "common"

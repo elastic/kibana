@@ -47,10 +47,11 @@ describe('agg_expression_functions', () => {
         precision: 10,
         useGeocentroid: true,
         isFilteredByCollar: false,
-        boundingBox: JSON.stringify({
+        boundingBox: {
+          type: 'geo_bounding_box',
           top_left: [-74.1, 40.73],
           bottom_right: [-71.12, 40.01],
-        }),
+        },
       });
 
       expect(actual.value).toMatchInlineSnapshot(`

@@ -15,7 +15,7 @@ import { set } from '@elastic/safer-lodash-set';
 
 // @ts-expect-error Untyped local
 import { getDefaultWorkpad } from '../../public/state/defaults';
-import { CanvasWorkpad, CanvasElement, CanvasAsset } from '../../types';
+import { CanvasWorkpad, CanvasElement, CanvasAsset, CanvasPage } from '../../types';
 
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../public/lib/elements_registry';
@@ -27,16 +27,21 @@ export { ADDON_ID, ACTIONS_PANEL_ID } from '../addon/src/constants';
 
 export interface Params {
   workpad?: CanvasWorkpad;
+  pages?: CanvasPage[];
   elements?: CanvasElement[];
   assets?: CanvasAsset[];
 }
 
 export const reduxDecorator = (params: Params = {}) => {
   const state = cloneDeep(getInitialState());
-  const { workpad, elements, assets } = params;
+  const { workpad, elements, assets, pages } = params;
 
   if (workpad) {
     set(state, 'persistent.workpad', workpad);
+  }
+
+  if (pages) {
+    set(state, 'persistent.workpad.pages', pages);
   }
 
   if (elements) {

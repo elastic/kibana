@@ -5,25 +5,53 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DocValueFields } from '../../../../../../common/search_strategy';
 
-export const buildTimelineDetailsQuery = (
-  indexName: string,
-  id: string,
-  docValueFields: DocValueFields[]
-) => ({
-  allowNoIndices: true,
-  index: indexName,
-  ignoreUnavailable: true,
-  body: {
-    docvalue_fields: docValueFields,
-    query: {
-      terms: {
-        _id: [id],
-      },
+export const buildTimelineDetailsQuery = ({
+  authFilter,
+  docValueFields,
+  id,
+  indexName,
+  runtimeMappings,
+}: {
+  authFilter?: JsonObject;
+  docValueFields: DocValueFields[];
+  id: string;
+  indexName: string;
+  runtimeMappings: MappingRuntimeFields;
+}) => {
+  const basicFilter = {
+    terms: {
+      _id: [id],
     },
-    fields: [{ field: '*', include_unmapped: true }],
-    _source: true,
-  },
-  size: 1,
-});
+  };
+  const query =
+    authFilter != null
+      ? {
+          bool: {
+            filter: [basicFilter, authFilter],
+          },
+        }
+      : {
+          terms: {
+            _id: [id],
+          },
+        };
+
+  return {
+    allow_no_indices: true,
+    index: indexName,
+    ignore_unavailable: true,
+    body: {
+      docvalue_fields: docValueFields,
+      query,
+      fields: [{ field: '*', include_unmapped: true }],
+      // Remove and instead pass index_pattern.id once issue resolved: https://github.com/elastic/kibana/issues/111762
+      runtime_mappings: runtimeMappings,
+      _source: true,
+    },
+    size: 1,
+  };
+};

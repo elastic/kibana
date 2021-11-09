@@ -41,7 +41,7 @@ describe('getKibanaTranslationPaths', () => {
     });
   });
 
-  it('calls getTranslationPaths for each config returned in plugin.paths and plugins.scanDirs', async () => {
+  it('calls getTranslationPaths for each config returned in plugin.paths', async () => {
     const pluginPaths = ['/path/to/pluginA', '/path/to/pluginB'];
 
     await getKibanaTranslationFiles(locale, pluginPaths);

@@ -18,6 +18,7 @@ export * from './helpers';
 export interface CaseCallOutProps {
   configureCasesNavigation: CasesNavigation;
   hasConnectors: boolean;
+  hasLicenseError: boolean;
   messages?: ErrorMessage[];
   onEditClick: () => void;
 }
@@ -31,6 +32,7 @@ type GroupByTypeMessages = {
 const CaseCallOutComponent = ({
   configureCasesNavigation,
   hasConnectors,
+  hasLicenseError,
   onEditClick,
   messages = [],
 }: CaseCallOutProps) => {
@@ -77,6 +79,7 @@ const CaseCallOutComponent = ({
                 id={id}
                 messages={groupedByTypeErrorMessages[type].messages}
                 type={type}
+                hasLicenseError={hasLicenseError}
               />
               <EuiSpacer />
             </React.Fragment>

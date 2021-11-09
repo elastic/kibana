@@ -29,7 +29,7 @@ describe('Enterprise Search Telemetry API', () => {
     jest.clearAllMocks();
     mockRouter = new MockRouter({
       method: 'put',
-      path: '/api/enterprise_search/stats',
+      path: '/internal/enterprise_search/stats',
     });
 
     registerTelemetryRoute({
@@ -40,7 +40,7 @@ describe('Enterprise Search Telemetry API', () => {
     });
   });
 
-  describe('PUT /api/enterprise_search/stats', () => {
+  describe('PUT /internal/enterprise_search/stats', () => {
     it('increments the saved objects counter for App Search', async () => {
       (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
 

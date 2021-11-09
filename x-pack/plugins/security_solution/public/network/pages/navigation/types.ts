@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { DataViewBase } from '@kbn/es-query';
 import { ESTermQuery } from '../../../../common/typed_json';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 import { NavTab } from '../../../common/components/navigation/types';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
@@ -32,7 +32,7 @@ export type NetworkComponentQueryProps = QueryTabBodyProps & {
 };
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   flowTarget: FlowTargetSourceDest;
 };
 
@@ -47,10 +47,9 @@ export type HttpQueryTabBodyProps = QueryTabBodyProps & {
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
   docValueFields: DocValueFields[];
-  networkPagePath: string;
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   indexNames: string[];
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };

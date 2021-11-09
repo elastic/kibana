@@ -15,7 +15,7 @@ import { CoreStart, HttpStart } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
-import type { SecurityOssPluginStart } from '../../../security_oss/public';
+import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 
 export class ShareMenuManager {
   private isOpen = false;
@@ -25,7 +25,7 @@ export class ShareMenuManager {
   start(
     core: CoreStart,
     shareRegistry: ShareMenuRegistryStart,
-    anonymousAccess?: SecurityOssPluginStart['anonymousAccess']
+    anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
     return {
       /**
@@ -35,6 +35,7 @@ export class ShareMenuManager {
        */
       toggleShareContextMenu: (options: ShowShareMenuOptions) => {
         const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose: this.onClose });
+        const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
           menuItems,
@@ -69,7 +70,7 @@ export class ShareMenuManager {
     menuItems: ShareMenuItem[];
     post: HttpStart['post'];
     basePath: string;
-    anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
+    anonymousAccess: AnonymousAccessServiceContract | undefined;
   }) {
     if (this.isOpen) {
       this.onClose();

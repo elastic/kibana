@@ -114,7 +114,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   documentation: {
     section: 'elasticsearch',
     signature: '',
-    description: i18n.translate('xpack.lens.indexPattern.count.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.count.documentation.markdown', {
       defaultMessage: `
 Calculates the number of documents.
 

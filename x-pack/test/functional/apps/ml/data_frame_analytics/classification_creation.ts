@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
             // tick/grid/axis
             { color: '#DDDDDD', percentage: 50 },
             // line
-            { color: '#98A2B3', percentage: 30 },
+            { color: '#98A2B3', percentage: 10 },
           ],
           scatterplotMatrixColorStats: [
             // marker colors
@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_y": {', '    "type": "keyword",'],
           row: {
+            memoryStatus: 'ok',
             type: 'classification',
             status: 'stopped',
             progress: '100',
@@ -194,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
-          await ml.testExecution.logTestStep('sets the create index pattern switch');
+          await ml.testExecution.logTestStep('sets the create data view switch');
           await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
           await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
             testData.createIndexPattern
@@ -242,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
+            memoryStatus: testData.expected.row.memoryStatus,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
@@ -280,6 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: editedDescription,
+            memoryStatus: testData.expected.row.memoryStatus,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,

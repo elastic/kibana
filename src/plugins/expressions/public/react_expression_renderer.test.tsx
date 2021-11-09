@@ -10,12 +10,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
-import { ReactExpressionRenderer } from './react_expression_renderer';
+import { default as ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
-import { RenderErrorHandlerFnType } from './types';
-import { ExpressionRendererEvent } from './render';
+import { IInterpreterRenderHandlers } from '../common';
+import { RenderErrorHandlerFnType, ExpressionRendererEvent } from './types';
 
 jest.mock('./loader', () => {
   return {
@@ -234,7 +234,7 @@ describe('ExpressionRenderer', () => {
         done: () => {
           renderSubject.next(1);
         },
-      } as any);
+      } as IInterpreterRenderHandlers);
     });
 
     instance.update();
@@ -255,7 +255,7 @@ describe('ExpressionRenderer', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
 
-    const newData = {};
+    const result = {};
     const inspectData = {};
     const onData$ = jest.fn();
 
@@ -275,11 +275,11 @@ describe('ExpressionRenderer', () => {
     expect(onData$).toHaveBeenCalledTimes(0);
 
     act(() => {
-      dataSubject.next(newData);
+      dataSubject.next({ result });
     });
 
     expect(onData$).toHaveBeenCalledTimes(1);
-    expect(onData$.mock.calls[0][0]).toBe(newData);
+    expect(onData$.mock.calls[0][0]).toBe(result);
     expect(onData$.mock.calls[0][1]).toBe(inspectData);
   });
 

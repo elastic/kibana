@@ -143,14 +143,6 @@ export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
   }
 );
 
-export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
-  'xpack.cases.configureCases.warningMessage',
-  {
-    defaultMessage:
-      'The selected connector has been deleted. Either select a different connector or create a new one.',
-  }
-);
-
 export const COMMENT = i18n.translate('xpack.cases.configureCases.commentMapping', {
   defaultMessage: 'Comments',
 });
@@ -170,3 +162,17 @@ export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string =>
     values: { connectorName },
     defaultMessage: 'Update { connectorName }',
   });
+
+export const DEPRECATED_TOOLTIP_TEXT = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipText',
+  {
+    defaultMessage: 'deprecated',
+  }
+);
+
+export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipContent',
+  {
+    defaultMessage: 'This connector is deprecated. Update it, or create a new one.',
+  }
+);

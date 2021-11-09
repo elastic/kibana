@@ -9,8 +9,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
-  EuiCodeEditor,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,8 +21,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import {
+  Filter,
+  FieldFilter,
+  buildFilter,
+  buildCustomFilter,
+  cleanFilter,
+  getFilterParams,
+} from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
+import { XJsonLang } from '@kbn/monaco';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -39,14 +46,7 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { getIndexPatternFromFilter } from '../../../query';
 import { IIndexPattern, IFieldType } from '../../..';
-import {
-  Filter,
-  FieldFilter,
-  buildFilter,
-  buildCustomFilter,
-  cleanFilter,
-  getFilterParams,
-} from '../../../../common';
+import { CodeEditor } from '../../../../../kibana_react/public';
 
 export interface Props {
   filter: Filter;
@@ -54,6 +54,7 @@ export interface Props {
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 interface State {
@@ -76,7 +77,7 @@ class FilterEditorUI extends Component<Props, State> {
       selectedOperator: this.getSelectedOperator(),
       params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
-      customLabel: props.filter.meta.alias,
+      customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
     };
@@ -327,13 +328,16 @@ class FilterEditorUI extends Component<Props, State> {
           defaultMessage: 'Elasticsearch Query DSL',
         })}
       >
-        <EuiCodeEditor
+        <CodeEditor
+          languageId={XJsonLang.ID}
+          width="100%"
+          height={'250px'}
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
-          mode="json"
-          width="100%"
-          height="250px"
           data-test-subj="customEditorInput"
+          aria-label={i18n.translate('data.filter.filterEditor.queryDslAriaLabel', {
+            defaultMessage: 'Elasticsearch Query DSL editor',
+          })}
         />
       </EuiFormRow>
     );
@@ -356,6 +360,7 @@ class FilterEditorUI extends Component<Props, State> {
             value={this.state.params}
             onChange={this.onParamsChange}
             data-test-subj="phraseValueInput"
+            timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
             fullWidth
           />
         );
@@ -366,6 +371,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
+            timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
             fullWidth
           />
         );
@@ -486,7 +492,7 @@ class FilterEditorUI extends Component<Props, State> {
     const alias = useCustomLabel ? customLabel : null;
 
     if (isCustomEditorOpen) {
-      const { index, disabled, negate } = this.props.filter.meta;
+      const { index, disabled = false, negate = false } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
@@ -497,7 +503,7 @@ class FilterEditorUI extends Component<Props, State> {
         field,
         operator.type,
         operator.negate,
-        this.props.filter.meta.disabled,
+        this.props.filter.meta.disabled ?? false,
         params ?? '',
         alias,
         $state.store

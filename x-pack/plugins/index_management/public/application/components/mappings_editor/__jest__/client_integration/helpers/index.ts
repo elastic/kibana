@@ -12,10 +12,12 @@ import {
   getMappingsEditorDataFactory,
 } from './mappings_editor.helpers';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test/jest';
+export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
+export { kibanaVersion } from './setup_environment';
 
 export const componentHelpers = {
   mappingsEditor: { setup: mappingsEditorSetup, getMappingsEditorDataFactory },
 };
 
-export { MappingsEditorTestBed, DomFields };
+export type { MappingsEditorTestBed, DomFields };

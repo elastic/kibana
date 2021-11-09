@@ -20,17 +20,16 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiKeyboardAccessible,
   EuiForm,
   EuiSpacer,
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
 import { LegacyIcon } from '../legacy_icon';
-import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 import { UpdateableFieldProperties } from './field_manager';
 
 import { isEqual } from '../helpers';
@@ -212,12 +211,9 @@ export function FieldEditor({
               defaultMessage: 'Edit',
             }),
             width: 380,
+            initialFocusedItemIndex: -1,
             content: (
               <EuiForm className="gphFieldEditor__displayForm">
-                {/* This is a workaround to prevent the field combo box from being focussed when opening the panel. */}
-                <EuiKeyboardAccessible>
-                  <span style={{ opacity: 0 }} onClick={() => {}} onKeyPress={() => {}} />
-                </EuiKeyboardAccessible>
                 <EuiFormRow
                   display="columnCompressed"
                   label={i18n.translate('xpack.graph.fieldManager.fieldLabel', {

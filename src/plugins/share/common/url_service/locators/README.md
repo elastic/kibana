@@ -65,7 +65,7 @@ plugins.share.url.locators.create({
     };
   },
 
-  migrations = {
+  migrations: {
     '7.20.0': ({productId, ...rest}) => {
       return {
         id: productId,
@@ -76,20 +76,20 @@ plugins.share.url.locators.create({
 });
 ```
 
-The migration version should correspond to Kibana relase when the chagne was
+The migration version should correspond to Kibana relase when the change was
 introduced. It is the responsibility of the *consumer* to make sure they
 migrate their stored parameters using the provided migration function to the
 latest version. Migrations versions are ordered by semver. As a consumer,
-if persist somewhere a locator parameters object, you also want to store
+if you persist somewhere a locator parameters object, you also want to store
 the version of that object, so later you know from starting from which
 version you need to execute migrations.
 
 
 ## Consumer Usage
 
-Consumers of the Locators service can use the locators to generate deeps links
-into Kibana apps, or navigate to the apps while passing to the destination
-app the *location state*.
+Consumers of the Locators service can use the locators to generate deep links
+into Kibana apps, or navigate to the apps while passing the *location state* to 
+the destination app.
 
 First you will need to get hold of the *locator* for the app you want to
 navigate to.
@@ -115,7 +115,7 @@ class MyPlugin {
 }
 ```
 
-Once you have the locator, you can use it to navigate to some kibana app:
+Once you have the locator, you can use it to navigate to some Kibana app:
 
 ```ts
 await locator.navigate({
@@ -136,10 +136,10 @@ const url = await locator.getUrl({
 **As a consumer, you should not persist the resulting URL string!**
 
 As soon as you do, you have lost your migration options. Instead you should
-store the ID, version and params of your locator. This will let you
+store the ID, version, and params of your locator. This will let you
 re-create the migrated URL later.
 
-If, as a consumer, you store the ID, version and params of the locator, you
+If, as a consumer, you store the ID, version, and params of the locator, you
 should use the migration functions provided by the locator when migrating
 between Kibana versions.
 

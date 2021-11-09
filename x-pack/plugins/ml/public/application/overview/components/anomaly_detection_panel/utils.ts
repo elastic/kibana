@@ -10,9 +10,10 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/state
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
 
-export function getGroupsFromJobs(
-  jobs: MlSummaryJobs
-): { groups: GroupsDictionary; count: number } {
+export function getGroupsFromJobs(jobs: MlSummaryJobs): {
+  groups: GroupsDictionary;
+  count: number;
+} {
   const groups: any = {
     ungrouped: {
       id: 'ungrouped',

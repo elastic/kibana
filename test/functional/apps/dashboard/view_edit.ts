@@ -18,15 +18,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
   const dashboardName = 'dashboard with filter';
   const filterBar = getService('filterBar');
+  const security = getService('security');
 
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('create new dashboard opens in edit mode', async function () {

@@ -7,14 +7,14 @@
  */
 
 import { get } from 'lodash';
-import { Filter, isExistsFilter, FILTERS } from '../../../../../common';
+import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
 
 export const mapExists = (filter: Filter) => {
   if (isExistsFilter(filter)) {
     return {
       type: FILTERS.EXISTS,
       value: FILTERS.EXISTS,
-      key: get(filter, 'exists.field'),
+      key: get(filter, 'query.exists.field'),
     };
   }
   throw filter;

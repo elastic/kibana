@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'src/core/server';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
@@ -25,9 +25,14 @@ export const ES_QUERY_ID = '.es-query';
 export const ActionGroupId = 'query matched';
 export const ConditionMetAlertInstanceId = 'query matched';
 
-export function getAlertType(
-  logger: Logger
-): AlertType<EsQueryAlertParams, EsQueryAlertState, {}, ActionContext, typeof ActionGroupId> {
+export function getAlertType(logger: Logger): AlertType<
+  EsQueryAlertParams,
+  never, // Only use if defining useSavedObjectReferences hook
+  EsQueryAlertState,
+  {},
+  ActionContext,
+  typeof ActionGroupId
+> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
   });
@@ -187,7 +192,10 @@ export function getAlertType(
                         filter: [
                           {
                             range: {
-                              [params.timeField]: { lte: timestamp },
+                              [params.timeField]: {
+                                lte: timestamp,
+                                format: 'strict_date_optional_time',
+                              },
                             },
                           },
                         ],

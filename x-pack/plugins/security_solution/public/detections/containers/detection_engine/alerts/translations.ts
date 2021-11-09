@@ -37,13 +37,3 @@ export const CASES_FROM_ALERTS_FAILURE = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.casesFromAlerts.title',
   { defaultMessage: 'Failed to find associated cases' }
 );
-
-export const ISOLATION_STATUS_FAILURE = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.isolationStatus.title',
-  { defaultMessage: 'Failed to retrieve current isolation status' }
-);
-
-export const ISOLATION_PENDING_FAILURE = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.isolationPending.title',
-  { defaultMessage: 'Failed to retrieve isolation pending statuses' }
-);

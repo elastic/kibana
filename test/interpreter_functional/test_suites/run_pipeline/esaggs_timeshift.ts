@@ -12,6 +12,10 @@ import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 function getCell(esaggsResult: any, row: number, column: number): unknown | undefined {
+  if (esaggsResult && !esaggsResult.columns) {
+    throw new Error(`Unexpected esaggs result: ${JSON.stringify(esaggsResult, undefined, ' ')}`);
+  }
+
   const columnId = esaggsResult?.columns[column]?.id;
   if (!columnId) {
     return;
@@ -97,6 +101,7 @@ export default function ({
         'esaggs_shift_single_percentile',
         expression
       ).getResponse();
+
       // percentile is not stable
       expect(getCell(result, 0, 0)).to.be.within(10000, 20000);
       expect(getCell(result, 0, 1)).to.be.within(10000, 20000);
@@ -147,7 +152,7 @@ export default function ({
               id="2-filter"
               enabled=true
               schema="bucket"
-              filter='{"language":"kuery","query":"geo.src:US"}'
+              filter={kql "geo.src:US"}
             }
             customMetric={aggAvg id="3"
               field="bytes"
@@ -164,7 +169,7 @@ export default function ({
               id="4-filter"
               enabled=true
               schema="bucket"
-              filter='{"language":"kuery","query":"geo.src:US"}'
+              filter={kql "geo.src:US"}
             }
             customMetric={aggAvg id="5"
               field="bytes"
@@ -223,8 +228,8 @@ export default function ({
       const expression = `
           kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
-          aggs={aggFilters id="1" filters='[{"input":{"query":"geo.src:\\"US\\" ","language":"kuery"},"label":""},{"input":{"query":"geo.src: \\"CN\\"","language":"kuery"},"label":""}]'}
-          aggs={aggFilters id="2" filters='[{"input":{"query":"geo.dest:\\"US\\" ","language":"kuery"},"label":""},{"input":{"query":"geo.dest: \\"CN\\"","language":"kuery"},"label":""}]'}
+          aggs={aggFilters id="1" filters={queryFilter {kql "geo.src:\\"US\\" "}} filters={queryFilter {kql "geo.src: \\"CN\\""}}}
+          aggs={aggFilters id="2" filters={queryFilter {kql "geo.dest:\\"US\\" "}} filters={queryFilter {kql "geo.dest: \\"CN\\""}}}
           aggs={aggAvg id="3" field="bytes" enabled=true schema="metric" timeShift="2h"}
           aggs={aggAvg id="4" field="bytes" enabled=true schema="metric"}
         `;

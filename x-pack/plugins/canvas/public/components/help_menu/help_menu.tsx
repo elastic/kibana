@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunction } from 'src/plugins/expressions';
 
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
+import { CanvasPluginServices } from '../../services/';
 
 let FunctionReferenceGenerator: null | React.LazyExoticComponent<any> = null;
 
@@ -31,9 +32,10 @@ const strings = {
 
 interface Props {
   functionRegistry: Record<string, ExpressionFunction>;
+  notifyService: CanvasPluginServices['notify'];
 }
 
-export const HelpMenu: FC<Props> = ({ functionRegistry }) => {
+export const HelpMenu: FC<Props> = ({ functionRegistry, notifyService }) => {
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
 
   const showFlyout = () => {
@@ -46,14 +48,17 @@ export const HelpMenu: FC<Props> = ({ functionRegistry }) => {
 
   return (
     <>
-      <EuiButtonEmpty size="xs" flush="left" iconType="keyboardShortcut" onClick={showFlyout}>
+      <EuiButtonEmpty size="s" flush="left" iconType="keyboardShortcut" onClick={showFlyout}>
         {strings.getKeyboardShortcutsLinkLabel()}
       </EuiButtonEmpty>
 
       {FunctionReferenceGenerator ? (
         <Suspense fallback={null}>
-          <EuiSpacer size="s" />
-          <FunctionReferenceGenerator functionRegistry={functionRegistry} />
+          <EuiSpacer size="xs" />
+          <FunctionReferenceGenerator
+            functionRegistry={functionRegistry}
+            notifyService={notifyService}
+          />
         </Suspense>
       ) : null}
 

@@ -49,6 +49,7 @@ const indexWithoutLifecyclePolicy: Index = {
   primary_size: '3.4kb',
   aliases: 'none',
   isFrozen: false,
+  hidden: false,
   ilm: {
     index: 'testy1',
     managed: false,
@@ -68,6 +69,7 @@ const indexWithLifecyclePolicy: Index = {
   primary_size: '6.5kb',
   aliases: 'none',
   isFrozen: false,
+  hidden: false,
   ilm: {
     index: 'testy3',
     managed: true,
@@ -95,6 +97,7 @@ const indexWithLifecycleError = {
   primary_size: '6.5kb',
   aliases: 'none',
   isFrozen: false,
+  hidden: false,
   ilm: {
     index: 'testy3',
     managed: true,

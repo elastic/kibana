@@ -12,16 +12,13 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
+import { SchemaType } from '../../../../../shared/schema/types';
 import { URL_LABEL } from '../../../../constants';
+import { getAsLocalDateTimeString } from '../../../../utils';
 
 import { CustomSourceIcon } from './custom_source_icon';
 import { DisplaySettingsLogic } from './display_settings_logic';
 import { TitleField } from './title_field';
-
-const getAsLocalDateTimeString = (str: string) => {
-  const dateValue = Date.parse(str);
-  return dateValue ? new Date(dateValue).toLocaleString() : null;
-};
 
 export const ExampleResultDetailCard: React.FC = () => {
   const {
@@ -30,6 +27,7 @@ export const ExampleResultDetailCard: React.FC = () => {
     titleFieldHover,
     urlFieldHover,
     exampleDocuments,
+    schemaFields,
   } = useValues(DisplaySettingsLogic);
 
   const result = exampleDocuments[0];
@@ -66,8 +64,9 @@ export const ExampleResultDetailCard: React.FC = () => {
       <div className="example-result-detail-card__content">
         {detailFields.length > 0 ? (
           detailFields.map(({ fieldName, label }, index) => {
-            const value = result[fieldName] as string;
-            const dateValue = getAsLocalDateTimeString(value);
+            const value = result[fieldName];
+            const fieldType = (schemaFields as { [key: string]: SchemaType })[fieldName];
+            const dateValue = fieldType === SchemaType.Date && getAsLocalDateTimeString(value);
 
             return (
               <div

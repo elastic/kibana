@@ -10,13 +10,13 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 
 import { useKibana } from '../../../common/lib/kibana';
 
 import { ThreatMatchComponent } from './';
 import { ThreatMapEntries } from './types';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({
@@ -65,14 +65,14 @@ describe('ThreatMatchComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           onChange={jest.fn()}
         />
@@ -94,14 +94,14 @@ describe('ThreatMatchComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           onChange={jest.fn()}
         />
@@ -123,14 +123,14 @@ describe('ThreatMatchComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           onChange={jest.fn()}
         />
@@ -151,14 +151,14 @@ describe('ThreatMatchComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           onChange={jest.fn()}
         />
@@ -188,14 +188,14 @@ describe('ThreatMatchComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           onChange={jest.fn()}
         />
@@ -225,14 +225,14 @@ describe('ThreatMatchComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           onChange={jest.fn()}
         />
@@ -255,14 +255,14 @@ describe('ThreatMatchComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           onChange={jest.fn()}
         />
@@ -286,14 +286,14 @@ describe('ThreatMatchComponent', () => {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           threatIndexPatterns={
             {
               id: '1234',
               title: 'logstash-*',
               fields,
-            } as IndexPattern
+            } as DataViewBase
           }
           onChange={jest.fn()}
         />

@@ -17,15 +17,21 @@ import { DefaultPageTitle } from './default_page_title';
 interface Props {
   section?: Section;
   children?: React.ReactNode;
+  rightColumn?: JSX.Element;
 }
 
-export const DefaultLayout: React.FunctionComponent<Props> = ({ section, children }) => {
+export const DefaultLayout: React.FunctionComponent<Props> = ({
+  section,
+  children,
+  rightColumn,
+}) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
 
   return (
     <WithHeaderLayout
       leftColumn={<DefaultPageTitle />}
+      rightColumn={rightColumn}
       tabs={[
         {
           name: (
@@ -43,7 +49,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.policiesLinkText"
-              defaultMessage="Agent Policies"
+              defaultMessage="Agent policies"
             />
           ),
           isSelected: section === 'agent_policies',
@@ -54,7 +60,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
           name: (
             <FormattedMessage
               id="xpack.fleet.appNavigation.enrollmentTokensText"
-              defaultMessage="Enrollment Tokens"
+              defaultMessage="Enrollment tokens"
             />
           ),
           isSelected: section === 'enrollment_tokens',

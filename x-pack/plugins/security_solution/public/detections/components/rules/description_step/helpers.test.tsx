@@ -14,8 +14,8 @@ import {
   esFilters,
   FilterManager,
   UI_SETTINGS,
-  IndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { SeverityBadge } from '../severity_badge';
 
 import * as i18n from './translations';
@@ -142,11 +142,11 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
-        indexPatterns: ({
+        indexPatterns: {
           fields: [{ name: 'event.category', type: 'test type' }],
           title: 'test title',
           getFormatterForField: () => ({ convert: (val: unknown) => val }),
-        } as unknown) as IndexPattern,
+        } as unknown as DataViewBase,
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);

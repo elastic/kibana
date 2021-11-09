@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -28,6 +28,8 @@ import {
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
   HostFirstLastSeenRequestOptions,
+  HostsRiskScoreStrategyResponse,
+  HostsRiskScoreRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -71,14 +73,27 @@ import {
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
 } from './cti';
+import {
+  HostRulesRequestOptions,
+  HostRulesStrategyResponse,
+  HostTacticsRequestOptions,
+  HostTacticsStrategyResponse,
+  RiskScoreRequestOptions,
+  RiskScoreStrategyResponse,
+  UebaQueries,
+  UserRulesRequestOptions,
+  UserRulesStrategyResponse,
+} from './ueba';
 
 export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
+export * from './ueba';
 
 export type FactoryQueryTypes =
   | HostsQueries
   | HostsKpiQueries
+  | UebaQueries
   | NetworkQueries
   | NetworkKpiQueries
   | CtiQueries
@@ -109,6 +124,16 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
+  : T extends UebaQueries.riskScore
+  ? RiskScoreStrategyResponse
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreStrategyResponse
+  : T extends UebaQueries.hostRules
+  ? HostRulesStrategyResponse
+  : T extends UebaQueries.userRules
+  ? UserRulesStrategyResponse
+  : T extends UebaQueries.hostTactics
+  ? HostTacticsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
@@ -157,6 +182,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreRequestOptions
   : T extends HostsQueries.details
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
@@ -199,6 +226,14 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkKpiUniqueFlowsRequestOptions
   : T extends NetworkKpiQueries.uniquePrivateIps
   ? NetworkKpiUniquePrivateIpsRequestOptions
+  : T extends UebaQueries.riskScore
+  ? RiskScoreRequestOptions
+  : T extends UebaQueries.hostRules
+  ? HostRulesRequestOptions
+  : T extends UebaQueries.userRules
+  ? UserRulesRequestOptions
+  : T extends UebaQueries.hostTactics
+  ? HostTacticsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment

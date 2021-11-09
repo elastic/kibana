@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy, PackagePolicy } from './types';
+import type { NewPackagePolicy, PackagePolicy, DeletePackagePoliciesResponse } from './types';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
@@ -44,4 +44,15 @@ export const createPackagePolicyMock = (): PackagePolicy => {
       },
     ],
   };
+};
+
+export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
+  const newPackagePolicy = createNewPackagePolicyMock();
+  return [
+    {
+      id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
+      success: true,
+      package: newPackagePolicy.package,
+    },
+  ];
 };

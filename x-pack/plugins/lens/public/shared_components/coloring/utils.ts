@@ -7,8 +7,9 @@
 
 import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { isColorDark } from '@elastic/eui';
+import type { Datatable } from 'src/plugins/expressions/public';
 import {
   CUSTOM_PALETTE,
   defaultPaletteParams,
@@ -16,7 +17,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from './constants';
-import { CustomPaletteParams, ColorStop } from './types';
+import type { CustomPaletteParams, ColorStop } from '../../../common';
 
 /**
  * Some name conventions here:
@@ -35,14 +36,15 @@ import { CustomPaletteParams, ColorStop } from './types';
  * for a single change.
  */
 
-export function applyPaletteParams(
+export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>(
   palettes: PaletteRegistry,
-  activePalette: PaletteOutput<CustomPaletteParams>,
+  activePalette: T,
   dataBounds: { min: number; max: number }
 ) {
   // make a copy of it as they have to be manipulated later on
   let displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
     dataBounds,
+    defaultPaletteName: activePalette?.name,
   });
 
   if (activePalette?.params?.reverse && activePalette?.params?.name !== CUSTOM_PALETTE) {
@@ -118,7 +120,13 @@ export function getPaletteStops(
     prevPalette,
     dataBounds,
     mapFromMinValue,
-  }: { prevPalette?: string; dataBounds: { min: number; max: number }; mapFromMinValue?: boolean }
+    defaultPaletteName,
+  }: {
+    prevPalette?: string;
+    dataBounds: { min: number; max: number };
+    mapFromMinValue?: boolean;
+    defaultPaletteName?: string;
+  }
 ) {
   const { min: minValue, max: maxValue } = getOverallMinMax(activePaletteParams, dataBounds);
   const interval = maxValue - minValue;
@@ -130,7 +138,9 @@ export function getPaletteStops(
   }
   // generate a palette from predefined ones and customize the domain
   const colorStopsFromPredefined = palettes
-    .get(prevPalette || activePaletteParams?.name || defaultPaletteParams.name)
+    .get(
+      prevPalette || activePaletteParams?.name || defaultPaletteName || defaultPaletteParams.name
+    )
     .getCategoricalColors(defaultPaletteParams.steps, otherParams);
 
   const newStopsMin = mapFromMinValue ? minValue : interval / defaultPaletteParams.steps;
@@ -262,7 +272,7 @@ export function getColorStops(
   dataBounds: { min: number; max: number }
 ) {
   // just forward the current stops if custom
-  if (activePalette?.name === CUSTOM_PALETTE) {
+  if (activePalette?.name === CUSTOM_PALETTE && colorStops?.length) {
     return colorStops;
   }
   // for predefined palettes create some stops, then drop the last one.
@@ -272,7 +282,7 @@ export function getColorStops(
     { ...activePalette?.params },
     // mapFromMinValue is a special flag to offset the stops values
     // used here to avoid a new remap/left shift
-    { dataBounds, mapFromMinValue: true }
+    { dataBounds, mapFromMinValue: true, defaultPaletteName: activePalette.name }
   );
   if (activePalette?.params?.reverse) {
     freshColorStops = reversePalette(freshColorStops);
@@ -283,7 +293,12 @@ export function getColorStops(
 export function getContrastColor(color: string, isDarkTheme: boolean) {
   const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorInk;
   const lightColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
-  return isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
+  const backgroundColor = isDarkTheme
+    ? euiDarkVars.euiPageBackgroundColor
+    : euiLightVars.euiPageBackgroundColor;
+  const finalColor =
+    chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
+  return isColorDark(...finalColor.rgb()) ? lightColor : darkColor;
 }
 
 /**
@@ -306,3 +321,46 @@ export function getStopsForFixedMode(stops: ColorStop[], colorStops?: ColorStop[
     oldMin: referenceStops[0].stop,
   });
 }
+
+function getId(id: string) {
+  return id;
+}
+
+export function getNumericValue(rowValue: number | number[] | undefined) {
+  if (rowValue == null || Array.isArray(rowValue)) {
+    return;
+  }
+  return rowValue;
+}
+
+export const findMinMaxByColumnId = (
+  columnIds: string[],
+  table: Datatable | undefined,
+  getOriginalId: (id: string) => string = getId
+) => {
+  const minMax: Record<string, { min: number; max: number; fallback?: boolean }> = {};
+
+  if (table != null) {
+    for (const columnId of columnIds) {
+      const originalId = getOriginalId(columnId);
+      minMax[originalId] = minMax[originalId] || { max: -Infinity, min: Infinity };
+      table.rows.forEach((row) => {
+        const rowValue = row[columnId];
+        const numericValue = getNumericValue(rowValue);
+        if (numericValue != null) {
+          if (minMax[originalId].min > numericValue) {
+            minMax[originalId].min = numericValue;
+          }
+          if (minMax[originalId].max < numericValue) {
+            minMax[originalId].max = numericValue;
+          }
+        }
+      });
+      // what happens when there's no data in the table? Fallback to a percent range
+      if (minMax[originalId].max === -Infinity) {
+        minMax[originalId] = { max: 100, min: 0, fallback: true };
+      }
+    }
+  }
+  return minMax;
+};

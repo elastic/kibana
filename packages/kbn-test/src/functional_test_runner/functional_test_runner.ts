@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { relative } from 'path';
 
 import { ToolingLog } from '@kbn/dev-utils';
 
@@ -79,18 +78,33 @@ export class FunctionalTestRunner {
       // replace the function of custom service providers so that they return
       // promise-like objects which never resolve, essentially disabling them
       // allowing us to load the test files and populate the mocha suites
-      const readStubbedProviderSpec = (type: string, providers: any) =>
+      const readStubbedProviderSpec = (type: string, providers: any, skip: string[]) =>
         readProviderSpec(type, providers).map((p) => ({
           ...p,
-          fn: () => ({
-            then: () => {},
-          }),
+          fn: skip.includes(p.name)
+            ? (...args: unknown[]) => {
+                const result = p.fn(...args);
+                if ('then' in result) {
+                  throw new Error(
+                    `Provider [${p.name}] returns a promise so it can't loaded during test analysis`
+                  );
+                }
+
+                return result;
+              }
+            : () => ({
+                then: () => {},
+              }),
         }));
 
       const providers = new ProviderCollection(this.log, [
         ...coreProviders,
-        ...readStubbedProviderSpec('Service', config.get('services')),
-        ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),
+        ...readStubbedProviderSpec(
+          'Service',
+          config.get('services'),
+          config.get('servicesRequiredForTestAnalysis')
+        ),
+        ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
       ]);
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
@@ -120,9 +134,6 @@ export class FunctionalTestRunner {
       ) {
         throw new Error('No tests defined.');
       }
-
-      // eslint-disable-next-line
-      console.log(`--- Running ${relative(process.cwd(), this.configFile)}`);
 
       const dockerServers = new DockerServersService(
         config.get('dockerServers'),

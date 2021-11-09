@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-
+import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import {
   Axis,
   BarSeries,
+  BrushEndListener,
   Chart,
-  niceTimeFormatter,
+  ElementClickListener,
   Position,
   ScaleType,
   Settings,
+  XYChartElementEvent,
+  XYBrushEvent,
 } from '@elastic/charts';
+import moment from 'moment';
+import { IUiSettingsClient } from 'kibana/public';
+import { useDataVisualizerKibana } from '../../../../kibana_context';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../../../src/plugins/charts/common';
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -34,6 +39,16 @@ interface Props {
 
 const SPEC_ID = 'document_count';
 
+function getTimezone(uiSettings: IUiSettingsClient) {
+  if (uiSettings.isDefault('dateFormat:tz')) {
+    const detectedTimezone = moment.tz.guess();
+    if (detectedTimezone) return detectedTimezone;
+    else return moment().format('Z');
+  } else {
+    return uiSettings.get('dateFormat:tz', 'Browser');
+  }
+}
+
 export const DocumentCountChart: FC<Props> = ({
   width,
   chartPoints,
@@ -41,6 +56,13 @@ export const DocumentCountChart: FC<Props> = ({
   timeRangeLatest,
   interval,
 }) => {
+  const {
+    services: { data, uiSettings, fieldFormats },
+  } = useDataVisualizerKibana();
+
+  const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
+  const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
+
   const seriesName = i18n.translate(
     'xpack.dataVisualizer.dataGrid.field.documentCountChart.seriesLabel',
     {
@@ -52,8 +74,6 @@ export const DocumentCountChart: FC<Props> = ({
     min: timeRangeEarliest,
     max: timeRangeLatest,
   };
-
-  const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
 
   const adjustedChartPoints = useMemo(() => {
     // Display empty chart when no data in range
@@ -71,6 +91,37 @@ export const DocumentCountChart: FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
 
+  const timefilterUpdateHandler = useCallback(
+    (ranges: { from: number; to: number }) => {
+      data.query.timefilter.timefilter.setTime({
+        from: moment(ranges.from).toISOString(),
+        to: moment(ranges.to).toISOString(),
+        mode: 'absolute',
+      });
+    },
+    [data]
+  );
+
+  const onBrushEnd = ({ x }: XYBrushEvent) => {
+    if (!x) {
+      return;
+    }
+    const [from, to] = x;
+    timefilterUpdateHandler({ from, to });
+  };
+
+  const onElementClick: ElementClickListener = ([elementData]) => {
+    const startRange = (elementData as XYChartElementEvent)[0].x;
+
+    const range = {
+      from: startRange,
+      to: startRange + interval,
+    };
+    timefilterUpdateHandler(range);
+  };
+
+  const timeZone = getTimezone(uiSettings);
+
   return (
     <div style={{ width: width ?? '100%' }} data-test-subj="dataVisualizerDocumentCountChart">
       <Chart
@@ -79,12 +130,18 @@ export const DocumentCountChart: FC<Props> = ({
           height: 120,
         }}
       >
-        <Settings xDomain={xDomain} />
+        <Settings
+          xDomain={xDomain}
+          onBrushEnd={onBrushEnd as BrushEndListener}
+          onElementClick={onElementClick}
+        />
         <Axis
           id="bottom"
           position={Position.Bottom}
           showOverlappingTicks={true}
-          tickFormat={dateFormatter}
+          tickFormat={(value) => xAxisFormatter.convert(value)}
+          timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
+          style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
         />
         <Axis id="left" position={Position.Left} />
         <BarSeries
@@ -95,6 +152,7 @@ export const DocumentCountChart: FC<Props> = ({
           xAccessor="time"
           yAccessors={['value']}
           data={adjustedChartPoints}
+          timeZone={timeZone}
         />
       </Chart>
     </div>

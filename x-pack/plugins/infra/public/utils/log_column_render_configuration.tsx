@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from 'react';
-import { JsonValue } from '@kbn/common-utils';
+import { JsonValue } from '@kbn/utility-types';
 
 /**
  * Interface for common configuration properties, regardless of the column type.

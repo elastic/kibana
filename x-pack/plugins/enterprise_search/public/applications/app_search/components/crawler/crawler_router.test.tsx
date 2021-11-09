@@ -4,38 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { setMockActions } from '../../../__mocks__/kea_logic';
+import '../../../__mocks__/shallow_useeffect.mock';
+import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { CrawlerLanding } from './crawler_landing';
 import { CrawlerOverview } from './crawler_overview';
 import { CrawlerRouter } from './crawler_router';
+import { CrawlerSingleDomain } from './crawler_single_domain';
 
 describe('CrawlerRouter', () => {
-  const OLD_ENV = process.env;
+  const mockActions = {
+    fetchCrawlerData: jest.fn(),
+  };
+
+  let wrapper: ShallowWrapper;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockActions(mockActions);
+    wrapper = shallow(<CrawlerRouter />);
   });
 
-  afterEach(() => {
-    process.env = OLD_ENV;
+  it('calls fetchCrawlerData and starts polling on page load', () => {
+    expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a landing page by default', () => {
-    const wrapper = shallow(<CrawlerRouter />);
-
-    expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(CrawlerLanding)).toHaveLength(1);
-  });
-
-  it('renders a crawler overview in dev', () => {
-    process.env.NODE_ENV = 'development';
-    const wrapper = shallow(<CrawlerRouter />);
-
+  it('renders a crawler views', () => {
     expect(wrapper.find(CrawlerOverview)).toHaveLength(1);
+    expect(wrapper.find(CrawlerSingleDomain)).toHaveLength(1);
   });
 });

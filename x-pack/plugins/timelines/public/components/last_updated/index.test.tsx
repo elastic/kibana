@@ -32,17 +32,6 @@ describe('LastUpdatedAt', () => {
     expect(wrapper.text()).toEqual(' Updated 2 minutes ago');
   });
 
-  test('it only renders icon if "compact" is true', () => {
-    const wrapper = mount(
-      <I18nProvider>
-        <LastUpdatedAt compact updatedAt={1603995240115} />
-      </I18nProvider>
-    );
-
-    expect(wrapper.text()).toEqual('');
-    expect(wrapper.find('[data-test-subj="last-updated-at-clock-icon"]').exists()).toBeTruthy();
-  });
-
   test('it renders updating text if "showUpdating" is true', () => {
     const wrapper = mount(
       <I18nProvider>

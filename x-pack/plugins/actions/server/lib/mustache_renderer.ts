@@ -40,7 +40,7 @@ export function renderMustacheObject<Params>(params: Params, variables: Variable
   // The return type signature for `cloneDeep()` ends up taking the return
   // type signature for the customizer, but rather than pollute the customizer
   // with casts, seemed better to just do it in one place, here.
-  return (result as unknown) as Params;
+  return result as unknown as Params;
 }
 
 // return variables cloned, with a toString() added to objects

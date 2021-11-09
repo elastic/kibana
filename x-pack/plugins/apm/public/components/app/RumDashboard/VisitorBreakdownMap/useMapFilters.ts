@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FieldFilter as Filter } from '../../../../../../../../src/plugins/data/common';
+import { FieldFilter as Filter } from '@kbn/es-query';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   SERVICE_NAME,
@@ -84,13 +84,15 @@ const existFilter: Filter = {
     key: 'transaction.marks.navigationTiming.fetchStart',
     value: 'exists',
   },
-  exists: {
-    field: 'transaction.marks.navigationTiming.fetchStart',
+  query: {
+    exists: {
+      field: 'transaction.marks.navigationTiming.fetchStart',
+    },
   },
 };
 
 export const useMapFilters = (): Filter[] => {
-  const { urlParams, uxUiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { serviceName, searchTerm } = urlParams;
 
@@ -108,7 +110,7 @@ export const useMapFilters = (): Filter[] => {
   } = uxUiFilters;
 
   return useMemo(() => {
-    const filters = [existFilter];
+    const filters: Filter[] = [existFilter];
     if (serviceName) {
       filters.push(getMatchFilter(SERVICE_NAME, serviceName));
     }

@@ -10,11 +10,13 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { ILicense } from '../../../licensing/public';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
+import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
-import { ReportListing } from './report_listing';
+import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
+import { KibanaContextProvider } from '../shared_imports';
+import { ReportListing } from '.';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,
@@ -22,17 +24,27 @@ export async function mountManagementSection(
   license$: Observable<ILicense>,
   pollConfig: ClientConfigType['poll'],
   apiClient: ReportingAPIClient,
+  urlService: SharePluginSetup['url'],
   params: ManagementAppMountParams
 ) {
   render(
     <I18nProvider>
-      <ReportListing
-        toasts={coreSetup.notifications.toasts}
-        license$={license$}
-        pollConfig={pollConfig}
-        redirect={coreStart.application.navigateToApp}
-        apiClient={apiClient}
-      />
+      <KibanaContextProvider
+        services={{ http: coreSetup.http, application: coreStart.application }}
+      >
+        <InternalApiClientProvider apiClient={apiClient}>
+          <IlmPolicyStatusContextProvider>
+            <ReportListing
+              toasts={coreSetup.notifications.toasts}
+              license$={license$}
+              pollConfig={pollConfig}
+              redirect={coreStart.application.navigateToApp}
+              navigateToUrl={coreStart.application.navigateToUrl}
+              urlService={urlService}
+            />
+          </IlmPolicyStatusContextProvider>
+        </InternalApiClientProvider>
+      </KibanaContextProvider>
     </I18nProvider>,
     params.element
   );

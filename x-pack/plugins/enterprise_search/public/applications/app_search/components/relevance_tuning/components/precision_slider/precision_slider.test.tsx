@@ -13,6 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { rerender } from '../../../../../test_helpers';
 
+import { STEP_DESCRIPTIONS } from './constants';
 import { PrecisionSlider } from './precision_slider';
 
 const MOCK_VALUES = {
@@ -24,7 +25,7 @@ const MOCK_VALUES = {
 
 const MOCK_ACTIONS = {
   // RelevanceTuningLogic
-  updatePrecision: jest.fn(),
+  setPrecision: jest.fn(),
 };
 
 describe('PrecisionSlider', () => {
@@ -48,22 +49,25 @@ describe('PrecisionSlider', () => {
       expect(wrapper.find('[data-test-subj="PrecisionRange"]').prop('value')).toEqual(2);
     });
 
-    it('calls updatePrecision on change', () => {
+    it('updates the precision on change', () => {
       wrapper
         .find('[data-test-subj="PrecisionRange"]')
         .simulate('change', { target: { value: 10 } });
 
-      expect(MOCK_ACTIONS.updatePrecision).toHaveBeenCalledWith(10);
+      expect(MOCK_ACTIONS.setPrecision).toHaveBeenCalledWith(10);
     });
   });
 
   describe('Step Description', () => {
     it('is visible when there is a step description', () => {
-      setMockValues({ ...MOCK_VALUES, precision: 10 });
+      setMockValues({
+        ...MOCK_VALUES,
+        searchSettings: { ...MOCK_VALUES.searchSettings, precision: 10 },
+      });
       rerender(wrapper);
 
       expect(wrapper.find('[data-test-subj="StepDescription"]').render().text()).toEqual(
-        'Default. High recall, low precision.'
+        STEP_DESCRIPTIONS[10]
       );
     });
 

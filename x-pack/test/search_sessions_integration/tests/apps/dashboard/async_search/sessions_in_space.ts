@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
 
-  describe('dashboard in space', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/112732
+  describe.skip('dashboard in space', () => {
     describe('Storing search sessions in space', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/dashboard/session_in_space');
@@ -56,11 +57,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await PageObjects.security.forceLogout();
+
         await security.role.delete('data_analyst');
         await security.user.delete('analyst');
 
         await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/session_in_space');
-        await PageObjects.security.forceLogout();
       });
 
       it('Saves and restores a session', async () => {
@@ -126,11 +129,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await PageObjects.security.forceLogout();
+
         await security.role.delete('data_analyst');
         await security.user.delete('analyst');
 
         await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/session_in_space');
-        await PageObjects.security.forceLogout();
       });
 
       it("Doesn't allow to store a session", async () => {

@@ -14,6 +14,8 @@ import {
   EuiButtonEmpty,
   EuiButtonProps,
   PropsForButton,
+  EuiCallOut,
+  EuiSpacer,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -30,6 +32,7 @@ import {
   isDeletionDialogOpen,
   isDeletionInProgress,
 } from '../store/selectors';
+import { isPolicyEffectScope } from '../state/type_guards';
 
 const CANCEL_SUBJ = 'trustedAppDeletionCancel';
 const CONFIRM_SUBJ = 'trustedAppDeletionConfirm';
@@ -38,14 +41,26 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   title: (
     <FormattedMessage
       id="xpack.securitySolution.trustedapps.deletionDialog.title"
-      defaultMessage="Remove trusted application"
+      defaultMessage='Delete "{name}"'
+      values={{ name: <b className="eui-textBreakWord">{entry?.name}</b> }}
     />
   ),
-  mainMessage: (
+  calloutTitle: (
     <FormattedMessage
-      id="xpack.securitySolution.trustedapps.deletionDialog.mainMessage"
-      defaultMessage='You are removing trusted application "{name}".'
-      values={{ name: <b className="eui-textBreakWord">{entry?.name}</b> }}
+      id="xpack.securitySolution.trustedapps.deletionDialog.calloutTitle"
+      defaultMessage="Warning"
+    />
+  ),
+  calloutMessage: (
+    <FormattedMessage
+      id="xpack.securitySolution.trustedapps.deletionDialog.calloutMessage"
+      defaultMessage="Deleting this entry will remove it from {count} associated {count, plural, one {policy} other {policies}}."
+      values={{
+        count:
+          entry && isPolicyEffectScope(entry.effectScope)
+            ? entry.effectScope.policies.length
+            : 'all',
+      }}
     />
   ),
   subMessage: (
@@ -63,7 +78,7 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   confirmButton: (
     <FormattedMessage
       id="xpack.securitySolution.trustedapps.deletionDialog.confirmButton"
-      defaultMessage="Remove trusted application"
+      defaultMessage="Delete"
     />
   ),
 });
@@ -105,8 +120,11 @@ export const TrustedAppDeletionDialog = memo(() => {
         </EuiModalHeader>
 
         <EuiModalBody>
+          <EuiCallOut title={translations.calloutTitle} color="danger" iconType="alert">
+            <p>{translations.calloutMessage}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
           <EuiText>
-            <p>{translations.mainMessage}</p>
             <p>{translations.subMessage}</p>
           </EuiText>
         </EuiModalBody>

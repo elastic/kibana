@@ -152,6 +152,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
           >
             <div
               className="euiTextColor euiTextColor--default"
+              style={Object {}}
             >
               <EuiText
                 size="s"

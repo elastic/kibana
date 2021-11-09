@@ -8,8 +8,8 @@
 import { uniq } from 'lodash';
 import React from 'react';
 import { Endzones } from '../../../../../src/plugins/charts/public';
-import { LensMultiTable } from '../types';
-import { LayerArgs } from './types';
+import type { LensMultiTable } from '../../common';
+import type { LayerArgs } from '../../common/expressions';
 
 export interface XDomain {
   min?: number;
@@ -26,12 +26,12 @@ export const getXDomain = (
 ) => {
   const baseDomain = isTimeViz
     ? {
-        min: data.dateRange?.fromDate.getTime(),
-        max: data.dateRange?.toDate.getTime(),
+        min: data.dateRange?.fromDate.getTime() ?? NaN,
+        max: data.dateRange?.toDate.getTime() ?? NaN,
         minInterval,
       }
     : isHistogram
-    ? { minInterval }
+    ? { minInterval, min: NaN, max: NaN }
     : undefined;
 
   if (isHistogram && isFullyQualified(baseDomain)) {

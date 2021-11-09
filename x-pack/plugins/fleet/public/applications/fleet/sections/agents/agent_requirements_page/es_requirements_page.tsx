@@ -72,10 +72,11 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <FormattedMessage
             id="xpack.fleet.setupPage.missingRequirementsElasticsearchTitle"
-            defaultMessage="In your Elasticsearch policy, enable:"
+            defaultMessage="In your Elasticsearch configuration ({esConfigFile}), enable:"
+            values={{ esConfigFile: <EuiCode>elasticsearch.yml</EuiCode> }}
           />
           <EuiSpacer size="l" />
-          <RequirementItem isMissing={false}>
+          <RequirementItem isMissing={missingRequirements.includes('security_required')}>
             <FormattedMessage
               id="xpack.fleet.setupPage.elasticsearchSecurityFlagText"
               defaultMessage="{esSecurityLink}. Set {securityFlag} to {true} ."

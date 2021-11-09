@@ -6,7 +6,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { shapes } from '../../renderers/progress/shapes';
+import { getAvailableProgressShapes } from '../../../../../../src/plugins/expression_shape/common';
 import { ViewStrings } from '../../../i18n';
 
 const { Progress: strings } = ViewStrings;
@@ -23,7 +23,7 @@ export const progress = () => ({
       help: strings.getShapeHelp(),
       argType: 'select',
       options: {
-        choices: Object.keys(shapes).map((key) => ({
+        choices: getAvailableProgressShapes().map((key) => ({
           value: key,
           //turns camel into title case
           name: key[0].toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),

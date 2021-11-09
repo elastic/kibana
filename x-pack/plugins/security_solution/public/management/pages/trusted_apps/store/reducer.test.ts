@@ -30,8 +30,8 @@ describe('reducer', () => {
       const result = trustedAppsPageReducer(
         initialState,
         createUserChangedUrlAction(
-          '/trusted_apps',
-          '?page_index=5&page_size=50&show=create&view_type=list&filter=test'
+          '/administration/trusted_apps',
+          '?page_index=5&page_size=50&show=create&view_type=list&filter=test&included_policies=global&excluded_policies=unassigned'
         )
       );
 
@@ -44,6 +44,8 @@ describe('reducer', () => {
           view_type: 'list',
           id: undefined,
           filter: 'test',
+          included_policies: 'global',
+          excluded_policies: 'unassigned',
         },
         active: true,
       });
@@ -53,9 +55,19 @@ describe('reducer', () => {
       const result = trustedAppsPageReducer(
         {
           ...initialState,
-          location: { page_index: 5, page_size: 50, view_type: 'grid', filter: '' },
+          location: {
+            page_index: 5,
+            page_size: 50,
+            view_type: 'grid',
+            filter: '',
+            included_policies: '',
+            excluded_policies: '',
+          },
         },
-        createUserChangedUrlAction('/trusted_apps', '?page_index=b&page_size=60&show=a&view_type=c')
+        createUserChangedUrlAction(
+          '/administration/trusted_apps',
+          '?page_index=b&page_size=60&show=a&view_type=c'
+        )
       );
 
       expect(result).toStrictEqual({ ...initialState, active: true });
@@ -65,9 +77,16 @@ describe('reducer', () => {
       const result = trustedAppsPageReducer(
         {
           ...initialState,
-          location: { page_index: 5, page_size: 50, view_type: 'grid', filter: '' },
+          location: {
+            page_index: 5,
+            page_size: 50,
+            view_type: 'grid',
+            filter: '',
+            included_policies: '',
+            excluded_policies: '',
+          },
         },
-        createUserChangedUrlAction('/trusted_apps')
+        createUserChangedUrlAction('/administration/trusted_apps')
       );
 
       expect(result).toStrictEqual({ ...initialState, active: true });
@@ -76,7 +95,7 @@ describe('reducer', () => {
     it('makes page state inactive and resets list to uninitialised state when navigating away', () => {
       const result = trustedAppsPageReducer(
         { ...initialState, listView: createLoadedListViewWithPagination(initialNow), active: true },
-        createUserChangedUrlAction('/endpoints')
+        createUserChangedUrlAction('/administration/endpoints')
       );
 
       expect(result).toStrictEqual(initialState);

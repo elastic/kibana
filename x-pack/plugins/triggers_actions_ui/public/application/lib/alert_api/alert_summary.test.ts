@@ -6,15 +6,15 @@
  */
 
 import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { AlertInstanceSummary } from '../../../../../alerting/common';
-import { loadAlertInstanceSummary } from './alert_summary';
+import { AlertSummary } from '../../../../../alerting/common';
+import { loadAlertSummary } from './alert_summary';
 
 const http = httpServiceMock.createStartContract();
 
-describe('loadAlertInstanceSummary', () => {
-  test('should call get alert types API', async () => {
-    const resolvedValue: AlertInstanceSummary = {
-      instances: {},
+describe('loadAlertSummary', () => {
+  test('should call alert summary API', async () => {
+    const resolvedValue: AlertSummary = {
+      alerts: {},
       consumer: 'alerts',
       enabled: true,
       errorMessages: [],
@@ -22,12 +22,16 @@ describe('loadAlertInstanceSummary', () => {
       lastRun: '2021-04-01T22:18:27.609Z',
       muteAll: false,
       name: 'test',
-      alertTypeId: '.index-threshold',
+      ruleTypeId: '.index-threshold',
       status: 'OK',
       statusEndDate: '2021-04-01T22:19:25.174Z',
       statusStartDate: '2021-04-01T21:19:25.174Z',
       tags: [],
       throttle: null,
+      executionDuration: {
+        average: 0,
+        values: [],
+      },
     };
 
     http.get.mockResolvedValueOnce({
@@ -45,9 +49,13 @@ describe('loadAlertInstanceSummary', () => {
       status_start_date: '2021-04-01T21:19:25.174Z',
       tags: [],
       throttle: null,
+      execution_duration: {
+        average: 0,
+        values: [],
+      },
     });
 
-    const result = await loadAlertInstanceSummary({ http, alertId: 'te/st' });
+    const result = await loadAlertSummary({ http, ruleId: 'te/st' });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

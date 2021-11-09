@@ -110,8 +110,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         selectableListOuterRef.current &&
         selectableListInnerRef.current
       ) {
-        const clientHeight = selectableListOuterRef.current!.clientHeight;
-        const scrollHeight = selectableListInnerRef.current!.clientHeight;
+        const clientHeight = selectableListOuterRef.current.clientHeight;
+        const scrollHeight = selectableListInnerRef.current.clientHeight;
         const clientHeightTrigger = clientHeight * 1.2;
         if (
           scrollOffset > 10 &&
@@ -204,7 +204,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       incremental: true,
       append: (
         <StyledEuiFilterButton
-          size="l"
           data-test-subj="only-favorites-toggle"
           hasActiveFilters={onlyFavorites}
           onClick={handleOnToggleOnlyFavorites}

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { FilterManager, Filter, FormFilter, UpdateFilter } from './filter_manager';
+export type { FormFilter, UpdateFilter } from './filter_manager';
+export { FilterManager } from './filter_manager';

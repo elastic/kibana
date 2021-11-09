@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 
 export interface InputOverrides {
@@ -111,6 +111,10 @@ export interface ImportResponse {
 export interface ImportFailure {
   item: number;
   reason: string;
+  caused_by?: {
+    type: string;
+    reason: string;
+  };
   doc: ImportDoc;
 }
 

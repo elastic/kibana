@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error no ts
-import { esKuery } from '../../../es_query';
+import * as esKuery from '@kbn/es-query';
 type KueryNode = any;
 
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
@@ -599,9 +598,9 @@ describe('#getQueryParams', () => {
 
         const mppClauses = shouldClauses.slice(1);
 
-        expect(
-          mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])
-        ).toEqual(['saved.title', 'pending.title', 'saved.desc', 'pending.desc']);
+        expect(mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])).toEqual(
+          ['saved.title', 'pending.title', 'saved.desc', 'pending.desc']
+        );
       });
 
       it('uses all registered types when `type` is not provided', () => {
@@ -616,9 +615,9 @@ describe('#getQueryParams', () => {
 
         const mppClauses = shouldClauses.slice(1);
 
-        expect(
-          mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])
-        ).toEqual(['pending.title', 'saved.title', 'shared.title', 'global.title']);
+        expect(mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])).toEqual(
+          ['pending.title', 'saved.title', 'shared.title', 'global.title']
+        );
       });
 
       it('removes the prefix search wildcard from the query', () => {
@@ -645,9 +644,9 @@ describe('#getQueryParams', () => {
 
         const mppClauses = shouldClauses.slice(1);
 
-        expect(
-          mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])
-        ).toEqual(['saved.title', 'global.name']);
+        expect(mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])).toEqual(
+          ['saved.title', 'global.name']
+        );
       });
 
       it('supports boosting', () => {

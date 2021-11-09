@@ -1,0 +1,8 @@
+{
+  "name": "kibana-buildkite",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "kibana-buildkite-library": "elastic/kibana-buildkite-library"
+  }
+}

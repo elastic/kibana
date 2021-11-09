@@ -47,7 +47,7 @@ import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useEqlEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
@@ -178,8 +178,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     browserFields,
     docValueFields,
     loading: loadingSourcerer,
+    runtimeMappings,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.timeline);
+  } = useSourcererDataView(SourcererScopeName.timeline);
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
@@ -205,23 +206,22 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     );
   }, [dispatch, timelineId]);
 
-  const [
-    isQueryLoading,
-    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: end,
-    eqlOptions: restEqlOption,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    fields: getTimelineQueryFields(),
-    language: 'eql',
-    limit: itemsPerPage,
-    filterQuery: eqlQuery ?? '',
-    startDate: start,
-    skip: !canQueryTimeline(),
-    timerangeKind,
-  });
+  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: end,
+      eqlOptions: restEqlOption,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      fields: getTimelineQueryFields(),
+      language: 'eql',
+      limit: itemsPerPage,
+      filterQuery: eqlQuery ?? '',
+      runtimeMappings,
+      startDate: start,
+      skip: !canQueryTimeline(),
+      timerangeKind,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.eql, timelineId });
@@ -348,6 +348,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
               <DetailsPanel
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.eql}
                 timelineId={timelineId}
                 handleOnPanelClosed={handleOnPanelClosed}
@@ -397,12 +398,23 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+  updateEventTypeAndIndexesName: (
+    newEventType: TimelineEventsType,
+    newIndexNames: string[],
+    newDataViewId: string
+  ) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
     dispatch(
-      sourcererActions.setSelectedIndexPatterns({
+      timelineActions.updateDataView({
+        dataViewId: newDataViewId,
+        id: timelineId,
+        indexNames: newIndexNames,
+      })
+    );
+    dispatch(
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
+        selectedDataViewId: newDataViewId,
         selectedPatterns: newIndexNames,
       })
     );

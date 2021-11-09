@@ -8,21 +8,33 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import memoizeOne from 'memoize-one';
-import type { TimeScaleUnit } from '../../../time_scale';
+import { LayerType, layerTypes } from '../../../../../common';
+import type { TimeScaleUnit } from '../../../../../common/expressions';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import { operationDefinitionMap } from '..';
 
-export const buildLabelFunction = (ofName: (name?: string) => string) => (
-  name?: string,
-  timeScale?: TimeScaleUnit,
-  timeShift?: string
-) => {
-  const rawLabel = ofName(name);
-  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
-};
+export const buildLabelFunction =
+  (ofName: (name?: string) => string) =>
+  (name?: string, timeScale?: TimeScaleUnit, timeShift?: string) => {
+    const rawLabel = ofName(name);
+    return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
+  };
+
+export function checkForDataLayerType(layerType: LayerType, name: string) {
+  if (layerType === layerTypes.REFERENCELINE) {
+    return [
+      i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
+        defaultMessage: '{name} is disabled for this type of layer.',
+        values: {
+          name,
+        },
+      }),
+    ];
+  }
+}
 
 /**
  * Checks whether the current layer includes a date histogram and returns an error otherwise
@@ -132,7 +144,7 @@ export function dateBasedOperationToExpression(
   functionName: string,
   additionalArgs: Record<string, unknown[]> = {}
 ): ExpressionFunctionAST[] {
-  const currentColumn = (layer.columns[columnId] as unknown) as ReferenceBasedIndexPatternColumn;
+  const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
   const dateColumnIndex = buckets.findIndex(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
@@ -163,7 +175,7 @@ export function optionallHistogramBasedOperationToExpression(
   functionName: string,
   additionalArgs: Record<string, unknown[]> = {}
 ): ExpressionFunctionAST[] {
-  const currentColumn = (layer.columns[columnId] as unknown) as ReferenceBasedIndexPatternColumn;
+  const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
   const nonHistogramColumns = buckets.filter(
     (colId) =>

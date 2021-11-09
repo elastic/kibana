@@ -19,7 +19,8 @@ export interface ScreenshotModePluginSetup {
   isScreenshotMode: IsScreenshotMode;
 
   /**
-   * Set the current environment to screenshot mode. Intended to run in a browser-environment.
+   * Set the current environment to screenshot mode. Intended to run in a browser-environment, before any other scripts
+   * on the page have run to ensure that screenshot mode is detected as early as possible.
    */
   setScreenshotModeEnabled: () => void;
 }

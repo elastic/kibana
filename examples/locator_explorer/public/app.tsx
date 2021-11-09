@@ -34,6 +34,7 @@ interface MigratedLink {
   linkText: string;
   link: string;
   version: string;
+  params: HelloLocatorV1Params | HelloLocatorV2Params;
 }
 
 const ActionsExplorer = ({ share }: Props) => {
@@ -93,6 +94,7 @@ const ActionsExplorer = ({ share }: Props) => {
             linkText: savedLink.linkText,
             link,
             version: savedLink.version,
+            params: savedLink.params,
           } as MigratedLink;
         })
       );
@@ -157,7 +159,17 @@ const ActionsExplorer = ({ share }: Props) => {
                     target="_blank"
                   >
                     {link.linkText}
+                  </EuiLink>{' '}
+                  (
+                  <EuiLink
+                    color={link.version !== '0.0.2' ? 'danger' : 'primary'}
+                    data-test-subj="linkToHelloPage"
+                    href={share.url.locators.get('HELLO_LOCATOR')?.getRedirectUrl(link.params)}
+                    target="_blank"
+                  >
+                    through redirect app
                   </EuiLink>
+                  )
                   <br />
                 </React.Fragment>
               ))

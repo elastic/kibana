@@ -81,12 +81,12 @@ describe('Lists', () => {
     });
 
     test('it should not validate when unexpected type found in array', () => {
-      const payload = ([1] as unknown) as ListArray;
+      const payload = [1] as unknown as ListArray;
       const decoded = listArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events", namespace_type: "agnostic" | "single" |}>"',
+        'Invalid value "1" supplied to "Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events" | "endpoint_host_isolation_exceptions", namespace_type: "agnostic" | "single" |}>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -112,13 +112,13 @@ describe('Lists', () => {
     });
 
     test('it should not allow an item that is not of type "list" in array', () => {
-      const payload = ([1] as unknown) as ListArrayOrUndefined;
+      const payload = [1] as unknown as ListArrayOrUndefined;
       const decoded = listArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events", namespace_type: "agnostic" | "single" |}> | undefined)"',
-        'Invalid value "[1]" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events", namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "1" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events" | "endpoint_host_isolation_exceptions", namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "[1]" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint" | "endpoint_events" | "endpoint_host_isolation_exceptions", namespace_type: "agnostic" | "single" |}> | undefined)"',
       ]);
       expect(message.schema).toEqual({});
     });

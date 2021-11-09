@@ -96,10 +96,10 @@ const ConnectorComponent: React.FC<Props> = ({
     hideConnectorServiceNowSir,
   ]);
 
-  useEffect(() => setFieldValue('connectorId', defaultConnectorId), [
-    defaultConnectorId,
-    setFieldValue,
-  ]);
+  useEffect(
+    () => setFieldValue('connectorId', defaultConnectorId),
+    [defaultConnectorId, setFieldValue]
+  );
 
   const connectorIdConfig = getConnectorsFormValidators({
     config: schema.connectorId as FieldConfig,

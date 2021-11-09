@@ -158,13 +158,23 @@ describe('<EditPolicy /> hot phase validation', () => {
   });
 
   describe('shrink', () => {
-    test(`doesn't allow 0 for shrink`, async () => {
-      await actions.hot.setShrink('0');
+    test(`doesn't allow 0 for shrink size`, async () => {
+      await actions.hot.setShrinkSize('0');
       actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
-    test(`doesn't allow -1 for shrink`, async () => {
-      await actions.hot.setShrink('-1');
+    test(`doesn't allow -1 for shrink size`, async () => {
+      await actions.hot.setShrinkSize('-1');
+      actions.errors.waitForValidation();
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+    });
+    test(`doesn't allow 0 for shrink count`, async () => {
+      await actions.hot.setShrinkCount('0');
+      actions.errors.waitForValidation();
+      actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+    });
+    test(`doesn't allow -1 for shrink count`, async () => {
+      await actions.hot.setShrinkCount('-1');
       actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });

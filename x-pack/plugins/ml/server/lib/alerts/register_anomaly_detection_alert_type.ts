@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from 'kibana/server';
-import {
-  ML_ALERT_TYPES,
-  ML_ALERT_TYPES_CONFIG,
-  AnomalyScoreMatchGroupId,
-} from '../../../common/constants/alerts';
+import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
@@ -21,12 +17,11 @@ import {
 import { RegisterAlertParams } from './register_ml_alerts';
 import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
 import {
+  ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
 } from '../../../../alerting/common';
-
-const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_DETECTION];
 
 export type AnomalyDetectionAlertContext = {
   name: string;
@@ -40,21 +35,35 @@ export type AnomalyDetectionAlertContext = {
   anomalyExplorerUrl: string;
 } & AlertInstanceContext;
 
+export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
+
+export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
+
+export const THRESHOLD_MET_GROUP: ActionGroup<AnomalyScoreMatchGroupId> = {
+  id: ANOMALY_SCORE_MATCH_GROUP_ID,
+  name: i18n.translate('xpack.ml.anomalyDetectionAlert.actionGroupName', {
+    defaultMessage: 'Anomaly score matched the condition',
+  }),
+};
+
 export function registerAnomalyDetectionAlertType({
   alerting,
   mlSharedServices,
 }: RegisterAlertParams) {
   alerting.registerType<
     MlAnomalyDetectionAlertParams,
+    never, // Only use if defining useSavedObjectReferences hook
     AlertTypeState,
     AlertInstanceState,
     AnomalyDetectionAlertContext,
     AnomalyScoreMatchGroupId
   >({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
-    name: alertTypeConfig.name,
-    actionGroups: alertTypeConfig.actionGroups,
-    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+    name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
+      defaultMessage: 'Anomaly detection alert',
+    }),
+    actionGroups: [THRESHOLD_MET_GROUP],
+    defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
     validate: {
       params: mlAnomalyDetectionAlertParams,
     },
@@ -75,7 +84,7 @@ export function registerAnomalyDetectionAlertType({
         {
           name: 'jobIds',
           description: i18n.translate('xpack.ml.alertContext.jobIdsDescription', {
-            defaultMessage: 'List of job IDs that triggered the alert instance',
+            defaultMessage: 'List of job IDs that triggered the alert',
           }),
         },
         {
@@ -131,7 +140,7 @@ export function registerAnomalyDetectionAlertType({
       if (executionResult) {
         const alertInstanceName = executionResult.name;
         const alertInstance = services.alertInstanceFactory(alertInstanceName);
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, executionResult);
+        alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult);
       }
     },
   });

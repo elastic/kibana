@@ -37,13 +37,8 @@ const UNSAVED_MESSAGE = i18n.translate(
 );
 
 export const ResultSettings: React.FC = () => {
-  const {
-    dataLoading,
-    schema,
-    stagedUpdates,
-    resultFieldsAtDefaultSettings,
-    resultFieldsEmpty,
-  } = useValues(ResultSettingsLogic);
+  const { dataLoading, schema, stagedUpdates, resultFieldsAtDefaultSettings, resultFieldsEmpty } =
+    useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
     saveResultSettings,

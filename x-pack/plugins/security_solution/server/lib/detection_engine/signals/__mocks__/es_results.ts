@@ -15,14 +15,16 @@ import type {
   WrappedSignalHit,
   AlertAttributes,
 } from '../types';
-import { SavedObject, SavedObjectsFindResponse } from '../../../../../../../../src/core/server';
+import { SavedObject } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { IRuleStatusSOAttributes } from '../../rules/types';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const sampleRuleSO = <T extends RuleParams>(params: T): SavedObject<AlertAttributes<T>> => {
   return {
@@ -32,6 +34,7 @@ export const sampleRuleSO = <T extends RuleParams>(params: T): SavedObject<Alert
     updated_at: '2020-03-27T22:55:59.577Z',
     attributes: {
       actions: [],
+      alertTypeId: 'siem.signals',
       enabled: true,
       name: 'rule-name',
       tags: ['some fake tag 1', 'some fake tag 2'],
@@ -166,6 +169,22 @@ export const sampleDocNoSortId = (
   },
   sort: [],
 });
+
+export const sampleDocNoSortIdWithTimestamp = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): SignalSourceHit & {
+  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+} => {
+  const doc = sampleDocNoSortId(someUuid, ip);
+  return {
+    ...doc,
+    _source: {
+      ...doc._source,
+      '@timestamp': new Date().toISOString(),
+    },
+  };
+};
 
 export const sampleDocSeverity = (severity?: unknown, fieldName?: string): SignalSourceHit => {
   const doc = {
@@ -326,7 +345,7 @@ export const sampleSignalHit = (): SignalHit => ({
       type: 'query',
       threat: [],
       version: 1,
-      status: 'succeeded',
+      status: RuleExecutionStatus.succeeded,
       status_date: '2020-02-22T16:47:50.047Z',
       last_success_at: '2020-02-22T16:47:50.047Z',
       last_success_message: 'succeeded',
@@ -391,7 +410,7 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
       type: 'query',
       threat: [],
       version: 1,
-      status: 'succeeded',
+      status: RuleExecutionStatus.succeeded,
       status_date: '2020-02-22T16:47:50.047Z',
       last_success_at: '2020-02-22T16:47:50.047Z',
       last_success_message: 'succeeded',
@@ -707,12 +726,11 @@ export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
 
 export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () => ({
-  type: ruleStatusSavedObjectType,
+  type: legacyRuleStatusSavedObjectType,
   id: '042e6d90-7069-11ea-af8b-0f8ae4fa817e',
   attributes: {
-    alertId: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
     statusDate: '2020-03-27T22:55:59.517Z',
-    status: 'succeeded',
+    status: RuleExecutionStatus.succeeded,
     lastFailureAt: null,
     lastSuccessAt: '2020-03-27T22:55:59.517Z',
     lastFailureMessage: null,
@@ -722,20 +740,15 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () 
     searchAfterTimeDurations: [],
     lastLookBackDate: null,
   },
-  references: [],
+  references: [
+    {
+      id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+      type: 'alert',
+      name: 'alert_0',
+    },
+  ],
   updated_at: '2020-03-27T22:55:59.577Z',
   version: 'WzgyMiwxXQ==',
-});
-
-export const exampleFindRuleStatusResponse: (
-  mockStatuses: Array<SavedObject<IRuleStatusSOAttributes>>
-) => SavedObjectsFindResponse<IRuleStatusSOAttributes> = (
-  mockStatuses = [exampleRuleStatus()]
-) => ({
-  total: 1,
-  per_page: 6,
-  page: 1,
-  saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
 export const mockLogger = loggingSystemMock.createLogger();

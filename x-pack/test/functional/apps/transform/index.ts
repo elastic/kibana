@@ -24,6 +24,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     after(async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await transform.securityUI.logout();
+
       await transform.securityCommon.cleanTransformUsers();
       await transform.securityCommon.cleanTransformRoles();
 
@@ -36,9 +39,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
 
       await transform.testResources.resetKibanaTimeZone();
-      await transform.securityUI.logout();
     });
 
+    loadTestFile(require.resolve('./permissions'));
     loadTestFile(require.resolve('./creation_index_pattern'));
     loadTestFile(require.resolve('./creation_saved_search'));
     loadTestFile(require.resolve('./creation_runtime_mappings'));

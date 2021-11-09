@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import useAsync from 'react-use/lib/useAsync';
+
 import { epmRouteService } from '../../services';
 import type {
   GetCategoriesRequest,
@@ -15,10 +17,24 @@ import type {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
+  UpdatePackageRequest,
+  UpdatePackageResponse,
 } from '../../types';
 import type { GetStatsResponse } from '../../../common';
 
+import { getCustomIntegrations } from '../../services/custom_integrations';
+
 import { useRequest, sendRequest } from './use_request';
+
+export function useGetAppendCustomIntegrations() {
+  const customIntegrations = getCustomIntegrations();
+  return useAsync(customIntegrations.getAppendCustomIntegrations, []);
+}
+
+export function useGetReplacementCustomIntegrations() {
+  const customIntegrations = getCustomIntegrations();
+  return useAsync(customIntegrations.getReplacementCustomIntegrations, []);
+}
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({
@@ -97,5 +113,13 @@ export const sendRemovePackage = (pkgkey: string) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgkey),
     method: 'delete',
+  });
+};
+
+export const sendUpdatePackage = (pkgkey: string, body: UpdatePackageRequest['body']) => {
+  return sendRequest<UpdatePackageResponse>({
+    path: epmRouteService.getUpdatePath(pkgkey),
+    method: 'put',
+    body,
   });
 };

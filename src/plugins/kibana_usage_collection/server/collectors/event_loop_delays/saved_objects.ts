@@ -12,12 +12,12 @@ import type {
   ISavedObjectsRepository,
 } from 'kibana/server';
 import moment from 'moment';
-import type { IntervalHistogram } from './event_loop_delays';
-
+import type { IntervalHistogram } from 'kibana/server';
 export const SAVED_OBJECTS_DAILY_TYPE = 'event_loop_delays_daily';
 
 export interface EventLoopDelaysDaily extends SavedObjectAttributes, IntervalHistogram {
   processId: number;
+  instanceUuid: string;
 }
 
 export function registerSavedObjectTypes(registerType: SavedObjectsServiceSetup['registerType']) {
@@ -35,10 +35,18 @@ export function registerSavedObjectTypes(registerType: SavedObjectsServiceSetup[
   });
 }
 
-export function serializeSavedObjectId({ date, pid }: { date: moment.MomentInput; pid: number }) {
+export function serializeSavedObjectId({
+  date,
+  pid,
+  instanceUuid,
+}: {
+  date: moment.MomentInput;
+  pid: number;
+  instanceUuid: string;
+}) {
   const formattedDate = moment(date).format('DDMMYYYY');
 
-  return `${pid}::${formattedDate}`;
+  return `${instanceUuid}::${pid}::${formattedDate}`;
 }
 
 export async function deleteHistogramSavedObjects(
@@ -59,14 +67,15 @@ export async function deleteHistogramSavedObjects(
 
 export async function storeHistogram(
   histogram: IntervalHistogram,
-  internalRepository: ISavedObjectsRepository
+  internalRepository: ISavedObjectsRepository,
+  instanceUuid: string
 ) {
   const pid = process.pid;
-  const id = serializeSavedObjectId({ date: histogram.lastUpdatedAt, pid });
+  const id = serializeSavedObjectId({ date: histogram.lastUpdatedAt, pid, instanceUuid });
 
   return await internalRepository.create<EventLoopDelaysDaily>(
     SAVED_OBJECTS_DAILY_TYPE,
-    { ...histogram, processId: pid },
+    { ...histogram, processId: pid, instanceUuid },
     { id, overwrite: true }
   );
 }

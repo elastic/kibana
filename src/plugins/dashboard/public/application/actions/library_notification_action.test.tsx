@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
@@ -44,10 +44,10 @@ let unlinkAction: UnlinkFromLibraryAction;
 beforeEach(async () => {
   coreStart = coreMock.createStart();
 
-  unlinkAction = ({
+  unlinkAction = {
     getDisplayName: () => 'unlink from dat library',
     execute: jest.fn(),
-  } as unknown) as UnlinkFromLibraryAction;
+  } as unknown as UnlinkFromLibraryAction;
 
   const containerOptions = {
     ExitFullScreenButton: () => null,

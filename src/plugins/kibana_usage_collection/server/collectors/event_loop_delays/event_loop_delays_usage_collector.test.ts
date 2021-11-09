@@ -55,9 +55,9 @@ describe('registerEventLoopDelaysCollector', () => {
   });
 
   it('returns objects from event_loop_delays_daily from fetch function', async () => {
-    const mockFind = jest.fn().mockResolvedValue(({
+    const mockFind = jest.fn().mockResolvedValue({
       saved_objects: [{ attributes: { test: 1 } }],
-    } as unknown) as SavedObjectsFindResponse);
+    } as unknown as SavedObjectsFindResponse);
     mockInternalRepository.find = mockFind;
     const fetchResult = await collector.fetch(collectorFetchContext);
 

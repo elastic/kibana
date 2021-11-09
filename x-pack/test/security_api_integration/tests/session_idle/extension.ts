@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Cookie, cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const saveCookie = async (response: any) => {
       // save the response cookie, and pass back the result
-      sessionCookie = cookie(response.headers['set-cookie'][0])!;
+      sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       return response;
     };
     const getSessionInfo = async () =>

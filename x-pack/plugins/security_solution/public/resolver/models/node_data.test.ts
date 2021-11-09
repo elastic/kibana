@@ -141,9 +141,7 @@ describe('node data model', () => {
             requestedNodes: new Set(['1']),
             numberOfRequestedEvents: 0,
           })
-        ).toEqual(
-          new Map<string, NodeData>([['2', { events: node2Events, status: 'error' }]])
-        );
+        ).toEqual(new Map<string, NodeData>([['2', { events: node2Events, status: 'error' }]]));
       });
 
       it('attempts to remove entries from the map even if they do not exist', () => {

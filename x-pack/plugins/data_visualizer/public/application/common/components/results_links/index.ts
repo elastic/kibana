@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export type { ResultLink } from './results_links';
 export { ResultsLinks } from './results_links';

@@ -36,9 +36,21 @@ export interface TagListProps {
 
 const MyFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
+    width: 100%;
     margin-top: ${theme.eui.euiSizeM};
     p {
       font-size: ${theme.eui.euiSizeM};
+    }
+  `}
+`;
+
+const ColumnFlexGroup = styled(EuiFlexGroup)`
+  ${({ theme }) => css`
+    & {
+      max-width: 100%;
+      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
+        flex-direction: row;
+      }
     }
   `}
 `;
@@ -80,7 +92,12 @@ export const TagList = React.memo(
     );
     return (
       <EuiText>
-        <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="xs"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <h4>{i18n.TAGS}</h4>
           </EuiFlexItem>
@@ -99,9 +116,13 @@ export const TagList = React.memo(
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          {!isEditTags && <Tags tags={tags} color="hollow" />}
+          {!isEditTags && (
+            <EuiFlexItem>
+              <Tags tags={tags} color="hollow" />
+            </EuiFlexItem>
+          )}
           {isEditTags && (
-            <EuiFlexGroup data-test-subj="edit-tags" direction="column">
+            <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>
                 <Form form={form}>
                   <CommonUseField
@@ -139,7 +160,7 @@ export const TagList = React.memo(
                 </Form>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="secondary"
@@ -164,7 +185,7 @@ export const TagList = React.memo(
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </ColumnFlexGroup>
           )}
         </MyFlexGroup>
       </EuiText>

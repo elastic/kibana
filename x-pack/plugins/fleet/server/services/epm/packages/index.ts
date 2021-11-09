@@ -12,6 +12,7 @@ import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
+export type { SearchParams } from './get';
 export {
   getCategories,
   getFile,
@@ -21,16 +22,10 @@ export {
   getPackageInfo,
   getPackages,
   getLimitedPackages,
-  SearchParams,
 } from './get';
 
-export {
-  BulkInstallResponse,
-  IBulkInstallPackageError,
-  handleInstallPackageFailure,
-  installPackage,
-  ensureInstalledPackage,
-} from './install';
+export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
+export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
 export { removeInstallation } from './remove';
 
 export function isUnremovablePackage(value: string): boolean {
@@ -53,7 +48,7 @@ export function createInstallableFrom<T>(
   return savedObject
     ? {
         ...from,
-        status: installationStatuses.Installed,
+        status: savedObject.attributes.install_status,
         savedObject,
       }
     : {

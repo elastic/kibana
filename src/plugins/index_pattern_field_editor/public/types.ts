@@ -65,3 +65,25 @@ export interface EsRuntimeField {
 }
 
 export type CloseEditor = () => void;
+
+export type PainlessErrorCode = 'CAST_ERROR' | 'UNKNOWN';
+
+export interface RuntimeFieldPainlessError {
+  message: string;
+  reason: string;
+  position: {
+    offset: number;
+    start: number;
+    end: number;
+  } | null;
+  scriptStack: string[];
+  code: PainlessErrorCode;
+}
+
+export interface MonacoEditorErrorMarker {
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  message: string;
+}

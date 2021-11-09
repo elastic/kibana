@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -13,13 +13,12 @@ import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mo
 import moment from 'moment';
 
 import {
-  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { mockKibanaVersion } from '../../../common/constants';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
@@ -54,7 +53,7 @@ describe('ReindexActions', () => {
 
   describe('createReindexOp', () => {
     beforeEach(() => {
-      versionService.setup(mockKibanaVersion);
+      versionService.setup(MAJOR_VERSION);
       client.create.mockResolvedValue();
     });
 
@@ -251,35 +250,16 @@ describe('ReindexActions', () => {
 
       // Really prettier??
       await expect(actions.findAllByStatus(ReindexStatus.completed)).resolves.toEqual([
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
       ]);
     });
   });
 
   describe('getFlatSettings', () => {
-    const asApiResponse = <T>(body: T): RequestEvent<T> =>
+    const asApiResponse = <T>(body: T): TransportResult<T> =>
       ({
         body,
-      } as RequestEvent<T>);
+      } as TransportResult<T>);
 
     it('returns flat settings', async () => {
       clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
@@ -300,48 +280,6 @@ describe('ReindexActions', () => {
     it('returns null if index does not exist', async () => {
       clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(asApiResponse({}));
       await expect(actions.getFlatSettings('myIndex')).resolves.toBeNull();
-    });
-  });
-
-  describe('runWhileConsumerLocked', () => {
-    Object.entries(IndexGroup).forEach(([typeKey, consumerType]) => {
-      describe(`IndexConsumerType.${typeKey}`, () => {
-        it('creates the lock doc if it does not exist and executes callback', async () => {
-          expect.assertions(3);
-          client.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError()); // mock no ML doc exists yet
-          client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
-            Promise.resolve({
-              type,
-              id,
-              attributes,
-            })
-          );
-
-          let flip = false;
-          await actions.runWhileIndexGroupLocked(consumerType, async (mlDoc) => {
-            expect(mlDoc.id).toEqual(consumerType);
-            expect(mlDoc.attributes.runningReindexCount).toEqual(0);
-            flip = true;
-            return mlDoc;
-          });
-          expect(flip).toEqual(true);
-        });
-
-        it('fails after 10 attempts to lock', async () => {
-          client.get.mockResolvedValue({
-            type: REINDEX_OP_TYPE,
-            id: consumerType,
-            attributes: { mlReindexCount: 0 },
-          });
-
-          client.update.mockRejectedValue(new Error('NO LOCKING!'));
-
-          await expect(
-            actions.runWhileIndexGroupLocked(consumerType, async (m) => m)
-          ).rejects.toThrow('Could not acquire lock for ML jobs');
-          expect(client.update).toHaveBeenCalledTimes(10);
-        }, 20000);
-      });
     });
   });
 });

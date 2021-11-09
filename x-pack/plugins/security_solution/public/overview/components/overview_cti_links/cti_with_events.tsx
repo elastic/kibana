@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
 
@@ -20,7 +21,7 @@ export const CtiWithEventsComponent = ({
   to: string;
   totalCount: number;
 }) => {
-  const { buttonHref, isDashboardPluginDisabled, listItems } = useCtiDashboardLinks(
+  const { buttonHref, isPluginDisabled, listItems } = useCtiDashboardLinks(
     eventCountsByDataset,
     to,
     from
@@ -29,13 +30,20 @@ export const CtiWithEventsComponent = ({
   return (
     <ThreatIntelPanelView
       buttonHref={buttonHref}
-      isDashboardPluginDisabled={isDashboardPluginDisabled}
+      isPluginDisabled={isPluginDisabled}
       listItems={listItems}
-      totalEventCount={totalCount}
+      totalCount={totalCount}
     />
   );
 };
 
 CtiWithEventsComponent.displayName = 'CtiWithEvents';
 
-export const CtiWithEvents = React.memo(CtiWithEventsComponent);
+export const CtiWithEvents = React.memo(
+  CtiWithEventsComponent,
+  (prevProps, nextProps) =>
+    prevProps.to === nextProps.to &&
+    prevProps.from === nextProps.from &&
+    prevProps.totalCount === nextProps.totalCount &&
+    isEqual(prevProps.eventCountsByDataset, nextProps.eventCountsByDataset)
+);

@@ -105,7 +105,7 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
       let response;
 
       try {
-        response = await http.delete(`/api/app_search/engines/${engine.name}`);
+        response = await http.delete(`/internal/app_search/engines/${engine.name}`);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -119,7 +119,7 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
       const { enginesMeta } = values;
 
       try {
-        const response = await http.get('/api/app_search/engines', {
+        const response = await http.get<EnginesAPIResponse>('/internal/app_search/engines', {
           query: {
             type: 'indexed',
             'page[current]': enginesMeta.page.current,
@@ -136,7 +136,7 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
       const { metaEnginesMeta } = values;
 
       try {
-        const response = await http.get('/api/app_search/engines', {
+        const response = await http.get<EnginesAPIResponse>('/internal/app_search/engines', {
           query: {
             type: 'meta',
             'page[current]': metaEnginesMeta.page.current,

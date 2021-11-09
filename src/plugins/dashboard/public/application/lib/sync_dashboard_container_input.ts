@@ -13,7 +13,13 @@ import { debounceTime, tap } from 'rxjs/operators';
 import { DashboardContainer } from '../embeddable';
 import { esFilters, Filter, Query } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';
-import { setExpandedPanelId, setFullScreenMode, setPanels, setQuery } from '../state';
+import {
+  setControlGroupState,
+  setExpandedPanelId,
+  setFullScreenMode,
+  setPanels,
+  setQuery,
+} from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
 import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
 import { DashboardBuildContext, DashboardContainerInput } from '../../types';
@@ -44,12 +50,8 @@ type SyncDashboardContainerProps = SyncDashboardContainerCommon & ApplyContainer
 export const syncDashboardContainerInput = (
   syncDashboardContainerProps: SyncDashboardContainerProps
 ) => {
-  const {
-    history,
-    dashboardContainer,
-    $onDashboardStateChange,
-    $triggerDashboardRefresh,
-  } = syncDashboardContainerProps;
+  const { history, dashboardContainer, $onDashboardStateChange, $triggerDashboardRefresh } =
+    syncDashboardContainerProps;
   const subscriptions = new Subscription();
   subscriptions.add(
     dashboardContainer
@@ -116,6 +118,10 @@ export const applyContainerChangesToState = ({
 
   if (!_.isEqual(input.expandedPanelId, latestState.expandedPanelId)) {
     dispatchDashboardStateChange(setExpandedPanelId(input.expandedPanelId));
+  }
+
+  if (!_.isEqual(input.controlGroupInput, latestState.controlGroupInput)) {
+    dispatchDashboardStateChange(setControlGroupState(input.controlGroupInput));
   }
   dispatchDashboardStateChange(setFullScreenMode(input.isFullScreenMode));
 };

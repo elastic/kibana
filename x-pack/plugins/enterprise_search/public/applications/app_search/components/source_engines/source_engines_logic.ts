@@ -32,19 +32,19 @@ interface SourceEnginesLogicActions {
   fetchIndexedEngines: () => void;
   fetchSourceEngines: () => void;
   onSourceEngineRemove: (sourceEngineNameToRemove: string) => { sourceEngineNameToRemove: string };
-  onSourceEnginesAdd: (
-    sourceEnginesToAdd: EngineDetails[]
-  ) => { sourceEnginesToAdd: EngineDetails[] };
-  onSourceEnginesFetch: (
-    sourceEngines: SourceEnginesLogicValues['sourceEngines']
-  ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
+  onSourceEnginesAdd: (sourceEnginesToAdd: EngineDetails[]) => {
+    sourceEnginesToAdd: EngineDetails[];
+  };
+  onSourceEnginesFetch: (sourceEngines: SourceEnginesLogicValues['sourceEngines']) => {
+    sourceEngines: SourceEnginesLogicValues['sourceEngines'];
+  };
   removeSourceEngine: (sourceEngineName: string) => { sourceEngineName: string };
   setIndexedEngines: (indexedEngines: EngineDetails[]) => { indexedEngines: EngineDetails[] };
   openModal: () => void;
   closeModal: () => void;
-  onAddEnginesSelection: (
-    selectedEngineNamesToAdd: string[]
-  ) => { selectedEngineNamesToAdd: string[] };
+  onAddEnginesSelection: (selectedEngineNamesToAdd: string[]) => {
+    selectedEngineNamesToAdd: string[];
+  };
 }
 
 export const SourceEnginesLogic = kea<
@@ -132,7 +132,7 @@ export const SourceEnginesLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.post(`/api/app_search/engines/${engineName}/source_engines/bulk_create`, {
+        await http.post(`/internal/app_search/engines/${engineName}/source_engines/bulk_create`, {
           body: JSON.stringify({
             source_engine_slugs: sourceEngineNames,
           }),
@@ -155,13 +155,13 @@ export const SourceEnginesLogic = kea<
       const { engineName } = EngineLogic.values;
 
       recursivelyFetchEngines({
-        endpoint: `/api/app_search/engines/${engineName}/source_engines`,
+        endpoint: `/internal/app_search/engines/${engineName}/source_engines`,
         onComplete: (engines) => actions.onSourceEnginesFetch(engines),
       });
     },
     fetchIndexedEngines: () => {
       recursivelyFetchEngines({
-        endpoint: '/api/app_search/engines',
+        endpoint: '/internal/app_search/engines',
         onComplete: (engines) => actions.setIndexedEngines(engines),
         query: { type: 'indexed' },
       });
@@ -172,7 +172,7 @@ export const SourceEnginesLogic = kea<
 
       try {
         await http.delete(
-          `/api/app_search/engines/${engineName}/source_engines/${sourceEngineName}`
+          `/internal/app_search/engines/${engineName}/source_engines/${sourceEngineName}`
         );
 
         actions.onSourceEngineRemove(sourceEngineName);

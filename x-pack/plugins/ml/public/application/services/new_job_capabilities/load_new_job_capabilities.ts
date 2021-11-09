@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IIndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
-import { getIndexPatternAndSavedSearch } from '../../util/index_utils';
+import { DataView, DataViewsContract } from '../../../../../../../src/plugins/data_views/public';
+import { getDataViewAndSavedSearch } from '../../util/index_utils';
 import { JobType } from '../../../../common/types/saved_objects';
 import { newJobCapsServiceAnalytics } from '../new_job_capabilities/new_job_capabilities_service_analytics';
 import { newJobCapsService } from '../new_job_capabilities/new_job_capabilities_service';
@@ -15,35 +15,42 @@ export const ANOMALY_DETECTOR = 'anomaly-detector';
 export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
 
 // called in the routing resolve block to initialize the NewJobCapabilites
-// service for the corresponding job type with the currently selected index pattern
+// service for the corresponding job type with the currently selected data view
 export function loadNewJobCapabilities(
-  indexPatternId: string,
+  dataViewId: string,
   savedSearchId: string,
-  indexPatterns: IndexPatternsContract,
+  dataViewContract: DataViewsContract,
   jobType: JobType
 ) {
   return new Promise(async (resolve, reject) => {
-    const serviceToUse =
-      jobType === ANOMALY_DETECTOR ? newJobCapsService : newJobCapsServiceAnalytics;
-    if (indexPatternId !== undefined) {
-      // index pattern is being used
-      const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
-      await serviceToUse.initializeFromIndexPattern(indexPattern);
-      resolve(serviceToUse.newJobCaps);
-    } else if (savedSearchId !== undefined) {
-      // saved search is being used
-      // load the index pattern from the saved search
-      const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
-      if (indexPattern === null) {
-        // eslint-disable-next-line no-console
-        console.error('Cannot retrieve index pattern from saved search');
+    try {
+      const serviceToUse =
+        jobType === ANOMALY_DETECTOR ? newJobCapsService : newJobCapsServiceAnalytics;
+
+      if (dataViewId !== undefined) {
+        // index pattern is being used
+        const dataView: DataView = await dataViewContract.get(dataViewId);
+        await serviceToUse.initializeFromDataVIew(dataView);
+        resolve(serviceToUse.newJobCaps);
+      } else if (savedSearchId !== undefined) {
+        // saved search is being used
+        // load the data view from the saved search
+        const { dataView } = await getDataViewAndSavedSearch(savedSearchId);
+
+        if (dataView === null) {
+          // eslint-disable-next-line no-console
+          console.error('Cannot retrieve data view from saved search');
+          reject();
+          return;
+        }
+
+        await serviceToUse.initializeFromDataVIew(dataView);
+        resolve(serviceToUse.newJobCaps);
+      } else {
         reject();
-        return;
       }
-      await serviceToUse.initializeFromIndexPattern(indexPattern);
-      resolve(serviceToUse.newJobCaps);
-    } else {
-      reject();
+    } catch (error) {
+      reject(error);
     }
   });
 }

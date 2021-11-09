@@ -6,7 +6,7 @@
  */
 import { AlertExecutionStatus } from '../../../../../alerting/common';
 import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
-import { Alert, AlertAction } from '../../../types';
+import { Alert, AlertAction, ResolvedRule } from '../../../types';
 
 const transformAction: RewriteRequestCase<AlertAction> = ({
   group,
@@ -22,9 +22,11 @@ const transformAction: RewriteRequestCase<AlertAction> = ({
 
 const transformExecutionStatus: RewriteRequestCase<AlertExecutionStatus> = ({
   last_execution_date: lastExecutionDate,
+  last_duration: lastDuration,
   ...rest
 }) => ({
   lastExecutionDate,
+  lastDuration,
   ...rest,
 });
 
@@ -59,3 +61,16 @@ export const transformAlert: RewriteRequestCase<Alert> = ({
   scheduledTaskId,
   ...rest,
 });
+
+export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  alias_target_id,
+  outcome,
+  ...rest
+}: any) => {
+  return {
+    ...transformAlert(rest),
+    alias_target_id,
+    outcome,
+  };
+};

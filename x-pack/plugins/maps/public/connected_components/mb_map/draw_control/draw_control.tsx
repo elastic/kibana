@@ -134,7 +134,7 @@ export class DrawControl extends Component<Props> {
         },
         paint: {
           'text-color': '#fbb03b',
-          'text-halo-color': 'rgba(255, 255, 255, 1)',
+          'text-halo-color': 'rgba(0, 0, 0, 1)',
           'text-halo-width': 2,
         },
       });

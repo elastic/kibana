@@ -8,7 +8,6 @@
 import { Observable } from 'rxjs';
 import type {
   ISavedObjectTypeRegistry,
-  ILegacyScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   Capabilities,
@@ -67,11 +66,6 @@ export interface GlobalSearchProviderContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
-    };
-    elasticsearch: {
-      legacy: {
-        client: ILegacyScopedClusterClient;
-      };
     };
     uiSettings: {
       client: IUiSettingsClient;

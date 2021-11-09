@@ -28,6 +28,9 @@
       "consumer": {
         "type": "keyword"
       },
+      "legacyId": {
+        "type": "keyword"
+      },
       "actions": {
         "type": "nested",
         "properties": {
@@ -97,6 +100,9 @@
           },
           "lastExecutionDate": {
             "type": "date"
+          },
+          "lastDuration": {
+            "type": "long"
           },
           "error": {
             "properties": {

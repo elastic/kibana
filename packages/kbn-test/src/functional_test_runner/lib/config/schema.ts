@@ -71,6 +71,7 @@ const defaultRelativeToConfigPath = (path: string) => {
 
 export const schema = Joi.object()
   .keys({
+    rootTags: Joi.array().items(Joi.string()),
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
 
@@ -88,6 +89,7 @@ export const schema = Joi.object()
       })
       .default(),
 
+    servicesRequiredForTestAnalysis: Joi.array().items(Joi.string()).default([]),
     services: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
 
     pageObjects: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
@@ -200,6 +202,8 @@ export const schema = Joi.object()
               .default(/Kibana is now available/),
           })
           .default(),
+        env: Joi.object().unknown().default(),
+        delayShutdown: Joi.number(),
       })
       .default(),
 

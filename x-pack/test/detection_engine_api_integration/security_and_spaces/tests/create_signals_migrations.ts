@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import {
   DEFAULT_SIGNALS_INDEX,
+  DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
@@ -21,12 +22,17 @@ import {
   getIndexNameFromLoad,
   waitForIndexToPopulate,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 interface CreateResponse {
   index: string;
   migration_index: string;
   migration_id: string;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -36,6 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const kbnClient = getService('kibanaServer');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('Creating signals migrations', () => {
     let createdMigrations: CreateResponse[];
@@ -44,7 +51,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
     beforeEach(async () => {
       createdMigrations = [];
-      await createSignalsIndex(supertest);
 
       legacySignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
@@ -52,16 +58,26 @@ export default ({ getService }: FtrProviderContext): void => {
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
+      // Finalize the migration after each test so that the .siem-signals alias gets added to the migrated index -
+      // this allows deleteSignalsIndex to find and delete the migrated index
+      await sleep(5000); // Allow the migration to complete
+      await supertest
+        .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
+        .expect(200);
+
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteMigrations({
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('returns the information necessary to finalize the migration', async () => {
@@ -95,13 +111,12 @@ export default ({ getService }: FtrProviderContext): void => {
       createResponses.forEach((response) => expect(response.migration_id).to.be.a('string'));
 
       const [{ migration_index: newIndex }] = createResponses;
-      await waitForIndexToPopulate(es, newIndex);
-      const { body: migrationResults } = await es.search({ index: newIndex });
+      await waitForIndexToPopulate(es, log, newIndex);
+      const migrationResults = await es.search<{ signal: Signal }>({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);
-      // @ts-expect-error _source has unknown type
-      const migratedSignal = migrationResults.hits.hits[0]._source.signal;
-      expect(migratedSignal._meta.version).to.equal(SIGNALS_TEMPLATE_VERSION);
+      const migratedSignal = migrationResults.hits.hits[0]._source?.signal;
+      expect(migratedSignal?._meta?.version).to.equal(SIGNALS_TEMPLATE_VERSION);
     });
 
     it('specifying the signals alias itself is a bad request', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { IScopedClusterClient } from 'kibana/server';
 import { chunk } from 'lodash';
@@ -136,7 +136,12 @@ export function categorizationExamplesProvider({
     });
 
     const lengths = examples.map((e) => e.length);
-    const sumLengths = lengths.map(((s) => (a: number) => (s += a))(0));
+    const sumLengths = lengths.map(
+      (
+        (s) => (a: number) =>
+          (s += a)
+      )(0)
+    );
 
     const tokensPerExample: Token[][] = examples.map((e) => []);
 

@@ -9,14 +9,15 @@
 import Path from 'path';
 import Fs from 'fs/promises';
 
-import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
+import { ToolingLog, kibanaPackageJson, extract } from '@kbn/dev-utils';
 import del from 'del';
 import tempy from 'tempy';
 
 import { Archives } from './archives';
-import { unzip, zip } from './zip';
+import { zip } from './zip';
 import { concurrentMap } from '../concurrent_map';
 import { RepoInfo } from './repo_info';
+import { ProjectSet } from '../project_set';
 
 export const OUTDIR_MERGE_BASE_FILENAME = '.ts-ref-cache-merge-base';
 
@@ -49,7 +50,7 @@ export class RefOutputCache {
   static async create(options: {
     log: ToolingLog;
     workingDir: string;
-    outDirs: string[];
+    projects: ProjectSet;
     repoRoot: string;
     upstreamUrl: string;
   }) {
@@ -59,14 +60,14 @@ export class RefOutputCache {
     const upstreamBranch: string = kibanaPackageJson.branch;
     const mergeBase = await repoInfo.getMergeBase('HEAD', upstreamBranch);
 
-    return new RefOutputCache(options.log, repoInfo, archives, options.outDirs, mergeBase);
+    return new RefOutputCache(options.log, repoInfo, archives, options.projects, mergeBase);
   }
 
   constructor(
     private readonly log: ToolingLog,
     private readonly repo: RepoInfo,
     public readonly archives: Archives,
-    private readonly outDirs: string[],
+    private readonly projects: ProjectSet,
     private readonly mergeBase: string
   ) {}
 
@@ -77,7 +78,7 @@ export class RefOutputCache {
    */
   async initCaches() {
     const outdatedOutDirs = (
-      await concurrentMap(100, this.outDirs, async (outDir) => ({
+      await concurrentMap(100, this.projects.outDirs, async (outDir) => ({
         path: outDir,
         outdated: !(await matchMergeBase(outDir, this.mergeBase)),
       }))
@@ -101,6 +102,9 @@ export class RefOutputCache {
       return;
     }
 
+    const changedFiles = await this.repo.getFilesChangesSinceSha(archive.sha);
+    const outDirsForcingExtraCacheCheck = this.projects.filterByPaths(changedFiles).outDirs;
+
     const tmpDir = tempy.directory();
     this.log.debug(
       'extracting',
@@ -109,9 +113,13 @@ export class RefOutputCache {
       outdatedOutDirs.length,
       'outDirs'
     );
-    await unzip(archive.path, tmpDir);
+    await extract({
+      archivePath: archive.path,
+      targetDir: tmpDir,
+    });
 
     const cacheNames = await Fs.readdir(tmpDir);
+    const beginningOfTime = new Date(0);
 
     await concurrentMap(50, outdatedOutDirs, async (outDir) => {
       const relative = this.repo.getRelative(outDir);
@@ -129,9 +137,22 @@ export class RefOutputCache {
         return;
       }
 
-      this.log.debug(`[${relative}] clearing outDir and replacing with cache`);
+      const setModifiedTimes = outDirsForcingExtraCacheCheck.includes(outDir)
+        ? beginningOfTime
+        : undefined;
+
+      if (setModifiedTimes) {
+        this.log.debug(`[${relative}] replacing outDir with cache (forcing revalidation)`);
+      } else {
+        this.log.debug(`[${relative}] clearing outDir and replacing with cache`);
+      }
+
       await del(outDir);
-      await unzip(Path.resolve(tmpDir, cacheName), outDir);
+      await extract({
+        archivePath: Path.resolve(tmpDir, cacheName),
+        targetDir: outDir,
+        setModifiedTimes,
+      });
       await Fs.writeFile(Path.resolve(outDir, OUTDIR_MERGE_BASE_FILENAME), this.mergeBase);
     });
   }
@@ -154,7 +175,7 @@ export class RefOutputCache {
     const subZips: Array<[string, string]> = [];
 
     await Promise.all(
-      this.outDirs.map(async (absolute) => {
+      this.projects.outDirs.map(async (absolute) => {
         const relative = this.repo.getRelative(absolute);
         const subZipName = `${relative.split(Path.sep).join('__')}.zip`;
         const subZipPath = Path.resolve(tmpDir, subZipName);

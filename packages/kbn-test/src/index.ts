@@ -18,20 +18,15 @@ import {
 // @internal
 export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
-// @ts-expect-error not typed yet
+// @ts-ignore not typed yet
 // @internal
 export { runTests, startServers } from './functional_tests/tasks';
 
 // @internal
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
-export {
-  esTestConfig,
-  createTestEsCluster,
-  CreateTestEsClusterOptions,
-  EsTestCluster,
-  ICluster,
-} from './es';
+export type { CreateTestEsClusterOptions, EsTestCluster, ICluster } from './es';
+export { esTestConfig, createTestEsCluster, convertToKibanaClient } from './es';
 
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
 

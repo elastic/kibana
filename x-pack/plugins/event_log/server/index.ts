@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { ConfigSchema } from './types';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { ConfigSchema, IEventLogConfig } from './types';
 import { Plugin } from './plugin';
 
-export {
+export type {
   IEventLogService,
   IEventLogger,
   IEventLogClientService,
@@ -17,12 +17,14 @@ export {
   IValidatedEvent,
   IEventLogClient,
   QueryEventsBySavedObjectResult,
-  SAVED_OBJECT_REL_PRIMARY,
 } from './types';
+export { SAVED_OBJECT_REL_PRIMARY } from './types';
 
 export { ClusterClientAdapter } from './es/cluster_client_adapter';
 
 export { createReadySignal } from './lib/ready_signal';
 
-export const config = { schema: ConfigSchema };
+export const config: PluginConfigDescriptor<IEventLogConfig> = {
+  schema: ConfigSchema,
+};
 export const plugin = (context: PluginInitializerContext) => new Plugin(context);

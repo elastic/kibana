@@ -28,9 +28,18 @@ interface Props {
   timezone: string;
   config: SessionsConfigSchema;
   plugins: IManagementSectionsPluginsSetup;
+  kibanaVersion: string;
 }
 
-export function SearchSessionsMgmtTable({ core, api, timezone, config, plugins, ...props }: Props) {
+export function SearchSessionsMgmtTable({
+  core,
+  api,
+  timezone,
+  config,
+  plugins,
+  kibanaVersion,
+  ...props
+}: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
@@ -111,7 +120,7 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, plugins, 
       rowProps={() => ({
         'data-test-subj': 'searchSessionsRow',
       })}
-      columns={getColumns(core, plugins, api, config, timezone, onActionComplete)}
+      columns={getColumns(core, plugins, api, config, timezone, onActionComplete, kibanaVersion)}
       items={tableData}
       pagination={pagination}
       search={search}

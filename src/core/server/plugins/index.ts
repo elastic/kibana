@@ -7,7 +7,12 @@
  */
 
 export { PluginsService } from './plugins_service';
-export type { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from './plugins_service';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  UiPlugins,
+  DiscoveredPlugins,
+} from './plugins_service';
 export { config } from './plugins_config';
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';

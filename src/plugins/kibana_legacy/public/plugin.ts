@@ -6,26 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreStart, CoreSetup } from 'kibana/public';
-import { ConfigSchema } from '../config';
-import { getDashboardConfig } from './dashboard_config';
-import { injectHeaderStyle } from './utils/inject_header_style';
+import type { CoreSetup } from 'kibana/public';
 
 export class KibanaLegacyPlugin {
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
-
   public setup(core: CoreSetup<{}, KibanaLegacyStart>) {
     return {};
   }
 
-  public start({ application, http: { basePath }, uiSettings }: CoreStart) {
-    injectHeaderStyle(uiSettings);
+  public start() {
     return {
-      /**
-       * Used to power dashboard mode. Should be removed when dashboard mode is removed eventually.
-       * @deprecated
-       */
-      dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
       /**
        * Loads the font-awesome icon font. Should be removed once the last consumer has migrated to EUI
        * @deprecated
@@ -33,11 +22,6 @@ export class KibanaLegacyPlugin {
       loadFontAwesome: async () => {
         await import('./font_awesome');
       },
-      /**
-       * @deprecated
-       * Just exported for wiring up with dashboard mode, should not be used.
-       */
-      config: this.initializerContext.config.get(),
     };
   }
 }

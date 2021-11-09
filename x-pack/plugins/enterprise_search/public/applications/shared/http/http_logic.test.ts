@@ -93,7 +93,7 @@ describe('HttpLogic', () => {
 
         it('sets errorConnecting to true if the response header is true', async () => {
           const httpResponse = {
-            response: { url: '/api/app_search/engines', headers: { get: () => 'true' } },
+            response: { url: '/internal/app_search/engines', headers: { get: () => 'true' } },
           };
           await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
@@ -102,7 +102,10 @@ describe('HttpLogic', () => {
 
         it('sets errorConnecting to false if the response header is false', async () => {
           const httpResponse = {
-            response: { url: '/api/workplace_search/overview', headers: { get: () => 'false' } },
+            response: {
+              url: '/internal/workplace_search/overview',
+              headers: { get: () => 'false' },
+            },
           };
           await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
@@ -140,7 +143,7 @@ describe('HttpLogic', () => {
 
         it('sets readOnlyMode to true if the response header is true', async () => {
           const httpResponse = {
-            response: { url: '/api/app_search/engines', headers: { get: () => 'true' } },
+            response: { url: '/internal/app_search/engines', headers: { get: () => 'true' } },
           };
           await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
 
@@ -149,7 +152,10 @@ describe('HttpLogic', () => {
 
         it('sets readOnlyMode to false if the response header is false', async () => {
           const httpResponse = {
-            response: { url: '/api/workplace_search/overview', headers: { get: () => 'false' } },
+            response: {
+              url: '/internal/workplace_search/overview',
+              headers: { get: () => 'false' },
+            },
           };
           await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
 

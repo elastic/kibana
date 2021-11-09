@@ -14,6 +14,7 @@ import {
   dateBasedOperationToExpression,
   hasDateField,
   buildLabelFunction,
+  checkForDataLayerType,
 } from './utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
@@ -108,13 +109,17 @@ export const cumulativeSumOperation: OperationDefinition<
       })
     );
   },
-  getDisabledStatus(indexPattern, layer) {
-    return checkForDateHistogram(
-      layer,
-      i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
-        defaultMessage: 'Cumulative sum',
-      })
-    )?.join(', ');
+  getDisabledStatus(indexPattern, layer, layerType) {
+    const opName = i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
+      defaultMessage: 'Cumulative sum',
+    });
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
+    }
+    return checkForDateHistogram(layer, opName)?.join(', ');
   },
   filterable: true,
   documentation: {
@@ -122,7 +127,7 @@ export const cumulativeSumOperation: OperationDefinition<
     signature: i18n.translate('xpack.lens.indexPattern.cumulative_sum.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.documentation', {
+    description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.documentation.markdown', {
       defaultMessage: `
 Calculates the cumulative sum of a metric over time, adding all previous values of a series to each value. To use this function, you need to configure a date histogram dimension as well.
 

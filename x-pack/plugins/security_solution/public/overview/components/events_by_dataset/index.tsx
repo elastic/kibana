@@ -10,7 +10,8 @@ import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
@@ -22,12 +23,7 @@ import { eventsStackByOptions } from '../../../hosts/pages/navigation';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { histogramConfigs } from '../../../hosts/pages/navigation/events_query_tab_body';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsTableType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -36,6 +32,7 @@ import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const DEFAULT_STACK_BY = 'event.dataset';
 
@@ -45,11 +42,13 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   combinedQueries?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   indexNames: string[];
   onlyField?: string;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
+  showLegend?: boolean;
   showSpacer?: boolean;
   timelineId?: string;
   toggleTopN?: () => void;
@@ -69,9 +68,11 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   indexPattern,
   indexNames,
   onlyField,
+  paddingSize,
   query,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
+  showLegend,
   showSpacer = true,
   timelineId,
   to,
@@ -96,7 +97,8 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const goToHostEvents = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.events, urlSearch),
       });
     },
@@ -115,18 +117,26 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [goToHostEvents, formatUrl]
   );
 
-  const filterQuery = useMemo(
-    () =>
-      combinedQueries == null
-        ? convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-            indexPattern,
-            queries: [query],
-            filters,
-          })
-        : combinedQueries,
-    [combinedQueries, kibana, indexPattern, query, filters]
-  );
+  const [filterQuery, kqlError] = useMemo(() => {
+    if (combinedQueries == null) {
+      return convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+        indexPattern,
+        queries: [query],
+        filters,
+      });
+    }
+    return [combinedQueries];
+  }, [combinedQueries, kibana, indexPattern, query, filters]);
+
+  useInvalidFilterQuery({
+    id: uniqueQueryId,
+    filterQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
@@ -167,9 +177,12 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       id={uniqueQueryId}
       indexNames={indexNames}
       onError={toggleTopN}
+      paddingSize={paddingSize}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
+      showLegend={showLegend}
+      skip={filterQuery === undefined}
       startDate={from}
       timelineId={timelineId}
       {...eventsByDatasetHistogramConfigs}

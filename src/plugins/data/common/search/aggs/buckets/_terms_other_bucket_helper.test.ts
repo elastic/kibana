@@ -16,8 +16,8 @@ import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
-import type { IndexPatternField } from '../../../index_patterns';
-import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
+import type { IndexPatternField } from '../../..';
+import { IndexPattern } from '../../..';
 
 const indexPattern = {
   id: '1234',
@@ -42,7 +42,7 @@ const indexPattern = {
   ],
 } as IndexPattern;
 
-indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
 
 const singleTerm = {
   aggs: [
@@ -365,6 +365,86 @@ describe('Terms Agg Other bucket helper', () => {
                     { match_phrase: { 'machine.os.raw': 'ios' } },
                     { match_phrase: { 'machine.os.raw': 'win xp' } },
                   ],
+                },
+              },
+            },
+          },
+        },
+      };
+      expect(agg).toBeDefined();
+      if (agg) {
+        expect(agg()).toEqual(expectedResponse);
+      }
+    });
+
+    test('correctly builds query for nested terms agg with one disabled', () => {
+      const oneDisabledNestedTerms = {
+        aggs: [
+          {
+            id: '2',
+            type: BUCKET_TYPES.TERMS,
+            enabled: false,
+            params: {
+              field: {
+                name: 'machine.os.raw',
+                indexPattern,
+                filterable: true,
+              },
+              size: 2,
+              otherBucket: false,
+              missingBucket: true,
+            },
+          },
+          {
+            id: '1',
+            type: BUCKET_TYPES.TERMS,
+            params: {
+              field: {
+                name: 'geo.src',
+                indexPattern,
+                filterable: true,
+              },
+              size: 2,
+              otherBucket: true,
+              missingBucket: false,
+            },
+          },
+        ],
+      };
+      const aggConfigs = getAggConfigs(oneDisabledNestedTerms.aggs);
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        singleTermResponse
+      );
+      const expectedResponse = {
+        'other-filter': {
+          aggs: undefined,
+          filters: {
+            filters: {
+              '': {
+                bool: {
+                  filter: [
+                    {
+                      exists: {
+                        field: 'geo.src',
+                      },
+                    },
+                  ],
+                  must: [],
+                  must_not: [
+                    {
+                      match_phrase: {
+                        'geo.src': 'ios',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'geo.src': 'win xp',
+                      },
+                    },
+                  ],
+                  should: [],
                 },
               },
             },

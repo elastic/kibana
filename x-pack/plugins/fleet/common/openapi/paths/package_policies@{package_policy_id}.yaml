@@ -1,5 +1,5 @@
 get:
-  summary: PackagePolicies - Info
+  summary: Package policy - Info
   tags: []
   responses:
     '200':
@@ -13,7 +13,7 @@ get:
                 $ref: ../components/schemas/package_policy.yaml
             required:
               - item
-  operationId: get-packagePolicies-packagePolicyId
+  operationId: get-package-policy
 parameters:
   - schema:
       type: string
@@ -21,8 +21,8 @@ parameters:
     in: path
     required: true
 put:
-  summary: PackagePolicies - Update
-  operationId: put-packagePolicies-packagePolicyId
+  summary: Package policy - Update
+  operationId: update-package-policy
   requestBody:
     content:
       application/json:

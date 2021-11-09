@@ -36,6 +36,7 @@ export const StepScreenshots = ({ step }: Props) => {
         timestamp: step['@timestamp'],
         monitorId: step.monitor.id,
         stepIndex: step.synthetics?.step?.index!,
+        location: step.observer?.geo?.name,
       });
     }
   }, [step._id, step['@timestamp']]);
@@ -60,8 +61,8 @@ export const StepScreenshots = ({ step }: Props) => {
         </Label>
         <StepScreenshotDisplay
           checkGroup={step.monitor.check_group}
-          isScreenshotRef={!!step.synthetics?.isScreenshotRef}
-          isScreenshotBlob={!!step.synthetics?.isFullScreenshot}
+          isScreenshotRef={Boolean(step.synthetics?.isScreenshotRef)}
+          isFullScreenshot={Boolean(step.synthetics?.isFullScreenshot)}
           stepIndex={step.synthetics?.step?.index}
           stepName={step.synthetics?.step?.name}
           lazyLoad={false}
@@ -74,8 +75,8 @@ export const StepScreenshots = ({ step }: Props) => {
           <ScreenshotLink lastSuccessfulStep={lastSuccessfulStep} />
           <StepScreenshotDisplay
             checkGroup={lastSuccessfulStep.monitor.check_group}
-            isScreenshotRef={!!lastSuccessfulStep.synthetics?.isScreenshotRef}
-            isScreenshotBlob={!!lastSuccessfulStep.synthetics?.isFullScreenshot}
+            isScreenshotRef={Boolean(lastSuccessfulStep.synthetics?.isScreenshotRef)}
+            isFullScreenshot={Boolean(lastSuccessfulStep.synthetics?.isFullScreenshot)}
             stepIndex={lastSuccessfulStep.synthetics?.step?.index}
             stepName={lastSuccessfulStep.synthetics?.step?.name}
             lazyLoad={false}

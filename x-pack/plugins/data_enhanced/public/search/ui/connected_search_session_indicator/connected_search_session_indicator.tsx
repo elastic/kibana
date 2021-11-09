@@ -31,6 +31,7 @@ export interface SearchSessionIndicatorDeps {
    * after the last search in the session has completed
    */
   disableSaveAfterSessionCompletesTimeout: number;
+  tourDisabled: boolean;
   usageCollector?: SearchUsageCollector;
 }
 
@@ -41,6 +42,7 @@ export const createConnectedSearchSessionIndicator = ({
   disableSaveAfterSessionCompletesTimeout,
   usageCollector,
   basePath,
+  tourDisabled,
 }: SearchSessionIndicatorDeps): React.FC => {
   const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
 
@@ -67,10 +69,8 @@ export const createConnectedSearchSessionIndicator = ({
       disableSaveAfterSessionCompleteTimedOut$,
       false
     );
-    const [
-      searchSessionIndicator,
-      setSearchSessionIndicator,
-    ] = useState<SearchSessionIndicatorRef | null>(null);
+    const [searchSessionIndicator, setSearchSessionIndicator] =
+      useState<SearchSessionIndicatorRef | null>(null);
     const searchSessionIndicatorRef = useCallback((ref: SearchSessionIndicatorRef) => {
       if (ref !== null) {
         setSearchSessionIndicator(ref);
@@ -115,6 +115,7 @@ export const createConnectedSearchSessionIndicator = ({
       searchSessionIndicator,
       state,
       saveDisabled,
+      tourDisabled,
       usageCollector
     );
 

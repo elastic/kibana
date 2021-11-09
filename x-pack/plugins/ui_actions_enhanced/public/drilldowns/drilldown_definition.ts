@@ -91,8 +91,7 @@ export interface DrilldownDefinition<
   CollectConfig: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['CollectConfig'];
 
   /**
-   * A validator function for the config object. Should always return a boolean
-   * given any input.
+   * A validator function for the config object. Should always return a boolean.
    */
   isConfigValid: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['isConfigValid'];
 

@@ -57,18 +57,29 @@ const SummarySection = styled(EuiFlexItem)`
 `;
 
 const DetailsSection = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.euiSize};
+  &&& {
+    margin-left: 0;
+  }
+  padding: ${({ theme }) => theme.eui.euiSizeM} ${({ theme }) => theme.eui.euiSizeL}
+    ${({ theme }) => theme.eui.euiSizeL} 0;
+  .trustedAppsConditionsTable {
+    margin-left: ${({ theme }) => theme.eui.euiSize};
+  }
 `;
 
 const DescriptionListTitle = styled(EuiDescriptionListTitle)`
   &&& {
     width: 40%;
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
 const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   &&& {
     width: 60%;
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
@@ -80,7 +91,7 @@ interface ItemDetailsPropertySummaryProps {
 export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
   ({ name, value }) => (
     <>
-      <DescriptionListTitle>{name}</DescriptionListTitle>
+      <DescriptionListTitle className="eui-textTruncate">{name}</DescriptionListTitle>
       <DescriptionListDescription className="eui-textBreakWord">{value}</DescriptionListDescription>
     </>
   )

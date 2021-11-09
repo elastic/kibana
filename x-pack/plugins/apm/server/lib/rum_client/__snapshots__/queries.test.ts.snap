@@ -48,8 +48,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -64,13 +64,7 @@ Object {
             },
           },
         ],
-        "must_not": Array [
-          Object {
-            "term": Object {
-              "service.environment": "staging",
-            },
-          },
-        ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -150,8 +144,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -225,8 +219,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -491,8 +485,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -512,13 +506,7 @@ Object {
             },
           },
         ],
-        "must_not": Array [
-          Object {
-            "term": Object {
-              "service.environment": "staging",
-            },
-          },
-        ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -550,8 +538,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -566,13 +554,7 @@ Object {
             },
           },
         ],
-        "must_not": Array [
-          Object {
-            "term": Object {
-              "service.environment": "staging",
-            },
-          },
-        ],
+        "must_not": Array [],
       },
     },
     "size": 0,
@@ -674,8 +656,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -721,8 +703,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },

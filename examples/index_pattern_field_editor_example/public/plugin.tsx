@@ -40,8 +40,7 @@ export class IndexPatternFieldEditorPlugin implements Plugin<void, void, SetupDe
       links: [
         {
           label: 'README',
-          href:
-            'https://github.com/elastic/kibana/blob/master/src/plugins/index_pattern_field_editor/README.md',
+          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/index_pattern_field_editor/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

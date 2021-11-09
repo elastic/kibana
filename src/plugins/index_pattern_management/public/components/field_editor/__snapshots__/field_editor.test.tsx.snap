@@ -122,7 +122,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
@@ -172,11 +172,13 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
+        value=""
         width="100%"
       />
     </eui-form-row>
@@ -363,7 +365,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
@@ -407,10 +409,11 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
         value="doc.test.value"
         width="100%"
@@ -543,7 +546,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       onClose={[Function]}
     />
     <eui-form-row
-      error={null}
+      error={false}
       helpText={
         <span>
           <eui-icon
@@ -655,7 +658,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
@@ -705,11 +708,13 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
+        value=""
         width="100%"
       />
     </eui-form-row>
@@ -989,7 +994,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
@@ -1033,10 +1038,11 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
         value="doc.test.value"
         width="100%"
@@ -1169,7 +1175,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       onClose={[Function]}
     />
     <eui-form-row
-      error={null}
+      error={false}
       helpText={
         <span>
           <eui-icon
@@ -1337,7 +1343,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
@@ -1387,11 +1393,13 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isInvalid={true}
       label="Script"
     >
-      <eui-code-editor
+      <code-editor
+        aria-label="Script editor"
         data-test-subj="editorFieldScript"
         height="300px"
-        mode="groovy"
+        languageId="painless"
         onChange={[Function]}
+        value=""
         width="100%"
       />
     </eui-form-row>

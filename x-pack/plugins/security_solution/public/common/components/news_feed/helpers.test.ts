@@ -279,8 +279,7 @@ describe('helpers', () => {
           {
             title: { en: 'Got SIEM Questions?', ja: translatedTitle },
             description: {
-              en:
-                "There's an awesome community of Elastic SIEM users out there. Join the discussion about configuring, learning, and using the Elastic SIEM app, and detecting threats!",
+              en: "There's an awesome community of Elastic SIEM users out there. Join the discussion about configuring, learning, and using the Elastic SIEM app, and detecting threats!",
               ja: translatedDescription,
             },
             link_text: null,
@@ -291,8 +290,7 @@ describe('helpers', () => {
             languages: null,
             badge: { en: '7.6' },
             image_url: {
-              en:
-                'https://aws1.discourse-cdn.com/elastic/original/3X/f/8/f8c3d0b9971cfcd0be349d973aa5799f71d280cc.png?blade=securitysolutionfeed',
+              en: 'https://aws1.discourse-cdn.com/elastic/original/3X/f/8/f8c3d0b9971cfcd0be349d973aa5799f71d280cc.png?blade=securitysolutionfeed',
               ja: translatedImageUrl,
             },
             publish_on: new Date('2020-01-01T00:00:00'),

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { useFetcher } from '../../hooks/use_fetcher';
-import { callObservabilityApi } from '../../services/call_observability_api';
 
 export function AlertsSearchBar({
+  dynamicIndexPatterns,
   rangeFrom,
   rangeTo,
   onQueryChange,
   query,
 }: {
+  dynamicIndexPatterns: IndexPatternBase[];
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
@@ -31,18 +32,21 @@ export function AlertsSearchBar({
   }, []);
   const [queryLanguage, setQueryLanguage] = useState<'lucene' | 'kuery'>('kuery');
 
-  const { data: dynamicIndexPattern } = useFetcher(({ signal }) => {
-    return callObservabilityApi({
-      signal,
-      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
-    });
-  }, []);
+  const compatibleIndexPatterns = useMemo(
+    () =>
+      dynamicIndexPatterns.map((dynamicIndexPattern) => ({
+        title: dynamicIndexPattern.title ?? '',
+        id: dynamicIndexPattern.id ?? '',
+        fields: dynamicIndexPattern.fields,
+      })),
+    [dynamicIndexPatterns]
+  );
 
   return (
     <SearchBar
-      indexPatterns={dynamicIndexPattern ? [dynamicIndexPattern] : []}
+      indexPatterns={compatibleIndexPatterns}
       placeholder={i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {
-        defaultMessage: '"domain": "ecommerce" AND ("service.name": "ProductCatalogService" …)',
+        defaultMessage: 'Search alerts (e.g. kibana.alert.evaluation.threshold > 75)',
       })}
       query={{ query: query ?? '', language: queryLanguage }}
       timeHistory={timeHistory}
@@ -58,6 +62,7 @@ export function AlertsSearchBar({
         });
         setQueryLanguage((nextQuery?.language || 'kuery') as 'kuery' | 'lucene');
       }}
+      displayStyle="inPage"
     />
   );
 }

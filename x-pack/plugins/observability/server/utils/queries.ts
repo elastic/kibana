@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { ALERT_STATUS } from '@kbn/rule-data-utils/target/technical_field_names';
-import { esKuery } from '../../../../../src/plugins/data/server';
-import { AlertStatus } from '../../common/typings';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-export function alertStatusQuery(status: AlertStatus) {
-  if (status === 'all') {
+export function termQuery<T extends string>(field: T, value: string | undefined) {
+  if (!value) {
     return [];
   }
 
-  return [{ term: { [ALERT_STATUS]: status } }];
+  return [{ term: { [field]: value } as Record<T, string> }];
 }
 
 export function rangeQuery(
@@ -36,11 +34,11 @@ export function rangeQuery(
   ];
 }
 
-export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
+export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }
 
-  const ast = esKuery.fromKueryExpression(kql);
-  return [esKuery.toElasticsearchQuery(ast)];
+  const ast = fromKueryExpression(kql);
+  return [toElasticsearchQuery(ast)];
 }

@@ -20,9 +20,8 @@ import { OverviewLogic } from './overview_logic';
 import { StatisticCard } from './statistic_card';
 
 export const OrganizationStats: React.FC = () => {
-  const { sourcesCount, pendingInvitationsCount, accountsCount, personalSourcesCount } = useValues(
-    OverviewLogic
-  );
+  const { sourcesCount, pendingInvitationsCount, accountsCount, privateSourcesCount } =
+    useValues(OverviewLogic);
 
   return (
     <ContentSection
@@ -37,8 +36,8 @@ export const OrganizationStats: React.FC = () => {
         <EuiFlexGrid columns={4}>
           <StatisticCard
             title={i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.organizationStats.sharedSources',
-              { defaultMessage: 'Shared sources' }
+              'xpack.enterpriseSearch.workplaceSearch.organizationStats.organizationalSources',
+              { defaultMessage: 'Organizational sources' }
             )}
             count={sourcesCount}
             actionPath={SOURCES_PATH}
@@ -64,7 +63,7 @@ export const OrganizationStats: React.FC = () => {
               'xpack.enterpriseSearch.workplaceSearch.organizationStats.privateSources',
               { defaultMessage: 'Private sources' }
             )}
-            count={personalSourcesCount}
+            count={privateSourcesCount}
           />
         </EuiFlexGrid>
       </EuiPanel>
