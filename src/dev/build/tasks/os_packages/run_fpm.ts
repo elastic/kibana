@@ -113,6 +113,8 @@ export async function runFpm(
     '--exclude',
     `usr/share/kibana/data`,
     '--exclude',
+    `usr/share/kibana/logs`,
+    '--exclude',
     'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
