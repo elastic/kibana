@@ -9,11 +9,14 @@
 import { get } from 'lodash';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { inter } from '../../../expressions/common';
+
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../data/public';
 import { VisParams } from './types';
+import { getStopsWithColorsFromRanges } from './utils';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -43,7 +46,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   const {
     percentageMode,
     percentageFormatPattern,
-    useRanges,
     colorSchema,
     metricColorMode,
     colorsRange,
@@ -64,26 +66,32 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
 
   const metricVis = buildExpressionFunction('metricVis', {
     percentageMode,
-    colorSchema,
     colorMode: metricColorMode,
-    useRanges,
-    invertColors,
     showLabels: labels?.show ?? false,
   });
 
-  if (style) {
-    metricVis.addArgument('bgFill', style.bgFill);
-    metricVis.addArgument('font', buildExpression(`font size=${style.fontSize}`));
-    metricVis.addArgument('subText', style.subText);
-  }
+  // Pt unit is provided to support the previous view of the metricVis at vis_types editor.
+  // Inter font is defined here to override the default `openSans` font, which comes from the expession.
+  metricVis.addArgument(
+    'font',
+    buildExpression(
+      `font family="${inter.value}" 
+        weight="bold"
+        align="center"
+        sizeUnit="pt"
+        ${style ? `size=${style.fontSize}` : ''}`
+    )
+  );
 
-  if (colorsRange) {
-    colorsRange.forEach((range: any) => {
-      metricVis.addArgument(
-        'colorRange',
-        buildExpression(`range from=${range.from} to=${range.to}`)
-      );
+  if (colorsRange && colorsRange.length) {
+    const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
+    const palette = buildExpressionFunction('palette', {
+      ...stopsWithColors,
+      range: 'number',
+      continuity: 'none',
     });
+
+    metricVis.addArgument('palette', buildExpression([palette]));
   }
 
   if (schemas.group) {

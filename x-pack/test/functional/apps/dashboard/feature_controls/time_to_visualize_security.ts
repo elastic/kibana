@@ -70,15 +70,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await PageObjects.security.forceLogout();
+
       await security.role.delete('dashboard_write_vis_read');
       await security.user.delete('dashboard_write_vis_read_user');
 
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
       );
-
-      // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
     });
 
     describe('lens by value works without library save permissions', () => {
