@@ -146,13 +146,10 @@ export default ({ getService }: FtrProviderContext): void => {
       it('migrates legacy siem-detection-engine-rule-status and removes alertId when not a string', async () => {
         const response = await es.get<{
           'siem-detection-engine-rule-status': IRuleStatusSOAttributes;
-        }>(
-          {
-            index: '.kibana',
-            id: 'siem-detection-engine-rule-status:d62d2980-27c4-11ec-92b0-f7b47106bb36',
-          },
-          { meta: true }
-        );
+        }>({
+          index: '.kibana',
+          id: 'siem-detection-engine-rule-status:d62d2980-27c4-11ec-92b0-f7b47106bb36',
+        });
         expect(response.statusCode).to.eql(200);
 
         expect(response.body._source?.['siem-detection-engine-rule-status']).to.eql({
