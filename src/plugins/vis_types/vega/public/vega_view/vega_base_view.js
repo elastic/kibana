@@ -247,11 +247,16 @@ export class VegaBaseView {
     if (!this._$messages) {
       this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
     }
-    this._$messages.append(
-      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-        $(`<pre class="vgaVis__messageCode">`).text(text)
-      )
-    );
+    const isMessageAlreadyDisplayed = this._$messages
+      .find(`pre.vgaVis__messageCode`)
+      .filter((index, element) => element.textContent === text).length;
+    if (!isMessageAlreadyDisplayed) {
+      this._$messages.append(
+        $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
+          $(`<pre class="vgaVis__messageCode">`).text(text)
+        )
+      );
+    }
   }
 
   resize() {
