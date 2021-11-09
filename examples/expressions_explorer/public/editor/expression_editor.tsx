@@ -19,6 +19,7 @@ export function ExpressionEditor({ value, onChange }: Props) {
     <CodeEditor
       languageId="javascript"
       width="100%"
+      height="250px"
       value={value}
       onChange={onChange}
       options={{

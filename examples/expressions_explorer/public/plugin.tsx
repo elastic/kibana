@@ -59,6 +59,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
             expressions: depsStart.expressions,
             inspector: depsStart.inspector,
             actions: depsStart.uiActions,
+            uiSettings: core.uiSettings,
           },
           params
         );
