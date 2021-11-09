@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const PageObjects = getPageObjects(['common', 'visChart', 'dashboard']);
   const monacoEditor = getService('monacoEditor');
 
-  describe.only('dashboard container', () => {
+  describe('dashboard container', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
       await esArchiver.loadIfNeeded(
