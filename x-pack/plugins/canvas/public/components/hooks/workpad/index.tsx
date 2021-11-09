@@ -6,3 +6,5 @@
  */
 
 export { useDownloadWorkpad, useDownloadRenderedWorkpad } from './use_download_workpad';
+
+export { useIncomingEmbeddable } from './use_incoming_embeddable';
