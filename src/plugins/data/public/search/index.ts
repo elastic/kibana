@@ -36,7 +36,7 @@ export {
   parseSearchSourceJSON,
   SearchSource,
   SortDirection,
-  checkDatatableForPrecisionError,
+  checkColumnForPrecisionError,
 } from '../../common/search';
 export type {
   ISessionService,

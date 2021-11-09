@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { DocLinksStart } from 'kibana/public';
+import { EuiLink, EuiTextColor } from '@elastic/eui';
 
+import { DatatableColumn } from 'src/plugins/expressions';
 import type { DataType, FramePublicAPI } from '../types';
 import type {
   IndexPattern,
@@ -25,7 +28,7 @@ import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
 import { isQueryValid } from './operations/definitions/filters';
-import { search } from '../../../../../src/plugins/data/public';
+import { checkColumnForPrecisionError } from '../../../../../src/plugins/data/common';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -114,33 +117,56 @@ export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPatt
 
 export function getPrecisionErrorWarningMessages(
   state: IndexPatternPrivateState,
-  { activeData }: FramePublicAPI
+  { activeData }: FramePublicAPI,
+  docLinks: DocLinksStart
 ) {
   const warningMessages: React.ReactNode[] = [];
 
   if (state && activeData) {
-    const hasPrecisionError = Object.values(activeData).some(
-      search.checkDatatableForPrecisionError
-    );
-
-    if (hasPrecisionError) {
-      warningMessages.push(
-        <FormattedMessage
-          id="xpack.lens.indexPattern.precisionErrorWarning"
-          defaultMessage="{docCount} values for a terms aggregation may be approximate. As a result, any sub-aggregations on the terms aggregation may also be approximate."
-          values={{
-            docCount: (
-              <strong>
-                <FormattedMessage
-                  id="xpack.lens.indexPattern.precisionErrorWarning.docCount"
-                  defaultMessage="doc_count"
-                />
-              </strong>
-            ),
-          }}
-        />
-      );
-    }
+    Object.values(activeData)
+      .reduce((acc: DatatableColumn[], { columns }) => [...acc, ...columns], [])
+      .forEach((column) => {
+        if (checkColumnForPrecisionError(column)) {
+          warningMessages.push(
+            <FormattedMessage
+              id="xpack.lens.indexPattern.precisionErrorWarning"
+              defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try increasing the number of {topValues} or use {filters} instead of {topValues} for precise results. To learn more about this limit, {link}."
+              values={{
+                name: <EuiTextColor color="accent">{column.name}</EuiTextColor>,
+                topValues: (
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
+                      defaultMessage="Top values"
+                    />
+                  </EuiTextColor>
+                ),
+                filters: (
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.lens.indexPattern.precisionErrorWarning.filters"
+                      defaultMessage="Filters"
+                    />
+                  </EuiTextColor>
+                ),
+                link: (
+                  <EuiLink
+                    href={docLinks.links.aggs.terms_doc_count_error}
+                    color="text"
+                    target="_blank"
+                    external={true}
+                  >
+                    <FormattedMessage
+                      defaultMessage="visit the documentation"
+                      id="xpack.lens.indexPattern.precisionErrorWarning.link"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          );
+        }
+      });
   }
 
   return warningMessages;

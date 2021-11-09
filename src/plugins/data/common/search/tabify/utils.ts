@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable } from '../../../../expressions';
+import type { DatatableColumn } from '../../../../expressions';
 
 /** @public **/
-export const checkDatatableForPrecisionError = (datatable: Datatable) =>
-  datatable.columns.some(({ meta }) => meta.sourceParams?.hasPrecisionError);
+export const checkColumnForPrecisionError = (column: DatatableColumn) =>
+  column.meta.sourceParams?.hasPrecisionError;

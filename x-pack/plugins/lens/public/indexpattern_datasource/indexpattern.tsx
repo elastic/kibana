@@ -505,7 +505,7 @@ export function getIndexPatternDatasource({
     getWarningMessages: (state, frame) => {
       return [
         ...(getStateTimeShiftWarningMessages(state, frame) || []),
-        ...getPrecisionErrorWarningMessages(state, frame),
+        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks),
       ];
     },
     checkIntegrity: (state) => {
