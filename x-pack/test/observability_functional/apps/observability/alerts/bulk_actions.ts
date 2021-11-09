@@ -75,7 +75,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
 
         describe('when selected bulk action button is clicked', async () => {
-          it('opens overflow menu with workflow status options', async () => {});
+          it('opens overflow menu with workflow status options', async () => {
+            await retry.try(async () => {
+              await (await observability.alerts.bulkActions.getBulkActionsButton()).click();
+            });
+          });
         });
       });
     });
@@ -113,7 +117,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
 
         describe('when selected bulk action button is clicked', async () => {
-          it('opens overflow menu with workflow status options', async () => {});
+          it('opens overflow menu with workflow status options', async () => {
+            await retry.try(async () => {
+              await (await observability.alerts.bulkActions.getBulkActionsButton()).click();
+            });
+          });
         });
       });
     });
