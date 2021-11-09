@@ -6,7 +6,13 @@
  */
 
 import React, { FC, ReactNode, useMemo } from 'react';
-import { EuiBasicTable, EuiSpacer, RIGHT_ALIGNMENT, HorizontalAlignment } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiSpacer,
+  RIGHT_ALIGNMENT,
+  LEFT_ALIGNMENT,
+  HorizontalAlignment,
+} from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -73,12 +79,13 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
       name: '',
       render: (_: string, summaryItem: { display: ReactNode }) => summaryItem.display,
       width: '25px',
-      align: RIGHT_ALIGNMENT as HorizontalAlignment,
+      align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',
       name: '',
       render: (v: string) => <strong>{v}</strong>,
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
   ];
 

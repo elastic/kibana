@@ -52,9 +52,6 @@ $panelWidthL:     #{'max(40%, 450px)'};
     }
 
     .dvSummaryTable {
-      .euiTableRow > .euiTableRowCell {
-        border-bottom: 0;
-      }
       .euiTableHeaderCell {
         display: none;
       }
