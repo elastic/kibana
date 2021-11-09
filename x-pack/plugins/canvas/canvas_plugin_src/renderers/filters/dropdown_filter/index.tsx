@@ -47,7 +47,10 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
   render(domNode, config, handlers) {
     let filterExpression = handlers.getFilter();
 
-    if (filterExpression === undefined || !filterExpression.includes('exactly')) {
+    if (
+      filterExpression !== '' &&
+      (filterExpression === undefined || !filterExpression.includes('exactly'))
+    ) {
       filterExpression = '';
       handlers.setFilter(filterExpression);
     } else if (filterExpression !== '') {

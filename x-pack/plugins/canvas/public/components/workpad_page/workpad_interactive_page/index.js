@@ -92,6 +92,16 @@ const isEmbeddableBody = (element) => {
   }
 };
 
+const isEuiSelect = (element) => {
+  const hasClosest = typeof element.closest === 'function';
+
+  if (hasClosest) {
+    return element.closest(`.euiSelect`);
+  } else {
+    return closest.call(element, `.euiSelect`);
+  }
+};
+
 // Some elements in an embeddable may be portaled out of the embeddable container.
 // We do not want clicks on those to trigger drags, etc, in the workpad. This function
 // will check to make sure the clicked item is actually in the container
@@ -243,7 +253,8 @@ export const InteractivePage = compose(
   })),
   withProps((...props) => ({
     ...props,
-    canDragElement: (element) => !isEmbeddableBody(element) && isInWorkpad(element),
+    canDragElement: (element) =>
+      !isEmbeddableBody(element) && !isEuiSelect(element) && isInWorkpad(element),
   })),
   withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent
