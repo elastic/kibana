@@ -14,13 +14,7 @@ import { EngineLogic } from '../engine';
 
 import { CrawlerDomainsLogic } from './crawler_domains_logic';
 
-import {
-  CrawlerData,
-  CrawlerDomain,
-  CrawlEvent,
-  CrawlRequest,
-  CrawlerStatus,
-} from './types';
+import { CrawlerData, CrawlerDomain, CrawlEvent, CrawlRequest, CrawlerStatus } from './types';
 import { crawlerDataServerToClient } from './utils';
 
 const POLLING_DURATION = 1000;
