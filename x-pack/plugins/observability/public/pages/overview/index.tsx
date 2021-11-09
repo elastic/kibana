@@ -121,7 +121,7 @@ export function OverviewPage({ routeParams }: Props) {
                 {!!alerts.length && (
                   <EuiFlexItem>
                     <EuiPanel hasBorder={true}>
-                      <AlertsSection alerts={alerts} />
+                      <AlertsSection />
                     </EuiPanel>
                   </EuiFlexItem>
                 )}
