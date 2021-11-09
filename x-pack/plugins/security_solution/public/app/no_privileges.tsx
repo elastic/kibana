@@ -36,7 +36,7 @@ export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(({ subPluginKe
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.NO_PERMISSIONS_MSG(subPluginKey)}
-          data-test-subj="no_feature_permissions-alerts"
+          data-test-subj="noFeaturePermissions-alerts"
           title={i18n.NO_PERMISSIONS_TITLE}
         />
       </EuiPageTemplate>

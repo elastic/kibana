@@ -7,4 +7,4 @@
 
 export const callOutWithId = (id: string) => `[data-test-subj^="callout-${id}"]`;
 
-export const CALLOUT_DISMISS_BTN = '[data-test-subj^="callout-dismiss-"]';
+export const CALLOUT_DISMISS_BTN = '[data-test-subj^="calloutDismiss-"]';

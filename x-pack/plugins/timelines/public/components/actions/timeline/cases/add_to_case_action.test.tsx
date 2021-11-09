@@ -78,7 +78,7 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-    expect(wrapper.find('[data-test-subj="create-case-flyout"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="createCaseFlyout"]').exists()).toBeTruthy();
   });
 
   it('it opens the all cases modal', () => {

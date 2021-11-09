@@ -38,7 +38,7 @@ export const AlertsFeatureNoPermissions: React.FC<AlertsFeatureNoPermissionsProp
       iconType={iconType}
       actions={actions}
       message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
-      data-test-subj="no_feature_permissions-alerts"
+      data-test-subj="noFeaturePermissions-alerts"
       title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
     />
   );

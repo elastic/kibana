@@ -31,7 +31,7 @@ describe('CreateCaseFlyout', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj='create-case-flyout']`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj='createCaseFlyout']`).exists()).toBeTruthy();
   });
 
   it('Closing modal calls onCloseCaseModal', () => {

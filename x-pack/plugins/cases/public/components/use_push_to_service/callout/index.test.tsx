@@ -66,11 +66,9 @@ describe('CaseCallOut ', () => {
     const idPrimary = createCalloutId(['message-two']);
 
     expect(
-      wrapper.find(`[data-test-subj="case-callout-${idPrimary}"]`).last().exists()
+      wrapper.find(`[data-test-subj="caseCallout-${idPrimary}"]`).last().exists()
     ).toBeTruthy();
-    expect(
-      wrapper.find(`[data-test-subj="case-callout-${idDanger}"]`).last().exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseCallout-${idDanger}"]`).last().exists()).toBeTruthy();
   });
 
   it('Opens edit connectors when hasConnectors=true', () => {

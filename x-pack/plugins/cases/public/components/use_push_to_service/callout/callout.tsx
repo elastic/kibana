@@ -52,7 +52,7 @@ const CallOutComponent = ({
       }
       color={type}
       iconType="gear"
-      data-test-subj={`case-callout-${id}`}
+      data-test-subj={`caseCallout-${id}`}
       size="s"
     >
       <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />

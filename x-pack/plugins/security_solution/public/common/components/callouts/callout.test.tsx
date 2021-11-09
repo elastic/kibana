@@ -47,7 +47,7 @@ describe('callout', () => {
         <CallOut message={message} />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-dismiss-btn"]')).toEqual(true);
+    expect(wrapper.exists('[data-test-subj="calloutDismiss-btn"]')).toEqual(true);
   });
 
   test('renders the callout dismiss button if given an explicit true to enable it', () => {
@@ -56,7 +56,7 @@ describe('callout', () => {
         <CallOut message={message} showDismissButton={true} />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-dismiss-btn"]')).toEqual(true);
+    expect(wrapper.exists('[data-test-subj="calloutDismiss-btn"]')).toEqual(true);
   });
 
   test('Does NOT render the callout dismiss button if given an explicit false to disable it', () => {
@@ -65,7 +65,7 @@ describe('callout', () => {
         <CallOut message={message} showDismissButton={false} />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-dismiss-btn"]')).toEqual(false);
+    expect(wrapper.exists('[data-test-subj="calloutDismiss-btn"]')).toEqual(false);
   });
 
   test('onDismiss callback operates when dismiss button is clicked', () => {
@@ -75,7 +75,7 @@ describe('callout', () => {
         <CallOut message={message} onDismiss={onDismiss} />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="callout-dismiss-btn"]').first().simulate('click');
+    wrapper.find('[data-test-subj="calloutDismiss-btn"]').first().simulate('click');
     expect(onDismiss).toBeCalledWith(message);
   });
 
@@ -85,7 +85,7 @@ describe('callout', () => {
         <CallOut message={message} dismissButtonText={'Some other text'} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="callout-dismiss-btn"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="calloutDismiss-btn"]').first().text()).toEqual(
       'Some other text'
     );
   });

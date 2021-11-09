@@ -43,7 +43,7 @@ describe('need_admin_for_update_callout', () => {
           <NeedAdminForUpdateRulesCallOut />
         </TestProviders>
       );
-      expect(wrapper.exists('[data-test-subj="callout-dismiss-btn"]')).toEqual(false);
+      expect(wrapper.exists('[data-test-subj="calloutDismiss-btn"]')).toEqual(false);
     });
 
     test('Does NOT render when signalIndexMappingOutdated is false', () => {
@@ -102,7 +102,7 @@ describe('need_admin_for_update_callout', () => {
           <NeedAdminForUpdateRulesCallOut />
         </TestProviders>
       );
-      expect(wrapper.exists('[data-test-subj="callout-dismiss-btn"]')).toEqual(false);
+      expect(wrapper.exists('[data-test-subj="calloutDismiss-btn"]')).toEqual(false);
     });
 
     test('Does NOT render when signalIndexMappingOutdated is false', () => {
@@ -161,7 +161,7 @@ describe('need_admin_for_update_callout', () => {
           <NeedAdminForUpdateRulesCallOut />
         </TestProviders>
       );
-      expect(wrapper.exists('[data-test-subj="callout-dismiss-btn"]')).toEqual(false);
+      expect(wrapper.exists('[data-test-subj="calloutDismiss-btn"]')).toEqual(false);
     });
 
     test('Does NOT render when signalIndexMappingOutdated is false', () => {
