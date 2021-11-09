@@ -16,7 +16,7 @@ import { processedResponseWithFirstShard } from './fixtures/processed_search_res
 
 describe('ProfileTree init data', () => {
   test('provides the expected result', () => {
-    const input: ShardSerialized[] = searchResponse as any;
+    const input: ShardSerialized[] = searchResponse;
     const actual = initDataFor('searches')(input);
 
     /* prettier-ignore */

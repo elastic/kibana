@@ -220,7 +220,7 @@ describe('Session service', () => {
 
     expect(state$.getValue()).toBe(SearchSessionState.None);
 
-    sessionService.continue(sessionId!);
+    sessionService.continue(sessionId);
     expect(sessionService.getSessionId()).toBe(sessionId);
 
     // the original search was never `untracked`,

@@ -605,16 +605,16 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
     this.searchAPI.resetSearchStats();
 
-    this._findObjectDataUrls(this.spec!, (obj: Data) => {
+    this._findObjectDataUrls(this.spec, (obj: Data) => {
       const url = obj.url;
       delete obj.url;
-      let type = url!['%type%'];
-      delete url!['%type%'];
+      let type = url['%type%'];
+      delete url['%type%'];
       if (type === undefined) {
         type = DEFAULT_PARSER;
       }
 
-      const parser = this._urlParsers![type];
+      const parser = this._urlParsers[type];
       if (parser === undefined) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.notSupportedUrlTypeErrorMessage', {
@@ -638,7 +638,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     if (pendingParsers.length > 0) {
       // let each parser populate its data in parallel
       await Promise.all(
-        pendingParsers.map((type) => this._urlParsers![type].populateData(pending[type]))
+        pendingParsers.map((type) => this._urlParsers[type].populateData(pending[type]))
       );
     }
   }

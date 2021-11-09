@@ -104,7 +104,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.migrations = migrations || {};
 
     for (const [key, arg] of Object.entries(args || {})) {
-      this.args[key as keyof typeof args] = new ExpressionFunctionParameter(key, arg);
+      this.args[key] = new ExpressionFunctionParameter(key, arg);
     }
   }
 

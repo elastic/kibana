@@ -102,7 +102,7 @@ export function FieldSearch({
             </EuiPopoverTitle>
             <EuiContextMenuPanel
               watchedItemProps={['icon', 'disabled']}
-              items={(availableFieldTypes as string[]).map((type) => (
+              items={availableFieldTypes.map((type) => (
                 <EuiContextMenuItem
                   key={type}
                   icon={fieldTypesValue.includes(type) ? 'check' : 'empty'}

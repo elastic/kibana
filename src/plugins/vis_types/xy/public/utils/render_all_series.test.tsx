@@ -105,7 +105,7 @@ describe('renderAllSeries', function () {
     const mutipleYAxisConfig = getVisConfigMutipleYaxis();
     const renderMutipleYAxisSeries = renderAllSeries(
       mutipleYAxisConfig,
-      defaultSeriesParams as SeriesParam[],
+      defaultSeriesParams,
       defaultData,
       jest.fn(),
       jest.fn(),
@@ -122,7 +122,7 @@ describe('renderAllSeries', function () {
     const percentilesData = getPercentilesData();
     const renderPercentileSeries = renderAllSeries(
       percentilesConfig,
-      defaultSeriesParams as SeriesParam[],
+      defaultSeriesParams,
       percentilesData,
       jest.fn(),
       jest.fn(),

@@ -462,7 +462,7 @@ class SavedObjectFinderUi extends React.Component<
               )!;
               const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
                 ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
-                : `${item.title} (${currentSavedObjectMetaData!.name})`;
+                : `${item.title} (${currentSavedObjectMetaData.name})`;
               const iconType = (
                 currentSavedObjectMetaData ||
                 ({

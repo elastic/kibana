@@ -15,7 +15,7 @@ export default function enterpriseSearchSetupEnginesTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver') as EsArchiver;
+  const esArchiver = getService('esArchiver');
   const browser = getService('browser') as Browser;
   const retry = getService('retry');
   const appSearch = getService('appSearch') as AppSearchService;

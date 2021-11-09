@@ -556,7 +556,7 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
   }
 
   const { id: originId, type } = otherAttrs;
-  const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
+  const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId);
   if (namespace !== undefined) {
     const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
       id: `${namespace}:${type}:${originId}`,

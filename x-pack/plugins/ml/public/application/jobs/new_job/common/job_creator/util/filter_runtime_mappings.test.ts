@@ -133,7 +133,7 @@ describe('filter_runtime_mappings', () => {
 
     test('return no runtime fields, no mappings in aggs', () => {
       datafeed.aggregations = getAggs();
-      datafeed.aggregations!.buckets!.aggregations!.responsetime!.avg!.field! = 'responsetime';
+      datafeed.aggregations.buckets!.aggregations!.responsetime!.avg!.field = 'responsetime';
 
       const resp = filterRuntimeMappings(job, datafeed);
       expect(Object.keys(resp.runtime_mappings).length).toEqual(0);

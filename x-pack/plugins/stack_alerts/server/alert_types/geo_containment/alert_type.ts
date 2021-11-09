@@ -168,12 +168,12 @@ export function extractEntityAndBoundaryReferences(params: GeoContainmentParams)
     {
       name: `tracked_index_${indexId}`,
       type: 'index-pattern',
-      id: indexId as string,
+      id: indexId,
     },
     {
       name: `boundary_index_${boundaryIndexId}`,
       type: 'index-pattern',
-      id: boundaryIndexId as string,
+      id: boundaryIndexId,
     },
   ];
   return {

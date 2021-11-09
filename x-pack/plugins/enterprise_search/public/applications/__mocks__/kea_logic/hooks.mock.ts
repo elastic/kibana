@@ -35,7 +35,7 @@ export const mockAllActions = {
  * import '../../../__mocks__/kea_logic'; // Must come before kea's import, adjust relative path as needed
  */
 jest.mock('kea', () => ({
-  ...(jest.requireActual('kea') as object),
+  ...jest.requireActual('kea'),
   useValues: jest.fn(() => ({ ...mockAllValues })),
   useActions: jest.fn(() => ({ ...mockAllActions })),
 }));

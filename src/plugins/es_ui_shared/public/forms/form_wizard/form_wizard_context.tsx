@@ -112,7 +112,7 @@ export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWiza
 
       if (nextStepIndex > lastStep) {
         // We are on the last step, save the data and don't go any further
-        onSave(getData() as T);
+        onSave(getData());
         return;
       }
 

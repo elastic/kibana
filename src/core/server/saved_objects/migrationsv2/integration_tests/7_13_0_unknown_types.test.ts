@@ -120,7 +120,7 @@ describe('migration v2', () => {
     });
     const settings = response[targetIndex].settings as estypes.IndicesIndexStatePrefixedSettings;
     expect(settings.index).not.toBeUndefined();
-    expect(settings.index!.blocks?.write).not.toEqual('true');
+    expect(settings.index.blocks?.write).not.toEqual('true');
 
     // Ensure that documents for unknown types were preserved in target index in an unmigrated state
     const spaceDocs = await fetchDocs(client, targetIndex, 'space');

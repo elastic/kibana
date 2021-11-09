@@ -68,7 +68,7 @@ describe('useEngineNav', () => {
 
     describe('engine label', () => {
       const renderEngineLabel = (engineNav: any) => {
-        return shallow(engineNav[0].renderItem() as any);
+        return shallow(engineNav[0].renderItem());
       };
 
       it('renders the capitalized engine name', () => {

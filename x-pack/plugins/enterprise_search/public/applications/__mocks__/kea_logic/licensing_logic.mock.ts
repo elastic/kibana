@@ -16,6 +16,6 @@ export const mockLicensingValues = {
 };
 
 jest.mock('../../shared/licensing', () => ({
-  ...(jest.requireActual('../../shared/licensing') as object),
+  ...jest.requireActual('../../shared/licensing'),
   LicensingLogic: { values: mockLicensingValues },
 }));

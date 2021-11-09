@@ -160,6 +160,6 @@ export class BookEmbeddableFactoryDefinition
         checkForDuplicateTitle: this.checkForDuplicateTitleMethod.bind(this),
       });
     }
-    return this.attributeService!;
+    return this.attributeService;
   }
 }

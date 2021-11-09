@@ -50,7 +50,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
               values: { username },
             }
           ),
-          text: (error as any).body?.message || error.message,
+          text: error.body?.message || error.message,
         });
       }
     }

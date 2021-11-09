@@ -80,7 +80,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
               }
               onChange={(selected) => {
                 latestFunctionService.updateLatestFunctionConfig({
-                  sort: { value: selected[0].value, label: selected[0].label as string },
+                  sort: { value: selected[0].value, label: selected[0].label },
                 });
               }}
               isClearable={false}

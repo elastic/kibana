@@ -52,7 +52,7 @@ export async function getEsGridTile({
       path,
       body,
     });
-    return tile.body as unknown as Buffer;
+    return tile.body as Buffer;
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions

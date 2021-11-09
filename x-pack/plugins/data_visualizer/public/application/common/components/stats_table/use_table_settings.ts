@@ -52,7 +52,7 @@ export function useTableSettings<TypeOfItem>(
   const sorting = useMemo(
     () => ({
       sort: {
-        field: sortField as string,
+        field: sortField,
         direction: sortDirection as Direction,
       },
     }),

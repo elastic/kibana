@@ -99,7 +99,7 @@ export const xyDimension = (): ExpressionFunctionDefinition<
       type: 'xy_dimension',
       label: args.label,
       aggType: args.aggType,
-      params: JSON.parse(args.params!),
+      params: JSON.parse(args.params),
       accessor: args.visDimension.accessor as number,
       format: args.visDimension.format,
     };

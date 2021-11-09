@@ -76,7 +76,7 @@ export const User: React.FC = () => {
   const userInvitationCallout = singleUserRoleMapping?.invitation && (
     <UserInvitationCallout
       isNew={userCreated}
-      invitationCode={singleUserRoleMapping!.invitation.code}
+      invitationCode={singleUserRoleMapping.invitation.code}
       urlPrefix={getAppSearchUrl()}
     />
   );

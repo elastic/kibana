@@ -213,7 +213,7 @@ export class CCRReadExceptionsRule extends BaseRule {
     if (!filters || !filters.length || !alertInstanceStates?.length || !alertFilter?.shardId) {
       return alertInstance;
     }
-    const shardIdInt = parseInt(alertFilter.shardId!, 10);
+    const shardIdInt = parseInt(alertFilter.shardId, 10);
     const alertStates = alertInstanceStates.filter(
       ({ meta }) => (meta as CCRReadExceptionsStats).shardId === shardIdInt
     );

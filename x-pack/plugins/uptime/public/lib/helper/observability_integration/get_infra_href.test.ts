@@ -133,7 +133,7 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraKubernetesHref returns undefined when summaryPings are null', () => {
-    delete summary.state.summaryPings![0]!.kubernetes!.pod!.uid;
+    delete summary.state.summaryPings[0]!.kubernetes!.pod!.uid;
     expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
   });
 
@@ -156,7 +156,7 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraIpHref returns undefined when ip is null', () => {
-    delete summary.state.summaryPings![0].monitor.ip;
+    delete summary.state.summaryPings[0].monitor.ip;
     expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
   });
 

@@ -124,7 +124,7 @@ describe('buildRuleWithOverrides', () => {
 
   test('it applies rule name override in buildRule', () => {
     completeRule.ruleParams.ruleNameOverride = 'someKey';
-    const rule = buildRuleWithOverrides(completeRule, sampleDocNoSortId()._source!);
+    const rule = buildRuleWithOverrides(completeRule, sampleDocNoSortId()._source);
     const expected = {
       ...expectedRule(),
       name: 'someValue',
@@ -150,7 +150,7 @@ describe('buildRuleWithOverrides', () => {
     ];
     const doc = sampleDocNoSortId();
     doc._source.new_risk_score = newRiskScore;
-    const rule = buildRuleWithOverrides(completeRule, doc._source!);
+    const rule = buildRuleWithOverrides(completeRule, doc._source);
     const expected = {
       ...expectedRule(),
       risk_score: newRiskScore,

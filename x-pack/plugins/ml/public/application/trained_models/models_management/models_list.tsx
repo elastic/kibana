@@ -363,7 +363,7 @@ export const ModelsList: FC = () => {
         const url = await urlLocator.getUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
           pageState: {
-            jobId: item.metadata?.analytics_config.id as string,
+            jobId: item.metadata?.analytics_config.id,
             analysisType,
             ...(analysisType === 'classification' || analysisType === 'regression'
               ? {

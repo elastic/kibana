@@ -105,7 +105,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
 
-      const includeStats = (request.query as TypeOf<typeof querySchema>).includeStats === 'true';
+      const includeStats = request.query.includeStats === 'true';
 
       try {
         const {
@@ -155,7 +155,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {
-      const { name } = request.params as TypeOf<typeof paramsSchema>;
+      const { name } = request.params;
       const { client } = context.core.elasticsearch;
       try {
         const [

@@ -28,7 +28,7 @@ type Path = string[];
 export const getValue = <Result = any>(path: Path, source: any) => {
   let current = source;
   for (const key of path) {
-    current = (current as any)[key];
+    current = current[key];
   }
   return current as unknown as Result;
 };

@@ -25,7 +25,7 @@ import { AddResultLogic, AddResultFlyout } from './results';
 import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 export const ManualCuration: React.FC = () => {
-  const { curationId } = useParams() as { curationId: string };
+  const { curationId } = useParams();
   const logic = CurationLogic({ curationId });
   const { onSelectPageTab } = useActions(logic);
   const { queries, selectedPageTab, curation } = useValues(logic);

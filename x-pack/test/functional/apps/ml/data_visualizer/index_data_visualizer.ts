@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       if (testData.expected.filters) {
         await ml.testExecution.logTestStep('displays filters in filter bar correctly');
-        for (const filter of testData.expected.filters!) {
+        for (const filter of testData.expected.filters) {
           await ml.dataVisualizerIndexBased.assertFilterBarFilterContent(filter);
         }
       }
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const fieldRow of testData.expected.nonMetricFields!) {
         await ml.dataVisualizerTable.assertNonMetricFieldContents(
           fieldRow.type,
-          fieldRow.fieldName!,
+          fieldRow.fieldName,
           fieldRow.docCountFormatted,
           fieldRow.exampleCount,
           fieldRow.viewableInLens,

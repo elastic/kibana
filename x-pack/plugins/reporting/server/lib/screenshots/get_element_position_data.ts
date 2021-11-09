@@ -28,7 +28,7 @@ export const getElementPositionAndAttributes = async (
           const results: ElementsPositionAndAttribute[] = [];
 
           for (const element of elements) {
-            const boundingClientRect = element.getBoundingClientRect() as DOMRect;
+            const boundingClientRect = element.getBoundingClientRect();
             results.push({
               position: {
                 boundingClientRect: {

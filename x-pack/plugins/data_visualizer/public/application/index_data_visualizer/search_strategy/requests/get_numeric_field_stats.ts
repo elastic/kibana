@@ -190,7 +190,7 @@ export const fetchNumericFieldsStats = (
             const medianPercentile: { value: number; key: number } | undefined = find(percentiles, {
               key: 50,
             });
-            stats.median = medianPercentile !== undefined ? medianPercentile!.value : 0;
+            stats.median = medianPercentile !== undefined ? medianPercentile.value : 0;
             stats.distribution = processDistributionData(
               percentiles,
               PERCENTILE_SPACING,

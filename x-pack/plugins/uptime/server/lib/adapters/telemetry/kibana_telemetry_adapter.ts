@@ -379,7 +379,7 @@ export class KibanaTelemetryAdapter {
   private static getMonitorsFrequency(uniqueMonitors = []) {
     const frequencies: number[] = [];
     uniqueMonitors
-      .map((item: any) => item!.docs.hits?.hits?.[0] ?? {})
+      .map((item: any) => item.docs.hits?.hits?.[0] ?? {})
       .forEach((monitor) => {
         const timespan = monitor?._source?.monitor?.timespan;
         if (timespan) {

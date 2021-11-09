@@ -33,7 +33,7 @@ export const DocumentDetail: React.FC = () => {
   const { dataLoading, fields } = useValues(DocumentDetailLogic);
   const { deleteDocument, getDocumentDetails, setFields } = useActions(DocumentDetailLogic);
 
-  const { documentId } = useParams() as { documentId: string };
+  const { documentId } = useParams();
   const { documentId: documentTitle } = useDecodedParams();
 
   useEffect(() => {

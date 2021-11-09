@@ -110,7 +110,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       http,
       uiSettings,
       startServices: getStartServices(),
-      usageCollector: this.usageCollector!,
+      usageCollector: this.usageCollector,
       session: this.sessionService,
     });
 
@@ -166,7 +166,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     return {
       aggs,
-      usageCollector: this.usageCollector!,
+      usageCollector: this.usageCollector,
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
     };

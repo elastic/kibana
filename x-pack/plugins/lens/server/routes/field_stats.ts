@@ -210,7 +210,7 @@ export async function getNumberHistogram(
   if (histogramInterval === 0) {
     return {
       totalDocuments: minMaxResult.hits.total.value,
-      sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
+      sampledValues: minMaxResult.aggregations!.sample.sample_count.value,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
       topValues: topValuesBuckets,
       histogram: useTopHits
@@ -243,7 +243,7 @@ export async function getNumberHistogram(
   return {
     totalDocuments: minMaxResult.hits.total.value,
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
-    sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
+    sampledValues: minMaxResult.aggregations!.sample.sample_count.value,
     histogram: {
       buckets: histogramResult.aggregations!.sample.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
@@ -283,7 +283,7 @@ export async function getStringSamples(
   return {
     totalDocuments: topValuesResult.hits.total.value,
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
-    sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
+    sampledValues: topValuesResult.aggregations!.sample.sample_count.value,
     topValues: {
       buckets: topValuesResult.aggregations!.sample.top_values.buckets.map((bucket) => ({
         count: bucket.doc_count,

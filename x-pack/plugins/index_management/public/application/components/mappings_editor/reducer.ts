@@ -327,7 +327,7 @@ export const reducer = (state: State, action: Action): State => {
         const allChildFields = getAllChildFields(field, state.fields.byId);
 
         // Remove all of its children
-        allChildFields!.forEach((childField) => {
+        allChildFields.forEach((childField) => {
           updatedFields = removeFieldFromMap(childField.id, updatedFields);
         });
       }
@@ -366,7 +366,7 @@ export const reducer = (state: State, action: Action): State => {
     case 'field.edit': {
       let updatedFields = { ...state.fields };
       const fieldToEdit = state.documentFields.fieldToEdit!;
-      const previousField = updatedFields.byId[fieldToEdit!];
+      const previousField = updatedFields.byId[fieldToEdit];
 
       let newField: NormalizedField = {
         ...previousField,
@@ -430,7 +430,7 @@ export const reducer = (state: State, action: Action): State => {
 
         if (shouldDeleteChildFields && previousField.childFields) {
           const allChildFields = getAllChildFields(previousField, updatedFields.byId);
-          allChildFields!.forEach((childField) => {
+          allChildFields.forEach((childField) => {
             updatedFields = removeFieldFromMap(childField.id, updatedFields);
           });
         }
@@ -593,6 +593,6 @@ export const reducer = (state: State, action: Action): State => {
       };
     }
     default:
-      throw new Error(`Action "${action!.type}" not recognized.`);
+      throw new Error(`Action "${action.type}" not recognized.`);
   }
 };

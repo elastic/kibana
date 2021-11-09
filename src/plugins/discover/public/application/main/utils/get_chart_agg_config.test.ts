@@ -28,7 +28,7 @@ describe('getChartAggConfigs', () => {
 
     const aggsConfig = getChartAggConfigs(searchSource, 'auto', dataMock);
 
-    expect(aggsConfig!.aggs).toMatchInlineSnapshot(`
+    expect(aggsConfig.aggs).toMatchInlineSnapshot(`
       Array [
         Object {
           "enabled": true,

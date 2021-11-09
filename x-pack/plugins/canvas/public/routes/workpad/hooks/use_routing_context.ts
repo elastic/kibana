@@ -23,7 +23,7 @@ export const useRoutingContext: () => WorkpadRoutingContextType = () => {
   const params = useParams<WorkpadPageRouteParams>();
   const workpad = useSelector(getWorkpad);
   const searchParams = new URLSearchParams(search);
-  const parsedPage = parseInt(params.pageNumber!, 10);
+  const parsedPage = parseInt(params.pageNumber, 10);
   const pageNumber = isNaN(parsedPage) ? workpad.page + 1 : parsedPage;
   const workpadPages = workpad.pages.length;
 

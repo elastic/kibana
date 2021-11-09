@@ -10,7 +10,7 @@ let mockUnmountHandler: () => void;
 export const unmountHandler = () => mockUnmountHandler();
 
 jest.mock('react', () => ({
-  ...(jest.requireActual('react') as object),
+  ...jest.requireActual('react'),
   useEffect: jest.fn((fn) => {
     mockUnmountHandler = fn();
     return mockUnmountHandler;

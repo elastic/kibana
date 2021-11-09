@@ -52,7 +52,7 @@ export class License {
 
     licensing.license$.subscribe((license: ILicense) => {
       this.licenseType = license.type;
-      this.licenseCheckState = license.check(pluginId, minimumLicenseType!).state;
+      this.licenseCheckState = license.check(pluginId, minimumLicenseType).state;
       // Retrieving security checks the results of GET /_xpack as well as license state,
       // so we're also checking whether security is disabled in elasticsearch.yml.
       this._isEsSecurityEnabled = license.getFeature('security').isEnabled;

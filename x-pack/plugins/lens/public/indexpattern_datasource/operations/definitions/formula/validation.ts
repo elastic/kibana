@@ -1011,7 +1011,7 @@ function validateFunctionArguments(
           messageId: 'wrongArgument',
           values: {
             operation: node.name,
-            text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+            text: esOperations.map(({ text }) => text).join(', '),
             type: i18n.translate('xpack.lens.indexPattern.formulaMetricValue', {
               defaultMessage: 'metric',
             }),
@@ -1027,7 +1027,7 @@ function validateFunctionArguments(
             operation: node.name,
             type,
             supported: requiredFunctions,
-            text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+            text: esOperations.map(({ text }) => text).join(', '),
           },
           locations: node.location ? [node.location] : [],
         })
@@ -1045,7 +1045,7 @@ function validateFunctionArguments(
         values: {
           operation: node.name,
           type,
-          text: (mathOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+          text: mathOperations.map(({ text }) => text).join(', '),
         },
         locations: node.location ? [node.location] : [],
       })

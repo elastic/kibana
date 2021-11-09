@@ -78,7 +78,7 @@ function getDisplayedSubFeaturePrivileges(
 ) {
   const { feature } = expandedRow.props();
 
-  const subFeatureEntries = findTestSubject(expandedRow as ReactWrapper<any>, 'subFeatureEntry');
+  const subFeatureEntries = findTestSubject(expandedRow, 'subFeatureEntry');
 
   displayedFeatures[feature.id] = displayedFeatures[feature.id] ?? {};
 
@@ -91,7 +91,7 @@ function getDisplayedSubFeaturePrivileges(
 
     role.kibana.forEach((entry, index) => {
       const key = getSpaceKey(entry);
-      const element = findTestSubject(expandedRow as ReactWrapper<any>, `entry-${index}`);
+      const element = findTestSubject(expandedRow, `entry-${index}`);
 
       const independentPrivileges = element
         .find('EuiFlexGroup[data-test-subj="independentPrivilege"]')

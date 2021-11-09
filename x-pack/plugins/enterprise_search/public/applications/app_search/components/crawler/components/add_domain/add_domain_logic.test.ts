@@ -22,7 +22,7 @@ jest.mock('../../crawler_logic', () => ({
 }));
 
 jest.mock('./utils', () => ({
-  ...(jest.requireActual('./utils') as object),
+  ...jest.requireActual('./utils'),
   getDomainWithProtocol: jest.fn().mockImplementation((domain) => domain),
 }));
 

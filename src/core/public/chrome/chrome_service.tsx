@@ -125,7 +125,7 @@ export class ChromeService {
     };
 
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
-    const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!]).pipe(
+    const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$]).pipe(
       map(([headerBanner, isVisible]) => {
         return [
           'kbnBody',

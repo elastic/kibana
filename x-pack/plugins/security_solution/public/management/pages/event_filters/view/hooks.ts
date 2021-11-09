@@ -35,9 +35,7 @@ import {
 } from '../../../common/constants';
 
 export function useEventFiltersSelector<R>(selector: (state: EventFiltersListPageState) => R): R {
-  return useSelector((state: State) =>
-    selector(state[GLOBAL_NS][EVENT_FILTER_NS] as EventFiltersListPageState)
-  );
+  return useSelector((state: State) => selector(state[GLOBAL_NS][EVENT_FILTER_NS]));
 }
 
 export const useEventFiltersNotification = () => {

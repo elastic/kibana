@@ -65,7 +65,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
 
   useEffect(() => {
     if (alert) {
-      const outcome = (alert as ResolvedRule).outcome;
+      const outcome = alert.outcome;
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
         const path = basePath.prepend(`insightsAndAlerting/triggersActions/rule/${alert.id}`);

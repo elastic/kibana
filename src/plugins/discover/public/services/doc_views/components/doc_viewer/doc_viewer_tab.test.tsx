@@ -37,7 +37,7 @@ describe('DocViewerTab', () => {
       },
     };
 
-    const shouldUpdate = (wrapper!.instance() as DocViewerTab).shouldComponentUpdate(nextProps, {
+    const shouldUpdate = (wrapper.instance() as DocViewerTab).shouldComponentUpdate(nextProps, {
       hasError: false,
       error: '',
     });

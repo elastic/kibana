@@ -47,7 +47,7 @@ describe('getAspects', function () {
     const aspects = getAspects(table, dimensions);
     validate(aspects.x[0], '0');
     validate(aspects.series![0], '1');
-    validate(aspects.y![0], '2');
+    validate(aspects.y[0], '2');
   });
 
   it('creates a fake x aspect if the column does not exist', function () {

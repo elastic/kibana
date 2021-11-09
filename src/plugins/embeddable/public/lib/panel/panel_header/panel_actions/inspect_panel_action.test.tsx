@@ -37,7 +37,7 @@ const setupTests = async () => {
         },
       ],
     },
-    getFactory as EmbeddableStart['getEmbeddableFactory']
+    getFactory
   );
 
   const embeddable: FilterableEmbeddable | ErrorEmbeddable = await container.addNewEmbeddable<

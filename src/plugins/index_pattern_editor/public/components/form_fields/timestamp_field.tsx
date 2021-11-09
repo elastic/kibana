@@ -57,7 +57,7 @@ const getTimestampConfig = (
   ];
 
   return {
-    ...timestampFieldConfig!,
+    ...timestampFieldConfig,
     validations,
   };
 };

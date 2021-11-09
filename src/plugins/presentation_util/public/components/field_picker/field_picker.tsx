@@ -42,7 +42,7 @@ export const FieldPicker = ({
           .filter(
             (f) =>
               f.name.includes(nameFilter) &&
-              (typesFilter.length === 0 || typesFilter.includes(f.type as string))
+              (typesFilter.length === 0 || typesFilter.includes(f.type))
           )
           .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
@@ -53,7 +53,7 @@ export const FieldPicker = ({
     ? uniq(
         dataView.fields
           .filter((f) => (filterPredicate ? filterPredicate(f) : true))
-          .map((f) => f.type as string)
+          .map((f) => f.type)
       )
     : [];
 

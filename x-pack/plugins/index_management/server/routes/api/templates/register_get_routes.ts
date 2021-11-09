@@ -67,8 +67,8 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
     },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const { name } = request.params as TypeOf<typeof paramsSchema>;
-      const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
+      const { name } = request.params;
+      const isLegacy = request.query.legacy === 'true';
 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);

@@ -186,7 +186,7 @@ export class APMPlugin
         alerting: plugins.alerting,
         ml: plugins.ml,
         config$,
-        logger: this.logger!.get('rule'),
+        logger: this.logger.get('rule'),
       });
     }
 

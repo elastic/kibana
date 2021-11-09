@@ -68,7 +68,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect(hit!._source!.task.params!).to.equal(
+      expect(hit._source!.task.params).to.equal(
         `{"spaceId":"user1","actionTaskParamsId":"${SavedObjectsUtils.getConvertedObjectId(
           'user1',
           'action_task_params',

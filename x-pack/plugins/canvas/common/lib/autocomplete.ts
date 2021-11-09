@@ -346,7 +346,7 @@ function getScore(
     contextType = 'null';
   }
 
-  const inputTypesNormalized = (func.inputTypes || []) as string[];
+  const inputTypesNormalized = func.inputTypes || [];
 
   if (isSubFunc) {
     if (returnTypes && func.type) {

@@ -258,7 +258,7 @@ export class SavedMap {
 
   public getSavedObjectId(): string | undefined {
     return this._mapEmbeddableInput && 'savedObjectId' in this._mapEmbeddableInput
-      ? (this._mapEmbeddableInput as MapByReferenceInput).savedObjectId
+      ? this._mapEmbeddableInput.savedObjectId
       : undefined;
   }
 

@@ -103,7 +103,7 @@ export function getActions(
       onClick: (item: FieldVisConfig) => {
         actionFlyoutRef.current = services.indexPatternFieldEditor?.openDeleteModal({
           ctx: { indexPattern },
-          fieldName: item.fieldName!,
+          fieldName: item.fieldName,
           onDelete: refreshPage,
         });
       },

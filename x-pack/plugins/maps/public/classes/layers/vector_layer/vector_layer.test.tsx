@@ -88,7 +88,7 @@ describe('cloneDescriptor', () => {
         source: new MockSource() as unknown as IVectorSource,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
-      const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
+      const clonedStyleProps = clonedDescriptor.style.properties;
       // Should update style field belonging to join
       // @ts-expect-error
       expect(clonedStyleProps[VECTOR_STYLES.FILL_COLOR].options.field.name).toEqual(
@@ -125,7 +125,7 @@ describe('cloneDescriptor', () => {
         source: new MockSource() as unknown as IVectorSource,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
-      const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
+      const clonedStyleProps = clonedDescriptor.style.properties;
       // Should update style field belonging to join
       // @ts-expect-error
       expect(clonedStyleProps[VECTOR_STYLES.FILL_COLOR].options.field.name).toEqual(

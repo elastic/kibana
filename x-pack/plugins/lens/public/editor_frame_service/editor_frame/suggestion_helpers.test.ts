@@ -552,7 +552,7 @@ describe('suggestion helpers', () => {
 
     it('should return top suggestion for field', () => {
       const result = getTopSuggestionForField(...defaultParams);
-      expect(result!.title).toEqual('top suggestion');
+      expect(result.title).toEqual('top suggestion');
       expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
         mockDatasourceState,
         {
@@ -614,7 +614,7 @@ describe('suggestion helpers', () => {
         vis3: mockVisualization3,
       };
       const result = getTopSuggestionForField(...defaultParams);
-      expect(result!.title).toEqual('other vis suggestion');
+      expect(result.title).toEqual('other vis suggestion');
       expect(mockVisualization1.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization3.getSuggestions).toHaveBeenCalled();

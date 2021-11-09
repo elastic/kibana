@@ -151,7 +151,7 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
       to: new Date(Math.max(...timestamps)).toISOString(),
     };
   }
-  const ecsData = ecs as Ecs;
+  const ecsData = ecs;
   const ruleFrom = getField(ecsData, ALERT_RULE_FROM);
   const elapsedTimeRule = moment.duration(
     moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-0s'))

@@ -137,7 +137,7 @@ describe('useUiSetting$', () => {
       container
     );
 
-    expect(core.uiSettings!.get).toHaveBeenCalledWith('non_existing', 'DEFAULT');
+    expect(core.uiSettings.get).toHaveBeenCalledWith('non_existing', 'DEFAULT');
   });
 
   test('subscribes to observable using useObservable', async () => {

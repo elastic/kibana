@@ -87,7 +87,7 @@ describe('Field Renderers', () => {
 
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
+        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem, FlowTarget.source)
       );
 
       expect(wrapper).toMatchSnapshot();

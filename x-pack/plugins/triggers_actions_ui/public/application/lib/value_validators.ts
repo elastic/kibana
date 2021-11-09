@@ -90,8 +90,8 @@ export function getAlertWithInvalidatedFields(
     const actionToValidate = alert.actions.length > index ? alert.actions[index] : null;
     if (actionToValidate) {
       Object.keys(error).forEach((errorKey) => {
-        if (error[errorKey].length >= 1 && get(actionToValidate!.params, errorKey) === undefined) {
-          set(actionToValidate!.params, errorKey, null);
+        if (error[errorKey].length >= 1 && get(actionToValidate.params, errorKey) === undefined) {
+          set(actionToValidate.params, errorKey, null);
         }
       });
     }

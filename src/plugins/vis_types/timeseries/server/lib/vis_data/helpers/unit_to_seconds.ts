@@ -54,7 +54,7 @@ export const convertIntervalToUnit = (
   if (parsedInterval && units[newUnit]) {
     return {
       value: Number(
-        ((parsedInterval.value * units[parsedInterval.unit!]) / units[newUnit]).toFixed(2)
+        ((parsedInterval.value * units[parsedInterval.unit]) / units[newUnit]).toFixed(2)
       ),
       unit: newUnit,
     };

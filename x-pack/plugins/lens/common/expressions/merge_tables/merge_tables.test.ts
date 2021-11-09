@@ -63,8 +63,8 @@ describe('lens_merge_tables', () => {
     mergeTables.fn(null, { layerIds: ['first', 'second'], tables: [sampleTable1, sampleTable2] }, {
       inspectorAdapters: adapters,
     } as ExecutionContext<DefaultInspectorAdapters, ExpressionValueSearchContext>);
-    expect(adapters.tables!.tables.first).toBe(sampleTable1);
-    expect(adapters.tables!.tables.second).toBe(sampleTable2);
+    expect(adapters.tables.tables.first).toBe(sampleTable1);
+    expect(adapters.tables.tables.second).toBe(sampleTable2);
   });
 
   it('should pass the date range along', () => {

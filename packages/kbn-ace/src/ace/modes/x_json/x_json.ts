@@ -32,7 +32,7 @@ const XJsonMode: any = function XJsonMode(this: any) {
 oop.inherits(XJsonMode, JSONMode);
 
 // Then clobber `createWorker` method to install our worker source. Per ace's wiki: https://github.com/ajaxorg/ace/wiki/Syntax-validation
-(XJsonMode.prototype as any).createWorker = function (session: ace.IEditSession) {
+XJsonMode.prototype.createWorker = function (session: ace.IEditSession) {
   const xJsonWorker = new WorkerClient(['ace'], workerModule, 'JsonWorker');
 
   xJsonWorker.attachToDocument(session.getDocument());

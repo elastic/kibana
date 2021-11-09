@@ -34,7 +34,7 @@ interface Props {
 
 const functionOptions = Object.values(FunctionalBoostFunction).map((boostFunction) => ({
   value: boostFunction,
-  text: FUNCTIONAL_BOOST_FUNCTION_DISPLAY_MAP[boostFunction as FunctionalBoostFunction],
+  text: FUNCTIONAL_BOOST_FUNCTION_DISPLAY_MAP[boostFunction],
 }));
 
 const operationOptions = Object.values(BoostOperation).map((boostOperation) => ({

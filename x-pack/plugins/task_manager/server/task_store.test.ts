@@ -159,7 +159,7 @@ describe('TaskStore', () => {
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
       const attributes = savedObjectsClient.create.mock
         .calls[0][1] as SerializedConcreteTaskInstance;
-      expect(new Date(attributes.runAt as string).getTime()).toEqual(mockedDate.getTime());
+      expect(new Date(attributes.runAt).getTime()).toEqual(mockedDate.getTime());
     });
 
     test('ensures params and state are not null', async () => {
@@ -504,7 +504,7 @@ describe('TaskStore', () => {
             state: { foo: 'bar' },
             taskType: 'report',
             attempts: 3,
-            status: status as TaskStatus,
+            status,
             version: '123',
             ownerId: null,
             traceparent: 'myTraceparent',

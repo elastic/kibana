@@ -150,8 +150,8 @@ describe('AnomalyExplorerChartsService', () => {
       12
     )) as ExplorerChartsData;
     expect(anomalyData).toBeDefined();
-    expect(anomalyData!.chartsPerRow).toBe(2);
-    expect(Array.isArray(anomalyData!.seriesToPlot)).toBe(true);
-    expect(anomalyData!.seriesToPlot.length).toBe(2);
+    expect(anomalyData.chartsPerRow).toBe(2);
+    expect(Array.isArray(anomalyData.seriesToPlot)).toBe(true);
+    expect(anomalyData.seriesToPlot.length).toBe(2);
   });
 });

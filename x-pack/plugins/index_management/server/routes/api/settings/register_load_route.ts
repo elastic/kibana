@@ -26,7 +26,7 @@ export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDepen
     { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const { indexName } = request.params as typeof paramsSchema.type;
+      const { indexName } = request.params;
       const params = {
         expand_wildcards: 'none',
         flat_settings: false,

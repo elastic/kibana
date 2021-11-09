@@ -87,7 +87,7 @@ export class DynamicActionManager {
     }
 
     const factory = uiActions.getActionFactory(event.action.factoryId);
-    const actionDefinition: ActionDefinition = factory.create(action as SerializedAction);
+    const actionDefinition: ActionDefinition = factory.create(action);
 
     uiActions.registerAction({
       ...actionDefinition,
@@ -108,7 +108,7 @@ export class DynamicActionManager {
             ','
           )}`
         );
-      uiActions.attachAction(trigger as string, actionId);
+      uiActions.attachAction(trigger, actionId);
     }
   }
 

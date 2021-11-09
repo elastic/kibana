@@ -356,7 +356,7 @@ export class AlertingAuthorization {
         for (const feature of fIds) {
           for (const operation of operations) {
             privilegeToRuleType.set(
-              this.authorization!.actions.alerting.get(
+              this.authorization.actions.alerting.get(
                 ruleType.id,
                 feature,
                 authorizationEntity,

@@ -18,7 +18,7 @@ export const useMlHref = (
   params: MlLocatorParams
 ) => {
   return ml && ml.locator
-    ? ml.locator!.useUrl(params)
+    ? ml.locator.useUrl(params)
     : basePath !== undefined
     ? `${basePath}/app/ml/${params.page}`
     : '';

@@ -230,10 +230,10 @@ export class LensAttributes {
         });
       }
       if (operationType?.includes('th')) {
-        return this.getPercentileNumberColumn(sourceField, operationType, seriesConfig!);
+        return this.getPercentileNumberColumn(sourceField, operationType, seriesConfig);
       }
     }
-    return this.getNumberRangeColumn(sourceField, seriesConfig!, label);
+    return this.getNumberRangeColumn(sourceField, seriesConfig, label);
   }
 
   getLastValueOperationColumn({
@@ -427,7 +427,7 @@ export class LensAttributes {
         ...this.getPercentileNumberColumn(
           fieldName,
           operationType || PERCENTILE_RANKS[0],
-          seriesConfig!
+          seriesConfig
         ),
         filter: colIndex !== undefined ? columnFilters?.[colIndex] : undefined,
       };
@@ -471,7 +471,7 @@ export class LensAttributes {
         layerConfig.seriesConfig,
         layerConfig.selectedMetricField
       );
-      const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
+      const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName);
       return { fieldMeta, fieldName, columnType, columnLabel, columnFilters, timeScale };
     } else {
       const fieldMeta = layerConfig.indexPattern.getFieldByName(sourceField);

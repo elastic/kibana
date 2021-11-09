@@ -68,7 +68,7 @@ export function toElasticsearchQuery(
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
       const subTypeNested = getDataViewFieldSubtypeNested(field);
-      if (!(fullFieldNameArg.type === 'wildcard') || !subTypeNested?.nested || context!.nested) {
+      if (!(fullFieldNameArg.type === 'wildcard') || !subTypeNested?.nested || context.nested) {
         return query;
       } else {
         return {
@@ -87,7 +87,7 @@ export function toElasticsearchQuery(
       };
     } else if (field.type === 'date') {
       const timeZoneParam = config.dateFormatTZ
-        ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
+        ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) }
         : {};
       return wrapWithNestedQuery({
         range: {

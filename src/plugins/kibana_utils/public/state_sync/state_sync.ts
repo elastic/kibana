@@ -119,7 +119,7 @@ export function syncState<
     const oldState = stateContainer.get();
     if (newState) {
       // apply only real differences to new state
-      const mergedState = { ...oldState } as State;
+      const mergedState = { ...oldState };
       // merges into 'mergedState' all differences from newState,
       // but leaves references if they are deeply the same
       const diff = applyDiff(mergedState, newState);

@@ -130,7 +130,7 @@ export class Vis<TVisParams = VisParams> {
       this.params = this.getParams(state.params);
     }
     if (state.data && state.data.searchSource) {
-      this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
+      this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource);
       this.data.indexPattern = this.data.searchSource.getField('index');
     }
     if (state.data && state.data.savedSearchId) {

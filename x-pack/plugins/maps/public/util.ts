@@ -37,8 +37,8 @@ export function getEMSClient(): EMSClient {
   if (!emsClient) {
     const emsSettings = getEMSSettings();
     const proxyPath = '';
-    const tileApiUrl = emsSettings!.getEMSTileApiUrl();
-    const fileApiUrl = emsSettings!.getEMSFileApiUrl();
+    const tileApiUrl = emsSettings.getEMSTileApiUrl();
+    const fileApiUrl = emsSettings.getEMSFileApiUrl();
 
     emsClient = new EMSClient({
       language: i18n.getLocale(),
@@ -46,7 +46,7 @@ export function getEMSClient(): EMSClient {
       appName: EMS_APP_NAME,
       tileApiUrl,
       fileApiUrl,
-      landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
+      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
       fetchFunction(url: string) {
         return fetch(url);
       },
@@ -63,11 +63,11 @@ export function getEMSClient(): EMSClient {
 
 export function getGlyphUrl(): string {
   const emsSettings = getEMSSettings();
-  if (!emsSettings!.isEMSEnabled()) {
+  if (!emsSettings.isEMSEnabled()) {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
 
-  return emsSettings!.getEMSFontLibraryUrl();
+  return emsSettings.getEMSFontLibraryUrl();
 }
 
 export function isRetina(): boolean {

@@ -45,7 +45,7 @@ describe('accessAgreementApp', () => {
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({
+    await mount({
       element: containerMock,
       appBasePath: '',
       onAppLeave: jest.fn(),

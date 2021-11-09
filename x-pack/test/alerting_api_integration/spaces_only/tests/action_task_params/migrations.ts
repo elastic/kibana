@@ -86,7 +86,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       return {};
     }
 
-    const actionTaskParams = (responseSource as any)?.action_task_params as ActionTaskParams;
+    const actionTaskParams = responseSource?.action_task_params as ActionTaskParams;
     const actionId = actionTaskParams.actionId;
     const relatedSavedObjects = actionTaskParams.relatedSavedObjects as unknown[];
     const references = responseSource?.references ?? [];

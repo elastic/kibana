@@ -148,7 +148,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     const { documents } = data as { documents: Document[] };
 
     const { isSuccessful } = await handleTestPipeline({
-      documents: documents!,
+      documents,
       verbose: cachedVerbose,
     });
 

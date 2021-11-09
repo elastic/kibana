@@ -62,7 +62,7 @@ describe('JSONRuleEditor', () => {
     const wrapper = renderView(props);
 
     const { value } = wrapper.find(CodeEditorField).props();
-    expect(JSON.parse(value as string)).toEqual({
+    expect(JSON.parse(value)).toEqual({
       all: [
         {
           any: [{ field: { username: '*' } }],

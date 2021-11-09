@@ -90,7 +90,7 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <FormDataProvider pathsToWatch="type">
                 {({ type }) => {
-                  const formDescriptor = getProcessorDescriptor(type as any);
+                  const formDescriptor = getProcessorDescriptor(type);
 
                   if (formDescriptor) {
                     return (

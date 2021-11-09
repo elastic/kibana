@@ -78,7 +78,7 @@ const aggregationsToModules = async (
   const fields = await Promise.all(
     uniqueFields.map(
       async (field) =>
-        await getDatasetForField(client, field as string, options.sourceConfiguration.metricAlias, {
+        await getDatasetForField(client, field, options.sourceConfiguration.metricAlias, {
           ...options.timerange,
         })
     )

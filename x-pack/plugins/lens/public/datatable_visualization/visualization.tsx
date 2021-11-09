@@ -186,7 +186,7 @@ export const getDatatableVisualization = ({
           accessors: sortedColumns
             .filter(
               (c) =>
-                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                datasource.getOperationForColumnId(c)?.isBucketed &&
                 !state.columns.find((col) => col.columnId === c)?.isTransposed
             )
             .map((accessor) => ({
@@ -213,7 +213,7 @@ export const getDatatableVisualization = ({
           accessors: sortedColumns
             .filter(
               (c) =>
-                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                datasource.getOperationForColumnId(c)?.isBucketed &&
                 state.columns.find((col) => col.columnId === c)?.isTransposed
             )
             .map((accessor) => ({ columnId: accessor })),
@@ -231,7 +231,7 @@ export const getDatatableVisualization = ({
           }),
           layerId: state.layerId,
           accessors: sortedColumns
-            .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
+            .filter((c) => !datasource.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
               const hasColoring = Boolean(
@@ -323,7 +323,7 @@ export const getDatatableVisualization = ({
 
     if (
       sortedColumns?.length &&
-      sortedColumns.filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed).length === 0
+      sortedColumns.filter((c) => !datasource.getOperationForColumnId(c)?.isBucketed).length === 0
     ) {
       return null;
     }
@@ -333,8 +333,8 @@ export const getDatatableVisualization = ({
       columnMap[column.columnId] = column;
     });
 
-    const columns = sortedColumns!
-      .filter((columnId) => datasource!.getOperationForColumnId(columnId))
+    const columns = sortedColumns
+      .filter((columnId) => datasource.getOperationForColumnId(columnId))
       .map((columnId) => columnMap[columnId]);
 
     return {
@@ -373,7 +373,7 @@ export const getDatatableVisualization = ({
                       isTransposed:
                         typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
                       transposable: [
-                        !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
+                        !datasource.getOperationForColumnId(column.columnId)?.isBucketed,
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                       colorMode: [column.colorMode ?? 'none'],

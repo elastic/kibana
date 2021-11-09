@@ -51,7 +51,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
 
             <CardSectionPanel>
               <CriteriaConditions
-                os={artifact.os as CriteriaConditionsProps['os']}
+                os={artifact.os}
                 entries={artifact.entries}
                 data-test-subj={getTestId('criteriaConditions')}
               />

@@ -334,7 +334,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           soClient,
           esClient,
           policy!,
-          installedPackagePolicies!,
+          installedPackagePolicies,
           defaultOutput
         );
         // If ann error happens while adding a package to the policy we will delete the policy so the setup can be retried later
@@ -369,7 +369,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     policies: fulfilledPolicies.map((p) =>
       p.policy
         ? {
-            id: p.policy.id!,
+            id: p.policy.id,
             updated_at: p.policy.updated_at,
           }
         : {

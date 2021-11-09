@@ -65,7 +65,7 @@ export const createVegaFn = (
     const response = await vegaRequestHandler({
       timeRange: get(input, 'timeRange') as TimeRange,
       query: get(input, 'query') as Query,
-      filters: get(input, 'filters') as any,
+      filters: get(input, 'filters'),
       visParams: { spec: args.spec },
       searchSessionId: context.getSearchSessionId(),
       executionContext: context.getExecutionContext(),

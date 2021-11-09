@@ -52,9 +52,7 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
       type: ' nested',
     };
 
-    expect(
-      migration(doc, {} as SavedObjectMigrationContext) as SavedObjectUnsanitizedDoc<PackagePolicy>
-    ).toEqual({
+    expect(migration(doc, {} as SavedObjectMigrationContext)).toEqual({
       attributes: {
         name: 'Some Policy Name',
         package: {
@@ -140,9 +138,7 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
       type: ' nested',
     };
 
-    expect(
-      migration(doc, {} as SavedObjectMigrationContext) as SavedObjectUnsanitizedDoc<PackagePolicy>
-    ).toEqual({
+    expect(migration(doc, {} as SavedObjectMigrationContext)).toEqual({
       attributes: {
         name: 'Some Policy Name',
         package: {

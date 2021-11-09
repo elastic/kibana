@@ -1657,7 +1657,7 @@ export class RulesClient {
       // Once we support additional types, this type signature will likely change
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
-      params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
+      params: this.injectReferencesIntoParams(id, ruleType, params, references || []),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),

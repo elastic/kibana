@@ -11,7 +11,7 @@ import { WebElementWrapper } from '../../../../test/functional/services/lib/web_
 
 export function AppSearchPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
-  const testSubjects = getService('testSubjects') as TestSubjects;
+  const testSubjects = getService('testSubjects');
 
   return {
     async navigateToPage(): Promise<void> {

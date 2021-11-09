@@ -67,7 +67,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
     this.views.register(getRequestsViewDescription());
 
     return {
-      registerView: this.views!.register.bind(this.views),
+      registerView: this.views.register.bind(this.views),
 
       __LEGACY: {
         views: this.views,

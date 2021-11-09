@@ -30,7 +30,7 @@ const getCompFromConfig = ({ Component, memoryRouter, store, onRouter }: Config)
   let Comp: ComponentType = store !== null ? WithStore(store)(Component) : Component;
 
   if (wrapWithRouter) {
-    const { componentRoutePath, initialEntries, initialIndex } = memoryRouter!;
+    const { componentRoutePath, initialEntries, initialIndex } = memoryRouter;
 
     // Wrap the componenet with a MemoryRouter and attach it to a react-router <Route />
     Comp = WithMemoryRouter(

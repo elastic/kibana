@@ -436,7 +436,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
       const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.storage) return;
         this.services.storage.set('kibana.KQLNestedQuerySyntaxInfoOptOut', true);
-        notifications!.toasts.remove(toast);
+        notifications.toasts.remove(toast);
       };
 
       if (notifications && docLinks) {

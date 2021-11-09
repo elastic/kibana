@@ -47,7 +47,7 @@ export class CustomIntegrationRegistry {
       (category) => {
         return INTEGRATION_CATEGORY_DISPLAY.hasOwnProperty(category);
       }
-    ) as IntegrationCategory[];
+    );
 
     this._integrations.push({ ...customIntegration, categories: allowedCategories });
   }

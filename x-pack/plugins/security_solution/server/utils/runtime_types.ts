@@ -47,7 +47,7 @@ const getProps = (
       const iTypes = codec.types as rt.HasProps[];
       return iTypes.reduce<rt.Props>((props, type) => {
         return Object.assign(props, getProps(type) as rt.Props);
-      }, {} as rt.Props) as rt.Props;
+      }, {} as rt.Props);
     default:
       return null;
   }

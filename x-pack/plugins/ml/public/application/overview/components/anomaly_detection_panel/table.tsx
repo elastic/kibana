@@ -187,7 +187,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
 
     const { field, direction } = sort;
     setSortField(field as string);
-    setSortDirection(direction as Direction);
+    setSortDirection(direction);
   };
 
   const pagination = {

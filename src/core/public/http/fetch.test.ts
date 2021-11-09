@@ -275,8 +275,8 @@ describe('Fetch', () => {
 
       const lastCall = fetchMock.lastCall();
 
-      expect(lastCall!.request.credentials).toBe('same-origin');
-      expect(lastCall![1]).toMatchObject({
+      expect(lastCall.request.credentials).toBe('same-origin');
+      expect(lastCall[1]).toMatchObject({
         method: 'GET',
         headers: {
           'content-type': 'application/json',

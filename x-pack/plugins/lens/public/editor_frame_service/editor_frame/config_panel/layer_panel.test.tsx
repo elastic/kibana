@@ -535,7 +535,7 @@ describe('LayerPanel', () => {
       mockDatasource.updateStateOnCloseDimension = jest.fn();
       instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
       act(() => {
-        (instance.find('DimensionContainer').first().prop('handleClose') as () => void)();
+        instance.find('DimensionContainer').first().prop('handleClose')();
       });
       instance.update();
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
@@ -546,7 +546,7 @@ describe('LayerPanel', () => {
 
       instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
       act(() => {
-        (instance.find('DimensionContainer').first().prop('handleClose') as () => void)();
+        instance.find('DimensionContainer').first().prop('handleClose')();
       });
       instance.update();
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();

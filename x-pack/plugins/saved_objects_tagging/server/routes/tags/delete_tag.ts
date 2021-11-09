@@ -20,7 +20,7 @@ export const registerDeleteTagRoute = (router: TagsPluginRouter) => {
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       const { id } = req.params;
-      await ctx.tags!.tagsClient.delete(id);
+      await ctx.tags.tagsClient.delete(id);
       return res.ok();
     })
   );

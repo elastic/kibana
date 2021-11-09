@@ -65,7 +65,7 @@ export const EngineRouter: React.FC = () => {
     },
   } = useValues(AppLogic);
 
-  const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
+  const { engineName: engineNameFromUrl } = useParams();
   const { engineName, dataLoading, engineNotFound, isMetaEngine } = useValues(EngineLogic);
   const { setEngineName, initializeEngine, pollEmptyEngine, stopPolling, clearEngine } =
     useActions(EngineLogic);

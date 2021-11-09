@@ -81,7 +81,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
         )}
         <EuiFlexItem grow={1}>
           <div data-test-subj={getTestId('entries')} className="group-entries">
-            {(entries as ConditionEntry[]).map((entry, index) => (
+            {entries.map((entry, index) => (
               <ConditionEntryInput
                 key={index}
                 os={os}

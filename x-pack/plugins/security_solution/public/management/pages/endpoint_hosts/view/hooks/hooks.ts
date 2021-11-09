@@ -18,11 +18,7 @@ import { pagePathGetters } from '../../../../../../../fleet/public';
 
 export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
   return useSelector(function (state: State) {
-    return selector(
-      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
-        MANAGEMENT_STORE_ENDPOINTS_NAMESPACE
-      ] as EndpointState
-    );
+    return selector(state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]);
   });
 }
 

@@ -80,7 +80,7 @@ export const AlertEdit = ({
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      const res = await getAlertActionErrors(alert, actionTypeRegistry);
       setAlertActionsErrors([...res]);
       setIsLoading(false);
     })();
@@ -100,7 +100,7 @@ export const AlertEdit = ({
   }, [props.ruleType, alertType.id, serverRuleType, http]);
 
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
-    alert as Alert,
+    alert,
     alertType,
     serverRuleType
   );
@@ -133,7 +133,7 @@ export const AlertEdit = ({
       } else {
         setAlert(
           getAlertWithInvalidatedFields(
-            alert as Alert,
+            alert,
             alertParamsErrors,
             alertBaseErrors,
             alertActionsErrors

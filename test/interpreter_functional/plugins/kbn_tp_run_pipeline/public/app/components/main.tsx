@@ -51,7 +51,7 @@ class Main extends React.Component<{}, State> {
 
       return getExpressions()
         .execute(expression, context || { type: 'null' }, {
-          searchContext: initialContext as any,
+          searchContext: initialContext,
         })
         .getData()
         .pipe(pluck('result'))

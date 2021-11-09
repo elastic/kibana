@@ -59,7 +59,7 @@ export const useFlyout = (metadata: WaterfallMetadata) => {
   const onProjectionClick: ProjectionClickListener = useCallback(
     (projectionData) => {
       setIsFlyoutVisible(false);
-      const { x } = projectionData as ProjectedValues;
+      const { x } = projectionData;
       if (typeof x === 'number' && x >= 0) {
         const metadataEntry = metadata[x];
         handleFlyout(metadataEntry);

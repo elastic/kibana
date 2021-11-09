@@ -43,7 +43,7 @@ export class ToastsService {
 
   public setup({ uiSettings }: SetupDeps) {
     this.api = new ToastsApi({ uiSettings });
-    return this.api!;
+    return this.api;
   }
 
   public start({ i18n, overlays, targetDomElement }: StartDeps) {

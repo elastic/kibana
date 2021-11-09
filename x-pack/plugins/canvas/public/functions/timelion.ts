@@ -150,7 +150,7 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
               label: series.label,
             }))
           )
-        ) as DatatableRow[];
+        );
 
         return {
           type: 'datatable',

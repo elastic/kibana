@@ -118,7 +118,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
       const [{ application }] = await getStartServices();
       const anomalyExplorerUrl = await this.getHref!(context);
       if (anomalyExplorerUrl) {
-        await application.navigateToUrl(anomalyExplorerUrl!);
+        await application.navigateToUrl(anomalyExplorerUrl);
       }
     },
     async isCompatible({

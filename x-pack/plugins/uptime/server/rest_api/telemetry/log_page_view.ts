@@ -34,6 +34,6 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       savedObjectsClient
     );
     await KibanaTelemetryAdapter.countNoOfUniqueFleetManagedMonitors(uptimeEsClient);
-    return KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
+    return KibanaTelemetryAdapter.countPageView(pageView);
   },
 });

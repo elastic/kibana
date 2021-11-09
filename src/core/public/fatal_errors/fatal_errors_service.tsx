@@ -99,9 +99,9 @@ export class FatalErrorsService {
       },
     };
 
-    this.setupGlobalErrorHandlers(this.fatalErrors!);
+    this.setupGlobalErrorHandlers(this.fatalErrors);
 
-    return this.fatalErrors!;
+    return this.fatalErrors;
   }
 
   public start() {

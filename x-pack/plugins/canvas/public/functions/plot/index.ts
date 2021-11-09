@@ -88,7 +88,7 @@ export function plotFunctionFactory(
         const data = map(groupBy(sortedRows, 'color'), (series, label) => {
           const seriesStyle = {
             ...args.defaultStyle,
-            ...seriesStyles[label as string],
+            ...seriesStyles[label],
           };
 
           const flotStyle = seriesStyle ? seriesStyleToFlot(seriesStyle) : {};

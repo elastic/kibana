@@ -111,7 +111,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   return (
     <EmbeddablePanel
       hideHeader={false}
-      embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
+      embeddable={embeddable}
       getActions={uiActions.getTriggerCompatibleActions}
       inspector={inspector}
       actionPredicate={actionPredicate}

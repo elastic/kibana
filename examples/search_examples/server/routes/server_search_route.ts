@@ -29,8 +29,8 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
       // Run a synchronous search server side, by enforcing a high keepalive and waiting for completion.
       // If you wish to run the search with polling (in basic+), you'd have to poll on the search API.
       // Please reach out to the @app-arch-team if you need this to be implemented.
-      const res = await context
-        .search!.search(
+      const res = await context.search
+        .search(
           {
             params: {
               index,
@@ -53,7 +53,7 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
 
       return response.ok({
         body: {
-          aggs: (res as IEsSearchResponse).rawResponse.aggregations,
+          aggs: res.rawResponse.aggregations,
         },
       });
     }

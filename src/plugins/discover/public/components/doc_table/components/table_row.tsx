@@ -94,7 +94,7 @@ export const TableRow = ({
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = indexPattern.fields.getByName(column);
-      filter(field!, flattenedRow[column], type);
+      filter(field, flattenedRow[column], type);
     },
     [filter, flattenedRow, indexPattern.fields]
   );

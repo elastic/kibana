@@ -31,7 +31,7 @@ import { SourcesLogic } from './sources_logic';
 import './sources.scss';
 
 export const SourcesRouter: React.FC = () => {
-  const { pathname } = useLocation() as Location;
+  const { pathname } = useLocation();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { resetSourcesState } = useActions(SourcesLogic);
   const {

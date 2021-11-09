@@ -238,7 +238,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults.streams![packagePolicyInputStream!.data_stream!.dataset]
+                    inputValidationResults.streams![packagePolicyInputStream!.data_stream.dataset]
                   }
                   forceShowErrors={forceShowErrors}
                 />

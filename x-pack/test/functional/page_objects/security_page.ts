@@ -600,7 +600,7 @@ export class SecurityPageObject extends FtrService {
         'div[data-test-subj="fieldInput0"] [title="Remove * from selection in this group"] svg.euiIcon'
       );
 
-      await addGrantedField(roleObj.elasticsearch.indices[0].field_security!.grant!);
+      await addGrantedField(roleObj.elasticsearch.indices[0].field_security.grant!);
     }
 
     this.log.debug('click save button');

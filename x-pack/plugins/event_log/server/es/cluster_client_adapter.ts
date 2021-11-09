@@ -165,7 +165,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       const esClient = await this.elasticsearchClientPromise;
       const { body: legacyResult } = await esClient.indices.existsTemplate({ name });
       const { body: indexTemplateResult } = await esClient.indices.existsIndexTemplate({ name });
-      return (legacyResult as boolean) || (indexTemplateResult as boolean);
+      return legacyResult || indexTemplateResult;
     } catch (err) {
       throw new Error(`error checking existence of index template: ${err.message}`);
     }
@@ -318,7 +318,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     try {
       const esClient = await this.elasticsearchClientPromise;
       const { body } = await esClient.indices.existsAlias({ name });
-      return body as boolean;
+      return body;
     } catch (err) {
       throw new Error(`error checking existance of initial index: ${err.message}`);
     }

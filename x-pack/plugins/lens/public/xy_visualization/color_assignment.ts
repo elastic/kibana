@@ -113,13 +113,13 @@ export function getAccessorColorConfig(
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (layerContainsSplits) {
       return {
-        columnId: accessor as string,
+        columnId: accessor,
         triggerIcon: 'disabled',
       };
     }
     if (layer.layerType === layerTypes.REFERENCELINE) {
       return {
-        columnId: accessor as string,
+        columnId: accessor,
         triggerIcon: 'color',
         color: currentYConfig?.color || defaultReferenceLineColor,
       };
@@ -144,7 +144,7 @@ export function getAccessorColorConfig(
         currentPalette.params
       );
     return {
-      columnId: accessor as string,
+      columnId: accessor,
       triggerIcon: customColor ? 'color' : 'disabled',
       color: customColor ?? undefined,
     };

@@ -32,5 +32,5 @@ export const fetchAlerts = async ({
       timeRange,
     }),
   });
-  return response as unknown as AlertsByName;
+  return response as AlertsByName;
 };

@@ -47,7 +47,7 @@ export const getNameFieldConfig = (
 
   // Add validation to not allow duplicates
   return {
-    ...nameFieldConfig!,
+    ...nameFieldConfig,
     validations: [
       ...(nameFieldConfig.validations ?? []),
       {

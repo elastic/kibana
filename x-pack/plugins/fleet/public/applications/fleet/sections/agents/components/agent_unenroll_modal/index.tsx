@@ -149,7 +149,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
             id="xpack.fleet.unenrollAgents.deleteSingleDescription"
             defaultMessage='This action will remove the selected agent running on "{hostName}" from Fleet.
               Any data that was already sent by the agent will not be deleted. This action cannot be undone.'
-            values={{ hostName: ((agents[0] as Agent).local_metadata.host as any).hostname }}
+            values={{ hostName: (agents[0] as Agent).local_metadata.host.hostname }}
           />
         ) : (
           <FormattedMessage

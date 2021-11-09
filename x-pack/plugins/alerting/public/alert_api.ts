@@ -20,9 +20,7 @@ export async function loadAlertType({
   http: HttpSetup;
   id: AlertType['id'];
 }): Promise<AlertType | undefined> {
-  const alertTypes = (await http.get(
-    `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`
-  )) as AlertType[];
+  const alertTypes = await http.get(`${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`);
   return alertTypes.find((type) => type.id === id);
 }
 

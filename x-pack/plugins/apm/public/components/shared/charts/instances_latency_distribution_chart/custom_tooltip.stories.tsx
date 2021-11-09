@@ -19,7 +19,7 @@ type MainStatsServiceInstanceItem =
 function getLatencyFormatter(props: TooltipInfo) {
   const maxLatency = Math.max(
     ...props.values.map((value) => {
-      const datum = value.datum as unknown as MainStatsServiceInstanceItem;
+      const datum = value.datum as MainStatsServiceInstanceItem;
       return datum.latency ?? 0;
     })
   );

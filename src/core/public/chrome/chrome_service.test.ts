@@ -48,7 +48,7 @@ function defaultStartDeps(availableApps?: App[]) {
 
   if (availableApps) {
     deps.application.applications$ = new Rx.BehaviorSubject<Map<string, PublicAppInfo>>(
-      new Map(availableApps.map((app) => [app.id, getAppInfo(app) as PublicAppInfo]))
+      new Map(availableApps.map((app) => [app.id, getAppInfo(app)]))
     );
   }
 

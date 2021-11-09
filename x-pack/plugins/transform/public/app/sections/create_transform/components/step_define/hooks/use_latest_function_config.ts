@@ -22,7 +22,7 @@ export const latestConfigMapper = {
   toAPIConfig(uiConfig: LatestFunctionConfigUI): LatestFunctionConfig {
     return {
       unique_key: uiConfig.unique_key?.length ? uiConfig.unique_key.map((v) => v.value!) : [],
-      sort: uiConfig.sort?.value !== undefined ? uiConfig.sort.value! : '',
+      sort: uiConfig.sort?.value !== undefined ? uiConfig.sort.value : '',
     };
   },
   toUIConfig() {},

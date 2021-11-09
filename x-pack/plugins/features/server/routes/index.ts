@@ -27,7 +27,7 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
       },
     },
     (context, request, response) => {
-      const currentLicense = context.licensing!.license;
+      const currentLicense = context.licensing.license;
 
       const allFeatures = featureRegistry.getAllKibanaFeatures(
         currentLicense,

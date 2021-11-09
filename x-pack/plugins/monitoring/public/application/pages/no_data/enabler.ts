@@ -28,7 +28,7 @@ export class Enabler {
       });
     } catch (err) {
       this.updateModel({
-        errors: (err as any).data,
+        errors: err.data,
         isCollectionIntervalUpdated: false,
         isCollectionIntervalUpdating: false,
       });
@@ -48,7 +48,7 @@ export class Enabler {
       });
     } catch (err) {
       this.updateModel({
-        errors: (err as any).data,
+        errors: err.data,
         isCollectionEnabledUpdated: false,
         isCollectionEnabledUpdating: false,
       });

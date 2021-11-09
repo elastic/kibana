@@ -77,9 +77,7 @@ describe('SchemaAddFieldModal', () => {
     const input = wrapper.find(EuiFieldText);
     input.simulate('change', { currentTarget: { value: 'foo-bar' } });
 
-    const helpText = wrapper
-      .find('[data-test-subj="SchemaAddFieldNameRow"]')
-      .prop('helpText') as React.ReactElement;
+    const helpText = wrapper.find('[data-test-subj="SchemaAddFieldNameRow"]').prop('helpText');
     expect(helpText.type).toEqual(FormattedMessage);
   });
 

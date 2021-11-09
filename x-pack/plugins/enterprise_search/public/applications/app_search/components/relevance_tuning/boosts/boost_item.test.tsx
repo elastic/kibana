@@ -38,9 +38,7 @@ describe('BoostItem', () => {
   });
 
   it('renders an accordion button which shows a summary of the boost', () => {
-    const buttonContent = shallow(
-      accordian.prop('buttonContent') as React.ReactElement
-    ) as ShallowWrapper;
+    const buttonContent = shallow(accordian.prop('buttonContent'));
 
     expect(buttonContent.find(BoostIcon).prop('type')).toEqual('value');
     expect(buttonContent.find(ValueBadge).children().text()).toEqual('2');

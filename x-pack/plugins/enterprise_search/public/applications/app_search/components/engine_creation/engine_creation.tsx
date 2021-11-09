@@ -43,7 +43,7 @@ import {
 import { EngineCreationLogic } from './engine_creation_logic';
 
 export const EngineCreation: React.FC = () => {
-  const { search } = useLocation() as Location;
+  const { search } = useLocation();
   const { method } = parseQueryParams(search);
 
   const { name, rawName, language, isLoading } = useValues(EngineCreationLogic);

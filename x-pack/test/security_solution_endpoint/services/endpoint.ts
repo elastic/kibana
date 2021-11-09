@@ -46,13 +46,11 @@ export class EndpointTestResources extends FtrService {
       await this.transform.api.waitForTransformToExist(transformId);
 
       transform = (
-        (
-          await this.transform.api
-            .getTransform(transformId)
-            .catch(catchAndWrapError)
-            .then((response: { body: GetTransformsResponseSchema }) => response)
-        ).body as GetTransformsResponseSchema
-      ).transforms[0];
+        await this.transform.api
+          .getTransform(transformId)
+          .catch(catchAndWrapError)
+          .then((response: { body: GetTransformsResponseSchema }) => response)
+      ).body.transforms[0];
     } else {
       transform = (
         await this.transform.api.getTransformList(100).catch(catchAndWrapError)
@@ -108,7 +106,7 @@ export class EndpointTestResources extends FtrService {
 
     // load data into the system
     const indexedData = await indexHostsAndAlerts(
-      this.esClient as Client,
+      this.esClient,
       this.kbnClient,
       generatorSeed,
       numHosts,
@@ -134,7 +132,7 @@ export class EndpointTestResources extends FtrService {
    * @param indexedData
    */
   async unloadEndpointData(indexedData: IndexedHostsAndAlertsResponse) {
-    return deleteIndexedHostsAndAlerts(this.esClient as Client, this.kbnClient, indexedData);
+    return deleteIndexedHostsAndAlerts(this.esClient, this.kbnClient, indexedData);
   }
 
   /**

@@ -10,7 +10,7 @@ import { CTI_DATASET_KEY_MAP } from '../../../../common/cti/constants';
 import { LinkPanelListItem } from '../../components/link_panel';
 import { EventCounts } from '../../components/link_panel/helpers';
 
-export const ctiTitles = Object.keys(CTI_DATASET_KEY_MAP) as string[];
+export const ctiTitles = Object.keys(CTI_DATASET_KEY_MAP);
 
 export const EMPTY_LIST_ITEMS: LinkPanelListItem[] = ctiTitles.map((title) => ({
   title,

@@ -95,7 +95,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   } else {
     const filteredList = searchTerm
       ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
+          (localSearchRef.current.search(searchTerm) as IntegrationCardItem[])
             .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )

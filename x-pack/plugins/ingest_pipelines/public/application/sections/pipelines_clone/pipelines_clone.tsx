@@ -37,7 +37,7 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
 
   useEffect(() => {
     if (error && !isLoading) {
-      services.notifications!.toasts.addError(error, {
+      services.notifications.toasts.addError(error, {
         title: i18n.translate('xpack.ingestPipelines.clone.loadSourcePipelineErrorTitle', {
           defaultMessage: 'Cannot load {name}.',
           values: { name: sourceName },

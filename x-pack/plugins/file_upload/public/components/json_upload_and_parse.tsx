@@ -238,7 +238,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
       phase: PHASE.COMPLETE,
       importStatus: '',
     });
-    this.props.onUploadComplete(results!);
+    this.props.onUploadComplete(results);
   };
 
   _onFileSelect = ({ features, importer, indexName, previewCoverage }: OnFileSelectParameters) => {

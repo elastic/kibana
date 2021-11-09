@@ -65,10 +65,10 @@ export default function ({ getService }: FtrProviderContext) {
         const metric = first(resp.metrics) as any;
         expect(metric).to.have.property('id', 'hostCpuUsage');
         expect(metric).to.have.property('series');
-        const series = first(metric.series) as any;
+        const series = first(metric.series);
         expect(series).to.have.property('id', 'user');
         expect(series).to.have.property('data');
-        const datapoint = last(series.data) as any;
+        const datapoint = last(series.data);
         expect(datapoint).to.have.property('timestamp', 1547571780000);
         expect(datapoint).to.have.property('value', 0.0015);
       });

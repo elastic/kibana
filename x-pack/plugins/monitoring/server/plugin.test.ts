@@ -61,7 +61,7 @@ describe('Monitoring plugin', () => {
   const initializerContext = coreMock.createPluginInitializerContext(defaultConfig);
 
   afterEach(() => {
-    (setupPlugins.alerting.registerType as jest.Mock).mockReset();
+    setupPlugins.alerting.registerType.mockReset();
   });
 
   it('always create the bulk uploader', async () => {

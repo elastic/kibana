@@ -55,7 +55,7 @@ describe('DocumentMigrator', () => {
       kibanaVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
-        migrations: migrations as any,
+        migrations,
       }),
       log: mockLogger,
     });
@@ -1280,9 +1280,5 @@ function renameAttr(path: string, newPath: string) {
 
 function setAttr(path: string, value: any) {
   return (doc: SavedObjectUnsanitizedDoc) =>
-    set(
-      doc,
-      path,
-      _.isFunction(value) ? value(_.get(doc, path)) : value
-    ) as SavedObjectUnsanitizedDoc;
+    set(doc, path, _.isFunction(value) ? value(_.get(doc, path)) : value);
 }

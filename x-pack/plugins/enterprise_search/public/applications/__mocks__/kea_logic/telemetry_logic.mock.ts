@@ -13,6 +13,6 @@ export const mockTelemetryActions = {
 };
 
 jest.mock('../../shared/telemetry', () => ({
-  ...(jest.requireActual('../../shared/telemetry') as object),
+  ...jest.requireActual('../../shared/telemetry'),
   TelemetryLogic: { actions: mockTelemetryActions },
 }));

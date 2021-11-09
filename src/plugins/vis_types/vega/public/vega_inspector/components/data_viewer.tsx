@@ -42,7 +42,7 @@ export const DataViewer = ({ vegaAdapter, ...rest }: DataViewerProps) => {
 
   const onViewChange: EuiComboBoxProps<unknown>['onChange'] = useCallback(
     (selectedOptions) => {
-      const newView = inspectDataSets!.find((view) => view.id === selectedOptions[0].label);
+      const newView = inspectDataSets.find((view) => view.id === selectedOptions[0].label);
 
       if (newView) {
         setDataGridAriaLabel(getDataGridArialabel(newView));

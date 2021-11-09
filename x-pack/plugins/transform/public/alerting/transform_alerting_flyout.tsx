@@ -120,7 +120,7 @@ export const TransformAlertFlyoutWrapper = () => {
   return editAlertRule || createAlertRule ? (
     <TransformAlertFlyout
       initialAlert={editAlertRule}
-      ruleParams={createAlertRule!}
+      ruleParams={createAlertRule}
       onCloseFlyout={hideAlertFlyout}
     />
   ) : null;

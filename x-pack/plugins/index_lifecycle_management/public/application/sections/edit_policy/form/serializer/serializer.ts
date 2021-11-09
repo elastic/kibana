@@ -156,7 +156,7 @@ export const createSerializer =
          *
          */
         if (updatedPolicy.phases.warm?.min_age) {
-          warmPhase.min_age = `${updatedPolicy.phases.warm!.min_age}${_meta.warm.minAgeUnit}`;
+          warmPhase.min_age = `${updatedPolicy.phases.warm.min_age}${_meta.warm.minAgeUnit}`;
         }
 
         /**
@@ -222,7 +222,7 @@ export const createSerializer =
          * COLD PHASE MIN AGE
          */
         if (updatedPolicy.phases.cold?.min_age) {
-          coldPhase.min_age = `${updatedPolicy.phases.cold!.min_age}${_meta.cold.minAgeUnit}`;
+          coldPhase.min_age = `${updatedPolicy.phases.cold.min_age}${_meta.cold.minAgeUnit}`;
         }
 
         /**
@@ -286,7 +286,7 @@ export const createSerializer =
          * FROZEN PHASE MIN AGE
          */
         if (updatedPolicy.phases.frozen?.min_age) {
-          frozenPhase.min_age = `${updatedPolicy.phases.frozen!.min_age}${_meta.frozen.minAgeUnit}`;
+          frozenPhase.min_age = `${updatedPolicy.phases.frozen.min_age}${_meta.frozen.minAgeUnit}`;
         }
 
         /**
@@ -320,7 +320,7 @@ export const createSerializer =
          * DELETE PHASE MIN AGE
          */
         if (updatedPolicy.phases.delete?.min_age) {
-          deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;
+          deletePhase.min_age = `${updatedPolicy.phases.delete.min_age}${_meta.delete.minAgeUnit}`;
         }
 
         /**

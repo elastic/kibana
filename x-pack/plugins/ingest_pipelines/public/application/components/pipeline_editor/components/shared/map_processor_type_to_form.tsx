@@ -824,5 +824,5 @@ export type ProcessorType = keyof typeof mapProcessorTypeToDescriptor;
 export const getProcessorDescriptor = (
   type: ProcessorType | string
 ): FieldDescriptor | undefined => {
-  return mapProcessorTypeToDescriptor[type as ProcessorType];
+  return mapProcessorTypeToDescriptor[type];
 };

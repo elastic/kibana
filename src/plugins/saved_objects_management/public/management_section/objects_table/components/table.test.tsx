@@ -140,7 +140,7 @@ describe('Table', () => {
     const component = shallowWithI18nProvider(<Table {...customizedProps} />);
 
     const table = component.find('EuiBasicTable');
-    const columns = table.prop('columns') as any[];
+    const columns = table.prop('columns');
     const actionColumn = columns.find((x) => x.hasOwnProperty('actions')) as { actions: any[] };
     const someAction = actionColumn.actions.find(
       (x) => x['data-test-subj'] === 'savedObjectsTableAction-someAction'

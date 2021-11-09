@@ -200,7 +200,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                 defaultMessage: 'Agents',
               }),
               content:
-                agentStatus && agentStatus!.total ? (
+                agentStatus && agentStatus.total ? (
                   <LinkedAgentCount
                     count={agentStatus.total}
                     agentPolicyId={(agentPolicy && agentPolicy.id) || ''}

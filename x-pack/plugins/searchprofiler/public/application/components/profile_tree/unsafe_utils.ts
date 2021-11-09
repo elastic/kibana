@@ -123,10 +123,10 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
   let sortQueryComponents;
   if (target === 'searches') {
     sortQueryComponents = (a: Shard, b: Shard) => {
-      const aTime = _.sumBy(a.searches!, (search: any) => {
+      const aTime = _.sumBy(a.searches, (search: any) => {
         return search.treeRoot!.time;
       });
-      const bTime = _.sumBy(b.searches!, (search: any) => {
+      const bTime = _.sumBy(b.searches, (search: any) => {
         return search.treeRoot!.time;
       });
 
@@ -134,10 +134,10 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
     };
   } else if (target === 'aggregations') {
     sortQueryComponents = (a: Shard, b: Shard) => {
-      const aTime = _.sumBy(a.aggregations!, (agg: any) => {
+      const aTime = _.sumBy(a.aggregations, (agg: any) => {
         return agg.treeRoot!.time;
       });
-      const bTime = _.sumBy(b.aggregations!, (agg: any) => {
+      const bTime = _.sumBy(b.aggregations, (agg: any) => {
         return agg.treeRoot!.time;
       });
 
@@ -168,8 +168,8 @@ export function initTree<T>(
 ) {
   if (MAX_TREE_DEPTH + 1 === depth) {
     if (parent) {
-      parent!.hasChildren = false;
-      parent!.children = [];
+      parent.hasChildren = false;
+      parent.children = [];
     }
     return;
   }

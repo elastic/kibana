@@ -28,7 +28,7 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, step
   const { data, loading } = useEsSearch(
     hasNavigationRequest
       ? createEsParams({
-          index: heartbeatIndices!,
+          index: heartbeatIndices,
           body: {
             query: {
               bool: {

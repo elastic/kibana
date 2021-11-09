@@ -27,7 +27,7 @@ describe.each([
   ) => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
-    item = generateItem() as AnyArtifact;
+    item = generateItem();
     appTestContext = createAppRootMockRenderer();
     render = (props = {}) => {
       renderResult = appTestContext.render(

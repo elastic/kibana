@@ -172,7 +172,7 @@ export const SearchExamplesApp = ({
     }
 
     // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
-    const aggs = [{ type: 'avg', params: { field: selectedNumericField!.name } }];
+    const aggs = [{ type: 'avg', params: { field: selectedNumericField.name } }];
     const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
 
     const req = {
@@ -207,7 +207,7 @@ export const SearchExamplesApp = ({
             const message = (
               <EuiText>
                 Searched {res.rawResponse.hits.total} documents. <br />
-                The average of {selectedNumericField!.name} is{' '}
+                The average of {selectedNumericField.name} is{' '}
                 {avgResult ? Math.floor(avgResult) : 0}.
                 <br />
                 {isCool ? `Is it Cool? ${isCool}` : undefined}
@@ -369,7 +369,7 @@ export const SearchExamplesApp = ({
       const res = await http.get(SERVER_SEARCH_ROUTE_PATH, {
         query: {
           index: indexPattern.title,
-          field: selectedNumericField!.name,
+          field: selectedNumericField.name,
         },
       });
 

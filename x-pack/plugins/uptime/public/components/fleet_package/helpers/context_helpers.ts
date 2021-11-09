@@ -10,7 +10,7 @@ export function formatDefaultValues<Fields>(
   defaultValues: Partial<Fields>
 ) {
   return keys.reduce((acc: any, currentValue) => {
-    const key = currentValue as keyof Fields;
+    const key = currentValue;
     acc[key] = defaultValues?.[key];
     return acc;
   }, {}) as Fields;

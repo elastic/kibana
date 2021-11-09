@@ -42,7 +42,7 @@ export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, O
       then: {
         resolve: false,
         required: true,
-        help: argHelp.then!,
+        help: argHelp.then,
       },
     },
     fn(input, { if: condition, then, when }) {

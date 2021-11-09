@@ -13,5 +13,5 @@ export const parseValue = (
   if (isObject(value)) {
     return JSON.stringify(value);
   }
-  return value as string | number | undefined | null;
+  return value;
 };

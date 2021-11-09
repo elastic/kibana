@@ -544,12 +544,12 @@ export function DashboardTopNav({
 
     if (visType) {
       if ('aliasPath' in visType) {
-        const { name, icon, title } = visType as VisTypeAlias;
+        const { name, icon, title } = visType;
 
         return {
           iconType: icon,
           createType: title,
-          onClick: createNewVisType(visType as VisTypeAlias),
+          onClick: createNewVisType(visType),
           'data-test-subj': `dashboardQuickButton${name}`,
         };
       } else {

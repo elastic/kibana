@@ -19,10 +19,7 @@ import { SCHEMA_ERRORS_HEADING } from './constants';
 import { SchemaLogic } from './schema_logic';
 
 export const SchemaChangeErrors: React.FC = () => {
-  const { activeReindexJobId, sourceId } = useParams() as {
-    activeReindexJobId: string;
-    sourceId: string;
-  };
+  const { activeReindexJobId, sourceId } = useParams();
   const { initializeSchemaFieldErrors } = useActions(SchemaLogic);
 
   const { fieldCoercionErrors, serverSchema } = useValues(SchemaLogic);

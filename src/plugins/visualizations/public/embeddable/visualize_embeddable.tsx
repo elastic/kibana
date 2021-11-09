@@ -416,7 +416,7 @@ export class VisualizeEmbeddable
     this.expression = await toExpressionAst(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
-      abortSignal: this.abortController!.signal,
+      abortSignal: this.abortController.signal,
     });
 
     if (this.handler && !abortController.signal.aborted) {

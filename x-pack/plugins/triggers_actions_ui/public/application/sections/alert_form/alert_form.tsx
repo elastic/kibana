@@ -262,13 +262,13 @@ export const AlertForm = ({
       availableAlertTypes
         .filter((alertTypeItem) =>
           solutionsFilter.length > 0
-            ? solutionsFilter.find((item) => alertTypeItem.alertType!.producer === item)
+            ? solutionsFilter.find((item) => alertTypeItem.alertType.producer === item)
             : alertTypeItem
         )
         .filter((alertTypeItem) =>
           searchValue
             ? alertTypeItem.alertType.name.toString().toLocaleLowerCase().includes(searchValue) ||
-              alertTypeItem.alertType!.producer.toLocaleLowerCase().includes(searchValue) ||
+              alertTypeItem.alertType.producer.toLocaleLowerCase().includes(searchValue) ||
               alertTypeItem.alertTypeModel.description.toLocaleLowerCase().includes(searchValue)
             : alertTypeItem
         )
@@ -299,7 +299,7 @@ export const AlertForm = ({
       .filter((item) =>
         alert.consumer === ALERTS_FEATURE_ID
           ? !item.alertTypeModel.requiresAppContext
-          : item.alertType!.producer === alert.consumer
+          : item.alertType.producer === alert.consumer
       );
   const selectedAlertType = alert?.alertTypeId ? ruleTypeIndex?.get(alert?.alertTypeId) : undefined;
   const recoveryActionGroup = selectedAlertType?.recoveryActionGroup?.id;

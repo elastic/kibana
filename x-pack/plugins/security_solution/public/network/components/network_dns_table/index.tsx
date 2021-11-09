@@ -92,7 +92,7 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
       if (criteria.sort != null) {
         const newDnsSortField: SortField<NetworkDnsFields> = {
           field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
-          direction: criteria.sort.direction as Direction,
+          direction: criteria.sort.direction,
         };
         if (!deepEqual(newDnsSortField, sort)) {
           dispatch(

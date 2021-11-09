@@ -50,12 +50,12 @@ export function extractEntityAndBoundaryReferences(params: GeoContainmentParams)
     {
       name: `param:${indexRefNamePrefix}${indexId}`,
       type: `index-pattern`,
-      id: indexId as string,
+      id: indexId,
     },
     {
       name: `param:${boundaryRefNamePrefix}${boundaryIndexId}`,
       type: 'index-pattern',
-      id: boundaryIndexId as string,
+      id: boundaryIndexId,
     },
   ];
   return {

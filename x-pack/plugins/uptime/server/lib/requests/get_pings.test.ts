@@ -102,7 +102,7 @@ describe('getAll', () => {
 
     expect(result.total).toBe(count);
 
-    const pings = result.pings!;
+    const pings = result.pings;
     expect(pings).toHaveLength(count);
     expect(pings[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
     expect(pings[1].timestamp).toBe('2018-10-30T18:53:59.792Z');

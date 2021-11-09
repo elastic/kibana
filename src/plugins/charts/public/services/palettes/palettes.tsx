@@ -311,6 +311,6 @@ export const buildPalettes: (
       }),
       ...buildSyncedKibanaPalette(legacyColorsService),
     },
-    custom: buildCustomPalette() as PaletteDefinition<unknown>,
+    custom: buildCustomPalette(),
   };
 };

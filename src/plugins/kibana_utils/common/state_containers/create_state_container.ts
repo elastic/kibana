@@ -26,11 +26,11 @@ const isProduction =
     : !process.env.NODE_ENV || process.env.NODE_ENV === 'production';
 
 const defaultFreeze: <T>(value: T) => T = isProduction
-  ? <T>(value: T) => value as T
+  ? <T>(value: T) => value
   : <T>(value: T): T => {
       const isFreezable = value !== null && typeof value === 'object';
-      if (isFreezable) return deepFreeze(value) as T;
-      return value as T;
+      if (isFreezable) return deepFreeze(value);
+      return value;
     };
 
 /**

@@ -130,7 +130,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Error loading snapshots"
           />
         }
-        error={error as Error}
+        error={error}
       />
     );
   } else if (Object.keys(errors).length && repositories.length === 0) {

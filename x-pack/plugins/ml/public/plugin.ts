@@ -185,7 +185,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   start(core: CoreStart, deps: MlStartDependencies) {
     setDependencyCache({
-      docLinks: core.docLinks!,
+      docLinks: core.docLinks,
       basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,

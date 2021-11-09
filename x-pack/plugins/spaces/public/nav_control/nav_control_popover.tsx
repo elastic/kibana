@@ -143,7 +143,7 @@ export class NavControlPopover extends Component<Props, State> {
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazySpaceAvatar space={activeSpace} size={'s'} />
       </Suspense>,
-      (activeSpace as Space).name
+      activeSpace.name
     );
   };
 

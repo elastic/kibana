@@ -260,9 +260,9 @@ export class ActionsClient {
 
     return {
       id,
-      actionTypeId: result.attributes.actionTypeId as string,
-      isMissingSecrets: result.attributes.isMissingSecrets as boolean,
-      name: result.attributes.name as string,
+      actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
+      name: result.attributes.name,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
     };

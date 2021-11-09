@@ -651,7 +651,7 @@ export class SavedObjectsRepository {
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
             // @ts-expect-error MultiGetHit._source is optional
-            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
+            ...(!this.rawDocExistsInNamespace(doc, namespace) && {
               metadata: { isNotOverwritable: true },
             }),
           },
@@ -1512,7 +1512,7 @@ export class SavedObjectsRepository {
             SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
           ];
           // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          versionProperties = getExpectedVersionProperties(version, actualResult!);
+          versionProperties = getExpectedVersionProperties(version, actualResult);
         } else {
           if (this._registry.isSingleNamespace(type)) {
             // if `objectNamespace` is undefined, fall back to `options.namespace`

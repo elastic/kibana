@@ -104,7 +104,7 @@ export class DefaultSpaceService {
       .subscribe();
 
     return {
-      serviceStatus$: this.serviceStatus$!.asObservable(),
+      serviceStatus$: this.serviceStatus$.asObservable(),
     };
   }
 

@@ -57,7 +57,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
 
   // "Type" column
   if (fieldName === 'type') {
-    return <>{DEPRECATION_TYPE_MAP[deprecation.type as EnrichedDeprecationInfo['type']]}</>;
+    return <>{DEPRECATION_TYPE_MAP[deprecation.type]}</>;
   }
 
   // "Resolution column"

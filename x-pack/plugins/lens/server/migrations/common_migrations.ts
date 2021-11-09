@@ -137,7 +137,7 @@ export const commonMakeReversePaletteAsCustom = (
   attributes: LensDocShape715<VisState716>
 ): LensDocShape715<VisState716> => {
   const newAttributes = cloneDeep(attributes);
-  const vizState = (newAttributes as LensDocShape715<VisState716>).state.visualization;
+  const vizState = newAttributes.state.visualization;
   if (
     attributes.visualizationType !== 'lnsDatatable' &&
     attributes.visualizationType !== 'lnsHeatmap'

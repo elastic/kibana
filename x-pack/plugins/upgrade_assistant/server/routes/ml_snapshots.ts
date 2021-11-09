@@ -209,7 +209,7 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
             detailed: true, // necessary in order to filter if there are more than 1 snapshot upgrades in progress
           });
 
-          const nodeTaskInfo = taskResponse?.nodes && taskResponse!.nodes[nodeId];
+          const nodeTaskInfo = taskResponse?.nodes && taskResponse.nodes[nodeId];
           const snapshotInfo: MlOperation = {
             ...snapshotOp.attributes,
           };

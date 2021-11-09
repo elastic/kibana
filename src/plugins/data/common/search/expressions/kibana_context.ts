@@ -99,7 +99,7 @@ export const getKibanaContextFn = (
         references.push({
           name: refName,
           type: 'search',
-          id: state.savedSearchId[0] as string,
+          id: state.savedSearchId[0],
         });
         return {
           state: {
@@ -127,7 +127,7 @@ export const getKibanaContextFn = (
       let queries = mergeQueries(input?.query, args?.q || []);
       let filters = [
         ...(input?.filters || []),
-        ...((args?.filters?.map(unboxExpressionValue) || []) as Filter[]),
+        ...(args?.filters?.map(unboxExpressionValue) || []),
       ];
 
       if (args.savedSearchId) {

@@ -15,12 +15,12 @@ import {
 export async function fetchNetworkEvents(
   params: FetchNetworkEventsParams
 ): Promise<SyntheticsNetworkEventsApiResponse> {
-  return (await apiService.get(
+  return await apiService.get(
     `/api/uptime/network_events`,
     {
       checkGroup: params.checkGroup,
       stepIndex: params.stepIndex,
     },
     SyntheticsNetworkEventsApiResponseType
-  )) as SyntheticsNetworkEventsApiResponse;
+  );
 }

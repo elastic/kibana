@@ -43,7 +43,7 @@ export const units: Unit[] = Object.keys(unitsMap).sort(
   (a, b) => unitsMap[b as Unit].weight - unitsMap[a as Unit].weight
 ) as Unit[];
 export const unitsDesc: Unit[] = [...units] as Unit[];
-export const unitsAsc: Unit[] = [...units].reverse() as Unit[];
+export const unitsAsc: Unit[] = [...units].reverse();
 
 const isDate = (d: string) => Object.prototype.toString.call(d) === '[object Date]';
 const isValidDate = (d: string) => isDate(d) && !isNaN(d.valueOf() as any);

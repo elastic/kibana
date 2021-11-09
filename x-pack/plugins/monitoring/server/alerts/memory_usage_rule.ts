@@ -72,7 +72,7 @@ export class MemoryUsageRule extends BaseRule {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const { duration, threshold } = params;
-    const parsedDuration = parseDuration(duration as string);
+    const parsedDuration = parseDuration(duration);
     const endMs = +new Date();
     const startMs = endMs - parsedDuration;
 

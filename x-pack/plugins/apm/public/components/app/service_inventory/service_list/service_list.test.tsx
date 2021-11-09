@@ -65,7 +65,7 @@ describe('ServiceList', () => {
             isXl: true,
           } as Breakpoints,
         }).map((c) =>
-          c.render ? c.render!(service[c.field!], service) : service[c.field!]
+          c.render ? c.render(service[c.field!], service) : service[c.field!]
         );
         expect(renderedColumns.length).toEqual(7);
         expect(renderedColumns[2]).toMatchInlineSnapshot(`
@@ -99,7 +99,7 @@ describe('ServiceList', () => {
             isXl: true,
           } as Breakpoints,
         }).map((c) =>
-          c.render ? c.render!(service[c.field!], service) : service[c.field!]
+          c.render ? c.render(service[c.field!], service) : service[c.field!]
         );
         expect(renderedColumns.length).toEqual(5);
         expect(renderedColumns[2]).toMatchInlineSnapshot(`
@@ -122,7 +122,7 @@ describe('ServiceList', () => {
               isXl: true,
             } as Breakpoints,
           }).map((c) =>
-            c.render ? c.render!(service[c.field!], service) : service[c.field!]
+            c.render ? c.render(service[c.field!], service) : service[c.field!]
           );
           expect(renderedColumns.length).toEqual(6);
           expect(renderedColumns[2]).toMatchInlineSnapshot(`
@@ -155,7 +155,7 @@ describe('ServiceList', () => {
               isXl: false,
             } as Breakpoints,
           }).map((c) =>
-            c.render ? c.render!(service[c.field!], service) : service[c.field!]
+            c.render ? c.render(service[c.field!], service) : service[c.field!]
           );
           expect(renderedColumns.length).toEqual(7);
           expect(renderedColumns[2]).toMatchInlineSnapshot(`

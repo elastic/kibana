@@ -30,7 +30,7 @@ async function renderTooltipAnchor({
   );
 
   // hover tooltip anchor if it exists
-  const toolTipAnchor = container.querySelector('.euiToolTipAnchor') as any;
+  const toolTipAnchor = container.querySelector('.euiToolTipAnchor');
   if (toolTipAnchor) {
     fireEvent.mouseOver(toolTipAnchor);
 

@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
         const cloneJobId = `${testData.job.id}_clone`;
-        const cloneDestIndex = `${testData.job!.dest!.index}_clone`;
+        const cloneDestIndex = `${testData.job.dest!.index}_clone`;
 
         before(async () => {
           await esArchiver.loadIfNeeded(testData.archive);

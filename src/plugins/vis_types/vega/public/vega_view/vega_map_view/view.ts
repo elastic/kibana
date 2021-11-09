@@ -168,7 +168,7 @@ export class VegaMapView extends VegaBaseView {
         id: userConfiguredLayerId,
         map: mapBoxInstance,
         context: {
-          tiles: [url!],
+          tiles: [url],
           maxZoom: options.maxZoom ?? defaultMapConfig.maxZoom,
           minZoom: options.minZoom ?? defaultMapConfig.minZoom,
           tileSize: options.tileSize ?? defaultMapConfig.tileSize,

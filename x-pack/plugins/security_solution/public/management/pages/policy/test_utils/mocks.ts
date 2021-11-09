@@ -59,7 +59,7 @@ export const getMockPolicyDetailsArtifactListUrlParams = (
 };
 
 export const getMockCreateResponse: () => PostTrustedAppCreateResponse = () =>
-  createSampleTrustedApp(1) as unknown as unknown as PostTrustedAppCreateResponse;
+  createSampleTrustedApp(1) as unknown as PostTrustedAppCreateResponse;
 
 export const getAPIError = () => ({
   statusCode: 500,

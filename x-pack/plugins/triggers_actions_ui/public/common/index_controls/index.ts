@@ -46,7 +46,7 @@ export const getIndexOptions = async (
   })) as string[];
   const matchingIndexPatterns = indexPatternsParam.filter((anIndexPattern) => {
     return anIndexPattern.includes(pattern);
-  }) as string[];
+  });
 
   if (matchingIndices.length || matchingIndexPatterns.length) {
     const matchingOptions = uniq([...matchingIndices, ...matchingIndexPatterns]);

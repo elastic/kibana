@@ -58,7 +58,7 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
           defaultMessage: "Could not delete space '{name}'",
           values: { name: space.name },
         }),
-        text: (error as any).body?.message || error.message,
+        text: error.body?.message || error.message,
       });
     }
   }, [isCurrentSpace]);

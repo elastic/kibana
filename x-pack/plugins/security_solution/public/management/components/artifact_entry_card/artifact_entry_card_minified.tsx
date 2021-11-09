@@ -126,7 +126,7 @@ export const ArtifactEntryCardMinified = memo(
             </EuiButtonEmpty>
             <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
               <CriteriaConditions
-                os={artifact.os as CriteriaConditionsProps['os']}
+                os={artifact.os}
                 entries={artifact.entries}
                 data-test-subj={getTestId('criteriaConditions')}
               />

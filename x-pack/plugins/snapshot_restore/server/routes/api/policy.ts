@@ -54,7 +54,7 @@ export function registerPolicyRoutes({
     { path: addBasePath('policy/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const { name } = req.params;
 
       try {
         const { body: policiesByName } = await clusterClient.asCurrentUser.slm.getLifecycle({
@@ -82,7 +82,7 @@ export function registerPolicyRoutes({
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
 
-      const policy = req.body as TypeOf<typeof policySchema>;
+      const policy = req.body;
       const { name } = policy;
 
       try {
@@ -121,8 +121,8 @@ export function registerPolicyRoutes({
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
-      const policy = req.body as TypeOf<typeof policySchema>;
+      const { name } = req.params;
+      const policy = req.body;
 
       try {
         // Check that policy with the given name exists
@@ -148,7 +148,7 @@ export function registerPolicyRoutes({
     { path: addBasePath('policies/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const { name } = req.params;
       const policyNames = name.split(',');
 
       const response: { itemsDeleted: string[]; errors: any[] } = {
@@ -179,7 +179,7 @@ export function registerPolicyRoutes({
     { path: addBasePath('policy/{name}/run'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const { name } = req.params;
 
       try {
         const {
@@ -260,7 +260,7 @@ export function registerPolicyRoutes({
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { retentionSchedule } = req.body as TypeOf<typeof retentionSettingsSchema>;
+      const { retentionSchedule } = req.body;
 
       try {
         const response = await clusterClient.asCurrentUser.cluster.putSettings({

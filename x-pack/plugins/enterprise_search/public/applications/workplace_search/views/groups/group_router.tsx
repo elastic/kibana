@@ -18,7 +18,7 @@ import { OrgSourcesModal } from './components/org_sources_modal';
 import { GroupLogic } from './group_logic';
 
 export const GroupRouter: React.FC = () => {
-  const { groupId } = useParams() as { groupId: string };
+  const { groupId } = useParams();
 
   const { initializeGroup, resetGroup } = useActions(GroupLogic);
   const { orgSourcesModalVisible } = useValues(GroupLogic);

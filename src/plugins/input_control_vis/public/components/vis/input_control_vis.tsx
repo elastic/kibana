@@ -90,7 +90,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
           />
         );
       } else {
-        throw new Error(`Unhandled control type ${control!.type}`);
+        throw new Error(`Unhandled control type ${control.type}`);
       }
 
       return (

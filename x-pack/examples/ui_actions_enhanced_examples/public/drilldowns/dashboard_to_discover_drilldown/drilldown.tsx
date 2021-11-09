@@ -73,7 +73,7 @@ export class DashboardToDiscoverDrilldown
       !!config.customIndexPattern && !!config.indexPatternId ? config.indexPatternId : '';
 
     if (!indexPatternId && !!context.embeddable) {
-      const output = context.embeddable!.getOutput();
+      const output = context.embeddable.getOutput();
       if (isOutputWithIndexPatterns(output) && output.indexPatterns.length > 0) {
         indexPatternId = output.indexPatterns[0].id;
       }

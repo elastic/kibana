@@ -220,7 +220,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawAlert).legacyId).to.equal(
+      expect((hit._source!.alert! as RawAlert).legacyId).to.equal(
         '74f3e6d7-b7bb-477d-ac28-92ee22728e6e'
       );
     });
@@ -242,7 +242,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawAlert).actions! as RawAlertAction[]).to.eql([
+      expect((hit._source!.alert! as RawAlert).actions).to.eql([
         {
           actionRef: 'action_0',
           actionTypeId: 'test.noop',
@@ -258,7 +258,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
         },
       ]);
-      expect(hit!._source!.references!).to.eql([
+      expect(hit._source!.references!).to.eql([
         {
           id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
           name: 'action_0',

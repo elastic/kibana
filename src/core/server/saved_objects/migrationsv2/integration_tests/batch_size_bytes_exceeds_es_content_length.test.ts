@@ -69,7 +69,7 @@ describe.skip('migration v2', () => {
         const records = logFileContent
           .split('\n')
           .filter(Boolean)
-          .map((str) => JSON5.parse(str)) as any[];
+          .map((str) => JSON5.parse(str));
 
         expect(
           records.find((rec) =>

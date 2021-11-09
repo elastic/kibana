@@ -91,16 +91,16 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       composedOf,
       _meta,
       _kbnMeta: { isLegacy },
-    } = template!;
+    } = template;
 
     const serializedTemplate = isLegacy
       ? serializeLegacyTemplate(
-          stripEmptyFields(template!, {
+          stripEmptyFields(template, {
             types: ['string'],
           }) as TemplateDeserialized
         )
       : serializeTemplate(
-          stripEmptyFields(template!, {
+          stripEmptyFields(template, {
             types: ['string'],
           }) as TemplateDeserialized
         );
@@ -109,9 +109,9 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');
     const serializedAliases = getTemplateParameter(serializedTemplate, 'aliases');
 
-    const numIndexPatterns = indexPatterns!.length;
+    const numIndexPatterns = indexPatterns.length;
 
-    const hasWildCardIndexPattern = Boolean(indexPatterns!.find((pattern) => pattern === '*'));
+    const hasWildCardIndexPattern = Boolean(indexPatterns.find((pattern) => pattern === '*'));
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
@@ -132,7 +132,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 {numIndexPatterns > 1 ? (
                   <EuiText>
                     <ul>
-                      {indexPatterns!.map((indexName: string, i: number) => {
+                      {indexPatterns.map((indexName: string, i: number) => {
                         return (
                           <li key={`${indexName}-${i}`}>
                             <EuiTitle size="xs">
@@ -144,7 +144,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                     </ul>
                   </EuiText>
                 ) : (
-                  indexPatterns!.toString()
+                  indexPatterns.toString()
                 )}
               </EuiDescriptionListDescription>
 

@@ -273,10 +273,10 @@ export default function ({ getService }: FtrProviderContext) {
               false
             );
           }
-          for (const fieldRow of testData.expected.nonMetricFields!) {
+          for (const fieldRow of testData.expected.nonMetricFields) {
             await ml.dataVisualizerTable.assertNonMetricFieldContents(
               fieldRow.type,
-              fieldRow.fieldName!,
+              fieldRow.fieldName,
               fieldRow.docCountFormatted,
               fieldRow.exampleCount,
               false

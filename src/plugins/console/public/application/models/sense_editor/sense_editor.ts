@@ -50,9 +50,9 @@ export class SenseEditor {
     if (rowOrPos == null) {
       curRow = this.coreEditor.getCurrentPosition().lineNumber;
     } else if (_.isObject(rowOrPos)) {
-      curRow = (rowOrPos as Position).lineNumber;
+      curRow = rowOrPos.lineNumber;
     } else {
-      curRow = rowOrPos as number;
+      curRow = rowOrPos;
     }
 
     while (curRow > 0 && !this.parser.isStartRequestRow(curRow, this.coreEditor)) curRow--;
@@ -68,9 +68,9 @@ export class SenseEditor {
     if (rowOrPos == null) {
       curRow = this.coreEditor.getCurrentPosition().lineNumber;
     } else if (_.isObject(rowOrPos)) {
-      curRow = (rowOrPos as Position).lineNumber;
+      curRow = rowOrPos.lineNumber;
     } else {
-      curRow = rowOrPos as number;
+      curRow = rowOrPos;
     }
     const maxLines = this.coreEditor.getLineCount();
     for (; curRow < maxLines - 1; curRow++) {

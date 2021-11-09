@@ -93,7 +93,7 @@ const RiskScoreTableComponent: React.FC<RiskScoreTableProps> = ({
       if (criteria.sort != null) {
         const newSort: RiskScoreSortField = {
           field: getSortField(criteria.sort.field),
-          direction: criteria.sort.direction as Direction,
+          direction: criteria.sort.direction,
         };
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           // dispatch(

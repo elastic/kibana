@@ -1399,7 +1399,7 @@ export function isOperationAllowedAsReference({
     hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
   } else if (operationDefinition.input === 'none') {
     const metadata = operationDefinition.getPossibleOperation();
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata);
   } else if (operationDefinition.input === 'fullReference') {
     const metadata = operationDefinition.getPossibleOperation(indexPattern);
     hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);

@@ -75,7 +75,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
       queryLanguage && uiSettings && storage && appName
-        ? getQueryLog(uiSettings!, storage, appName, queryLanguage)
+        ? getQueryLog(uiSettings, storage, appName, queryLanguage)
         : undefined,
     [appName, queryLanguage, uiSettings, storage]
   );
@@ -89,7 +89,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function getDateRange() {
-    const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
+    const defaultTimeSetting = uiSettings.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
       from: props.dateRangeFrom || defaultTimeSetting.from,
       to: props.dateRangeTo || defaultTimeSetting.to,
@@ -267,7 +267,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         });
     }
 
-    const commonlyUsedRanges = uiSettings!
+    const commonlyUsedRanges = uiSettings
       .get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
       .map(({ from, to, display }: { from: string; to: string; display: string }) => {
         return {
@@ -295,7 +295,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           showUpdateButton={false}
           recentlyUsedRanges={recentlyUsedRanges}
           commonlyUsedRanges={commonlyUsedRanges}
-          dateFormat={uiSettings!.get('dateFormat')}
+          dateFormat={uiSettings.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="kbnQueryBar__datePicker"
         />

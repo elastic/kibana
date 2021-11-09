@@ -237,7 +237,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
-      this.actionTypeRegistry!,
+      this.actionTypeRegistry,
       plugins.taskManager.index,
       this.preconfiguredActions
     );
@@ -365,13 +365,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
+          isESOCanEncrypt,
           preconfiguredActions,
         }),
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
+          isESOCanEncrypt,
           preconfiguredActions,
         }),
         auditLogger: this.security?.audit.asScoped(request),
@@ -530,13 +530,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
-              isESOCanEncrypt: isESOCanEncrypt!,
+              isESOCanEncrypt,
               preconfiguredActions,
             }),
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
-              isESOCanEncrypt: isESOCanEncrypt!,
+              isESOCanEncrypt,
               preconfiguredActions,
             }),
             auditLogger: security?.audit.asScoped(request),

@@ -70,9 +70,7 @@ export function getAlertPanelsByNode(
       title: panelTitle,
       items: [
         ...Object.keys(statesByNodes).map((nodeUuid, index) => {
-          const states = (statesByNodes[nodeUuid] as CommonAlertState[]).filter(({ state }) =>
-            stateFilter(state)
-          );
+          const states = statesByNodes[nodeUuid].filter(({ state }) => stateFilter(state));
           const { nodeName, itemLabel } = states[0].state;
           return {
             name: (

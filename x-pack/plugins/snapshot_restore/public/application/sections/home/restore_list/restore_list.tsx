@@ -93,7 +93,7 @@ export const RestoreList: React.FunctionComponent = () => {
               defaultMessage="Error loading restores"
             />
           }
-          error={error as Error}
+          error={error}
         />
       );
     }

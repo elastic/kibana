@@ -147,7 +147,7 @@ const getTitleConfig = ({
   ];
 
   return {
-    ...titleFieldConfig!,
+    ...titleFieldConfig,
     validations,
   };
 };

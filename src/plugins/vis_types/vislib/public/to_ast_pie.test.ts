@@ -14,7 +14,7 @@ import { samplePieVis } from '../../pie/public/sample_vis.test.mocks';
 import { toExpressionAst } from './to_ast_pie';
 
 jest.mock('../../../expressions/public', () => ({
-  ...(jest.requireActual('../../../expressions/public') as any),
+  ...jest.requireActual('../../../expressions/public'),
   buildExpression: jest.fn().mockImplementation(() => ({
     toAst: () => ({
       type: 'expression',

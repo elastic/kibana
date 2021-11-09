@@ -136,8 +136,8 @@ export const VisualizeEditorCommon = ({
                 id="visualize.pageHeading"
                 defaultMessage="{chartName} {chartType} visualization"
                 values={{
-                  chartName: (visInstance as SavedVisInstance).savedVis.title,
-                  chartType: (visInstance as SavedVisInstance).vis.type.title,
+                  chartName: visInstance.savedVis.title,
+                  chartType: visInstance.vis.type.title,
                 }}
               />
             ) : (

@@ -110,7 +110,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       if (criteria.sort != null) {
         const sort: HostsSortField = {
           field: getSortField(criteria.sort.field),
-          direction: criteria.sort.direction as Direction,
+          direction: criteria.sort.direction,
         };
         if (sort.direction !== direction || sort.field !== sortField) {
           dispatch(

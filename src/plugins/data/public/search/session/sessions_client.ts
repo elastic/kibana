@@ -62,7 +62,7 @@ export class SessionsClient {
   }
 
   public find(options: Omit<SavedObjectsFindOptions, 'type'>): Promise<SavedObjectsFindResponse> {
-    return this.http!.post(`/internal/session/_find`, {
+    return this.http.post(`/internal/session/_find`, {
       body: JSON.stringify(options),
     });
   }
@@ -71,7 +71,7 @@ export class SessionsClient {
     sessionId: string,
     attributes: unknown
   ): Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>> {
-    return this.http!.put(`/internal/session/${encodeURIComponent(sessionId)}`, {
+    return this.http.put(`/internal/session/${encodeURIComponent(sessionId)}`, {
       body: JSON.stringify(attributes),
     });
   }
@@ -87,12 +87,12 @@ export class SessionsClient {
     sessionId: string,
     expires: string
   ): Promise<SavedObjectsFindResponse<SearchSessionSavedObjectAttributes>> {
-    return this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
+    return this.http.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
       body: JSON.stringify({ expires }),
     });
   }
 
   public delete(sessionId: string): Promise<void> {
-    return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}`);
+    return this.http.delete(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 }

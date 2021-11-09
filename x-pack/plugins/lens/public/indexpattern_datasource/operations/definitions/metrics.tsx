@@ -91,7 +91,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         newField &&
           supportedTypes.includes(newField.type) &&
           newField.aggregatable &&
-          (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
+          (!newField.aggregationRestrictions || newField.aggregationRestrictions[type])
       );
     },
     onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>

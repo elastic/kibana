@@ -71,7 +71,7 @@ export class DiskUsageRule extends BaseRule {
       esClient,
       clusters,
       esIndexPattern,
-      duration as string,
+      duration,
       Globals.app.config.ui.max_bucket_size,
       params.filterQuery
     );

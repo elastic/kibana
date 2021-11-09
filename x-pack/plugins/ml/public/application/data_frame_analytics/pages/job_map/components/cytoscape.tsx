@@ -105,7 +105,7 @@ export function Cytoscape({
 
     return () => {
       if (cy) {
-        cy.removeListener('data', undefined, dataHandler as cytoscape.EventHandler);
+        cy.removeListener('data', undefined, dataHandler);
       }
     };
   }, [cy, elements, height, width]);

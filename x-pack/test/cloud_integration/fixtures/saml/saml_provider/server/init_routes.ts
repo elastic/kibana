@@ -18,7 +18,7 @@ export function initRoutes(core: CoreSetup) {
     },
     async (context, request, response) => {
       const samlResponse = await getSAMLResponse({
-        inResponseTo: await getSAMLRequestId(request.url.href!),
+        inResponseTo: await getSAMLRequestId(request.url.href),
         destination: `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}/api/security/saml/callback`,
       });
 

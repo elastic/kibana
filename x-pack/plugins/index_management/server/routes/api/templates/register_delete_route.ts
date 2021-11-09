@@ -29,7 +29,7 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
     },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const { templates } = request.body as TypeOf<typeof bodySchema>;
+      const { templates } = request.body;
       const responseBody: {
         templatesDeleted: Array<TemplateDeserialized['name']>;
         errors: any[];

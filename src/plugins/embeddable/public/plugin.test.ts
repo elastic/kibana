@@ -157,12 +157,12 @@ describe('embeddable factory', () => {
   });
 
   test('embeddableFactory migrate function gets called when calling embeddable migrate', () => {
-    start.getAllMigrations!()['7.11.0']!(embeddableState);
+    start.getAllMigrations()['7.11.0']!(embeddableState);
     expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
   });
 
   test('panels inside container get automatically migrated when migrating conta1iner', () => {
-    start.getAllMigrations!()['7.11.0']!(containerState);
+    start.getAllMigrations()['7.11.0']!(containerState);
     expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
   });
 
@@ -224,7 +224,7 @@ describe('embeddable enhancements', () => {
   });
 
   test('enhancement migrate function gets called when calling embeddable migrate', () => {
-    start.getAllMigrations!()['7.11.0']!(embeddableState);
+    start.getAllMigrations()['7.11.0']!(embeddableState);
     expect(embeddableEnhancement.migrations['7.11.0']).toBeCalledWith(
       embeddableState.enhancements.test
     );
@@ -232,9 +232,9 @@ describe('embeddable enhancements', () => {
 
   test('doesnt fail if there is no migration function registered for specific version', () => {
     expect(() => {
-      start.getAllMigrations!()['7.11.0']!(embeddableState);
+      start.getAllMigrations()['7.11.0']!(embeddableState);
     }).not.toThrow();
 
-    expect(start.getAllMigrations!()['7.11.0']!(embeddableState)).toEqual(embeddableState);
+    expect(start.getAllMigrations()['7.11.0']!(embeddableState)).toEqual(embeddableState);
   });
 });

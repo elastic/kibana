@@ -207,8 +207,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       await Promise.all([
         getLatencyPeriods({
           ...options,
-          latencyAggregationType:
-            latencyAggregationType as LatencyAggregationType,
+          latencyAggregationType,
           comparisonStart,
           comparisonEnd,
         }),

@@ -1080,7 +1080,7 @@ function setTaskTypeCount(
   status: Record<string, number>
 ) {
   const buckets = [
-    ...(aggregations.taskType as TaskTypeAggregation).buckets.filter(({ key }) => key !== taskType),
+    ...aggregations.taskType.buckets.filter(({ key }) => key !== taskType),
     {
       key: taskType,
       doc_count: Object.values(status).reduce((sum, count) => sum + count, 0),

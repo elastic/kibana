@@ -136,7 +136,7 @@ describe('Range filter builder', () => {
       };
 
       const filter = buildRangeFilter(field!, params, indexPattern) as ScriptedRangeFilter;
-      const script = filter.query.script!.script;
+      const script = filter.query.script.script;
 
       expect(script.source).toBe('(' + field!.script + ')' + operator + key);
       expect(script.params?.[key]).toBe(5);
@@ -163,17 +163,17 @@ describe('Range filter builder', () => {
       });
 
       it('contain a param for the finite side', () => {
-        expect(filter.query.script!.script.params).toHaveProperty('gte', 0);
+        expect(filter.query.script.script.params).toHaveProperty('gte', 0);
       });
 
       it('does not contain a param for the infinite side', () => {
-        expect(filter.query.script!.script.params).not.toHaveProperty('lt');
+        expect(filter.query.script.script.params).not.toHaveProperty('lt');
       });
 
       it('does not contain a script condition for the infinite side', () => {
         const script = field!.script;
 
-        expect(filter.query.script!.script.source).toEqual(`(${script})>=gte`);
+        expect(filter.query.script.script.source).toEqual(`(${script})>=gte`);
       });
     });
   });

@@ -30,10 +30,7 @@ export function getRootPropertiesObjects(mappings: IndexMapping) {
   const rootProperties = getRootProperties(mappings);
   return Object.entries(rootProperties).reduce((acc, [key, value]) => {
     // we consider the existence of the properties or type of object to designate that this is an object datatype
-    if (
-      !omittedRootProps.includes(key) &&
-      ((value as SavedObjectsFieldMapping).properties || value.type === 'object')
-    ) {
+    if (!omittedRootProps.includes(key) && (value.properties || value.type === 'object')) {
       acc[key] = value;
     }
     return acc;

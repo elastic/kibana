@@ -394,9 +394,7 @@ export const convertTimelineAsInput = (
                   ...(esFilters.isMatchAllFilter(basicFilter)
                     ? {
                         query: {
-                          match_all: convertToString(
-                            (basicFilter as MatchAllFilter).query.match_all
-                          ),
+                          match_all: convertToString(basicFilter.query.match_all),
                         },
                       }
                     : { match_all: null }),

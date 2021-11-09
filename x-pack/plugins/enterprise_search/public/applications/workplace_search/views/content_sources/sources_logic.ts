@@ -133,7 +133,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         setServerSourceStatuses: (_, sources) => {
           const serverStatuses = {} as ServerStatuses;
           sources.forEach((source) => {
-            serverStatuses[source.id as string] = source.status.status;
+            serverStatuses[source.id] = source.status.status;
           });
           return serverStatuses;
         },
@@ -276,7 +276,7 @@ const updateSourcesOnToggle = (
   sourceId: string,
   searchable: boolean
 ): ContentSourceDetails[] => {
-  const sources = cloneDeep(contentSources) as ContentSourceDetails[];
+  const sources = cloneDeep(contentSources);
   const index = findIndex(sources, ({ id }) => id === sourceId);
   const updatedSource = sources[index];
   sources[index] = {

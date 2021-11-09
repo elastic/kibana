@@ -20,7 +20,7 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
     },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const template = request.body as TypeOf<typeof bodySchema>;
+      const template = request.body;
 
       try {
         const { body: templatePreview } = await client.asCurrentUser.indices.simulateTemplate({

@@ -92,7 +92,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
 
   // This function is a noop in the form's disabled state
   const createMLJob = heartbeatIndices
-    ? () => dispatch(createMLJobAction.get({ monitorId: monitorId as string, heartbeatIndices }))
+    ? () => dispatch(createMLJobAction.get({ monitorId, heartbeatIndices }))
     : () => null;
 
   const { data: uptimeJobs } = useSelector(hasMLJobSelector);
@@ -107,14 +107,13 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
     if (isCreatingJob && !isMLJobCreating) {
       if (hasMLJob) {
         showMLJobNotification(
-          monitorId as string,
+          monitorId,
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
           true,
           hasMLJob.awaitingNodeAssignment
         );
-        const loadMLJob = (jobId: string) =>
-          dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
+        const loadMLJob = (jobId: string) => dispatch(getExistingMLJobAction.get({ monitorId }));
 
         loadMLJob(ML_JOB_ID);
 
@@ -123,7 +122,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
         dispatch(setAlertFlyoutVisible(true));
       } else {
         showMLJobNotification(
-          monitorId as string,
+          monitorId,
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
           false,
@@ -140,7 +139,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
   useEffect(() => {
     if (hasExistingMLJob && !isMLJobCreating && !hasMLJob && heartbeatIndices) {
       setIsCreatingJob(true);
-      dispatch(createMLJobAction.get({ monitorId: monitorId as string, heartbeatIndices }));
+      dispatch(createMLJobAction.get({ monitorId, heartbeatIndices }));
     }
 
     // Don't add isMLJobCreating, because it will result int end less loop

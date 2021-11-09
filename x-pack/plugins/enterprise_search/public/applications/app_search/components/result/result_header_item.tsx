@@ -27,7 +27,7 @@ export const ResultHeaderItem: React.FC<Props> = ({ field, type, value, href }) 
   if (typeof value === 'string') {
     formattedValue = value;
   } else if (typeof value === 'number') {
-    formattedValue = parseFloat((value as number).toFixed(2)).toString();
+    formattedValue = parseFloat(value.toFixed(2)).toString();
   }
 
   const HeaderItemContent = () => (

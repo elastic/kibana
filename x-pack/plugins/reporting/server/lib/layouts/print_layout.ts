@@ -62,7 +62,7 @@ export class PrintLayout extends Layout implements LayoutInstance {
     };
     const evalOptions: { fn: EvaluateFn; args: SerializableOrJSHandle[] } = {
       fn: (selector: string, height: number, width: number) => {
-        const visualizations = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
+        const visualizations = document.querySelectorAll(selector);
         const visualizationsLength = visualizations.length;
 
         for (let i = 0; i < visualizationsLength; i++) {

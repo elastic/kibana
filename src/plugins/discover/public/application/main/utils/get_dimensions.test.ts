@@ -34,7 +34,7 @@ test('getDimensions', () => {
   };
 
   const aggsConfig = getChartAggConfigs(searchSource, 'auto', dataMock);
-  const actual = getDimensions(aggsConfig!, dataMock);
+  const actual = getDimensions(aggsConfig, dataMock);
   expect(actual).toMatchInlineSnapshot(`
     Object {
       "x": Object {

@@ -120,10 +120,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     return agentPolicyData.items.reduce((acc, item) => {
       const existingPolicies = item?.package_policies
         ? isStringArray(item.package_policies)
-          ? (item.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
-          : (item.package_policies as PackagePolicy[]).filter((p) =>
-              packagePolicyIds.includes(p.id)
-            )
+          ? item.package_policies.filter((p) => packagePolicyIds.includes(p))
+          : item.package_policies.filter((p) => packagePolicyIds.includes(p.id))
         : [];
       return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
     }, 0);

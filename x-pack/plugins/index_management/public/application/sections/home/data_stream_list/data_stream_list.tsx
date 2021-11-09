@@ -191,7 +191,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
             defaultMessage="Error loading data streams"
           />
         }
-        error={error as Error}
+        error={error}
       />
     );
   } else if (Array.isArray(dataStreams) && dataStreams.length === 0) {

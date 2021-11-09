@@ -209,7 +209,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
     searchAggregatedTransactions,
     transactionType,
     numBuckets,
-    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    latencyAggregationType,
     environment,
     kuery,
   };

@@ -104,7 +104,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
   // State for custom patterns
   const [indexPatterns, setIndexPatterns] = useState<string[]>(() =>
     typeof config.indices === 'string'
-      ? (config.indices as string).split(',')
+      ? config.indices.split(',')
       : Array.isArray(config.indices) && config.indices
       ? config.indices
       : []

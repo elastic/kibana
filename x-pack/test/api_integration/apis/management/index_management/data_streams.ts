@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(testDataStream).to.be.ok();
 
         // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = testDataStream!.indices[0];
+        const { name: indexName, uuid } = testDataStream.indices[0];
 
         expect(testDataStream).to.eql({
           name: testDataStreamName,
@@ -118,8 +118,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(testDataStream).to.be.ok();
 
         // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = testDataStream!.indices[0];
-        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = testDataStream!;
+        const { name: indexName, uuid } = testDataStream.indices[0];
+        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = testDataStream;
         assertDataStreamStorageSizeExists(storageSize, storageSizeBytes);
 
         expect(dataStreamWithoutStorageSize).to.eql({

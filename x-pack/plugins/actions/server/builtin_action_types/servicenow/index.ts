@@ -271,7 +271,7 @@ async function executorITOM(
     logger,
     configurationUtilities,
     externalServiceConfig
-  ) as ExternalServiceITOM;
+  );
 
   const apiAsRecord = api as unknown as Record<string, unknown>;
 

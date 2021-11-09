@@ -851,7 +851,7 @@ async function _compilePackagePolicyInput(
   );
 
   if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
-    throw new Error(`Unable to load input template at /agent/input/${packageInput.template_path!}`);
+    throw new Error(`Unable to load input template at /agent/input/${packageInput.template_path}`);
   }
 
   return compileTemplate(

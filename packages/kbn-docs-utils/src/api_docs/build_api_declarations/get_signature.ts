@@ -76,7 +76,7 @@ export function getSignature(
     isNamedNode(node) &&
     referenceLinks.length === 1 &&
     typeof referenceLinks[0] === 'object' &&
-    (referenceLinks[0] as Reference).text === node.getName()
+    referenceLinks[0].text === node.getName()
   ) {
     return undefined;
   }

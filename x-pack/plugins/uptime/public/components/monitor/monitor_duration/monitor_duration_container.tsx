@@ -38,8 +38,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const { data: mlJobs, loading: jobsLoading } = useSelector(hasMLJobSelector);
 
   const hasMLJob =
-    !!mlJobs?.jobsExist &&
-    !!mlJobs.jobs.find((job: JobStat) => job.id === getMLJobId(monitorId as string));
+    !!mlJobs?.jobsExist && !!mlJobs.jobs.find((job: JobStat) => job.id === getMLJobId(monitorId));
 
   const anomalies = useSelector(anomaliesSelector);
 

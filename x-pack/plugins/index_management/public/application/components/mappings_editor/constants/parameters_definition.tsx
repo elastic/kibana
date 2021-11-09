@@ -1000,7 +1000,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         },
         {
           validator: (({ value }: ValidationFuncArg<any, number>) => {
-            if ((value as number) < 0) {
+            if (value < 0) {
               return { message: commonErrorMessages.smallerThanZero };
             }
           }) as ValidationFunc,
@@ -1026,7 +1026,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       validations: [
         {
           validator: (({ value }: ValidationFuncArg<any, number>) => {
-            if ((value as number) < 0) {
+            if (value < 0) {
               return { message: commonErrorMessages.smallerThanZero };
             }
           }) as ValidationFunc,

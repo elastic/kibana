@@ -30,7 +30,7 @@ export const mockFlashMessageHelpers = {
 };
 
 jest.mock('../../shared/flash_messages', () => ({
-  ...(jest.requireActual('../../shared/flash_messages') as object),
+  ...jest.requireActual('../../shared/flash_messages'),
   ...mockFlashMessageHelpers,
   FlashMessagesLogic: {
     values: mockFlashMessagesValues,

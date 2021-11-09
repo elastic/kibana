@@ -100,15 +100,15 @@ export async function aggregateLatencyMetrics() {
 
   const include = String(argv.include ?? '')
     .split(',')
-    .filter(Boolean) as string[];
+    .filter(Boolean);
 
   const exclude = String(argv.exclude ?? '')
     .split(',')
-    .filter(Boolean) as string[];
+    .filter(Boolean);
 
   const only = String(argv.only ?? '')
     .split(',')
-    .filter(Boolean) as string[];
+    .filter(Boolean);
 
   const fields = only.length
     ? uniq(only)
@@ -385,7 +385,7 @@ export async function aggregateLatencyMetrics() {
               return;
             }
 
-            const response = await (destClient as any)?.bulk({
+            const response = await destClient?.bulk({
               refresh: 'wait_for',
               body: flatten(
                 docs.map((doc) => [

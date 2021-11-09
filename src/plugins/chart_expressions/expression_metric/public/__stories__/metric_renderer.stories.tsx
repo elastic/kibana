@@ -233,8 +233,8 @@ storiesOf('renderers/visMetric', module)
         config={{
           ...config,
           visData: {
-            ...(config.visData as Datatable),
-            columns: [...(config.visData as Datatable).columns, dayColumn],
+            ...config.visData,
+            columns: [...config.visData.columns, dayColumn],
             rows: dataWithBuckets,
           },
           visConfig: {

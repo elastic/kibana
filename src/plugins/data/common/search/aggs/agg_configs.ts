@@ -45,7 +45,7 @@ function removeParentAggs(obj: any) {
 function parseParentAggs(dslLvlCursor: any, dsl: any) {
   if (dsl.parentAggs) {
     _.each(dsl.parentAggs, (agg, key) => {
-      dslLvlCursor[key as string] = agg;
+      dslLvlCursor[key] = agg;
       parseParentAggs(dslLvlCursor, agg);
     });
   }
@@ -431,7 +431,7 @@ export class AggConfigs {
         doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
       };
     }
-    const aggCursor = transformedRawResponse.aggregations!;
+    const aggCursor = transformedRawResponse.aggregations;
 
     mergeTimeShifts(this, aggCursor);
     return {

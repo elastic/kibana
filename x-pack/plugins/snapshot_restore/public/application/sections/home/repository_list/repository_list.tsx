@@ -87,7 +87,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             defaultMessage="Error loading repositories"
           />
         }
-        error={error as Error}
+        error={error}
       />
     );
   } else if (repositories && repositories.length === 0) {

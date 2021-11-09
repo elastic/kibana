@@ -21,7 +21,7 @@ export const multiSelectComponent: Record<string, FuncType> = {
         return selectOptions;
       }
 
-      return (selectOptions as EuiSelectableOption[]).map((option) => ({
+      return selectOptions.map((option) => ({
         ...option,
         checked: (defaultFormValue as string[]).includes(option.label) ? 'on' : undefined,
       }));

@@ -87,7 +87,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
             defaultMessage="Error loading component template"
           />
         }
-        error={error as Error}
+        error={error}
         data-test-subj="loadComponentTemplateError"
       />
     );

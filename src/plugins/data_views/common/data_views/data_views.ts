@@ -547,7 +547,7 @@ export class DataViewsService {
     const indexPattern = await this.create(spec, skipFetchFields);
     const createdIndexPattern = await this.createSavedObject(indexPattern, override);
     await this.setDefault(createdIndexPattern.id!);
-    return createdIndexPattern!;
+    return createdIndexPattern;
   }
 
   /**

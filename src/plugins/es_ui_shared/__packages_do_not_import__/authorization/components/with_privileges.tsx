@@ -28,7 +28,7 @@ interface Props {
 type Privilege = [string, string];
 
 const toArray = (value: Privileges): string[] =>
-  Array.isArray(value) ? (value as string[]) : ([value] as string[]);
+  Array.isArray(value) ? value : ([value] as string[]);
 
 export const convertPrivilegesToArray = (privileges: Privileges): Privilege[] => {
   return toArray(privileges).map((p) => {

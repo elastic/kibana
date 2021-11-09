@@ -143,7 +143,7 @@ const createSuccessTransportRequestPromise = <T>(
 ): Promise<TransportResult<T>> => {
   const response = createApiResponse({ body, statusCode, headers });
 
-  return Promise.resolve(response) as Promise<TransportResult<T>>;
+  return Promise.resolve(response);
 };
 
 const createErrorTransportRequestPromise = (err: any): Promise<TransportResult<never>> => {

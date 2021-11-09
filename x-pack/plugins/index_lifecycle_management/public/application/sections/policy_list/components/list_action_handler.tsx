@@ -48,8 +48,8 @@ export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolici
         policy={listAction.selectedPolicy}
         onSuccess={(indexTemplate: string) => {
           // update the linked index templates of the selected policy
-          listAction!.selectedPolicy.indexTemplates = [
-            ...(listAction!.selectedPolicy.indexTemplates || []),
+          listAction.selectedPolicy.indexTemplates = [
+            ...(listAction.selectedPolicy.indexTemplates || []),
             indexTemplate,
           ];
           setListAction(null);

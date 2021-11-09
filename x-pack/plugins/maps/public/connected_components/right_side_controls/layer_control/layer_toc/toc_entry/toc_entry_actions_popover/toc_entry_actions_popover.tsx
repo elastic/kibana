@@ -90,7 +90,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     }
 
     if (
-      (layerSource as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
+      layerSource.getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
       (await vectorLayer.isFilteredByGlobalTime()) ||
       vectorLayer.isPreviewLayer() ||
       !vectorLayer.isVisible() ||

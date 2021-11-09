@@ -212,7 +212,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       inject: getInjectFunction(commonContract),
       getAllMigrations: getAllMigrationsFn,
       migrateToLatest: (state) => {
-        return migrateToLatest(getAllMigrationsFn(), state) as EmbeddableStateWithType;
+        return migrateToLatest(getAllMigrationsFn(), state);
       },
     };
   }

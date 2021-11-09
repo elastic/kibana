@@ -40,8 +40,8 @@ export const createExternalService = (
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
-  const { apiUrl: url, appId, mappings } = config as SwimlanePublicConfigurationType;
-  const { apiToken } = secrets as SwimlaneSecretConfigurationType;
+  const { apiUrl: url, appId, mappings } = config;
+  const { apiToken } = secrets;
 
   const axiosInstance = axios.create();
 
@@ -77,7 +77,7 @@ export const createExternalService = (
     params: CreateRecordParams
   ): Promise<ExternalServiceIncidentResponse> => {
     try {
-      const mappingConfig = mappings as MappingConfigType;
+      const mappingConfig = mappings;
       const data = getBodyForEventAction(appId, mappingConfig, params.incident);
 
       const res = await request({
@@ -117,7 +117,7 @@ export const createExternalService = (
     params: UpdateRecordParams
   ): Promise<ExternalServiceIncidentResponse> => {
     try {
-      const mappingConfig = mappings as MappingConfigType;
+      const mappingConfig = mappings;
       const data = getBodyForEventAction(appId, mappingConfig, params.incident, params.incidentId);
 
       const res = await request<SwimlaneRecordPayload>({
@@ -155,7 +155,7 @@ export const createExternalService = (
 
   const createComment = async ({ incidentId, comment, createdDate }: CreateCommentParams) => {
     try {
-      const mappingConfig = mappings as MappingConfigType;
+      const mappingConfig = mappings;
       const fieldId = getCommentFieldId(mappingConfig);
 
       if (fieldId == null) {

@@ -103,7 +103,7 @@ const getNameFieldConfig = (
 
   // Add validation to not allow duplicates
   return {
-    ...nameFieldConfig!,
+    ...nameFieldConfig,
     validations: [
       ...(nameFieldConfig.validations ?? []),
       {
@@ -143,7 +143,7 @@ const RuntimeFieldFormComp = ({
   const typeFieldConfig = schema.type as FieldConfig<RuntimeType, RuntimeField>;
 
   const [painlessContext, setPainlessContext] = useState<PainlessContext>(
-    mapReturnTypeToPainlessContext(typeFieldConfig!.defaultValue!)
+    mapReturnTypeToPainlessContext(typeFieldConfig.defaultValue!)
   );
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
   const { submit, isValid: isFormValid, isSubmitted } = form;

@@ -57,7 +57,7 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
   } else if (
     Node.isPropertySignature(node) &&
     node.getTypeNode() &&
-    Node.isFunctionTypeNode(node.getTypeNode()!)
+    Node.isFunctionTypeNode(node.getTypeNode())
   ) {
     // This code path covers optional properties on interfaces, otherwise they lost their children. Yes, a bit strange.
     return buildFunctionTypeDec(node, node.getTypeNode()! as FunctionTypeNode, opts);

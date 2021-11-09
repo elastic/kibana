@@ -73,8 +73,8 @@ export async function fetchClusterHealth(
   const response: ElasticsearchResponse = result.body as ElasticsearchResponse;
   return (response.hits?.hits ?? []).map((hit) => {
     return {
-      health: hit._source!.cluster_state?.status,
-      clusterUuid: hit._source!.cluster_uuid,
+      health: hit._source.cluster_state?.status,
+      clusterUuid: hit._source.cluster_uuid,
       ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
     } as AlertClusterHealth;
   });

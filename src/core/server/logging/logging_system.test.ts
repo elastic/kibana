@@ -8,7 +8,7 @@
 
 const mockStreamWrite = jest.fn();
 jest.mock('fs', () => ({
-  ...(jest.requireActual('fs') as any),
+  ...jest.requireActual('fs'),
   constants: {},
   createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
 }));

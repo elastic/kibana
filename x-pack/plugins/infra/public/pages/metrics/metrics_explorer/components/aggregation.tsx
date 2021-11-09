@@ -73,7 +73,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
       fullWidth
       value={options.aggregation}
       options={METRIC_EXPLORER_AGGREGATIONS.map((k) => ({
-        text: AGGREGATION_LABELS[k as MetricsExplorerAggregation],
+        text: AGGREGATION_LABELS[k],
         value: k,
       }))}
       onChange={handleChange}

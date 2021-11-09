@@ -49,7 +49,7 @@ const jsonToTree: (obj: Record<string, any>) => Node[] = (obj) => {
     const id = uuid();
 
     if (isDate(value)) {
-      return { label: `${label}: ${(value as Date).toDateString()}` };
+      return { label: `${label}: ${value.toDateString()}` };
     }
 
     if (isObject(value)) {

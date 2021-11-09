@@ -80,7 +80,7 @@ export function disableUICapabilitiesFactory(
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) =>
       mapValues(featureUICapabilities, (value, uiCapability) => {
         if (typeof value === 'boolean') {
-          if (shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+          if (shouldDisableFeatureUICapability(featureId, uiCapability)) {
             return false;
           }
           return value;
@@ -230,19 +230,19 @@ export function disableUICapabilitiesFactory(
         featureUICapabilities,
         (value: boolean | Record<string, boolean>, uiCapability) => {
           if (typeof value === 'boolean') {
-            if (!shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+            if (!shouldDisableFeatureUICapability(featureId, uiCapability)) {
               return value;
             }
-            return checkPrivilegesForCapability(value, featureId!, uiCapability!);
+            return checkPrivilegesForCapability(value, featureId, uiCapability);
           }
 
           if (isObject(value)) {
             const res = mapValues(value, (enabled, subUiCapability) => {
               return checkPrivilegesForCapability(
                 enabled,
-                featureId!,
-                uiCapability!,
-                subUiCapability!
+                featureId,
+                uiCapability,
+                subUiCapability
               );
             });
             return res;

@@ -111,8 +111,8 @@ describe('AggConfig Filters', () => {
       expect(filter).toHaveProperty('query');
       expect(filter.query).toHaveProperty('bool');
       expect(filter.query?.bool).toHaveProperty('should');
-      expect((filter.query?.bool?.should as any)[0]).toHaveProperty('match_phrase');
-      expect((filter.query?.bool!.should as any)[0].match_phrase).toHaveProperty('field', 'apache');
+      expect((filter.query?.bool?.should)[0]).toHaveProperty('match_phrase');
+      expect((filter.query?.bool!.should)[0].match_phrase).toHaveProperty('field', 'apache');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter.meta).toHaveProperty('negate', true);

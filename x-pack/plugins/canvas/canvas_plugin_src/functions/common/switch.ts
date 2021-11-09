@@ -34,7 +34,7 @@ export function switchFn(): ExpressionFunctionDefinition<
         resolve: false,
         multi: true,
         required: true,
-        help: argHelp.case!,
+        help: argHelp.case,
       },
       default: {
         aliases: ['finally'],

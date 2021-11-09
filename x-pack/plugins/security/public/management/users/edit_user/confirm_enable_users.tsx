@@ -46,7 +46,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
             defaultMessage: "Could not activate user '{username}'",
             values: { username },
           }),
-          text: (error as any).body?.message || error.message,
+          text: error.body?.message || error.message,
         });
       }
     }

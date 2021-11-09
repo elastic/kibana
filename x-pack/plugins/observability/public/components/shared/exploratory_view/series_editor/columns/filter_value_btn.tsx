@@ -75,7 +75,7 @@ export function FilterValueButton({
 
   const onNestedChange = (valuesN?: string[]) => {
     (valuesN ?? []).forEach((valN) => {
-      setFilter({ field: nestedField!, value: valN! });
+      setFilter({ field: nestedField!, value: valN });
     });
     setIsNestedOpen({ value: '', negate });
   };

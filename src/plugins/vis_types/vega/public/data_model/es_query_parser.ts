@@ -188,13 +188,13 @@ export class EsQueryParser {
         // Use dashboard context
         const newQuery = cloneDeep(this._filters);
         if (timefield) {
-          newQuery.bool!.must!.push(body.query);
+          newQuery.bool.must.push(body.query);
         }
         body.query = newQuery;
       }
     }
 
-    this._injectContextVars(body.aggs!, false);
+    this._injectContextVars(body.aggs, false);
     return { dataObject, url };
   }
 

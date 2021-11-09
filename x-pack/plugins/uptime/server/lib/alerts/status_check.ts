@@ -398,7 +398,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
       const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;
 
-      const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
+      const statusMessage = getStatusMessage(downMonInfo, availMonInfo, availability);
       const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
 
       const alert = alertWithLifecycle({

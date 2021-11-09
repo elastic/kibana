@@ -70,7 +70,7 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
           }
 
           // Re-throw error so that downstream catches work as expected
-          return Promise.reject(httpResponse) as Promise<HttpInterceptorResponseError>;
+          return Promise.reject(httpResponse);
         },
       });
       httpInterceptors.push(errorConnectingInterceptor);

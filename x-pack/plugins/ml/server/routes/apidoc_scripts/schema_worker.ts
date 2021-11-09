@@ -52,10 +52,10 @@ function updateBlockParameters(docEntries: DocEntry[], block: Block, paramsGroup
     block.local.parameter.fields = {};
   }
 
-  if (!block.local.parameter.fields![paramsGroup]) {
-    block.local.parameter.fields![paramsGroup] = [];
+  if (!block.local.parameter.fields[paramsGroup]) {
+    block.local.parameter.fields[paramsGroup] = [];
   }
-  const collection = block.local.parameter.fields![paramsGroup] as ApiParameter[];
+  const collection = block.local.parameter.fields[paramsGroup] as ApiParameter[];
 
   for (const field of docEntries) {
     collection.push({

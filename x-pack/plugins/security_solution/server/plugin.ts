@@ -421,8 +421,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryReceiver.start(
       core,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.kibanaIndex!,
+      this.kibanaIndex,
       this.endpointAppContextService,
       exceptionListClient
     );

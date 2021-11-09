@@ -354,7 +354,7 @@ export const aggs: Agg[] = [
 
 export const getAggsByPredicate = (
   predicate: Assign<Partial<Agg>, { meta?: Partial<Agg['meta']> }>
-) => filter(aggs, predicate) as Agg[];
+) => filter(aggs, predicate);
 
 export const getAggByPredicate = (metricType: MetricType, metaPredicate?: Partial<Agg['meta']>) => {
   const predicate = {

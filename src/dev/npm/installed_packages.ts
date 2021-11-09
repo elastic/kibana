@@ -57,7 +57,7 @@ function readModuleInfo(
     return;
   }
 
-  const isPrivate = !!(moduleInfo as any).private as boolean;
+  const isPrivate = !!(moduleInfo as any).private;
   const keyParts = pkgAndVersion.split('@');
   const name = keyParts.slice(0, -1).join('@');
   const version = keyParts[keyParts.length - 1];

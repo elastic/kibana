@@ -42,8 +42,8 @@ export function convertSettingsIntoLists(
 
       const dataRoles = nodeSettings.roles.filter((r) => r.startsWith('data')) as DataTierRole[];
       for (const role of dataRoles) {
-        accum.nodesByRoles[role as DataTierRole] = accum.nodesByRoles[role] ?? [];
-        accum.nodesByRoles[role as DataTierRole]!.push(nodeId);
+        accum.nodesByRoles[role] = accum.nodesByRoles[role] ?? [];
+        accum.nodesByRoles[role]!.push(nodeId);
       }
 
       // If we detect a single node using legacy "data:true" setting we know we are not using data roles for

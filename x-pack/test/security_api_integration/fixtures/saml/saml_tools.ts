@@ -30,12 +30,12 @@ const signingKey = fs.readFileSync(KBN_KEY_PATH);
 const signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
 
 export async function getSAMLRequestId(urlWithSAMLRequestId: string) {
-  const inflatedSAMLRequest = (await inflateRawAsync(
+  const inflatedSAMLRequest = await inflateRawAsync(
     Buffer.from(
       url.parse(urlWithSAMLRequestId, true /* parseQueryString */).query.SAMLRequest as string,
       'base64'
     )
-  )) as Buffer;
+  );
 
   const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
   return parsedSAMLRequest['saml2p:AuthnRequest'].$.ID;
@@ -140,9 +140,7 @@ export async function getLogoutRequest({
 
   // HTTP-Redirect with deflate encoding:
   // http://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf - section 3.4.4.1
-  const deflatedLogoutRequest = (await deflateRawAsync(
-    Buffer.from(logoutRequestTemplateXML)
-  )) as Buffer;
+  const deflatedLogoutRequest = await deflateRawAsync(Buffer.from(logoutRequestTemplateXML));
 
   const queryStringParameters: Record<string, string> = {
     SAMLRequest: deflatedLogoutRequest.toString('base64'),

@@ -164,7 +164,7 @@ export async function findListItems(
     .map((v) => v.appExtensions?.visualizations)
     .filter(Boolean) as VisualizationsAppExtension[];
   const extensionByType = extensions.reduce((acc, m) => {
-    return m!.docTypes.reduce((_acc, type) => {
+    return m.docTypes.reduce((_acc, type) => {
       acc[type] = m;
       return acc;
     }, acc);

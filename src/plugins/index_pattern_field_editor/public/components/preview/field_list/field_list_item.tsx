@@ -56,7 +56,7 @@ export const PreviewListItem: React.FC<Props> = ({
         <span
           className="indexPatternFieldEditor__previewFieldList__item__value__wrapper"
           // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-          dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: formattedValue }} // eslint-disable-line react/no-danger
         />
       );
     }

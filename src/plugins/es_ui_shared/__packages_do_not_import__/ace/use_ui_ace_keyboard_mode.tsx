@@ -90,7 +90,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
         document.removeEventListener('keydown', documentKeyDownListener, { capture: true });
         aceTextAreaElement.removeEventListener('keydown', aceKeydownListener);
         const textAreaContainer = aceTextAreaElement.parentElement;
-        if (textAreaContainer && textAreaContainer.contains(overlayMountNode.current!)) {
+        if (textAreaContainer && textAreaContainer.contains(overlayMountNode.current)) {
           textAreaContainer.removeChild(overlayMountNode.current!);
         }
       }

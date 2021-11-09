@@ -77,7 +77,7 @@ class ApiService {
     decodeType?: any,
     asResponse = false
   ) {
-    const response = await this._http!.fetch<T>({
+    const response = await this._http.fetch<T>({
       path: apiUrl,
       query: params,
       asResponse,
@@ -104,7 +104,7 @@ class ApiService {
   }
 
   public async post<T>(apiUrl: string, data?: any, decodeType?: any) {
-    const response = await this._http!.post<T>(apiUrl, {
+    const response = await this._http.post<T>(apiUrl, {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -124,7 +124,7 @@ class ApiService {
   }
 
   public async delete<T>(apiUrl: string) {
-    const response = await this._http!.delete<T>(apiUrl);
+    const response = await this._http.delete<T>(apiUrl);
     if (response instanceof Error) {
       throw response;
     }

@@ -67,7 +67,7 @@ function FilterBarUI(props: Props) {
           onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
-          uiSettings={uiSettings!}
+          uiSettings={uiSettings}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
         />
       </EuiFlexItem>
@@ -75,7 +75,7 @@ function FilterBarUI(props: Props) {
   }
 
   function renderAddFilter() {
-    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
+    const isPinned = uiSettings.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
     const [indexPattern] = props.indexPatterns;
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);

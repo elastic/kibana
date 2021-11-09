@@ -47,8 +47,8 @@ export function registerSearchRoute(router: DataPluginRouter): void {
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
-        const response = await context
-          .search!.search(
+        const response = await context.search
+          .search(
             { ...searchRequest, id },
             {
               abortSignal,
@@ -85,7 +85,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
       const { strategy, id } = request.params;
 
       try {
-        await context.search!.cancel(id, { strategy });
+        await context.search.cancel(id, { strategy });
         return res.ok();
       } catch (err) {
         return reportServerError(res, err);

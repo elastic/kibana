@@ -15,7 +15,7 @@ import type { SavedDashboardPanel, DashboardPanelMap } from '../../types';
 export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): DashboardPanelMap => {
   const panelsMap: DashboardPanelMap = {};
   panels?.forEach((panel, idx) => {
-    panelsMap![panel.panelIndex ?? String(idx)] = convertSavedDashboardPanelToPanelState(panel);
+    panelsMap[panel.panelIndex ?? String(idx)] = convertSavedDashboardPanelToPanelState(panel);
   });
   return panelsMap;
 };

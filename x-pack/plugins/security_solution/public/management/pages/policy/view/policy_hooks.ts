@@ -33,11 +33,7 @@ export function usePolicyDetailsSelector<TSelected>(
   selector: (state: PolicyDetailsState) => TSelected
 ) {
   return useSelector((state: State) =>
-    selector(
-      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
-        MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE
-      ] as PolicyDetailsState
-    )
+    selector(state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE])
   );
 }
 

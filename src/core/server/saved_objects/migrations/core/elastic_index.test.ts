@@ -36,7 +36,7 @@ describe('ElasticIndex', () => {
 
     test('decorates index info with exists and indexName', async () => {
       client.indices.get.mockImplementation((params) => {
-        const index = params!.index as string;
+        const index = params.index as string;
         return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },

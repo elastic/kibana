@@ -107,9 +107,7 @@ const validateTCP: Record<string, Validator> = {
 const validateICMP: ValidationLibrary = {
   [ConfigKeys.HOSTS]: ({ [ConfigKeys.HOSTS]: value }) => !value,
   [ConfigKeys.WAIT]: ({ [ConfigKeys.WAIT]: value }) =>
-    !!value &&
-    !digitsOnly.test(`${value}`) &&
-    parseFloat(value as ICustomFields[ConfigKeys.WAIT]) < 0,
+    !!value && !digitsOnly.test(`${value}`) && parseFloat(value) < 0,
   ...validateCommon,
 };
 

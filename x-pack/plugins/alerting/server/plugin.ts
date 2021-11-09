@@ -379,11 +379,11 @@ export class AlertingPlugin {
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
-      return rulesClientFactory!.create(request, core.savedObjects);
+      return rulesClientFactory.create(request, core.savedObjects);
     };
 
     const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
-      return alertingAuthorizationClientFactory!.create(request);
+      return alertingAuthorizationClientFactory.create(request);
     };
 
     taskRunnerFactory.initialize({
@@ -433,7 +433,7 @@ export class AlertingPlugin {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getRulesClient: () => {
-          return rulesClientFactory!.create(request, savedObjects);
+          return rulesClientFactory.create(request, savedObjects);
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>

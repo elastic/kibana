@@ -188,12 +188,12 @@ export class ElasticsearchService {
 
       let enrollmentResponse;
       try {
-        enrollmentResponse = (await enrollClient
+        enrollmentResponse = await enrollClient
           .asScoped(scopeableRequest)
           .asCurrentUser.transport.request({
             method: 'GET',
             path: '/_security/enroll/kibana',
-          })) as TransportResult<{ token: { name: string; value: string }; http_ca: string }>;
+          });
       } catch (err) {
         // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
         // that enrollment will fail for any other host and we should bail out.

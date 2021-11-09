@@ -154,7 +154,7 @@ describe('FlashMessagesLogic', () => {
         jest.spyOn(FlashMessagesLogic.actions, 'clearQueuedMessages');
         jest.spyOn(FlashMessagesLogic.actions, 'setHistoryListener');
 
-        const mockHistoryChange = (history.listen.mock.calls[0] as any)[0];
+        const mockHistoryChange = history.listen.mock.calls[0][0];
         mockHistoryChange();
         expect(FlashMessagesLogic.actions.clearFlashMessages).toHaveBeenCalled();
         expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([

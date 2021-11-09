@@ -437,7 +437,7 @@ export async function syncExistingFields({
 
     return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
       body: JSON.stringify(body),
-    }) as Promise<ExistingFields>;
+    });
   });
 
   try {

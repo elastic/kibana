@@ -190,7 +190,7 @@ export const ActionForm = ({
 
   function addActionType(actionTypeModel: ActionTypeModel) {
     if (!defaultActionGroupId) {
-      toasts!.addDanger({
+      toasts.addDanger({
         title: i18n.translate('xpack.triggersActionsUI.sections.actionForm.unableToAddAction', {
           defaultMessage: 'Unable to add action, because default action group is not defined',
         }),
@@ -268,7 +268,7 @@ export const ActionForm = ({
               type={
                 typeof item.iconClass === 'string'
                   ? item.iconClass
-                  : suspendedComponentWithProps(item.iconClass as React.ComponentType)
+                  : suspendedComponentWithProps(item.iconClass)
               }
             />
           </EuiKeyPadMenuItem>

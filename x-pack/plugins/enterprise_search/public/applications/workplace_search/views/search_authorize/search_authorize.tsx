@@ -21,7 +21,7 @@ import { AppLogic } from '../../app_logic';
 import { SearchAuthorizeLogic } from './search_authorize_logic';
 
 export const SearchAuthorize: React.FC = () => {
-  const { search } = useLocation() as Location;
+  const { search } = useLocation();
   const { initializeSearchAuth } = useActions(SearchAuthorizeLogic);
 
   const { searchOAuth } = useValues(AppLogic);

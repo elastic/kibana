@@ -32,7 +32,7 @@ export function createIndexMap({ kibanaIndexName, registry, indexMap }: CreateIn
     const script = typeDef?.convertToAliasScript;
     // Defaults to kibanaIndexName if indexPattern isn't defined
     const indexPattern = typeDef?.indexPattern || kibanaIndexName;
-    if (!map.hasOwnProperty(indexPattern as string)) {
+    if (!map.hasOwnProperty(indexPattern)) {
       map[indexPattern] = { typeMappings: {} };
     }
     map[indexPattern].typeMappings[type] = indexMap[type];

@@ -424,7 +424,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       // Expected source is not compatible, so remove.
       return true;
     }
-    const mbTileSource = mbSource as MbVectorSource;
+    const mbTileSource = mbSource;
 
     const dataRequest = this.getSourceDataRequest();
     if (!dataRequest) {

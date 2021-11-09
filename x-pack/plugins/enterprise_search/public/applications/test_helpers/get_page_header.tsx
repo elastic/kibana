@@ -18,7 +18,7 @@ import { EuiPageHeaderProps, EuiTab } from '@elastic/eui';
  */
 
 export const getPageHeader = (wrapper: ShallowWrapper) => {
-  const pageHeader = wrapper.prop('pageHeader') as EuiPageHeaderProps;
+  const pageHeader = wrapper.prop('pageHeader');
   return pageHeader || {};
 };
 

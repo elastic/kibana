@@ -14,7 +14,7 @@ export const registerInternalSearchableTypesRoute = (router: GlobalSearchRouter)
       validate: false,
     },
     async (ctx, req, res) => {
-      const types = await ctx.globalSearch!.getSearchableTypes();
+      const types = await ctx.globalSearch.getSearchableTypes();
       return res.ok({
         body: {
           types,

@@ -14,7 +14,7 @@ interface IFlattened {
 
 export const checkIfRowsHaveFormulas = (flattened: IFlattened, fields: string[]) => {
   const pruned = pick(flattened, fields);
-  const cells = [...keys(pruned), ...(values(pruned) as string[])];
+  const cells = [...keys(pruned), ...values(pruned)];
 
   return some(cells, (cell) => cellHasFormulas(cell));
 };

@@ -30,7 +30,7 @@ export function inferTimeZone(
     tz = isDefaultTimezone()
       ? detectedTimezone || tzOffset
       : // if timezone is not the default, this will always return a string
-        (getConfig('dateFormat:tz') as string);
+        getConfig('dateFormat:tz');
   }
   return tz;
 }

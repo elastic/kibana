@@ -504,7 +504,7 @@ describe('SearchInterceptor', () => {
           sessionId?: string;
         } | null
       ) => {
-        const sessionServiceMock = sessionService as jest.Mocked<ISessionService>;
+        const sessionServiceMock = sessionService;
         sessionServiceMock.getSearchOptions.mockImplementation(() =>
           opts && opts.sessionId
             ? {
@@ -524,7 +524,7 @@ describe('SearchInterceptor', () => {
       };
 
       afterEach(() => {
-        const sessionServiceMock = sessionService as jest.Mocked<ISessionService>;
+        const sessionServiceMock = sessionService;
         sessionServiceMock.getSearchOptions.mockReset();
         fetchMock.mockReset();
       });
@@ -547,9 +547,7 @@ describe('SearchInterceptor', () => {
           })
         );
 
-        expect(
-          (sessionService as jest.Mocked<ISessionService>).getSearchOptions
-        ).toHaveBeenCalledWith(sessionId);
+        expect(sessionService.getSearchOptions).toHaveBeenCalledWith(sessionId);
       });
 
       test("doesn't forward sessionId if search options return null", async () => {
@@ -566,9 +564,7 @@ describe('SearchInterceptor', () => {
           })
         );
 
-        expect(
-          (sessionService as jest.Mocked<ISessionService>).getSearchOptions
-        ).toHaveBeenCalledWith(sessionId);
+        expect(sessionService.getSearchOptions).toHaveBeenCalledWith(sessionId);
       });
 
       test('should not show warning if a search is available during restore', async () => {

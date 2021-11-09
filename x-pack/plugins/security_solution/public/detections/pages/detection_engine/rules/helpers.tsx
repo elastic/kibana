@@ -189,7 +189,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    threat: threat as Threats,
+    threat,
     threatIndicatorPath,
   };
 };

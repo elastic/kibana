@@ -90,7 +90,7 @@ async function executor(
   >
 ): Promise<ActionTypeExecutorResult<JiraExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  const { subAction, subActionParams } = params;
   let data: JiraExecutorResultData | null = null;
 
   const externalService = createExternalService(

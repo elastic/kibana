@@ -75,9 +75,9 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_LINE,
-      geoField: normalizedDescriptor.geoField!,
-      splitField: normalizedDescriptor.splitField!,
-      sortField: normalizedDescriptor.sortField!,
+      geoField: normalizedDescriptor.geoField,
+      splitField: normalizedDescriptor.splitField,
+      sortField: normalizedDescriptor.sortField,
     };
   }
 

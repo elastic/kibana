@@ -303,7 +303,7 @@ export const useColumns = (
     },
     {
       name: i18n.translate('xpack.transform.tableActionLabel', { defaultMessage: 'Actions' }),
-      actions: actions as EuiTableActionsColumnType<TransformListRow>['actions'],
+      actions,
       width: '80px',
     },
   ];

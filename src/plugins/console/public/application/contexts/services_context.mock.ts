@@ -23,7 +23,7 @@ export const serviceContextMock = {
     const http = httpServiceMock.createSetupContract();
     const api = createApi({ http });
     const esHostService = createEsHostService({ api });
-    (storage.keys as jest.Mock).mockImplementation(() => []);
+    storage.keys.mockImplementation(() => []);
     return {
       services: {
         trackUiMetric: { count: () => {}, load: () => {} },

@@ -111,7 +111,7 @@ export const KibanaDeprecationAccordion: FunctionComponent<Props> = ({
                           onClick={() =>
                             showStepsModal({
                               domainId,
-                              steps: correctiveActions.manualSteps!,
+                              steps: correctiveActions.manualSteps,
                               documentationUrl,
                             })
                           }

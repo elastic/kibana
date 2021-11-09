@@ -26,7 +26,7 @@ export async function getRelationships(
       },
     });
   } catch (respError) {
-    const respBody = get(respError, 'data', {}) as any;
+    const respBody = get(respError, 'data', {});
     const err = new Error(respBody.message || respBody.error || `${respError.status} Response`);
 
     (err as any).statusCode = respBody.statusCode || respError.status;

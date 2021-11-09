@@ -101,7 +101,7 @@ describe('Actions Plugin', () => {
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
         )) as unknown as ActionsApiRequestHandlerContext;
-        actionsContextHandler!.getActionsClient();
+        actionsContextHandler.getActionsClient();
       });
 
       it('should throw error when ESO plugin is missing encryption key', async () => {
@@ -125,7 +125,7 @@ describe('Actions Plugin', () => {
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
         )) as unknown as ActionsApiRequestHandlerContext;
-        expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
+        expect(() => actionsContextHandler.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });

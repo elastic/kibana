@@ -32,7 +32,7 @@ describe('test useChartPanels', () => {
     const panels: EuiContextMenuPanelDescriptor[] = result.current;
     const panel0: EuiContextMenuPanelDescriptor = result.current[0];
     expect(panels.length).toBe(1);
-    expect(panel0!.items![0].icon).toBe('eye');
+    expect(panel0.items![0].icon).toBe('eye');
   });
   test('useChartsPanel when hideChart is false', async () => {
     const charts$ = new BehaviorSubject({
@@ -50,6 +50,6 @@ describe('test useChartPanels', () => {
     const panels: EuiContextMenuPanelDescriptor[] = result.current;
     const panel0: EuiContextMenuPanelDescriptor = result.current[0];
     expect(panels.length).toBe(2);
-    expect(panel0!.items![0].icon).toBe('eyeClosed');
+    expect(panel0.items![0].icon).toBe('eyeClosed');
   });
 });

@@ -219,9 +219,9 @@ describe('AggConfigs', () => {
 
       expect(sorted.shift()).toBe(aggs.terms);
       expect(sorted.shift()).toBe(aggs.date_histogram);
-      expect(sorted.shift()!.id!).toBe(aggs.percentiles.id + '.' + 1);
-      expect(sorted.shift()!.id!).toBe(aggs.percentiles.id + '.' + 2);
-      expect(sorted.shift()!.id!).toBe(aggs.percentiles.id + '.' + 3);
+      expect(sorted.shift()!.id).toBe(aggs.percentiles.id + '.' + 1);
+      expect(sorted.shift()!.id).toBe(aggs.percentiles.id + '.' + 2);
+      expect(sorted.shift()!.id).toBe(aggs.percentiles.id + '.' + 3);
       expect(sorted).toHaveLength(0);
     });
   });

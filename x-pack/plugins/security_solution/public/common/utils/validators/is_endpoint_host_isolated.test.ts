@@ -13,7 +13,7 @@ describe('When using isEndpointHostIsolated()', () => {
   const generator = new EndpointDocGenerator();
 
   const generateMetadataDoc = (isolation: boolean = true) => {
-    const metadataDoc = generator.generateHostMetadata() as HostMetadata;
+    const metadataDoc = generator.generateHostMetadata();
     return {
       ...metadataDoc,
       Endpoint: {

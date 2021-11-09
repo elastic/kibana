@@ -57,9 +57,8 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     newCustomSource,
   } = useValues(AddSourceLogic);
 
-  const { serviceType, configuration, features, objTypes, addPath } = staticSourceData[
-    props.sourceIndex
-  ] as SourceDataItem;
+  const { serviceType, configuration, features, objTypes, addPath } =
+    staticSourceData[props.sourceIndex];
 
   const { isOrganization } = useValues(AppLogic);
 

@@ -295,7 +295,7 @@ export class DashboardPlugin
           restorePreviousUrl,
           element: params.element,
           onAppLeave: params.onAppLeave,
-          scopedHistory: this.currentHistory!,
+          scopedHistory: this.currentHistory,
           initializerContext: this.initializerContext,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });

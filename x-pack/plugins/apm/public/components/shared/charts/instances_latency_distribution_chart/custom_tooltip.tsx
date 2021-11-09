@@ -53,7 +53,7 @@ function SingleInstanceCustomTooltip({
 }) {
   const value = values[0];
   const { color } = value;
-  const datum = value.datum as unknown as MainStatsServiceInstanceItem;
+  const datum = value.datum as MainStatsServiceInstanceItem;
   const { latency, serviceNodeName, throughput } = datum;
 
   return (
@@ -124,7 +124,7 @@ function MultipleInstanceCustomTooltip({
       </div>
       {values.map((value) => {
         const { color } = value;
-        const datum = value.datum as unknown as MainStatsServiceInstanceItem;
+        const datum = value.datum as MainStatsServiceInstanceItem;
         const { latency, serviceNodeName, throughput } = datum;
         return (
           <div className="echTooltip__list" key={serviceNodeName}>

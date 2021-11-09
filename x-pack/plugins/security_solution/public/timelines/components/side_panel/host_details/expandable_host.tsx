@@ -85,7 +85,7 @@ export const ExpandableHostDetails = ({
           docValueFields={docValueFields}
           id={ID}
           isInDetailsSidePanel
-          data={hostOverview as HostItem}
+          data={hostOverview}
           anomaliesData={anomaliesData}
           isDraggable={isDraggable}
           isLoadingAnomaliesData={isLoadingAnomaliesData}

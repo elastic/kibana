@@ -85,7 +85,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
         pageTitle={
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiAvatar name={displayName!} size="xl" />
+              <EuiAvatar name={displayName} size="xl" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle>
@@ -158,13 +158,13 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
 
       {action === 'changePassword' ? (
         <ChangePasswordFlyout
-          username={username!}
+          username={username}
           onCancel={() => setAction('none')}
           onSuccess={() => setAction('none')}
         />
       ) : action === 'disableUser' ? (
         <ConfirmDisableUsers
-          usernames={[username!]}
+          usernames={[username]}
           onCancel={() => setAction('none')}
           onSuccess={() => {
             setAction('none');
@@ -173,7 +173,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
         />
       ) : action === 'enableUser' ? (
         <ConfirmEnableUsers
-          usernames={[username!]}
+          usernames={[username]}
           onCancel={() => setAction('none')}
           onSuccess={() => {
             setAction('none');
@@ -182,7 +182,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
         />
       ) : action === 'deleteUser' ? (
         <ConfirmDeleteUsers
-          usernames={[username!]}
+          usernames={[username]}
           onCancel={() => setAction('none')}
           onSuccess={backToUsers}
         />

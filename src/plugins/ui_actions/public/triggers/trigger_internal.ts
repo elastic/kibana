@@ -21,7 +21,7 @@ export class TriggerInternal<Context extends object = object> {
 
   public async execute(context: Context, alwaysShowPopup?: boolean) {
     const triggerId = this.trigger.id;
-    const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
+    const actions = await this.service.getTriggerCompatibleActions(triggerId, context);
 
     await Promise.all([
       actions.map((action) =>

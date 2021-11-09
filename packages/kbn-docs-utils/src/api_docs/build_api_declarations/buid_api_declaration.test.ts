@@ -108,7 +108,7 @@ it('Function inside interface has a label', () => {
     captureReferences: false,
   });
 
-  const fn = def!.children?.find((c) => c.label === 'aFn');
+  const fn = def.children?.find((c) => c.label === 'aFn');
   expect(fn).toBeDefined();
   expect(fn?.label).toBe('aFn');
   expect(fn?.type).toBe(TypeKind.FunctionKind);

@@ -260,7 +260,7 @@ const createFilterClauses = (
     return [{ bool: { filter: [filterQuery, highlightQuery] } }];
   }
 
-  return compact([filterQuery, highlightQuery]) as LogEntryQuery[];
+  return compact([filterQuery, highlightQuery]);
 };
 
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>

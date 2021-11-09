@@ -211,8 +211,8 @@ const getAgentAndPoliciesForEndpointsList = async (
   ).items.reduce<PolicyIds>(
     (list, agentPolicy) => {
       (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
-        list.packagePolicy[packagePolicy as string] = true;
-        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
+        list.packagePolicy[packagePolicy] = true;
+        list.agentPolicy[packagePolicy] = agentPolicy.id;
       });
       return list;
     },
@@ -222,11 +222,11 @@ const getAgentAndPoliciesForEndpointsList = async (
   // packagePolicy contains non-existing packagePolicy ids whereas agentPolicy contains existing agentPolicy ids
   const nonExistingPackagePoliciesAndExistingAgentPolicies = policyIdsToCheck.reduce<PolicyIds>(
     (list, policyId: string) => {
-      if (policiesFound.packagePolicy[policyId as string]) {
-        list.agentPolicy[policyId as string] = policiesFound.agentPolicy[policyId];
+      if (policiesFound.packagePolicy[policyId]) {
+        list.agentPolicy[policyId] = policiesFound.agentPolicy[policyId];
         return list;
       }
-      list.packagePolicy[policyId as string] = true;
+      list.packagePolicy[policyId] = true;
       return list;
     },
     { packagePolicy: {}, agentPolicy: {} }
@@ -536,7 +536,7 @@ async function loadEndpointDetails({
   // call the endpoint details api
   try {
     const response = await coreStart.http.get<HostInfo>(
-      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
+      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint })
     );
     dispatch({
       type: 'serverReturnedEndpointDetails',

@@ -76,7 +76,7 @@ export function maxIntervalFromDate(
   ...intervals: Array<Interval | undefined>
 ): Date | undefined {
   const maxSeconds = Math.max(
-    ...intervals.filter(isString).map((interval) => parseIntervalAsSecond(interval as Interval))
+    ...intervals.filter(isString).map((interval) => parseIntervalAsSecond(interval))
   );
   if (!isNaN(maxSeconds)) {
     return secondsFromDate(date, maxSeconds);

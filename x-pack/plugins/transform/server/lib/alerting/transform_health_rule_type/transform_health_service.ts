@@ -177,7 +177,7 @@ export function transformHealthServiceProvider(
         );
 
         resultTransformIds.forEach((transformId) => {
-          const transformRef = transformMap[transformId] as TransformWithAlertingRules;
+          const transformRef = transformMap[transformId];
 
           if (transformRef) {
             if (Array.isArray(transformRef.alerting_rules)) {

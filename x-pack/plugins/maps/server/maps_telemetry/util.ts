@@ -199,7 +199,7 @@ export function getCountsByMap<K extends string>(
     if (!counts[scalingOption]) {
       counts[scalingOption] = 1;
     } else {
-      (counts[scalingOption] as number) += 1;
+      counts[scalingOption] += 1;
     }
   });
   return counts;
@@ -222,22 +222,15 @@ export function getCountsByCluster(
 
       if (!clusterCounts[key]) {
         clusterCounts[key] = {
-          min: count[key] as number,
-          max: count[key] as number,
-          total: count[key] as number,
-          avg: count[key] as number,
+          min: count[key],
+          max: count[key],
+          total: count[key],
+          avg: count[key],
         };
       } else {
-        (clusterCounts[key] as ClusterCountStats).min = Math.min(
-          count[key] as number,
-          (clusterCounts[key] as ClusterCountStats).min
-        );
-        (clusterCounts[key] as ClusterCountStats).max = Math.max(
-          count[key] as number,
-          (clusterCounts[key] as ClusterCountStats).max
-        );
-        (clusterCounts[key] as ClusterCountStats).total =
-          (count[key] as number) + (clusterCounts[key] as ClusterCountStats).total;
+        clusterCounts[key].min = Math.min(count[key], clusterCounts[key].min);
+        clusterCounts[key].max = Math.max(count[key], clusterCounts[key].max);
+        clusterCounts[key].total = count[key] + clusterCounts[key].total;
       }
     }
   });

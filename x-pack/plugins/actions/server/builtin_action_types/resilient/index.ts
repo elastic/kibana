@@ -81,7 +81,7 @@ async function executor(
   >
 ): Promise<ActionTypeExecutorResult<ResilientExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  const { subAction, subActionParams } = params;
   let data: ResilientExecutorResultData | null = null;
 
   const externalService = createExternalService(

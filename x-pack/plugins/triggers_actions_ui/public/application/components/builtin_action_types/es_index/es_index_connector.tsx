@@ -67,7 +67,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
     const indexPatternsFunction = async () => {
       setIndexPatterns(await getIndexPatterns());
       if (index) {
-        const currentEsFields = await getFields(http!, [index]);
+        const currentEsFields = await getFields(http, [index]);
         setTimeFields(getTimeFieldOptions(currentEsFields as any));
       }
     };
@@ -144,12 +144,12 @@ const IndexActionConnectorFields: React.FunctionComponent<
               setTimeFields([]);
               return;
             }
-            const currentEsFields = await getFields(http!, indices);
+            const currentEsFields = await getFields(http, indices);
             setTimeFields(getTimeFieldOptions(currentEsFields as any));
           }}
           onSearchChange={async (search) => {
             setIsIndiciesLoading(true);
-            setIndexOptions(await getIndexOptions(http!, search, indexPatterns));
+            setIndexOptions(await getIndexOptions(http, search, indexPatterns));
             setIsIndiciesLoading(false);
           }}
           onBlur={() => {

@@ -85,7 +85,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
         <EuiButton
           onClick={() =>
             indexPatternFieldEditor.openEditor({
-              ctx: { indexPattern: indexPattern! },
+              ctx: { indexPattern },
               onSave: refreshFields,
             })
           }

@@ -90,7 +90,7 @@ export class DrilldownManagerState {
     );
     const drilldownFactoryContext: BaseActionFactoryContext = {
       ...this.deps.placeContext,
-      triggers: event.triggers as string[],
+      triggers: event.triggers,
     };
     const firstTrigger = event.triggers[0];
     return {
@@ -103,7 +103,7 @@ export class DrilldownManagerState {
         : !actionFactory.isCompatibleLicense()
         ? insufficientLicenseLevel
         : undefined,
-      triggers: event.triggers.map((trigger) => this.deps.getTrigger(trigger as string)),
+      triggers: event.triggers.map((trigger) => this.deps.getTrigger(trigger)),
       triggerIncompatible: !this.deps.triggers.find((t) => t === firstTrigger),
     };
   };

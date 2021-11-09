@@ -120,7 +120,7 @@ export async function fetchRollupSavedSearches(
           ({ type, id }) => type === 'index-pattern' && rollupIndexPatternToFlagMap[id]
         );
         if (rollupSavedSearches.length) {
-          const id = getIdFromSavedObjectId(savedObjectId) as string;
+          const id = getIdFromSavedObjectId(savedObjectId);
           rollupSavedSearchesIds.push(id);
         }
       }

@@ -30,9 +30,9 @@ export const ChartHeader = ({ title, metrics }: Props) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
           {metrics.map((chartMetric) => (
-            <EuiFlexItem key={chartMetric.label!}>
+            <EuiFlexItem key={chartMetric.label}>
               <EuiFlexGroup
-                key={chartMetric.label!}
+                key={chartMetric.label}
                 gutterSize={'xs'}
                 alignItems={'center'}
                 responsive={false}

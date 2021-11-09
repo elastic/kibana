@@ -51,7 +51,7 @@ export interface SearchBarStateProps {
 function queryToString(query: Query, indexPattern: IndexPattern) {
   if (query.language === 'kuery' && typeof query.query === 'string') {
     const dsl = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(query.query as string),
+      esKuery.fromKueryExpression(query.query),
       indexPattern
     );
     // JSON representation of query will be handled by existing logic.

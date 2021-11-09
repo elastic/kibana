@@ -98,7 +98,7 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
 
   // Children prevails over anything else provided.
   if (children) {
-    return children!(field);
+    return children(field);
   }
 
   if (ComponentToRender === 'input') {

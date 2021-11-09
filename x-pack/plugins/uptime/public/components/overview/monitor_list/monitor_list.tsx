@@ -160,7 +160,7 @@ export const MonitorListComponent: ({
             render: (monitorId: string) => (
               <MonitorBarSeries
                 histogramSeries={histogramsById?.[monitorId]?.points}
-                minInterval={minInterval!}
+                minInterval={minInterval}
               />
             ),
           },

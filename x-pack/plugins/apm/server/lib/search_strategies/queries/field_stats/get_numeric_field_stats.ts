@@ -122,7 +122,7 @@ export const fetchNumericFieldStats = async (
         key: 50,
       }
     );
-    stats.median = medianPercentile !== undefined ? medianPercentile!.value : 0;
+    stats.median = medianPercentile !== undefined ? medianPercentile.value : 0;
   }
 
   return stats;

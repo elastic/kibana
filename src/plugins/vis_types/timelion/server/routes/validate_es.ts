@@ -44,7 +44,7 @@ export function validateEsRoute(router: IRouter<DataRequestHandlerContext>) {
 
       let resp;
       try {
-        resp = (await context.search!.search(body, {}).toPromise()).rawResponse;
+        resp = (await context.search.search(body, {}).toPromise()).rawResponse;
       } catch (errResp) {
         resp = errResp;
       }

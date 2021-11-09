@@ -535,7 +535,7 @@ export class AnomalyExplorerChartsService {
     data.tooManyBuckets = false;
     const chartWidth = Math.floor(containerWith / chartsPerRow);
     const { chartRange, tooManyBuckets } = this.calculateChartRange(
-      seriesConfigs as SeriesConfigWithMetadata[],
+      seriesConfigs,
       selectedEarliestMs,
       selectedLatestMs,
       chartWidth,

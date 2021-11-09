@@ -87,8 +87,8 @@ export function ServiceProfiling() {
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <ServiceProfilingTimeline
-              start={start!}
-              end={end!}
+              start={start}
+              end={end}
               series={profilingTimeline}
               onValueTypeSelect={(type) => {
                 setValueType(type);

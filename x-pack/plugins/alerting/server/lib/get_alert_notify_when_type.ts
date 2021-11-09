@@ -13,5 +13,5 @@ export function getAlertNotifyWhenType(
 ): AlertNotifyWhenType {
   // We allow notifyWhen to be null for backwards compatibility. If it is null, determine its
   // value based on whether the throttle is set to a value or null
-  return notifyWhen ? notifyWhen! : throttle ? 'onThrottleInterval' : 'onActiveAlert';
+  return notifyWhen ? notifyWhen : throttle ? 'onThrottleInterval' : 'onActiveAlert';
 }

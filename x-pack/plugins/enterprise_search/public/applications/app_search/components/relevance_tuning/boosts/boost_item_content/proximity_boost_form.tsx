@@ -30,7 +30,7 @@ export const ProximityBoostForm: React.FC<Props> = ({ boost, index, name }) => {
 
   const functionOptions = Object.values(ProximityBoostFunction).map((boostFunction) => ({
     value: boostFunction,
-    text: PROXIMITY_BOOST_FUNCTION_DISPLAY_MAP[boostFunction as ProximityBoostFunction],
+    text: PROXIMITY_BOOST_FUNCTION_DISPLAY_MAP[boostFunction],
   }));
 
   return (

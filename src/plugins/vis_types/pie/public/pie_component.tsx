@@ -87,8 +87,8 @@ const PieComponent = (props: PieComponentProps) => {
 
   useEffect(() => {
     if (parentRef && parentRef.current) {
-      const parentHeight = parentRef.current!.getBoundingClientRect().height;
-      const parentWidth = parentRef.current!.getBoundingClientRect().width;
+      const parentHeight = parentRef.current.getBoundingClientRect().height;
+      const parentWidth = parentRef.current.getBoundingClientRect().width;
       setDimensions({ width: parentWidth, height: parentHeight });
     }
   }, [parentRef]);

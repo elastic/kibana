@@ -50,7 +50,7 @@ const mapValuesDeep = (
   iterator: (value: unknown, key: string, obj: Record<string, any>) => unknown
 ): Record<string, any> =>
   mapValues(obj, (val, key) =>
-    isPlainObject(val) ? mapValuesDeep(val, iterator) : iterator(val, key!, obj)
+    isPlainObject(val) ? mapValuesDeep(val, iterator) : iterator(val, key, obj)
   );
 
 export async function generateSampleDocuments(

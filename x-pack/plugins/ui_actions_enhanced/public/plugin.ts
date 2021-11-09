@@ -97,10 +97,8 @@ export class AdvancedUiActionsPublicPlugin
   public start(core: CoreStart, { uiActions, licensing }: StartDependencies): StartContract {
     this.subs.push(licensing.license$.subscribe(this.licenseInfo));
 
-    const dateFormat = core.uiSettings.get('dateFormat') as string;
-    const commonlyUsedRanges = core.uiSettings.get(
-      UI_SETTINGS.TIMEPICKER_QUICK_RANGES
-    ) as CommonlyUsedRange[];
+    const dateFormat = core.uiSettings.get('dateFormat');
+    const commonlyUsedRanges = core.uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
     const { openModal } = createReactOverlays(core);
     const timeRangeAction = new CustomTimeRangeAction({
       openModal,

@@ -38,7 +38,7 @@ async function getArtifact(
     throw new Error(`Unable to fetch ${artifact}`);
   }
   log.info(`Fetching ${filename} from ${url}`);
-  const agent = await axios(url as string, { responseType: 'arraybuffer' });
+  const agent = await axios(url, { responseType: 'arraybuffer' });
   writeFileSync(filename, agent.data);
   execSync(`tar xvf ${filename}`);
   return resolve(filename);

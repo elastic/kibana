@@ -181,8 +181,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         const { tuples, remainingGap } = getRuleRangeTuples({
           logger,
           previousStartedAt,
-          from: from as string,
-          to: to as string,
+          from,
+          to,
           interval,
           maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
           buildRuleMessage,
@@ -216,7 +216,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const exceptionItems = await getExceptions({
             client: exceptionsClient,
-            lists: (params.exceptionsList as ListArray) ?? [],
+            lists: params.exceptionsList ?? [],
           });
 
           const bulkCreate = bulkCreateFactory(

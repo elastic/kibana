@@ -11,7 +11,7 @@ import { getEsErrorMessage } from './es_error_parser';
 export function isErrorThatHandlesItsOwnResponse(
   e: ErrorThatHandlesItsOwnResponse
 ): e is ErrorThatHandlesItsOwnResponse {
-  return typeof (e as ErrorThatHandlesItsOwnResponse).sendResponse === 'function';
+  return typeof e.sendResponse === 'function';
 }
 
 export type { ErrorThatHandlesItsOwnResponse, ElasticsearchError };

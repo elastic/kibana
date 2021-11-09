@@ -224,7 +224,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
           new Set(roleMapping.engines.map((engine: Engine) => engine.name)),
         handleAccessAllEnginesChange: () => new Set(),
         handleEngineSelectionChange: (_, { engineNames }) => {
-          const newSelectedEngineNames = new Set() as Set<string>;
+          const newSelectedEngineNames = new Set();
           engineNames.forEach((engineName) => newSelectedEngineNames.add(engineName));
 
           return newSelectedEngineNames;

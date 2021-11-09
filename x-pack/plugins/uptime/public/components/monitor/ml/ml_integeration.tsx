@@ -38,7 +38,7 @@ export const MLIntegrationComponent = () => {
 
   const isMLAvailable = useSelector(hasMLFeatureSelector);
 
-  const deleteMLJob = () => dispatch(deleteMLJobAction.get({ monitorId: monitorId as string }));
+  const deleteMLJob = () => dispatch(deleteMLJobAction.get({ monitorId }));
   const isMLJobDeleting = useSelector(isMLJobDeletingSelector);
   const { data: jobDeletionSuccess } = useSelector(isMLJobDeletedSelector);
 
@@ -46,16 +46,16 @@ export const MLIntegrationComponent = () => {
 
   const hasMLJob =
     !!uptimeJobs?.jobsExist &&
-    !!uptimeJobs.jobs.find((job: JobStat) => job.id === getMLJobId(monitorId as string));
+    !!uptimeJobs.jobs.find((job: JobStat) => job.id === getMLJobId(monitorId));
 
   useEffect(() => {
     if (isMLAvailable) {
-      dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
+      dispatch(getExistingMLJobAction.get({ monitorId }));
     }
   }, [dispatch, isMLAvailable, monitorId, lastRefresh]);
 
   useEffect(() => {
-    if (isConfirmDeleteJobOpen && jobDeletionSuccess?.[getMLJobId(monitorId as string)]?.deleted) {
+    if (isConfirmDeleteJobOpen && jobDeletionSuccess?.[getMLJobId(monitorId)]?.deleted) {
       setIsConfirmDeleteJobOpen(false);
       notifications.toasts.success({
         title: <p data-test-subj="uptimeMLJobSuccessfullyDeleted">{labels.JOB_DELETION}</p>,
@@ -94,7 +94,7 @@ export const MLIntegrationComponent = () => {
   return (
     <>
       <ManageMLJobComponent
-        hasMLJob={hasMLJob as boolean}
+        hasMLJob={hasMLJob}
         onEnableJob={onEnableJobClick}
         onJobDelete={confirmDeleteMLJob}
       />

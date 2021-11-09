@@ -630,7 +630,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as unknown as AddPrepackagedRulesSchemaDecoded).enabled).toEqual(false);
+    expect((message.schema as AddPrepackagedRulesSchemaDecoded).enabled).toEqual(false);
   });
 
   test('rule_id is required', () => {

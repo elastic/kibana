@@ -60,6 +60,6 @@ function makeErrorGeneric(errors: UpgradeError[]): string[] {
       const firstMessage = error.message[0];
       return firstMessage?.indexOf('is required') > -1 ? 'Field is required' : firstMessage;
     }
-    return error.message as string;
+    return error.message;
   });
 }

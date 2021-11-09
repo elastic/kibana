@@ -28,8 +28,8 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
   // --- Mapped fields ---
   const getFieldInfo = (testSubjectField: string): { name: string; type: string } => {
-    const name = find(`${testSubjectField}-fieldName` as TestSubjects).text();
-    const type = find(`${testSubjectField}-datatype` as TestSubjects).props()['data-type-value'];
+    const name = find(`${testSubjectField}-fieldName`).text();
+    const type = find(`${testSubjectField}-datatype`).props()['data-type-value'];
     return { name, type };
   };
 
@@ -46,7 +46,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
       .split(' ')
       .filter((subj: string) => subj !== 'fieldsListItem')[0] as string;
 
-    const expandButton = find(`${testSubjectField}.toggleExpandButton` as TestSubjects);
+    const expandButton = find(`${testSubjectField}.toggleExpandButton`);
 
     // No expand button, so this field is not expanded
     if (expandButton.length === 0) {
@@ -76,7 +76,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     domTreeMetadata: DomFields = {}
   ): Promise<DomFields> => {
     const fields = find(
-      fieldName ? (`${fieldName}.fieldsList.fieldsListItem` as TestSubjects) : 'fieldsListItem'
+      fieldName ? `${fieldName}.fieldsList.fieldsListItem` : 'fieldsListItem'
     ).map((wrapper) => wrapper); // convert to Array for our for of loop below
 
     for (const field of fields) {
@@ -107,7 +107,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   // Get a nested field in the rendered DOM tree
   const getFieldAt = (path: string) => {
     const testSubject = `${path.split('.').join('')}Field`;
-    return { field: find(testSubject as TestSubjects), testSubject };
+    return { field: find(testSubject), testSubject };
   };
 
   const addField = async (name: string, type: string, subType?: string) => {
@@ -140,7 +140,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const startEditField = async (path: string) => {
     const { testSubject } = getFieldAt(path);
     await act(async () => {
-      find(`${testSubject}.editFieldButton` as TestSubjects).simulate('click');
+      find(`${testSubject}.editFieldButton`).simulate('click');
     });
     component.update();
   };

@@ -174,7 +174,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               defaultMessage="Error loading repository types"
             />
           }
-          error={repositoryTypesError as Error}
+          error={repositoryTypesError}
         />
       );
     }

@@ -43,7 +43,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
       );
 
       if (originalElement) {
-        const originalAst = fromExpression(originalElement!.expression);
+        const originalAst = fromExpression(originalElement.expression);
 
         const functionIndex = originalAst.chain.findIndex(
           ({ function: fn }) => fn === 'embeddable'

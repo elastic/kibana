@@ -89,7 +89,7 @@ export class ExportCSVAction implements Action<ExportContext> {
             const postFix = datatables.length > 1 ? `-${i + 1}` : '';
             const untitledFilename = dashboardExportCsvAction.getUntitledFilename();
 
-            memo[`${context!.embeddable!.getTitle() || untitledFilename}${postFix}.csv`] = {
+            memo[`${context.embeddable!.getTitle() || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {
                 csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
                 quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),

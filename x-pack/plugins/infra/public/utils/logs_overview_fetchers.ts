@@ -103,7 +103,7 @@ async function fetchLogsOverview(
         (error) => reject(error),
         () => {
           if (esResponse?.aggregations) {
-            resolve(processLogsOverviewAggregations(esResponse!.aggregations as any));
+            resolve(processLogsOverviewAggregations(esResponse.aggregations as any));
           } else {
             resolve({ stats: {}, series: {} });
           }

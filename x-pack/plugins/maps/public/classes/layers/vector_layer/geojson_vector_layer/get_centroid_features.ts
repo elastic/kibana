@@ -41,7 +41,7 @@ export function getCentroid(feature: Feature): Feature | null {
   if (feature.geometry.type === GEO_JSON_TYPE.LINE_STRING) {
     centroidGeometry = getLineCentroid(feature);
   } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
-    const coordinates = (feature.geometry as MultiLineString).coordinates;
+    const coordinates = feature.geometry.coordinates;
     let longestLine = coordinates[0];
     let longestLength = turfLength(lineString(longestLine));
     for (let j = 1; j < coordinates.length; j++) {
@@ -56,7 +56,7 @@ export function getCentroid(feature: Feature): Feature | null {
   } else if (feature.geometry.type === GEO_JSON_TYPE.POLYGON) {
     centroidGeometry = turfCenterOfMass(feature).geometry;
   } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_POLYGON) {
-    const coordinates = (feature.geometry as MultiPolygon).coordinates;
+    const coordinates = feature.geometry.coordinates;
     let largestPolygon = coordinates[0];
     let largestArea = turfArea(polygon(largestPolygon));
     for (let j = 1; j < coordinates.length; j++) {
@@ -70,15 +70,15 @@ export function getCentroid(feature: Feature): Feature | null {
     centroidGeometry = turfCenterOfMass(polygon(largestPolygon)).geometry;
   } else if (
     feature.geometry.type === GEO_JSON_TYPE.GEOMETRY_COLLECTION &&
-    (feature.geometry as GeometryCollection).geometries.length
+    feature.geometry.geometries.length
   ) {
-    const firstGeometry = (feature.geometry as GeometryCollection).geometries[0];
+    const firstGeometry = feature.geometry.geometries[0];
     if (firstGeometry.type === GEO_JSON_TYPE.POINT) {
       centroidGeometry = firstGeometry;
     } else if (firstGeometry.type === GEO_JSON_TYPE.MULTI_POINT) {
       centroidGeometry = {
         type: 'Point',
-        coordinates: (firstGeometry as MultiPoint).coordinates[0],
+        coordinates: firstGeometry.coordinates[0],
       };
     } else {
       return getCentroid({

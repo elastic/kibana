@@ -86,7 +86,7 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
             factory={editableFactory}
             width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
             updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
-            updateWidth={(newWidth) => dispatch(setDefaultControlWidth(newWidth as ControlWidth))}
+            updateWidth={(newWidth) => dispatch(setDefaultControlWidth(newWidth))}
             onTypeEditorChange={(partialInput) =>
               (inputToReturn = { ...inputToReturn, ...partialInput })
             }

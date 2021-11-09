@@ -188,7 +188,7 @@ describe('functions', () => {
   });
 
   it('crazyFunction is typed correctly', () => {
-    const fn = doc.client!.find((c) => c.label === 'crazyFunction');
+    const fn = doc.client.find((c) => c.label === 'crazyFunction');
 
     expect(fn).toBeDefined();
 

@@ -49,5 +49,5 @@ export const useServicesContext = () => {
   if (context == null) {
     throw new Error('useServicesContext must be used inside the ServicesContextProvider.');
   }
-  return context!;
+  return context;
 };

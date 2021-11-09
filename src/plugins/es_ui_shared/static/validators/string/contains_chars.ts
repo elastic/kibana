@@ -7,7 +7,7 @@
  */
 
 export const containsChars = (chars: string | string[]) => (value: string) => {
-  const charToArray = Array.isArray(chars) ? (chars as string[]) : ([chars] as string[]);
+  const charToArray = Array.isArray(chars) ? chars : ([chars] as string[]);
 
   const charsFound = charToArray.reduce(
     (acc, char) => (value.includes(char) ? [...acc, char] : acc),

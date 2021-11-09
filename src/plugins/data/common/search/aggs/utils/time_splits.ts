@@ -199,7 +199,7 @@ export function mergeTimeShifts(
         } else if (agg && agg === bucketAggs[aggIndex]) {
           const bucketAgg = agg as IBucketAggConfig;
           // expected next bucket sub agg
-          const subAggregate = val as estypes.AggregationsAggregate;
+          const subAggregate = val;
           const buckets = ('buckets' in subAggregate ? subAggregate.buckets : undefined) as
             | GenericBucket[]
             | Record<string, GenericBucket>

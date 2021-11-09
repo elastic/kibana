@@ -88,7 +88,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                       });
                     }}
                     inputValidationResults={
-                      validationResults!.inputs![
+                      validationResults.inputs![
                         hasIntegrations
                           ? `${policyTemplate.name}-${packagePolicyInput.type}`
                           : packagePolicyInput.type

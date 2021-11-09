@@ -58,7 +58,7 @@ const varsReducer = (
   if (registryVar.type) {
     configEntry.type = registryVar.type;
   }
-  configObject![registryVar.name] = configEntry;
+  configObject[registryVar.name] = configEntry;
   return configObject;
 };
 

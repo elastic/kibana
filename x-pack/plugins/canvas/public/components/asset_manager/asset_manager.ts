@@ -44,7 +44,7 @@ export const AssetManager = connect(
 
     // pull values out of assets object
     // have to cast to AssetType[] because TS doesn't know about filtering
-    const assetValues = Object.values(assets).filter((asset) => !!asset) as AssetType[];
+    const assetValues = Object.values(assets).filter((asset) => !!asset);
 
     return {
       ...ownProps,

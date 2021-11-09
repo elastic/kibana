@@ -329,7 +329,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
       response.attributes = attributes as T;
       if (error) {
-        response.error = error as any;
+        response.error = error;
       }
     }
 

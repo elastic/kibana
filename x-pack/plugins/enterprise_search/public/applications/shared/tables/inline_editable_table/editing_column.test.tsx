@@ -71,7 +71,7 @@ describe('EditingColumn', () => {
     });
 
     it('renders form errors for this field if any are present', () => {
-      expect(shallow(wrapper.find(EuiFormRow).prop('helpText') as any).html()).toContain(
+      expect(shallow(wrapper.find(EuiFormRow).prop('helpText')).html()).toContain(
         'I am an error for foo and should be displayed'
       );
     });

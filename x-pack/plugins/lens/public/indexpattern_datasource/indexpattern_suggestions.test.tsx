@@ -1954,7 +1954,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it("should not propose an over time suggestion if there's a top values aggregation with an high size", () => {
       const initialState = testInitialState();
-      (initialState.layers.first.columns.col1 as { params: { size: number } }).params!.size = 6;
+      (initialState.layers.first.columns.col1 as { params: { size: number } }).params.size = 6;
       const suggestions = getDatasourceSuggestionsFromCurrentState({
         ...initialState,
         indexPatterns: { 1: { ...initialState.indexPatterns['1'], timeFieldName: undefined } },

@@ -76,7 +76,7 @@ async function executor(
   >
 ): Promise<ActionTypeExecutorResult<SwimlaneExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  const { subAction, subActionParams } = params;
   let data: SwimlaneExecutorResultData | null = null;
 
   const externalService = createExternalService(
@@ -101,7 +101,7 @@ async function executor(
   }
 
   if (subAction === 'pushToService') {
-    const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
+    const pushToServiceParams = subActionParams;
 
     data = await api.pushToService({
       externalService,

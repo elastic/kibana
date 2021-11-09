@@ -810,7 +810,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         updateTargetMappingsTaskId: res.right.taskId,
       };
     } else {
-      throwBadResponse(stateP, res as never);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

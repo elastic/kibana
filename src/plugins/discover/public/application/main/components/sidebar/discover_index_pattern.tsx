@@ -37,7 +37,7 @@ export function DiscoverIndexPattern({
 }: DiscoverIndexPatternProps) {
   const options: IndexPatternRef[] = (indexPatternList || []).map((entity) => ({
     id: entity.id,
-    title: entity.attributes!.title,
+    title: entity.attributes.title,
   }));
   const { id: selectedId, title: selectedTitle } = selectedIndexPattern || {};
 

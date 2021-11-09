@@ -26,7 +26,7 @@ export function registerReloadRoute({
     { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const { indexNames = [] } = (request.body as typeof bodySchema.type) ?? {};
+      const { indexNames = [] } = request.body ?? {};
 
       try {
         const indices = await fetchIndices(client, indexDataEnricher, indexNames);

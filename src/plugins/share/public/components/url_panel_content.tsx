@@ -128,7 +128,7 @@ export class UrlPanelContent extends Component<Props, State> {
           }
 
           try {
-            showPublicUrlSwitch = this.props.showPublicUrlSwitch!(anonymousUserCapabilities);
+            showPublicUrlSwitch = this.props.showPublicUrlSwitch(anonymousUserCapabilities);
           } catch {
             showPublicUrlSwitch = false;
           }

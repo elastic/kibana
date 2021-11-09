@@ -136,7 +136,7 @@ function DiscoverDocumentsComponent({
           searchDescription={savedSearch.description}
           sharedItemTitle={savedSearch.title}
           onAddColumn={onAddColumn}
-          onFilter={onAddFilter as DocViewFilterFn}
+          onFilter={onAddFilter}
           onMoveColumn={onMoveColumn}
           onRemoveColumn={onRemoveColumn}
           onSort={onSort}
@@ -162,7 +162,7 @@ function DiscoverDocumentsComponent({
             services={services}
             settings={state.grid}
             onAddColumn={onAddColumn}
-            onFilter={onAddFilter as DocViewFilterFn}
+            onFilter={onAddFilter}
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
             onSort={onSort}

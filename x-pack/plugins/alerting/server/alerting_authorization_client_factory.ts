@@ -49,7 +49,7 @@ export class AlertingAuthorizationClientFactory {
       getSpace: this.getSpace,
       getSpaceId: this.getSpaceId,
       ruleTypeRegistry: this.ruleTypeRegistry,
-      features: features!,
+      features,
     });
   }
 }

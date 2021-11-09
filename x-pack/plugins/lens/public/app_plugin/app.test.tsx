@@ -364,17 +364,16 @@ describe('Lens App', () => {
       }
 
       function getButton(inst: ReactWrapper): TopNavMenuData {
-        return (
-          inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
-        ).find((button) => button.testId === 'lnsApp_saveButton')!;
+        return inst
+          .find('[data-test-subj="lnsApp_topNav"]')
+          .prop('config')
+          .find((button) => button.testId === 'lnsApp_saveButton')!;
       }
 
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
         await getButton(inst).run(inst.getDOMNode());
         inst.update();
-        const handler = inst.find('SavedObjectSaveModalOrigin').prop('onSave') as (
-          p: unknown
-        ) => void;
+        const handler = inst.find('SavedObjectSaveModalOrigin').prop('onSave');
         handler(saveProps);
       }
 
@@ -745,9 +744,10 @@ describe('Lens App', () => {
 
   describe('download button', () => {
     function getButton(inst: ReactWrapper): TopNavMenuData {
-      return (
-        inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
-      ).find((button) => button.testId === 'lnsApp_downloadCSVButton')!;
+      return inst
+        .find('[data-test-subj="lnsApp_topNav"]')
+        .prop('config')
+        .find((button) => button.testId === 'lnsApp_downloadCSVButton')!;
     }
 
     it('should be disabled when no data is available', async () => {
@@ -789,9 +789,10 @@ describe('Lens App', () => {
 
   describe('inspector', () => {
     function getButton(inst: ReactWrapper): TopNavMenuData {
-      return (
-        inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
-      ).find((button) => button.testId === 'lnsApp_inspectButton')!;
+      return inst
+        .find('[data-test-subj="lnsApp_topNav"]')
+        .prop('config')
+        .find((button) => button.testId === 'lnsApp_inspectButton')!;
     }
 
     async function runInspect(inst: ReactWrapper) {

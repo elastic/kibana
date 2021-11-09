@@ -120,7 +120,7 @@ describe('RoleMappingsTable', () => {
       />
     );
     const roleMappingsTable = wrapper.find('[data-test-subj="RoleMappingsTable"]').first();
-    const searchProp = roleMappingsTable.prop('search') as EuiSearchBarProps;
+    const searchProp = roleMappingsTable.prop('search');
 
     act(() => {
       if (searchProp.onChange) {

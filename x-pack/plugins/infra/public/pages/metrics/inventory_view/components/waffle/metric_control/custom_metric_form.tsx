@@ -117,7 +117,7 @@ export const CustomMetricForm = withTheme(
       .map((f) => ({ label: f.name }));
 
     const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map((k) => ({
-      text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
+      text: AGGREGATION_LABELS[k],
       value: k,
     }));
 

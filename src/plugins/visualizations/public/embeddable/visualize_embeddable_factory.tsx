@@ -147,7 +147,7 @@ export class VisualizeEmbeddableFactory
           checkForDuplicateTitle: this.checkTitle.bind(this),
         });
     }
-    return this.attributeService!;
+    return this.attributeService;
   }
 
   public async createFromSavedObject(

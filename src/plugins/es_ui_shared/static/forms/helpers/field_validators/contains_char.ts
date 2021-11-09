@@ -25,7 +25,7 @@ export const containsCharsField =
       return;
     }
 
-    const { doesContain, charsFound } = containsChars(chars)(value as string);
+    const { doesContain, charsFound } = containsChars(chars)(value);
     if (doesContain) {
       return {
         code: 'ERR_INVALID_CHARS',

@@ -82,7 +82,7 @@ function getPutPreconfiguredPackagesMock() {
     return {
       id: `mocked-${id}`,
       attributes,
-      type: type as string,
+      type,
       references: [],
     };
   });

@@ -21,7 +21,7 @@ export function toNavLink(
   basePath: IBasePath,
   deepLink?: PublicAppDeepLinkInfo
 ): NavLinkWrapper {
-  const relativeBaseUrl = basePath.prepend(app.appRoute!);
+  const relativeBaseUrl = basePath.prepend(app.appRoute);
   const url = appendAppPath(relativeBaseUrl, deepLink?.path || app.defaultPath);
   const href = relativeToAbsolute(url);
   const baseUrl = relativeToAbsolute(relativeBaseUrl);

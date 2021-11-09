@@ -18,7 +18,7 @@ describe('RolesAPIClient', () => {
     await rolesAPIClient.saveRole({ role });
     expect(httpMock.put).toHaveBeenCalledTimes(1);
 
-    return JSON.parse((httpMock.put.mock.calls[0] as any)[1]?.body as any);
+    return JSON.parse((httpMock.put.mock.calls[0] as any)[1]?.body);
   }
 
   it('removes placeholder index privileges', async () => {

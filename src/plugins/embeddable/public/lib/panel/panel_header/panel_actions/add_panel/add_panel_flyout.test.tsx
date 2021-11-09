@@ -28,7 +28,7 @@ function DummySavedObjectFinder(props: { children: React.ReactNode }) {
       <div>Hello World</div>
       {props.children}
     </div>
-  ) as JSX.Element;
+  );
 }
 
 test('createNewEmbeddable() add embeddable to container', async () => {

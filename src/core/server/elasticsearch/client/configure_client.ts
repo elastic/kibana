@@ -52,7 +52,7 @@ export const configureClient = (
       if (opts.meta === undefined) {
         opts.meta = true;
       }
-      return super.request(params, opts) as Promise<TransportResult<any, any>>;
+      return super.request(params, opts);
     }
   }
 

@@ -21,9 +21,7 @@ import { Ping } from '../../../common/runtime_types/ping';
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 
 export const fetchConnectors = async (): Promise<ActionConnector[]> => {
-  const response = (await apiService.get(API_URLS.RULE_CONNECTORS)) as Array<
-    AsApiContract<ActionConnector>
-  >;
+  const response = await apiService.get(API_URLS.RULE_CONNECTORS);
   return response.map(
     ({
       connector_type_id: actionTypeId,
@@ -139,9 +137,7 @@ export const disableAlertById = async ({ alertId }: { alertId: string }) => {
 };
 
 export const fetchActionTypes = async (): Promise<ActionType[]> => {
-  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES)) as Array<
-    AsApiContract<ActionType>
-  >;
+  const response = await apiService.get(API_URLS.CONNECTOR_TYPES);
   return response.map<ActionType>(
     ({
       enabled_in_config: enabledInConfig,

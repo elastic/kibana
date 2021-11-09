@@ -88,14 +88,13 @@ describe('autocomplete', () => {
         (suggestion) =>
           suggestion.fnDef.type === 'datatable' &&
           suggestion.fnDef.inputTypes &&
-          !(suggestion.fnDef.inputTypes as string[]).includes('datatable')
+          !suggestion.fnDef.inputTypes.includes('datatable')
       );
 
       const withNeither = suggestions.findIndex(
         (suggestion) =>
           suggestion.fnDef.type !== 'datatable' &&
-          (!suggestion.fnDef.inputTypes ||
-            !(suggestion.fnDef.inputTypes as string[]).includes('datatable'))
+          (!suggestion.fnDef.inputTypes || !suggestion.fnDef.inputTypes.includes('datatable'))
       );
 
       expect(suggestions[0].fnDef.type).toBe('datatable');

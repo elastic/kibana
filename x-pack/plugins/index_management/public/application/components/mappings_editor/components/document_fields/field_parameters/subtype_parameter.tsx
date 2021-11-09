@@ -79,10 +79,10 @@ export const SubTypeParameter = ({
                 singleSelection={{ asPlainText: true }}
                 options={
                   isMultiField
-                    ? filterTypesForMultiField(subTypeOptions!)
+                    ? filterTypesForMultiField(subTypeOptions)
                     : isRootLevelField
                     ? subTypeOptions
-                    : filterTypesForNonRootFields(subTypeOptions!)
+                    : filterTypesForNonRootFields(subTypeOptions)
                 }
                 selectedOptions={subTypeField.value as ComboBoxOption[]}
                 onChange={subTypeField.setValue}

@@ -100,7 +100,7 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
         const splitField = criteria.sort.field.split('.');
         const newTlsSort: SortField<NetworkTlsFields> = {
           field: getSortFromString(splitField[splitField.length - 1]),
-          direction: criteria.sort.direction as Direction,
+          direction: criteria.sort.direction,
         };
         if (!deepEqual(newTlsSort, sort)) {
           dispatch(

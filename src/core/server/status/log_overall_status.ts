@@ -23,7 +23,7 @@ export const getOverallStatusChanges = (
     pairwise(),
     map(([oldStatus, newStatus]) => {
       if (oldStatus) {
-        return `Kibana is now ${newStatus!.level.toString()} (was ${oldStatus!.level.toString()})`;
+        return `Kibana is now ${newStatus!.level.toString()} (was ${oldStatus.level.toString()})`;
       }
       return `Kibana is now ${newStatus!.level.toString()}`;
     })

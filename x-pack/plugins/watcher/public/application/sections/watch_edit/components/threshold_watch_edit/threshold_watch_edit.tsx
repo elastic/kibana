@@ -121,7 +121,7 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
   const matchingIndices = (await getMatchingIndices(patternString)) as string[];
   const matchingIndexPatterns = indexPatterns.filter((anIndexPattern) => {
     return anIndexPattern.includes(patternString);
-  }) as string[];
+  });
 
   if (matchingIndices.length || matchingIndexPatterns.length) {
     const matchingOptions = _.uniq([...matchingIndices, ...matchingIndexPatterns]);

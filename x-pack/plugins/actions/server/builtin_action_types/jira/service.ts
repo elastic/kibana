@@ -285,7 +285,7 @@ export const createExternalService = (
         res,
       });
 
-      const updatedIncident = await getIncident(incidentId as string);
+      const updatedIncident = await getIncident(incidentId);
 
       return {
         title: updatedIncident.key,

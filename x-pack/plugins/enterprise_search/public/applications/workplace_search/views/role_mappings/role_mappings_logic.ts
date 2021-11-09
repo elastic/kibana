@@ -231,7 +231,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setRoleMapping: (_, { roleMapping }) =>
           new Set(roleMapping.groups.map((group: RoleGroup) => group.id)),
         handleGroupSelectionChange: (_, { groupIds }) => {
-          const newSelectedGroupNames = new Set() as Set<string>;
+          const newSelectedGroupNames = new Set();
           groupIds.forEach((groupId) => newSelectedGroupNames.add(groupId));
 
           return newSelectedGroupNames;

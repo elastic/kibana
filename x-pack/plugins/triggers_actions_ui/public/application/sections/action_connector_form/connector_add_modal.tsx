@@ -107,7 +107,7 @@ const ConnectorAddModal = ({
       const res = await getConnectorErrors(connector, actionTypeModel);
       setHasErrors(
         !!Object.keys(res.connectorErrors).find(
-          (errorKey) => (res.connectorErrors as IErrorObject)[errorKey].length >= 1
+          (errorKey) => res.connectorErrors[errorKey].length >= 1
         )
       );
       setIsLoading(false);

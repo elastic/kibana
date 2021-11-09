@@ -1186,8 +1186,8 @@ export default ({ getService }: FtrProviderContext) => {
           }
           if (testData.hasOwnProperty('indexPattern')) {
             await ml.testResources.createIndexPatternIfNeeded(
-              testData.indexPattern!.name as string,
-              testData.indexPattern!.timeField as string
+              testData.indexPattern!.name,
+              testData.indexPattern!.timeField
             );
           }
         });

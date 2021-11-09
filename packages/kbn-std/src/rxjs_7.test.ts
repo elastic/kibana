@@ -36,7 +36,7 @@ describe('firstValueFrom()', () => {
     let unsubscribed = false;
     const source = new Rx.Observable<number>((subscriber) => {
       while (!subscriber.closed && values.length) {
-        subscriber.next(values.shift()!);
+        subscriber.next(values.shift());
       }
       unsubscribed = subscriber.closed;
       subscriber.complete();
@@ -55,7 +55,7 @@ describe('firstValueFrom()', () => {
     const source = new Rx.Observable<number>((subscriber) => {
       setTimeout(() => {
         while (!subscriber.closed) {
-          subscriber.next(values.shift()!);
+          subscriber.next(values.shift());
         }
         unsubscribed = subscriber.closed;
       });

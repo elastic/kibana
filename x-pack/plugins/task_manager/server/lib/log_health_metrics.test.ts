@@ -53,12 +53,12 @@ describe('logHealthMetrics', () => {
     const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls;
     const performanceMessage = /^Task Manager detected a degradation in performance/;
     const lastStatsMessage = /^Latest Monitored Stats: \{.*\}$/;
-    expect(debugCalls[0][0] as string).toMatch(lastStatsMessage);
-    expect(debugCalls[1][0] as string).toMatch(lastStatsMessage);
-    expect(debugCalls[2][0] as string).toMatch(performanceMessage);
-    expect(debugCalls[3][0] as string).toMatch(lastStatsMessage);
-    expect(debugCalls[4][0] as string).toMatch(lastStatsMessage);
-    expect(debugCalls[5][0] as string).toMatch(performanceMessage);
+    expect(debugCalls[0][0]).toMatch(lastStatsMessage);
+    expect(debugCalls[1][0]).toMatch(lastStatsMessage);
+    expect(debugCalls[2][0]).toMatch(performanceMessage);
+    expect(debugCalls[3][0]).toMatch(lastStatsMessage);
+    expect(debugCalls[4][0]).toMatch(lastStatsMessage);
+    expect(debugCalls[5][0]).toMatch(performanceMessage);
   });
 
   it('should not log a warning message to enable verbose logging when the status goes from Warning to OK', () => {

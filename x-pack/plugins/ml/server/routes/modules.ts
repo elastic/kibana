@@ -540,7 +540,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             datafeedOverrides,
             estimateModelMemory,
             applyToAllSpaces,
-          } = request.body as TypeOf<typeof setupModuleBodySchema>;
+          } = request.body;
 
           const dataViewService = await getDataViewsService();
 

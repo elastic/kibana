@@ -46,7 +46,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
             defaultMessage: "Could not delete user '{username}'",
             values: { username },
           }),
-          text: (error as any).body?.message || error.message,
+          text: error.body?.message || error.message,
         });
       }
     }

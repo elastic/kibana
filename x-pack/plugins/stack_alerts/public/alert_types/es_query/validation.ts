@@ -74,7 +74,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
     builtInComparators[thresholdComparator].requiredValues > 1 &&
     (!threshold ||
       threshold[1] === undefined ||
-      (threshold && threshold.length < builtInComparators[thresholdComparator!].requiredValues))
+      (threshold && threshold.length < builtInComparators[thresholdComparator].requiredValues))
   ) {
     errors.threshold1.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold1Text', {

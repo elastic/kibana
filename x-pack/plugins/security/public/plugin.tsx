@@ -164,7 +164,7 @@ export class SecurityPlugin
     return {
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core }),
-      authc: this.authc as AuthenticationServiceStart,
+      authc: this.authc,
     };
   }
 

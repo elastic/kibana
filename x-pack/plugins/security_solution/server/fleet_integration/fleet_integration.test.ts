@@ -253,7 +253,7 @@ describe('ingest_integration tests ', () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
       const policyConfig = generator.generatePolicyPackagePolicy();
-      policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+      policyConfig.inputs[0]!.config.policy.value = mockPolicy;
       await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
         'Requires Platinum license'
       );
@@ -264,7 +264,7 @@ describe('ingest_integration tests ', () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
       const policyConfig = generator.generatePolicyPackagePolicy();
-      policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+      policyConfig.inputs[0]!.config.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
@@ -280,7 +280,7 @@ describe('ingest_integration tests ', () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
       const policyConfig = generator.generatePolicyPackagePolicy();
-      policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+      policyConfig.inputs[0]!.config.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });

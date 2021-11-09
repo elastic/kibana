@@ -24,7 +24,7 @@ export function ElasticsearchSupertestProvider({ getService }: FtrProviderContex
 
   let agentOptions = {};
   if ('certificateAuthorities' in esServerConfig) {
-    agentOptions = { ca: esServerConfig!.certificateAuthorities };
+    agentOptions = { ca: esServerConfig.certificateAuthorities };
   }
 
   return supertest.agent(elasticSearchServerUrl, agentOptions);

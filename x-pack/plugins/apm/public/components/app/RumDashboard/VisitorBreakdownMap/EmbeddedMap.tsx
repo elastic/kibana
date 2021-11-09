@@ -89,7 +89,7 @@ export function EmbeddedMapComponent() {
     },
     ...(start && {
       timeRange: {
-        from: new Date(start!).toISOString(),
+        from: new Date(start).toISOString(),
         to: new Date(end!).toISOString(),
       },
     }),

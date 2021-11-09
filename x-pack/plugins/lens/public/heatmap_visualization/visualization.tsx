@@ -315,9 +315,7 @@ export const getHeatmapVisualization = ({
               ? [
                   paletteService
                     .get(CUSTOM_PALETTE)
-                    .toExpression(
-                      computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                    ),
+                    .toExpression(computePaletteParams(state.palette?.params || {})),
                 ]
               : [paletteService.get(DEFAULT_PALETTE_NAME).toExpression()],
             legend: [
@@ -418,9 +416,7 @@ export const getHeatmapVisualization = ({
               ? [
                   paletteService
                     .get(CUSTOM_PALETTE)
-                    .toExpression(
-                      computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                    ),
+                    .toExpression(computePaletteParams(state.palette?.params || {})),
                 ]
               : [paletteService.get(DEFAULT_PALETTE_NAME).toExpression()],
             gridConfig: [

@@ -108,7 +108,7 @@ export const useField = <T, FormType = FormData, I = T>(
     validationTypeToFilterOut: string | string[] = VALIDATION_TYPES.FIELD
   ): ValidationError[] => {
     const validationTypeToArray = Array.isArray(validationTypeToFilterOut)
-      ? (validationTypeToFilterOut as string[])
+      ? validationTypeToFilterOut
       : ([validationTypeToFilterOut] as string[]);
 
     return _errors.filter((error) =>
@@ -459,7 +459,7 @@ export const useField = <T, FormType = FormData, I = T>(
 
   const onChange: FieldHook<T, I>['onChange'] = useCallback(
     (event) => {
-      const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
+      const newValue = {}.hasOwnProperty.call(event.target, 'checked')
         ? event.target.checked
         : event.target.value;
 
@@ -489,7 +489,7 @@ export const useField = <T, FormType = FormData, I = T>(
             !{}.hasOwnProperty.call(error, 'validationType'));
 
         if (isSameErrorCode || (typeof errorCode === 'undefined' && isSamevalidationType)) {
-          return messages ? `${messages}, ${error.message}` : (error.message as string);
+          return messages ? `${messages}, ${error.message}` : error.message;
         }
         return messages;
       }, '');

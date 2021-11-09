@@ -36,7 +36,7 @@ export const AnalyticsLayout: React.FC<Props> = ({
   children,
 }) => {
   const { history } = useValues(KibanaLogic);
-  const { query } = useParams() as { query: string };
+  const { query } = useParams();
   const { dataLoading } = useValues(AnalyticsLogic);
   const { loadAnalyticsData, loadQueryData } = useActions(AnalyticsLogic);
 

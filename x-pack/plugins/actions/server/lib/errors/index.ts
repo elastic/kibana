@@ -10,7 +10,7 @@ import { ErrorThatHandlesItsOwnResponse } from './types';
 export function isErrorThatHandlesItsOwnResponse(
   e: ErrorThatHandlesItsOwnResponse
 ): e is ErrorThatHandlesItsOwnResponse {
-  return typeof (e as ErrorThatHandlesItsOwnResponse).sendResponse === 'function';
+  return typeof e.sendResponse === 'function';
 }
 
 export type { ActionTypeDisabledReason } from './action_type_disabled';

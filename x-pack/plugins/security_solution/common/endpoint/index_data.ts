@@ -126,10 +126,10 @@ const getEndpointPackageInfo = async (
   kbnClient: KbnClient
 ): Promise<GetPackagesResponse['response'][0]> => {
   const endpointPackage = (
-    (await kbnClient.request({
+    await kbnClient.request({
       path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
       method: 'GET',
-    })) as AxiosResponse<GetPackagesResponse>
+    })
   ).data.response.find((epmPackage) => epmPackage.name === 'endpoint');
 
   if (!endpointPackage) {

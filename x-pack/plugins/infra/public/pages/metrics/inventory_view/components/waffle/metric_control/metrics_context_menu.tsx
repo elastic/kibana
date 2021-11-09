@@ -43,7 +43,7 @@ export const MetricsContextMenu = ({
           onChange(selectedMetric);
         }
       } else {
-        onChange({ type: val as SnapshotMetricType });
+        onChange({ type: val });
       }
       onClose();
     },

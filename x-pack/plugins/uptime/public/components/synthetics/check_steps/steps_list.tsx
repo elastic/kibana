@@ -99,7 +99,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
       name: '',
       render: (_val: string, item) => (
         <StepDetailLink
-          checkGroupId={item.monitor.check_group!}
+          checkGroupId={item.monitor.check_group}
           stepIndex={item.synthetics?.step?.index!}
         >
           {VIEW_PERFORMANCE}

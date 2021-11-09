@@ -107,8 +107,7 @@ const TRUSTED_APP: TrustedApp = {
 const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
 const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
 
-const packagePolicyClient =
-  createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
+const packagePolicyClient = createPackagePolicyServiceMock();
 
 describe('TrustedApps API Handlers', () => {
   beforeEach(() => {

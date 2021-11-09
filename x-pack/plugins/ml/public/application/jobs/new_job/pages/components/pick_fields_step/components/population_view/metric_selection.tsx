@@ -66,7 +66,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
 
   function addDetector(selectedOptionsIn: DropDownLabel[]) {
     if (selectedOptionsIn !== null && selectedOptionsIn.length) {
-      const option = selectedOptionsIn[0] as DropDownLabel;
+      const option = selectedOptionsIn[0];
       if (typeof option !== 'undefined') {
         const newPair = { agg: option.agg, field: option.field, by: { field: null, value: null } };
         setAggFieldPairList([...aggFieldPairList, newPair]);

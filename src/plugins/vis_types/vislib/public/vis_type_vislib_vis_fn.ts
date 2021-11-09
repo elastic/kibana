@@ -54,7 +54,7 @@ export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefin
     },
   },
   fn(context, args, handlers) {
-    const visType = args.type as Exclude<VislibChartType, 'pie'>;
+    const visType = args.type;
     const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
     const visData = vislibSeriesResponseHandler(context, visConfig.dimensions);
 

@@ -14,7 +14,7 @@ const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest') as SuperTest<Test>;
+  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('scroll_count', () => {

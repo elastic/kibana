@@ -32,8 +32,8 @@ describe('AnalyticsFilters', () => {
   let wrapper: ShallowWrapper;
   const getTagsSelect = () => wrapper.find(EuiSelect);
   const getDateRangePicker = () => wrapper.find(EuiDatePickerRange);
-  const getStartDatePicker = () => getDateRangePicker().prop('startDateControl') as ReactElement;
-  const getEndDatePicker = () => getDateRangePicker().prop('endDateControl') as ReactElement;
+  const getStartDatePicker = () => getDateRangePicker().prop('startDateControl');
+  const getEndDatePicker = () => getDateRangePicker().prop('endDateControl');
   const getApplyButton = () => wrapper.find(EuiButton);
 
   beforeEach(() => {

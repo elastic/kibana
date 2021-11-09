@@ -23,7 +23,7 @@ describe('filter manager utilities', () => {
       const filter = buildEmptyFilter(true);
 
       try {
-        mapQueryString(filter as Filter);
+        mapQueryString(filter);
       } catch (e) {
         expect(e).toBe(filter);
         done();

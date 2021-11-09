@@ -38,8 +38,7 @@ const vegaAdapterValueLabel = i18n.translate('visTypeVega.inspector.vegaAdapter.
 /** Get Runtime Scope for Vega View
  * @link https://vega.github.io/vega/docs/api/debugging/#scope
  **/
-const getVegaRuntimeScope = (debugValues: DebugValues) =>
-  (debugValues.view as any)._runtime as Runtime;
+const getVegaRuntimeScope = (debugValues: DebugValues) => (debugValues.view as any)._runtime;
 
 const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
   const nonSerializableFieldLabel = '(..)';

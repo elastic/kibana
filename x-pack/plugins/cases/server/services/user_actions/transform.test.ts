@@ -557,7 +557,7 @@ describe('user action transform utils', () => {
           fieldType: UserActionFieldType.New,
         });
 
-        const transformedConnetor = JSON.parse(transformedActionDetails!);
+        const transformedConnetor = JSON.parse(transformedActionDetails);
         expect(transformedConnetor).not.toHaveProperty('id');
         expect(transformedConnetor).toMatchInlineSnapshot(`
           Object {

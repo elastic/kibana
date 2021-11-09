@@ -375,14 +375,14 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       const formData = isFormValid ? getFormData() : ({} as T);
 
       if (onSubmit) {
-        await onSubmit(formData, isFormValid!);
+        await onSubmit(formData, isFormValid);
       }
 
       if (isMounted.current) {
         setSubmitting(false);
       }
 
-      return { data: formData, isValid: isFormValid! };
+      return { data: formData, isValid: isFormValid };
     },
     [validate, getFormData, onSubmit]
   );

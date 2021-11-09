@@ -390,7 +390,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     }
 
     let sortedActions = regularActions
-      .concat(Object.values(this.state.universalActions || {}) as Array<Action<object>>)
+      .concat(Object.values(this.state.universalActions || {}))
       .sort(sortByOrderField);
 
     if (this.props.actionPredicate) {

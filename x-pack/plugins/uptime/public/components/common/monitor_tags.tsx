@@ -58,7 +58,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
 
   if (summary) {
     // summary in case of monitor list
-    tags = getTagsFromSummary(summary!);
+    tags = getTagsFromSummary(summary);
   } else {
     tags = getTagsFromPing(ping!);
   }

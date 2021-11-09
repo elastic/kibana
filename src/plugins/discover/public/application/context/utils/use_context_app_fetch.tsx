@@ -123,7 +123,7 @@ export function useContextAppFetch({
         const rows = await fetchSurroundingDocs(
           type,
           indexPattern,
-          anchor as EsHitRecord,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           count,

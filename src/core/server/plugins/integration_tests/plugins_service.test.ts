@@ -170,8 +170,8 @@ describe('PluginsService', () => {
     await pluginsService.start(startDeps);
 
     expect(startDependenciesResolved).toBe(true);
-    expect(contextFromStart!.core).toEqual(contextFromStartService!.core);
-    expect(contextFromStart!.plugins).toEqual(contextFromStartService!.plugins);
-    expect(contextFromStartService!.pluginStart).toEqual(pluginStartContract);
+    expect(contextFromStart.core).toEqual(contextFromStartService.core);
+    expect(contextFromStart.plugins).toEqual(contextFromStartService.plugins);
+    expect(contextFromStartService.pluginStart).toEqual(pluginStartContract);
   });
 });

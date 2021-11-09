@@ -100,7 +100,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined if necessary container is null', () => {
-    delete summary.state.summaryPings![0].container!.id;
+    delete summary.state.summaryPings[0].container!.id;
     expect(getLoggingContainerHref(summary, '')).toBeUndefined();
   });
 
@@ -111,7 +111,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined if necessary pod is null', () => {
-    delete summary.state.summaryPings![0].kubernetes!.pod!.uid;
+    delete summary.state.summaryPings[0].kubernetes!.pod!.uid;
     expect(getLoggingKubernetesHref(summary, '')).toBeUndefined();
   });
 
@@ -122,7 +122,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined ip href if ip is null', () => {
-    delete summary.state.summaryPings![0].monitor.ip;
+    delete summary.state.summaryPings[0].monitor.ip;
     expect(getLoggingIpHref(summary, '')).toBeUndefined();
   });
 });

@@ -116,12 +116,12 @@ export class MonitoringPlugin
 
     Globals.init({
       initializerContext: this.initializerContext,
-      config: this.config!,
+      config: this.config,
       getLogger: this.getLogger,
       log: this.log,
       legacyConfig: this.legacyConfig,
-      coreSetup: this.coreSetup!,
-      setupPlugins: this.setupPlugins!,
+      coreSetup: this.coreSetup,
+      setupPlugins: this.setupPlugins,
     });
 
     const alerts = AlertsFactory.getAll();
@@ -209,7 +209,7 @@ export class MonitoringPlugin
   }
 
   start(coreStart: CoreStart, { licensing }: PluginsStart) {
-    const config = this.config!;
+    const config = this.config;
     this.cluster = instantiateClient(
       config.ui.elasticsearch,
       this.log,

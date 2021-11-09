@@ -22,7 +22,7 @@ describe('DiscoverErrorLink without kuery', () => {
   });
 
   it('should have correct query', () => {
-    const queryProp = wrapper.prop('query') as any;
+    const queryProp = wrapper.prop('query');
     expect(queryProp._a.query.query).toEqual(
       'service.name:"myServiceName" AND error.grouping_key:"myGroupingKey"'
     );
@@ -47,7 +47,7 @@ describe('DiscoverErrorLink with kuery', () => {
   });
 
   it('should have correct query', () => {
-    const queryProp = wrapper.prop('query') as any;
+    const queryProp = wrapper.prop('query');
     expect(queryProp._a.query.query).toEqual(
       'service.name:"myServiceName" AND error.grouping_key:"myGroupingKey" AND transaction.sampled: true'
     );

@@ -109,7 +109,7 @@ export class GraphPlugin
           capabilities: coreStart.application.capabilities,
           chrome: coreStart.chrome,
           toastNotifications: coreStart.notifications.toasts,
-          indexPatterns: pluginsStart.data!.indexPatterns,
+          indexPatterns: pluginsStart.data.indexPatterns,
           overlays: coreStart.overlays,
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,

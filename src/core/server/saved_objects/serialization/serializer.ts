@@ -88,9 +88,7 @@ export class SavedObjectsSerializer {
       _source;
 
     const version =
-      _seq_no != null || _primary_term != null
-        ? encodeVersion(_seq_no!, _primary_term!)
-        : undefined;
+      _seq_no != null || _primary_term != null ? encodeVersion(_seq_no, _primary_term) : undefined;
     const { id, namespace } = this.trimIdPrefix(_source.namespace, type, _id, namespaceTreatment);
     const includeNamespace =
       namespace && (namespaceTreatment === 'lax' || this.registry.isSingleNamespace(type));

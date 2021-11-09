@@ -99,7 +99,7 @@ export const createDeserializer =
         }
         if (draft.phases.hot?.actions.shrink?.max_primary_shard_size) {
           const primaryShardSize = splitSizeAndUnits(
-            draft.phases.hot.actions.shrink.max_primary_shard_size!
+            draft.phases.hot.actions.shrink.max_primary_shard_size
           );
           draft.phases.hot.actions.shrink.max_primary_shard_size = primaryShardSize.size;
           draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
@@ -120,7 +120,7 @@ export const createDeserializer =
 
           if (draft.phases.warm.actions.shrink?.max_primary_shard_size) {
             const primaryShardSize = splitSizeAndUnits(
-              draft.phases.warm.actions.shrink.max_primary_shard_size!
+              draft.phases.warm.actions.shrink.max_primary_shard_size
             );
             draft.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
             draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;

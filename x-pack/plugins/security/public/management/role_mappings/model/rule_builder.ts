@@ -134,7 +134,7 @@ function createRuleForType(
 
       const subRulesResults = ((ruleDefinition as any[]) || []).map((definition: any, index) =>
         parseRawRules(definition, ruleType, [...currentRuleTrace, `[${index}]`], depth)
-      ) as RuleBuilderResult[];
+      );
 
       const { subRules, maxDepth } = subRulesResults.reduce(
         (acc, result) => {

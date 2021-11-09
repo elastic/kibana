@@ -100,10 +100,10 @@ describe('reference editor', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(fields![0].options).not.toContainEqual(
+    expect(fields[0].options).not.toContainEqual(
       expect.objectContaining({ 'data-test-subj': expect.stringContaining('Incompatible') })
     );
-    expect(fields![1].options).not.toContainEqual(
+    expect(fields[1].options).not.toContainEqual(
       expect.objectContaining({ 'data-test-subj': expect.stringContaining('Incompatible') })
     );
   });
@@ -146,7 +146,7 @@ describe('reference editor', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
     expect(
-      fields![0].options!.find(({ label }) => label === 'timestampLabel')!['data-test-subj']
+      fields[0].options!.find(({ label }) => label === 'timestampLabel')!['data-test-subj']
     ).toContain('Incompatible');
   });
 

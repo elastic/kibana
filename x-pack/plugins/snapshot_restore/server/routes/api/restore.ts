@@ -100,8 +100,8 @@ export function registerRestoreRoutes({
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { repository, snapshot } = req.params as TypeOf<typeof restoreParamsSchema>;
-      const restoreSettings = req.body as TypeOf<typeof restoreSettingsSchema>;
+      const { repository, snapshot } = req.params;
+      const restoreSettings = req.body;
 
       try {
         const response = await clusterClient.asCurrentUser.snapshot.restore({

@@ -254,7 +254,7 @@ export class ReportingCore {
 
   private async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
+    return savedObjects.getScopedClient(request);
   }
 
   public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {

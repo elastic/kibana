@@ -87,7 +87,7 @@ describe('Kibana deprecations', () => {
         );
 
         expect(steps).not.toBe(null);
-        expect(steps.length).toEqual(deprecation!.correctiveActions!.manualSteps!.length);
+        expect(steps.length).toEqual(deprecation.correctiveActions.manualSteps.length);
 
         await act(async () => {
           const closeButton: HTMLButtonElement | null = modal!.querySelector(

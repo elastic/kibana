@@ -237,7 +237,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                   isInvalid={form.touched.role_descriptors && !!form.errors.role_descriptors}
                 >
                   <CodeEditorField
-                    value={form.values.role_descriptors!}
+                    value={form.values.role_descriptors}
                     onChange={(value) => form.setValue('role_descriptors', value)}
                     languageId="xjson"
                     height={200}
@@ -325,7 +325,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                   isInvalid={form.touched.metadata && !!form.errors.metadata}
                 >
                   <CodeEditorField
-                    value={form.values.metadata!}
+                    value={form.values.metadata}
                     onChange={(value) => form.setValue('metadata', value)}
                     languageId="xjson"
                     height={200}

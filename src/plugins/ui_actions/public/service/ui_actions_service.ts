@@ -143,7 +143,7 @@ export class UiActionsService {
 
   public readonly getTriggerActions = (triggerId: string): Action[] => {
     // This line checks if trigger exists, otherwise throws.
-    this.getTrigger!(triggerId);
+    this.getTrigger(triggerId);
 
     const actionIds = this.triggerToActions.get(triggerId);
 
@@ -158,7 +158,7 @@ export class UiActionsService {
     triggerId: string,
     context: object
   ): Promise<Action[]> => {
-    const actions = this.getTriggerActions!(triggerId);
+    const actions = this.getTriggerActions(triggerId);
     const isCompatibles = await Promise.all(
       actions.map((action) =>
         action.isCompatible({

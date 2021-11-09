@@ -101,9 +101,7 @@ function extractColumns(
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
 
-      const newCol = (
-        nodeOperation as OperationDefinition<IndexPatternColumn, 'field'>
-      ).buildColumn(
+      const newCol = nodeOperation.buildColumn(
         {
           layer,
           indexPattern,
@@ -138,9 +136,7 @@ function extractColumns(
       }
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
-      const newCol = (
-        nodeOperation as OperationDefinition<IndexPatternColumn, 'fullReference'>
-      ).buildColumn(
+      const newCol = nodeOperation.buildColumn(
         {
           layer,
           indexPattern,

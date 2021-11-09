@@ -28,7 +28,7 @@ interface ReauthenticateProps {
 }
 
 export const Reauthenticate: React.FC<ReauthenticateProps> = ({ name, header }) => {
-  const { search } = useLocation() as Location;
+  const { search } = useLocation();
 
   const { sourceId } = parseQueryParams(search) as unknown as SourceQueryParams;
   const [formLoading, setFormLoading] = useState(false);

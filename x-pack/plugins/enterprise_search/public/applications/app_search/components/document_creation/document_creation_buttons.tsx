@@ -39,7 +39,7 @@ interface Props {
 export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) => {
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
 
-  const { search } = useLocation() as Location;
+  const { search } = useLocation();
   const { method } = parseQueryParams(search);
 
   useEffect(() => {

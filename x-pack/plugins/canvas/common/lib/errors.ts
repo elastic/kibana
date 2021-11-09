@@ -26,7 +26,7 @@ function createError(name: string) {
   function CustomError(...args: any[]) {
     const instance = new Error(...args);
     // @ts-expect-error this has not type annotation
-    const self = this as any;
+    const self = this;
     instance.name = self.name = name;
 
     if (Error.captureStackTrace) {

@@ -18,7 +18,7 @@ const mockDriver = {
 };
 
 jest.mock('react', () => ({
-  ...(jest.requireActual('react') as object),
+  ...jest.requireActual('react'),
   useContext: jest.fn(() => ({
     driver: mockDriver,
   })),

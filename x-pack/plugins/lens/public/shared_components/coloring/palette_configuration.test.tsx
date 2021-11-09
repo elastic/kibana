@@ -98,7 +98,7 @@ describe('palette panel', () => {
       const paletteOptions = instance
         .find('[data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"]')
         .at(1)
-        .prop('palettes') as EuiColorPalettePickerPaletteProps[];
+        .prop('palettes');
       expect(paletteOptions.length).toEqual(2);
 
       expect(paletteOptions[paletteOptions.length - 1]).toEqual({

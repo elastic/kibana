@@ -97,8 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const { edges } = await PageObjects.graph.getGraphObjects();
       expect(edges.length).to.be(expectedConnectionCount);
       edges.forEach((edge) => {
-        const from = edge.sourceNode.label!;
-        const to = edge.targetNode.label!;
+        const from = edge.sourceNode.label;
+        const to = edge.targetNode.label;
         expect(expectedConnections[from][to]).to.be(true);
       });
     });

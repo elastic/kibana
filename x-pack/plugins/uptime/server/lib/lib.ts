@@ -68,10 +68,10 @@ export function createUptimeESClient({
       let res: any;
       let esError: any;
       const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-        savedObjectsClient!
+        savedObjectsClient
       );
 
-      const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
+      const esParams = { index: dynamicSettings.heartbeatIndices, ...params };
       const startTime = process.hrtime();
 
       const startTimeNow = Date.now();
@@ -115,10 +115,10 @@ export function createUptimeESClient({
       let esError: any;
 
       const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-        savedObjectsClient!
+        savedObjectsClient
       );
 
-      const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
+      const esParams = { index: dynamicSettings.heartbeatIndices, ...params };
       const startTime = process.hrtime();
 
       try {

@@ -688,10 +688,10 @@ export class JobCreator {
       this._job_config.analysis_config.per_partition_categorization = {};
     }
     if (this._job_config.analysis_config.per_partition_categorization?.enabled === undefined) {
-      this._job_config.analysis_config.per_partition_categorization!.enabled = false;
+      this._job_config.analysis_config.per_partition_categorization.enabled = false;
     }
     if (this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === undefined) {
-      this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = false;
+      this._job_config.analysis_config.per_partition_categorization.stop_on_warn = false;
     }
   }
 

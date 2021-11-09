@@ -396,7 +396,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           sortDirection,
         },
       ],
-      filterStatus: workflowStatus as AlertWorkflowStatus,
+      filterStatus: workflowStatus,
       leadingControlColumns,
       trailingControlColumns,
       unit: (totalAlerts: number) => translations.showingAlertsTitle(totalAlerts),

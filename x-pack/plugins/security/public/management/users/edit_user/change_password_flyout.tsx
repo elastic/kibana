@@ -118,7 +118,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
         );
         onSuccess?.();
       } catch (error) {
-        if ((error as any).body?.message === 'security_exception') {
+        if (error.body?.message === 'security_exception') {
           form.setError(
             'current_password',
             i18n.translate(
@@ -136,7 +136,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
                 defaultMessage: 'Could not change password',
               }
             ),
-            text: (error as any).body?.message || error.message,
+            text: error.body?.message || error.message,
           });
           throw error;
         }

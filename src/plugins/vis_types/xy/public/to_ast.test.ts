@@ -14,7 +14,7 @@ import { toExpressionAst } from './to_ast';
 import { VisParams } from './types';
 
 jest.mock('../../../expressions/public', () => ({
-  ...(jest.requireActual('../../../expressions/public') as any),
+  ...jest.requireActual('../../../expressions/public'),
   buildExpression: jest.fn().mockImplementation(() => ({
     toAst: () => ({
       type: 'expression',

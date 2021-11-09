@@ -46,7 +46,7 @@ describe.each([
       const gridProps: ArtifactCardGridProps = {
         items,
         onPageChange: pageChangeHandler!,
-        onExpandCollapse: expandCollapseHandler!,
+        onExpandCollapse: expandCollapseHandler,
         cardComponentProps: cardComponentPropsProvider,
         pagination: {
           pageSizeOptions: [5, 10],

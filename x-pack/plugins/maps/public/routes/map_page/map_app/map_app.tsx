@@ -459,7 +459,7 @@ export class MapApp extends React.Component<Props, State> {
           objectNoun: getMapEmbeddableDisplayName(),
           currentObjectId: this.props.savedMap.getSavedObjectId()!,
           otherObjectId: sharingSavedObjectProps.aliasTargetId!,
-          otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId!)}${
+          otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId)}${
             this.props.history.location.hash
           }`,
         })

@@ -51,7 +51,7 @@ export const localizeItem = (rawItem: ApiItem, userLanguage: string): NewsfeedIt
     description: description[chosenLanguage],
     linkText: linkText != null ? linkText[chosenLanguage] : null,
     linkUrl: linkUrl[chosenLanguage],
-    badge: badge != null ? badge![chosenLanguage] : null,
+    badge: badge != null ? badge[chosenLanguage] : null,
     publishOn: moment(publishOnUtc),
     expireOn: moment(expireOnUtc),
     hash: hash.slice(0, 10), // optimize for storage and faster parsing

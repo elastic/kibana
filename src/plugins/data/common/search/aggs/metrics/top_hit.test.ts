@@ -57,7 +57,7 @@ describe('Top hit metric', () => {
         getByName: () => field,
         filter: () => [field],
       },
-      flattenHit: jest.fn((x) => x!._source),
+      flattenHit: jest.fn((x) => x._source),
     } as any;
 
     const aggConfigs = new AggConfigs(

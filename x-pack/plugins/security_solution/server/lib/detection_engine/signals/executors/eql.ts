@@ -117,9 +117,9 @@ export const eqlExecutor = async ({
   );
 
   // TODO: fix this later
-  const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.transport.request(
     request
-  )) as TransportResult<EqlSignalSearchResponse>;
+  );
 
   const eqlSignalSearchEnd = performance.now();
   const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);

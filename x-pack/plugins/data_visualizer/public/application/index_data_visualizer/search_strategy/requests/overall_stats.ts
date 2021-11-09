@@ -107,7 +107,7 @@ export const processAggregatableFieldsExistResponse = (
   responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
     const aggregations = body.aggregations;
     const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total;
-    stats.totalCount = totalCount as number;
+    stats.totalCount = totalCount;
 
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const sampleCount =

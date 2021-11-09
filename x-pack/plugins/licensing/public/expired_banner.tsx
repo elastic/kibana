@@ -47,4 +47,4 @@ const ExpiredBanner: React.FunctionComponent<Props> = (props) => (
 );
 
 export const mountExpiredBanner = (props: Props) =>
-  toMountPoint(<ExpiredBanner type={props.type!} uploadUrl={props.uploadUrl} />);
+  toMountPoint(<ExpiredBanner type={props.type} uploadUrl={props.uploadUrl} />);

@@ -422,10 +422,12 @@ export class SavedObjectsService
 
       // The Elasticsearch service should already ensure that, but let's double check just in case.
       // Should it be replaced with elasticsearch.status$ API instead?
-      const compatibleNodes = await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
-        filter((nodes) => nodes.isCompatible),
-        take(1)
-      ).toPromise();
+      const compatibleNodes = await this.setupDeps.elasticsearch.esNodesCompatibility$
+        .pipe(
+          filter((nodes) => nodes.isCompatible),
+          take(1)
+        )
+        .toPromise();
 
       // Running migrations only if we got compatible nodes.
       // It may happen that the observable completes due to Kibana shutting down

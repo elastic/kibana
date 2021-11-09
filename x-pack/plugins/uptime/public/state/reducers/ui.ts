@@ -41,7 +41,7 @@ export const uiReducer = handleActions<UiState, UiPayload>(
   {
     [String(toggleIntegrationsPopover)]: (state, action: Action<PopoverState>) => ({
       ...state,
-      integrationsPopoverOpen: action.payload as PopoverState,
+      integrationsPopoverOpen: action.payload,
     }),
 
     [String(setAlertFlyoutVisible)]: (state, action: Action<boolean | undefined>) => ({
@@ -51,12 +51,12 @@ export const uiReducer = handleActions<UiState, UiPayload>(
 
     [String(setBasePath)]: (state, action: Action<string>) => ({
       ...state,
-      basePath: action.payload as string,
+      basePath: action.payload,
     }),
 
     [String(setEsKueryString)]: (state, action: Action<string>) => ({
       ...state,
-      esKuery: action.payload as string,
+      esKuery: action.payload,
     }),
 
     [String(setAlertFlyoutType)]: (state, action: Action<string>) => ({

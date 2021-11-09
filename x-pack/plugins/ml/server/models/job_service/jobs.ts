@@ -281,8 +281,8 @@ export function jobsProvider(
       const dataCounts = job.data_counts;
       if (dataCounts !== undefined) {
         timeRange.to = getLatestDataOrBucketTimestamp(
-          dataCounts.latest_record_timestamp as number,
-          dataCounts.latest_bucket_timestamp as number
+          dataCounts.latest_record_timestamp,
+          dataCounts.latest_bucket_timestamp
         );
         timeRange.from = dataCounts.earliest_record_timestamp;
       }

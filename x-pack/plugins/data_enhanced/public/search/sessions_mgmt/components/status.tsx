@@ -58,7 +58,7 @@ const getStatusAttributes = ({
 }: StatusIndicatorProps): StatusAttributes | null => {
   let expireDate: string;
   if (session.expires) {
-    expireDate = dateString(session.expires!, timezone);
+    expireDate = dateString(session.expires, timezone);
   } else {
     expireDate = i18n.translate('xpack.data.mgmt.searchSessions.status.expireDateUnknown', {
       defaultMessage: 'unknown',

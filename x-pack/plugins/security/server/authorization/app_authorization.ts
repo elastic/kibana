@@ -44,7 +44,7 @@ export function initAppAuthorization(
   const protectedApplications = new ProtectedApplications(featuresService);
 
   http.registerOnPostAuth(async (request, response, toolkit) => {
-    const path = request.url.pathname!;
+    const path = request.url.pathname;
 
     // if the path doesn't start with "/app/", just continue
     if (!path.startsWith('/app/')) {

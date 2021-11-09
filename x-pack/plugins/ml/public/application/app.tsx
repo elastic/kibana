@@ -71,8 +71,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const pageDeps = {
     history: appMountParams.history,
     dataViewsContract: deps.data.dataViews,
-    config: coreStart.uiSettings!,
-    setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    config: coreStart.uiSettings,
+    setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
   };
 
@@ -126,12 +126,12 @@ export const renderApp = (
     timefilter: deps.data.query.timefilter,
     fieldFormats: deps.data.fieldFormats,
     autocomplete: deps.data.autocomplete,
-    config: coreStart.uiSettings!,
-    chrome: coreStart.chrome!,
-    docLinks: coreStart.docLinks!,
+    config: coreStart.uiSettings,
+    chrome: coreStart.chrome,
+    docLinks: coreStart.docLinks,
     toastNotifications: coreStart.notifications.toasts,
     overlays: coreStart.overlays,
-    recentlyAccessed: coreStart.chrome!.recentlyAccessed,
+    recentlyAccessed: coreStart.chrome.recentlyAccessed,
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,
     application: coreStart.application,

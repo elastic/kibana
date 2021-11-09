@@ -63,7 +63,7 @@ export function useEmbeddableFactory<I extends EmbeddableInput>({
     setEmbeddable(undefined);
     setLoading(true);
     factory
-      .create(latestInput.current!)
+      .create(latestInput.current)
       .then((createdEmbeddable) => {
         if (canceled) {
           if (createdEmbeddable) {

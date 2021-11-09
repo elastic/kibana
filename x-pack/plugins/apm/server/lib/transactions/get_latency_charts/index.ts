@@ -208,7 +208,7 @@ export async function getLatencyPeriods({
     ...options,
     start,
     end,
-    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    latencyAggregationType,
   });
 
   const previousPeriodPromise =
@@ -217,8 +217,7 @@ export async function getLatencyPeriods({
           ...options,
           start: comparisonStart,
           end: comparisonEnd,
-          latencyAggregationType:
-            latencyAggregationType as LatencyAggregationType,
+          latencyAggregationType,
         })
       : { latencyTimeseries: [], overallAvgDuration: null };
 

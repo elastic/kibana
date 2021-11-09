@@ -59,7 +59,7 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
             }
             return acc;
           },
-          { ...data.template } as any
+          { ...data.template }
         );
       }
     }

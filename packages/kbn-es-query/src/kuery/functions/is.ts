@@ -156,7 +156,7 @@ export function toElasticsearchQuery(
       dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
     */
       const timeZoneParam = config.dateFormatTZ
-        ? { time_zone: getTimeZoneFromSettings(config!.dateFormatTZ) }
+        ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) }
         : {};
       return [
         ...accumulator,

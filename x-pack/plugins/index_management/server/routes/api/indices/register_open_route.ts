@@ -19,7 +19,7 @@ export function registerOpenRoute({ router, lib: { handleEsError } }: RouteDepen
     { path: addBasePath('/indices/open'), validate: { body: bodySchema } },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const { indices = [] } = request.body as typeof bodySchema.type;
+      const { indices = [] } = request.body;
 
       const params = {
         expand_wildcards: 'none',

@@ -288,7 +288,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
               aggregationTypes={builtInAggregationTypes}
               comparators={builtInComparators}
               charts={charts}
-              dataFieldsFormats={data!.fieldFormats}
+              dataFieldsFormats={data.fieldFormats}
             />
           </Fragment>
         )}

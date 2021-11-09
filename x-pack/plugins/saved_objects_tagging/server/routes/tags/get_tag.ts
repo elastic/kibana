@@ -20,7 +20,7 @@ export const registerGetTagRoute = (router: TagsPluginRouter) => {
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       const { id } = req.params;
-      const tag = await ctx.tags!.tagsClient.get(id);
+      const tag = await ctx.tags.tagsClient.get(id);
       return res.ok({
         body: {
           tag,

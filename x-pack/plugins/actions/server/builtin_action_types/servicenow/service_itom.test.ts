@@ -43,7 +43,7 @@ describe('ServiceNow SIR service', () => {
       logger,
       configurationUtilities,
       snExternalServiceConfig['.servicenow-itom']
-    ) as ExternalServiceITOM;
+    );
   });
 
   beforeEach(() => {

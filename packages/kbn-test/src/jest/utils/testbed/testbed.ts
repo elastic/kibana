@@ -188,7 +188,7 @@ export const registerTestBed = <T extends string = string>(
         value,
         isAsync = false
       ) => {
-        const formInput = typeof input === 'string' ? find(input) : (input as ReactWrapper);
+        const formInput = typeof input === 'string' ? find(input) : input;
 
         if (!formInput.length) {
           throw new Error(`Input "${input}" was not found.`);
@@ -207,7 +207,7 @@ export const registerTestBed = <T extends string = string>(
         value,
         doUpdateComponent = true
       ) => {
-        const formSelect = typeof select === 'string' ? find(select) : (select as ReactWrapper);
+        const formSelect = typeof select === 'string' ? find(select) : select;
 
         if (!formSelect.length) {
           throw new Error(`Select "${select}" was not found.`);

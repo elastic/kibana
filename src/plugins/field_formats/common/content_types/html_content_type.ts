@@ -25,7 +25,7 @@ const getConvertFn = (
       : getHighlightHtml(formatted, hit.highlight[field.name]);
   };
 
-  return (convert || fallbackHtml) as HtmlContextTypeConvert;
+  return convert || fallbackHtml;
 };
 
 export const setup = (

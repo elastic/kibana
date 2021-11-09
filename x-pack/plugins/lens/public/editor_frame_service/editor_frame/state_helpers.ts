@@ -97,7 +97,7 @@ export async function persistedStateToExpression(
       errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
     };
   }
-  const visualization = visualizations[visualizationType!];
+  const visualization = visualizations[visualizationType];
   const datasourceStates = await initializeDatasources(
     datasourceMap,
     Object.fromEntries(

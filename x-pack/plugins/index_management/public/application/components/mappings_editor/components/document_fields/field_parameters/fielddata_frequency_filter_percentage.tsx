@@ -35,7 +35,7 @@ export const FielddataFrequencyFilterPercentage = ({ min, max }: Props) => {
       <EuiDualRange
         min={0}
         max={100}
-        value={[min.value as number, max.value as number]}
+        value={[min.value, max.value]}
         onChange={onFrequencyFilterChange}
         showInput="inputWithPopover"
         // @ts-ignore

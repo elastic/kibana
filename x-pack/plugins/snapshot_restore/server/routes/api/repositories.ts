@@ -99,7 +99,7 @@ export function registerRepositoriesRoutes({
     { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const { name } = req.params;
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
@@ -192,7 +192,7 @@ export function registerRepositoriesRoutes({
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const { name } = req.params;
 
       try {
         const { body: verificationResults } = await clusterClient.asCurrentUser.snapshot
@@ -228,7 +228,7 @@ export function registerRepositoriesRoutes({
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const { name } = req.params;
 
       try {
         const { body: cleanupResults } = await clusterClient.asCurrentUser.snapshot
@@ -261,7 +261,7 @@ export function registerRepositoriesRoutes({
     { path: addBasePath('repositories'), validate: { body: repositorySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name = '', type = '', settings = {} } = req.body as TypeOf<typeof repositorySchema>;
+      const { name = '', type = '', settings = {} } = req.body;
 
       // Check that repository with the same name doesn't already exist
       try {
@@ -302,8 +302,8 @@ export function registerRepositoriesRoutes({
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
-      const { type = '', settings = {} } = req.body as TypeOf<typeof repositorySchema>;
+      const { name } = req.params;
+      const { type = '', settings = {} } = req.body;
 
       try {
         // Check that repository with the given name exists
@@ -334,7 +334,7 @@ export function registerRepositoriesRoutes({
     { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { name } = req.params as TypeOf<typeof nameParameterSchema>;
+      const { name } = req.params;
       const repositoryNames = name.split(',');
 
       const response: { itemsDeleted: string[]; errors: any[] } = {

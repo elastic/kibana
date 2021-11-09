@@ -45,7 +45,7 @@ export const useReduxEmbeddableContext = <
     );
   }
 
-  return context!;
+  return context;
 };
 
 /**
@@ -69,5 +69,5 @@ export const useReduxContainerContext = <
       'useReduxEmbeddableContext must be used inside the useReduxEmbeddableContextProvider.'
     );
   }
-  return context!;
+  return context;
 };

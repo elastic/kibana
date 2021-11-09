@@ -19,7 +19,7 @@ export function registerRefreshRoute({ router, lib: { handleEsError } }: RouteDe
     { path: addBasePath('/indices/refresh'), validate: { body: bodySchema } },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const { indices = [] } = request.body as typeof bodySchema.type;
+      const { indices = [] } = request.body;
 
       const params = {
         expand_wildcards: 'none',

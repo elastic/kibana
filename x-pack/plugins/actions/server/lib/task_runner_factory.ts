@@ -130,7 +130,7 @@ export class TaskRunnerFactory {
         try {
           executorResult = await actionExecutor.execute({
             params,
-            actionId: actionId as string,
+            actionId,
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request: fakeRequest,
             ...getSourceFromReferences(references),

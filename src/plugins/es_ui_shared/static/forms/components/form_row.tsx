@@ -48,7 +48,7 @@ export const FormRow = ({
 
   return (
     <EuiDescribedFormGroup title={titleWrapped} description={description} fullWidth>
-      {children ? children : field ? <Field field={field!} {...rest} /> : null}
+      {children ? children : field ? <Field field={field} {...rest} /> : null}
     </EuiDescribedFormGroup>
   );
 };

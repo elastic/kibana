@@ -48,15 +48,14 @@ export function registerSnapshotsRoutes({
     { path: addBasePath('snapshots'), validate: { query: snapshotListSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const sortField =
-        sortFieldToESParams[(req.query as TypeOf<typeof snapshotListSchema>).sortField];
-      const sortDirection = (req.query as TypeOf<typeof snapshotListSchema>).sortDirection;
-      const pageIndex = (req.query as TypeOf<typeof snapshotListSchema>).pageIndex;
-      const pageSize = (req.query as TypeOf<typeof snapshotListSchema>).pageSize;
-      const searchField = (req.query as TypeOf<typeof snapshotListSchema>).searchField;
-      const searchValue = (req.query as TypeOf<typeof snapshotListSchema>).searchValue;
-      const searchMatch = (req.query as TypeOf<typeof snapshotListSchema>).searchMatch;
-      const searchOperator = (req.query as TypeOf<typeof snapshotListSchema>).searchOperator;
+      const sortField = sortFieldToESParams[req.query.sortField];
+      const sortDirection = req.query.sortDirection;
+      const pageIndex = req.query.pageIndex;
+      const pageSize = req.query.pageSize;
+      const searchField = req.query.searchField;
+      const searchValue = req.query.searchValue;
+      const searchMatch = req.query.searchMatch;
+      const searchOperator = req.query.searchOperator;
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
@@ -179,7 +178,7 @@ export function registerSnapshotsRoutes({
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { repository, snapshot } = req.params as TypeOf<typeof getOneParamsSchema>;
+      const { repository, snapshot } = req.params;
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       try {

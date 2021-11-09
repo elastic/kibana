@@ -34,7 +34,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
   if (defaultIndexPattern.timeFieldName === undefined) {
     const columns: Record<string, IndexPatternColumn> = {
       col1: {
-        label: item.fieldName!,
+        label: item.fieldName,
         dataType: 'number',
         isBucketed: true,
         operationType: 'range',
@@ -43,7 +43,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
           maxBars: 'auto',
           ranges: [],
         },
-        sourceField: item.fieldName!,
+        sourceField: item.fieldName,
       },
       col2: {
         label: COUNT,
@@ -73,16 +73,16 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
         values: { fieldName: item.fieldName },
       }),
       operationType: 'average',
-      sourceField: item.fieldName!,
+      sourceField: item.fieldName,
     },
     col1: {
       dataType: 'date',
       isBucketed: true,
-      label: defaultIndexPattern.timeFieldName!,
+      label: defaultIndexPattern.timeFieldName,
       operationType: 'date_histogram',
       params: { interval: 'auto' },
       scale: 'interval',
-      sourceField: defaultIndexPattern.timeFieldName!,
+      sourceField: defaultIndexPattern.timeFieldName,
     },
   };
 
@@ -109,11 +109,11 @@ export function getDateSettings(item: FieldVisConfig) {
     col1: {
       dataType: 'date',
       isBucketed: true,
-      label: item.fieldName!,
+      label: item.fieldName,
       operationType: 'date_histogram',
       params: { interval: 'auto' },
       scale: 'interval',
-      sourceField: item.fieldName!,
+      sourceField: item.fieldName,
     },
   };
   const layer: XYLayerConfig = {
@@ -139,7 +139,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
         size: 10,
         orderDirection: 'desc',
       },
-      sourceField: item.fieldName!,
+      sourceField: item.fieldName,
     },
     col2: {
       label: COUNT,
@@ -172,7 +172,7 @@ export function getBooleanSettings(item: FieldVisConfig) {
         size: 2,
         orderDirection: 'desc',
       },
-      sourceField: item.fieldName!,
+      sourceField: item.fieldName,
     },
     col2: {
       label: COUNT,

@@ -66,7 +66,7 @@ function buildSuggestion({
   }));
 
   const columnOrder = layers[layerId].columnOrder;
-  const columnMap = layers[layerId].columns as Record<string, IndexPatternColumn>;
+  const columnMap = layers[layerId].columns;
   const isMultiRow = Object.values(columnMap).some((column) => column.isBucketed);
 
   return {

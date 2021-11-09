@@ -490,7 +490,7 @@ describe('checkNonPersistedSessions', () => {
 
       expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
       const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
-      const updatedAttributes = updateInput[0] as SavedObjectsBulkUpdateObject;
+      const updatedAttributes = updateInput[0];
       expect(updatedAttributes.namespace).toBe('awesome');
     });
 

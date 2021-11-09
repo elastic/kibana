@@ -92,7 +92,7 @@ function EditorOutputUI() {
       );
     } else if (error) {
       const mode = modeForContentType(error.response.contentType);
-      editor.update(error.response.value as string, mode);
+      editor.update(error.response.value, mode);
     } else {
       editor.update('');
     }

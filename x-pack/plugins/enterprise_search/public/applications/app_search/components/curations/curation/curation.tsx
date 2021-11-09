@@ -17,7 +17,7 @@ import { CurationLogic } from './curation_logic';
 import { ManualCuration } from './manual_curation';
 
 export const Curation: React.FC = () => {
-  const { curationId } = useParams() as { curationId: string };
+  const { curationId } = useParams();
   const { loadCuration } = useActions(CurationLogic({ curationId }));
   const { dataLoading, isAutomated } = useValues(CurationLogic({ curationId }));
 

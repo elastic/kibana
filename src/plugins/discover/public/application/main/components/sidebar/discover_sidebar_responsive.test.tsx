@@ -92,7 +92,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     columns: ['extension'],
     documents$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
-      result: hits as ElasticSearchHit[],
+      result: hits,
     }) as DataDocuments$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),

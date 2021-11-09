@@ -265,7 +265,7 @@ export class ContextContainer implements IContextContainer {
   }
 
   private getContextNamesForCore() {
-    return new Set(this.contextNamesBySource.get(this.coreId)!);
+    return new Set(this.contextNamesBySource.get(this.coreId));
   }
 
   private getContextNamesForPluginId(pluginId: symbol) {

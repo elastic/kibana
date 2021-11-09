@@ -73,7 +73,7 @@ function getAgentPolicyCreateMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.create.mockImplementation(async (type, attributes) => {
     return {
-      attributes: attributes as unknown as NewAgentPolicy,
+      attributes: attributes as NewAgentPolicy,
       id: 'mocked',
       type: 'mocked',
       references: [],

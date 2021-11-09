@@ -95,7 +95,7 @@ function extractParamsForFormula(
       if (isObject(value)) {
         return Object.keys(value).map((subName) => ({
           name: `${name}-${subName}`,
-          value: value[subName] as string | number,
+          value: value[subName],
           required,
         }));
       }

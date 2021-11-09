@@ -58,12 +58,9 @@ describe('XY Config panels', () => {
         />
       );
 
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
+      const options = component.find(EuiButtonGroup).first().prop('options');
 
-      expect(options!.map(({ id }) => id)).toEqual([
+      expect(options.map(({ id }) => id)).toEqual([
         'bar',
         'bar_stacked',
         'bar_percentage_stacked',
@@ -73,7 +70,7 @@ describe('XY Config panels', () => {
         'line',
       ]);
 
-      expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
+      expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
     });
 
     test('shows only horizontal bar options when in horizontal mode', () => {
@@ -87,17 +84,14 @@ describe('XY Config panels', () => {
         />
       );
 
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
+      const options = component.find(EuiButtonGroup).first().prop('options');
 
-      expect(options!.map(({ id }) => id)).toEqual([
+      expect(options.map(({ id }) => id)).toEqual([
         'bar_horizontal',
         'bar_horizontal_stacked',
         'bar_horizontal_percentage_stacked',
       ]);
-      expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
+      expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
     });
   });
 
@@ -266,12 +260,9 @@ describe('XY Config panels', () => {
         />
       );
 
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
+      const options = component.find(EuiButtonGroup).first().prop('options');
 
-      expect(options!.map(({ label }) => label)).toEqual(['Auto', 'Bottom', 'Top']);
+      expect(options.map(({ label }) => label)).toEqual(['Auto', 'Bottom', 'Top']);
     });
 
     test('shows the default axis side options when not in horizontal mode', () => {
@@ -290,12 +281,9 @@ describe('XY Config panels', () => {
         />
       );
 
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
+      const options = component.find(EuiButtonGroup).first().prop('options');
 
-      expect(options!.map(({ label }) => label)).toEqual(['Auto', 'Left', 'Right']);
+      expect(options.map(({ label }) => label)).toEqual(['Auto', 'Left', 'Right']);
     });
 
     test('sets the color of a dimension to the color from palette service if not set explicitly', () => {

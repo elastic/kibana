@@ -114,13 +114,13 @@ export function checkPrivilegesWithRequestFactory(
 
       // we need to filter out the non requested privileges from the response
       const resourcePrivileges = transform(applicationPrivilegesResponse, (result, value, key) => {
-        result[key!] = pick(value, privileges.kibana ?? []);
-      }) as HasPrivilegesResponseApplication;
+        result[key] = pick(value, privileges.kibana ?? []);
+      });
       const privilegeArray = Object.entries(resourcePrivileges)
         .map(([key, val]) => {
           // we need to turn the resource responses back into the space ids
           const resource =
-            key !== GLOBAL_RESOURCE ? ResourceSerializer.deserializeSpaceResource(key!) : undefined;
+            key !== GLOBAL_RESOURCE ? ResourceSerializer.deserializeSpaceResource(key) : undefined;
           return Object.entries(val).map(([privilege, authorized]) => ({
             resource,
             privilege,

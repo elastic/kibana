@@ -65,7 +65,7 @@ const getProps = (
       return iTypes.reduce<rt.Props>(
         (props, type) => Object.assign(props, getProps(type) as rt.Props),
         {} as rt.Props
-      ) as rt.Props;
+      );
     }
     default:
       return null;

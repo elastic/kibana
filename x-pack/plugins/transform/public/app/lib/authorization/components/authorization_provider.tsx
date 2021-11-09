@@ -61,7 +61,7 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
     isLoading,
     privileges: isLoading ? { ...initialValue.privileges } : privilegesData,
     capabilities: { ...initialCapabilities },
-    apiError: error ? (error as Error) : null,
+    apiError: error ? error : null,
   };
 
   const hasPrivilege = hasPrivilegeFactory(value.privileges);

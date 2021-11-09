@@ -54,7 +54,7 @@ export function setupSavedObjects(
       },
       onImport(connectors) {
         return {
-          warnings: getImportWarnings(connectors as Array<SavedObject<RawAction>>),
+          warnings: getImportWarnings(connectors),
         };
       },
     },

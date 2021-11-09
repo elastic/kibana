@@ -36,9 +36,7 @@ export const getRenderCellValueFn =
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const rowFlattened = rowsFlattened
-      ? (rowsFlattened[rowIndex] as Record<string, unknown>)
-      : undefined;
+    const rowFlattened = rowsFlattened ? rowsFlattened[rowIndex] : undefined;
 
     const field = indexPattern.fields.getByName(columnId);
     const ctx = useContext(DiscoverGridContext);
@@ -94,7 +92,7 @@ export const getRenderCellValueFn =
         const formatter = subField
           ? indexPattern.getFormatterForField(subField)
           : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
-        const formatted = (values as unknown[])
+        const formatted = values
           .map((val: unknown) =>
             formatter.convert(val, 'html', {
               field: subField,

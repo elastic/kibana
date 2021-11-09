@@ -22,9 +22,7 @@ import { TrustedAppsListPageLocation, TrustedAppsListPageState } from '../state'
 import { getCurrentLocation } from '../store/selectors';
 
 export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsListPageState) => R): R {
-  return useSelector((state: State) =>
-    selector(state[GLOBAL_NS][TRUSTED_APPS_NS] as TrustedAppsListPageState)
-  );
+  return useSelector((state: State) => selector(state[GLOBAL_NS][TRUSTED_APPS_NS]));
 }
 
 export type NavigationCallback = (

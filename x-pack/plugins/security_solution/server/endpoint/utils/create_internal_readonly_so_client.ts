@@ -59,5 +59,5 @@ export const createInternalReadonlySoClient = (
 
       return Reflect.get(target, methodName, receiver);
     },
-  }) as SavedObjectsClientContract;
+  });
 };

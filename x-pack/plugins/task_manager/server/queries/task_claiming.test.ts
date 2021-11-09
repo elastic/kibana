@@ -1158,7 +1158,7 @@ if (doc['task.runAt'].size()!=0) {
 
       expect(tasksUpdated).toEqual(2);
       // ensure we only count conflicts that *may* have counted against max_docs, no more than that
-      expect(tasksConflicted).toEqual(10 - tasksUpdated!);
+      expect(tasksConflicted).toEqual(10 - tasksUpdated);
       expect(tasksClaimed).toEqual(2);
     });
   });

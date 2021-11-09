@@ -194,7 +194,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
       each(jobIds, (jobId, i: number) => {
-        jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id:${jobId}`;
+        jobIdFilterStr += `${i > 0 ? ' OR ' : ''}job_id:${jobId}`;
       });
       boolCriteria.push({
         query_string: {

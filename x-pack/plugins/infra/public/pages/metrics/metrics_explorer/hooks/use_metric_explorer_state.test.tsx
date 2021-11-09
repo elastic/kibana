@@ -213,7 +213,7 @@ describe('useMetricsExplorerState', () => {
       await rerender();
       const { handleLoadMore } = result.current;
       act(() => {
-        handleLoadMore(pageInfo.afterKey!);
+        handleLoadMore(pageInfo.afterKey);
       });
       expect(result.current.afterKey).toBe(pageInfo.afterKey);
     });

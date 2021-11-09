@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         ).sampleTask?.count ?? 0;
       const scheduledWorkload = mapValues(
-        keyBy(workload.value.schedule as Array<[string, number]>, ([interval, count]) => interval),
+        keyBy(workload.value.schedule, ([interval, count]) => interval),
         ([, count]) => count
       ) as unknown as { '37m': number | undefined; '37s': number | undefined };
 
@@ -171,10 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
         ).to.eql(sumSampleTaskInWorkload + 2);
 
         const schedulesWorkloadAfterScheduling = mapValues(
-          keyBy(
-            workloadAfterScheduling.schedule as Array<[string, number]>,
-            ([interval]) => interval
-          ),
+          keyBy(workloadAfterScheduling.schedule, ([interval]) => interval),
           ([, count]) => count
         ) as unknown as {
           '37m': number;
@@ -244,8 +241,8 @@ export default function ({ getService }: FtrProviderContext) {
         },
       } = (await getHealth()).stats;
 
-      expect(isNaN(Date.parse(polling.last_successful_poll as string))).to.eql(false);
-      expect(isNaN(Date.parse(polling.last_polling_delay as string))).to.eql(false);
+      expect(isNaN(Date.parse(polling.last_successful_poll))).to.eql(false);
+      expect(isNaN(Date.parse(polling.last_polling_delay))).to.eql(false);
       expect(typeof polling.result_frequency_percent_as_number.NoTasksClaimed).to.eql('number');
       expect(typeof polling.result_frequency_percent_as_number.RanOutOfCapacity).to.eql('number');
       expect(typeof polling.result_frequency_percent_as_number.PoolFilled).to.eql('number');

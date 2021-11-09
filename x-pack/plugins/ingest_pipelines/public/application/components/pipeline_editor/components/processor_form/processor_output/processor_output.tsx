@@ -103,7 +103,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
     ignored_error: ignoredError,
     error,
     status,
-  } = processorOutput!;
+  } = processorOutput;
 
   const NoOutputCallOut: FunctionComponent = () => (
     <EuiCallOut title={i18nTexts.noOutputCalloutTitle} iconType="pin" />

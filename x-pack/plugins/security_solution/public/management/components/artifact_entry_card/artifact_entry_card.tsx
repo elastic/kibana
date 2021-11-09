@@ -101,7 +101,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
 
         <CardSectionPanel>
           <CriteriaConditions
-            os={artifact.os as CriteriaConditionsProps['os']}
+            os={artifact.os}
             entries={artifact.entries}
             data-test-subj={getTestId('criteriaConditions')}
           />

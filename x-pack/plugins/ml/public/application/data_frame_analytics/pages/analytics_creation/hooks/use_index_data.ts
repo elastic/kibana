@@ -45,9 +45,7 @@ interface MLEuiDataGridColumn extends EuiDataGridColumn {
 function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   return Object.keys(runtimeMappings).map((id) => {
     const field = runtimeMappings[id];
-    const schema = getDataGridSchemaFromESFieldType(
-      field.type as estypes.MappingRuntimeField['type']
-    );
+    const schema = getDataGridSchemaFromESFieldType(field.type);
     return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
   });
 }

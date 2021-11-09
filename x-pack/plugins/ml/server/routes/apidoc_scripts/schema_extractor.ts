@@ -48,7 +48,7 @@ export function extractDocumentation(
     if (isNodeExported(node) && ts.isVariableDeclaration(node)) {
       const schemaName = node.name.getText();
       const schemaType = checker.getTypeAtLocation(node);
-      result.set(schemaName, extractDocEntries(schemaType!));
+      result.set(schemaName, extractDocEntries(schemaType));
     }
 
     if (node.getChildCount() > 0) {

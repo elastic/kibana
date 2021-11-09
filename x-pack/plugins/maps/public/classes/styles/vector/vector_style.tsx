@@ -1055,7 +1055,7 @@ function getDynamicOptions(
   ) {
     return null;
   }
-  return propertyDescriptor.options as DynamicStylePropertyOptions;
+  return propertyDescriptor.options;
 }
 
 function rectifyFieldDescriptor(

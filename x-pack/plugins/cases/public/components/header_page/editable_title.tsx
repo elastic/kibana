@@ -124,7 +124,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
         {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
         {!isLoading && userCanCrud && (
           <MyEuiButtonIcon
-            aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
+            aria-label={i18n.EDIT_TITLE_ARIA(title)}
             iconType="pencil"
             onClick={onClickEditIcon}
             data-test-subj="editable-title-edit-icon"

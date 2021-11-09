@@ -40,7 +40,7 @@ export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
             meta: true,
           }
         );
-        const indices = Object.keys(resp.body) as string[];
+        const indices = Object.keys(resp.body);
 
         // if no indexes exits then we're done with this pattern
         if (resp.statusCode === 404 || !indices.length) {

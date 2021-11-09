@@ -69,7 +69,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
     const _rm = { ...rm } as SharedRoleMapping;
     _rm.accessItems = rm[accessItemKey];
     return _rm;
-  }) as SharedRoleMapping[];
+  });
 
   const [items, setItems] = useState([] as SharedRoleMapping[]);
 

@@ -244,7 +244,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state.datasourceStates = mapValues(
         state.datasourceStates,
         (datasourceState, datasourceId) => {
-          const datasource = datasourceMap[datasourceId!];
+          const datasource = datasourceMap[datasourceId];
           return {
             ...datasourceState,
             state: isOnlyLayer

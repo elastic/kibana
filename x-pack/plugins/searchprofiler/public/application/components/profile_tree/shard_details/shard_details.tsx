@@ -55,7 +55,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
           <EuiText className="prfDevTool__shardDetails--dim">
             <PercentageBadge
               timePercentage={String(relative)}
-              label={msToPretty(time as number, 3)}
+              label={msToPretty(time, 3)}
               valueType={'time'}
             />
           </EuiText>

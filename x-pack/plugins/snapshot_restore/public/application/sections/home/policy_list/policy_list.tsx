@@ -105,7 +105,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             defaultMessage="Error loading policies"
           />
         }
-        error={error as Error}
+        error={error}
       />
     );
   } else if (policies && policies.length === 0) {

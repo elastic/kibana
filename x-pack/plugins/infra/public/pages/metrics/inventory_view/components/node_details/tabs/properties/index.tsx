@@ -21,7 +21,7 @@ import { useWaffleFiltersContext } from '../../../../hooks/use_waffle_filters';
 
 const TabComponent = (props: TabProps) => {
   const nodeId = props.node.id;
-  const nodeType = props.nodeType as InventoryItemType;
+  const nodeType = props.nodeType;
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useContext(Source.Context);
   const { currentTimeRange } = useWaffleTimeContext();

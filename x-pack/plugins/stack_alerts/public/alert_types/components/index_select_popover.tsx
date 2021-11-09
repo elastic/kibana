@@ -188,14 +188,14 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               if (selectedIndices.length === 0) {
                 setTimeFieldOptions([firstFieldOption]);
               } else {
-                const currentEsFields = await getFields(http!, selectedIndices);
+                const currentEsFields = await getFields(http, selectedIndices);
                 const timeFields = getTimeFieldOptions(currentEsFields);
                 setTimeFieldOptions([firstFieldOption, ...timeFields]);
               }
             }}
             onSearchChange={async (search) => {
               setAreIndicesLoading(true);
-              setIndexOptions(await getIndexOptions(http!, search, indexPatterns));
+              setIndexOptions(await getIndexOptions(http, search, indexPatterns));
               setAreIndicesLoading(false);
             }}
             onBlur={() => {

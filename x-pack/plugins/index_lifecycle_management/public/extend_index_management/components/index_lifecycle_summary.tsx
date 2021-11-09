@@ -262,7 +262,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
             </EuiCallOut>
           </>
         ) : null}
-        {ilm.step_info && ilm.step_info!.message && !ilm.step_info!.stack_trace ? (
+        {ilm.step_info && ilm.step_info.message && !ilm.step_info.stack_trace ? (
           <>
             <EuiSpacer size="s" />
             <EuiCallOut
@@ -274,7 +274,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
                 />
               }
             >
-              {ilm.step_info!.message}
+              {ilm.step_info.message}
             </EuiCallOut>
           </>
         ) : null}

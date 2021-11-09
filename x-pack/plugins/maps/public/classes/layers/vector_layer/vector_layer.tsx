@@ -155,11 +155,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
             'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
           );
         }
-        const termSourceDescriptor: ESTermSourceDescriptor =
-          joinDescriptor.right as ESTermSourceDescriptor;
+        const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right;
 
         // todo: must tie this to generic thing
-        const originalJoinId = joinDescriptor.right.id!;
+        const originalJoinId = joinDescriptor.right.id;
 
         // right.id is uuid used to track requests in inspector
         joinDescriptor.right.id = uuid();
@@ -179,13 +178,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
             const newJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
               aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: joinDescriptor.right.id!,
+              rightSourceId: joinDescriptor.right.id,
             });
 
             Object.keys(clonedDescriptor.style.properties).forEach((key) => {
               const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
               if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
-                const options = styleProp.options as DynamicStylePropertyOptions;
+                const options = styleProp.options;
                 if (
                   options.field &&
                   options.field.origin === FIELD_ORIGIN.JOIN &&

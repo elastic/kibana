@@ -360,7 +360,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 {advancedVars.map((varDef) => {
                   const { name: varName, type: varType } = varDef;
                   if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
-                  const value = packagePolicy.vars![varName].value;
+                  const value = packagePolicy.vars[varName].value;
                   return (
                     <EuiFlexItem key={varName}>
                       <PackagePolicyInputVarField

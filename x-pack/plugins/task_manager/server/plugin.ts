@@ -99,7 +99,7 @@ export class TaskManagerPlugin
       this.monitoringStats$,
       this.logger,
       this.taskManagerId,
-      this.config!
+      this.config
     );
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -168,12 +168,12 @@ export class TaskManagerPlugin
     const managedConfiguration = createManagedConfiguration({
       logger: this.logger,
       errors$: taskStore.errors$,
-      startingMaxWorkers: this.config!.max_workers,
-      startingPollInterval: this.config!.poll_interval,
+      startingMaxWorkers: this.config.max_workers,
+      startingPollInterval: this.config.poll_interval,
     });
 
     this.taskPollingLifecycle = new TaskPollingLifecycle({
-      config: this.config!,
+      config: this.config,
       definitions: this.definitions,
       logger: this.logger,
       executionContext,
@@ -184,7 +184,7 @@ export class TaskManagerPlugin
     });
 
     this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
-      config: this.config!,
+      config: this.config,
       definitions: this.definitions,
       logger: this.logger,
       executionContext,
@@ -199,7 +199,7 @@ export class TaskManagerPlugin
       this.ephemeralTaskLifecycle,
       taskStore,
       this.elasticsearchAndSOAvailability$!,
-      this.config!,
+      this.config,
       managedConfiguration,
       this.logger
     ).subscribe((stat) => this.monitoringStats$.next(stat));

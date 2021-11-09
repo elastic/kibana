@@ -84,7 +84,7 @@ export const evaluateCondition = async ({
     const comparisonFunction = comparatorMap[c];
     return Array.isArray(value)
       ? value.map((v) => comparisonFunction(Number(v), t))
-      : [comparisonFunction(value as number, t)];
+      : [comparisonFunction(value, t)];
   };
 
   const result = mapValues(currentValues, (value) => {

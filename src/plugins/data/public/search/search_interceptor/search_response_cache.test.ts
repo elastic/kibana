@@ -243,7 +243,7 @@ describe('SearchResponseCache', () => {
       });
 
       // wait for original search to complete
-      await s$!.toPromise();
+      await s$.toPromise();
 
       // get final response from cached$
       const finalRes = await cached$!.response$.toPromise();
@@ -261,7 +261,7 @@ describe('SearchResponseCache', () => {
         next: (res) => {
           if (res.rawResponse.t === 3) {
             cached$ = cache.get('123')!.response$;
-            cached$!.subscribe({
+            cached$.subscribe({
               next,
             });
           }
@@ -269,7 +269,7 @@ describe('SearchResponseCache', () => {
       });
 
       // wait for original search to complete
-      await s$!.toPromise();
+      await s$.toPromise();
 
       const finalRes = await cached$!.toPromise();
 
@@ -283,7 +283,7 @@ describe('SearchResponseCache', () => {
       cache.set('123', s$);
 
       // wait for original search to complete
-      await s$!.response$.toPromise();
+      await s$.response$.toPromise();
 
       const next = jest.fn();
       const cached$ = cache.get('123');
@@ -302,7 +302,7 @@ describe('SearchResponseCache', () => {
       cache.set('123', wrapWithAbortController(s$));
 
       // wait for original search to complete
-      await s$!.toPromise();
+      await s$.toPromise();
 
       const next = jest.fn();
       const cached$ = cache.get('123');

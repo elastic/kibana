@@ -161,7 +161,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           </EuiFormRow>
         </>
       )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'ruleNameConfig') && (
+      {isValidFieldForConnector(connectorType, 'ruleNameConfig') && (
         <>
           <EuiFormRow
             id="ruleNameConfig"
@@ -182,7 +182,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           </EuiFormRow>
         </>
       )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'severityConfig') && (
+      {isValidFieldForConnector(connectorType, 'severityConfig') && (
         <>
           <EuiFormRow
             id="severityConfig"
@@ -203,7 +203,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           </EuiFormRow>
         </>
       )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'caseIdConfig') && (
+      {isValidFieldForConnector(connectorType, 'caseIdConfig') && (
         <>
           <EuiFormRow
             id="caseIdConfig"
@@ -224,7 +224,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           </EuiFormRow>
         </>
       )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'caseNameConfig') && (
+      {isValidFieldForConnector(connectorType, 'caseNameConfig') && (
         <>
           <EuiFormRow
             id="caseNameConfig"
@@ -245,7 +245,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           </EuiFormRow>
         </>
       )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'commentsConfig') && (
+      {isValidFieldForConnector(connectorType, 'commentsConfig') && (
         <>
           <EuiFormRow
             id="commentsConfig"
@@ -266,7 +266,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
           </EuiFormRow>
         </>
       )}
-      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'descriptionConfig') && (
+      {isValidFieldForConnector(connectorType, 'descriptionConfig') && (
         <>
           <EuiFormRow
             id="descriptionConfig"

@@ -131,7 +131,7 @@ export class ElasticsearchService
     }
 
     return {
-      client: this.client!,
+      client: this.client,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       legacy: {
         config$: this.config$,

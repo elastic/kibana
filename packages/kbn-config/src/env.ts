@@ -51,7 +51,7 @@ export class Env {
    */
   public static createDefault(repoRoot: string, options: EnvOptions, pkg?: RawPackageInfo): Env {
     if (!pkg) {
-      pkg = loadJsonFile.sync(join(repoRoot, 'package.json')) as RawPackageInfo;
+      pkg = loadJsonFile.sync(join(repoRoot, 'package.json'));
     }
     return new Env(repoRoot, pkg, options);
   }

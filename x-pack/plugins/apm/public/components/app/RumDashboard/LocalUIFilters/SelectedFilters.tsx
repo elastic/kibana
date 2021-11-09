@@ -50,7 +50,7 @@ export function SelectedFilters({
       <SelectedWildcards indexPattern={indexPattern} />
       {(filters ?? []).map(({ name, title, fieldName, excluded }) => (
         <Fragment key={name}>
-          {((uxUiFilters?.[name] ?? []) as string[]).map((value) => (
+          {(uxUiFilters?.[name] ?? []).map((value) => (
             <FilterItem key={name + value} grow={false}>
               <FilterValueLabel
                 indexPattern={indexPattern}

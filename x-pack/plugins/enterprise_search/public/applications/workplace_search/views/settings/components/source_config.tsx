@@ -27,7 +27,7 @@ interface SourceConfigProps {
 
 export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
-  const { configuration, serviceType } = staticSourceData[sourceIndex] as SourceDataItem;
+  const { configuration, serviceType } = staticSourceData[sourceIndex];
   const { deleteSourceConfig } = useActions(SettingsLogic);
   const { saveSourceConfig, getSourceConfigData } = useActions(AddSourceLogic);
   const {

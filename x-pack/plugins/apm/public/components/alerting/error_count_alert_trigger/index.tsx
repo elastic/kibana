@@ -57,7 +57,7 @@ export function ErrorCountAlertTrigger(props: Props) {
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
-        windowUnit: params.windowUnit as TimeUnit,
+        windowUnit: params.windowUnit,
       });
       if (interval && start && end) {
         return callApmApi({

@@ -392,7 +392,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
     onCellsSelection({
       lanes: e.y as string[],
-      times: e.x!.map((v) => (v as number) / 1000) as [number, number],
+      times: e.x.map((v) => (v as number) / 1000) as [number, number],
       type: swimlaneType,
       viewByFieldName: swimlaneData.fieldName,
     });

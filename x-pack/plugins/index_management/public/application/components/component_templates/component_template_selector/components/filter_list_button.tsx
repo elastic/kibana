@@ -26,7 +26,7 @@ export interface Filters {
 export function FilterListButton({ onChange, filters }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const activeFilters = Object.values(filters).filter((v) => (v as Filter).checked === 'on');
+  const activeFilters = Object.values(filters).filter((v) => v.checked === 'on');
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -79,12 +79,12 @@ export function FilterListButton({ onChange, filters }: Props) {
         <div className="euiFilterSelect__items">
           {Object.entries(filters).map(([filter, item], index) => (
             <EuiFilterSelectItem
-              checked={(item as Filter).checked}
+              checked={item.checked}
               key={index}
               onClick={() => toggleFilter(filter)}
               data-test-subj="filterItem"
             >
-              {(item as Filter).name}
+              {item.name}
             </EuiFilterSelectItem>
           ))}
         </div>

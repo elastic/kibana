@@ -312,7 +312,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       setSearchParams({
         searchQuery: combinedQuery,
         searchString: mergedQuery.query,
-        queryLanguage: mergedQuery.language as SearchQueryLanguage,
+        queryLanguage: mergedQuery.language,
         filters: data.query.filterManager.getFilters(),
       });
     },

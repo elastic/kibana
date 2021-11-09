@@ -1027,9 +1027,7 @@ const updateTypeAndProvider = (
                     displayValue: undefined,
                     value:
                       type === DataProviderType.template ? `{${andProvider.queryMatch.field}}` : '',
-                    operator: (type === DataProviderType.template
-                      ? IS_OPERATOR
-                      : EXISTS_OPERATOR) as QueryOperator,
+                    operator: type === DataProviderType.template ? IS_OPERATOR : EXISTS_OPERATOR,
                   },
                 }
               : andProvider
@@ -1050,9 +1048,7 @@ const updateTypeProvider = (type: DataProviderType, providerId: string, timeline
             displayField: undefined,
             displayValue: undefined,
             value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
-            operator: (type === DataProviderType.template
-              ? IS_OPERATOR
-              : EXISTS_OPERATOR) as QueryOperator,
+            operator: type === DataProviderType.template ? IS_OPERATOR : EXISTS_OPERATOR,
           },
         }
       : provider

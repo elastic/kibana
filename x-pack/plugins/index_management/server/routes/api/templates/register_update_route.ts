@@ -26,7 +26,7 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
     },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const { name } = request.params as typeof paramsSchema.type;
+      const { name } = request.params;
       const template = request.body as TemplateDeserialized;
 
       try {

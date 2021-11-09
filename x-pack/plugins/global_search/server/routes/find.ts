@@ -32,8 +32,8 @@ export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
     async (ctx, req, res) => {
       const { params, options } = req.body;
       try {
-        const allResults = await ctx
-          .globalSearch!.find(params, { ...options, aborted$: req.events.aborted$ })
+        const allResults = await ctx.globalSearch
+          .find(params, { ...options, aborted$: req.events.aborted$ })
           .pipe(
             map((batch) => batch.results),
             reduce((acc, results) => [...acc, ...results])

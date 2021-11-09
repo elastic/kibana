@@ -153,17 +153,13 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
     const job = jobsResponse.jobs[0];
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
-    const isAnomalousOnly = (Object.entries(fieldsConfig) as Array<[string, FieldConfig]>).some(
-      ([k, v]) => {
-        return !!v?.anomalousOnly;
-      }
-    );
+    const isAnomalousOnly = Object.entries(fieldsConfig).some(([k, v]) => {
+      return !!v?.anomalousOnly;
+    });
 
-    const applyTimeRange = (Object.entries(fieldsConfig) as Array<[string, FieldConfig]>).some(
-      ([k, v]) => {
-        return !!v?.applyTimeRange;
-      }
-    );
+    const applyTimeRange = Object.entries(fieldsConfig).some(([k, v]) => {
+      return !!v?.applyTimeRange;
+    });
 
     const isModelPlotSearch = !!isModelPlotEnabled && !isAnomalousOnly;
 

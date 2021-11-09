@@ -43,7 +43,7 @@ async function setupAndStart({
   storageValue,
 }: TestParams) {
   const coreSetup = coreMock.createSetup();
-  (coreSetup.http.basePath.serverBasePath as string) = tenant;
+  coreSetup.http.basePath.serverBasePath = tenant;
 
   const coreStart = coreMock.createStart();
   coreStart.http.get.mockResolvedValue({ displayAlert });

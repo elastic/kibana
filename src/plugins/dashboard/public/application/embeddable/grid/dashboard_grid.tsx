@@ -230,9 +230,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const isViewMode = viewMode === ViewMode.VIEW;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map(
-      (key: string) => panels[key] as DashboardPanelState
-    );
+    const panelsInOrder = Object.keys(panels).map((key: string) => panels[key]);
 
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {

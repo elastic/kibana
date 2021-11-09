@@ -131,7 +131,7 @@ export function DiscoverLayout({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments),
     [dataState.fetchStatus, dataState.foundDocuments]
   );
 

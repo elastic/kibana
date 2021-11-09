@@ -264,7 +264,7 @@ export class TimeBuckets {
       let originalUnit: Unit | undefined;
 
       if (!interval.scaled && this._originalInterval) {
-        originalUnit = splitStringInterval(this._originalInterval!)?.unit;
+        originalUnit = splitStringInterval(this._originalInterval)?.unit;
       }
 
       const esInterval =

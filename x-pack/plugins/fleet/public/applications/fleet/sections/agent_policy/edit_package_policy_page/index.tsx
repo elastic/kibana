@@ -213,7 +213,7 @@ export const EditPackagePolicyForm = memo<{
             }
 
             const { data: packageData } = await sendGetPackageInfoByKey(
-              pkgKeyFromPackageInfo(_packageInfo!)
+              pkgKeyFromPackageInfo(_packageInfo)
             );
 
             if (packageData?.response) {
@@ -325,7 +325,7 @@ export const EditPackagePolicyForm = memo<{
     if (packageInfo && policyId) {
       return from === 'package-edit'
         ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+            pkgkey: pkgKeyFromPackageInfo(packageInfo),
           })
         : getHref('policy_details', { policyId });
     }
@@ -336,7 +336,7 @@ export const EditPackagePolicyForm = memo<{
     if (packageInfo && policyId) {
       return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
         ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+            pkgkey: pkgKeyFromPackageInfo(packageInfo),
           })
         : getHref('policy_details', { policyId });
     }

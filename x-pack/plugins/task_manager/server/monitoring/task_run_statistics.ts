@@ -301,8 +301,8 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
     timing: TaskTiming,
     result: TaskRunResult
   ): Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'> => {
-    const drift = timing!.start - task.runAt.getTime();
-    const duration = timing!.stop - timing!.start;
+    const drift = timing.start - task.runAt.getTime();
+    const duration = timing.stop - timing.start;
     return {
       drift: driftQueue(drift),
       drift_by_type: driftByTaskQueue(task.taskType, drift),
@@ -365,20 +365,18 @@ export function summarizeTaskRunStat(
       polling: {
         ...(last_successful_poll ? { last_successful_poll } : {}),
         ...(last_polling_delay ? { last_polling_delay } : {}),
-        ...(claim_duration
-          ? { claim_duration: calculateRunningAverage(claim_duration as number[]) }
-          : {}),
-        duration: calculateRunningAverage(pollingDuration as number[]),
-        claim_conflicts: calculateRunningAverage(claimConflicts as number[]),
-        claim_mismatches: calculateRunningAverage(claimMismatches as number[]),
+        ...(claim_duration ? { claim_duration: calculateRunningAverage(claim_duration) } : {}),
+        duration: calculateRunningAverage(pollingDuration),
+        claim_conflicts: calculateRunningAverage(claimConflicts),
+        claim_mismatches: calculateRunningAverage(claimMismatches),
         result_frequency_percent_as_number: {
           ...DEFAULT_POLLING_FREQUENCIES,
-          ...calculateFrequency<FillPoolResult>(pollingResultFrequency as FillPoolResult[]),
+          ...calculateFrequency<FillPoolResult>(pollingResultFrequency),
         },
         persistence: {
           [TaskPersistence.Recurring]: 0,
           [TaskPersistence.NonRecurring]: 0,
-          ...calculateFrequency<TaskPersistence>(pollingPersistence as TaskPersistence[]),
+          ...calculateFrequency<TaskPersistence>(pollingPersistence),
         },
       },
       drift: calculateRunningAverage(drift),

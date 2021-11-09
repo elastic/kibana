@@ -200,7 +200,7 @@ describe('GroupSelection', () => {
   it('should sort promoted visualizations first', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes as BaseVisType[])}
+        visTypesRegistry={visTypesRegistry(_visTypes)}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}

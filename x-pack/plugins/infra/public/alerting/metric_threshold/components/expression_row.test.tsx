@@ -94,7 +94,7 @@ describe('ExpressionRow', () => {
       aggType: 'avg',
     } as MetricExpression;
 
-    const { wrapper } = await setup(expression as MetricExpression);
+    const { wrapper } = await setup(expression);
 
     const helpText = wrapper.find('[data-test-subj="ofExpression"]').at(0).prop('helpText');
 

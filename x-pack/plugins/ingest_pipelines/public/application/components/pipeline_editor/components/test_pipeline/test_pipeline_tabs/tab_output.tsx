@@ -81,7 +81,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
               const isVerbose = e.target.checked;
               setIsVerboseEnabled(isVerbose);
 
-              await handleTestPipeline({ documents: cachedDocuments!, verbose: isVerbose });
+              await handleTestPipeline({ documents: cachedDocuments, verbose: isVerbose });
             }}
           />
         </EuiFlexItem>
@@ -90,7 +90,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
             size="s"
             onClick={async () =>
               await handleTestPipeline(
-                { documents: cachedDocuments!, verbose: isVerboseEnabled },
+                { documents: cachedDocuments, verbose: isVerboseEnabled },
                 true
               )
             }

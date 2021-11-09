@@ -128,7 +128,7 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
         const splitField = criteria.sort.field.split('.');
         const lastField = last(splitField) as NetworkTopTablesFields;
         const newSortDirection =
-          lastField !== sort.field ? Direction.desc : (criteria.sort.direction as Direction); // sort by desc on init click
+          lastField !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
         const newTopCountriesSort: SortField<NetworkTopTablesFields> = {
           field: lastField,
           direction: newSortDirection,

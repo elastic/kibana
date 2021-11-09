@@ -48,7 +48,7 @@ describe('registerSessionRoutes', () => {
 
     saveHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.saveSession).toHaveBeenCalledWith(sessionId, { name });
+    expect(mockContext.search.saveSession).toHaveBeenCalledWith(sessionId, { name });
   });
 
   it('get calls getSession with sessionId', async () => {
@@ -63,7 +63,7 @@ describe('registerSessionRoutes', () => {
 
     getHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.getSession).toHaveBeenCalledWith(id);
+    expect(mockContext.search.getSession).toHaveBeenCalledWith(id);
   });
 
   it('find calls findSession with options', async () => {
@@ -82,7 +82,7 @@ describe('registerSessionRoutes', () => {
 
     findHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.findSessions).toHaveBeenCalledWith(body);
+    expect(mockContext.search.findSessions).toHaveBeenCalledWith(body);
   });
 
   it('update calls updateSession with id and attributes', async () => {
@@ -100,7 +100,7 @@ describe('registerSessionRoutes', () => {
 
     updateHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.updateSession).toHaveBeenCalledWith(id, body);
+    expect(mockContext.search.updateSession).toHaveBeenCalledWith(id, body);
   });
 
   it('cancel calls cancelSession with id', async () => {
@@ -115,7 +115,7 @@ describe('registerSessionRoutes', () => {
 
     cancelHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
+    expect(mockContext.search.cancelSession).toHaveBeenCalledWith(id);
   });
 
   it('delete calls deleteSession with id', async () => {
@@ -130,7 +130,7 @@ describe('registerSessionRoutes', () => {
 
     await deleteHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.deleteSession).toHaveBeenCalledWith(id);
+    expect(mockContext.search.deleteSession).toHaveBeenCalledWith(id);
   });
 
   it('extend calls extendSession with id', async () => {

@@ -50,7 +50,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
+    const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = LAYER_TYPE.VECTOR;
 
     if (!options.style) {

@@ -21,7 +21,7 @@ import { SCHEMA_TITLE } from '../constants';
 import { ReindexJobLogic } from './reindex_job_logic';
 
 export const ReindexJob: React.FC = () => {
-  const { reindexJobId } = useParams() as { reindexJobId: string };
+  const { reindexJobId } = useParams();
   const { loadReindexJob } = useActions(ReindexJobLogic);
   const { dataLoading, fieldCoercionErrors } = useValues(ReindexJobLogic);
   const {

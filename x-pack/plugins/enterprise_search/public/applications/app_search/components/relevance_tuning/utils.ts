@@ -45,7 +45,7 @@ const normalizeBoostValue = (boost: RawBoost): Boost => {
 
   return {
     ...boost,
-    type: boost.type as BoostType,
+    type: boost.type,
     value: toArray(boost.value).map(toString),
   };
 };

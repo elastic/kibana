@@ -25,7 +25,7 @@ import { AddSourceLogic, OauthParams } from './add_source/add_source_logic';
  * success or error message upon completion.
  */
 export const SourceAdded: React.FC = () => {
-  const { search } = useLocation() as Location;
+  const { search } = useLocation();
   const params = parseQueryParams(search) as unknown as OauthParams;
   const state = JSON.parse(params.state);
   const isOrganization = state.context !== 'account';

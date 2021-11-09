@@ -520,7 +520,7 @@ async function queryUnitedIndex(
     })
     .map((doc) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { endpoint: metadata, agent } = doc!._source!.united!;
+      const { endpoint: metadata, agent } = doc._source!.united;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const agentPolicy = agentPoliciesMap[agent.policy_id!];
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

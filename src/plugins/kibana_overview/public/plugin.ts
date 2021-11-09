@@ -83,7 +83,7 @@ export class KibanaOverviewPlugin
         const [coreStart, depsStart] = await core.getStartServices();
 
         // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
 

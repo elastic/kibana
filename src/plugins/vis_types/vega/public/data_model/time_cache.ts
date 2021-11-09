@@ -85,10 +85,10 @@ export class TimeCache {
    * @private
    */
   _getBounds(): CacheBounds {
-    const bounds = this._timefilter.calculateBounds(this._timeRange!);
+    const bounds = this._timefilter.calculateBounds(this._timeRange);
     return {
-      min: bounds.min!.valueOf(),
-      max: bounds.max!.valueOf(),
+      min: bounds.min.valueOf(),
+      max: bounds.max.valueOf(),
     };
   }
 }

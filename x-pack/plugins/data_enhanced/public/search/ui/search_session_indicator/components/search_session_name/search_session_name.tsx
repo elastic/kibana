@@ -76,7 +76,7 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
             if (newName !== name && editName) {
               setIsSaving(true);
               try {
-                await editName(newName!);
+                await editName(newName);
               } catch (e) {
                 // handled by the service
               }

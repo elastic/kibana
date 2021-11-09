@@ -144,9 +144,7 @@ export const buildRegressionDecisionPathData = ({
       });
     }
   }
-  const filteredFeatureImportance = mappedFeatureImportance.filter(
-    (f) => f !== undefined
-  ) as ExtendedFeatureImportance[];
+  const filteredFeatureImportance = mappedFeatureImportance.filter((f) => f !== undefined);
 
   const finalResult: DecisionPathPlotData = filteredFeatureImportance
     // sort by absolute importance so it goes from bottom (baseline) to top
@@ -154,7 +152,7 @@ export const buildRegressionDecisionPathData = ({
       (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
         b.absImportance - a.absImportance
     )
-    .map((d) => [d[FEATURE_NAME] as string, d[FEATURE_IMPORTANCE] as number, NaN]);
+    .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE] as number, NaN]);
 
   // start at the baseline and end at predicted value
   // for regression, cumulativeSum should add up to baseline
@@ -331,7 +329,7 @@ export const buildClassificationDecisionPathData = ({
       (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
         b.absImportance - a.absImportance
     )
-    .map((d) => [d[FEATURE_NAME] as string, d[FEATURE_IMPORTANCE] as number, NaN]);
+    .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE] as number, NaN]);
 
   // if binary classification
   if (baselines.length === 2) {

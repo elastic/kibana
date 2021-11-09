@@ -111,7 +111,7 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
       return (
         layer.sourceDescriptor !== null &&
         layer.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE &&
-        (layer.sourceDescriptor as AbstractSourceDescriptor).id
+        layer.sourceDescriptor.id
       );
     });
     const emsCountsById = _(emsLayers).countBy((layer: LayerDescriptor) => {
@@ -120,7 +120,7 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
 
     const layerTypeCount = emsCountsById.value();
     return layerTypeCount as ILayerTypeCount;
-  }) as ILayerTypeCount[];
+  });
 }
 
 async function isFieldGeoShape(
@@ -137,7 +137,7 @@ async function isFieldGeoShape(
   }
   return indexPattern.fields.some(
     (fieldDescriptor: IndexPatternField) =>
-      fieldDescriptor.name && fieldDescriptor.name === geoField!
+      fieldDescriptor.name && fieldDescriptor.name === geoField
   );
 }
 

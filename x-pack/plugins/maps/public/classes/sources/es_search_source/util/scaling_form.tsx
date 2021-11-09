@@ -63,7 +63,7 @@ export class ScalingForm extends Component<Props, State> {
   async loadIndexSettings() {
     try {
       const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
-      const { maxResultWindow } = await loadIndexSettings(indexPattern!.title);
+      const { maxResultWindow } = await loadIndexSettings(indexPattern.title);
       if (this._isMounted) {
         this.setState({ maxResultWindow: maxResultWindow.toLocaleString() });
       }

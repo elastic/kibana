@@ -117,7 +117,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 defaultMessage: "Could not update user '{username}'",
                 values: { username: user.username },
               }),
-          text: (error as any).body?.message || error.message,
+          text: error.body?.message || error.message,
         });
         throw error;
       }

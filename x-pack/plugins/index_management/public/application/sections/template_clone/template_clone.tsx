@@ -86,7 +86,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
             defaultMessage="Error loading template to clone"
           />
         }
-        error={templateToCloneError as Error}
+        error={templateToCloneError}
         data-test-subj="sectionError"
       />
     );

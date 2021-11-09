@@ -277,7 +277,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const sorting = useMemo<EuiDataGridSorting>(
-    () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),
+    () => createGridSortingConfig(sortBy, sortDirection, onEditAction),
     [onEditAction, sortBy, sortDirection]
   );
 

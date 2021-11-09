@@ -100,7 +100,7 @@ describe('ServiceNow SIR service', () => {
       logger,
       configurationUtilities,
       snExternalServiceConfig['.servicenow-sir']
-    ) as ExternalServiceSIR;
+    );
   });
 
   beforeEach(() => {

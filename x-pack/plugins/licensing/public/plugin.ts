@@ -105,7 +105,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
         if (httpResponse.response) {
           const signatureHeader = httpResponse.response.headers.get('kbn-license-sig');
           if (typeof signatureHeader === 'string' && this.prevSignature !== signatureHeader) {
-            if (!httpResponse.request!.url.includes(this.infoEndpoint)) {
+            if (!httpResponse.request.url.includes(this.infoEndpoint)) {
               signatureUpdated$.next();
             }
           }

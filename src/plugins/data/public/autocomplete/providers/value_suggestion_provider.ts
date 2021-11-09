@@ -96,11 +96,11 @@ export const setupValueSuggestionProvider = (
     signal,
     method,
   }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
-    const shouldSuggestValues = core!.uiSettings.get<boolean>(
+    const shouldSuggestValues = core.uiSettings.get<boolean>(
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
     );
     useTimeRange =
-      useTimeRange ?? core!.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
+      useTimeRange ?? core.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
     const { title } = indexPattern;
 
     if (field.type === 'boolean') {

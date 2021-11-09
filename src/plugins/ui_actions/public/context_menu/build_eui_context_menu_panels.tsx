@@ -150,7 +150,7 @@ export async function buildContextMenuForActions({
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
           };
           if (parentPanel) {
-            panels[parentPanel].items!.push({
+            panels[parentPanel].items.push({
               name,
               panel: currentPanel,
               icon: group.getIconType ? group.getIconType(context) : 'empty',
@@ -162,7 +162,7 @@ export async function buildContextMenuForActions({
         parentPanel = currentPanel;
       }
     }
-    panels[parentPanel || 'mainMenu'].items!.push({
+    panels[parentPanel || 'mainMenu'].items.push({
       name: action.MenuItem
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),

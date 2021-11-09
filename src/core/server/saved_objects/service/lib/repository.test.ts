@@ -644,11 +644,11 @@ describe('SavedObjectsRepository', () => {
           const objects = [obj1, obj2].map((x) => ({ ...x, type: MULTI_NAMESPACE_ISOLATED_TYPE }));
           const [o1, o2] = objects;
           mockPreflightCheckForCreate.mockResolvedValueOnce([
-            { type: o1.type, id: o1.id! }, // first object does not have an existing document to overwrite
+            { type: o1.type, id: o1.id }, // first object does not have an existing document to overwrite
             {
               type: o2.type,
-              id: o2.id!,
-              existingDocument: { _id: o2.id!, _source: { namespaces: ['*'], type: o2.type } }, // second object does have an existing document to overwrite
+              id: o2.id,
+              existingDocument: { _id: o2.id, _source: { namespaces: ['*'], type: o2.type } }, // second object does have an existing document to overwrite
             },
           ]);
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
@@ -678,12 +678,12 @@ describe('SavedObjectsRepository', () => {
           const [o1, o2, o3] = objects;
           mockPreflightCheckForCreate.mockResolvedValueOnce([
             // first object does not get passed in to preflightCheckForCreate at all
-            { type: o2.type, id: o2.id! }, // second object does not have an existing document to overwrite
+            { type: o2.type, id: o2.id }, // second object does not have an existing document to overwrite
             {
               type: o3.type,
-              id: o3.id!,
+              id: o3.id,
               existingDocument: {
-                _id: o3.id!,
+                _id: o3.id,
                 _source: { type: o3.type, namespaces: [namespace ?? 'default', 'something-else'] }, // third object does have an existing document to overwrite
               },
             },
@@ -918,15 +918,15 @@ describe('SavedObjectsRepository', () => {
         const [o1, o2, o3, o4, o5] = objects;
         mockPreflightCheckForCreate.mockResolvedValueOnce([
           // first and last objects do not get passed in to preflightCheckForCreate at all
-          { type: o2.type, id: o2.id!, error: { type: 'conflict' } },
+          { type: o2.type, id: o2.id, error: { type: 'conflict' } },
           {
             type: o3.type,
-            id: o3.id!,
+            id: o3.id,
             error: { type: 'unresolvableConflict', metadata: { isNotOverwritable: true } },
           },
           {
             type: o4.type,
-            id: o4.id!,
+            id: o4.id,
             error: { type: 'aliasConflict', metadata: { spacesWithConflictingAliases: ['foo'] } },
           },
         ]);

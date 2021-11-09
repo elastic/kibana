@@ -598,7 +598,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
       expect(eventEnd).to.be.ok();
 
       const durationDiff = Math.abs(
-        Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+        Math.round(duration / NANOS_IN_MILLIS) - (eventEnd - eventStart)
       );
 
       // account for rounding errors

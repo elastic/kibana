@@ -150,8 +150,8 @@ export class SavedSearchEmbeddable
 
     updateSearchSource(
       searchSource,
-      this.searchProps!.indexPattern,
-      this.searchProps!.sort,
+      this.searchProps.indexPattern,
+      this.searchProps.sort,
       useNewFieldsApi,
       {
         sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
@@ -162,7 +162,7 @@ export class SavedSearchEmbeddable
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
 
-    this.searchProps!.isLoading = true;
+    this.searchProps.isLoading = true;
 
     this.updateOutput({ loading: true, error: undefined });
     const executionContext = {
@@ -195,14 +195,14 @@ export class SavedSearchEmbeddable
         .toPromise();
       this.updateOutput({ loading: false, error: undefined });
 
-      this.searchProps!.rows = resp.hits.hits;
-      this.searchProps!.totalHitCount = resp.hits.total as number;
-      this.searchProps!.isLoading = false;
+      this.searchProps.rows = resp.hits.hits;
+      this.searchProps.totalHitCount = resp.hits.total as number;
+      this.searchProps.isLoading = false;
     } catch (error) {
       if (!this.destroyed) {
         this.updateOutput({ loading: false, error });
 
-        this.searchProps!.isLoading = false;
+        this.searchProps.isLoading = false;
       }
     }
   };

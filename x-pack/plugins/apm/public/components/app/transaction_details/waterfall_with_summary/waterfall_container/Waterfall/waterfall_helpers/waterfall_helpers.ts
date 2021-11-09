@@ -135,7 +135,7 @@ function getErrorItem(
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
   const parent = items.find(
     (waterfallItem) => waterfallItem.id === error.parent?.id
-  ) as IWaterfallSpanOrTransaction | undefined;
+  );
 
   const errorItem: IWaterfallError = {
     docType: 'error',
@@ -232,7 +232,7 @@ function getRootTransaction(childrenByParentId: IWaterfallGroup) {
 function getLegends(waterfallItems: IWaterfallItem[]) {
   const onlyBaseSpanItems = waterfallItems.filter(
     (item) => item.docType === 'span' || item.docType === 'transaction'
-  ) as IWaterfallSpanOrTransaction[];
+  );
 
   const legends = [
     WaterfallLegendType.ServiceName,

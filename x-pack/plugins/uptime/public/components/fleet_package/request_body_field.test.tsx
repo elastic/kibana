@@ -48,7 +48,7 @@ describe('<RequestBodyField />', () => {
         type={config.type}
         value={config.value}
         onChange={useCallback(
-          (code) => setConfig({ type: code.type as Mode, value: code.value }),
+          (code) => setConfig({ type: code.type, value: code.value }),
           [setConfig]
         )}
       />

@@ -15,7 +15,7 @@ export const routeDefinitionParamsMock = {
   create: (config: Record<string, unknown> = {}) => ({
     router: httpServiceMock.createRouter(),
     logger: loggingSystemMock.create().get(),
-    config: ConfigSchema.validate(config) as ConfigType,
+    config: ConfigSchema.validate(config),
     encryptionKeyRotationService: encryptionKeyRotationServiceMock.create(),
   }),
 };

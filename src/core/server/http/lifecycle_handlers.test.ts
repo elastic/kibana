@@ -233,7 +233,7 @@ describe('customHeaders pre-response handler', () => {
 
   it('adds the kbn-name header to the response', () => {
     const config = createConfig({ name: 'my-server-name' });
-    const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
+    const handler = createCustomHeadersPreResponseHandler(config);
 
     handler({} as any, {} as any, toolkit);
 
@@ -252,7 +252,7 @@ describe('customHeaders pre-response handler', () => {
         headerB: 'x',
       },
     });
-    const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
+    const handler = createCustomHeadersPreResponseHandler(config);
 
     handler({} as any, {} as any, toolkit);
 
@@ -275,7 +275,7 @@ describe('customHeaders pre-response handler', () => {
         headerB: 'value-B',
       },
     });
-    const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
+    const handler = createCustomHeadersPreResponseHandler(config);
 
     handler({} as any, {} as any, toolkit);
 

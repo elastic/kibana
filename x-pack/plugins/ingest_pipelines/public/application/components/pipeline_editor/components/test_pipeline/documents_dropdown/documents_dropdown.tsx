@@ -101,7 +101,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
         onChange={(newOptions) => {
           const selectedOption = newOptions.find((option) => option.checked === 'on');
           if (selectedOption) {
-            updateSelectedDocument(Number(selectedOption.key!));
+            updateSelectedDocument(Number(selectedOption.key));
           }
 
           setShowPopover(false);

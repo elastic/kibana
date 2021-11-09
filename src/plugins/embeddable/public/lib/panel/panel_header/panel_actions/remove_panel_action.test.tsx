@@ -35,7 +35,7 @@ beforeEach(async () => {
   };
   container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter], viewMode: ViewMode.EDIT },
-    getFactory as EmbeddableStart['getEmbeddableFactory']
+    getFactory
   );
 
   const filterableEmbeddable = await container.addNewEmbeddable<

@@ -102,7 +102,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
         const splitField = criteria.sort.field.split('.');
         const newUsersSort: SortField<NetworkUsersFields> = {
           field: getSortFromString(splitField[splitField.length - 1]),
-          direction: criteria.sort.direction as Direction,
+          direction: criteria.sort.direction,
         };
         if (!deepEqual(newUsersSort, sort)) {
           dispatch(

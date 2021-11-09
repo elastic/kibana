@@ -156,7 +156,7 @@ describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
     await render();
     const confirmedAction = (await clickConfirmButton(true))[0];
 
-    expect(confirmedAction!.payload).toEqual({
+    expect(confirmedAction.payload).toEqual({
       action: 'remove',
       artifacts: trustedApps,
     });

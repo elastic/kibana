@@ -114,7 +114,7 @@ const getCombinedIndexInfos = async (
       }
     });
   }
-  return indices as EnrichedDeprecationInfo[];
+  return indices;
 };
 
 const getCorrectiveAction = (

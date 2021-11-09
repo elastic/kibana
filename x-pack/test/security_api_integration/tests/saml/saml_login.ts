@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
           handshakeResponse.headers.location,
           true /* parseQueryString */
         );
-        expect(redirectURL.href!.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
+        expect(redirectURL.href.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
         expect(redirectURL.query.SAMLRequest).to.not.be.empty();
       });
 
@@ -352,7 +352,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutCookie.maxAge).to.be(0);
 
         const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href!.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
+        expect(redirectURL.href.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
         expect(redirectURL.query.SAMLRequest).to.not.be.empty();
 
         // Session should be invalidated and old session cookie should not allow API access.
@@ -403,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutCookie.maxAge).to.be(0);
 
         const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href!.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
+        expect(redirectURL.href.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
         expect(redirectURL.query.SAMLResponse).to.not.be.empty();
 
         // Session should be invalidated and old session cookie should not allow API access.
@@ -423,7 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
 
         const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href!.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
+        expect(redirectURL.href.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
         expect(redirectURL.query.SAMLResponse).to.not.be.empty();
 
         // Elasticsearch should find and invalidate access and refresh tokens that correspond to provided
@@ -612,7 +612,7 @@ export default function ({ getService }: FtrProviderContext) {
           handshakeResponse.headers.location,
           true /* parseQueryString */
         );
-        expect(redirectURL.href!.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
+        expect(redirectURL.href.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
         expect(redirectURL.query.SAMLRequest).to.not.be.empty();
       });
 

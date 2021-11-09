@@ -40,7 +40,7 @@ export const percentile: TableResponseProcessorsFunction =
       results.push({
         id: split.id,
         label: `${split.label} (${lastPercentile ?? 0})`,
-        data: data!,
+        data,
       });
     });
 

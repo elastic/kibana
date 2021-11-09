@@ -114,7 +114,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         {
           defaultMessage: 'magnitude',
         }
-      ) as string,
+      ),
     };
     let classificationType:
       | 'binary_classification'

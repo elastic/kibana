@@ -78,7 +78,7 @@ export class PainlessError extends EsError {
 export function isPainlessError(err: Error | IEsError) {
   if (!isEsError(err)) return false;
 
-  const rootCause = getRootCause(err as IEsError);
+  const rootCause = getRootCause(err);
   if (!rootCause) return false;
 
   const { lang } = rootCause;

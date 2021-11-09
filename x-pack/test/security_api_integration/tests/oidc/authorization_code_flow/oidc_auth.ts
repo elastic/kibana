@@ -83,9 +83,9 @@ export default function ({ getService }: FtrProviderContext) {
           handshakeResponse.headers.location,
           true /* parseQueryString */
         );
-        expect(
-          redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
-        ).to.be(true);
+        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(
+          true
+        );
         expect(redirectURL.query.scope).to.not.be.empty();
         expect(redirectURL.query.response_type).to.not.be.empty();
         expect(redirectURL.query.client_id).to.not.be.empty();
@@ -113,9 +113,9 @@ export default function ({ getService }: FtrProviderContext) {
           handshakeResponse.headers.location,
           true /* parseQueryString */
         );
-        expect(
-          redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
-        ).to.be(true);
+        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(
+          true
+        );
         expect(redirectURL.query.scope).to.not.be.empty();
         expect(redirectURL.query.response_type).to.not.be.empty();
         expect(redirectURL.query.client_id).to.not.be.empty();
@@ -423,7 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
         expect(
-          redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/endsession`)
+          redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/endsession`)
         ).to.be(true);
         expect(redirectURL.query.id_token_hint).to.not.be.empty();
 
@@ -603,9 +603,9 @@ export default function ({ getService }: FtrProviderContext) {
           handshakeResponse.headers.location,
           true /* parseQueryString */
         );
-        expect(
-          redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
-        ).to.be(true);
+        expect(redirectURL.href.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)).to.be(
+          true
+        );
         expect(redirectURL.query.scope).to.not.be.empty();
         expect(redirectURL.query.response_type).to.not.be.empty();
         expect(redirectURL.query.client_id).to.not.be.empty();

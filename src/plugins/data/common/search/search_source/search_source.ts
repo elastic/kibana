@@ -309,7 +309,7 @@ export class SearchSource {
     return this.fetch$(options)
       .toPromise()
       .then((r) => {
-        return r.rawResponse as estypes.SearchResponse<any>;
+        return r.rawResponse;
       });
   }
 
@@ -473,7 +473,7 @@ export class SearchSource {
                   obs.next(
                     this.postFlightTransform({
                       ...response,
-                      rawResponse: responseWithOther!,
+                      rawResponse: responseWithOther,
                     })
                   );
                 },

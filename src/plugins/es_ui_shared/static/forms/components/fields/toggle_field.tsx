@@ -40,7 +40,7 @@ export const ToggleField = ({ field, euiFieldProps = {}, idAria, ...rest }: Prop
     >
       <EuiSwitch
         label={field.label}
-        checked={field.value as boolean}
+        checked={field.value}
         onChange={onChange}
         data-test-subj="input"
         {...euiFieldProps}

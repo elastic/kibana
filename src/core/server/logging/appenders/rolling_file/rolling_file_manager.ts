@@ -47,6 +47,6 @@ export class RollingFileManager {
       // refresh the file meta in case it was not initialized yet.
       this.context.refreshFileInfo();
     }
-    return this.outputStream!;
+    return this.outputStream;
   }
 }

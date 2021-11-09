@@ -37,7 +37,7 @@ const MlAnnotationUpdatesContextProvider = ({
 
 const ObservableComponent = (props: any) => {
   const { annotationUpdatesService } = props;
-  const annotationProp = useObservable(annotationUpdatesService!.isAnnotationInitialized$());
+  const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
   if (annotationProp === undefined) {
     return null;
   }

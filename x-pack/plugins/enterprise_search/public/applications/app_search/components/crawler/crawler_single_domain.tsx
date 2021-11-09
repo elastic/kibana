@@ -28,7 +28,7 @@ import { CRAWLER_TITLE } from './constants';
 import { CrawlerSingleDomainLogic } from './crawler_single_domain_logic';
 
 export const CrawlerSingleDomain: React.FC = () => {
-  const { domainId } = useParams() as { domainId: string };
+  const { domainId } = useParams();
   const { engineName } = EngineLogic.values;
 
   const { dataLoading, domain } = useValues(CrawlerSingleDomainLogic);

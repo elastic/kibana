@@ -90,11 +90,9 @@ describe('SourceFiltersTable', () => {
   test('should show a delete modal', () => {
     const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
-        indexPattern={
-          getIndexPatternMock({
-            sourceFilters: [{ value: 'tim*' }],
-          }) as IndexPattern
-        }
+        indexPattern={getIndexPatternMock({
+          sourceFilters: [{ value: 'tim*' }],
+        })}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={async () => {}}
@@ -110,11 +108,9 @@ describe('SourceFiltersTable', () => {
     const saveIndexPattern = jest.fn(async () => {});
     const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
-        indexPattern={
-          getIndexPatternMock({
-            sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
-          }) as IndexPattern
-        }
+        indexPattern={getIndexPatternMock({
+          sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
+        })}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={saveIndexPattern}
@@ -154,11 +150,9 @@ describe('SourceFiltersTable', () => {
     const saveIndexPattern = jest.fn(async () => {});
     const component = shallow<SourceFiltersTable>(
       <SourceFiltersTable
-        indexPattern={
-          getIndexPatternMock({
-            sourceFilters: [{ value: 'tim*' }],
-          }) as IndexPattern
-        }
+        indexPattern={getIndexPatternMock({
+          sourceFilters: [{ value: 'tim*' }],
+        })}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={saveIndexPattern}

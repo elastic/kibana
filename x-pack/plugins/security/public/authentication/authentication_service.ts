@@ -56,11 +56,10 @@ export class AuthenticationService {
     http,
   }: SetupParams): AuthenticationServiceSetup {
     const getCurrentUser = async () =>
-      (await http.get('/internal/security/me', { asSystemRequest: true })) as AuthenticatedUser;
+      await http.get('/internal/security/me', { asSystemRequest: true });
 
     const areAPIKeysEnabled = async () =>
-      ((await http.get('/internal/security/api_key/_enabled')) as { apiKeysEnabled: boolean })
-        .apiKeysEnabled;
+      (await http.get('/internal/security/api_key/_enabled')).apiKeysEnabled;
 
     accessAgreementApp.create({ application, getStartServices });
     captureURLApp.create({ application, fatalErrors, http });

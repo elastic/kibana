@@ -37,7 +37,7 @@ export const getEsErrorMessage = (error: ElasticsearchError) => {
   let message = error?.message;
   const apiError = error?.error?.meta?.body?.error ?? error?.meta?.body?.error;
   if (apiError) {
-    message += `, caused by: "${getEsCause(apiError as ElasticsearchErrorCausedByObject)}"`;
+    message += `, caused by: "${getEsCause(apiError)}"`;
   }
   return message;
 };

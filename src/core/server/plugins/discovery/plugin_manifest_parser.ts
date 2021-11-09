@@ -210,7 +210,7 @@ export async function parseManifest(
     ui: includesUiPlugin,
     server: includesServerPlugin,
     extraPublicDirs: manifest.extraPublicDirs,
-    owner: manifest.owner!,
+    owner: manifest.owner,
     description: manifest.description,
   };
 }

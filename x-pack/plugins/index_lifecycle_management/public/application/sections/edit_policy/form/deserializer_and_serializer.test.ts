@@ -160,7 +160,7 @@ describe('deserializer and serializer', () => {
 
       const policyWithFreeze = cloneDeep(policyWithoutFreeze);
       // add a freeze action to the cold phase
-      policyWithFreeze.phases.cold!.actions!.freeze = {};
+      policyWithFreeze.phases.cold!.actions.freeze = {};
       serializer = createSerializer(policyWithFreeze);
 
       const _formInternal = deserializer(policyWithFreeze);
@@ -359,8 +359,8 @@ describe('deserializer and serializer', () => {
   });
 
   it('removes shrink from hot and warm when unset', () => {
-    delete formInternal.phases.hot!.actions!.shrink;
-    delete formInternal.phases.warm!.actions!.shrink;
+    delete formInternal.phases.hot!.actions.shrink;
+    delete formInternal.phases.warm!.actions.shrink;
 
     const result = serializer(formInternal);
 

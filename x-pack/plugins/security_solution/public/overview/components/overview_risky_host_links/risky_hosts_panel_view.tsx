@@ -24,7 +24,7 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     sortable: true,
     truncateText: true,
     width: '55%',
-    render: (name) => (<NavigateToHost name={name} />) as JSX.Element,
+    render: (name) => <NavigateToHost name={name} />,
   },
   {
     align: 'right',
@@ -44,7 +44,7 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   {
     field: 'path',
     name: '',
-    render: (path: string) => (<Link path={path} copy={i18n.LINK_COPY} />) as JSX.Element,
+    render: (path: string) => <Link path={path} copy={i18n.LINK_COPY} />,
     truncateText: true,
     width: '80px',
   },

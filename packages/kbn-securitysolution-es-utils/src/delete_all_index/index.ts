@@ -33,7 +33,7 @@ export const deleteAllIndex = async (
       return true;
     }
 
-    const indices = Object.keys(resp) as string[];
+    const indices = Object.keys(resp);
 
     // if no indexes exits then we're done with this pattern
     if (!indices.length) {

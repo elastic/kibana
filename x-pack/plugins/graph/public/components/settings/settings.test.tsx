@@ -263,7 +263,7 @@ describe('settings', () => {
     it('should delete node', () => {
       instance.find(EuiListGroupItem).at(0).prop('extraAction')!.onClick!({} as any);
 
-      expect(workspaceProps.unblockNode).toHaveBeenCalledWith(workspaceProps.blocklistedNodes![0]);
+      expect(workspaceProps.unblockNode).toHaveBeenCalledWith(workspaceProps.blocklistedNodes[0]);
     });
 
     it('should delete all nodes', () => {

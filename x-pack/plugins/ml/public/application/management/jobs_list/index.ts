@@ -53,7 +53,7 @@ export async function mountApp(
   const [coreStart, pluginsStart] = await core.getStartServices();
 
   setDependencyCache({
-    docLinks: coreStart.docLinks!,
+    docLinks: coreStart.docLinks,
     basePath: coreStart.http.basePath,
     http: coreStart.http,
     i18n: coreStart.i18n,

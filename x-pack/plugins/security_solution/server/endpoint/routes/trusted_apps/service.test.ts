@@ -39,10 +39,8 @@ import { getPackagePoliciesResponse, getTrustedAppByPolicy } from './mocks';
 import { EndpointLicenseError } from '../../errors';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
-const packagePolicyClient =
-  createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
-const savedObjectClient =
-  savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClientContract>;
+const packagePolicyClient = createPackagePolicyServiceMock();
+const savedObjectClient = savedObjectsClientMock.create();
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   _version: 'abc123',

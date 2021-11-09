@@ -81,7 +81,7 @@ export const calculateLabel = (
   const metricTypeLabel = getMetricLabel(metric.type);
 
   if (includes(paths, metric.type)) {
-    const targetMetric = metrics.find((m) => startsWith(metric.field!, m.id));
+    const targetMetric = metrics.find((m) => startsWith(metric.field, m.id));
     const targetLabel = calculateLabel(targetMetric!, metrics, fields, isThrowErrorOnFieldNotFound);
 
     // For percentiles we need to parse the field id to extract the percentile

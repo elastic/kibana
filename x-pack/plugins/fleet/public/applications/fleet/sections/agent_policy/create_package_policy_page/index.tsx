@@ -365,9 +365,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   const integrationInfo = useMemo(
     () =>
-      (params as AddToPolicyParams).integration
+      params.integration
         ? packageInfo?.policy_templates?.find(
-            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
+            (policyTemplate) => policyTemplate.name === params.integration
           )
         : undefined,
     [packageInfo?.policy_templates, params]

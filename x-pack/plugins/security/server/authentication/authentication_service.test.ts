@@ -297,7 +297,7 @@ describe('AuthenticationService', () => {
         expect(mockResponse.customError).toHaveBeenCalledTimes(1);
         const [[options]] = mockResponse.customError.mock.calls;
         expect(options.body).toBe(originalError);
-        expect(options!.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
+        expect(options.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
 
         expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();

@@ -299,7 +299,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public migrateToLatest(state: VersionedState) {
-    return migrateToLatest(this.getAllMigrations(), state) as ExpressionAstExpression;
+    return migrateToLatest(this.getAllMigrations(), state);
   }
 
   private migrate(ast: SerializableRecord, version: string) {

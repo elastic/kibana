@@ -47,7 +47,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
 
   locations.forEach((item: MonitorLocation) => {
     allLocations.push({
-      label: item.geo.name!,
+      label: item.geo.name,
       timestamp: getShortTimeStamp(moment(new Date(item.timestamp).valueOf())),
       color: item.summary.down === 0 ? gray : danger,
       availability: (item.up_history / (item.up_history + item.down_history)) * 100,

@@ -25,7 +25,7 @@ export class MonacoEditorService extends FtrService {
       );
     });
 
-    return values[nthIndex] as string;
+    return values[nthIndex];
   }
 
   public async typeCodeEditorValue(value: string, testSubjId: string) {

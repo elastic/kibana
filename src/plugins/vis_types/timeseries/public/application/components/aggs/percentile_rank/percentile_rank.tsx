@@ -128,8 +128,8 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
               disableAdd={isTablePanel}
               disableDelete={isTablePanel}
               showOnlyLastRow={isTablePanel}
-              values={model.values!}
-              colors={model.colors!}
+              values={model.values}
+              colors={model.colors}
               onChange={handlePercentileRankValuesChange}
               enableColorPicker={enableColorPicker}
             />

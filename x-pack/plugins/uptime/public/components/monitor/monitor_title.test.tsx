@@ -108,7 +108,7 @@ describe('MonitorTitle component', () => {
         state: { monitorStatus: { status: defaultMonitorStatus, loading: false } },
       }
     );
-    expect(screen.getByText(defaultMonitorStatus!.url!.full!));
+    expect(screen.getByText(defaultMonitorStatus.url!.full!));
   });
 
   it('renders beta disclaimer for synthetics monitors', () => {

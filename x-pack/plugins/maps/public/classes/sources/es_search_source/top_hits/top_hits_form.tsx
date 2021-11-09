@@ -71,7 +71,7 @@ export class TopHitsForm extends Component<Props, State> {
   async loadIndexSettings() {
     try {
       const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
-      const { maxInnerResultWindow } = await loadIndexSettings(indexPattern!.title);
+      const { maxInnerResultWindow } = await loadIndexSettings(indexPattern.title);
       if (this._isMounted) {
         this.setState({ maxInnerResultWindow });
       }

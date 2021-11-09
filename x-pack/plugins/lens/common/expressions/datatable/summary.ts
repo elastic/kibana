@@ -31,7 +31,7 @@ export function getFinalSummaryConfiguration(
 }
 
 export function getDefaultSummaryLabel(type: SummaryRowType) {
-  return getSummaryRowOptions().find(({ value }) => type === value)!.label!;
+  return getSummaryRowOptions().find(({ value }) => type === value)!.label;
 }
 
 export function getSummaryRowOptions(): Array<{

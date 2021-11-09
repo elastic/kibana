@@ -24,7 +24,7 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
     },
     async (context, request, response) => {
       const { client } = context.core.elasticsearch;
-      const { indexName } = request.params as typeof paramsSchema.type;
+      const { indexName } = request.params;
       const params = {
         ignore_unavailable: true,
         allow_no_indices: false,

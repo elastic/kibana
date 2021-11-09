@@ -48,7 +48,7 @@ export const generateAgentOption = (
 
 export const generateGroupOption = (label: string, groupType: AGENT_GROUP_KEY, data: Group[]) => ({
   label,
-  options: (data as Group[]).map(({ name, id, size }) => ({
+  options: data.map(({ name, id, size }) => ({
     label: name !== id ? `${name} (${id})` : name,
     key: id,
     color: getColor(groupType),

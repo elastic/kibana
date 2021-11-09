@@ -244,7 +244,7 @@ export const WatchHistory = () => {
               </h4>
             </EuiTitle>
             <EuiInMemoryTable
-              items={(watchHistoryDetails.watchStatus as any).actionStatuses}
+              items={watchHistoryDetails.watchStatus.actionStatuses}
               itemId="id"
               columns={detailColumns}
               message={
