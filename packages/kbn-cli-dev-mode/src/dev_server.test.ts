@@ -117,7 +117,7 @@ afterEach(() => {
   subscriptions.length = 0;
 });
 
-describe('#run$', () => {
+describe.skip('#run$', () => {
   it('starts the dev server with the right options', () => {
     run(new DevServer(defaultOptions)).unsubscribe();
 
