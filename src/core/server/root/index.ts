@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import apm from 'elastic-apm-node';
 import { ConnectableObservable, Subscription } from 'rxjs';
 import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
 
@@ -34,7 +35,11 @@ export class Root {
     this.server = new Server(rawConfigProvider, env, this.loggingSystem);
   }
 
-  public async preboot() {
+  public async preboot(serverAvailableTransaction?: apm.Transaction) {
+    const transaction = apm.startTransaction('server_preboot', 'kibana_platform', {
+      childOf: serverAvailableTransaction,
+    });
+
     try {
       this.server.setupCoreConfig();
       await this.setupLogging();
@@ -42,27 +47,44 @@ export class Root {
       return await this.server.preboot();
     } catch (e) {
       await this.shutdown(e);
+      transaction?.setOutcome('failure');
       throw e;
+    } finally {
+      transaction?.end();
     }
   }
 
-  public async setup() {
+  public async setup(serverAvailableTransaction?: apm.Transaction) {
+    const transaction = apm.startTransaction('server_setup', 'kibana_platform', {
+      childOf: serverAvailableTransaction,
+    });
+
     try {
       this.log.debug('setting up root');
       return await this.server.setup();
     } catch (e) {
       await this.shutdown(e);
+      transaction?.setOutcome('failure');
       throw e;
+    } finally {
+      transaction?.end();
     }
   }
 
-  public async start() {
+  public async start(serverAvailableTransaction?: apm.Transaction) {
+    const transaction = apm.startTransaction('server_start', 'kibana_platform', {
+      childOf: serverAvailableTransaction,
+    });
+
     this.log.debug('starting root');
     try {
       return await this.server.start();
     } catch (e) {
       await this.shutdown(e);
+      transaction?.setOutcome('failure');
       throw e;
+    } finally {
+      transaction?.end();
     }
   }
 

@@ -93,7 +93,7 @@ export async function bootstrap({
   }
 
   try {
-    const { preboot } = await root.preboot();
+    const { preboot } = await root.preboot(serverAvailableTransaction);
 
     // If setup is on hold then preboot server is supposed to serve user requests and we can let
     // dev parent process know that we are ready for dev mode.
@@ -110,8 +110,8 @@ export async function bootstrap({
       }
     }
 
-    const coreSetup = await root.setup();
-    await root.start();
+    const coreSetup = await root.setup(serverAvailableTransaction);
+    await root.start(serverAvailableTransaction);
 
     // Notify parent process if we haven't done that yet during preboot stage.
     if (process.send && !isSetupOnHold) {

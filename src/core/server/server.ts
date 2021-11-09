@@ -128,11 +128,6 @@ export class Server {
 
   public async preboot() {
     this.log.debug('prebooting server');
-    const prebootTransaction = apm.startTransaction('server_preboot', 'kibana_platform', {
-      // make this a child of the current transaction, if it exists, rather than replacing it
-      childOf: apm.currentTransaction ?? undefined,
-    });
-
     const environmentPreboot = await this.environment.preboot();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
@@ -181,17 +176,11 @@ export class Server {
 
     this.coreApp.preboot(corePreboot, uiPlugins);
 
-    prebootTransaction?.end();
     return corePreboot;
   }
 
   public async setup() {
     this.log.debug('setting up server');
-    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform', {
-      // make this a child of the current transaction, if it exists, rather than replacing it
-      childOf: apm.currentTransaction ?? undefined,
-    });
-
     const environmentSetup = this.environment.setup();
 
     // Configuration could have changed after preboot.
@@ -291,21 +280,15 @@ export class Server {
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup, uiPlugins);
 
-    setupTransaction?.end();
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
-    const startTransaction = apm.startTransaction('server_start', 'kibana_platform', {
-      // make this a child of the current transaction, if it exists, rather than replacing it
-      childOf: apm.currentTransaction ?? undefined,
-    });
-
     const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
     const deprecationsStart = this.deprecations.start();
-    const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
+    const soStartSpan = apm.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
@@ -340,8 +323,6 @@ export class Server {
     await this.plugins.start(this.coreStart);
 
     await this.http.start();
-
-    startTransaction?.end();
 
     return this.coreStart;
   }
