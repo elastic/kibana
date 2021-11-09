@@ -7,7 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Upgrade Step', () => {
   let testBed: OverviewTestBed;
@@ -22,22 +23,24 @@ describe('Overview - Upgrade Step', () => {
     server.restore();
   });
 
-  describe('Step 3 - Upgrade stack', () => {
-    test('Shows link to setup upgrade docs for on-prem installations', () => {
+  describe('On-prem', () => {
+    test('Shows link to setup upgrade docs', () => {
       const { exists } = testBed;
 
       expect(exists('upgradeSetupDocsLink')).toBe(true);
       expect(exists('upgradeSetupCloudLink')).toBe(false);
     });
+  });
 
-    test('Shows upgrade cta and link to docs for cloud installations', async () => {
+  describe('On Cloud', () => {
+    test('Shows upgrade CTA and link to docs', async () => {
       await act(async () => {
         testBed = await setupOverviewPage({
-          servicesOverrides: {
+          plugins: {
             cloud: {
               isCloudEnabled: true,
-              baseUrl: 'https://test.com',
-              cloudId: '1234',
+              deploymentUrl:
+                'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63',
             },
           },
         });
@@ -46,10 +49,12 @@ describe('Overview - Upgrade Step', () => {
       const { component, exists, find } = testBed;
       component.update();
 
-      expect(exists('upgradeSetupCloudLink')).toBe(true);
       expect(exists('upgradeSetupDocsLink')).toBe(true);
+      expect(exists('upgradeSetupCloudLink')).toBe(true);
 
-      expect(find('upgradeSetupCloudLink').props().href).toBe('https://test.com/deployments/1234');
+      expect(find('upgradeSetupCloudLink').props().href).toBe(
+        'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63?show_upgrade=true'
+      );
     });
   });
 });

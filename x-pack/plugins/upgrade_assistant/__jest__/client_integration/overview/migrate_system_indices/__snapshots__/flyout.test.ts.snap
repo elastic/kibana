@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview - Migrate system indices - Flyout shows correct features in flyout table 1`] = `
+Array [
+  Array [
+    "Security",
+    "Migration failed",
+  ],
+  Array [
+    "Machine Learning",
+    "Migration in progress",
+  ],
+  Array [
+    "Kibana",
+    "Migration required",
+  ],
+  Array [
+    "Logstash",
+    "Migration complete",
+  ],
+]
+`;

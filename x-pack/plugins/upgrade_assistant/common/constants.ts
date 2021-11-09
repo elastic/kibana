@@ -24,6 +24,20 @@ export const indexSettingDeprecations = {
 
 export const API_BASE_PATH = '/api/upgrade_assistant';
 
+// Telemetry constants
+export const UPGRADE_ASSISTANT_TELEMETRY = 'upgrade-assistant-telemetry';
+
+/**
+ * This is the repository where Cloud stores its backup snapshots.
+ */
+export const CLOUD_SNAPSHOT_REPOSITORY = 'found-snapshots';
+
 export const DEPRECATION_WARNING_UPPER_LIMIT = 999999;
 export const DEPRECATION_LOGS_SOURCE_ID = 'deprecation_logs';
+export const DEPRECATION_LOGS_INDEX = '.logs-deprecation.elasticsearch-default';
 export const DEPRECATION_LOGS_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
+
+export const CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS = 45000;
+export const CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS = 60000;
+export const DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS = 15000;
+export const SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS = 15000;

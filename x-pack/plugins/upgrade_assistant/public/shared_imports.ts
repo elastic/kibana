@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
-import { AppServicesContext } from './types';
-
 export type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
+  Privileges,
+  MissingPrivileges,
+  Authorization,
 } from '../../../../src/plugins/es_ui_shared/public/';
 export {
   sendRequest,
   useRequest,
   SectionLoading,
   GlobalFlyout,
+  WithPrivileges,
+  AuthorizationProvider,
+  AuthorizationContext,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+export { Storage } from '../../../../src/plugins/kibana_utils/public';
+
+export {
+  KibanaContextProvider,
+  reactRouterNavigate,
+} from '../../../../src/plugins/kibana_react/public';
 
 export type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
-export const useKibana = () => _useKibana<AppServicesContext>();
+export { APP_WRAPPER_CLASS } from '../../../../src/core/public';

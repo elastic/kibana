@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
-
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
 
 describe('Index settings deprecation flyout', () => {
@@ -33,27 +33,34 @@ describe('Index settings deprecation flyout', () => {
       testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
     });
 
-    const { find, exists, actions, component } = testBed;
-
+    const { actions, component } = testBed;
     component.update();
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
+  });
 
-    await actions.clickIndexSettingsDeprecationAt(0);
+  test('renders a flyout with deprecation details', async () => {
+    const { find, exists } = testBed;
 
     expect(exists('indexSettingsDetails')).toBe(true);
     expect(find('indexSettingsDetails.flyoutTitle').text()).toContain(
       indexSettingDeprecation.message
     );
+    expect(find('indexSettingsDetails.documentationLink').props().href).toBe(
+      indexSettingDeprecation.url
+    );
     expect(exists('removeSettingsPrompt')).toBe(true);
   });
 
   it('removes deprecated index settings', async () => {
-    const { find, actions } = testBed;
+    const { find, actions, exists } = testBed;
 
     httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
       acknowledged: true,
     });
 
-    await actions.clickDeleteSettingsButton();
+    expect(exists('indexSettingsDetails.warningDeprecationBadge')).toBe(true);
+
+    await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
     const request = server.requests[server.requests.length - 1];
 
@@ -69,12 +76,14 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.clickIndexSettingsDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
 
     // Verify prompt to remove setting no longer displays
     expect(find('removeSettingsPrompt').length).toEqual(0);
     // Verify the action button no longer displays
     expect(find('indexSettingsDetails.deleteSettingsButton').length).toEqual(0);
+    // Verify the badge got marked as resolved
+    expect(exists('indexSettingsDetails.resolvedDeprecationBadge')).toBe(true);
   });
 
   it('handles failure', async () => {
@@ -87,7 +96,7 @@ describe('Index settings deprecation flyout', () => {
 
     httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
 
-    await actions.clickDeleteSettingsButton();
+    await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
     const request = server.requests[server.requests.length - 1];
 
@@ -103,7 +112,7 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.clickIndexSettingsDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
 
     // Verify the flyout shows an error message
     expect(find('indexSettingsDetails.deleteSettingsError').text()).toContain(

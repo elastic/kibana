@@ -4,7 +4,7 @@
 <titleabbrev>Upgrade readiness status</titleabbrev>
 ++++
 
-experimental[] Check the status of your cluster.
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
 
 Check the status of your cluster.
 
