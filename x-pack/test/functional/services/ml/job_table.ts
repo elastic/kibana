@@ -373,6 +373,19 @@ export function MachineLearningJobTableProvider(
       await testSubjects.existOrFail('~mlPageJobWizard');
     }
 
+    public async clickCloneJobActionWhenNoDataViewExists(jobId: string) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      await testSubjects.click('mlActionButtonCloneJob');
+      await this.assertNoDataViewForCloneJobWarningToastExist();
+    }
+
+    public async assertNoDataViewForCloneJobWarningToastExist() {
+      await retry.tryForTime(5000, async () => {
+        const toast = await testSubjects.find('mlCloneJobNoDataViewExistsWarningToast');
+        expect(toast).not.to.be(undefined);
+      });
+    }
+
     public async clickEditJobAction(jobId: string) {
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonEditJob');
