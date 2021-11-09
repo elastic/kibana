@@ -52,7 +52,7 @@ const ProgressLoader = styled(EuiProgress)`
 const getSortField = (field: string): SortFieldCase =>
   field === SortFieldCase.closedAt ? SortFieldCase.closedAt : SortFieldCase.createdAt;
 
-interface AllCasesListProps {
+export interface AllCasesListProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   disableAlerts?: boolean;
   hiddenStatuses?: CaseStatusWithAllStatus[];
