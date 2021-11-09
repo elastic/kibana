@@ -24,3 +24,7 @@ A legacy signals index. It has no migration metadata fields and a very old mappi
 #### `signals/outdated_signals_index`
 
 A signals index that had previously been updated but is now out of date. It has migration metadata fields and a recent mapping version.
+
+#### `signals/index_alias_clash`
+
+An index that has the .siem-signals alias, but is NOT a signals index. Used for simulating an alerts-as-data index, which will have the .siem-signals alias but different mappings. This way we can test that functionality that needs to target only signals indices (e.g. mapping updates to apply field aliases) work correctly in the presence of alerts-as-data indices.
