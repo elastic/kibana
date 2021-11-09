@@ -14,7 +14,8 @@ export type StaticPage =
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
-  | 'data_streams';
+  | 'data_streams'
+  | 'settings';
 
 export type DynamicPage =
   | 'integrations_all'
@@ -57,6 +58,7 @@ export const FLEET_ROUTING_PATHS = {
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
+  settings: '/settings',
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
@@ -145,4 +147,5 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
+  settings: () => [FLEET_BASE_PATH, '/settings'],
 };

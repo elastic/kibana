@@ -9,16 +9,12 @@ import React, { useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
+  EuiPortal,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiButton,
-  EuiFlyoutFooter,
   EuiForm,
   EuiFormRow,
   EuiCode,
@@ -38,9 +34,9 @@ import {
   sendPutSettings,
   useDefaultOutput,
   sendPutOutput,
-} from '../../hooks';
-import { isDiffPathProtocol, normalizeHostsForAgents } from '../../../common';
-import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../../../../hooks';
+import { isDiffPathProtocol, normalizeHostsForAgents } from '../../../../../../../common';
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { SettingsConfirmModal } from './confirm_modal';
 import type { SettingsConfirmModalProps } from './confirm_modal';
@@ -68,10 +64,6 @@ const CodeEditorPlaceholder = styled(EuiTextColor).attrs((props) => ({
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 
-interface Props {
-  onClose: () => void;
-}
-
 function normalizeHosts(hostsInput: string[]) {
   return hostsInput.map((host) => {
     try {
@@ -88,7 +80,7 @@ function isSameArrayValueWithNormalizedHosts(arrayA: string[] = [], arrayB: stri
   return hostsA.length === hostsB.length && hostsA.every((val, index) => val === hostsB[index]);
 }
 
-function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
+function useSettingsForm(outputId: string | undefined) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useStartServices();
 
@@ -237,7 +229,6 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           })
         );
         setIsloading(false);
-        onSuccess();
       } catch (error) {
         setIsloading(false);
         notifications.toasts.addError(error, {
@@ -253,13 +244,13 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   };
 }
 
-export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
+export const LegacySettingsForm: React.FunctionComponent = () => {
   const { docLinks } = useStartServices();
 
   const settingsRequest = useGetSettings();
   const settings = settingsRequest?.data?.item;
   const { output } = useDefaultOutput();
-  const { inputs, submit, validate, isLoading } = useSettingsForm(output?.id, onClose);
+  const { inputs, submit, validate, isLoading } = useSettingsForm(output?.id);
 
   const [isConfirmModalVisible, setConfirmModalVisible] = React.useState(false);
 
@@ -455,14 +446,16 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   return (
     <>
       {isConfirmModalVisible && (
-        <SettingsConfirmModal
-          changes={changes}
-          onConfirm={onConfirm}
-          onClose={onConfirmModalClose}
-        />
+        <EuiPortal>
+          <SettingsConfirmModal
+            changes={changes}
+            onConfirm={onConfirm}
+            onClose={onConfirmModalClose}
+          />
+        </EuiPortal>
       )}
-      <EuiFlyout onClose={onClose} size="m">
-        <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerSettingsFlyoutTitle">
+      <>
+        <>
           <EuiTitle size="m">
             <h2 id="IngestManagerSettingsFlyoutTitle">
               <FormattedMessage
@@ -471,18 +464,11 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               />
             </h2>
           </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>{body}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
+        </>
+        <>{body}</>
+        <>
+          <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} flush="left">
-                <FormattedMessage
-                  id="xpack.fleet.settings.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 disabled={!isUpdated}
@@ -505,8 +491,8 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+        </>
+      </>
     </>
   );
 };
