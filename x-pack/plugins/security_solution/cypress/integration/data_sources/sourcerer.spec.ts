@@ -13,34 +13,36 @@ import {
 import { HOSTS_URL } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 import {
-  clickOutOfSourcererTimeline,
-  clickTimelineRadio,
-  deselectSourcererOptions,
-  isCustomRadio,
+  isKibanaDataViewOption,
+  isDataViewSelection,
   isHostsStatValue,
-  isNotCustomRadio,
-  isNotSourcererSelection,
   isSourcererOptions,
   isSourcererSelection,
+  openAdvancedSettings,
   openSourcerer,
   resetSourcerer,
-  setSourcererOption,
-  unsetSourcererOption,
+  saveSourcerer,
+  deselectSourcererOptions,
+  addIndexToDefault,
+  isNotSourcererSelection,
+  deselectSourcererOption,
 } from '../../tasks/sourcerer';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { populateTimeline } from '../../tasks/timeline';
-import { SERVER_SIDE_EVENT_COUNT } from '../../screens/timeline';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, postDataView } from '../../tasks/common';
 import { createUsersAndRoles, secReadCasesAll, secReadCasesAllUser } from '../../tasks/privileges';
 import { TOASTER } from '../../screens/configure_cases';
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
+import { SOURCERER } from '../../screens/sourcerer';
 
 const usersToCreate = [secReadCasesAllUser];
 const rolesToCreate = [secReadCasesAll];
+const siemDataViewTitle = 'Security Default Data View';
+const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,beats*,siem-read*,.kibana*,fakebeat-*'];
 // Skipped at the moment as this has flake due to click handler issues. This has been raised with team members
 // and the code is being re-worked and then these tests will be unskipped
 describe('Sourcerer', () => {
   beforeEach(() => {
     cleanKibana();
+    dataViews.forEach((dataView: string) => postDataView(dataView));
   });
   describe('permissions', () => {
     before(() => {
@@ -51,88 +53,68 @@ describe('Sourcerer', () => {
       cy.get(TOASTER).should('have.text', 'Write role required to generate data');
     });
   });
-  // Originially written in December 2020, flakey from day1
-  // has always been skipped with intentions to fix, see note at top of file
-  describe.skip('Default scope', () => {
+
+  describe('Default scope', () => {
     beforeEach(() => {
       cy.clearLocalStorage();
       loginAndWaitForPage(HOSTS_URL);
     });
 
-    it('has SIEM index patterns selected on initial load', () => {
+    it('correctly loads SIEM data view', () => {
+      openSourcerer();
+      isDataViewSelection(siemDataViewTitle);
+      openAdvancedSettings();
+      isSourcererSelection(`auditbeat-*`);
+      isSourcererOptions(DEFAULT_INDEX_PATTERN.filter((pattern) => pattern !== 'auditbeat-*'));
+    });
+
+    it('can do so many tasks and modified badge updates correctly', () => {
+      cy.get(SOURCERER.badgeModified).should(`not.exist`);
+      openSourcerer();
+      cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
+      isKibanaDataViewOption(dataViews);
+      cy.get(SOURCERER.selectListDefaultOption).should(`contain`, siemDataViewTitle);
+      cy.get(SOURCERER.selectListOption).contains(dataViews[1]).click();
+      isDataViewSelection(dataViews[1]);
+      saveSourcerer();
+      cy.get(SOURCERER.badgeModified).should(`not.exist`);
+      openSourcerer();
+      cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
+      isDataViewSelection(dataViews[1]);
+      openAdvancedSettings();
+      const patterns = dataViews[1].split(',');
+      deselectSourcererOptions([patterns[0]]);
+      saveSourcerer();
+      cy.get(SOURCERER.badgeModified).should(`exist`);
+      openSourcerer();
+      cy.get(SOURCERER.badgeModifiedOption).should(`exist`);
+      resetSourcerer();
+      saveSourcerer();
+      cy.get(SOURCERER.badgeModified).should(`not.exist`);
+      openSourcerer();
+      cy.get(SOURCERER.badgeModifiedOption).should(`not.exist`);
+      isDataViewSelection(siemDataViewTitle);
+    });
+
+    it('disables save when no patterns are selected', () => {
+      openSourcerer();
+      openAdvancedSettings();
+      cy.get(SOURCERER.saveButton).should('be.enabled');
+      deselectSourcererOptions(['auditbeat-*']);
+      cy.get(SOURCERER.saveButton).should('be.disabled');
+    });
+
+    it('adds a pattern to the default index and correctly filters out auditbeat-*', () => {
       openSourcerer();
       isSourcererSelection(`auditbeat-*`);
-    });
-
-    it('has Kibana index patterns in the options', () => {
-      openSourcerer();
-      isSourcererOptions([`metrics-*`, `logs-*`]);
-    });
-
-    it('selected DATA_VIEW gets added to sourcerer', () => {
-      setSourcererOption(`metrics-*`);
-      openSourcerer();
-      isSourcererSelection(`metrics-*`);
-    });
-
-    it('does not return data without correct pattern selected', () => {
-      waitForAllHostsToBeLoaded();
+      isNotSourcererSelection('beats*');
+      addIndexToDefault('beats*');
       isHostsStatValue('4 ');
-      setSourcererOption(`metrics-*`);
-      unsetSourcererOption(`auditbeat-*`);
+      openSourcerer();
+      isSourcererSelection(`auditbeat-*`);
+      isSourcererSelection('beats*');
+      deselectSourcererOption(`auditbeat-*`);
       isHostsStatValue('0 ');
-    });
-
-    it('reset button restores to original state', () => {
-      setSourcererOption(`metrics-*`);
-      openSourcerer();
-      isSourcererSelection(`metrics-*`);
-      resetSourcerer();
-      openSourcerer();
-      isNotSourcererSelection(`metrics-*`);
-    });
-  });
-  // Originially written in December 2020, flakey from day1
-  // has always been skipped with intentions to fix
-  describe.skip('Timeline scope', () => {
-    beforeEach(() => {
-      cy.clearLocalStorage();
-      loginAndWaitForPage(HOSTS_URL);
-    });
-
-    const alertPatterns = ['.siem-signals-default'];
-    const rawPatterns = ['auditbeat-*'];
-    const allPatterns = [...alertPatterns, ...rawPatterns];
-
-    it('Radio buttons select correct sourcerer patterns', () => {
-      openTimelineUsingToggle();
-      openSourcerer('timeline');
-      allPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
-      clickTimelineRadio('raw');
-      rawPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
-      alertPatterns.forEach((ss) => isNotSourcererSelection(ss, 'timeline'));
-      clickTimelineRadio('alert');
-      alertPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
-      rawPatterns.forEach((ss) => isNotSourcererSelection(ss, 'timeline'));
-    });
-
-    it('Adding an option results in the custom radio becoming active', () => {
-      openTimelineUsingToggle();
-      openSourcerer('timeline');
-      isNotCustomRadio();
-      clickOutOfSourcererTimeline();
-      const luckyOption = 'logs-*';
-      setSourcererOption(luckyOption, 'timeline');
-      openSourcerer('timeline');
-      isCustomRadio();
-    });
-
-    it('Selected index patterns are properly queried', () => {
-      openTimelineUsingToggle();
-      populateTimeline();
-      openSourcerer('timeline');
-      deselectSourcererOptions(rawPatterns, 'timeline');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.eql(0));
     });
   });
 });

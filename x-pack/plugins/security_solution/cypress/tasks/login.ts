@@ -295,6 +295,12 @@ export const loginAndWaitForPage = (url: string, role?: ROLES) => {
   );
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
+export const waitForPage = (url: string) => {
+  cy.visit(
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
+  );
+  cy.get('[data-test-subj="headerGlobalNav"]');
+};
 
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);

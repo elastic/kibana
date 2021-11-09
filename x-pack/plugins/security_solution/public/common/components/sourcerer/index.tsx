@@ -145,7 +145,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         title={i18n.DATA_VIEW}
       >
         {i18n.DATA_VIEW}
-        {isModified === 'modified' && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
+        {isModified === 'modified' && (
+          <StyledBadge data-test-subj="sourcerer-modified-badge">
+            {i18n.MODIFIED_BADGE_TITLE}
+          </StyledBadge>
+        )}
         {isModified === 'alerts' && (
           <StyledBadge data-test-subj="sourcerer-alerts-badge">
             {i18n.ALERTS_BADGE_TITLE}
