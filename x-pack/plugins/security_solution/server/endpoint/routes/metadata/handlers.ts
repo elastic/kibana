@@ -73,16 +73,6 @@ const errorHandler = <E extends Error>(res: KibanaResponseFactory, error: E): IK
     return res.badRequest({ body: error });
   }
 
-  // legacy check for Boom errors. for the errors around non-standard error properties
-  // @ts-expect-error TS2339
-  const boomStatusCode = error.isBoom && error?.output?.statusCode;
-  if (boomStatusCode) {
-    return res.customError({
-      statusCode: boomStatusCode,
-      body: error,
-    });
-  }
-
   // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
   throw error;
 };
