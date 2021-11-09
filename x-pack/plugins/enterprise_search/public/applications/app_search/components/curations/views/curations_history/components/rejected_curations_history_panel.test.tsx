@@ -29,7 +29,7 @@ describe('RejectedCurationsHistoryPanel', () => {
 
     expect(wrapper.is(DataPanel)).toBe(true);
     expect(wrapper.find(EntSearchLogStream).prop('query')).toEqual(
-      'event.kind: event and event.dataset: search-relevance-suggestions and appsearch.search_relevance_suggestions.engine: some-engine and event.action: curation_suggestion and appsearch.search_relevance_suggestions.suggestion.new_status: rejected'
+      'event.kind: event and event.dataset: search-relevance-suggestions and appsearch.adaptive_relevance.engine: some-engine and event.action: curation_suggestion and appsearch.adaptive_relevance.suggestion.new_status: rejected'
     );
   });
 });

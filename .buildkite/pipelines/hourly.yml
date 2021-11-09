@@ -147,6 +147,13 @@ steps:
     key: linting
     timeout_in_minutes: 90
 
+  - command: .buildkite/scripts/steps/lint_with_types.sh
+    label: 'Linting (with types)'
+    agents:
+      queue: c2-16
+    key: linting_with_types
+    timeout_in_minutes: 90
+
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { StatsBar, AnalyticStatsBarStats, JobStatsBarStats, ModelsBarStats } from './stats_bar';
+export type { AnalyticStatsBarStats, JobStatsBarStats, ModelsBarStats } from './stats_bar';
+export { StatsBar } from './stats_bar';
