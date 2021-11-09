@@ -116,7 +116,9 @@ export const PreviewHistogram = ({
     (): string =>
       isLoading
         ? i18n.QUERY_PREVIEW_SUBTITLE_LOADING
-        : i18n.QUERY_PREVIEW_TITLE(isThresholdRule ? thresholdTotalCount : totalCount),
+        : isThresholdRule
+        ? i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(thresholdTotalCount)
+        : i18n.QUERY_PREVIEW_TITLE(totalCount),
     [isLoading, totalCount, thresholdTotalCount, isThresholdRule]
   );
 

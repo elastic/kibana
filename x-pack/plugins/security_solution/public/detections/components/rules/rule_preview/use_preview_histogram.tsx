@@ -35,7 +35,7 @@ export const usePreviewHistogram = ({
   const { uiSettings } = useKibana().services;
   const { query: queryString, filters } = query;
 
-  const [filterQuery] = convertToBuildEsQuery({
+  const [filterQuery, error] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     indexPattern: {
       fields: [
@@ -63,8 +63,9 @@ export const usePreviewHistogram = ({
       stackByField: threshold != null ? threshold.field[0] : 'event.category',
       startDate,
       threshold,
+      skip: error != null,
     };
-  }, [startDate, endDate, filterQuery, spaceId, threshold]);
+  }, [startDate, endDate, filterQuery, spaceId, error, threshold]);
 
   return useMatrixHistogram(matrixHistogramRequest);
 };
