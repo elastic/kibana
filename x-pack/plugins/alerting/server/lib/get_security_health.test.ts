@@ -6,7 +6,6 @@
  */
 
 import { licensingMock } from '../../../licensing/server/mocks';
-import { ILicense } from '../../../licensing/server';
 import { LicenseState, ILicenseState } from './license_state';
 import { BehaviorSubject } from 'rxjs';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
