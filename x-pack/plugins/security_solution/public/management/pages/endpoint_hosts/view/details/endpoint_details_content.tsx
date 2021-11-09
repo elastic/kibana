@@ -8,8 +8,6 @@
 import styled from 'styled-components';
 import {
   EuiDescriptionList,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +17,6 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { isPolicyOutOfDate } from '../../utils';
 import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
@@ -32,12 +29,19 @@ import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
 import { EndpointAgentStatus } from '../components/endpoint_agent_status';
 
-const HostIds = styled(EuiListGroupItem)`
-  margin-top: 0;
-  .euiListGroupItem__text {
-    padding: 0;
+const EndpointDetailsContentStyled = styled.div`
+  dl dt {
+    max-width: 220px;
   }
 `;
+
+const ColumnTitle = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <EuiText size="s">
+      <h5>{children}</h5>
+    </EuiText>
+  );
+};
 
 export const EndpointDetailsContent = memo(
   ({
@@ -70,21 +74,36 @@ export const EndpointDetailsContent = memo(
     const detailsResults = useMemo(() => {
       return [
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.os', {
-            defaultMessage: 'OS',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.os"
+                defaultMessage="OS"
+              />
+            </ColumnTitle>
+          ),
           description: <EuiText size="xs">{details.host.os.full}</EuiText>,
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.agentStatus', {
-            defaultMessage: 'Agent Status',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.agentStatus"
+                defaultMessage="Agent Status"
+              />
+            </ColumnTitle>
+          ),
           description: <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={details} />,
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.lastSeen', {
-            defaultMessage: 'Last Seen',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.lastSeen"
+                defaultMessage="Last Seen"
+              />
+            </ColumnTitle>
+          ),
           description: (
             <EuiText size="xs">
               {' '}
@@ -93,9 +112,14 @@ export const EndpointDetailsContent = memo(
           ),
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.policy', {
-            defaultMessage: 'Policy',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.policy"
+                defaultMessage="Policy"
+              />
+            </ColumnTitle>
+          ),
           description: (
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
@@ -137,9 +161,14 @@ export const EndpointDetailsContent = memo(
           ),
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.policyStatus', {
-            defaultMessage: 'Policy Status',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.policyStatus"
+                defaultMessage="Policy Status"
+              />
+            </ColumnTitle>
+          ),
           description: (
             <EuiHealth
               data-test-subj={`policyStatusValue-${policyStatus}`}
@@ -158,35 +187,48 @@ export const EndpointDetailsContent = memo(
           ),
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.endpointVersion', {
-            defaultMessage: 'Endpoint Version',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.endpointVersion"
+                defaultMessage="Endpoint Version"
+              />
+            </ColumnTitle>
+          ),
           description: <EuiText size="xs">{details.agent.version}</EuiText>,
         },
         {
-          title: i18n.translate('xpack.securitySolution.endpoint.details.ipAddress', {
-            defaultMessage: 'IP Address',
-          }),
+          title: (
+            <ColumnTitle>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.ipAddress"
+                defaultMessage="IP Address"
+              />
+            </ColumnTitle>
+          ),
           description: (
-            <EuiListGroup flush>
+            <EuiFlexGroup direction="column" gutterSize="s">
               {details.host.ip.map((ip: string, index: number) => (
-                <HostIds size="xs" key={index} label={ip} />
+                <EuiFlexItem key={index}>
+                  <EuiText size="xs">{ip}</EuiText>
+                </EuiFlexItem>
               ))}
-            </EuiListGroup>
+            </EuiFlexGroup>
           ),
         },
       ];
     }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo]);
 
     return (
-      <>
-        <EuiSpacer size="l" />
+      <EndpointDetailsContentStyled>
+        <EuiSpacer size="s" />
         <EuiDescriptionList
+          compressed={true}
           type="column"
           listItems={detailsResults}
           data-test-subj="endpointDetailsList"
         />
-      </>
+      </EndpointDetailsContentStyled>
     );
   }
 );

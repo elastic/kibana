@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiTab, EuiTabs, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import { EuiTabs, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
 
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
