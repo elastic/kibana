@@ -94,6 +94,9 @@ export const usePickIndexPatterns = ({
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(selectedPatterns)
   );
+  useEffect(() => {
+    setSelectedOptions(patternListToOptions(selectedPatterns));
+  }, [selectedPatterns]);
 
   const getDefaultSelectedOptionsByDataView = useCallback(
     (id: string, isAlerts: boolean = false): Array<EuiComboBoxOptionOption<string>> =>
@@ -151,6 +154,7 @@ export const usePickIndexPatterns = ({
   const setIndexPatternsByDataView = (newSelectedDataViewId: string, isAlerts?: boolean) => {
     setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
   };
+
   return {
     isModified,
     onChangeCombo,
