@@ -56,6 +56,7 @@ describe('sendTelemetryEvents', () => {
         packageName: 'aws',
         status: 'failure',
         dryRun: true,
+        eventType: 'package-policy-upgrade',
       },
     ]);
   });
