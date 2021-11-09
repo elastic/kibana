@@ -43,7 +43,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       );
     });
 
-    describe.skip('When user has all priviledges for logs app', () => {
+    describe('When user has all priviledges for logs app', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -57,13 +57,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('checkbox is enabled', async () => {
-        const checkboxDisabledValue =
-          await observability.alerts.bulkActions.getCheckboxSelectorDisabledValue();
-        expect(checkboxDisabledValue).to.be(null);
+      it('logs checkboxes are enabled', async () => {
+        const logsCheckboxes =
+          await observability.alerts.bulkActions.getCheckboxSelectorPerProducer('logs');
+
+        await asyncForEach(logsCheckboxes, async (checkbox, index) => {
+          expect(await checkbox.isEnabled()).to.be(true);
+        });
       });
 
-      describe('when checkbox is clicked', async () => {
+      describe.skip('when checkbox is clicked', async () => {
         it('shows bulk actions container', async () => {
           await retry.try(async () => {
             const checkbox =
@@ -78,7 +81,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('When user has all priviledges for apm app', () => {
+    describe('When user has all priviledges for apm app', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -92,13 +95,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('checkbox is enabled', async () => {
-        const checkboxDisabledValue =
-          await observability.alerts.bulkActions.getCheckboxSelectorDisabledValue();
-        expect(checkboxDisabledValue).to.be(null);
+      it('apm checkboxes are enabled', async () => {
+        const apmCheckboxes = await observability.alerts.bulkActions.getCheckboxSelectorPerProducer(
+          'apm'
+        );
+
+        await asyncForEach(apmCheckboxes, async (checkbox, index) => {
+          expect(await checkbox.isEnabled()).to.be(true);
+        });
       });
 
-      describe('when checkbox is clicked', async () => {
+      describe.skip('when checkbox is clicked', async () => {
         it('shows bulk actions container', async () => {
           await retry.try(async () => {
             const checkbox =
@@ -113,7 +120,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('When user has read permissions for logs', () => {
+    describe('When user has read permissions for logs', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -128,9 +135,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('checkbox is not visible', async () => {
-        const checkbox = await observability.alerts.bulkActions.getCheckboxSelectorForFirstRow();
-
-        expect(checkbox).to.be(undefined);
+        await observability.alerts.bulkActions.missingCheckboxSelectorOrFail();
       });
     });
 
@@ -148,10 +153,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('checkbox is missing', async () => {
-        const checkbox = await observability.alerts.bulkActions.getCheckboxSelectorForFirstRow();
-
-        expect(checkbox).to.be(undefined);
+      it('checkbox is not displayed', async () => {
+        await observability.alerts.bulkActions.missingCheckboxSelectorOrFail();
       });
     });
 
