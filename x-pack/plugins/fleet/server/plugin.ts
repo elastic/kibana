@@ -338,13 +338,26 @@ export class FleetPlugin
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
 
-    return {
-      fleetSetupCompleted: async () => {
-        await startFleetServerSetup();
-        await setupFleet(
+    const logger = appContextService.getLogger();
+
+    const fleetSetupPromise = startFleetServerSetup()
+      .then(() =>
+        setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
           core.elasticsearch.client.asInternalUser
-        );
+        )
+      )
+      .then(() => {
+        logger.info('Fleet setup completed');
+      })
+      .catch((error) => {
+        logger.warn('Fleet setup failed');
+        logger.warn(error);
+      });
+
+    return {
+      fleetSetupCompleted: async () => {
+        return fleetSetupPromise;
       },
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {

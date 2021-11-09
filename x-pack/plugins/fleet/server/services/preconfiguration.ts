@@ -72,6 +72,8 @@ export async function ensurePreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
+  const logger = appContextService.getLogger();
+
   if (outputs.length === 0) {
     return;
   }
@@ -114,8 +116,11 @@ export async function ensurePreconfiguredOutputs(
 
       if (isCreate) {
         await outputService.create(soClient, data, { id, overwrite: true });
+        logger.info(`Created output ${id}`);
       } else if (isUpdateWithNewData) {
         await outputService.update(soClient, id, data);
+        logger.info(`Updated output ${id}`);
+
         // Bump revision of all policies using that output
         if (outputData.is_default) {
           await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
@@ -342,7 +347,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         await soClient
           .delete(AGENT_POLICY_SAVED_OBJECT_TYPE, policy!.id)
           // swallow error
-          .catch((deleteErr) => appContextService.getLogger().error(deleteErr));
+          .catch((deleteErr) => logger.error(deleteErr));
 
         throw err;
       }
