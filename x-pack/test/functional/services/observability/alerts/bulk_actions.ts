@@ -21,14 +21,6 @@ export function ObservabilityAlertsBulkActionsProvider({ getService }: FtrProvid
     return await testSubjects.missingOrFail(`~${CHECKBOX_SELECTOR}`);
   };
 
-  const getCheckboxSelectorForFirstRow = async () => {
-    return (await find.allByCssSelector(`[data-test-subj="${CHECKBOX_SELECTOR}"]`))[0];
-  };
-
-  const getCheckboxSelectorDisabledValue = async () => {
-    return await (await getCheckboxSelectorForFirstRow()).getAttribute('disabled');
-  };
-
   const getCheckboxSelectorPerProducer = async (producer: string) => {
     return await find.allByCssSelector(
       testSubjects.getCssSelector(`~select-event-rule-producer-${producer}`)
@@ -37,8 +29,6 @@ export function ObservabilityAlertsBulkActionsProvider({ getService }: FtrProvid
 
   return {
     getCheckboxSelector,
-    getCheckboxSelectorForFirstRow,
-    getCheckboxSelectorDisabledValue,
     getCheckboxSelectorPerProducer,
     missingCheckboxSelectorOrFail,
   };
