@@ -23625,7 +23625,6 @@
     "xpack.snapshotRestore.repositoryDetails.cleanupErrorTitle": "抱歉，清理存储库时出错。",
     "xpack.snapshotRestore.repositoryDetails.cleanupRepositoryMessage": "您可以清理存储库，以从快照中删除任何未引用的数据。这可节省存储空间。注意：如果定时删除快照，此功能可能并不那么有用，不应频繁使用。",
     "xpack.snapshotRestore.repositoryDetails.cleanupTitle": "存储库清理",
-    "xpack.snapshotRestore.repositoryDetails.cleanupUnknownError": "503：未知错误",
     "xpack.snapshotRestore.repositoryDetails.closeButtonLabel": "关闭",
     "xpack.snapshotRestore.repositoryDetails.editButtonLabel": "编辑",
     "xpack.snapshotRestore.repositoryDetails.genericSettingsDescription": "存储库“{name}”的只读设置",
