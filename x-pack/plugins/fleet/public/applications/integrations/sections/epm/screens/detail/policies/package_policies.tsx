@@ -211,7 +211,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.name',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
-          defaultMessage: 'Integration',
+          defaultMessage: 'Integration Policy',
         }),
         render(_, { packagePolicy }) {
           return <IntegrationDetailsLink packagePolicy={packagePolicy} />;
@@ -226,7 +226,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false}>
-                <EuiText size="s" className="eui-textNoWrap">
+                <EuiText size="s" className="eui-textNoWrap" data-test-subj="packageVersionText">
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.integrationList.packageVersion"
                     defaultMessage="v{version}"

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
 import { PluginInitializerContext } from '../../../../src/core/server';
 
 import { MetricsEntitiesPlugin } from './plugin';
@@ -16,4 +18,11 @@ export const plugin = (initializerContext: PluginInitializerContext): MetricsEnt
   return new MetricsEntitiesPlugin(initializerContext);
 };
 
-export { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
+export type { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
+
+export const config = {
+  schema: schema.object({
+    // This plugin is experimental and should be disabled by default.
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+};

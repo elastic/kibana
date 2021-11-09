@@ -24,6 +24,7 @@ import {
   DeleteExceptionListItemByIdOptions,
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
+  ExportExceptionListAndItemsOptions,
   FindEndpointListItemOptions,
   FindExceptionListItemOptions,
   FindExceptionListOptions,
@@ -38,6 +39,10 @@ import {
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
+import {
+  ExportExceptionListAndItemsReturn,
+  exportExceptionListAndItems,
+} from './export_exception_list_and_items';
 import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
@@ -490,6 +495,21 @@ export class ExceptionListClient {
       savedObjectsClient,
       sortField,
       sortOrder,
+    });
+  };
+
+  public exportExceptionListAndItems = async ({
+    listId,
+    id,
+    namespaceType,
+  }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
+    const { savedObjectsClient } = this;
+
+    return exportExceptionListAndItems({
+      id,
+      listId,
+      namespaceType,
+      savedObjectsClient,
     });
   };
 }

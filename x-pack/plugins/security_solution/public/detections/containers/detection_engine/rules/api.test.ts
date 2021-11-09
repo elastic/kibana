@@ -21,6 +21,7 @@ import {
   getRuleStatusById,
   fetchTags,
   getPrePackagedRulesStatus,
+  previewRule,
 } from './api';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
@@ -84,6 +85,23 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
         body: JSON.stringify(payload),
         method: 'PATCH',
+        signal: abortCtrl.signal,
+      });
+    });
+  });
+
+  describe('previewRule', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
+    });
+
+    test('POSTs rule', async () => {
+      const payload = getCreateRulesSchemaMock();
+      await previewRule({ rule: { ...payload, invocationCount: 1 }, signal: abortCtrl.signal });
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/preview', {
+        body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1","invocationCount":1}',
+        method: 'POST',
         signal: abortCtrl.signal,
       });
     });
@@ -651,8 +669,8 @@ describe('Detections Rules API', () => {
 
     test('check parameter url, query', async () => {
       await getRuleStatusById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find_statuses', {
-        body: '{"ids":["mySuperRuleId"]}',
+      expect(fetchMock).toHaveBeenCalledWith('/internal/detection_engine/rules/_find_status', {
+        body: '{"ruleId":"mySuperRuleId"}',
         method: 'POST',
         signal: abortCtrl.signal,
       });

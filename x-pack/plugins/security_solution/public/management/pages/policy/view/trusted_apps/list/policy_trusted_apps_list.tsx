@@ -33,12 +33,12 @@ import {
 } from '../../../../../common/routing';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
 import { useAppUrl, useToasts } from '../../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 
 const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
@@ -113,7 +113,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
 
       for (const trustedApp of trustedAppItems) {
         const isGlobal = trustedApp.effectScope.type === 'global';
-        const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
+        const viewUrlPath = getTrustedAppsListPath({ filter: trustedApp.id });
         const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
           trustedApp.effectScope.type === 'global'
             ? undefined
@@ -130,7 +130,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
                 const policyDetailsPath = getPolicyDetailPath(trustedAppAssignedPolicyId);
 
                 const thisPolicyMenuProps: ContextMenuItemNavByRouterProps = {
-                  navigateAppId: APP_ID,
+                  navigateAppId: APP_UI_ID,
                   navigateOptions: {
                     path: policyDetailsPath,
                   },
@@ -150,8 +150,8 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
               'xpack.securitySolution.endpoint.policy.trustedApps.list.viewAction',
               { defaultMessage: 'View full details' }
             ),
-            href: getAppUrl({ appId: APP_ID, path: viewUrlPath }),
-            navigateAppId: APP_ID,
+            href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
+            navigateAppId: APP_UI_ID,
             navigateOptions: { path: viewUrlPath },
             'data-test-subj': getTestId('viewFullDetailsAction'),
           },

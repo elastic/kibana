@@ -9,5 +9,5 @@
   "requiredPlugins": ["data", "savedObjects", "kibanaUtils", "expressions"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["inspector"]
+  "requiredBundles": []
 }

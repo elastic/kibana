@@ -11,7 +11,7 @@ import { fields } from '../../filters/stubs';
 
 import * as is from './is';
 import { DataViewBase } from '../..';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 jest.mock('../grammar');
 

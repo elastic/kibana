@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
 import {
@@ -48,9 +48,9 @@ export const buildQuery = ({
   };
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       aggregations: {
         ...agg,

@@ -21,7 +21,7 @@ import { IRuleStatusSOAttributes } from '../../rules/types';
 
 export interface RuleStatusSavedObjectsClient {
   find: (
-    options?: Omit<SavedObjectsFindOptions, 'type'>
+    options: Omit<SavedObjectsFindOptions, 'type'> & { ruleId: string }
   ) => Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>>;
   findBulk: (ids: string[], statusesPerId: number) => Promise<FindBulkResponse>;
   create: (
@@ -47,9 +47,14 @@ export const ruleStatusSavedObjectsClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
 ): RuleStatusSavedObjectsClient => ({
   find: async (options) => {
+    const references = {
+      id: options.ruleId,
+      type: 'alert',
+    };
     const result = await savedObjectsClient.find<IRuleStatusSOAttributes>({
       ...options,
       type: legacyRuleStatusSavedObjectType,
+      hasReference: references,
     });
     return result.saved_objects;
   },
@@ -62,6 +67,9 @@ export const ruleStatusSavedObjectsClientFactory = (
       type: 'alert',
     }));
     const order: 'desc' = 'desc';
+    // NOTE: Once https://github.com/elastic/kibana/issues/115153 is resolved
+    // ${legacyRuleStatusSavedObjectType}.statusDate will need to be updated to
+    // ${legacyRuleStatusSavedObjectType}.attributes.statusDate
     const aggs = {
       references: {
         nested: {

@@ -10,7 +10,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
+import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
 
 const ecommerceName = i18n.translate('home.sampleData.ecommerceSpecTitle', {
   defaultMessage: 'Sample eCommerce orders',
@@ -18,7 +18,6 @@ const ecommerceName = i18n.translate('home.sampleData.ecommerceSpecTitle', {
 const ecommerceDescription = i18n.translate('home.sampleData.ecommerceSpecDescription', {
   defaultMessage: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
 });
-const initialAppLinks = [] as AppLinkSchema[];
 
 export const ecommerceSpecProvider = function (): SampleDatasetSchema {
   return {
@@ -28,7 +27,6 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
     previewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard_dark.png',
     overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
-    appLinks: initialAppLinks,
     defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
     savedObjects: getSavedObjects(),
     dataIndices: [

@@ -10,6 +10,9 @@
 readonly links: {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -133,7 +136,11 @@ readonly links: {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+            readonly remoteReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
@@ -211,6 +218,7 @@ readonly links: {
             clusterPrivileges: string;
             elasticsearchSettings: string;
             elasticsearchEnableSecurity: string;
+            elasticsearchEnableApiKeys: string;
             indicesPrivileges: string;
             kibanaTLS: string;
             kibanaPrivileges: string;
@@ -228,19 +236,24 @@ readonly links: {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
+            datastreamsILM: string;
+            beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
             settings: string;
             settingsFleetServerHostSettings: string;
+            settingsFleetServerProxySettings: string;
             troubleshooting: string;
             elasticAgent: string;
             datastreams: string;
             datastreamsNamingScheme: string;
+            installElasticAgent: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
             apiKeysLearnMore: string;
+            onPremRegistry: string;
         }>;
         readonly ecs: {
             readonly guide: string;
@@ -256,6 +269,9 @@ readonly links: {
             readonly pythonGuide: string;
             readonly rubyOverview: string;
             readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
         };
     };
 ```

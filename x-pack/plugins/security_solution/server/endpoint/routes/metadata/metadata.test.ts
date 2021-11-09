@@ -22,6 +22,7 @@ import { HostInfo, HostResultList, HostStatus } from '../../../../common/endpoin
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { registerEndpointRoutes } from './index';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createMockPackageService,
   createRouteHandlerContext,
@@ -140,6 +141,7 @@ describe('test endpoint route', () => {
           keep_policies_up_to_date: false,
         })
       );
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
       mockAgentService = startContract.agentService!;
       mockAgentPolicyService = startContract.agentPolicyService!;
@@ -403,6 +405,7 @@ describe('test endpoint route', () => {
           keep_policies_up_to_date: false,
         })
       );
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
       mockAgentService = startContract.agentService!;
 

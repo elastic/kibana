@@ -13,7 +13,7 @@ import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger, SavedObject } from '../../../../../../../../src/core/server';
+import { Logger } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -33,15 +33,14 @@ import type {
   SignalSource,
   SignalSearchResponse,
   ThresholdSignalHistory,
-  AlertAttributes,
   BulkCreate,
   WrapHits,
 } from '../types';
-import { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
-  ruleSO: SavedObject<AlertAttributes<ThresholdRuleParams>>;
+  completeRule: CompleteRule<ThresholdRuleParams>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
@@ -66,8 +65,11 @@ const getTransformedHits = (
   timestampOverride: TimestampOverrideOrUndefined,
   signalHistory: ThresholdSignalHistory
 ) => {
+  if (results.aggregations == null) {
+    return [];
+  }
   const aggParts = threshold.field.length
-    ? results.aggregations && getThresholdAggregationParts(results.aggregations)
+    ? getThresholdAggregationParts(results.aggregations)
     : {
         field: null,
         index: 0,
@@ -132,8 +134,7 @@ const getTransformedHits = (
   };
 
   return getCombinations(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    (results.aggregations![aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
+    (results.aggregations[aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
     0,
     aggParts.field
   ).reduce((acc: Array<BaseHit<SignalSource>>, bucket) => {
@@ -226,7 +227,7 @@ export const transformThresholdResultsToEcs = (
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<GenericBulkCreateResponse<{}>> => {
-  const ruleParams = params.ruleSO.attributes.params;
+  const ruleParams = params.completeRule.ruleParams;
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,

@@ -110,7 +110,7 @@ const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' }
 const packagePolicyClient =
   createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
 
-describe('handlers', () => {
+describe('TrustedApps API Handlers', () => {
   beforeEach(() => {
     packagePolicyClient.getByIDs.mockReset();
   });
@@ -195,6 +195,7 @@ describe('handlers', () => {
       const mockResponse = httpServerMock.createResponseFactory();
 
       exceptionsListClient.deleteExceptionListItem.mockResolvedValue(null);
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
 
       await deleteTrustedAppHandler(
         createHandlerContextMock(),
@@ -582,7 +583,7 @@ describe('handlers', () => {
     });
 
     it('should return 404 if trusted app does not exist', async () => {
-      exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(null);
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
 
       await updateHandler(
         createHandlerContextMock(),

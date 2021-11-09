@@ -66,8 +66,15 @@ export const mapToCard = (
     uiInternalPathUrl = url;
   }
 
+  let release: 'ga' | 'beta' | 'experimental' | undefined;
+  if ('release' in item) {
+    release = item.release;
+  } else if (item.isBeta === true) {
+    release = 'beta';
+  }
+
   return {
-    id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}-${item.id}`,
+    id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,
     description: item.description,
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     title: item.title,
@@ -75,7 +82,7 @@ export const mapToCard = (
     integration: 'integration' in item ? item.integration || '' : '',
     name: 'name' in item ? item.name || '' : '',
     version: 'version' in item ? item.version || '' : '',
-    release: 'release' in item ? item.release : undefined,
+    release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
   };
 };

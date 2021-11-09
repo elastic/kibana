@@ -98,14 +98,17 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
       description: {
         type: FIELD_TYPES.TEXT,
         label: i18n.translate('xpack.osquery.pack.form.descriptionFieldLabel', {
-          defaultMessage: 'Description',
+          defaultMessage: 'Description (optional)',
         }),
       },
       policy_ids: {
         defaultValue: [],
         type: FIELD_TYPES.COMBO_BOX,
         label: i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldLabel', {
-          defaultMessage: 'Agent policies',
+          defaultMessage: 'Scheduled agent policies (optional)',
+        }),
+        helpText: i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldHelpText', {
+          defaultMessage: 'Queries in this pack are scheduled for agents in the selected policies.',
         }),
       },
       enabled: {

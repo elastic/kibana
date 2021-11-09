@@ -1,0 +1,49 @@
+{
+  "name": "preview query",
+  "description": "preview query for custom query rule",
+  "false_positives": [
+    "https://www.example.com/some-article-about-a-false-positive",
+    "some text string about why another condition could be a false positive"
+  ],
+  "rule_id": "preview-placeholder-rule-id",
+  "filters": [
+    {
+      "exists": {
+        "field": "file.hash.md5"
+      }
+    }
+  ],
+  "enabled": false,
+  "invocationCount": 500,
+  "index": ["custom-events"],
+  "interval": "5m",
+  "query": "file.hash.md5 : *",
+  "language": "kuery",
+  "risk_score": 1,
+  "tags": ["tag 1", "tag 2", "any tag you want"],
+  "to": "now",
+  "from": "now-6m",
+  "severity": "high",
+  "type": "threat_match",
+  "references": [
+    "http://www.example.com/some-article-about-attack",
+    "Some plain text string here explaining why this is a valid thing to look out for"
+  ],
+  "timeline_id": "timeline_id",
+  "timeline_title": "timeline_title",
+  "threat_index": ["custom-threats"],
+  "threat_query": "*:*",
+  "threat_mapping": [
+    {
+      "entries": [
+        {
+          "field": "file.hash.md5",
+          "type": "mapping",
+          "value": "threat.indicator.file.hash.md5"
+        }
+      ]
+    }
+  ],
+  "note": "# note markdown",
+  "version": 1
+}

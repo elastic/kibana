@@ -221,6 +221,7 @@ export class UptimePlugin
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-edit',
+        useLatestPackageVersion: true,
         Component: LazySyntheticsPolicyEditExtension,
       });
 

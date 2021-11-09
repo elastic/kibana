@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { maxSuggestions } from '../../../observability/common';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/environments/get_environments';
 import { rangeRt } from './default_api_types';

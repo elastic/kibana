@@ -19,13 +19,12 @@ import { createLoadedResourceState, isLoadedResourceState } from '../../../../..
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
-import {
-  EndpointPrivileges,
-  useEndpointPrivileges,
-} from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../../../fleet/common';
 
 jest.mock('../../../../trusted_apps/service');
-jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
 let mockedContext: AppContextTestRender;
@@ -37,16 +36,6 @@ let http: typeof coreStart.http;
 const generator = new EndpointDocGenerator();
 
 describe('Policy trusted apps layout', () => {
-  const loadedUserEndpointPrivilegesState = (
-    endpointOverrides: Partial<EndpointPrivileges> = {}
-  ): EndpointPrivileges => ({
-    loading: false,
-    canAccessFleet: true,
-    canAccessEndpointManagement: true,
-    isPlatinumPlus: true,
-    ...endpointOverrides,
-  });
-
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     http = mockedContext.coreStart.http;
@@ -55,7 +44,7 @@ describe('Policy trusted apps layout', () => {
       const [path] = args;
       if (typeof path === 'string') {
         // GET datasouce
-        if (path === '/api/fleet/package_policies/1234') {
+        if (path === `${PACKAGE_POLICY_API_ROOT}/1234`) {
           return Promise.resolve({
             item: generator.generatePolicyPackagePolicy(),
             success: true,
@@ -63,7 +52,7 @@ describe('Policy trusted apps layout', () => {
         }
 
         // GET Agent status for agent policy
-        if (path === '/api/fleet/agent-status') {
+        if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
           return Promise.resolve({
             results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
             success: true,
@@ -137,7 +126,7 @@ describe('Policy trusted apps layout', () => {
 
   it('should hide assign button on empty state with unassigned policies when downgraded to a gold or below license', async () => {
     mockUseEndpointPrivileges.mockReturnValue(
-      loadedUserEndpointPrivilegesState({
+      getEndpointPrivilegesInitialStateMock({
         isPlatinumPlus: false,
       })
     );
@@ -155,7 +144,7 @@ describe('Policy trusted apps layout', () => {
 
   it('should hide the `Assign trusted applications` button when there is data and the license is downgraded to gold or below', async () => {
     mockUseEndpointPrivileges.mockReturnValue(
-      loadedUserEndpointPrivilegesState({
+      getEndpointPrivilegesInitialStateMock({
         isPlatinumPlus: false,
       })
     );

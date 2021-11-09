@@ -11,7 +11,8 @@ import { get } from 'lodash';
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
 export { registerUiSettings } from './ui_settings';
-export { ConfigSchema, ReportingConfigType };
+export type { ReportingConfigType };
+export { ConfigSchema };
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: { poll: true, roles: true },
@@ -37,7 +38,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
             defaultMessage:
               `Use Kibana application privileges to grant reporting privileges.` +
               ` Using  "{fromPath}.roles.allow" to grant reporting privileges` +
-              ` prevents users from using API Keys to create reports.` +
+              ` is deprecated.` +
               ` The "{fromPath}.roles.enabled" setting will default to false` +
               ` in a future release.`,
             values: { fromPath },
@@ -46,6 +47,9 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
             manualSteps: [
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
                 defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
+              }),
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOnePartOne', {
+                defaultMessage: `Remove "xpack.reporting.roles.allow" to "false" in kibana.yml, if present.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
                 defaultMessage:

@@ -15,7 +15,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { licenseService } from '../../hooks';
 import type { UIExtensionsStorage } from '../../types';
 
-import { AppRoutes, IntegrationsAppContext, WithPermissionsAndSetup } from './app';
+import { AppRoutes, IntegrationsAppContext } from './app';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -58,9 +58,7 @@ const IntegrationsApp = ({
       extensions={extensions}
       setHeaderActionMenu={setHeaderActionMenu}
     >
-      <WithPermissionsAndSetup>
-        <AppRoutes />
-      </WithPermissionsAndSetup>
+      <AppRoutes />
     </IntegrationsAppContext>
   );
 };
@@ -70,18 +68,21 @@ export function renderApp(
   { element, appBasePath, history, setHeaderActionMenu }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
-  extensions: UIExtensionsStorage
+  extensions: UIExtensionsStorage,
+  UsageTracker: React.FC
 ) {
   ReactDOM.render(
-    <IntegrationsApp
-      basepath={appBasePath}
-      startServices={startServices}
-      config={config}
-      history={history}
-      kibanaVersion={kibanaVersion}
-      extensions={extensions}
-      setHeaderActionMenu={setHeaderActionMenu}
-    />,
+    <UsageTracker>
+      <IntegrationsApp
+        basepath={appBasePath}
+        startServices={startServices}
+        config={config}
+        history={history}
+        kibanaVersion={kibanaVersion}
+        extensions={extensions}
+        setHeaderActionMenu={setHeaderActionMenu}
+      />
+    </UsageTracker>,
     element
   );
 

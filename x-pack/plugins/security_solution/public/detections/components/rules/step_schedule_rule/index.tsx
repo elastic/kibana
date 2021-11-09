@@ -6,6 +6,7 @@
  */
 
 import React, { FC, memo, useCallback, useEffect } from 'react';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   RuleStep,
@@ -16,16 +17,25 @@ import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField, useForm } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { NextStep } from '../next_step';
 import { schema } from './schema';
 
 interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues?: ScheduleStepRule | null;
+  ruleType?: Type;
 }
 
-const stepScheduleDefaultValue: ScheduleStepRule = {
-  interval: '5m',
-  from: '1m',
+const DEFAULT_INTERVAL = '5m';
+const DEFAULT_FROM = '1m';
+const THREAT_MATCH_INTERVAL = '1h';
+const THREAT_MATCH_FROM = '5m';
+
+const getStepScheduleDefaultValue = (ruleType: Type | undefined): ScheduleStepRule => {
+  return {
+    interval: isThreatMatchRule(ruleType) ? THREAT_MATCH_INTERVAL : DEFAULT_INTERVAL,
+    from: isThreatMatchRule(ruleType) ? THREAT_MATCH_FROM : DEFAULT_FROM,
+  };
 };
 
 const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
@@ -37,8 +47,9 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   isUpdateView = false,
   onSubmit,
   setForm,
+  ruleType,
 }) => {
-  const initialState = defaultValues ?? stepScheduleDefaultValue;
+  const initialState = defaultValues ?? getStepScheduleDefaultValue(ruleType);
 
   const { form } = useForm<ScheduleStepRule>({
     defaultValue: initialState,

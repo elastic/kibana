@@ -7,7 +7,7 @@
 
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Histogram,
   HistogramPoint,
