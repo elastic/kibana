@@ -207,12 +207,10 @@ export class MapApp extends React.Component<Props, State> {
     filters,
     query,
     time,
-    forceRefresh = false,
   }: {
     filters?: Filter[];
     query?: Query;
     time?: TimeRange;
-    forceRefresh?: boolean;
   }) => {
     const { filterManager } = getData().query;
 
@@ -221,7 +219,7 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     this.props.setQuery({
-      forceRefresh,
+      forceRefresh: false,
       filters: filterManager.getFilters(),
       query,
       timeFilters: time,
@@ -398,11 +396,16 @@ export class MapApp extends React.Component<Props, State> {
         filters={this.props.filters}
         query={this.props.query}
         onQuerySubmit={({ dateRange, query }) => {
-          this._onQueryChange({
-            query,
-            time: dateRange,
-            forceRefresh: true,
-          });
+          const isUpdate =
+            !_.isEqual(dateRange, this.props.timeFilters) || !_.isEqual(query, this.props.query);
+          if (isUpdate) {
+            this._onQueryChange({
+              query,
+              time: dateRange,
+            });
+          } else {
+            this.props.setQuery({ forceRefresh: true });
+          }
         }}
         onFiltersUpdated={this._onFiltersChange}
         dateRangeFrom={this.props.timeFilters.from}
