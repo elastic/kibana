@@ -27,6 +27,11 @@
     { "path": "../field_formats/tsconfig.json" },
     { "path": "../data_views/tsconfig.json" },
     { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/trigger_actions_ui/tsconfig.json" }
+    { "path": "../../../x-pack/plugins/trigger_actions_ui/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/features/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/alerting/tsconfig.json" },
+
+
+
   ]
 }

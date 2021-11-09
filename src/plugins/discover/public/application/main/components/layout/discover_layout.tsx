@@ -49,7 +49,7 @@ import {
   DOCUMENTS_VIEW_CLICK,
   FIELD_STATISTICS_VIEW_CLICK,
 } from '../../../components/field_stats_table/constants';
-import { DiscoverAlertButton } from '../alert';
+import { DiscoverAlertButton } from '../../../../components/alert';
 /**
  * Local storage key for sidebar persistence state
  */

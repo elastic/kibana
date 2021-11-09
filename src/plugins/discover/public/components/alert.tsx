@@ -8,8 +8,8 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
-import { useKibana } from '../../../../../../kibana_react/public';
-import { DiscoverServices } from '../../../../build_services';
+import { useKibana } from '../../../kibana_react/public';
+import { DiscoverServices } from '../build_services';
 
 export const DiscoverAlertButton = ({ index, timeField }: { index: string; timeField: string }) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
