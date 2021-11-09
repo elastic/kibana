@@ -147,7 +147,7 @@ describe('rule preview privileges deprecation', () => {
             'https://www.elastic.co/guide/en/security/some-branch/rules-ui-create.html#preview-rules',
           level: 'warning',
           message:
-            'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices (.alerts-security.preview.alert-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
+            'In order to enable a more robust preview in 8.0+, users will need read privileges to new detection alerts preview indices (.preview.alerts-security.alerts-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
           title: 'The Detections Rule Preview feature is changing',
         },
       ]);
