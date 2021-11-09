@@ -50,9 +50,13 @@ export const legacyMigrateRuleAlertIdSOReferences = (
   const { alertId, ...otherAttributes } = doc.attributes;
   const existingReferences = doc.references ?? [];
 
-  // early return if alertId is not a string as expected
+  // early return if alertId is not a string as expected, still removing alertId as the mapping no longer exists
   if (!isString(alertId)) {
-    return { ...doc, references: existingReferences };
+    return {
+      ...doc,
+      attributes: otherAttributes,
+      references: existingReferences,
+    };
   }
 
   const alertReferences = legacyMigrateAlertId({
