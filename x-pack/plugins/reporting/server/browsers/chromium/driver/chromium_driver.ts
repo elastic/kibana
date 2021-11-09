@@ -210,20 +210,15 @@ export class HeadlessChromiumDriver {
     return resp;
   }
 
-  public async waitFor(
-    {
-      fn,
-      args,
-      timeout,
-    }: {
-      fn: EvaluateFn;
-      args: SerializableOrJSHandle[];
-      timeout: number;
-    },
-    meta: EvaluateMetaOpts,
-    logger: LevelLogger
-  ): Promise<void> {
-    logger.debug(`evaluate ${meta.context}`);
+  public async waitFor({
+    fn,
+    args,
+    timeout,
+  }: {
+    fn: EvaluateFn;
+    args: SerializableOrJSHandle[];
+    timeout: number;
+  }): Promise<void> {
     await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 

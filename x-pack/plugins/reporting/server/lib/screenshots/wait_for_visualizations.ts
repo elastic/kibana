@@ -12,15 +12,22 @@ import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
 interface CompletedItemsCountParameters {
-  renderCompleteSelector: string;
+  context: string;
   count: number;
+  renderCompleteSelector: string;
 }
 
 const getCompletedItemsCount = ({
-  renderCompleteSelector,
+  context,
   count,
+  renderCompleteSelector,
 }: CompletedItemsCountParameters) => {
-  return document.querySelectorAll(renderCompleteSelector).length >= count;
+  const { length } = document.querySelectorAll(renderCompleteSelector);
+
+  // eslint-disable-next-line no-console
+  console.debug(`evaluate ${context}: waitng for ${count} elements, got ${length}.`);
+
+  return length >= count;
 };
 
 /*
@@ -46,11 +53,11 @@ export const waitForVisualizations = async (
   );
 
   try {
-    await browser.waitFor(
-      { fn: getCompletedItemsCount, args: [{ renderCompleteSelector, count: toEqual }], timeout },
-      { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },
-      logger
-    );
+    await browser.waitFor({
+      fn: getCompletedItemsCount,
+      args: [{ renderCompleteSelector, context: CONTEXT_WAITFORELEMENTSTOBEINDOM, count: toEqual }],
+      timeout,
+    });
 
     logger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
