@@ -20,7 +20,7 @@ import {
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 
 import { SearchNavTab } from './types';
-import { SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererUrlState } from '../../store/sourcerer/model';
 
 export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
   if (tab && tab.urlKey != null && !isAdministration(tab.urlKey)) {
@@ -29,7 +29,7 @@ export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
         let urlStateToReplace:
           | Filter[]
           | Query
-          | SourcererScopePatterns
+          | SourcererUrlState
           | TimelineUrl
           | UrlInputsModel
           | string = '';

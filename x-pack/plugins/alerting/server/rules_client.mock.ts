@@ -29,7 +29,7 @@ const createRulesClientMock = () => {
     muteInstance: jest.fn(),
     unmuteInstance: jest.fn(),
     listAlertTypes: jest.fn(),
-    getAlertInstanceSummary: jest.fn(),
+    getAlertSummary: jest.fn(),
     getSpaceId: jest.fn(),
   };
   return mocked;
