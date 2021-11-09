@@ -158,25 +158,6 @@ export class ServiceSettings implements IServiceSettings {
     this._emsClient.addQueryParams(additionalQueryParams);
   }
 
-  async getFileLayerFromConfig(fileLayerConfig: FileLayer): Promise<EMSFileLayer | undefined> {
-    const fileLayers = await this._emsClient.getFileLayers();
-    return fileLayers.find((fileLayer) => {
-      const hasIdByName = fileLayer.hasId(fileLayerConfig.name); // legacy
-      const hasIdById = fileLayer.hasId(fileLayerConfig.id);
-      return hasIdByName || hasIdById;
-    });
-  }
-
-  async getEMSHotLink(fileLayerConfig: FileLayer): Promise<string | null> {
-    const layer = await this.getFileLayerFromConfig(fileLayerConfig);
-    return layer ? layer.getEMSHotLink() : null;
-  }
-
-  async loadFileLayerConfig(fileLayerConfig: FileLayer): Promise<FileLayer | null> {
-    const fileLayer = await this.getFileLayerFromConfig(fileLayerConfig);
-    return fileLayer ? this._backfillSettings(fileLayer) : null;
-  }
-
   async _getAttributesForEMSTMSLayer(isDesaturated: boolean, isDarkMode: boolean) {
     const tmsServices = await this._emsClient.getTMSServices();
     const emsTileLayerId = this._mapConfig.emsTileLayerId;
@@ -257,12 +238,6 @@ export class ServiceSettings implements IServiceSettings {
       url = fileLayerConfig.url;
     }
     return url;
-  }
-
-  async getJsonForRegionLayer(fileLayerConfig: FileLayer) {
-    const url = await this.getUrlForRegionLayer(fileLayerConfig);
-    const response = await fetch(url!);
-    return await response.json();
   }
 }
 
