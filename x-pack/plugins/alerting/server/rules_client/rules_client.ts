@@ -30,7 +30,7 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
-  AlertInstanceSummary,
+  AlertSummary,
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
   AlertTypeParams,
@@ -68,7 +68,7 @@ import {
   SAVED_OBJECT_REL_PRIMARY,
 } from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
-import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
+import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
 import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
@@ -193,7 +193,7 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
   };
 }
 
-export interface GetAlertInstanceSummaryParams {
+export interface GetAlertSummaryParams {
   id: string;
   dateStart?: string;
 }
@@ -508,29 +508,26 @@ export class RulesClient {
     }
   }
 
-  public async getAlertInstanceSummary({
-    id,
-    dateStart,
-  }: GetAlertInstanceSummaryParams): Promise<AlertInstanceSummary> {
-    this.logger.debug(`getAlertInstanceSummary(): getting alert ${id}`);
-    const alert = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
+  public async getAlertSummary({ id, dateStart }: GetAlertSummaryParams): Promise<AlertSummary> {
+    this.logger.debug(`getAlertSummary(): getting alert ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
 
     await this.authorization.ensureAuthorized({
-      ruleTypeId: alert.alertTypeId,
-      consumer: alert.consumer,
+      ruleTypeId: rule.alertTypeId,
+      consumer: rule.consumer,
       operation: ReadOperations.GetAlertSummary,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // default duration of instance summary is 60 * alert interval
+    // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
-    const durationMillis = parseDuration(alert.schedule.interval) * 60;
+    const durationMillis = parseDuration(rule.schedule.interval) * 60;
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 
     const eventLogClient = await this.getEventLogClient();
 
-    this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
+    this.logger.debug(`getAlertSummary(): search the event log for rule ${id}`);
     let events: IEvent[];
     try {
       const queryResults = await eventLogClient.findEventsBySavedObjectIds(
@@ -543,18 +540,18 @@ export class RulesClient {
           end: dateNow.toISOString(),
           sort_order: 'desc',
         },
-        alert.legacyId !== null ? [alert.legacyId] : undefined
+        rule.legacyId !== null ? [rule.legacyId] : undefined
       );
       events = queryResults.data;
     } catch (err) {
       this.logger.debug(
-        `rulesClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
+        `rulesClient.getAlertSummary(): error searching event log for rule ${id}: ${err.message}`
       );
       events = [];
     }
 
-    return alertInstanceSummaryFromEventLog({
-      alert,
+    return alertSummaryFromEventLog({
+      rule,
       events,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
