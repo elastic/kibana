@@ -7,10 +7,11 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 const CHECKBOX_SELECTOR = 'select-event';
+const CHECKBOX_PRODUCER_SELECTOR = 'select-event-rule-producer-';
 
 export function ObservabilityAlertsBulkActionsProvider({ getService }: FtrProviderContext) {
-  // const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   const getCheckboxSelectorForFirstRow = async () => {
     return (await find.allByCssSelector(`[data-test-subj="${CHECKBOX_SELECTOR}"]`))[0];
@@ -20,8 +21,15 @@ export function ObservabilityAlertsBulkActionsProvider({ getService }: FtrProvid
     return await (await getCheckboxSelectorForFirstRow()).getAttribute('disabled');
   };
 
+  const getCheckboxSelectorPerProducer = async (producer: string) => {
+    return await find.allByCssSelector(
+      testSubjects.getCssSelector(`~select-event-rule-producer-${producer}`)
+    );
+  };
+
   return {
     getCheckboxSelectorForFirstRow,
     getCheckboxSelectorDisabledValue,
+    getCheckboxSelectorPerProducer,
   };
 }

@@ -11,8 +11,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
+
+async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index);
+  }
+}
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -25,13 +30,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/apm-test');
+      await esArchiver.load(
+        'x-pack/test/apm_api_integration/common/fixtures/es_archiver/apm_8.0.0'
+      );
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/apm-test');
+      await esArchiver.unload(
+        'x-pack/test/apm_api_integration/common/fixtures/es_archiver/apm_8.0.0'
+      );
     });
 
     describe.skip('When user has all priviledges for logs app', () => {
@@ -69,12 +78,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('When user has all priviledges for apm app', () => {
+    describe.skip('When user has all priviledges for apm app', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             apm: ['all'],
-            // logs: ['all']
           })
         );
         await observability.alerts.common.navigateToTimeWithData();
@@ -119,14 +127,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('checkbox is disabled', async () => {});
+      it('checkbox is not visible', async () => {
+        const checkbox = await observability.alerts.bulkActions.getCheckboxSelectorForFirstRow();
+
+        expect(checkbox).to.be(undefined);
+      });
     });
 
-    describe.skip('When user has read permissions for apm', () => {
+    describe('When user has read permissions for apm', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            logs: ['read'],
+            apm: ['read'],
           })
         );
         await observability.alerts.common.navigateToTimeWithData();
@@ -136,7 +148,47 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('checkbox is disabled', async () => {});
+      it('checkbox is missing', async () => {
+        const checkbox = await observability.alerts.bulkActions.getCheckboxSelectorForFirstRow();
+
+        expect(checkbox).to.be(undefined);
+      });
+    });
+
+    describe('When user has mixed permissions for observability apps', () => {
+      before(async () => {
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            logs: ['all'],
+            apm: ['read'],
+            observabilityCases: ['read'],
+          })
+        );
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await observability.users.restoreDefaultTestUserRole();
+      });
+
+      it('apm checkboxes are disabled', async () => {
+        const apmCheckboxes = await observability.alerts.bulkActions.getCheckboxSelectorPerProducer(
+          'apm'
+        );
+
+        await asyncForEach(apmCheckboxes, async (checkbox, index) => {
+          expect(await checkbox.isEnabled()).to.be(false);
+        });
+      });
+
+      it('logs checkboxes are enabled', async () => {
+        const logsCheckboxes =
+          await observability.alerts.bulkActions.getCheckboxSelectorPerProducer('logs');
+
+        await asyncForEach(logsCheckboxes, async (checkbox, index) => {
+          expect(await checkbox.isEnabled()).to.be(true);
+        });
+      });
     });
   });
 };
