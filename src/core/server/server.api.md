@@ -48,6 +48,7 @@ import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
 import { Stream } from 'stream';
+import { Transaction } from 'elastic-apm-node';
 import { TransportRequestOptions } from '@elastic/elasticsearch';
 import { TransportRequestParams } from '@elastic/elasticsearch';
 import { TransportResult } from '@elastic/elasticsearch';
@@ -191,7 +192,7 @@ export class BasePath {
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 //
 // @internal (undocumented)
-export function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs): Promise<void>;
+export function bootstrap({ configs, cliArgs, applyConfigOverrides, serverAvailableTransaction, }: BootstrapArgs): Promise<void>;
 
 // @public
 export interface Capabilities {
