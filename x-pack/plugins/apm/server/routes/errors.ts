@@ -11,11 +11,16 @@ import { getErrorDistribution } from '../lib/errors/distribution/get_distributio
 import { getErrorGroupSample } from '../lib/errors/get_error_group_sample';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { environmentRt, kueryRt, rangeRt } from './default_api_types';
+import {
+  environmentRt,
+  kueryRt,
+  rangeRt,
+  comparisonRangeRt,
+} from './default_api_types';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const errorsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/errors',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -35,7 +40,8 @@ const errorsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { environment, kuery, sortField, sortDirection } = params.query;
+    const { environment, kuery, sortField, sortDirection, start, end } =
+      params.query;
 
     const errorGroups = await getErrorGroups({
       environment,
@@ -44,6 +50,8 @@ const errorsRoute = createApmServerRoute({
       sortField,
       sortDirection,
       setup,
+      start,
+      end,
     });
 
     return { errorGroups };
@@ -51,7 +59,7 @@ const errorsRoute = createApmServerRoute({
 });
 
 const errorGroupsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -64,7 +72,7 @@ const errorGroupsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName, groupId } = params.path;
-    const { environment, kuery } = params.query;
+    const { environment, kuery, start, end } = params.query;
 
     return getErrorGroupSample({
       environment,
@@ -72,12 +80,14 @@ const errorGroupsRoute = createApmServerRoute({
       kuery,
       serviceName,
       setup,
+      start,
+      end,
     });
   },
 });
 
 const errorDistributionRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/errors/distribution',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/distribution',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -89,6 +99,7 @@ const errorDistributionRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
+      comparisonRangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -96,13 +107,25 @@ const errorDistributionRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, kuery, groupId } = params.query;
+    const {
+      environment,
+      kuery,
+      groupId,
+      start,
+      end,
+      comparisonStart,
+      comparisonEnd,
+    } = params.query;
     return getErrorDistribution({
       environment,
       kuery,
       serviceName,
       groupId,
       setup,
+      start,
+      end,
+      comparisonStart,
+      comparisonEnd,
     });
   },
 });

@@ -165,8 +165,6 @@ describe('Detection rules, EQL', () => {
       .invoke('text')
       .then((text) => {
         expect(text).contains(this.rule.name);
-        expect(text).contains(this.rule.severity.toLowerCase());
-        expect(text).contains(this.rule.riskScore);
       });
   });
 });
@@ -188,7 +186,7 @@ describe('Detection rules, sequence EQL', () => {
     });
   });
 
-  it('Creates and activates a new EQL rule with a sequence', function () {
+  it.skip('Creates and activates a new EQL rule with a sequence', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();

@@ -8,7 +8,9 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
 import { RedirectTo } from '../redirect_to';
+import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
@@ -18,6 +20,7 @@ import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
+import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
 
 function page<TPath extends string>({
   path,
@@ -63,12 +66,16 @@ export const home = {
         rangeTo: t.string,
         kuery: t.string,
       }),
+      t.partial({
+        refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+        refreshInterval: t.string,
+        comparisonEnabled: toBooleanRt,
+        comparisonType: comparisonTypeRt,
+      }),
     ]),
   }),
   defaults: {
     query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
     },
@@ -98,16 +105,25 @@ export const home = {
       element: <Outlet />,
       params: t.partial({
         query: t.partial({
-          comparisonEnabled: t.string,
-          comparisonType: t.string,
+          comparisonEnabled: toBooleanRt,
+          comparisonType: comparisonTypeRt,
         }),
       }),
       children: [
         {
           path: '/backends/{backendName}/overview',
-          element: <BackendDetailOverview />,
+          element: <RedirectToBackendOverviewRouteView />,
           params: t.type({
             path: t.type({
+              backendName: t.string,
+            }),
+          }),
+        },
+        {
+          path: '/backends/overview',
+          element: <BackendDetailOverview />,
+          params: t.type({
+            query: t.type({
               backendName: t.string,
             }),
           }),

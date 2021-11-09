@@ -1,7 +1,8 @@
-.lnsPalettePanel__section--shaded {
-  background-color: $euiColorLightestShade;
+.lnsPalettePanel__section {
+  padding: $euiSize;
 }
 
-.lnsPalettePanel__section {
-  padding: $euiSizeS;
+.lnsPalettePanel__section--shaded {
+  background-color: $euiColorLightestShade;
+  border-bottom: $euiBorderThin;
 }

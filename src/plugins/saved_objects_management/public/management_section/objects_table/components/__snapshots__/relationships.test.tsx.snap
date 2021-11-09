@@ -213,13 +213,13 @@ exports[`Relationships should render index patterns normally 1`] = `
     >
       <h2>
         <EuiToolTip
-          content="index patterns"
+          content="index-pattern"
           delay="regular"
           display="inlineBlock"
           position="top"
         >
           <EuiIcon
-            aria-label="index patterns"
+            aria-label="index-pattern"
             size="m"
             type="indexPatternApp"
           />
@@ -374,13 +374,13 @@ exports[`Relationships should render invalid relations 1`] = `
     >
       <h2>
         <EuiToolTip
-          content="index patterns"
+          content="index-pattern"
           delay="regular"
           display="inlineBlock"
           position="top"
         >
           <EuiIcon
-            aria-label="index patterns"
+            aria-label="index-pattern"
             size="m"
             type="indexPatternApp"
           />
@@ -627,10 +627,10 @@ exports[`Relationships should render searches normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "editUrl": "/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/app/management/kibana/indexPatterns/patterns/1",
+                "path": "/app/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "My Index Pattern",

@@ -17,6 +17,13 @@ export function useGetOutputs() {
   });
 }
 
+export function useDefaultOutput() {
+  const outputsRequest = useGetOutputs();
+  const output = outputsRequest.data?.items.find((o) => o.is_default);
+
+  return { output, refresh: outputsRequest.resendRequest };
+}
+
 export function sendPutOutput(outputId: string, body: PutOutputRequest['body']) {
   return sendRequest({
     method: 'put',

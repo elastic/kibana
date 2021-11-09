@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import semver from 'semver';
 import LRU from 'lru-cache';
-import { isEqual } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { ListResult } from '../../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
@@ -25,6 +26,7 @@ import {
   getEndpointEventFiltersList,
   getEndpointExceptionList,
   getEndpointTrustedAppsList,
+  getHostIsolationExceptionsList,
   Manifest,
 } from '../../../lib/artifacts';
 import {
@@ -236,6 +238,46 @@ export class ManifestManager {
     );
   }
 
+  protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildHostIsolationExceptionForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(
+            await this.buildHostIsolationExceptionForOs(os, policyId)
+          );
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildHostIsolationExceptionForOs(
+    os: string,
+    policyId?: string
+  ): Promise<InternalArtifactCompleteSchema> {
+    return buildArtifact(
+      await getHostIsolationExceptionsList(
+        this.exceptionListClient,
+        this.schemaVersion,
+        os,
+        policyId
+      ),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME
+    );
+  }
+
   /**
    * Writes new artifact SO.
    *
@@ -380,6 +422,7 @@ export class ManifestManager {
       this.buildExceptionListArtifacts(),
       this.buildTrustedAppsArtifacts(),
       this.buildEventFiltersArtifacts(),
+      this.buildHostIsolationExceptionsArtifacts(),
     ]);
 
     const manifest = new Manifest({
@@ -442,7 +485,7 @@ export class ManifestManager {
               try {
                 await this.packagePolicyService.update(
                   this.savedObjectsClient,
-                  // @ts-ignore
+                  // @ts-expect-error TS2345
                   undefined,
                   id,
                   newPackagePolicy
@@ -514,5 +557,76 @@ export class ManifestManager {
 
   public getArtifactsClient(): EndpointArtifactClientInterface {
     return this.artifactClient;
+  }
+
+  /**
+   * Cleanup .fleet-artifacts index if there are some orphan artifacts
+   */
+  public async cleanup(manifest: Manifest) {
+    try {
+      const fleetArtifacts = [];
+      const perPage = 100;
+      let page = 1;
+
+      let fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+        perPage,
+        page,
+      });
+      fleetArtifacts.push(...fleetArtifactsResponse.items);
+
+      while (
+        fleetArtifactsResponse.total > fleetArtifacts.length &&
+        !isEmpty(fleetArtifactsResponse.items)
+      ) {
+        page += 1;
+        fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+          perPage,
+          page,
+        });
+        fleetArtifacts.push(...fleetArtifactsResponse.items);
+      }
+
+      if (isEmpty(fleetArtifacts)) {
+        return;
+      }
+
+      const badArtifacts = [];
+
+      const manifestArtifactsIds = manifest
+        .getAllArtifacts()
+        .map((artifact) => getArtifactId(artifact));
+
+      for (const fleetArtifact of fleetArtifacts) {
+        const artifactId = getArtifactId(fleetArtifact);
+        const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
+
+        if (!isArtifactInManifest) {
+          badArtifacts.push(fleetArtifact);
+        }
+      }
+
+      if (isEmpty(badArtifacts)) {
+        return;
+      }
+
+      this.logger.error(
+        new EndpointError(`Cleaning up ${badArtifacts.length} orphan artifacts`, badArtifacts)
+      );
+
+      await pMap(
+        badArtifacts,
+        async (badArtifact) => this.artifactClient.deleteArtifact(getArtifactId(badArtifact)),
+        {
+          concurrency: 5,
+          /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
+           * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
+          stopOnError: false,
+        }
+      );
+
+      this.logger.info(`All orphan artifacts has been removed successfully`);
+    } catch (error) {
+      this.logger.error(new EndpointError('There was an error cleaning orphan artifacts', error));
+    }
   }
 }

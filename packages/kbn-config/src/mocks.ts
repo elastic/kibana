@@ -14,4 +14,5 @@
 export { configMock } from './config.mock';
 export { configServiceMock } from './config_service.mock';
 export { rawConfigServiceMock } from './raw/raw_config_service.mock';
+export { configDeprecationsMock } from './deprecation/deprecations.mock';
 export { getEnvOptions } from './__mocks__/env';

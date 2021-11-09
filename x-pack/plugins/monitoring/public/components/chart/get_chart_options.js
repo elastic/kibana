@@ -10,17 +10,8 @@ import { merge } from 'lodash';
 import { CHART_LINE_COLOR, CHART_TEXT_COLOR } from '../../../common/constants';
 
 export async function getChartOptions(axisOptions) {
-  let timezone;
-  try {
-    const $injector = Legacy.shims.getAngularInjector();
-    timezone = $injector.get('config').get('dateFormat:tz');
-  } catch (error) {
-    if (error.message === 'Angular has been removed.') {
-      timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
-    } else {
-      throw error;
-    }
-  }
+  const timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
+
   const opts = {
     legend: {
       show: false,

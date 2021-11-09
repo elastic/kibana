@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiFieldSearch,
   EuiHighlight,
+  EuiSpacer,
 } from '@elastic/eui';
 import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { IndexPattern } from '../../../../types';
@@ -298,7 +299,7 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
 
   return (
     <>
-      <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
+      <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="m">
         {i18n.translate('xpack.lens.formulaDocumentation.header', {
           defaultMessage: 'Formula reference',
         })}
@@ -347,22 +348,28 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
                       </h6>
                     </EuiTitle>
 
-                    <EuiListGroup gutterSize="none">
-                      {helpGroup.items.map((helpItem) => {
-                        return (
-                          <EuiListGroupItem
-                            key={helpItem.label}
-                            label={
-                              <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
-                            }
-                            size="s"
-                            onClick={() => {
-                              setSelectedFunction(helpItem.label);
-                            }}
-                          />
-                        );
-                      })}
-                    </EuiListGroup>
+                    {helpGroup.items.length ? (
+                      <>
+                        <EuiSpacer size="s" />
+
+                        <EuiListGroup gutterSize="none">
+                          {helpGroup.items.map((helpItem) => {
+                            return (
+                              <EuiListGroupItem
+                                key={helpItem.label}
+                                label={
+                                  <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
+                                }
+                                size="s"
+                                onClick={() => {
+                                  setSelectedFunction(helpItem.label);
+                                }}
+                              />
+                            );
+                          })}
+                        </EuiListGroup>
+                      </>
+                    ) : null}
                   </nav>
                 );
               })}

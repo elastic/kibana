@@ -8,14 +8,18 @@
 import { rangeQuery } from '../../../../../observability/server';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
-export async function getLegacyDataStatus(setup: Setup & SetupTimeRange) {
-  const { apmEventClient, start, end } = setup;
+export async function getLegacyDataStatus(
+  setup: Setup,
+  start: number,
+  end: number
+) {
+  const { apmEventClient } = setup;
 
   const params = {
-    terminateAfter: 1,
+    terminate_after: 1,
     apm: {
       events: [ProcessorEvent.transaction],
       includeLegacyData: true,

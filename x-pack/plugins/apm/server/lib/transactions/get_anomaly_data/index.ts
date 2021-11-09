@@ -11,7 +11,7 @@ import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { maybe } from '../../../../common/utils/maybe';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMLJobIds } from '../../service_map/get_service_anomalies';
 import { ANOMALY_THRESHOLD } from '../../../../common/ml_constants';
@@ -25,16 +25,20 @@ export async function getAnomalySeries({
   kuery,
   setup,
   logger,
+  start,
+  end,
 }: {
   environment: string;
   serviceName: string;
   transactionType: string;
   transactionName?: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   logger: Logger;
+  start: number;
+  end: number;
 }) {
-  const { start, end, ml } = setup;
+  const { ml } = setup;
 
   // don't fetch anomalies if the ML plugin is not setup
   if (!ml) {

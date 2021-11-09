@@ -30,6 +30,7 @@ interface AxisConfig {
 export type YAxisMode = 'auto' | 'left' | 'right' | 'bottom';
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type FillStyle = 'none' | 'above' | 'below';
+export type IconPosition = 'auto' | 'left' | 'right' | 'above' | 'below';
 
 export interface YConfig {
   forAccessor: string;
@@ -39,6 +40,8 @@ export interface YConfig {
   lineWidth?: number;
   lineStyle?: LineStyle;
   fill?: FillStyle;
+  iconPosition?: IconPosition;
+  textVisibility?: boolean;
 }
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
@@ -170,15 +173,24 @@ export const yAxisConfig: ExpressionFunctionDefinition<
     lineStyle: {
       types: ['string'],
       options: ['solid', 'dotted', 'dashed'],
-      help: 'The style of the threshold line',
+      help: 'The style of the reference line',
     },
     lineWidth: {
       types: ['number'],
-      help: 'The width of the threshold line',
+      help: 'The width of the reference line',
     },
     icon: {
       types: ['string'],
-      help: 'An optional icon used for threshold lines',
+      help: 'An optional icon used for reference lines',
+    },
+    iconPosition: {
+      types: ['string'],
+      options: ['auto', 'above', 'below', 'left', 'right'],
+      help: 'The placement of the icon for the reference line',
+    },
+    textVisibility: {
+      types: ['boolean'],
+      help: 'Visibility of the label on the reference line',
     },
     fill: {
       types: ['string'],

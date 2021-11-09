@@ -26,6 +26,11 @@ export const ResetCommand: ICommand = {
     'Deletes node_modules and output directories, resets internal and disk caches, and stops Bazel server',
   name: 'reset',
 
+  reportTiming: {
+    group: 'scripts/kbn reset',
+    id: 'total',
+  },
+
   async run(projects) {
     log.warning(dedent`
       In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when

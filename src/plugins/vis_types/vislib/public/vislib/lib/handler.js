@@ -17,7 +17,6 @@ import { visTypes as chartTypes } from '../visualizations/vis_types';
 import { NoResults } from '../errors';
 import { Layout } from './layout/layout';
 import { ChartTitle } from './chart_title';
-import { Alerts } from './alerts';
 import { Axis } from './axis/axis';
 import { ChartGrid as Grid } from './chart_grid';
 import { Binder } from './binder';
@@ -46,7 +45,6 @@ export class Handler {
     this.ChartClass = chartTypes[visConfig.get('type')];
     this.uiSettings = uiSettings;
     this.charts = [];
-
     this.vis = vis;
     this.visConfig = visConfig;
     this.data = visConfig.data;
@@ -56,7 +54,6 @@ export class Handler {
       .map((axisArgs) => new Axis(visConfig, axisArgs));
     this.valueAxes = visConfig.get('valueAxes').map((axisArgs) => new Axis(visConfig, axisArgs));
     this.chartTitle = new ChartTitle(visConfig);
-    this.alerts = new Alerts(this, visConfig.get('alerts'));
     this.grid = new Grid(this, visConfig.get('grid'));
 
     if (visConfig.get('type') === 'point_series') {
@@ -69,7 +66,7 @@ export class Handler {
 
     this.layout = new Layout(visConfig);
     this.binder = new Binder();
-    this.renderArray = _.filter([this.layout, this.chartTitle, this.alerts], Boolean);
+    this.renderArray = _.filter([this.layout, this.chartTitle], Boolean);
 
     this.renderArray = this.renderArray
       .concat(this.valueAxes)

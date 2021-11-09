@@ -14,7 +14,7 @@ import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ChoroplethMap } from './choropleth_map';
 
-export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
+export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();
   const { stats, fieldName } = config;
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
@@ -44,7 +44,12 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerKeywordContent'}>
       <DocumentStatsTable config={config} />
-      <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
+      <TopValues
+        stats={stats}
+        fieldFormat={fieldFormat}
+        barColor="secondary"
+        onAddFilter={onAddFilter}
+      />
       {EMSSuggestion && stats && <ChoroplethMap stats={stats} suggestion={EMSSuggestion} />}
     </ExpandedRowContent>
   );

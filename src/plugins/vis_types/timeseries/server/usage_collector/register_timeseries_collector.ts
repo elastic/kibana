@@ -18,6 +18,10 @@ export function registerTimeseriesUsageCollector(collectorSet: UsageCollectionSe
         type: 'long',
         _meta: { description: 'Number of TSVB visualizations using "last value" as a time range' },
       },
+      timeseries_table_use_aggregate_function: {
+        type: 'long',
+        _meta: { description: 'Number of TSVB table visualizations using aggregate function' },
+      },
     },
     fetch: async ({ soClient }) => await getStats(soClient),
   });

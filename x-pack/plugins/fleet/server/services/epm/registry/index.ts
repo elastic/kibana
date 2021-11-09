@@ -96,16 +96,12 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
   const url = new URL(
     `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
-  }
+  setKibanaVersion(url);
+
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
@@ -144,11 +140,18 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
+  // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
+  const disableVersionCheck =
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? true;
+  if (disableVersionCheck) {
+    return;
+  }
+
   const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
   const kibanaBranch = appContextService.getKibanaBranch();
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
+  // on main, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'main') {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 }

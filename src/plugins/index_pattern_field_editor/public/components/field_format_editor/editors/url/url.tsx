@@ -148,6 +148,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
     const { formatParams, format } = this.props;
     const { error, samples, sampleConverterType } = this.state;
 
+    const urlType = formatParams.type ?? format.getParamDefaults().type;
     return (
       <Fragment>
         <EuiFormRow
@@ -157,7 +158,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         >
           <EuiSelect
             data-test-subj="urlEditorType"
-            value={formatParams.type}
+            value={urlType}
             options={(format.type as typeof UrlFormat).urlTypes.map((type: UrlType) => {
               return {
                 value: type.kind,
@@ -170,7 +171,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           />
         </EuiFormRow>
 
-        {formatParams.type === 'a' ? (
+        {urlType === 'a' ? (
           <EuiFormRow
             label={
               <FormattedMessage
@@ -258,7 +259,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           />
         </EuiFormRow>
 
-        {formatParams.type === 'img' && this.renderWidthHeightParameters()}
+        {urlType === 'img' && this.renderWidthHeightParameters()}
 
         <FormatEditorSamples samples={samples} sampleType={sampleConverterType} />
       </Fragment>

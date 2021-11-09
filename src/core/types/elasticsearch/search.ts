@@ -7,7 +7,7 @@
  */
 
 import { ValuesType } from 'utility-types';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 type InvalidAggregationRequest = unknown;
 
@@ -48,7 +48,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = Exclude<Required<estypes.SearchRequest>['body']['fields'], undefined>;
+type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
 type DocValueFields = MaybeArray<string | estypes.SearchDocValueField>;
 
 export type SearchHit<

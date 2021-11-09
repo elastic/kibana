@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+
 import type {
   PackageInfo,
   PackageSpecCategory,
@@ -28,11 +30,35 @@ import { entries } from '../../../../../types';
 import { useGetCategories } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 
+import {
+  withSuspense,
+  LazyReplacementCard,
+} from '../../../../../../../../../../../src/plugins/custom_integrations/public';
+
 import { NoticeModal } from './notice_modal';
+
+const ReplacementCard = withSuspense(LazyReplacementCard);
 
 interface Props {
   packageInfo: PackageInfo;
 }
+
+const Replacements = euiStyled(EuiFlexItem)`
+  margin: 0;
+
+  & .euiAccordion {
+    padding-top: ${({ theme }) => parseInt(theme.eui.euiSizeL, 10) * 2}px;
+
+    &::before {
+      content: '';
+      display: block;
+      border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+      position: relative;
+      top: -${({ theme }) => theme.eui.euiSizeL};
+      margin: 0 ${({ theme }) => theme.eui.euiSizeXS};
+    }
+  }
+`;
 
 export const Details: React.FC<Props> = memo(({ packageInfo }) => {
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategories();
@@ -97,10 +123,10 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
           ),
           description: (
             <EuiFlexGroup direction="column" gutterSize="xs">
-              {entries(filteredTypes).map(([_type, parts]) => {
+              {entries(filteredTypes).map(([_type, parts], index) => {
                 const type = _type as KibanaAssetType;
                 return (
-                  <EuiFlexItem>
+                  <EuiFlexItem key={`item-${index}`}>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>{AssetTitleMap[type]}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -181,6 +207,9 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
         <EuiFlexItem>
           <EuiDescriptionList type="column" compressed listItems={listItems} />
         </EuiFlexItem>
+        <Replacements>
+          <ReplacementCard eprPackageName={packageInfo.name} />
+        </Replacements>
       </EuiFlexGroup>
     </>
   );

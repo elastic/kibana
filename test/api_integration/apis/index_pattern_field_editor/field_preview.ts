@@ -8,14 +8,18 @@
 
 import expect from '@kbn/expect';
 
+import { getErrorCodeFromErrorReason } from '../../../../src/plugins/index_pattern_field_editor/public/lib/runtime_field_validation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { API_BASE_PATH } from './constants';
 
 const INDEX_NAME = 'api-integration-test-field-preview';
+const DOC_ID = '1';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+
+  const document = { foo: 1, bar: 'hello' };
 
   const createIndex = async () => {
     await es.indices.create({
@@ -35,6 +39,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
+  const addDoc = async () => {
+    await es.index({
+      index: INDEX_NAME,
+      id: DOC_ID,
+      body: document,
+      refresh: 'wait_for',
+    });
+  };
+
   const deleteIndex = async () => {
     await es.indices.delete({
       index: INDEX_NAME,
@@ -42,12 +55,13 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Field preview', function () {
-    before(async () => await createIndex());
+    before(async () => {
+      await createIndex();
+      await addDoc();
+    });
     after(async () => await deleteIndex());
 
     describe('should return the script value', () => {
-      const document = { foo: 1, bar: 'hello' };
-
       const tests = [
         {
           context: 'keyword_field',
@@ -77,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           const payload = {
             script: test.script,
             document,
+            documentId: DOC_ID,
             context: test.context,
             index: INDEX_NAME,
           };
@@ -124,6 +139,27 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .set('kbn-xsrf', 'xxx')
           .expect(400);
+      });
+    });
+
+    describe('Error messages', () => {
+      // As ES does not return error codes we will add a test to make sure its error message string
+      // does not change overtime as we rely on it to extract our own error code.
+      // If this test fail we'll need to update the "getErrorCodeFromErrorReason()" handler
+      it('should detect a script casting error', async () => {
+        const { body: response } = await supertest
+          .post(`${API_BASE_PATH}/field_preview`)
+          .send({
+            script: { source: 'emit(123)' }, // We send a long but the type is "keyword"
+            context: 'keyword_field',
+            index: INDEX_NAME,
+            documentId: DOC_ID,
+          })
+          .set('kbn-xsrf', 'xxx');
+
+        const errorCode = getErrorCodeFromErrorReason(response.error?.caused_by?.reason);
+
+        expect(errorCode).be('CAST_ERROR');
       });
     });
   });

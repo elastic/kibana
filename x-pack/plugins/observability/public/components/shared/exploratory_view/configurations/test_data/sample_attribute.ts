@@ -5,12 +5,18 @@
  * 2.0.
  */
 export const sampleAttribute = {
-  title: 'Prefilled from exploratory view app',
-  description: '',
-  visualizationType: 'lnsXY',
+  description: 'undefined',
   references: [
-    { id: 'apm-*', name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern' },
-    { id: 'apm-*', name: 'indexpattern-datasource-layer-layer0', type: 'index-pattern' },
+    {
+      id: 'apm-*',
+      name: 'indexpattern-datasource-current-indexpattern',
+      type: 'index-pattern',
+    },
+    {
+      id: 'apm-*',
+      name: 'indexpattern-datasource-layer-layer0',
+      type: 'index-pattern',
+    },
   ],
   state: {
     datasourceStates: {
@@ -28,17 +34,23 @@ export const sampleAttribute = {
             ],
             columns: {
               'x-axis-column-layer0': {
-                sourceField: 'transaction.duration.us',
-                label: 'Page load time',
                 dataType: 'number',
-                operationType: 'range',
                 isBucketed: true,
-                scale: 'interval',
+                label: 'Page load time',
+                operationType: 'range',
                 params: {
-                  type: 'histogram',
-                  ranges: [{ from: 0, to: 1000, label: '' }],
                   maxBars: 'auto',
+                  ranges: [
+                    {
+                      from: 0,
+                      label: '',
+                      to: 1000,
+                    },
+                  ],
+                  type: 'histogram',
                 },
+                scale: 'interval',
+                sourceField: 'transaction.duration.us',
               },
               'y-axis-column-layer0': {
                 dataType: 'number',
@@ -81,16 +93,16 @@ export const sampleAttribute = {
               'y-axis-column-layer0X1': {
                 customLabel: true,
                 dataType: 'number',
-                isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
-                operationType: 'count',
-                scale: 'ratio',
-                sourceField: 'Records',
                 filter: {
                   language: 'kuery',
                   query:
                     'transaction.type: page-load and processor.event: transaction and transaction.type : *',
                 },
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'count',
+                scale: 'ratio',
+                sourceField: 'Records',
               },
               'y-axis-column-layer0X2': {
                 customLabel: true,
@@ -140,27 +152,54 @@ export const sampleAttribute = {
         },
       },
     },
+    filters: [],
+    query: {
+      language: 'kuery',
+      query: 'transaction.duration.us < 60000000',
+    },
     visualization: {
-      legend: { isVisible: true, position: 'right' },
-      valueLabels: 'hide',
-      fittingFunction: 'Linear',
+      axisTitlesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
       curveType: 'CURVE_MONOTONE_X',
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      preferredSeriesType: 'line',
+      fittingFunction: 'Linear',
+      gridlinesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
       layers: [
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
           layerType: 'data',
           seriesType: 'line',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
           xAccessor: 'x-axis-column-layer0',
+          yConfig: [
+            {
+              color: 'green',
+              forAccessor: 'y-axis-column-layer0',
+              axisMode: 'left',
+            },
+          ],
         },
       ],
+      legend: {
+        isVisible: true,
+        showSingleSeries: true,
+        position: 'right',
+      },
+      preferredSeriesType: 'line',
+      tickLabelsVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      valueLabels: 'hide',
     },
-    query: { query: 'transaction.duration.us < 60000000', language: 'kuery' },
-    filters: [],
   },
+  title: 'Prefilled from exploratory view app',
+  visualizationType: 'lnsXY',
 };

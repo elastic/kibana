@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { ZOOM_LEVELS, MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../common/lib/constants';
 
 export interface Props {
@@ -12,10 +13,6 @@ export interface Props {
    * current zoom level of the workpad
    */
   zoomScale: number;
-  /**
-   * zoom level to scale workpad to fit into the viewport
-   */
-  fitZoomScale: number;
   /**
    * sets the new zoom level
    */
@@ -45,4 +42,26 @@ export const zoomHandlerCreators = {
     (): void => {
       setZoomScale(1);
     },
+};
+
+export const useZoomHandlers = ({ zoomScale, setZoomScale }: Props) => {
+  const zoomIn = useCallback(() => {
+    const scaleUp =
+      ZOOM_LEVELS.find((zoomLevel: number) => zoomScale < zoomLevel) || MAX_ZOOM_LEVEL;
+    setZoomScale(scaleUp);
+  }, [zoomScale, setZoomScale]);
+
+  const zoomOut = useCallback(() => {
+    const scaleDown =
+      ZOOM_LEVELS.slice()
+        .reverse()
+        .find((zoomLevel: number) => zoomScale > zoomLevel) || MIN_ZOOM_LEVEL;
+    setZoomScale(scaleDown);
+  }, [zoomScale, setZoomScale]);
+
+  const resetZoom = useCallback(() => {
+    setZoomScale(1);
+  }, [setZoomScale]);
+
+  return { zoomIn, zoomOut, resetZoom };
 };

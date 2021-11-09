@@ -36,7 +36,7 @@ import type { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/pu
 import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
 import { LoginValidator } from './validate_login';
 
-interface Props {
+export interface LoginFormProps {
   http: HttpStart;
   notifications: NotificationsStart;
   selector: LoginSelector;
@@ -78,7 +78,7 @@ export enum PageMode {
   LoginHelp,
 }
 
-export class LoginForm extends Component<Props, State> {
+export class LoginForm extends Component<LoginFormProps, State> {
   private readonly validator: LoginValidator;
 
   /**
@@ -88,7 +88,7 @@ export class LoginForm extends Component<Props, State> {
    */
   private readonly suggestedProvider?: LoginSelectorProvider;
 
-  constructor(props: Props) {
+  constructor(props: LoginFormProps) {
     super(props);
     this.validator = new LoginValidator({ shouldValidate: false });
 
@@ -513,7 +513,7 @@ export class LoginForm extends Component<Props, State> {
       );
 
       window.location.href = location;
-    } catch (err) {
+    } catch (err: any) {
       this.props.notifications.toasts.addError(
         err?.body?.message ? new Error(err?.body?.message) : err,
         {

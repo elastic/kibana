@@ -19,14 +19,13 @@ describe('EventLogService', () => {
   const esContext = contextMock.create();
 
   function getService(config: IEventLogConfig) {
-    const { enabled, logEntries, indexEntries } = config;
+    const { logEntries, indexEntries } = config;
     return new EventLogService({
       esContext,
       systemLogger,
       kibanaUUID: '42',
       savedObjectProviderRegistry,
       config: {
-        enabled,
         logEntries,
         indexEntries,
       },
@@ -37,30 +36,19 @@ describe('EventLogService', () => {
   test('returns config values from service methods', () => {
     let service;
 
-    service = getService({ enabled: true, logEntries: true, indexEntries: true });
-    expect(service.isEnabled()).toEqual(true);
+    service = getService({ logEntries: true, indexEntries: true });
     expect(service.isLoggingEntries()).toEqual(true);
     expect(service.isIndexingEntries()).toEqual(true);
 
-    service = getService({ enabled: true, logEntries: false, indexEntries: true });
-    expect(service.isEnabled()).toEqual(true);
+    service = getService({ logEntries: false, indexEntries: true });
     expect(service.isLoggingEntries()).toEqual(false);
     expect(service.isIndexingEntries()).toEqual(true);
 
-    service = getService({ enabled: true, logEntries: true, indexEntries: false });
-    expect(service.isEnabled()).toEqual(true);
+    service = getService({ logEntries: true, indexEntries: false });
     expect(service.isLoggingEntries()).toEqual(true);
     expect(service.isIndexingEntries()).toEqual(false);
 
-    service = getService({ enabled: true, logEntries: false, indexEntries: false });
-    expect(service.isEnabled()).toEqual(true);
-    expect(service.isLoggingEntries()).toEqual(false);
-    expect(service.isIndexingEntries()).toEqual(false);
-
-    // this is the only non-obvious one; when enabled is false,
-    // logging/indexing will be false as well.
-    service = getService({ enabled: false, logEntries: true, indexEntries: true });
-    expect(service.isEnabled()).toEqual(false);
+    service = getService({ logEntries: false, indexEntries: false });
     expect(service.isLoggingEntries()).toEqual(false);
     expect(service.isIndexingEntries()).toEqual(false);
   });

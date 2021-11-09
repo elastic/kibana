@@ -106,11 +106,8 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   }
 
   .lnsConfigPanel {
-    @include euiScrollBar;
-    padding: $euiSize $euiSizeXS $euiSizeXL $euiSize;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    padding-left: $euiFormMaxWidth + $euiSize;
+    @include euiYScroll;
+    padding: $euiSize $euiSize $euiSizeXL ($euiFormMaxWidth + $euiSize);
     margin-left: -$euiFormMaxWidth;
 
     @include euiBreakpoint('xs', 's', 'm') {

@@ -31,7 +31,7 @@ export const setupFleetForEndpoint = async (
   kbnClient: KbnClient
 ): Promise<SetupFleetForEndpointResponse> => {
   // We try to use the kbnClient **private** logger, bug if unable to access it, then just use console
-  // @ts-ignore
+  // @ts-expect-error TS2341
   const log = kbnClient.log ? kbnClient.log : console;
 
   // Setup Fleet
@@ -110,15 +110,20 @@ export const installOrUpgradeEndpointFleetPackage = async (
     );
   }
 
-  if (isFleetBulkInstallError(bulkResp[0])) {
-    if (bulkResp[0].error instanceof Error) {
+  const firstError = bulkResp[0];
+
+  if (isFleetBulkInstallError(firstError)) {
+    if (firstError.error instanceof Error) {
       throw new EndpointDataLoadingError(
-        `Installing the Endpoint package failed: ${bulkResp[0].error.message}, exiting`,
+        `Installing the Endpoint package failed: ${firstError.error.message}, exiting`,
         bulkResp
       );
     }
 
-    throw new EndpointDataLoadingError(bulkResp[0].error, bulkResp);
+    // Ignore `409` (conflicts due to Concurrent install or upgrades of package) errors
+    if (firstError.statusCode !== 409) {
+      throw new EndpointDataLoadingError(firstError.error, bulkResp);
+    }
   }
 
   return bulkResp[0] as BulkInstallPackageInfo;

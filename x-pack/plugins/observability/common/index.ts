@@ -6,6 +6,11 @@
  */
 
 export type { AsDuration, AsPercent } from './utils/formatters';
+export {
+  enableInspectEsQueries,
+  maxSuggestions,
+  enableComparisonByDefault,
+} from './ui_settings_keys';
 
 export const casesFeatureId = 'observabilityCases';
 

@@ -222,7 +222,7 @@ describe('LayerPanel', () => {
 
       const group = instance
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error')?.props?.children === 'Required dimension');
+        .findWhere((e) => e.prop('error') === 'Required dimension');
 
       expect(group).toHaveLength(1);
     });

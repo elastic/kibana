@@ -9,13 +9,14 @@
 import { buildPhraseFilter } from './phrase_filter';
 import { buildQueryFilter } from './query_string_filter';
 import { getFilterField } from './get_filter_field';
-import { IndexPatternBase } from '../../es_query';
+import { DataViewBase } from '../../es_query';
 import { fields } from '../stubs/fields.mocks';
 
 describe('getFilterField', function () {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     id: 'logstash-*',
     fields,
+    title: 'dataView',
   };
 
   it('should return the field name from known filter types that target a specific field', () => {
@@ -28,10 +29,8 @@ describe('getFilterField', function () {
   it('should return undefined for filters that do not target a specific field', () => {
     const filter = buildQueryFilter(
       {
-        query: {
-          query_string: {
-            query: 'response:200 and extension:jpg',
-          },
+        query_string: {
+          query: 'response:200 and extension:jpg',
         },
       },
       indexPattern.id!,

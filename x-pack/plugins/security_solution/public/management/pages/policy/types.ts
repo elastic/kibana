@@ -13,57 +13,43 @@ import {
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
+  PostTrustedAppCreateResponse,
   MaybeImmutable,
+  GetTrustedAppsListResponse,
+  TrustedApp,
+  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
   GetAgentStatusResponse,
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
-  GetPackagesResponse,
   UpdatePackagePolicyResponse,
 } from '../../../../../fleet/common';
 import { AsyncResourceState } from '../../state';
-import { TrustedAppsListData } from '../trusted_apps/state';
 import { ImmutableMiddlewareAPI } from '../../../common/store';
 import { AppAction } from '../../../common/store/actions';
+import { TrustedAppsService } from '../trusted_apps/service';
+
+export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 
 /**
  * Function that runs Policy Details middleware
  */
 export type MiddlewareRunner = (
-  coreStart: CoreStart,
-  store: ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>,
+  context: MiddlewareRunnerContext,
+  store: PolicyDetailsStore,
   action: MaybeImmutable<AppAction>
 ) => Promise<void>;
 
-/**
- * Policy list store state
- */
-export interface PolicyListState {
-  /** Array of policy items  */
-  policyItems: PolicyData[];
-  /** Information about the latest endpoint package */
-  endpointPackageInfo?: GetPackagesResponse['response'][0];
-  /** API error if loading data failed */
-  apiError?: ServerApiError;
-  /** total number of policies */
-  total: number;
-  /** Number of policies per page */
-  pageSize: number;
-  /** page number (zero based) */
-  pageIndex: number;
-  /** data is being retrieved from server */
-  isLoading: boolean;
-  /** current location information */
-  location?: Immutable<AppLocation>;
-  /** policy is being deleted */
-  isDeleting: boolean;
-  /** Deletion status */
-  deleteStatus?: boolean;
-  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+export interface MiddlewareRunnerContext {
+  coreStart: CoreStart;
+  trustedAppsService: TrustedAppsService;
 }
+
+export type PolicyDetailsSelector<T = unknown> = (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<T>;
 
 /**
  * Policy details store state
@@ -89,6 +75,16 @@ export interface PolicyDetailsState {
   license?: ILicense;
 }
 
+export interface PolicyAssignedTrustedApps {
+  location: PolicyDetailsArtifactsPageListLocationParams;
+  artifacts: GetTrustedAppsListResponse;
+}
+
+export interface PolicyRemoveTrustedApps {
+  artifacts: TrustedApp[];
+  response: PutTrustedAppUpdateResponse[];
+}
+
 /**
  * Policy artifacts store state
  */
@@ -96,7 +92,19 @@ export interface PolicyArtifactsState {
   /** artifacts location params  */
   location: PolicyDetailsArtifactsPageLocation;
   /** A list of artifacts can be linked to the policy  */
-  availableList: AsyncResourceState<TrustedAppsListData>;
+  assignableList: AsyncResourceState<GetTrustedAppsListResponse>;
+  /** Represents if available trusted apps entries exist, regardless of whether the list is showing results  */
+  assignableListEntriesExist: AsyncResourceState<boolean>;
+  /** A list of trusted apps going to be updated  */
+  trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+  /** Represents if there is any trusted app existing  */
+  doesAnyTrustedAppExists: AsyncResourceState<boolean>;
+  /** List of artifacts currently assigned to the policy (body specific and global) */
+  assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
+  /** A list of all available polices */
+  policies: AsyncResourceState<GetPolicyListResponse>;
+  /** list of artifacts to remove. Holds the ids that were removed and the API response */
+  removeList: AsyncResourceState<PolicyRemoveTrustedApps>;
 }
 
 export enum OS {
@@ -105,11 +113,15 @@ export enum OS {
   linux = 'linux',
 }
 
-export interface PolicyDetailsArtifactsPageLocation {
+export interface PolicyDetailsArtifactsPageListLocationParams {
   page_index: number;
   page_size: number;
-  show?: 'list';
   filter: string;
+}
+
+export interface PolicyDetailsArtifactsPageLocation
+  extends PolicyDetailsArtifactsPageListLocationParams {
+  show?: 'list';
 }
 
 /**
@@ -163,8 +175,8 @@ export type PolicyProtection =
       UIPolicyConfig['windows'],
       'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
     >
-  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection'>
-  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection'>;
+  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
 export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
 

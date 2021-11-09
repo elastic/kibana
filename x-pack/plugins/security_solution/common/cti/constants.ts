@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENRICHMENT_DESTINATION_PATH } from '../constants';
+import { ENRICHMENT_DESTINATION_PATH, DEFAULT_INDICATOR_SOURCE_PATH } from '../constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
@@ -43,27 +43,29 @@ export enum ENRICHMENT_TYPES {
 }
 
 export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
-  'file.hash.md5': 'threatintel.indicator.file.hash.md5',
-  'file.hash.sha1': 'threatintel.indicator.file.hash.sha1',
-  'file.hash.sha256': 'threatintel.indicator.file.hash.sha256',
-  'file.pe.imphash': 'threatintel.indicator.file.pe.imphash',
-  'file.elf.telfhash': 'threatintel.indicator.file.elf.telfhash',
-  'file.hash.ssdeep': 'threatintel.indicator.file.hash.ssdeep',
-  'source.ip': 'threatintel.indicator.ip',
-  'destination.ip': 'threatintel.indicator.ip',
-  'url.full': 'threatintel.indicator.url.full',
-  'registry.path': 'threatintel.indicator.registry.path',
+  'file.hash.md5': `${DEFAULT_INDICATOR_SOURCE_PATH}.file.hash.md5`,
+  'file.hash.sha1': `${DEFAULT_INDICATOR_SOURCE_PATH}.file.hash.sha1`,
+  'file.hash.sha256': `${DEFAULT_INDICATOR_SOURCE_PATH}.file.hash.sha256`,
+  'file.pe.imphash': `${DEFAULT_INDICATOR_SOURCE_PATH}.file.pe.imphash`,
+  'file.elf.telfhash': `${DEFAULT_INDICATOR_SOURCE_PATH}.file.elf.telfhash`,
+  'file.hash.ssdeep': `${DEFAULT_INDICATOR_SOURCE_PATH}.file.hash.ssdeep`,
+  'source.ip': `${DEFAULT_INDICATOR_SOURCE_PATH}.ip`,
+  'destination.ip': `${DEFAULT_INDICATOR_SOURCE_PATH}.ip`,
+  'url.full': `${DEFAULT_INDICATOR_SOURCE_PATH}.url.full`,
+  'registry.path': `${DEFAULT_INDICATOR_SOURCE_PATH}.registry.path`,
 };
 
 export const DEFAULT_EVENT_ENRICHMENT_FROM = 'now-30d';
 export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
 export const CTI_DATASET_KEY_MAP: { [key: string]: string } = {
-  'Abuse URL': 'threatintel.abuseurl',
-  'Abuse Malware': 'threatintel.abusemalware',
-  'AlienVault OTX': 'threatintel.otx',
-  Anomali: 'threatintel.anomali',
-  'Malware Bazaar': 'threatintel.malwarebazaar',
-  MISP: 'threatintel.misp',
-  'Recorded Future': 'threatintel.recordedfuture',
+  'AbuseCH URL': 'ti_abusech.url',
+  'AbuseCH Malware': 'ti_abusech.malware',
+  'AbuseCH MalwareBazaar': 'ti_abusech.malwarebazaar',
+  'AlienVault OTX': 'ti_otx.threat',
+  'Anomali Limo': 'ti_anomali.limo',
+  'Anomali Threatstream': 'ti_anomali.threatstream',
+  MISP: 'ti_misp.threat',
+  ThreatQuotient: 'ti_threatq.threat',
+  Cybersixgill: 'ti_cybersixgill.threat',
 };

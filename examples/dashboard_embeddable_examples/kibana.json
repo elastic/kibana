@@ -16,6 +16,5 @@
     "githubTeam": "kibana-presentation"
   },
   "description": "Example app that shows how to embed a dashboard in an application",
-  "optionalPlugins": [],
-  "requiredBundles": ["esUiShared"]
+  "optionalPlugins": []
 }

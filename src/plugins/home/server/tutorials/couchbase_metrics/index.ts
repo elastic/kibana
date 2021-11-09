@@ -23,17 +23,17 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
   return {
     id: 'couchbaseMetrics',
     name: i18n.translate('home.tutorials.couchbaseMetrics.nameTitle', {
-      defaultMessage: 'Couchbase metrics',
+      defaultMessage: 'Couchbase Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.couchbaseMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Couchbase.',
+      defaultMessage: 'Collect metrics from Couchbase databases with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.couchbaseMetrics.longDescription', {
       defaultMessage:
-        'The `couchbase` Metricbeat module fetches internal metrics from Couchbase. \
+        'The `couchbase` Metricbeat module fetches metrics from Couchbase. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-couchbase.html',
@@ -56,5 +56,6 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['security', 'network', 'web'],
   };
 }

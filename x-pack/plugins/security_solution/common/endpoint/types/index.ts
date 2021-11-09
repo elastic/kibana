@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
+import { Agent, PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
@@ -546,6 +546,16 @@ export type HostMetadata = Immutable<{
   data_stream: DataStream;
 }>;
 
+export type UnitedAgentMetadata = Immutable<{
+  agent: {
+    id: string;
+  };
+  united: {
+    endpoint: HostMetadata;
+    agent: Agent;
+  };
+}>;
+
 export interface LegacyEndpointEvent {
   '@timestamp': number;
   endgame: {
@@ -932,12 +942,17 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields;
     behavior_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
         message: string;
         enabled: boolean;
       };
       behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
         message: string;
         enabled: boolean;
       };
@@ -955,12 +970,17 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields;
     behavior_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
         message: string;
         enabled: boolean;
       };
       behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
         message: string;
         enabled: boolean;
       };
@@ -994,14 +1014,14 @@ export interface UIPolicyConfig {
    */
   mac: Pick<
     PolicyConfig['mac'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
   >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
   linux: Pick<
     PolicyConfig['linux'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
   >;
 }
 

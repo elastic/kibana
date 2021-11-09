@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { Setup } from '../helpers/setup_request';
 import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -21,20 +20,17 @@ export const getServiceInfrastructure = async ({
   serviceName,
   environment,
   setup,
+  start,
+  end,
 }: {
   kuery: string;
   serviceName: string;
   environment: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) => {
-  const { apmEventClient, start, end } = setup;
-
-  const filter: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    ...rangeQuery(start, end),
-    ...environmentQuery(environment),
-    ...kqlQuery(kuery),
-  ];
+  const { apmEventClient } = setup;
 
   const response = await apmEventClient.search('get_service_infrastructure', {
     apm: {
@@ -44,7 +40,12 @@ export const getServiceInfrastructure = async ({
       size: 0,
       query: {
         bool: {
-          filter,
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
       },
       aggs: {

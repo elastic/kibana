@@ -11,32 +11,36 @@ import {
 } from '../../../common/transaction_types';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
-import { calculateThroughput } from '../helpers/calculate_throughput';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
+import { calculateThroughputWithRange } from '../helpers/calculate_throughput';
 
 export async function getTransactionsPerMinute({
   setup,
   bucketSize,
   searchAggregatedTransactions,
+  start,
+  end,
+  intervalString,
 }: {
-  setup: Setup & SetupTimeRange;
-  bucketSize: string;
+  setup: Setup;
+  bucketSize: number;
+  intervalString: string;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const { aggregations } = await apmEventClient.search(
     'observability_overview_get_transactions_per_minute',
     {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {
@@ -45,7 +49,7 @@ export async function getTransactionsPerMinute({
           bool: {
             filter: [
               ...rangeQuery(start, end),
-              ...getDocumentTypeFilterForAggregatedTransactions(
+              ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
             ],
@@ -60,7 +64,7 @@ export async function getTransactionsPerMinute({
               timeseries: {
                 date_histogram: {
                   field: '@timestamp',
-                  fixed_interval: bucketSize,
+                  fixed_interval: intervalString,
                   min_doc_count: 0,
                 },
                 aggs: {
@@ -86,7 +90,7 @@ export async function getTransactionsPerMinute({
     ) || aggregations.transactionType.buckets[0];
 
   return {
-    value: calculateThroughput({
+    value: calculateThroughputWithRange({
       start,
       end,
       value: topTransactionTypeBucket?.doc_count || 0,

@@ -6,7 +6,12 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
+import {
+  FieldLabels,
+  REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
+  ReportTypes,
+} from '../constants';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -24,13 +29,14 @@ import {
   SYNTHETICS_FCP,
   SYNTHETICS_LCP,
 } from '../constants/field_names/synthetics';
+import { buildExistsFilter } from '../utils';
 
 export function getSyntheticsDistributionConfig({
   series,
   indexPattern,
 }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'data-distribution',
+    reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: series?.seriesType || 'line',
     seriesTypes: [],
     xAxisColumn: {
@@ -53,7 +59,10 @@ export function getSyntheticsDistributionConfig({
       'url.port',
     ],
     baseFilters: [],
-    definitionFields: ['monitor.name', 'url.full'],
+    definitionFields: [
+      { field: 'monitor.name', nested: 'synthetics.step.name.keyword', singleSelection: true },
+      { field: 'url.full', filters: buildExistsFilter('summary.up', indexPattern) },
+    ],
     metricOptions: [
       {
         label: MONITORS_DURATION_LABEL,

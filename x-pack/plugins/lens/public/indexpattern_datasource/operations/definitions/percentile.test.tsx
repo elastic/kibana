@@ -286,12 +286,12 @@ describe('percentile', () => {
 
       jest.runAllTimers();
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiFieldNumber);
+      const input = instance.find(
+        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
+      );
 
       await act(async () => {
-        input.prop('onChange')!({ target: { value: '27' } } as React.ChangeEvent<HTMLInputElement>);
+        input.simulate('change', { target: { value: '27' } });
       });
 
       instance.update();
@@ -327,14 +327,12 @@ describe('percentile', () => {
 
       jest.runAllTimers();
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiFieldNumber);
+      const input = instance.find(
+        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
+      );
 
       await act(async () => {
-        input.prop('onChange')!({
-          target: { value: '12.12' },
-        } as React.ChangeEvent<HTMLInputElement>);
+        input.simulate('change', { target: { value: '12.12' } });
       });
 
       instance.update();

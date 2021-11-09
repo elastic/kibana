@@ -83,6 +83,7 @@ export interface CaseComponentProps extends CaseViewComponentProps {
   fetchCase: UseGetCase['fetchCase'];
   caseData: Case;
   updateCase: (newCase: Case) => void;
+  onCaseDataSuccess?: (newCase: Case) => void;
 }
 
 export const CaseComponent = React.memo<CaseComponentProps>(
@@ -94,6 +95,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     configureCasesNavigation,
     getCaseDetailHrefWithCommentId,
     fetchCase,
+    onCaseDataSuccess,
     onComponentInitialized,
     actionsNavigation,
     ruleDetailsNavigation,
@@ -315,8 +317,17 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     );
 
     const onSubmitTitle = useCallback(
-      (newTitle) => onUpdateField({ key: 'title', value: newTitle }),
-      [onUpdateField]
+      (newTitle) =>
+        onUpdateField({
+          key: 'title',
+          value: newTitle,
+          onSuccess: () => {
+            if (onCaseDataSuccess) {
+              onCaseDataSuccess({ ...caseData, title: newTitle });
+            }
+          },
+        }),
+      [caseData, onUpdateField, onCaseDataSuccess]
     );
 
     const changeStatus = useCallback(
@@ -588,6 +599,7 @@ export const CaseView = React.memo(
               configureCasesNavigation={configureCasesNavigation}
               getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
               fetchCase={fetchCase}
+              onCaseDataSuccess={onCaseDataSuccess}
               onComponentInitialized={onComponentInitialized}
               actionsNavigation={actionsNavigation}
               ruleDetailsNavigation={ruleDetailsNavigation}

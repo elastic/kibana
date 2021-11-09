@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { IndexPattern } from '../..';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 import { AggConfigs, AggTypesRegistryStart } from '../../';
@@ -824,7 +824,7 @@ describe('SearchSource', () => {
     test('should serialize filters', () => {
       const filter = [
         {
-          query: { q: 'query' },
+          query: { query_string: { query: 'query' } },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -842,7 +842,7 @@ describe('SearchSource', () => {
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
-          query: { q: 'query' },
+          query: { query_string: { query: 'query' } },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -885,7 +885,7 @@ describe('SearchSource', () => {
   describe('getSerializedFields', () => {
     const filter: Filter[] = [
       {
-        query: { q: 'query' },
+        query: { query_string: { query: 'query' } },
         meta: {
           alias: 'alias',
           disabled: false,
@@ -915,7 +915,9 @@ describe('SearchSource', () => {
                 "negate": false,
               },
               "query": Object {
-                "q": "query",
+                "query_string": Object {
+                  "query": "query",
+                },
               },
             },
           ],
@@ -1113,7 +1115,7 @@ describe('SearchSource', () => {
           },
         };
 
-        searchSourceDependencies.search = jest.fn().mockReturnValue(of(Promise.reject('aaaaa')));
+        searchSourceDependencies.search = jest.fn().mockReturnValue(throwError('aaaaa'));
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);

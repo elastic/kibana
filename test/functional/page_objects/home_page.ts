@@ -13,6 +13,7 @@ export class HomePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly log = this.ctx.getService('log');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -27,7 +28,10 @@ export class HomePageObject extends FtrService {
   }
 
   async isSampleDataSetInstalled(id: string) {
-    return !(await this.testSubjects.exists(`addSampleDataSet${id}`));
+    const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    const sampleDataCardInnerHTML = await sampleDataCard.getAttribute('innerHTML');
+    this.log.debug(sampleDataCardInnerHTML);
+    return sampleDataCardInnerHTML.includes('removeSampleDataSet');
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -45,8 +49,11 @@ export class HomePageObject extends FtrService {
   async addSampleDataSet(id: string) {
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
-      await this.testSubjects.click(`addSampleDataSet${id}`);
-      await this._waitForSampleDataLoadingAction(id);
+      await this.retry.waitFor('wait until sample data is installed', async () => {
+        await this.testSubjects.click(`addSampleDataSet${id}`);
+        await this._waitForSampleDataLoadingAction(id);
+        return await this.isSampleDataSetInstalled(id);
+      });
     }
   }
 

@@ -49,6 +49,23 @@ const mockedSavedObject = {
         }),
       },
     },
+    {
+      attributes: {
+        visState: JSON.stringify({
+          type: 'metrics',
+          title: 'TSVB visualization 4',
+          params: {
+            type: 'table',
+            series: [
+              {
+                aggregate_by: 'test',
+                aggregate_function: 'max',
+              },
+            ],
+          },
+        }),
+      },
+    },
   ],
 } as SavedObjectsFindResponse;
 
@@ -77,6 +94,27 @@ const mockedSavedObjectsByValue = [
             type: 'metrics',
             params: {
               time_range_mode: TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+            },
+          },
+        },
+      }),
+    },
+  },
+  {
+    attributes: {
+      panelsJSON: JSON.stringify({
+        type: 'visualization',
+        embeddableConfig: {
+          savedVis: {
+            type: 'metrics',
+            params: {
+              type: 'table',
+              series: [
+                {
+                  aggregate_by: 'test1',
+                  aggregate_function: 'sum',
+                },
+              ],
             },
           },
         },
@@ -142,6 +180,58 @@ describe('Timeseries visualization usage collector', () => {
     expect(result).toBeUndefined();
   });
 
+  test('Returns undefined when aggregate function is null', async () => {
+    const mockCollectorFetchContext = getMockCollectorFetchContext({
+      saved_objects: [
+        {
+          attributes: {
+            panelsJSON: JSON.stringify({
+              type: 'visualization',
+              embeddableConfig: {
+                savedVis: {
+                  type: 'metrics',
+                  params: {
+                    type: 'table',
+                    series: [
+                      {
+                        aggregate_by: null,
+                        aggregate_function: null,
+                      },
+                    ],
+                  },
+                },
+              },
+            }),
+          },
+        },
+        {
+          attributes: {
+            panelsJSON: JSON.stringify({
+              type: 'visualization',
+              embeddableConfig: {
+                savedVis: {
+                  type: 'metrics',
+                  params: {
+                    type: 'table',
+                    series: [
+                      {
+                        axis_position: 'right',
+                      },
+                    ],
+                  },
+                },
+              },
+            }),
+          },
+        },
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getStats(mockCollectorFetchContext.soClient);
+
+    expect(result).toBeUndefined();
+  });
+
   test('Summarizes visualizations response data', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(
       mockedSavedObject,
@@ -149,8 +239,9 @@ describe('Timeseries visualization usage collector', () => {
     );
     const result = await getStats(mockCollectorFetchContext.soClient);
 
-    expect(result).toMatchObject({
-      timeseries_use_last_value_mode_total: 3,
+    expect(result).toStrictEqual({
+      timeseries_use_last_value_mode_total: 5,
+      timeseries_table_use_aggregate_function: 2,
     });
   });
 });

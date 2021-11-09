@@ -6,9 +6,10 @@
  */
 
 import { useState, useCallback } from 'react';
-import { EUI_SORT_ASCENDING } from '../../../common/constants';
+import { EuiTableSortingType } from '@elastic/eui';
 import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { EUI_SORT_ASCENDING } from '../../../common/constants';
 
 interface Pagination {
   pageSize: number;
@@ -24,12 +25,7 @@ interface Page {
   index: number;
 }
 
-interface Sorting {
-  sort: {
-    field: string;
-    direction: string;
-  };
-}
+type Sorting = EuiTableSortingType<string>;
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
@@ -82,26 +78,39 @@ export function useTable(storageKey: string) {
   );
 
   // get initial state from localStorage
-  const [sorting, setSorting] = useState<Sorting>(storageData.sort || { sort: {} });
-  const cleanSortingData = (sortData: Sorting) => {
-    const sort = sortData || { sort: {} };
-
-    if (!sort.sort.field) {
-      sort.sort.field = 'name';
-    }
-    if (!sort.sort.direction) {
-      sort.sort.direction = EUI_SORT_ASCENDING;
-    }
-
-    return sort;
-  };
+  const [sorting, setSorting] = useState<Sorting>(
+    storageData.sort || { sort: { field: 'name', direction: EUI_SORT_ASCENDING } }
+  );
 
   const [query, setQuery] = useState('');
 
-  const onTableChange = () => {
-    // we are already updating the state in fetchMoreData. We would need to check in react
-    // if both methods are needed or we can clean one of them
-    // For now I just keep it so existing react components don't break
+  const onTableChange = ({
+    page,
+    sort,
+    queryText,
+  }: {
+    page: Page;
+    sort: Sorting['sort'];
+    queryText: string;
+  }) => {
+    setPagination({
+      ...pagination,
+      ...{
+        initialPageSize: page.size,
+        pageSize: page.size,
+        initialPageIndex: page.index,
+        pageIndex: page.index,
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
+      },
+    });
+    setSorting({ sort });
+    setLocalStorageData(storage, {
+      page,
+      sort: {
+        sort,
+      },
+    });
+    setQuery(queryText);
   };
 
   const getPaginationRouteOptions = useCallback(() => {
@@ -124,33 +133,6 @@ export function useTable(storageKey: string) {
       sorting,
       pagination,
       onTableChange,
-      fetchMoreData: ({
-        page,
-        sort,
-        queryText,
-      }: {
-        page: Page;
-        sort: Sorting;
-        queryText: string;
-      }) => {
-        setPagination({
-          ...pagination,
-          ...{
-            initialPageSize: page.size,
-            pageSize: page.size,
-            initialPageIndex: page.index,
-            pageIndex: page.index,
-            pageSizeOptions: PAGE_SIZE_OPTIONS,
-          },
-        });
-        setSorting(cleanSortingData(sort));
-        setQuery(queryText);
-
-        setLocalStorageData(storage, {
-          page,
-          sort,
-        });
-      },
     };
   };
 

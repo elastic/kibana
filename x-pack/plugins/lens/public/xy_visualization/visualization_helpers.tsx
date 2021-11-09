@@ -40,9 +40,9 @@ export function getAxisName(
     defaultMessage: 'Horizontal bottom axis',
   });
   if (axis === 'yLeft') {
-    return isHorizontal ? horizontalTop : verticalLeft;
+    return isHorizontal ? horizontalBottom : verticalLeft;
   }
-  return isHorizontal ? horizontalBottom : verticalRight;
+  return isHorizontal ? horizontalTop : verticalRight;
 }
 
 // min requirement for the bug:

@@ -6,3 +6,8 @@
  */
 
 export * from './artifact_entry_card';
+export * from './artifact_entry_card_minified';
+export * from './artifact_entry_collapsible_card';
+export * from './components/card_section_panel';
+export * from './types';
+export { CardCompressedHeaderLayout } from './components/card_compressed_header';

@@ -14,20 +14,24 @@ import {
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getServicesFromMetricDocuments({
   environment,
   setup,
   maxNumServices,
   kuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   environment: string;
   maxNumServices: number;
   kuery: string;
+  start: number;
+  end: number;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(
     'get_services_from_metric_documents',

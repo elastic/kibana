@@ -15,29 +15,31 @@ import {
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
   setup,
   serviceName,
   environment,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
   environment: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...environmentQuery(environment),
   ];
 
@@ -46,9 +48,7 @@ export async function getDerivedServiceAnnotations({
       await apmEventClient.search('get_derived_service_annotations', {
         apm: {
           events: [
-            getProcessorEventForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
+            getProcessorEventForTransactions(searchAggregatedTransactions),
           ],
         },
         body: {
@@ -79,9 +79,7 @@ export async function getDerivedServiceAnnotations({
         {
           apm: {
             events: [
-              getProcessorEventForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
+              getProcessorEventForTransactions(searchAggregatedTransactions),
             ],
           },
           body: {

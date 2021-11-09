@@ -28,13 +28,16 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/indexPatterns/patterns/1',
+        editUrl: '#/management/kibana/dataViews/dataView/1',
         inAppUrl: {
-          path: '/management/kibana/indexPatterns/patterns/1',
+          path: '/management/kibana/dataViews/dataView/1',
           uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },
     },
+  ],
+  allowedTypes: [
+    { name: 'index-pattern', displayName: 'index-pattern', hidden: false, namespaceType: 'single' },
   ],
   selectionConfig: {
     onSelectionChange: () => {},
@@ -56,9 +59,9 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/indexPatterns/patterns/1',
+        editUrl: '#/management/kibana/dataViews/dataView/1',
         inAppUrl: {
-          path: '/management/kibana/indexPatterns/patterns/1',
+          path: '/management/kibana/dataViews/dataView/1',
           uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },

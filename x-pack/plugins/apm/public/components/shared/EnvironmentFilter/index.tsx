@@ -126,6 +126,7 @@ export function EnvironmentFilter({
 
   return (
     <EuiSelect
+      fullWidth
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
         defaultMessage: 'Environment',
       })}
@@ -136,6 +137,7 @@ export function EnvironmentFilter({
       }}
       isLoading={status === 'loading'}
       style={{ minWidth }}
+      data-test-subj="environmentFilter"
     />
   );
 }

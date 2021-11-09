@@ -2,7 +2,7 @@
 
 exports[`should render BoundaryIndexExpression 1`] = `
 <ExpressionWithPopover
-  defaultValue="Select an index pattern and geo shape field"
+  defaultValue="Select a data view and geo shape field"
   expressionDescription="index"
   popoverContent={
     <React.Fragment>
@@ -77,7 +77,7 @@ exports[`should render BoundaryIndexExpression 1`] = `
 
 exports[`should render EntityIndexExpression 1`] = `
 <ExpressionWithPopover
-  defaultValue="Select an index pattern and geo point field"
+  defaultValue="Select a data view and geo point field"
   expressionDescription="index"
   isInvalid={false}
   popoverContent={
@@ -159,7 +159,7 @@ exports[`should render EntityIndexExpression 1`] = `
 
 exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
 <ExpressionWithPopover
-  defaultValue="Select an index pattern and geo point field"
+  defaultValue="Select a data view and geo point field"
   expressionDescription="index"
   isInvalid={true}
   popoverContent={

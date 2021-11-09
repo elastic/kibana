@@ -34,7 +34,7 @@ export class ByteSizeValue {
       return new ByteSizeValue(number);
     }
 
-    const value = parseInt(match[1], 0);
+    const value = parseInt(match[1], 10);
     const unit = match[2];
 
     return new ByteSizeValue(value * unitMultiplier[unit]);

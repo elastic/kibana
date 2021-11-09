@@ -17,6 +17,7 @@ import { tlsFormatters } from '../tls/formatters';
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
 export const httpFormatters: HTTPFormatMap = {
+  [ConfigKeys.METADATA]: (fields) => objectToJsonFormatter(fields[ConfigKeys.METADATA]),
   [ConfigKeys.URLS]: null,
   [ConfigKeys.MAX_REDIRECTS]: null,
   [ConfigKeys.USERNAME]: null,

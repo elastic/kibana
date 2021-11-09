@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  TermsEnumRequest,
+  TermsEnumResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';
@@ -37,6 +41,10 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
     events: ProcessorEvent[];
     includeLegacyData?: boolean;
   };
+};
+
+export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
+  apm: { events: ProcessorEvent[] };
 };
 
 // These keys shoul all be `ProcessorEvent.x`, but until TypeScript 4.2 we're inlining them here.
@@ -102,9 +110,14 @@ export function createApmEventClient({
 
       return callAsyncWithDebug({
         cb: () => {
-          const searchPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(esClient.search(searchParams), request)
-          );
+          const searchPromise = withApmSpan(operationName, () => {
+            const controller = new AbortController();
+            return cancelEsRequestOnAbort(
+              esClient.search(searchParams, { signal: controller.signal }),
+              request,
+              controller
+            );
+          });
 
           return unwrapEsResponse(searchPromise);
         },
@@ -122,6 +135,50 @@ export function createApmEventClient({
         requestType,
         operationName,
         requestParams: searchParams,
+      });
+    },
+
+    async termsEnum(
+      operationName: string,
+      params: APMEventESTermsEnumRequest
+    ): Promise<TermsEnumResponse> {
+      const requestType = 'terms_enum';
+      const { index } = unpackProcessorEvents(params, indices);
+
+      return callAsyncWithDebug({
+        cb: () => {
+          const { apm, ...rest } = params;
+          const termsEnumPromise = withApmSpan(operationName, () => {
+            const controller = new AbortController();
+            return cancelEsRequestOnAbort(
+              esClient.termsEnum(
+                {
+                  index: Array.isArray(index) ? index.join(',') : index,
+                  ...rest,
+                },
+                { signal: controller.signal }
+              ),
+              request,
+              controller
+            );
+          });
+
+          return unwrapEsResponse(termsEnumPromise);
+        },
+        getDebugMessage: () => ({
+          body: getDebugBody({
+            params,
+            requestType,
+            operationName,
+          }),
+          title: getDebugTitle(request),
+        }),
+        isCalledWithInternalUser: false,
+        debug,
+        request,
+        requestType,
+        operationName,
+        requestParams: params,
       });
     },
   };

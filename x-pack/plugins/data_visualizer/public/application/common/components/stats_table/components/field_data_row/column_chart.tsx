@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
 
-import { BarSeries, Chart, Settings } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import './column_chart.scss';
@@ -22,25 +22,12 @@ interface Props {
   columnType: EuiDataGridColumn;
   dataTestSubj: string;
   hideLabel?: boolean;
-  maxChartColumns?: number;
+  maxChartColumns: number;
 }
 
-const columnChartTheme = {
-  background: { color: 'transparent' },
-  chartMargins: {
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 1,
-  },
-  chartPaddings: {
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-  scales: { barsPadding: 0.1 },
-};
+const zeroSize = { bottom: 0, left: 0, right: 0, top: 0 };
+const size = { width: 100, height: 10 };
+
 export const ColumnChart: FC<Props> = ({
   chartData,
   columnType,
@@ -48,26 +35,38 @@ export const ColumnChart: FC<Props> = ({
   hideLabel,
   maxChartColumns,
 }) => {
-  const { data, legendText, xScaleType } = useColumnChart(chartData, columnType, maxChartColumns);
+  const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
 
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
-        <div className="dataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
-          <Chart>
-            <Settings theme={columnChartTheme} />
-            <BarSeries
-              id="histogram"
-              name="count"
-              xScaleType={xScaleType}
-              yScaleType="linear"
-              xAccessor={'key_as_string'}
-              yAccessors={['doc_count']}
-              styleAccessor={(d) => d.datum.color}
-              data={data}
-            />
-          </Chart>
-        </div>
+        <Chart size={size}>
+          <Settings
+            xDomain={Array.from({ length: maxChartColumns }, (_, i) => i)}
+            theme={{
+              chartMargins: zeroSize,
+              chartPaddings: zeroSize,
+              crosshair: { band: { visible: false } },
+            }}
+          />
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            tickFormat={(idx) => {
+              return `${data[idx]?.key_as_string ?? ''}`;
+            }}
+            hide
+          />
+          <BarSeries
+            id={'count'}
+            xScaleType={ScaleType.Ordinal}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['doc_count']}
+            data={data}
+            styleAccessor={(d) => d.datum.color}
+          />
+        </Chart>
       )}
       <div
         className={classNames('dataGridChart__legend', {

@@ -36,8 +36,17 @@ export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
 
 if is_pr; then
-  export ELASTIC_APM_ACTIVE=false
-  export CHECKS_REPORTER_ACTIVE=true
+  if [[ "${GITHUB_PR_LABELS:-}" == *"ci:collect-apm"* ]]; then
+    export ELASTIC_APM_ACTIVE=true
+  else
+    export ELASTIC_APM_ACTIVE=false
+  fi
+
+  if [[ "${GITHUB_STEP_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
+    export CHECKS_REPORTER_ACTIVE=true
+  else
+    export CHECKS_REPORTER_ACTIVE=false
+  fi
 
   # These can be removed once we're not supporting Jenkins and Buildkite at the same time
   # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
@@ -45,11 +54,19 @@ if is_pr; then
   export ghprbActualCommit="$BUILDKITE_COMMIT"
   export BUILD_URL="$BUILDKITE_BUILD_URL"
 
-  # set_git_merge_base # TODO for PRs
+  set_git_merge_base
+
+  # For backwards compatibility
+  export PR_MERGE_BASE="$GITHUB_PR_MERGE_BASE"
+  export PR_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
 else
   export ELASTIC_APM_ACTIVE=true
   export CHECKS_REPORTER_ACTIVE=false
 fi
+
+# These are for backwards-compatibility
+export GIT_COMMIT="${BUILDKITE_COMMIT:-}"
+export GIT_BRANCH="${BUILDKITE_BRANCH:-}"
 
 export FLEET_PACKAGE_REGISTRY_PORT=6104
 export TEST_CORS_SERVER_PORT=6105

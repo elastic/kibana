@@ -7,7 +7,6 @@
  */
 
 import { getExistsFilterField, isExistsFilter } from './exists_filter';
-import { getMissingFilterField, isMissingFilter } from './missing_filter';
 import { getPhrasesFilterField, isPhrasesFilter } from './phrases_filter';
 import { getPhraseFilterField, isPhraseFilter } from './phrase_filter';
 import { getRangeFilterField, isRangeFilter } from './range_filter';
@@ -26,9 +25,6 @@ export const getFilterField = (filter: Filter) => {
   }
   if (isRangeFilter(filter)) {
     return getRangeFilterField(filter);
-  }
-  if (isMissingFilter(filter)) {
-    return getMissingFilterField(filter);
   }
 
   return;

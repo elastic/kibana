@@ -55,7 +55,7 @@ export interface PageProps {
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlContext = useMlContext();
   const jobCreator = jobCreatorFactory(jobType)(
-    mlContext.currentIndexPattern,
+    mlContext.currentDataView,
     mlContext.currentSavedSearch,
     mlContext.combinedQuery
   );
@@ -184,7 +184,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
-  const chartLoader = new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery);
+  const chartLoader = new ChartLoader(mlContext.currentDataView, mlContext.combinedQuery);
 
   const jobValidator = new JobValidator(jobCreator);
 
@@ -216,9 +216,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
                 </EuiTitle>
 
                 <FormattedMessage
-                  id="xpack.ml.newJob.page.createJob.indexPatternTitle"
-                  defaultMessage="Using index pattern {index}"
-                  values={{ index: jobCreator.indexPatternTitle }}
+                  id="xpack.ml.newJob.page.createJob.dataViewName"
+                  defaultMessage="Using data view {dataViewName}"
+                  values={{ dataViewName: jobCreator.indexPatternTitle }}
                 />
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>

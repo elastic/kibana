@@ -178,9 +178,9 @@ export function LayerPanel(
         setNextFocusedButtonId(columnId);
       }
 
-      const filterOperations =
-        groups.find(({ groupId: gId }) => gId === targetItem.groupId)?.filterOperations ||
-        (() => false);
+      const group = groups.find(({ groupId: gId }) => gId === groupId);
+
+      const filterOperations = group?.filterOperations || (() => false);
 
       const dropResult = layerDatasourceOnDrop({
         ...layerDatasourceDropProps,
@@ -193,12 +193,28 @@ export function LayerPanel(
         dropType,
       });
       if (dropResult) {
+        let previousColumn =
+          typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
+
+        // make it inherit only for moving and duplicate
+        if (!previousColumn) {
+          // when duplicating check if the previous column is required
+          if (
+            dropType === 'duplicate_compatible' &&
+            typeof droppedItem.columnId === 'string' &&
+            group?.requiresPreviousColumnOnDuplicate
+          ) {
+            previousColumn = droppedItem.columnId;
+          } else {
+            previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
+          }
+        }
         const newVisState = setDimension({
           columnId,
           groupId,
           layerId: targetLayerId,
           prevState: props.visualizationState,
-          previousColumn: typeof droppedItem.column === 'string' ? droppedItem.column : undefined,
+          previousColumn,
           frame: framePublicAPI,
         });
 
@@ -310,12 +326,7 @@ export function LayerPanel(
         className="lnsLayerPanel"
         style={{ visibility: isDimensionPanelOpen ? 'hidden' : 'visible' }}
       >
-        <EuiPanel
-          data-test-subj={`lns-layerPanel-${layerIndex}`}
-          paddingSize="none"
-          hasBorder
-          hasShadow
-        >
+        <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="none">
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
@@ -378,16 +389,13 @@ export function LayerPanel(
 
           {groups.map((group, groupIndex) => {
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+
             return (
               <EuiFormRow
-                className={
-                  group.supportsMoreColumns
-                    ? 'lnsLayerPanel__row'
-                    : 'lnsLayerPanel__row lnsLayerPanel__row--notSupportsMoreColumns'
-                }
+                className="lnsLayerPanel__row"
                 fullWidth
                 label={
-                  <div>
+                  <>
                     {group.groupLabel}
                     {group.groupTooltip && (
                       <>
@@ -404,92 +412,98 @@ export function LayerPanel(
                         />
                       </>
                     )}
-                  </div>
+                  </>
                 }
                 labelType="legend"
                 key={group.groupId}
                 isInvalid={isMissing}
                 error={
-                  isMissing ? (
-                    <div className="lnsLayerPanel__error">
-                      {i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
+                  isMissing
+                    ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
                         defaultMessage: 'Required dimension',
-                      })}
-                    </div>
-                  ) : (
-                    []
-                  )
+                      })
+                    : []
                 }
               >
                 <>
-                  <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
-                    {group.accessors.map((accessorConfig, accessorIndex) => {
-                      const { columnId } = accessorConfig;
+                  {group.accessors.length ? (
+                    <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
+                      {group.accessors.map((accessorConfig, accessorIndex) => {
+                        const { columnId } = accessorConfig;
 
-                      return (
-                        <DraggableDimensionButton
-                          registerNewButtonRef={registerNewButtonRef}
-                          accessorIndex={accessorIndex}
-                          columnId={columnId}
-                          group={group}
-                          groups={groups}
-                          groupIndex={groupIndex}
-                          key={columnId}
-                          layerDatasourceDropProps={layerDatasourceDropProps}
-                          label={columnLabelMap[columnId]}
-                          layerDatasource={layerDatasource}
-                          layerIndex={layerIndex}
-                          layerId={layerId}
-                          onDrop={onDrop}
-                        >
-                          <div className="lnsLayerPanel__dimension">
-                            <DimensionButton
-                              accessorConfig={accessorConfig}
-                              label={columnLabelMap[accessorConfig.columnId]}
-                              group={group}
-                              onClick={(id: string) => {
-                                setActiveDimension({
-                                  isNew: false,
-                                  activeGroup: group,
-                                  activeId: id,
-                                });
-                              }}
-                              onRemoveClick={(id: string) => {
-                                trackUiEvent('indexpattern_dimension_removed');
-                                props.updateAll(
-                                  datasourceId,
-                                  layerDatasource.removeColumn({
-                                    layerId,
-                                    columnId: id,
-                                    prevState: layerDatasourceState,
-                                  }),
-                                  activeVisualization.removeDimension({
-                                    layerId,
-                                    columnId: id,
-                                    prevState: props.visualizationState,
-                                    frame: framePublicAPI,
-                                  })
-                                );
-                                removeButtonRef(id);
-                              }}
-                            >
-                              <NativeRenderer
-                                render={layerDatasource.renderDimensionTrigger}
-                                nativeProps={{
-                                  ...layerDatasourceConfigProps,
-                                  columnId: accessorConfig.columnId,
-                                  groupId: group.groupId,
-                                  filterOperations: group.filterOperations,
-                                  invalid: group.invalid,
-                                  invalidMessage: group.invalidMessage,
+                        return (
+                          <DraggableDimensionButton
+                            registerNewButtonRef={registerNewButtonRef}
+                            accessorIndex={accessorIndex}
+                            columnId={columnId}
+                            group={group}
+                            groups={groups}
+                            groupIndex={groupIndex}
+                            key={columnId}
+                            layerDatasourceDropProps={layerDatasourceDropProps}
+                            label={columnLabelMap[columnId]}
+                            layerDatasource={layerDatasource}
+                            layerIndex={layerIndex}
+                            layerId={layerId}
+                            onDrop={onDrop}
+                          >
+                            <div className="lnsLayerPanel__dimension">
+                              <DimensionButton
+                                accessorConfig={accessorConfig}
+                                label={columnLabelMap[accessorConfig.columnId]}
+                                group={group}
+                                onClick={(id: string) => {
+                                  setActiveDimension({
+                                    isNew: false,
+                                    activeGroup: group,
+                                    activeId: id,
+                                  });
                                 }}
-                              />
-                            </DimensionButton>
-                          </div>
-                        </DraggableDimensionButton>
-                      );
-                    })}
-                  </ReorderProvider>
+                                onRemoveClick={(id: string) => {
+                                  trackUiEvent('indexpattern_dimension_removed');
+                                  props.updateAll(
+                                    datasourceId,
+                                    layerDatasource.removeColumn({
+                                      layerId,
+                                      columnId: id,
+                                      prevState: layerDatasourceState,
+                                    }),
+                                    activeVisualization.removeDimension({
+                                      layerId,
+                                      columnId: id,
+                                      prevState: props.visualizationState,
+                                      frame: framePublicAPI,
+                                    })
+                                  );
+                                  removeButtonRef(id);
+                                }}
+                                invalid={
+                                  !layerDatasource.isValidColumn(
+                                    layerDatasourceState,
+                                    layerId,
+                                    columnId
+                                  )
+                                }
+                              >
+                                <NativeRenderer
+                                  render={layerDatasource.renderDimensionTrigger}
+                                  nativeProps={{
+                                    ...layerDatasourceConfigProps,
+                                    columnId: accessorConfig.columnId,
+                                    groupId: group.groupId,
+                                    filterOperations: group.filterOperations,
+                                    invalid: group.invalid,
+                                    invalidMessage: group.invalidMessage,
+                                  }}
+                                />
+                              </DimensionButton>
+                            </div>
+                          </DraggableDimensionButton>
+                        );
+                      })}
+                    </ReorderProvider>
+                  ) : null}
+
                   {group.supportsMoreColumns ? (
                     <EmptyDimensionButton
                       group={group}

@@ -8,9 +8,9 @@
 import { getFilterClause } from '../helper';
 import { GetPingHistogramParams, HistogramResult } from '../../../common/runtime_types';
 import { QUERY } from '../../../common/constants';
-import { getHistogramInterval } from '../helper/get_histogram_interval';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { createEsQuery } from '../../../common/utils/es_search';
+import { getHistogramInterval } from '../../../common/lib/get_histogram_interval';
 
 export const getPingHistogram: UMElasticsearchQueryFn<GetPingHistogramParams, HistogramResult> =
   async ({
@@ -87,7 +87,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<GetPingHistogramParams, Hi
       },
     });
 
-    const { body: result } = await uptimeEsClient.search(params);
+    const { body: result } = await uptimeEsClient.search(params, 'getPingsOverTime');
     const buckets = result?.aggregations?.timeseries?.buckets ?? [];
 
     const histogram = buckets.map((bucket) => {

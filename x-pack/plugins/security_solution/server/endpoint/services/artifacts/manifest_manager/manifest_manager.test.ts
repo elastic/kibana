@@ -7,6 +7,7 @@
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
@@ -66,6 +67,12 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_EVENT_FILTERS_MACOS = 'endpoint-eventfilterlist-macos-v1';
   const ARTIFACT_NAME_EVENT_FILTERS_WINDOWS = 'endpoint-eventfilterlist-windows-v1';
   const ARTIFACT_NAME_EVENT_FILTERS_LINUX = 'endpoint-eventfilterlist-linux-v1';
+  const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS =
+    'endpoint-hostisolationexceptionlist-macos-v1';
+  const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS =
+    'endpoint-hostisolationexceptionlist-windows-v1';
+  const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX =
+    'endpoint-hostisolationexceptionlist-linux-v1';
 
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
   let ARTIFACTS_BY_ID: { [K: string]: InternalArtifactCompleteSchema } = {};
@@ -157,31 +164,29 @@ describe('ManifestManager', () => {
       const manifestManagerContext = buildManifestManagerContextMock({ savedObjectsClient });
       const manifestManager = new ManifestManager(manifestManagerContext);
 
-      savedObjectsClient.get = jest
-        .fn()
-        .mockImplementation(async (objectType: string, id: string) => {
-          if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
-            return {
-              attributes: {
-                created: '20-01-2020 10:00:00.000Z',
-                schemaVersion: 'v2',
-                semanticVersion: '1.0.0',
-                artifacts: [
-                  { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
-                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
-                  { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
-                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
-                ],
-              },
-              version: '2.0.0',
-            };
-          } else {
-            return null;
-          }
-        });
+      savedObjectsClient.get = jest.fn().mockImplementation(async (objectType: string) => {
+        if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
+          return {
+            attributes: {
+              created: '20-01-2020 10:00:00.000Z',
+              schemaVersion: 'v2',
+              semanticVersion: '1.0.0',
+              artifacts: [
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+                { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
+              ],
+            },
+            version: '2.0.0',
+          };
+        } else {
+          return null;
+        }
+      });
 
       (
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
@@ -218,31 +223,29 @@ describe('ManifestManager', () => {
       const manifestManagerContext = buildManifestManagerContextMock({ savedObjectsClient });
       const manifestManager = new ManifestManager(manifestManagerContext);
 
-      savedObjectsClient.get = jest
-        .fn()
-        .mockImplementation(async (objectType: string, id: string) => {
-          if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
-            return {
-              attributes: {
-                created: '20-01-2020 10:00:00.000Z',
-                schemaVersion: 'v2',
-                semanticVersion: '1.0.0',
-                artifacts: [
-                  { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
-                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
-                  { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
-                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
-                ],
-              },
-              version: '2.0.0',
-            };
-          } else {
-            return null;
-          }
-        });
+      savedObjectsClient.get = jest.fn().mockImplementation(async (objectType: string) => {
+        if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
+          return {
+            attributes: {
+              created: '20-01-2020 10:00:00.000Z',
+              schemaVersion: 'v2',
+              semanticVersion: '1.0.0',
+              artifacts: [
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+                { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
+              ],
+            },
+            version: '2.0.0',
+          };
+        } else {
+          return null;
+        }
+      });
 
       (
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
@@ -278,6 +281,9 @@ describe('ManifestManager', () => {
       ARTIFACT_NAME_EVENT_FILTERS_MACOS,
       ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
       ARTIFACT_NAME_EVENT_FILTERS_LINUX,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
     ];
 
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
@@ -310,7 +316,7 @@ describe('ManifestManager', () => {
 
       context.savedObjectsClient.create = jest
         .fn()
-        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
       const manifest = await manifestManager.buildNewManifest();
@@ -321,7 +327,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(9);
+      expect(artifacts.length).toBe(12);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       for (const artifact of artifacts) {
@@ -336,16 +342,18 @@ describe('ManifestManager', () => {
     test('Builds fully new manifest if no baseline parameter passed and present exception list items', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
         [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
+        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: { linux: [hostIsolationExceptionsItem] },
       });
       context.savedObjectsClient.create = jest
         .fn()
-        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
       context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
@@ -358,7 +366,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(9);
+      expect(artifacts.length).toBe(12);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -374,6 +382,11 @@ describe('ManifestManager', () => {
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({
+        entries: translateToEndpointExceptions([hostIsolationExceptionsItem], 'v1'),
+      });
 
       for (const artifact of artifacts) {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
@@ -395,7 +408,7 @@ describe('ManifestManager', () => {
       context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
       context.savedObjectsClient.create = jest
         .fn()
-        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
       const oldManifest = await manifestManager.buildNewManifest();
@@ -413,7 +426,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(9);
+      expect(artifacts.length).toBe(12);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(artifacts[0]).toStrictEqual(oldManifest.getAllArtifacts()[0]);
@@ -462,7 +475,7 @@ describe('ManifestManager', () => {
 
       context.savedObjectsClient.create = jest
         .fn()
-        .mockImplementation((type: string, object: InternalManifestSchema) => ({
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
 
@@ -474,7 +487,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(10);
+      expect(artifacts.length).toBe(13);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -653,7 +666,7 @@ describe('ManifestManager', () => {
 
       context.savedObjectsClient.create = jest
         .fn()
-        .mockImplementation((type: string, object: InternalManifestSchema) => object);
+        .mockImplementation((_type: string, object: InternalManifestSchema) => object);
 
       await expect(manifestManager.commit(manifest)).resolves.toBeUndefined();
 
@@ -690,7 +703,7 @@ describe('ManifestManager', () => {
 
       context.savedObjectsClient.update = jest
         .fn()
-        .mockImplementation((type: string, id: string, object: InternalManifestSchema) => object);
+        .mockImplementation((_type: string, _id: string, object: InternalManifestSchema) => object);
 
       await expect(manifestManager.commit(manifest)).resolves.toBeUndefined();
 
@@ -1002,6 +1015,76 @@ describe('ManifestManager', () => {
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
 
       expect(context.packagePolicyService.update).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('cleanup artifacts', () => {
+    const mockPolicyListIdsResponse = (items: string[]) =>
+      jest.fn().mockResolvedValue({
+        items,
+        page: 1,
+        per_page: 100,
+        total: items.length,
+      });
+
+    test('Successfully removes orphan artifacts', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+      const manifest = await manifestManager.buildNewManifest();
+
+      await manifestManager.cleanup(manifest);
+      const artifactToBeRemoved = await context.artifactClient.getArtifact('');
+      expect(artifactToBeRemoved).not.toBeUndefined();
+
+      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledWith(
+        getArtifactId(artifactToBeRemoved!)
+      );
+    });
+
+    test('When there is no artifact to be removed', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+
+      context.artifactClient.listArtifacts = jest.fn().mockResolvedValue([
+        {
+          id: '123',
+          type: 'trustlist',
+          identifier: 'endpoint-trustlist-windows-v1',
+          packageName: 'endpoint',
+          encryptionAlgorithm: 'none',
+          relative_url: '/api/fleet/artifacts/trustlist-v1/d801aa1fb',
+          compressionAlgorithm: 'zlib',
+          decodedSha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+          decodedSize: 14,
+          encodedSha256: 'd29238d40',
+          encodedSize: 22,
+          body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
+          created: '2021-03-08T14:47:13.714Z',
+        },
+      ]);
+      const manifest = await manifestManager.buildNewManifest();
+
+      await manifestManager.cleanup(manifest);
+
+      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledTimes(0);
     });
   });
 });

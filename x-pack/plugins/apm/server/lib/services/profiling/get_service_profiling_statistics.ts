@@ -24,7 +24,7 @@ import {
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 const MAX_STACK_IDS = 10000;
@@ -188,16 +188,20 @@ export async function getServiceProfilingStatistics({
   environment,
   valueType,
   logger,
+  start,
+  end,
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   environment: string;
   valueType: ProfilingValueType;
   logger: Logger;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_service_profiling_statistics', async () => {
-    const { apmEventClient, start, end } = setup;
+    const { apmEventClient } = setup;
 
     const valueTypeField = getValueTypeConfig(valueType).field;
 

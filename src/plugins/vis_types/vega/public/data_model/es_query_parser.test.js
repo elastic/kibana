@@ -178,11 +178,23 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
   );
   test(
     `%autointerval% = true`,
-    check({ interval: { '%autointerval%': true } }, { calendar_interval: `1h` }, ctxObj)
+    check(
+      { date_histogram: { interval: { '%autointerval%': true } } },
+      { date_histogram: { calendar_interval: `1h` } },
+      ctxObj
+    )
   );
   test(
     `%autointerval% = 10`,
-    check({ interval: { '%autointerval%': 10 } }, { fixed_interval: `3h` }, ctxObj)
+    check(
+      { date_histogram: { interval: { '%autointerval%': 10 } } },
+      { date_histogram: { fixed_interval: `3h` } },
+      ctxObj
+    )
+  );
+  test(
+    `histogram with interval`,
+    check({ histogram: { interval: 1 } }, { histogram: { interval: 1 } }, ctxObj)
   );
   test(`%timefilter% = min`, check({ a: { '%timefilter%': 'min' } }, { a: rangeStart }));
   test(`%timefilter% = max`, check({ a: { '%timefilter%': 'max' } }, { a: rangeEnd }));

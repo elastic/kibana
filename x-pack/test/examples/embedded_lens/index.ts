@@ -15,14 +15,19 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
   describe('embedded Lens examples', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/lens/basic'); // need at least one index pattern
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      ); // need at least one index pattern
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     describe('', function () {

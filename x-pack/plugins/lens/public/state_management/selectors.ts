@@ -10,7 +10,7 @@ import { SavedObjectReference } from 'kibana/server';
 import { LensState } from './types';
 import { extractFilterReferences } from '../persistence';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
-import { createDatasourceLayers } from '../editor_frame_service/editor_frame';
+import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
 export const selectQuery = (state: LensState) => state.lens.query;
@@ -141,13 +141,15 @@ export const selectAreDatasourcesLoaded = createSelector(
 
 export const selectDatasourceLayers = createSelector(
   [selectDatasourceStates, selectDatasourceMap],
-  (datasourceStates, datasourceMap) => createDatasourceLayers(datasourceStates, datasourceMap)
+  (datasourceStates, datasourceMap) => getDatasourceLayers(datasourceStates, datasourceMap)
 );
 
 export const selectFramePublicAPI = createSelector(
   [selectDatasourceStates, selectActiveData, selectDatasourceMap],
-  (datasourceStates, activeData, datasourceMap) => ({
-    datasourceLayers: createDatasourceLayers(datasourceStates, datasourceMap),
-    activeData,
-  })
+  (datasourceStates, activeData, datasourceMap) => {
+    return {
+      datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
+      activeData,
+    };
+  }
 );

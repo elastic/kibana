@@ -1,0 +1,203 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { isFailedResourceState, isLoadedResourceState } from '../../../state';
+import { getHostIsolationExceptionItems } from '../service';
+import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
+import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
+
+jest.mock('../service');
+jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+
+const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+
+describe('When on the host isolation exceptions page', () => {
+  let render: () => ReturnType<AppContextTestRender['render']>;
+  let renderResult: ReturnType<typeof render>;
+  let history: AppContextTestRender['history'];
+  let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
+  let mockedContext: AppContextTestRender;
+
+  const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
+
+  beforeEach(() => {
+    getHostIsolationExceptionItemsMock.mockReset();
+    mockedContext = createAppRootMockRenderer();
+    ({ history } = mockedContext);
+    render = () => (renderResult = mockedContext.render(<HostIsolationExceptionsList />));
+    waitForAction = mockedContext.middlewareSpy.waitForAction;
+
+    act(() => {
+      history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
+    });
+  });
+  describe('When on the host isolation list page', () => {
+    const dataReceived = () =>
+      act(async () => {
+        await waitForAction('hostIsolationExceptionsPageDataChanged', {
+          validate(action) {
+            return isLoadedResourceState(action.payload);
+          },
+        });
+      });
+    describe('And no data exists', () => {
+      beforeEach(async () => {
+        getHostIsolationExceptionItemsMock.mockReturnValue({
+          data: [],
+          page: 1,
+          per_page: 10,
+          total: 0,
+        });
+      });
+
+      it('should show the Empty message', async () => {
+        render();
+        await dataReceived();
+        expect(renderResult.getByTestId('hostIsolationExceptionsEmpty')).toBeTruthy();
+      });
+
+      it('should not display the search bar', async () => {
+        render();
+        await dataReceived();
+        expect(renderResult.queryByTestId('searchExceptions')).toBeFalsy();
+      });
+    });
+    describe('And data exists', () => {
+      beforeEach(async () => {
+        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+      });
+
+      it('should show loading indicator while retrieving data', async () => {
+        let releaseApiResponse: (value?: unknown) => void;
+
+        getHostIsolationExceptionItemsMock.mockReturnValue(
+          new Promise((resolve) => (releaseApiResponse = resolve))
+        );
+        render();
+
+        expect(renderResult.getByTestId('hostIsolationExceptionsContent-loader')).toBeTruthy();
+
+        const wasReceived = dataReceived();
+        releaseApiResponse!();
+        await wasReceived;
+        expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
+      });
+
+      it('should display the search bar and item count', async () => {
+        render();
+        await dataReceived();
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+        expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
+          'Showing 1 exception'
+        );
+      });
+
+      it('should show items on the list', async () => {
+        render();
+        await dataReceived();
+
+        expect(renderResult.getByTestId('hostIsolationExceptionsCard')).toBeTruthy();
+      });
+
+      it('should show API error if one is encountered', async () => {
+        getHostIsolationExceptionItemsMock.mockImplementation(() => {
+          throw new Error('Server is too far away');
+        });
+        const errorDispatched = act(async () => {
+          await waitForAction('hostIsolationExceptionsPageDataChanged', {
+            validate(action) {
+              return isFailedResourceState(action.payload);
+            },
+          });
+        });
+        render();
+        await errorDispatched;
+        expect(
+          renderResult.getByTestId('hostIsolationExceptionsContent-error').textContent
+        ).toEqual(' Server is too far away');
+      });
+
+      it('should show the searchbar when no results from search', async () => {
+        // render the page with data
+        render();
+        await dataReceived();
+
+        // check if the searchbar is there
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+
+        // simulate a no-data scenario
+        getHostIsolationExceptionItemsMock.mockReturnValueOnce({
+          data: [],
+          page: 1,
+          per_page: 10,
+          total: 0,
+        });
+
+        // type something to search and press the button
+        userEvent.type(renderResult.getByTestId('searchField'), 'this does not exists');
+        userEvent.click(renderResult.getByTestId('searchButton'));
+
+        // wait for the page render
+        await dataReceived();
+
+        // check the url changed
+        expect(mockedContext.history.location.search).toBe('?filter=this%20does%20not%20exists');
+
+        // check the searchbar is still there
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+      });
+    });
+
+    describe('has canIsolateHost privileges', () => {
+      beforeEach(async () => {
+        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
+        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+      });
+
+      it('should show the create flyout when the add button is pressed', async () => {
+        render();
+        await dataReceived();
+        userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+        await dataReceived();
+        expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+      });
+
+      it('should show the create flyout when the show location is create', async () => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
+        render();
+        await dataReceived();
+        expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
+      });
+    });
+
+    describe('does not have canIsolateHost privileges', () => {
+      beforeEach(() => {
+        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
+      });
+
+      it('should not show the create flyout if the user navigates to the create url', () => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
+        render();
+        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
+      });
+
+      it('should not show the create flyout if the user navigates to the edit url', () => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit`);
+        render();
+        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
+      });
+    });
+  });
+});

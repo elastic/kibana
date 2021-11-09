@@ -11,9 +11,10 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaRequest } from 'src/core/server';
 import type { KibanaExecutionContext } from 'src/core/public';
 
-import { ExpressionType } from '../expression_types';
+import { Datatable, ExpressionType } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { TablesAdapter } from '../util/tables_adapter';
+import { ExpressionsInspectorAdapter } from '../util';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
@@ -69,12 +70,18 @@ export interface ExecutionContext<
    * Contains the meta-data about the source of the expression.
    */
   getExecutionContext: () => KibanaExecutionContext | undefined;
+
+  /**
+   * Logs datatable.
+   */
+  logDatatable?(name: string, datatable: Datatable): void;
 }
 
 /**
  * Default inspector adapters created if inspector adapters are not set explicitly.
  */
-export interface DefaultInspectorAdapters extends Adapters {
+export interface DefaultInspectorAdapters {
   requests: RequestAdapter;
   tables: TablesAdapter;
+  expression: ExpressionsInspectorAdapter;
 }

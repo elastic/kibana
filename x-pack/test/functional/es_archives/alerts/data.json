@@ -452,3 +452,43 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:d7a8c6a1-9394-48df-a634-d5457c35d747",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test upgrade of ruleAlertId",
+        "alertTypeId" : "siem.notifications",
+        "consumer" : "alertsFixture",
+        "params" : {
+          "ruleAlertId" : "1a4ed6ae-3c89-44b2-999d-db554144504c"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}

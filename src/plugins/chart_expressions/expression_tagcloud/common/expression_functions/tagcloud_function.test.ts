@@ -12,6 +12,8 @@ import { functionWrapper } from '../../../../expressions/common/expression_funct
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
+type Arguments = Parameters<ReturnType<typeof tagcloudFunction>['fn']>[1];
+
 describe('interpreter/functions#tagcloud', () => {
   const fn = functionWrapper(tagcloudFunction());
   const column1 = 'Count';
@@ -26,7 +28,7 @@ describe('interpreter/functions#tagcloud', () => {
       { [column1]: 0, [column2]: 'US' },
       { [column1]: 10, [column2]: 'UK' },
     ],
-  };
+  } as unknown as Datatable;
   const visConfig = {
     scale: 'linear',
     orientation: 'single',
@@ -73,12 +75,12 @@ describe('interpreter/functions#tagcloud', () => {
   };
 
   it('returns an object with the correct structure for number accessors', () => {
-    const actual = fn(context, { ...visConfig, ...numberAccessors }, undefined);
+    const actual = fn(context, { ...visConfig, ...numberAccessors } as Arguments, undefined);
     expect(actual).toMatchSnapshot();
   });
 
   it('returns an object with the correct structure for string accessors', () => {
-    const actual = fn(context, { ...visConfig, ...stringAccessors }, undefined);
+    const actual = fn(context, { ...visConfig, ...stringAccessors } as Arguments, undefined);
     expect(actual).toMatchSnapshot();
   });
 
@@ -93,7 +95,7 @@ describe('interpreter/functions#tagcloud', () => {
         },
       },
     };
-    await fn(context, { ...visConfig, ...numberAccessors }, handlers as any);
+    await fn(context, { ...visConfig, ...numberAccessors } as Arguments, handlers as any);
 
     expect(loggedTable!).toMatchSnapshot();
   });

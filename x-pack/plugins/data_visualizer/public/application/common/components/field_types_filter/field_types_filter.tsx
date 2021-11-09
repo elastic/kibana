@@ -12,9 +12,9 @@ import { MultiSelectPicker, Option } from '../multi_select_picker';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,
-} from '../stats_table/types/field_vis_config';
+} from '../../../../../common/types/field_vis_config';
 import { FieldTypeIcon } from '../field_type_icon';
-import { JOB_FIELD_TYPES_OPTIONS } from '../../../../../common';
+import { jobTypeLabels } from '../../util/field_types_utils';
 
 interface Props {
   fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>;
@@ -39,27 +39,18 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
     const fieldTypesTracker = new Set();
     const fieldTypes: Option[] = [];
     fields.forEach(({ type }) => {
-      if (
-        type !== undefined &&
-        !fieldTypesTracker.has(type) &&
-        JOB_FIELD_TYPES_OPTIONS[type] !== undefined
-      ) {
-        const item = JOB_FIELD_TYPES_OPTIONS[type];
+      if (type !== undefined && !fieldTypesTracker.has(type) && jobTypeLabels[type] !== undefined) {
+        const label = jobTypeLabels[type];
 
         fieldTypesTracker.add(type);
         fieldTypes.push({
           value: type,
           name: (
             <EuiFlexGroup>
-              <EuiFlexItem grow={true}> {item.name}</EuiFlexItem>
+              <EuiFlexItem grow={true}> {label}</EuiFlexItem>
               {type && (
                 <EuiFlexItem grow={false}>
-                  <FieldTypeIcon
-                    type={type}
-                    fieldName={item.name}
-                    tooltipEnabled={false}
-                    needsAria={true}
-                  />
+                  <FieldTypeIcon type={type} tooltipEnabled={false} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

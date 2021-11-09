@@ -6,10 +6,9 @@
  */
 
 import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
+import { DataViewBase, FilterStateStore } from '@kbn/es-query';
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
@@ -17,7 +16,6 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '../../../common';
-import { IIndexPattern } from '../../../../../../src/plugins/data/public';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
@@ -138,7 +136,7 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
 interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -190,9 +188,9 @@ export const combineQueries = ({
 
 export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
   const combinedQuery = combineQueries(combineQueriesParams);
-  return combinedQuery
+  return combinedQuery?.filterQuery
     ? {
-        filterQuery: replaceStatusField(combinedQuery!.filterQuery),
+        filterQuery: combinedQuery.filterQuery,
       }
     : null;
 };
@@ -228,23 +226,14 @@ export const getCombinedFilterQuery = ({
   to,
   filters,
   ...combineQueriesParams
-}: CombineQueries & { from: string; to: string }): string => {
-  return replaceStatusField(
-    combineQueries({
-      ...combineQueriesParams,
-      filters: [...filters, buildTimeRangeFilter(from, to)],
-    })!.filterQuery
-  );
-};
+}: CombineQueries & { from: string; to: string }): string | undefined => {
+  const combinedQueries = combineQueries({
+    ...combineQueriesParams,
+    filters: [...filters, buildTimeRangeFilter(from, to)],
+  });
 
-/**
- * This function is a temporary patch to prevent queries using old `signal.status` field.
- * @todo The `signal.status` field should not be queried anymore and
- * must be replaced by `ALERT_WORKFLOW_STATUS` field name constant
- * @deprecated
- */
-const replaceStatusField = (query: string): string =>
-  query.replaceAll('signal.status', ALERT_WORKFLOW_STATUS);
+  return combinedQueries ? combinedQueries.filterQuery : undefined;
+};
 
 /**
  * The CSS class name of a "stateful event", which appears in both

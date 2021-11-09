@@ -31,6 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
+      await kibanaServer.uiSettings.replace({
+        'timepicker:timeDefaults':
+          '{  "from": "2019-04-27T23:56:51.374Z",  "to": "2019-08-23T16:18:51.821Z"}',
+      });
     });
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -40,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         refresh: true,
         body: { query: { match_all: {} } },
       });
+      await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
     });
 
     describe('Print PDF button', () => {
@@ -53,10 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
-        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.clickGo();

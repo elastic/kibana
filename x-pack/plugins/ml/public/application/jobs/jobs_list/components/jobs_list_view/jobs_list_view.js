@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { isEqual, debounce } from 'lodash';
+import { debounce } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -101,6 +101,7 @@ export class JobsListView extends Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.lastRefresh !== this.props.lastRefresh) {
+      this.setState({ isRefreshing: true });
       this.refreshJobSummaryList();
     }
   }
@@ -387,9 +388,8 @@ export class JobsListView extends Component {
     }
 
     const { jobs } = await ml.jobs.blockingJobTasks();
-    const blockingJobIds = Object.keys(jobs);
-    const taskListHasChanged =
-      isEqual(blockingJobIds.sort(), this.state.blockingJobIds.sort()) === false;
+    const blockingJobIds = jobs.map((j) => Object.keys(j)[0]).sort();
+    const taskListHasChanged = blockingJobIds.join() !== this.state.blockingJobIds.join();
 
     this.setState({
       blockingJobIds,
@@ -501,7 +501,11 @@ export class JobsListView extends Component {
 
           <NodeAvailableWarning />
           <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
-          <SavedObjectsWarning jobType="anomaly-detector" />
+          <SavedObjectsWarning
+            jobType="anomaly-detector"
+            onCloseFlyout={this.onRefreshClick}
+            forceRefresh={loading || isRefreshing}
+          />
 
           <UpgradeWarning />
 

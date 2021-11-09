@@ -71,7 +71,6 @@ function getValueLabelsStyling() {
   return {
     displayValue: {
       fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-      fill: { textInverted: false, textContrast: true },
       alignment: { horizontal: HorizontalAlignment.Center, vertical: VerticalAlignment.Middle },
     },
   };
@@ -166,7 +165,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       baseTheme={baseTheme}
       showLegend={showLegend}
       legendPosition={legendPosition}
-      allowBrushingLastHistogramBucket={isTimeChart}
+      allowBrushingLastHistogramBin={isTimeChart}
       roundHistogramBrushValues={enableHistogramMode && !isTimeChart}
       legendColorPicker={legendColorPicker}
       onElementClick={onElementClick}

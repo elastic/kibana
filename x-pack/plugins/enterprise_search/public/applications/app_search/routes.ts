@@ -49,6 +49,7 @@ export const ENGINE_RESULT_SETTINGS_PATH = `${ENGINE_PATH}/result_settings`;
 export const ENGINE_CURATIONS_PATH = `${ENGINE_PATH}/curations`;
 export const ENGINE_CURATIONS_NEW_PATH = `${ENGINE_CURATIONS_PATH}/new`;
 export const ENGINE_CURATION_PATH = `${ENGINE_CURATIONS_PATH}/:curationId`;
+export const ENGINE_CURATION_SUGGESTION_PATH = `${ENGINE_CURATIONS_PATH}/suggestions/:query`;
 
 export const ENGINE_SEARCH_UI_PATH = `${ENGINE_PATH}/search_ui`;
 export const ENGINE_API_LOGS_PATH = `${ENGINE_PATH}/api_logs`;

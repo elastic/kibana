@@ -11,7 +11,7 @@ import { getMetricsProjection } from '../../projections/metrics';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { ChartBase } from './types';
 
@@ -56,6 +56,8 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
   chartBase,
   aggs,
   additionalFilters = [],
@@ -63,22 +65,25 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
   chartBase: ChartBase;
   aggs: T;
   additionalFilters?: Filter[];
   operationName: string;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const projection = getMetricsProjection({
     environment,
     kuery,
-    setup,
     serviceName,
     serviceNodeName,
+    start,
+    end,
   });
 
   const params: GenericMetricsRequest = mergeProjection(projection, {
@@ -94,7 +99,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
           date_histogram: getMetricsDateHistogramParams({
             start,
             end,
-            metricsInterval: config['xpack.apm.metricsInterval'],
+            metricsInterval: config.metricsInterval,
           }),
           aggs,
         },

@@ -54,8 +54,7 @@ export function WorkspacePanelWrapper({
       dispatchLens(
         updateVisualizationState({
           visualizationId: activeVisualization.id,
-          updater: newState,
-          clearStagedPreview: false,
+          newState,
         })
       );
     },
@@ -125,10 +124,15 @@ export function WorkspacePanelWrapper({
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
+
       <EuiPageContent
         className={classNames('lnsWorkspacePanelWrapper', {
           'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
         })}
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
       >
         <WorkspaceTitle />
         {children}

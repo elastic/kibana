@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
 import { navTabs } from '../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../app/types';
 import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
-import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { UrlStateContainerPropTypes, LocationTypes } from './types';
 import { Query } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../../network/store';
@@ -87,9 +84,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
   indexPattern: {
     fields: [
       {
-        aggregatable: true,
         name: '@timestamp',
-        searchable: true,
         type: 'date',
       },
     ],
@@ -127,12 +122,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
     },
     [CONSTANTS.sourcerer]: {},
   },
-  setInitialStateFromUrl: dispatchSetInitialStateFromUrl(mockDispatch),
-  updateTimeline: jest.fn() as unknown as DispatchUpdateTimeline,
-  updateTimelineIsLoading: jest.fn() as unknown as ActionCreator<{
-    id: string;
-    isLoading: boolean;
-  }>,
   history: {
     ...mockHistory,
     location: defaultLocation,

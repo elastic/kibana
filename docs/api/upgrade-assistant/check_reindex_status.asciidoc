@@ -4,7 +4,9 @@
 <titleabbrev>Check reindex status</titleabbrev>
 ++++
 
-experimental[] Check the status of the reindex operation.
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+Check the status of the reindex task.
 
 [[check-reindex-status-request]]
 ==== Request
@@ -43,7 +45,7 @@ The API returns the following:
 <2> Current status of the reindex. For details, see <<status-code,Status codes>>.
 <3> Last successfully completed step of the reindex. For details, see <<step-code,Step codes>> table.
 <4> Task ID of the reindex task in Elasticsearch. Only present if reindexing has started.
-<5> Percentage of how far the reindexing task in Elasticsearch has progressed, in decimal from from 0 to 1.
+<5> Percentage of how far the reindexing task in Elasticsearch has progressed, in decimal form from 0 to 1.
 <6> Error that caused the reindex to fail, if it failed.
 <7> An array of any warning codes explaining what changes are required for this reindex. For details, see <<warning-code,Warning codes>>.
 <8> Specifies if the user has sufficient privileges to reindex this index. When security is unavailable or disables, returns `true`.
@@ -73,7 +75,7 @@ To resume the reindex, you must submit a new POST request to the `/api/upgrade_a
 ==== Step codes
 
 `0`::
-  The reindex operation has been created in Kibana.
+  The reindex task has been created in Kibana.
 
 `10`::
   The index group services stopped. Only applies to some system indices.

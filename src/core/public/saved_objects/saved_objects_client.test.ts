@@ -148,13 +148,15 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#resolve', () => {
-    beforeEach(() => {
+    function mockResolvedObjects(...objects: Array<Record<string, unknown>>) {
       http.fetch.mockResolvedValue({
-        resolved_objects: [
-          { saved_object: doc, outcome: 'conflict', alias_target_id: 'another-id' },
-        ],
+        resolved_objects: objects.map((obj) => ({
+          saved_object: obj,
+          outcome: 'conflict',
+          alias_target_id: 'another-id',
+        })),
       });
-    });
+    }
 
     test('rejects if `type` parameter is undefined', () => {
       return expect(
@@ -176,6 +178,7 @@ describe('SavedObjectsClient', () => {
     });
 
     test('makes HTTP call', async () => {
+      mockResolvedObjects(doc);
       await savedObjectsClient.resolve(doc.type, doc.id);
       expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -191,10 +194,12 @@ describe('SavedObjectsClient', () => {
 
     test('batches several #resolve calls into a single HTTP call', async () => {
       // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      mockResolvedObjects({ ...doc, type: 'type2' });
       await savedObjectsClient.resolve('type2', doc.id);
       http.fetch.mockClear();
 
       // Make two #resolve calls right after one another
+      mockResolvedObjects({ ...doc, type: 'type1' }, { ...doc, type: 'type0' });
       savedObjectsClient.resolve('type1', doc.id);
       await savedObjectsClient.resolve('type0', doc.id);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
@@ -211,58 +216,55 @@ describe('SavedObjectsClient', () => {
       `);
     });
 
-    test('removes duplicates when calling `_bulk_resolve`', async () => {
+    test('handles duplicates correctly', async () => {
       // Await #resolve call to ensure batchQueue is empty and throttle has reset
+      mockResolvedObjects({ ...doc, type: 'type2' });
       await savedObjectsClient.resolve('type2', doc.id);
       http.fetch.mockClear();
 
-      savedObjectsClient.resolve(doc.type, doc.id);
-      savedObjectsClient.resolve('some-type', 'some-id');
-      await savedObjectsClient.resolve(doc.type, doc.id);
+      mockResolvedObjects(doc, { ...doc, type: 'type2' }, { ...doc, type: 'type3' }); // the client will only request three objects, so we only mock three results
+      const call1 = savedObjectsClient.resolve(doc.type, doc.id);
+      const call2 = savedObjectsClient.resolve('type2', doc.id);
+      const call3 = savedObjectsClient.resolve(doc.type, doc.id);
+      const objFromCall4 = await savedObjectsClient.resolve('type3', doc.id);
+      const objFromCall1 = await call1;
+      const objFromCall2 = await call2;
+      const objFromCall3 = await call3;
 
+      // Assertion 1: all calls should return the expected object
+      expect(objFromCall1.saved_object).toEqual(
+        expect.objectContaining({ type: doc.type, id: doc.id, error: undefined })
+      );
+      expect(objFromCall2.saved_object).toEqual(
+        expect.objectContaining({ type: 'type2', id: doc.id, error: undefined })
+      );
+      expect(objFromCall3.saved_object).toEqual(
+        expect.objectContaining({ type: doc.type, id: doc.id, error: undefined })
+      );
+      expect(objFromCall4.saved_object).toEqual(
+        expect.objectContaining({ type: 'type3', id: doc.id, error: undefined })
+      );
+
+      // Assertion 2: requests should be deduplicated (call1 and call3)
       expect(http.fetch).toHaveBeenCalledTimes(1);
       expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "/api/saved_objects/_bulk_resolve",
           Object {
-            "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"},{\\"id\\":\\"some-id\\",\\"type\\":\\"some-type\\"}]",
+            "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"},{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type2\\"},{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type3\\"}]",
             "method": "POST",
             "query": undefined,
           },
         ]
       `);
-    });
 
-    test('resolves with correct object when there are duplicates present', async () => {
-      // Await #resolve call to ensure batchQueue is empty and throttle has reset
-      await savedObjectsClient.resolve('type2', doc.id);
-      http.fetch.mockClear();
-
-      const call1 = savedObjectsClient.resolve(doc.type, doc.id);
-      const objFromCall2 = await savedObjectsClient.resolve(doc.type, doc.id);
-      const objFromCall1 = await call1;
-
-      expect(objFromCall1.saved_object.type).toBe(doc.type);
-      expect(objFromCall1.saved_object.id).toBe(doc.id);
-
-      expect(objFromCall2.saved_object.type).toBe(doc.type);
-      expect(objFromCall2.saved_object.id).toBe(doc.id);
-    });
-
-    test('do not share instances or references between duplicate callers', async () => {
-      // Await #resolve call to ensure batchQueue is empty and throttle has reset
-      await savedObjectsClient.resolve('type2', doc.id);
-      http.fetch.mockClear();
-
-      const call1 = savedObjectsClient.resolve(doc.type, doc.id);
-      const objFromCall2 = await savedObjectsClient.resolve(doc.type, doc.id);
-      const objFromCall1 = await call1;
-
+      // Assertion 3: deduplicated requests should not share response object instances or references
       objFromCall1.saved_object.set('title', 'new title');
-      expect(objFromCall2.saved_object.get('title')).toEqual('Example title');
+      expect(objFromCall3.saved_object.get('title')).toEqual('Example title'); // unchanged
     });
 
     test('resolves with ResolvedSimpleSavedObject instance', async () => {
+      mockResolvedObjects(doc);
       const result = await savedObjectsClient.resolve(doc.type, doc.id);
       expect(result.saved_object).toBeInstanceOf(SimpleSavedObject);
       expect(result.saved_object.type).toBe(doc.type);

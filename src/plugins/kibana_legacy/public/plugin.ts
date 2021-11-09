@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, CoreSetup } from 'kibana/public';
-import { injectHeaderStyle } from './utils/inject_header_style';
+import type { CoreSetup } from 'kibana/public';
 
 export class KibanaLegacyPlugin {
   public setup(core: CoreSetup<{}, KibanaLegacyStart>) {
     return {};
   }
 
-  public start({ uiSettings }: CoreStart) {
-    injectHeaderStyle(uiSettings);
+  public start() {
     return {
       /**
        * Loads the font-awesome icon font. Should be removed once the last consumer has migrated to EUI
@@ -23,14 +21,6 @@ export class KibanaLegacyPlugin {
        */
       loadFontAwesome: async () => {
         await import('./font_awesome');
-      },
-      /**
-       * Loads angular bootstrap modules. Should be removed once the last consumer has migrated to EUI
-       * @deprecated
-       */
-      loadAngularBootstrap: async () => {
-        const { initAngularBootstrap } = await import('./angular_bootstrap');
-        initAngularBootstrap();
       },
     };
   }

@@ -9,6 +9,6 @@
   },
   "description": "Adds embeddables service to Kibana",
   "requiredPlugins": ["inspector", "uiActions"],
-  "extraPublicDirs": ["public/lib/test_samples", "common"],
+  "extraPublicDirs": ["common"],
   "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"]
 }

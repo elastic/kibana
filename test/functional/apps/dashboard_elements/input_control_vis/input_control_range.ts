@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
 
-  describe('input control range', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/113744
+  describe.skip('input control range', () => {
     before(async () => {
       await PageObjects.visualize.initTests();
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);

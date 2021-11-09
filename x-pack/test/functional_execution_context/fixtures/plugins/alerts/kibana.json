@@ -6,7 +6,6 @@
   },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack"],
   "requiredPlugins": ["features", "alerting"],
   "server": true,
   "ui": false

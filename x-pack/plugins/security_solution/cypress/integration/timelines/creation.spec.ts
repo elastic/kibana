@@ -12,8 +12,10 @@ import {
   NOTES_TEXT,
   PIN_EVENT,
   SERVER_SIDE_EVENT_COUNT,
+  TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
   TIMELINE_FLYOUT_WRAPPER,
+  TIMELINE_QUERY,
   TIMELINE_PANEL,
   TIMELINE_TAB_CONTENT_EQL,
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
@@ -21,9 +23,9 @@ import {
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
-
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
+import { selectCustomTemplates } from '../../tasks/templates';
 import {
   addEqlToTimeline,
   addFilter,
@@ -113,30 +115,22 @@ describe('Timelines', (): void => {
 
 describe('Create a timeline from a template', () => {
   before(() => {
+    cy.intercept('/api/timeline*').as('timeline');
     cleanKibana();
+    createTimelineTemplate(getTimeline());
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
     waitForTimelinesPanelToBeLoaded();
   });
-
   it('Should have the same query and open the timeline modal', () => {
-    createTimelineTemplate(getTimeline()).then(() => {
-      expandEventAction();
-      cy.intercept('/api/timeline').as('timeline');
+    selectCustomTemplates();
+    cy.wait('@timeline', { timeout: 100000 });
+    expandEventAction();
+    clickingOnCreateTimelineFormTemplateBtn();
+    cy.wait('@timeline', { timeout: 100000 });
 
-      clickingOnCreateTimelineFormTemplateBtn();
-      cy.wait('@timeline', { timeout: 100000 }).then(({ request }) => {
-        if (request.body && request.body.timeline) {
-          expect(request.body.timeline).to.haveOwnProperty(
-            'description',
-            getTimeline().description
-          );
-          expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
-            'expression',
-            getTimeline().query
-          );
-          cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-        }
-      });
-    });
+    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+    closeTimeline();
   });
 });

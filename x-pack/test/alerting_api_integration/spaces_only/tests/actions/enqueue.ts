@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Spaces } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -23,8 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  // Failing: See https://github.com/elastic/kibana/issues/111812
-  describe.skip('enqueue', () => {
+  describe('enqueue', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -124,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(0);
+        expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(0);
       });
     });
 
@@ -170,21 +169,17 @@ export default function ({ getService }: FtrProviderContext) {
                       'task.taskType': 'actions:test.no-attempts-rate-limit',
                     },
                   },
-                  {
-                    term: {
-                      'task.status': 'running',
-                    },
-                  },
                 ],
               },
             },
           },
         });
-        expect((runningSearchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(1);
+        const total = (runningSearchResult.hits.total as estypes.SearchTotalHits).value;
+        expect(total).to.eql(1);
       });
 
       await retry.try(async () => {
-        const searchResult = await es.search({
+        const runningSearchResult = await es.search({
           index: '.kibana_task_manager',
           body: {
             query: {
@@ -200,7 +195,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(0);
+        const total = (runningSearchResult.hits.total as estypes.SearchTotalHits).value;
+        expect(total).to.eql(0);
       });
     });
   });

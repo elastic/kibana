@@ -36,7 +36,11 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
   /**
    * Function to run function (context, args)
    */
-  fn: (input: ExpressionValue, params: Record<string, any>, handlers: object) => ExpressionValue;
+  fn: (
+    input: ExpressionValue,
+    params: Record<string, unknown>,
+    handlers: object
+  ) => ExpressionValue;
 
   /**
    * A short help text.
@@ -56,8 +60,8 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
   disabled: boolean;
   telemetry: (
     state: ExpressionAstFunction['arguments'],
-    telemetryData: Record<string, any>
-  ) => Record<string, any>;
+    telemetryData: Record<string, unknown>
+  ) => Record<string, unknown>;
   extract: (state: ExpressionAstFunction['arguments']) => {
     state: ExpressionAstFunction['arguments'];
     references: SavedObjectReference[];
@@ -100,13 +104,12 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.migrations = migrations || {};
 
     for (const [key, arg] of Object.entries(args || {})) {
-      this.args[key] = new ExpressionFunctionParameter(key, arg);
+      this.args[key as keyof typeof args] = new ExpressionFunctionParameter(key, arg);
     }
   }
 
   accepts = (type: string): boolean => {
     // If you don't tell us input types, we'll assume you don't care what you get.
-    if (!this.inputTypes) return true;
-    return this.inputTypes.indexOf(type) > -1;
+    return this.inputTypes?.includes(type) ?? true;
   };
 }

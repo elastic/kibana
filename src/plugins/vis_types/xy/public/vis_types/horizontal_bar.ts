@@ -56,7 +56,7 @@ export const horizontalBarVisTypeDefinition = {
           labels: {
             show: true,
             rotate: LabelRotation.Horizontal,
-            filter: false,
+            filter: true,
             truncate: 200,
           },
           title: {},
@@ -81,7 +81,7 @@ export const horizontalBarVisTypeDefinition = {
             truncate: 100,
           },
           title: {
-            text: defaultCountLabel,
+            text: '',
           },
           style: {},
         },

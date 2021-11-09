@@ -19,9 +19,9 @@ describe('read_privileges route', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    context.core.elasticsearch.client.asCurrentUser.transport.request.mockResolvedValue({
-      body: getMockPrivilegesResult(),
-    });
+    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getMockPrivilegesResult())
+    );
 
     readPrivilegesRoute(server.router, true);
   });
@@ -65,7 +65,7 @@ describe('read_privileges route', () => {
     });
 
     test('returns 500 when bad response from cluster', async () => {
-      context.core.elasticsearch.client.asCurrentUser.transport.request.mockResolvedValue(
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
       );
       const response = await server.inject(

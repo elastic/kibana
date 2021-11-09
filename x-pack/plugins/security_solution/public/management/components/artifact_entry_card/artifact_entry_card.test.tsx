@@ -6,57 +6,18 @@
  */
 
 import React from 'react';
-import { cloneDeep } from 'lodash';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
-import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { AnyArtifact } from './types';
-import { isTrustedApp } from './hooks/use_normalized_artifact';
-
-const getCommonItemDataOverrides = () => {
-  return {
-    name: 'some internal app',
-    description: 'this app is trusted by the company',
-    created_at: new Date('2021-07-01').toISOString(),
-  };
-};
-
-const getTrustedAppProvider = () =>
-  new TrustedAppGenerator('seed').generate(getCommonItemDataOverrides());
-
-const getExceptionProvider = () => {
-  // cloneDeep needed because exception mock generator uses state across instances
-  return cloneDeep(
-    getExceptionListItemSchemaMock({
-      ...getCommonItemDataOverrides(),
-      os_types: ['windows'],
-      updated_at: new Date().toISOString(),
-      created_by: 'Justa',
-      updated_by: 'Mara',
-      entries: [
-        {
-          field: 'process.hash.*',
-          operator: 'included',
-          type: 'match',
-          value: '1234234659af249ddf3e40864e9fb241',
-        },
-        {
-          field: 'process.executable.caseless',
-          operator: 'included',
-          type: 'match',
-          value: '/one/two/three',
-        },
-      ],
-      tags: ['policy:all'],
-    })
-  );
-};
+import { isTrustedApp } from './utils';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
+import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
+import { TrustedApp } from '../../../../common/endpoint/types';
 
 describe.each([
-  ['trusted apps', getTrustedAppProvider],
-  ['exceptions/event filters', getExceptionProvider],
+  ['trusted apps', getTrustedAppProviderMock],
+  ['exceptions/event filters', getExceptionProviderMock],
 ])('when using the ArtifactEntryCard component with %s', (_, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
@@ -66,7 +27,7 @@ describe.each([
   ) => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
-    item = generateItem();
+    item = generateItem() as AnyArtifact;
     appTestContext = createAppRootMockRenderer();
     render = (props = {}) => {
       renderResult = appTestContext.render(
@@ -89,10 +50,10 @@ describe.each([
       'some internal app'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-createdBy').textContent).toEqual(
-      'Created byJJusta'
+      'Created byMMarty'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-updatedBy').textContent).toEqual(
-      'Updated byMMara'
+      'Updated byEEllamae'
     );
   });
 
@@ -108,7 +69,7 @@ describe.each([
     render();
 
     expect(renderResult.getByTestId('testCard-header-updated').textContent).toEqual(
-      expect.stringMatching(/Last updated(\s seconds? ago|now)/)
+      expect.stringMatching(/Last updated(?:(\s*\d+ seconds? ago)|now)/)
     );
   });
 
@@ -118,11 +79,29 @@ describe.each([
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual(item.description);
   });
 
+  it("shouldn't display description", async () => {
+    render({ hideDescription: true });
+    expect(renderResult.queryByTestId('testCard-description')).toBeNull();
+  });
+
   it('should display default empty value if description does not exist', async () => {
     item.description = undefined;
     render();
-
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
+  });
+
+  it('should display comments if one exists', async () => {
+    render();
+    if (isTrustedApp(item)) {
+      expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
+    } else {
+      expect(renderResult.queryByTestId('testCard-comments')).not.toBeNull();
+    }
+  });
+
+  it("shouldn't display comments", async () => {
+    render({ hideComments: true });
+    expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
   });
 
   it('should display OS and criteria conditions', () => {
@@ -130,6 +109,22 @@ describe.each([
 
     expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
       ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three'
+    );
+  });
+
+  it('should display multiple OSs in the criteria conditions', () => {
+    if (isTrustedApp(item)) {
+      // Trusted apps does not support multiple OS, so this is just so the test will pass
+      // for the trusted app run (the top level `describe()` uses a `.each()`)
+      item.os = [OS_LINUX, OS_MAC, OS_WINDOWS].join(', ') as TrustedApp['os'];
+    } else {
+      item.os_types = ['linux', 'macos', 'windows'];
+    }
+
+    render();
+
+    expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
+      ` OSIS ${OS_LINUX}, ${OS_MAC}, ${OS_WINDOWS}AND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three`
     );
   });
 
@@ -220,7 +215,9 @@ describe.each([
         renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
       ).not.toBeNull();
 
-      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
+        'Policy oneView details'
+      );
     });
 
     it('should display policy ID if no policy menu item found in `policies` prop', async () => {

@@ -28,13 +28,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // FLAKY https://github.com/elastic/kibana/issues/113067
-  describe('spaces', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/113067
+  describe.skip('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
-    describe('space with no features disabled', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/60559
+    describe.skip('space with no features disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects

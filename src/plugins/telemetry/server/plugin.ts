@@ -7,7 +7,7 @@
  */
 
 import { URL } from 'url';
-import { AsyncSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   TelemetryCollectionManagerPluginSetup,
@@ -22,7 +22,6 @@ import {
   SavedObjectsClient,
   Plugin,
   Logger,
-  UiSettingsServiceStart,
 } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
@@ -32,7 +31,6 @@ import {
 } from './collectors';
 import type { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
-import { handleOldSettings } from './handle_old_settings';
 import { getTelemetrySavedObject } from './telemetry_repository';
 import { getTelemetryOptIn, getTelemetryChannelEndpoint } from '../common/telemetry_config';
 
@@ -79,7 +77,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
-  private readonly oldUiSettingsHandled$ = new AsyncSubject();
   private savedObjectsClient?: ISavedObjectsRepository;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
@@ -118,7 +115,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return {
       getTelemetryUrl: async () => {
         const { sendUsageTo } = await config$.pipe(take(1)).toPromise();
-        const telemetryUrl = getTelemetryChannelEndpoint({ env: sendUsageTo, channelName: 'main' });
+        const telemetryUrl = getTelemetryChannelEndpoint({
+          env: sendUsageTo,
+          channelName: 'snapshot',
+        });
 
         return new URL(telemetryUrl);
       },
@@ -126,19 +126,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
-    const { savedObjects, uiSettings } = core;
+    const { savedObjects } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
     this.savedObjectsClient = savedObjectsInternalRepository;
-
-    // Not catching nor awaiting these promises because they should never reject
-    this.handleOldUiSettings(uiSettings);
-    this.startFetcherWhenOldSettingsAreHandled(core, telemetryCollectionManager);
+    this.startFetcher(core, telemetryCollectionManager);
 
     return {
       getIsOptedIn: async () => {
-        await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
         const internalRepository = new SavedObjectsClient(savedObjectsInternalRepository);
         const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+
         const config = await this.config$.pipe(take(1)).toPromise();
         const allowChangingOptInStatus = config.allowChangingOptInStatus;
         const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
@@ -155,24 +152,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  private async handleOldUiSettings(uiSettings: UiSettingsServiceStart) {
-    const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient!);
-    const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-
-    try {
-      await handleOldSettings(savedObjectsClient, uiSettingsClient);
-    } catch (error) {
-      this.logger.warn('Unable to update legacy telemetry configs.');
-    }
-    // Set the mark in the AsyncSubject as complete so all the methods that require this method to be completed before working, can move on
-    this.oldUiSettingsHandled$.complete();
-  }
-
-  private async startFetcherWhenOldSettingsAreHandled(
+  private startFetcher(
     core: CoreStart,
     telemetryCollectionManager: TelemetryCollectionManagerPluginStart
   ) {
-    await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
+    // We start the fetcher having updated everything we need to using the config settings
     this.fetcherTask.start(core, { telemetryCollectionManager });
   }
 

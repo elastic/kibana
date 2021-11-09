@@ -15,6 +15,7 @@ import {
   getIndexPatternService,
   getHttp,
 } from '../kibana_services';
+import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../common/i18n_getters';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
 
 interface Props {
@@ -83,7 +84,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
       <>
         <EuiCallOut
           title={i18n.translate('xpack.maps.noIndexPattern.messageTitle', {
-            defaultMessage: `Couldn't find any index patterns`,
+            defaultMessage: `Couldn't find any data views`,
           })}
           color="warning"
         >
@@ -92,10 +93,10 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               id="xpack.maps.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
-            <EuiLink href={getHttp().basePath.prepend(`/app/management/kibana/indexPatterns`)}>
+            <EuiLink href={getHttp().basePath.prepend(`/app/management/kibana/dataViews`)}>
               <FormattedMessage
                 id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
-                defaultMessage="Create an index pattern."
+                defaultMessage="Create a data view."
               />
             </EuiLink>
           </p>
@@ -122,28 +123,20 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     const isIndexPatternInvalid = !!this.props.value && !this.state.doesIndexPatternHaveGeoField;
     const error = isIndexPatternInvalid
       ? i18n.translate('xpack.maps.noGeoFieldInIndexPattern.message', {
-          defaultMessage: 'Index pattern does not contain any geospatial fields',
+          defaultMessage: 'Data view does not contain any geospatial fields',
         })
       : '';
     return (
       <>
         {this._renderNoIndexPatternWarning()}
 
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.indexPatternSelectLabel', {
-            defaultMessage: 'Index pattern',
-          })}
-          isInvalid={isIndexPatternInvalid}
-          error={error}
-        >
+        <EuiFormRow label={getDataViewLabel()} isInvalid={isIndexPatternInvalid} error={error}>
           <IndexPatternSelect
             isInvalid={isIndexPatternInvalid}
             isDisabled={this.state.noIndexPatternsExist}
             indexPatternId={this.props.value ? this.props.value : ''}
             onChange={this._onIndexPatternSelect}
-            placeholder={i18n.translate('xpack.maps.indexPatternSelectPlaceholder', {
-              defaultMessage: 'Select index pattern',
-            })}
+            placeholder={getDataViewSelectPlaceholder()}
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}
           />

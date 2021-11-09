@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { Logger } from 'src/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -19,9 +20,12 @@ import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
+  logger: Logger,
   isRuleRegistryEnabled: boolean
 ) => {
   router.get(
@@ -53,6 +57,7 @@ export const readRulesRoute = (
         }
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const savedObjectsClient = context.core.savedObjects.client;
         const rule = await readRules({
           id,
           isRuleRegistryEnabled,
@@ -60,12 +65,15 @@ export const readRulesRoute = (
           ruleId,
         });
         if (rule != null) {
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
+          const legacyRuleActions = await legacyGetRuleActionsSavedObject({
+            savedObjectsClient,
+            ruleAlertId: rule.id,
+            logger,
+          });
+          const currentStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
-          const [currentStatus] = ruleStatuses;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
             currentStatus.attributes.lastFailureAt =
@@ -74,7 +82,12 @@ export const readRulesRoute = (
               rule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
-          const transformed = transform(rule, currentStatus, isRuleRegistryEnabled);
+          const transformed = transform(
+            rule,
+            currentStatus,
+            isRuleRegistryEnabled,
+            legacyRuleActions
+          );
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

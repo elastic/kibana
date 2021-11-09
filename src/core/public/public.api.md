@@ -5,23 +5,22 @@
 ```ts
 
 import { Action } from 'history';
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
-import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiOverlayMaskProps } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -39,9 +38,9 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestOptions } from '@elastic/elasticsearch';
+import { TransportRequestParams } from '@elastic/elasticsearch';
+import { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -459,9 +458,13 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public
 export interface DeprecationsServiceStart {
+    // Warning: (ae-incompatible-release-tags) The symbol "getAllDeprecations" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+    // Warning: (ae-incompatible-release-tags) The symbol "getDeprecations" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
+    // Warning: (ae-incompatible-release-tags) The symbol "isDeprecationResolvable" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
+    // Warning: (ae-incompatible-release-tags) The symbol "resolveDeprecation" is marked as @public, but its signature references "DomainDeprecationDetails" which is marked as @internal
     resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
@@ -474,6 +477,10 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly settings: string;
+        readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -597,7 +604,11 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+            readonly remoteReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
@@ -608,6 +619,10 @@ export interface DocLinksStart {
             readonly ruleChangeLog: string;
             readonly detectionsReq: string;
             readonly networkMap: string;
+            readonly troubleshootGaps: string;
+        };
+        readonly securitySolution: {
+            readonly trustedApps: string;
         };
         readonly query: {
             readonly eql: string;
@@ -671,6 +686,7 @@ export interface DocLinksStart {
             clusterPrivileges: string;
             elasticsearchSettings: string;
             elasticsearchEnableSecurity: string;
+            elasticsearchEnableApiKeys: string;
             indicesPrivileges: string;
             kibanaTLS: string;
             kibanaPrivileges: string;
@@ -678,38 +694,62 @@ export interface DocLinksStart {
             mappingRolesFieldRules: string;
             runAsPrivilege: string;
         }>;
+        readonly spaces: Readonly<{
+            kibanaLegacyUrlAliases: string;
+            kibanaDisableLegacyUrlAliasesApi: string;
+        }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
+            datastreamsILM: string;
+            beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
             settings: string;
             settingsFleetServerHostSettings: string;
+            settingsFleetServerProxySettings: string;
             troubleshooting: string;
             elasticAgent: string;
             datastreams: string;
             datastreamsNamingScheme: string;
+            installElasticAgent: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
+            learnMoreBlog: string;
+            apiKeysLearnMore: string;
+            onPremRegistry: string;
         }>;
         readonly ecs: {
             readonly guide: string;
+        };
+        readonly clients: {
+            readonly guide: string;
+            readonly goOverview: string;
+            readonly javaIndex: string;
+            readonly jsIntro: string;
+            readonly netGuide: string;
+            readonly perlGuide: string;
+            readonly phpGuide: string;
+            readonly pythonGuide: string;
+            readonly rubyOverview: string;
+            readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
         };
     };
 }
 
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "DomainDeprecationDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
-export interface DomainDeprecationDetails extends DeprecationsDetails {
-    // (undocumented)
+// @internal (undocumented)
+export type DomainDeprecationDetails = DeprecationsDetails & {
     domainId: string;
-}
+};
 
 export { EnvironmentMode }
 
@@ -778,17 +818,17 @@ export interface HttpFetchQuery {
 // @public
 export interface HttpHandler {
     // (undocumented)
-    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
+    <TResponseBody = unknown>(path: string, options: HttpFetchOptions & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+    <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 // @public
@@ -840,7 +880,7 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse<TResponseBody = any> {
+export interface HttpResponse<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
     readonly request: Readonly<Request>;
@@ -907,9 +947,9 @@ export interface IExternalUrlPolicy {
 }
 
 // @public (undocumented)
-export interface IHttpFetchError extends Error {
+export interface IHttpFetchError<TResponseBody = unknown> extends Error {
     // (undocumented)
-    readonly body?: any;
+    readonly body?: TResponseBody;
     // (undocumented)
     readonly name: string;
     // @deprecated (undocumented)
@@ -929,7 +969,7 @@ export interface IHttpInterceptController {
 }
 
 // @public
-export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly response?: Readonly<Response>;
 }
@@ -1020,6 +1060,8 @@ export interface OverlayFlyoutOpenOptions {
     closeButtonAriaLabel?: string;
     // (undocumented)
     hideCloseButton?: boolean;
+    // (undocumented)
+    maskProps?: EuiOverlayMaskProps;
     // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
@@ -1159,6 +1201,16 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
+}
+
+// @public (undocumented)
+export interface ResponseErrorBody {
+    // (undocumented)
+    attributes?: Record<string, unknown>;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
 }
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

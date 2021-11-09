@@ -7,8 +7,19 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
-import { CustomIntegration, ROUTES_ADDABLECUSTOMINTEGRATIONS } from '../common';
+import {
+  CustomIntegrationsSetup,
+  CustomIntegrationsStart,
+  CustomIntegrationsStartDependencies,
+} from './types';
+import {
+  CustomIntegration,
+  ROUTES_APPEND_CUSTOM_INTEGRATIONS,
+  ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
+} from '../common';
+
+import { pluginServices } from './services';
+import { pluginServiceRegistry } from './services/kibana';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
@@ -16,14 +27,24 @@ export class CustomIntegrationsPlugin
   public setup(core: CoreSetup): CustomIntegrationsSetup {
     // Return methods that should be available to other plugins
     return {
-      async getAppendCustomIntegrations(): Promise<CustomIntegration[]> {
-        return core.http.get(ROUTES_ADDABLECUSTOMINTEGRATIONS);
+      async getReplacementCustomIntegrations(): Promise<CustomIntegration[]> {
+        return core.http.get(ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS);
       },
-    } as CustomIntegrationsSetup;
+
+      async getAppendCustomIntegrations(): Promise<CustomIntegration[]> {
+        return core.http.get(ROUTES_APPEND_CUSTOM_INTEGRATIONS);
+      },
+    };
   }
 
-  public start(core: CoreStart): CustomIntegrationsStart {
-    return {};
+  public start(
+    coreStart: CoreStart,
+    startPlugins: CustomIntegrationsStartDependencies
+  ): CustomIntegrationsStart {
+    pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
+    return {
+      ContextProvider: pluginServices.getContextProvider(),
+    };
   }
 
   public stop() {}

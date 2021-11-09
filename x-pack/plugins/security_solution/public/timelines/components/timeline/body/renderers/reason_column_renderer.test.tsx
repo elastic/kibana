@@ -19,7 +19,7 @@ import {
   RowRenderer,
   RowRendererId,
 } from '../../../../../../common';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../../../timelines/public/mock';
 import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../../timelines/public/components';
 import { cloneDeep } from 'lodash';
@@ -61,7 +61,6 @@ const rowRenderers: RowRenderer[] = [
   {
     id: RowRendererId.alerts,
     isInstance: (ecs) => ecs === validEcs,
-    // eslint-disable-next-line react/display-name
     renderRow: () => <span data-test-subj="test-row-render" />,
   },
 ];
@@ -93,9 +92,10 @@ describe('reasonColumnRenderer', () => {
       expect(plainColumnRenderer.renderColumn).toBeCalledTimes(1);
     });
 
-    it("doesn't call `plainColumnRenderer.renderColumn` when ecsData, rowRenderers or browserFields fields are not empty", () => {
+    it("doesn't call `plainColumnRenderer.renderColumn` in expanded value when ecsData, rowRenderers or browserFields fields are not empty", () => {
       reasonColumnRenderer.renderColumn({
         ...defaultProps,
+        isDetails: true,
         ecsData: invalidEcs,
         rowRenderers,
         browserFields,
@@ -104,9 +104,22 @@ describe('reasonColumnRenderer', () => {
       expect(plainColumnRenderer.renderColumn).toBeCalledTimes(0);
     });
 
-    it("doesn't render popover button when getRowRenderer doesn't find a rowRenderer", () => {
+    it('call `plainColumnRenderer.renderColumn` in cell value', () => {
+      reasonColumnRenderer.renderColumn({
+        ...defaultProps,
+        isDetails: false,
+        ecsData: invalidEcs,
+        rowRenderers,
+        browserFields,
+      });
+
+      expect(plainColumnRenderer.renderColumn).toBeCalledTimes(1);
+    });
+
+    it("doesn't render reason renderers button when getRowRenderer doesn't find a rowRenderer", () => {
       const renderedColumn = reasonColumnRenderer.renderColumn({
         ...defaultProps,
+        isDetails: true,
         ecsData: invalidEcs,
         rowRenderers,
         browserFields,
@@ -117,9 +130,10 @@ describe('reasonColumnRenderer', () => {
       expect(wrapper.queryByTestId('reason-cell-button')).not.toBeInTheDocument();
     });
 
-    it('render popover button when getRowRenderer finds a rowRenderer', () => {
+    it('render reason renderers when getRowRenderer finds a rowRenderer', () => {
       const renderedColumn = reasonColumnRenderer.renderColumn({
         ...defaultProps,
+        isDetails: true,
         ecsData: validEcs,
         rowRenderers,
         browserFields,
@@ -127,39 +141,7 @@ describe('reasonColumnRenderer', () => {
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
 
-      expect(wrapper.queryByTestId('reason-cell-button')).toBeInTheDocument();
-    });
-
-    it('render rowRender inside a popover when reson field button is clicked', () => {
-      const renderedColumn = reasonColumnRenderer.renderColumn({
-        ...defaultProps,
-        ecsData: validEcs,
-        rowRenderers,
-        browserFields,
-      });
-
-      const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
-
-      fireEvent.click(wrapper.getByTestId('reason-cell-button'));
-
-      expect(wrapper.queryByTestId('test-row-render')).toBeInTheDocument();
-    });
-
-    it('the popover always contains a class that hides it when an overlay (e.g. the inspect modal) is displayed', () => {
-      const renderedColumn = reasonColumnRenderer.renderColumn({
-        ...defaultProps,
-        ecsData: validEcs,
-        rowRenderers,
-        browserFields,
-      });
-
-      const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
-
-      fireEvent.click(wrapper.getByTestId('reason-cell-button'));
-
-      expect(wrapper.getByRole('dialog')).toHaveClass(
-        'euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--right withHoverActions__popover'
-      );
+      expect(wrapper.queryByTestId('reason-cell-renderer')).toBeInTheDocument();
     });
   });
 });

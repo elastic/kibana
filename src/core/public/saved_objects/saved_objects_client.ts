@@ -151,9 +151,7 @@ interface ObjectTypeAndId {
   type: string;
 }
 
-const getObjectsToFetch = (
-  queue: Array<BatchGetQueueEntry | BatchResolveQueueEntry>
-): ObjectTypeAndId[] => {
+const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
   const objects: ObjectTypeAndId[] = [];
   const inserted = new Set<string>();
   queue.forEach(({ id, type }) => {
@@ -163,6 +161,24 @@ const getObjectsToFetch = (
     }
   });
   return objects;
+};
+
+const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
+  const responseIndices: number[] = [];
+  const objectsToResolve: ObjectTypeAndId[] = [];
+  const inserted = new Map<string, number>();
+  queue.forEach(({ id, type }) => {
+    const key = `${type}|${id}`;
+    const indexForTypeAndId = inserted.get(key);
+    if (indexForTypeAndId === undefined) {
+      inserted.set(key, objectsToResolve.length);
+      responseIndices.push(objectsToResolve.length);
+      objectsToResolve.push({ id, type });
+    } else {
+      responseIndices.push(indexForTypeAndId);
+    }
+  });
+  return { objectsToResolve, responseIndices };
 };
 
 /**
@@ -224,28 +240,18 @@ export class SavedObjectsClient {
       this.batchResolveQueue = [];
 
       try {
-        const objectsToFetch = getObjectsToFetch(queue);
-        const { resolved_objects: savedObjects } = await this.performBulkResolve(objectsToFetch);
+        const { objectsToResolve, responseIndices } = getObjectsToResolve(queue);
+        const { resolved_objects: resolvedObjects } = await this.performBulkResolve(
+          objectsToResolve
+        );
 
-        queue.forEach((queueItem) => {
-          const foundObject = savedObjects.find((resolveResponse) => {
-            return (
-              resolveResponse.saved_object.id === queueItem.id &&
-              resolveResponse.saved_object.type === queueItem.type
-            );
-          });
-
-          if (foundObject) {
-            // multiple calls may have been requested the same object.
-            // we need to clone to avoid sharing references between the instances
-            queueItem.resolve(this.createResolvedSavedObject(cloneDeep(foundObject)));
-          } else {
-            queueItem.resolve(
-              this.createResolvedSavedObject({
-                saved_object: pick(queueItem, ['id', 'type']),
-              } as SavedObjectsResolveResponse)
-            );
-          }
+        queue.forEach((queueItem, i) => {
+          // This differs from the older processBatchGetQueue approach because the resolved object IDs are *not* guaranteed to be the same.
+          // Instead, we rely on the guarantee that the objects in the bulkResolve response will be in the same order as the requests.
+          // However, we still need to clone the response object because we deduplicate batched requests.
+          const responseIndex = responseIndices[i];
+          const clone = cloneDeep(resolvedObjects[responseIndex]);
+          queueItem.resolve(this.createResolvedSavedObject(clone));
         });
       } catch (err) {
         queue.forEach((queueItem) => {
@@ -286,7 +292,7 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
+    const createRequest = this.savedObjectsFetch<SavedObject<T>>(path, {
       method: 'POST',
       query,
       body: JSON.stringify({
@@ -565,10 +571,10 @@ export class SavedObjectsClient {
       upsert,
     };
 
-    return this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch<SavedObject<T>>(path, {
       method: 'PUT',
       body: JSON.stringify(body),
-    }).then((resp: SavedObject<T>) => {
+    }).then((resp) => {
       return this.createSavedObject(resp);
     });
   }
@@ -582,11 +588,11 @@ export class SavedObjectsClient {
   public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 
-    return this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch<{ saved_objects: Array<SavedObject<T>> }>(path, {
       method: 'PUT',
       body: JSON.stringify(objects),
     }).then((resp) => {
-      resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,
         SavedObjectsBatchResponse
@@ -618,8 +624,8 @@ export class SavedObjectsClient {
    * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
    * uses `{response: {status: number}}`.
    */
-  private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
-    return this.http.fetch(path, { method, query, body });
+  private savedObjectsFetch<T = unknown>(path: string, { method, query, body }: HttpFetchOptions) {
+    return this.http.fetch<T>(path, { method, query, body });
   }
 }
 
