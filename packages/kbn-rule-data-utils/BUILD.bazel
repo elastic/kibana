@@ -20,6 +20,10 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
+  "alerts_as_data_rbac/package.json",
+  "alerts_as_data_severity/package.json",
+  "alerts_as_data_status/package.json",
+  "technical_field_names/package.json",
 ]
 
 RUNTIME_DEPS = [
