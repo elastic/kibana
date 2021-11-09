@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ENABLE_ITOM } from '../../actions/server/constants/connectors';
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
@@ -326,6 +324,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.resilient',
   '.servicenow',
   '.servicenow-sir',
+  '.servicenow-itom',
   '.slack',
   '.swimlane',
   '.teams',
@@ -334,11 +333,6 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
 
 if (ENABLE_CASE_CONNECTOR) {
   NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
-}
-
-// TODO: Remove when ITOM is ready
-if (ENABLE_ITOM) {
-  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.servicenow-itom');
 }
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;

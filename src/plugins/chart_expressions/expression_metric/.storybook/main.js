@@ -12,7 +12,10 @@ import { resolve } from 'path';
 const mockConfig = {
   resolve: {
     alias: {
-      '../format_service': resolve(__dirname, '../public/__mocks__/format_service.ts'),
+      '../../../expression_metric/public/services': resolve(
+        __dirname,
+        '../public/__mocks__/services.ts'
+      ),
     },
   },
 };
