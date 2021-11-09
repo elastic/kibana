@@ -13,7 +13,7 @@ import { ILayer } from '../../../../../../classes/layers/layer';
 import { IVectorSource } from '../../../../../../classes/sources/vector_source';
 
 interface Footnote {
-  icon: ReactNode;
+  icon?: ReactNode;
   message?: string | null;
 }
 
@@ -100,17 +100,10 @@ export class TOCEntryButton extends Component<Props, State> {
         values: { minZoom, maxZoom },
       });
     } else {
-      const customIconAndTooltipContent = this.props.layer.getLayerIcon();
-      if (customIconAndTooltipContent) {
-        icon = customIconAndTooltipContent.icon;
-        if (!customIconAndTooltipContent.areResultsTrimmed) {
-          tooltipContent = customIconAndTooltipContent.tooltipContent;
-        } else {
-          footnotes.push({
-            icon: <EuiIcon color="subdued" type="partial" size="s" />,
-            message: customIconAndTooltipContent.tooltipContent,
-          });
-        }
+      const { areResultsTrimmed, icon: layerIcon, tooltipContent: layerTooltipContent } = this.props.layer.getLayerIcon();
+      icon = layerIcon;
+      if (layerTooltipContent) {
+        tooltipContent = layerTooltipContent;
       }
 
       if (this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length) {
