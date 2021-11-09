@@ -11,7 +11,7 @@ import uuidv5 from 'uuid/v5';
 
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
@@ -22,19 +22,24 @@ import {
   Privilege,
   RuleExecutionStatus,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import {
+
+import type {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
-import {
+
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-  parseDuration,
 } from '../../../../../alerting/server';
-import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import {
+
+// We _must_ import from here and not from "alerting/server" above or we will get a memory leak. See https://github.com/elastic/kibana/issues/117255
+import { parseDuration } from '../../../../../alerting/common/parse_duration';
+
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
+import type {
   BulkResponseErrorAggregation,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
@@ -47,9 +52,9 @@ import {
   SimpleHit,
   WrappedEventHit,
 } from './types';
-import { BuildRuleMessage } from './rule_messages';
-import { ShardError } from '../../types';
-import {
+import type { BuildRuleMessage } from './rule_messages';
+import type { ShardError } from '../../types';
+import type {
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
@@ -58,9 +63,9 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import { RACAlert, WrappedRACAlert } from '../rule_types/types';
-import { SearchTypes } from '../../../../common/detection_engine/types';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import type { RACAlert, WrappedRACAlert } from '../rule_types/types';
+import type { SearchTypes } from '../../../../common/detection_engine/types';
+import type { IRuleExecutionLogClient } from '../rule_execution_log/types';
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
   exceptionsWithoutValueLists: ExceptionListItemSchema[];

@@ -8,19 +8,19 @@
 import { of } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { Logger, SavedObject } from 'kibana/server';
+import type { Logger, SavedObject } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
 
 import type { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
 import { eventLogServiceMock } from '../../../../../../event_log/server/mocks';
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
-import { ConfigType } from '../../../../config';
-import { AlertAttributes } from '../../signals/types';
+import type { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
+import type { ConfigType } from '../../../../config';
+import type { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 // this is only used in tests
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createDefaultAlertExecutorOptions } from '../../../../../../rule_registry/server/utils/rule_executor_test_utils';

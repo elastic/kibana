@@ -52,8 +52,8 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 
-import { Filter } from '../../../../../../src/plugins/data/server';
-import { AlertTypeParams } from '../../../../alerting/common';
+import type { Filter } from '../../../../../../src/plugins/data/server';
+import type { AlertTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;
 

@@ -17,7 +17,7 @@ import { getThresholdRuleParams, getCompleteRuleMock } from '../../schemas/rule_
 import { buildRuleMessageFactory } from '../rule_messages';
 import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
-import { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
 
 describe('threshold_executor', () => {
   const version = '8.0.0';

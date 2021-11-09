@@ -22,16 +22,16 @@ import {
 } from './utils';
 import { getAlertMock } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { PartialFilter } from '../../types';
-import { BulkError } from '../utils';
+import type { PartialFilter } from '../../types';
+import type { BulkError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { PartialAlert } from '../../../../../../alerting/server';
+import type { PartialAlert } from '../../../../../../alerting/server';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
-import { RuleAlertType } from '../../rules/types';
-import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { RuleAlertType } from '../../rules/types';
+import type { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import {
   getMlRuleParams,
   getQueryRuleParams,

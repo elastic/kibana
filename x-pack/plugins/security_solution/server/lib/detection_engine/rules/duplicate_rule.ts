@@ -10,9 +10,9 @@ import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings, SIGNALS_ID } from '@kbn/securitysolution-rules';
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import type { SanitizedAlert } from '../../../../../alerting/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
-import { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
+import type { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
 
 const DUPLICATE_TITLE = i18n.translate(

@@ -7,7 +7,7 @@
 
 import { Logger, SavedObjectReference } from 'src/core/server';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesNotificationParams } from '../legacy_types';
+import type { LegacyRulesNotificationParams } from '../legacy_types';
 
 /**
  * This injects any legacy "id"'s from saved object reference and returns the "ruleAlertId" using the saved object reference. If for

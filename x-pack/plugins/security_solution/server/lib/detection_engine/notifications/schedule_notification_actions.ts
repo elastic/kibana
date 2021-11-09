@@ -6,12 +6,12 @@
  */
 
 import { mapKeys, snakeCase } from 'lodash/fp';
-import { AlertInstance } from '../../../../../alerting/server';
+import type { AlertInstance } from '../../../../../alerting/server';
 import { expandDottedObject } from '../rule_types/utils';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { isRACAlert } from '../signals/utils';
-import { RACAlert } from '../rule_types/types';
+import type { RACAlert } from '../rule_types/types';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;

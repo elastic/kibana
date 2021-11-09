@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { RuleParamsAndRefs } from '../../../../../../alerting/server';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { Logger } from 'src/core/server';
+import type { RuleParamsAndRefs } from '../../../../../../alerting/server';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { extractExceptionsList } from './extract_exceptions_list';
 
 /**

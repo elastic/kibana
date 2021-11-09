@@ -8,17 +8,17 @@
 import Boom from '@hapi/boom';
 import { has, snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import type { SanitizedAlert } from '../../../../../alerting/common';
 
-import {
+import type {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '../../../../../../../src/core/server';
-import { RulesClient } from '../../../../../alerting/server';
-import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
+import type { RulesClient } from '../../../../../alerting/server';
+import type { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
-import { RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
 
 export interface OutputError {
   message: string;

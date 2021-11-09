@@ -8,17 +8,17 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger } from '../../../../../../../src/core/server';
-import {
+import type { Logger } from '../../../../../../../src/core/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { GenericBulkCreateResponse } from './bulk_create_factory';
-import { AnomalyResults, Anomaly } from '../../machine_learning';
-import { BuildRuleMessage } from './rule_messages';
-import { BulkCreate, WrapHits } from './types';
-import { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
+import type { GenericBulkCreateResponse } from './bulk_create_factory';
+import type { AnomalyResults, Anomaly } from '../../machine_learning';
+import type { BuildRuleMessage } from './rule_messages';
+import type { BulkCreate, WrapHits } from './types';
+import type { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
 import { buildReasonMessageForMlAlert } from './reason_formatters';
 
 interface BulkCreateMlSignalsParams {

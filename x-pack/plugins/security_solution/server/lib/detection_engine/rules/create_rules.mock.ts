@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateRulesOptions } from './types';
+import type { CreateRulesOptions } from './types';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 
 export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): CreateRulesOptions => ({

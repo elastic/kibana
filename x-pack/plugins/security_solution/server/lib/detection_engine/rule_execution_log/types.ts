@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Duration } from 'moment';
-import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { IRuleStatusSOAttributes } from '../rules/types';
+import type { Duration } from 'moment';
+import type { SavedObjectsFindResult } from '../../../../../../../src/core/server';
+import type { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { IRuleStatusSOAttributes } from '../rules/types';
 
 export enum UnderlyingLogClient {
   'savedObjects' = 'savedObjects',

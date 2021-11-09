@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
@@ -25,7 +25,7 @@ import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
-import { PartialFilter } from '../../types';
+import type { PartialFilter } from '../../types';
 
 export const patchRulesRoute = (
   router: SecuritySolutionPluginRouter,

@@ -8,7 +8,7 @@
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 import { deleteRules } from './delete_rules';
-import { DeleteRuleOptions } from './types';
+import type { DeleteRuleOptions } from './types';
 
 describe('deleteRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;

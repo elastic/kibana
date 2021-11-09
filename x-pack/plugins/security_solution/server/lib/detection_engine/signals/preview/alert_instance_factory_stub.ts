@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleParams } from '../../schemas/rule_schemas';
-import {
+import type { RuleParams } from '../../schemas/rule_schemas';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,

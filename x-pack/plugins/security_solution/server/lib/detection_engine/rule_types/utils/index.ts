@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertTypeState } from '../../../../../../alerting/server';
-import { SecurityAlertTypeReturnValue } from '../types';
+import type { AlertTypeState } from '../../../../../../alerting/server';
+import type { SecurityAlertTypeReturnValue } from '../types';
 
 export const createResultObject = <TState extends AlertTypeState>(state: TState) => {
   const result: SecurityAlertTypeReturnValue<TState> = {

@@ -7,9 +7,9 @@
 
 import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { FindResult } from '../../../../../alerting/server';
-import { RuleParams } from '../schemas/rule_schemas';
-import { FindRuleOptions } from './types';
+import type { FindResult } from '../../../../../alerting/server';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { FindRuleOptions } from './types';
 
 export const getFilter = (
   filter: string | null | undefined,

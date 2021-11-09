@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
-import { ThresholdSignalHistory } from '../types';
-import { BuildRuleMessage } from '../rule_messages';
+import type { Logger } from '../../../../../../../../src/core/server';
+import type { ThresholdSignalHistory } from '../types';
+import type { BuildRuleMessage } from '../rule_messages';
 import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
 import { buildThresholdSignalHistory } from './build_signal_history';
 

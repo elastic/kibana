@@ -18,11 +18,11 @@ import {
 import { buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { EqlSequence } from '../../../../common/detection_engine/types';
+import type { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
 import type { ConfigType } from '../../../config';
-import { BuildReasonMessage } from './reason_formatters';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import type { BuildReasonMessage } from './reason_formatters';
+import type { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a

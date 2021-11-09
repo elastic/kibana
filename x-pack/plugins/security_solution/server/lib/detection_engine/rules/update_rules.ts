@@ -9,9 +9,9 @@
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { PartialAlert } from '../../../../../alerting/server';
+import type { PartialAlert } from '../../../../../alerting/server';
 
-import { UpdateRulesOptions } from './types';
+import type { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';

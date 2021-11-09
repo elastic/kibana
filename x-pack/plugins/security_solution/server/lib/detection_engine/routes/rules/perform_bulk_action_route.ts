@@ -6,12 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from 'src/core/server';
+import type { Logger } from 'src/core/server';
 
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../machine_learning/authz';

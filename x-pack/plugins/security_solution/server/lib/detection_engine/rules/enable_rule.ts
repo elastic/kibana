@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
-import { RulesClient } from '../../../../../alerting/server';
+import type { SanitizedAlert } from '../../../../../alerting/common';
+import type { RulesClient } from '../../../../../alerting/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import type { RuleParams } from '../schemas/rule_schemas';
 
 interface EnableRuleArgs {
   rule: SanitizedAlert<RuleParams>;

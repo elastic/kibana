@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatchRulesOptions } from './types';
+import type { PatchRulesOptions } from './types';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';

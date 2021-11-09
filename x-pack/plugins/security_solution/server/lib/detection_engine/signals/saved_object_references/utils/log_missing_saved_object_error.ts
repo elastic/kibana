@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { RuleParams } from '../../../schemas/rule_schemas';
+import type { Logger } from 'src/core/server';
+import type { RuleParams } from '../../../schemas/rule_schemas';
 
 /**
  * This will log a warning that we are missing an object reference.

@@ -15,7 +15,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../utils';
@@ -23,7 +23,7 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { readRules } from '../../rules/read_rules';
-import { PartialFilter } from '../../types';
+import type { PartialFilter } from '../../types';
 import { legacyMigrate } from '../../rules/utils';
 
 export const patchRulesBulkRoute = (

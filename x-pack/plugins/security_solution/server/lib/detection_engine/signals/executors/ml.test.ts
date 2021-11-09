@@ -16,7 +16,7 @@ import { getListClientMock } from '../../../../../../lists/server/services/lists
 import { findMlSignals } from '../find_ml_signals';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
-import { MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { MachineLearningRuleParams } from '../../schemas/rule_schemas';
 
 jest.mock('../find_ml_signals');
 jest.mock('../bulk_create_ml_signals');

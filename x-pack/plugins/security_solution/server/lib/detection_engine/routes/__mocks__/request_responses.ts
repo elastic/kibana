@@ -9,9 +9,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { SavedObjectsFindResponse } from 'src/core/server';
+import type { SavedObjectsFindResponse } from 'src/core/server';
 
-import { ActionResult } from '../../../../../../actions/server';
+import type { ActionResult } from '../../../../../../actions/server';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -25,21 +25,21 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
-import {
+import type {
   RuleAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
   HapiReadableStream,
   IRuleStatusSOAttributes,
 } from '../../rules/types';
 import { requestMock } from './request';
-import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
-import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
-import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
+import type { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
-import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
+import type { RuleParams } from '../../schemas/rule_schemas';
+import type { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';

@@ -15,14 +15,14 @@ import type {
   WrappedSignalHit,
   AlertAttributes,
 } from '../types';
-import { SavedObject } from '../../../../../../../../src/core/server';
+import type { SavedObject } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
-import { IRuleStatusSOAttributes } from '../../rules/types';
+import type { IRuleStatusSOAttributes } from '../../rules/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 

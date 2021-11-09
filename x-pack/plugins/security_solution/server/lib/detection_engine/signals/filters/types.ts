@@ -8,8 +8,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'src/core/server';
 
 import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ListClient } from '../../../../../../lists/server';
-import { BuildRuleMessage } from '../rule_messages';
+import type { ListClient } from '../../../../../../lists/server';
+import type { BuildRuleMessage } from '../rule_messages';
 
 export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;

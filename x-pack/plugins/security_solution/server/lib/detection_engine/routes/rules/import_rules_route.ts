@@ -24,8 +24,8 @@ import {
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ConfigType } from '../../../../config';
-import { SetupPlugins } from '../../../../plugin';
+import type { ConfigType } from '../../../../config';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
@@ -44,8 +44,8 @@ import { legacyMigrate } from '../../rules/utils';
 import { getTupleDuplicateErrorsAndUniqueRules, getInvalidConnectors } from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { HapiReadableStream } from '../../rules/types';
-import { PartialFilter } from '../../types';
+import type { HapiReadableStream } from '../../rules/types';
+import type { PartialFilter } from '../../types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 

@@ -10,7 +10,7 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
-import { ConfigType } from './config';
+import type { ConfigType } from './config';
 import { UnderlyingLogClient } from './lib/detection_engine/rule_execution_log/types';
 
 export const createMockConfig = (): ConfigType => {

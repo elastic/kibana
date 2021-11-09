@@ -9,14 +9,14 @@ import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
 import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
@@ -30,12 +30,12 @@ import {
   parseDuration,
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorType } from '../../../../../../alerting/server/types';
-import { AlertInstance } from '../../../../../../alerting/server';
-import { ConfigType } from '../../../../config';
-import { IEventLogService } from '../../../../../../event_log/server';
+import type { ExecutorType } from '../../../../../../alerting/server/types';
+import type { AlertInstance } from '../../../../../../alerting/server';
+import type { ConfigType } from '../../../../config';
+import type { IEventLogService } from '../../../../../../event_log/server';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
-import { CreateRuleOptions } from '../../rule_types/types';
+import type { CreateRuleOptions } from '../../rule_types/types';
 
 enum InvocationCount {
   HOUR = 1,

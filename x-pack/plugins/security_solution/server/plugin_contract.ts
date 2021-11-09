@@ -16,7 +16,7 @@ import {
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
 import { UsageCollectionSetup as UsageCollectionPluginSetup } from '../../../../src/plugins/usage_collection/server';
-import {
+import type {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '../../alerting/server';

@@ -7,7 +7,7 @@
 
 import { KibanaRequest, Logger } from 'kibana/server';
 import { ExceptionListClient } from '../../../../lists/server';
-import { PluginStartContract as AlertsStartContract } from '../../../../alerting/server';
+import type { PluginStartContract as AlertsStartContract } from '../../../../alerting/server';
 import { createDetectionIndex } from '../../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
 import { SecuritySolutionApiRequestHandlerContext } from '../../types';

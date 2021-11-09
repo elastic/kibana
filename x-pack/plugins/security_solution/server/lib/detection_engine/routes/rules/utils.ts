@@ -8,11 +8,11 @@
 import { countBy } from 'lodash/fp';
 import uuid from 'uuid';
 
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
-import { ActionsClient } from '../../../../../../actions/server';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import type { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import type { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import type { ActionsClient } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -22,10 +22,10 @@ import {
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
-import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert } from '../../../../../../alerting/common';
+import type { RuleParams } from '../../schemas/rule_schemas';
+import type { SanitizedAlert } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 

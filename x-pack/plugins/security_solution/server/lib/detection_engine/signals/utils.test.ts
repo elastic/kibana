@@ -7,13 +7,13 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
-import { ExceptionListClient } from '../../../../../lists/server';
+import type { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 

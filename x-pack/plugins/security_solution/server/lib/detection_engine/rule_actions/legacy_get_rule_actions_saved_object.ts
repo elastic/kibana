@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsFindOptionsReference } from 'kibana/server';
-import { Logger } from 'src/core/server';
-import { AlertServices } from '../../../../../alerting/server';
+import type { SavedObjectsFindOptionsReference } from 'kibana/server';
+import type { Logger } from 'src/core/server';
+import type { AlertServices } from '../../../../../alerting/server';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
 } from './legacy_types';

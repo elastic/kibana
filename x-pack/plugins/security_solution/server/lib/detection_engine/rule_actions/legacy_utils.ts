@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from 'kibana/server';
-import { Logger } from 'src/core/server';
+import type { SavedObjectsUpdateResponse } from 'kibana/server';
+import type { Logger } from 'src/core/server';
 
-import { AlertAction } from '../../../../../alerting/common';
+import type { AlertAction } from '../../../../../alerting/common';
 
 // eslint-disable-next-line no-restricted-imports
 import {

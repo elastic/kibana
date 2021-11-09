@@ -7,7 +7,7 @@
 
 import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { ExceptionListClient } from '../../../lists/server';
-import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
+import type { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
 import {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,

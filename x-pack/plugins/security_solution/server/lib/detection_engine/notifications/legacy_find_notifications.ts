@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams, FindResult } from '../../../../../alerting/server';
+import type { AlertTypeParams, FindResult } from '../../../../../alerting/server';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyFindNotificationParams } from './legacy_types';

@@ -27,8 +27,12 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { AlertAction, AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
-import {
+import type {
+  AlertAction,
+  AlertNotifyWhenType,
+  SanitizedAlert,
+} from '../../../../../alerting/common';
+import type {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
   QueryOrUndefined,
@@ -54,24 +58,24 @@ import {
   EventCategoryOverrideOrUndefined,
   NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import { PartialFilter } from '../types';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { PartialFilter } from '../types';
+import type { RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
-import { RulesClient } from '../../../../../alerting/server';
+import type { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleActions } from '../rule_actions/legacy_types';
-import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import type { LegacyRuleActions } from '../rule_actions/legacy_types';
+import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 import {
   transformAlertToRuleAction,
   transformRuleToAlertAction,
 } from '../../../../common/detection_engine/transform_actions';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
-import { LegacyMigrateParams } from './types';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import type { LegacyMigrateParams } from './types';
+import type { RuleAlertAction } from '../../../../common/detection_engine/types';
 
 export const calculateInterval = (
   interval: string | undefined,

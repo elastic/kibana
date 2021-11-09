@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectsFindOptionsReference } from 'kibana/server';
-import { Logger } from 'src/core/server';
+import type { SavedObjectsFindOptionsReference } from 'kibana/server';
+import type { Logger } from 'src/core/server';
 
-import { AlertServices } from '../../../../../alerting/server';
+import type { AlertServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
+import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsFromSavedObject } from './legacy_utils';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
+import type { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

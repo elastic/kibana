@@ -7,7 +7,7 @@
 
 import { Logger, SavedObjectReference } from 'src/core/server';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesNotificationParams } from '../legacy_types';
+import type { LegacyRulesNotificationParams } from '../legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyInjectRuleIdReferences } from './legacy_inject_rule_id_references';
 

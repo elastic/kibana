@@ -6,9 +6,9 @@
  */
 
 import { get } from 'lodash/fp';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-import { SavedObject, SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObject, SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -43,9 +43,9 @@ import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-ty
 import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import {
+import type { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
+import type { RuleAlertAction } from '../../../../common/detection_engine/types';
+import type {
   FalsePositives,
   RuleId,
   Immutable,
@@ -100,11 +100,11 @@ import {
   NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
-import { RulesClient, PartialAlert } from '../../../../../alerting/server';
-import { SanitizedAlert } from '../../../../../alerting/common';
-import { PartialFilter } from '../types';
-import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import type { RulesClient, PartialAlert } from '../../../../../alerting/server';
+import type { SanitizedAlert } from '../../../../../alerting/common';
+import type { PartialFilter } from '../types';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 export type RuleAlertType = SanitizedAlert<RuleParams>;
 

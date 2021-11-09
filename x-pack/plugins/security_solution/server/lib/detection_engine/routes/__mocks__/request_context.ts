@@ -8,10 +8,13 @@
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from 'src/core/server/mocks';
 
-import { ActionsApiRequestHandlerContext } from '../../../../../../actions/server';
-import { AlertingApiRequestHandlerContext } from '../../../../../../alerting/server';
+import type { ActionsApiRequestHandlerContext } from '../../../../../../actions/server';
+import type { AlertingApiRequestHandlerContext } from '../../../../../../alerting/server';
 import { rulesClientMock } from '../../../../../../alerting/server/mocks';
-import { actionsClientMock } from '../../../../../../actions/server/mocks';
+
+// We have to disable this path otherwise we leak memory and cannot directly import from "../../../../../../actions/server/"
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
@@ -27,7 +30,7 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 
-const createMockClients = () => {
+export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
   const license = licensingMock.createLicenseMock();
 

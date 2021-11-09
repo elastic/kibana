@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from 'kibana/server';
+import type { SavedObjectsUpdateResponse } from 'kibana/server';
 import { loggingSystemMock } from 'src/core/server/mocks';
 
-import { AlertAction } from '../../../../../alerting/common';
+import type { AlertAction } from '../../../../../alerting/common';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
 } from './legacy_types';

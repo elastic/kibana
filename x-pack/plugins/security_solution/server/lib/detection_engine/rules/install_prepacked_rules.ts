@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { SanitizedAlert, AlertTypeParams } from '../../../../../alerting/common';
-import { RulesClient } from '../../../../../alerting/server';
+import type { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { SanitizedAlert, AlertTypeParams } from '../../../../../alerting/common';
+import type { RulesClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
-import { PartialFilter } from '../types';
+import type { PartialFilter } from '../types';
 
 export const installPrepackagedRules = (
   rulesClient: RulesClient,

@@ -6,22 +6,26 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { Type, LanguageOrUndefined, Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  Type,
+  LanguageOrUndefined,
+  Language,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
-import {
+import type {
   QueryOrUndefined,
   SavedIdOrUndefined,
   IndexOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { PartialFilter } from '../types';
-import { QueryFilter } from './types';
+import type { PartialFilter } from '../types';
+import type { QueryFilter } from './types';
 
 interface GetFilterArgs {
   type: Type;

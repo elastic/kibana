@@ -10,7 +10,10 @@ import Boom from '@hapi/boom';
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
+import type {
+  IRuleSavedAttributesSavedObjectAttributes,
+  IRuleStatusSOAttributes,
+} from '../rules/types';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   transformBulkError,

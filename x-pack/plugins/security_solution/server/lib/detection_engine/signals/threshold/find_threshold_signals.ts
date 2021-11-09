@@ -8,17 +8,17 @@
 import { set } from '@elastic/safer-lodash-set';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
-import {
+import type {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
-import { BuildRuleMessage } from '../rule_messages';
+import type { Logger } from '../../../../../../../../src/core/server';
+import type { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import type { SignalSearchResponse } from '../types';
 

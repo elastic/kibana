@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { AlertAction } from '../../../../../alerting/common';
-import { AlertServices } from '../../../../../alerting/server';
+import type { Logger } from 'src/core/server';
+import type { AlertAction } from '../../../../../alerting/common';
+import type { AlertServices } from '../../../../../alerting/server';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsSavedObject } from './legacy_get_rule_actions_saved_object';

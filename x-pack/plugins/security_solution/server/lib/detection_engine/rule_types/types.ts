@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/logging';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from '@kbn/logging';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { AlertExecutorOptions, AlertType } from '../../../../../alerting/server';
-import {
+import type { AlertExecutorOptions, AlertType } from '../../../../../alerting/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
   WithoutReservedActionGroups,
 } from '../../../../../alerting/common';
-import { ListClient } from '../../../../../lists/server';
-import { TechnicalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
-import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
-import { PersistenceServices, IRuleDataClient } from '../../../../../rule_registry/server';
-import { BaseHit } from '../../../../common/detection_engine/types';
-import { ConfigType } from '../../../config';
-import { SetupPlugins } from '../../../plugin';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
-import { BuildRuleMessage } from '../signals/rule_messages';
-import {
+import type { ListClient } from '../../../../../lists/server';
+import type { TechnicalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
+import type { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
+import type { PersistenceServices, IRuleDataClient } from '../../../../../rule_registry/server';
+import type { BaseHit } from '../../../../common/detection_engine/types';
+import type { ConfigType } from '../../../config';
+import type { SetupPlugins } from '../../../plugin';
+import type { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import type { BuildRuleMessage } from '../signals/rule_messages';
+import type {
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
   WrapSequences,
 } from '../signals/types';
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { IEventLogService } from '../../../../../event_log/server';
-import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { IEventLogService } from '../../../../../event_log/server';
+import type { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];

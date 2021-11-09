@@ -12,11 +12,11 @@ import {
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import type { SanitizedAlert } from '../../../../../alerting/common';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS, SERVER_APP_ID } from '../../../../common/constants';
-import { CreateRulesOptions } from './types';
+import type { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
-import { PartialFilter, RuleTypeParams } from '../types';
+import type { PartialFilter, RuleTypeParams } from '../types';
 import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const createRules = async ({

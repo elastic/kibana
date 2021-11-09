@@ -6,12 +6,12 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import {
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import type {
   AlertType,
   AlertTypeState,
   AlertInstanceState,
@@ -19,24 +19,24 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerting/server';
-import { TermAggregationBucket } from '../../types';
-import {
+import type { TermAggregationBucket } from '../../types';
+import type {
   EqlSearchResponse,
   BaseHit,
   RuleAlertAction,
   SearchTypes,
   EqlSequence,
 } from '../../../../common/detection_engine/types';
-import { ListClient } from '../../../../../lists/server';
-import { Logger } from '../../../../../../../src/core/server';
-import { BuildRuleMessage } from './rule_messages';
-import { TelemetryEventsSender } from '../../telemetry/sender';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
-import { GenericBulkCreateResponse } from './bulk_create_factory';
-import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
-import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
-import { BuildReasonMessage } from './reason_formatters';
-import { RACAlert } from '../rule_types/types';
+import type { ListClient } from '../../../../../lists/server';
+import type { Logger } from '../../../../../../../src/core/server';
+import type { BuildRuleMessage } from './rule_messages';
+import type { TelemetryEventsSender } from '../../telemetry/sender';
+import type { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import type { GenericBulkCreateResponse } from './bulk_create_factory';
+import type { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
+import type { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
+import type { BuildReasonMessage } from './reason_formatters';
+import type { RACAlert } from '../rule_types/types';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention

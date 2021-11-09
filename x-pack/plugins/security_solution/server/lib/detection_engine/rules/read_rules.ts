@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
+import type { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
 import { findRules } from './find_rules';
 import { isAlertType, ReadRuleOptions } from './types';
 

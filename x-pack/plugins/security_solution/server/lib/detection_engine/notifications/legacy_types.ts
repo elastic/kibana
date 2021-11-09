@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import {
+import type {
   RulesClient,
   PartialAlert,
   AlertType,
@@ -17,7 +17,7 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
 } from '../../../../../alerting/server';
-import { Alert, AlertAction } from '../../../../../alerting/common';
+import type { Alert, AlertAction } from '../../../../../alerting/common';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 
 /**

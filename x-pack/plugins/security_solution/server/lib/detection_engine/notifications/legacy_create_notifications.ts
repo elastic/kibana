@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import type { SanitizedAlert } from '../../../../../alerting/common';
 import { SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
 import { CreateNotificationParams, LegacyRuleNotificationAlertTypeParams } from './legacy_types';

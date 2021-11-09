@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { SavedObjectReference } from 'src/core/server';
+import type { SavedObjectReference } from 'src/core/server';
 import { getSavedObjectReference } from '.';
 
 describe('get_saved_object_reference', () => {

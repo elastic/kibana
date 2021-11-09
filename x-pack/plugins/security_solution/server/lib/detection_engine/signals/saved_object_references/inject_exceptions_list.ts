@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { Logger, SavedObjectReference } from 'src/core/server';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { getSavedObjectReferenceForExceptionsList, logMissingSavedObjectError } from './utils';
 
 /**

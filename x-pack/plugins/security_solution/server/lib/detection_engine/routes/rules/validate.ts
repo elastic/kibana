@@ -14,7 +14,7 @@ import {
   RulesSchema,
   rulesSchema,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { PartialAlert } from '../../../../../../alerting/server';
+import type { PartialAlert } from '../../../../../../alerting/server';
 import {
   isAlertType,
   IRuleStatusSOAttributes,
@@ -22,7 +22,7 @@ import {
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transform, transformAlertToRule } from './utils';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 

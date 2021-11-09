@@ -6,14 +6,14 @@
  */
 
 import { chunk } from 'lodash/fp';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { RulesClient, PartialAlert } from '../../../../../alerting/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
+import type { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
-import { PartialFilter } from '../types';
-import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import type { PartialFilter } from '../types';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { legacyMigrate } from './utils';
 
 /**

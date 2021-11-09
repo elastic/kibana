@@ -10,12 +10,12 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
 } from '../../../../common/constants';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export interface GetInputIndex {
   experimentalFeatures: ExperimentalFeatures;

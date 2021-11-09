@@ -18,15 +18,15 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ListClient } from '../../../../../../lists/server';
-import {
+import type { ListClient } from '../../../../../../lists/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
+import type { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
+import type { TelemetryEventsSender } from '../../../telemetry/sender';
+import type { BuildRuleMessage } from '../rule_messages';
 import {
   BulkCreate,
   RuleRangeTuple,
@@ -34,7 +34,7 @@ import {
   SignalsEnrichment,
   WrapHits,
 } from '../types';
-import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 

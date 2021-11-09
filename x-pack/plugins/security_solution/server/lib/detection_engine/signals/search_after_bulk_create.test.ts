@@ -20,7 +20,7 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mo
 import uuid from 'uuid';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types';
+import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types';
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
@@ -31,8 +31,8 @@ import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { BuildReasonMessage } from './reason_formatters';
-import { QueryRuleParams } from '../schemas/rule_schemas';
+import type { BuildReasonMessage } from './reason_formatters';
+import type { QueryRuleParams } from '../schemas/rule_schemas';
 
 const buildRuleMessage = mockBuildRuleMessage;
 

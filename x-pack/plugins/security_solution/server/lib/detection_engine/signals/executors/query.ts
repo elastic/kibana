@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import type { Logger } from 'src/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
+import type { ListClient } from '../../../../../../lists/server';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
-import { CompleteRule, SavedQueryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { TelemetryEventsSender } from '../../../telemetry/sender';
+import type { BuildRuleMessage } from '../rule_messages';
+import type {
+  CompleteRule,
+  SavedQueryRuleParams,
+  QueryRuleParams,
+} from '../../schemas/rule_schemas';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 
 export const queryExecutor = async ({

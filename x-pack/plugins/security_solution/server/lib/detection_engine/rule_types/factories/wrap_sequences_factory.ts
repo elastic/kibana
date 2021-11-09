@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import type { Logger } from 'kibana/server';
 
-import { WrapSequences } from '../../signals/types';
+import type { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
-import { ConfigType } from '../../../../config';
-import { WrappedRACAlert } from '../types';
-import { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
+import type { ConfigType } from '../../../../config';
+import type { WrappedRACAlert } from '../types';
+import type { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
 
 export const wrapSequencesFactory =
   ({

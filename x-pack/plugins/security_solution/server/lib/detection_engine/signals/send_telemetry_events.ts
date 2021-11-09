@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { TelemetryEventsSender } from '../../telemetry/sender';
-import { TelemetryEvent } from '../../telemetry/types';
-import { BuildRuleMessage } from './rule_messages';
-import { SignalSearchResponse, SignalSource } from './types';
-import { Logger } from '../../../../../../../src/core/server';
+import type { TelemetryEventsSender } from '../../telemetry/sender';
+import type { TelemetryEvent } from '../../telemetry/types';
+import type { BuildRuleMessage } from './rule_messages';
+import type { SignalSearchResponse, SignalSource } from './types';
+import type { Logger } from '../../../../../../../src/core/server';
 
 export interface SearchResultWithSource {
   _source: SignalSource;

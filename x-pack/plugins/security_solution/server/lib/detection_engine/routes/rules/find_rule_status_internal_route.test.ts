@@ -14,7 +14,7 @@ import {
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRuleStatusInternalRoute } from './find_rule_status_internal_route';
-import { RuleStatusResponse } from '../../rules/types';
+import type { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 

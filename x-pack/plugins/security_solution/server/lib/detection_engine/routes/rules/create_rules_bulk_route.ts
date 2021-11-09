@@ -15,7 +15,7 @@ import {
   DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
 } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';

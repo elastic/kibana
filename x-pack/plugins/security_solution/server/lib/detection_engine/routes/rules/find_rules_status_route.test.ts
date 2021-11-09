@@ -13,7 +13,7 @@ import {
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
-import { RuleStatusResponse } from '../../rules/types';
+import type { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 

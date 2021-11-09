@@ -8,12 +8,12 @@
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty } from 'lodash';
 
-import { Logger } from 'kibana/server';
-import { BaseHit } from '../../../../../common/detection_engine/types';
-import { BuildRuleMessage } from '../../signals/rule_messages';
+import type { Logger } from 'kibana/server';
+import type { BaseHit } from '../../../../../common/detection_engine/types';
+import type { BuildRuleMessage } from '../../signals/rule_messages';
 import { errorAggregator, makeFloatString } from '../../signals/utils';
-import { RefreshTypes } from '../../types';
-import { PersistenceAlertService } from '../../../../../../rule_registry/server';
+import type { RefreshTypes } from '../../types';
+import type { PersistenceAlertService } from '../../../../../../rule_registry/server';
 
 export interface GenericBulkCreateResponse<T> {
   success: boolean;

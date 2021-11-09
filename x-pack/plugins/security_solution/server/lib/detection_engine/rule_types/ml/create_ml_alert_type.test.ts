@@ -13,7 +13,7 @@ import { bulkCreateMlSignals } from '../../signals/bulk_create_ml_signals';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createMlAlertType } from './create_ml_alert_type';
 
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
 import { createMockConfig } from '../../routes/__mocks__';
 

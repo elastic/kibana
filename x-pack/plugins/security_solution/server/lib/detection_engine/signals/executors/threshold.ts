@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Logger } from 'src/core/server';
+import type { Logger } from 'src/core/server';
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import {
@@ -25,7 +25,7 @@ import {
   getThresholdBucketFilters,
   getThresholdSignalHistory,
 } from '../threshold';
-import {
+import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
@@ -37,8 +37,8 @@ import {
   createSearchAfterReturnTypeFromResponse,
   mergeReturns,
 } from '../utils';
-import { BuildRuleMessage } from '../rule_messages';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { BuildRuleMessage } from '../rule_messages';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 
 export const thresholdExecutor = async ({

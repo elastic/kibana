@@ -8,8 +8,8 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Logger } from 'src/core/server';
-import {
+import type { Logger } from 'src/core/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
@@ -21,7 +21,7 @@ import { getIndexVersion } from '../../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_template';
 import { getInputIndex } from '../get_input_output_index';
 
-import {
+import type {
   BulkCreate,
   WrapHits,
   WrapSequences,
@@ -31,9 +31,9 @@ import {
   SimpleHit,
 } from '../types';
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
-import { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 
 export const eqlExecutor = async ({
   completeRule,

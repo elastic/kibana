@@ -7,21 +7,21 @@
 
 import { KibanaRequest, Logger } from 'src/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
+import type { ListClient } from '../../../../../../lists/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
-import { BuildRuleMessage } from '../rule_messages';
-import { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import type { BuildRuleMessage } from '../rule_messages';
+import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 
 export const mlExecutor = async ({
   completeRule,

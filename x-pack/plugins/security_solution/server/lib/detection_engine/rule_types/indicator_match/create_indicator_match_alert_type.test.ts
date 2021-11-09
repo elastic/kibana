@@ -14,8 +14,8 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createIndicatorMatchAlertType } from './create_indicator_match_alert_type';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
-import { CountResponse } from 'kibana/server';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { CountResponse } from 'kibana/server';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
 import { createMockConfig } from '../../routes/__mocks__';
 

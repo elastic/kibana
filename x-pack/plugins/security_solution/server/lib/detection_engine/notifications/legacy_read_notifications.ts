@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
+import type { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyReadNotificationParams, legacyIsAlertType } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports

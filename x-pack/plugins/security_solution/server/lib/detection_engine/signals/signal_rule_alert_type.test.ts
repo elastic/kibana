@@ -18,8 +18,8 @@ import {
   createSearchAfterReturnType,
 } from './utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
-import { RuleAlertType } from '../rules/types';
+import type { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
+import type { RuleAlertType } from '../rules/types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';

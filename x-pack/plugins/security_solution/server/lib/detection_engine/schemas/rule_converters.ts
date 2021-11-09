@@ -13,25 +13,25 @@ import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
-import {
+import type {
   InternalRuleCreate,
   RuleParams,
   TypeSpecificRuleParams,
   BaseRuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
-import {
+import type {
   CreateRulesSchema,
   CreateTypeSpecific,
   FullResponseSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
-import { AppClient } from '../../../types';
+import type { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
-import { IRuleStatusSOAttributes } from '../rules/types';
+import type { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
+import type { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import {
@@ -41,7 +41,7 @@ import {
   transformActions,
 } from '../rules/utils';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import type { LegacyRuleActions } from '../rule_actions/legacy_types';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for

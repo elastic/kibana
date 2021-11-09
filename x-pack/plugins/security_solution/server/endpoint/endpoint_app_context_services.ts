@@ -18,7 +18,7 @@ import {
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
-import { PluginStartContract as AlertsPluginStartContract } from '../../../alerting/server';
+import type { PluginStartContract as AlertsPluginStartContract } from '../../../alerting/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,

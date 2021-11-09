@@ -6,7 +6,7 @@
  */
 /* eslint-disable complexity */
 
-import { Logger } from 'src/core/server';
+import type { Logger } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
 
 import * as t from 'io-ts';
@@ -21,7 +21,7 @@ import {
   isThreatMatchRule,
   isQueryRule,
 } from '../../../../common/detection_engine/utils';
-import { SetupPlugins } from '../../../plugin';
+import type { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
 import { SignalRuleAlertTypeDefinition, ThresholdAlertState } from './types';
 import {
@@ -41,7 +41,7 @@ import {
 } from '../notifications/schedule_notification_actions';
 import { buildRuleMessageFactory } from './rule_messages';
 import { getNotificationResultsLink } from '../notifications/utils';
-import { TelemetryEventsSender } from '../../telemetry/sender';
+import type { TelemetryEventsSender } from '../../telemetry/sender';
 import { eqlExecutor } from './executors/eql';
 import { queryExecutor } from './executors/query';
 import { threatMatchExecutor } from './executors/threat_match';
@@ -61,8 +61,8 @@ import {
 import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { wrapSequencesFactory } from './wrap_sequences_factory';
-import { ConfigType } from '../../../config';
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { ConfigType } from '../../../config';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { injectReferences, extractReferences } from './saved_object_references';
 import {
   IRuleExecutionLogClient,
@@ -71,7 +71,7 @@ import {
 } from '../rule_execution_log';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
-import { IEventLogService } from '../../../../../event_log/server';
+import type { IEventLogService } from '../../../../../event_log/server';
 
 export const signalRulesAlertType = ({
   logger,
