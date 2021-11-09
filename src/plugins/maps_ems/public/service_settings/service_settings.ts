@@ -148,15 +148,29 @@ export class ServiceSettings implements IServiceSettings {
     return allServices;
   }
 
-  /**
-   * Set optional query-parameters for all requests
-   *
-   * @param additionalQueryParams
-   */
-  setQueryParams(additionalQueryParams: { [p: string]: string }) {
-    // Functions more as a "set" than an "add" in ems-client
-    this._emsClient.addQueryParams(additionalQueryParams);
+  async getTmsService(id: string) {
+    return this._emsClient.findTMSServiceById(id);
   }
+
+  async getDefaultTmsLayer(isDarkMode: boolean) {
+    const { dark, desaturated } = this._mapConfig.emsTileLayerId;
+
+    if (hasUserConfiguredTmsLayer(this._mapConfig)) {
+      return TMS_IN_YML_ID;
+    }
+
+    return isDarkMode ? dark : desaturated;
+  }
+
+  // /**
+  //  * Set optional query-parameters for all requests
+  //  *
+  //  * @param additionalQueryParams
+  //  */
+  // setQueryParams(additionalQueryParams: { [p: string]: string }) {
+  //   // Functions more as a "set" than an "add" in ems-client
+  //   this._emsClient.addQueryParams(additionalQueryParams);
+  // }
 
   async _getAttributesForEMSTMSLayer(isDesaturated: boolean, isDarkMode: boolean) {
     const tmsServices = await this._emsClient.getTMSServices();
@@ -253,4 +267,8 @@ function getAttributionString(emsService: EMSFileLayer | TMSService) {
     return anchorTag.outerHTML;
   });
   return attributionSnippets.join(' | '); // !!!this is the current convention used in Kibana
+}
+
+function hasUserConfiguredTmsLayer(config: MapsEmsConfig) {
+  return Boolean(config.tilemap?.url);
 }
