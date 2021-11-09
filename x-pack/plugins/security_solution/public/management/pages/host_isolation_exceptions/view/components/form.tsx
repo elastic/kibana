@@ -179,7 +179,7 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.form.description"
-          defaultMessage="Allows isolated hosts to connect to these IP addresses. Only accepts IPv4 with optional CIDR"
+          defaultMessage="Allows isolated hosts to connect to these IP addresses. Only accepts IPv4 with optional CIDR."
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -198,7 +198,7 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.form.conditions.subtitle"
-          defaultMessage="Host Isolation exceptions will apply to all operating systems"
+          defaultMessage="Host Isolation exceptions will apply to all operating systems."
         />
       </EuiText>
       <EuiSpacer size="m" />
