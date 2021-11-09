@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -15,13 +15,10 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiCallOut,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
-import type { Field, EsRuntimeField } from '../types';
-import { RuntimeFieldPainlessError } from '../lib';
+import type { Field } from '../types';
 import { euiFlyoutClassname } from '../constants';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
@@ -35,9 +32,6 @@ const i18nTexts = {
   }),
   saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
     defaultMessage: 'Save',
-  }),
-  formErrorsCalloutTitle: i18n.translate('indexPatternFieldEditor.editor.validationErrorTitle', {
-    defaultMessage: 'Fix errors in form before continuing.',
   }),
 };
 
@@ -55,8 +49,6 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
-  /** Handler to validate the script  */
-  runtimeFieldValidator: (field: EsRuntimeField) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
   isSavingField: boolean;
@@ -70,10 +62,10 @@ const FieldEditorFlyoutContentComponent = ({
   field,
   onSave,
   onCancel,
-  runtimeFieldValidator,
   isSavingField,
   onMounted,
 }: Props) => {
+  const isMounted = useRef(false);
   const isEditingExistingField = !!field;
   const { indexPattern } = useFieldEditorContext();
   const {
@@ -82,32 +74,18 @@ const FieldEditorFlyoutContentComponent = ({
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
+    isSubmitting: false,
     isValid: field ? true : undefined,
     submit: field
       ? async () => ({ isValid: true, data: field })
       : async () => ({ isValid: false, data: {} as Field }),
   });
 
-  const [painlessSyntaxError, setPainlessSyntaxError] = useState<RuntimeFieldPainlessError | null>(
-    null
-  );
-
-  const [isValidating, setIsValidating] = useState(false);
   const [modalVisibility, setModalVisibility] = useState(defaultModalVisibility);
   const [isFormModified, setIsFormModified] = useState(false);
 
-  const { submit, isValid: isFormValid, isSubmitted } = formState;
-  const hasErrors = isFormValid === false || painlessSyntaxError !== null;
-
-  const clearSyntaxError = useCallback(() => setPainlessSyntaxError(null), []);
-
-  const syntaxError = useMemo(
-    () => ({
-      error: painlessSyntaxError,
-      clear: clearSyntaxError,
-    }),
-    [painlessSyntaxError, clearSyntaxError]
-  );
+  const { submit, isValid: isFormValid, isSubmitting } = formState;
+  const hasErrors = isFormValid === false;
 
   const canCloseValidator = useCallback(() => {
     if (isFormModified) {
@@ -121,25 +99,15 @@ const FieldEditorFlyoutContentComponent = ({
 
   const onClickSave = useCallback(async () => {
     const { isValid, data } = await submit();
-    const nameChange = field?.name !== data.name;
-    const typeChange = field?.type !== data.type;
+
+    if (!isMounted.current) {
+      // User has closed the flyout meanwhile submitting the form
+      return;
+    }
 
     if (isValid) {
-      if (data.script) {
-        setIsValidating(true);
-
-        const error = await runtimeFieldValidator({
-          type: data.type,
-          script: data.script,
-        });
-
-        setIsValidating(false);
-        setPainlessSyntaxError(error);
-
-        if (error) {
-          return;
-        }
-      }
+      const nameChange = field?.name !== data.name;
+      const typeChange = field?.type !== data.type;
 
       if (isEditingExistingField && (nameChange || typeChange)) {
         setModalVisibility({
@@ -150,7 +118,7 @@ const FieldEditorFlyoutContentComponent = ({
         onSave(data);
       }
     }
-  }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField]);
+  }, [onSave, submit, field, isEditingExistingField]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
@@ -206,6 +174,14 @@ const FieldEditorFlyoutContentComponent = ({
     }
   }, [onMounted, canCloseValidator]);
 
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   return (
     <>
       <FlyoutPanels.Group
@@ -253,23 +229,11 @@ const FieldEditorFlyoutContentComponent = ({
               field={field}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
-              syntaxError={syntaxError}
             />
           </FlyoutPanels.Content>
 
           <FlyoutPanels.Footer>
             <>
-              {isSubmitted && hasErrors && (
-                <>
-                  <EuiCallOut
-                    title={i18nTexts.formErrorsCalloutTitle}
-                    color="danger"
-                    iconType="cross"
-                    data-test-subj="formError"
-                  />
-                  <EuiSpacer size="m" />
-                </>
-              )}
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
@@ -289,7 +253,7 @@ const FieldEditorFlyoutContentComponent = ({
                     data-test-subj="fieldSaveButton"
                     fill
                     disabled={hasErrors}
-                    isLoading={isSavingField || isValidating}
+                    isLoading={isSavingField || isSubmitting}
                   >
                     {i18nTexts.saveButtonLabel}
                   </EuiButton>
