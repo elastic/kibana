@@ -109,10 +109,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardExpect.tsvbMetricValuesExist(['0 custom template']);
       });
 
-      // skipped pending TSVB investigation
-      // it('tsvb top n is filtered', async () => {
-      //   await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
-      // });
+      it('tsvb top n is filtered', async () => {
+        await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
+      });
 
       it('saved search is filtered', async () => {
         await dashboardExpect.savedSearchRowCount(0);
@@ -223,20 +222,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardExpect.tagCloudWithValuesFound(['9,972', '4,886', '1,944', '9,025']);
       });
 
-      // skipped pending TSVB investigation
-      // it('tsvb metric', async () => {
-      //   await dashboardExpect.tsvbMetricValuesExist(['50,465 custom template']);
-      // });
+      it('tsvb metric', async () => {
+        await dashboardExpect.tsvbMetricValuesExist(['50,465 custom template']);
+      });
 
-      // skipped pending TSVB investigation
-      // it('tsvb top n', async () => {
-      //   await dashboardExpect.tsvbTopNValuesExist(['6,308.125', '6,308.125']);
-      // });
+      it('tsvb top n', async () => {
+        await dashboardExpect.tsvbTopNValuesExist(['6,308.125', '6,308.125']);
+      });
 
-      // skipped pending TSVB investigation
-      // it('tsvb markdown', async () => {
-      //   await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
-      // });
+      it('tsvb markdown', async () => {
+        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
+      });
 
       it('saved searches', async () => {
         await dashboardExpect.savedSearchRowCount(1);
