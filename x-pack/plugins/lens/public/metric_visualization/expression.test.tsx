@@ -101,23 +101,15 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               3
             </div>
             <div
+              className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
             >
               My fanci metric chart
             </div>
@@ -149,23 +141,15 @@ describe('metric_expression', () => {
             key="last"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               last
             </div>
             <div
+              className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
             >
               My fanci metric chart
             </div>
@@ -196,23 +180,15 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               3
             </div>
             <div
+              className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
             >
               My fanci metric chart
             </div>
@@ -243,13 +219,9 @@ describe('metric_expression', () => {
             key="3"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               3
             </div>
@@ -334,23 +306,15 @@ describe('metric_expression', () => {
             key="0"
           >
             <div
+              className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={
-                Object {
-                  "fontSize": "60pt",
-                  "fontWeight": 600,
-                }
-              }
+              style={Object {}}
             >
               0
             </div>
             <div
+              className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={
-                Object {
-                  "fontSize": "24pt",
-                }
-              }
             >
               My fanci metric chart
             </div>
