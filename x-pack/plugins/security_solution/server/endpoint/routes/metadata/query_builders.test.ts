@@ -223,22 +223,8 @@ describe('query builder', () => {
   });
 
   describe('buildUnitedIndexQuery', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let mockRequest: KibanaRequest<any, any, any>;
-    let mockEndpointAppContext: EndpointAppContext;
-    const filters = { kql: '', host_status: [] };
-    beforeEach(() => {
-      mockRequest = httpServerMock.createKibanaRequest({ body: { filters } });
-      mockEndpointAppContext = {
-        logFactory: loggingSystemMock.create(),
-        service: new EndpointAppContextService(),
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-      };
-    });
-
     it('correctly builds empty query', async () => {
-      const query = await buildUnitedIndexQuery(mockRequest, mockEndpointAppContext, []);
+      const query = await buildUnitedIndexQuery({ page: 1, pageSize: 10, filters: {} }, []);
       const expected = {
         bool: {
           must_not: {
@@ -279,13 +265,16 @@ describe('query builder', () => {
     });
 
     it('correctly builds query', async () => {
-      mockRequest.body.filters.kql = 'united.endpoint.host.os.name : *';
-      mockRequest.body.filters.host_status = ['healthy'];
-      const endpointPolicyIds: string[] = ['test-endpoint-policy-id'];
       const query = await buildUnitedIndexQuery(
-        mockRequest,
-        mockEndpointAppContext,
-        endpointPolicyIds
+        {
+          page: 1,
+          pageSize: 10,
+          filters: {
+            kql: 'united.endpoint.host.os.name : *',
+            host_status: ['healthy'],
+          },
+        },
+        ['test-endpoint-policy-id']
       );
       const expected = expectedCompleteUnitedIndexQuery;
       expect(query.body.query).toEqual(expected);

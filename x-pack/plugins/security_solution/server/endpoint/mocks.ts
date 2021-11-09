@@ -90,22 +90,27 @@ export const createMockEndpointAppContextServiceStartContract =
     const factory = new AppClientFactory();
     factory.setup({ getSpaceId: () => 'mockSpace', config });
 
+    const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
     const casesClientMock = createCasesClientMock();
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
     const agentService = createMockAgentService();
     const agentPolicyService = createMockAgentPolicyService();
+    const packagePolicyService = createPackagePolicyServiceMock();
     const endpointMetadataService = new EndpointMetadataService(
       savedObjectsStart,
       agentService,
-      agentPolicyService
+      agentPolicyService,
+      packagePolicyService,
+      logger
     );
 
     return {
       agentService,
       agentPolicyService,
       endpointMetadataService,
+      packagePolicyService,
+      logger,
       packageService: createMockPackageService(),
-      logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
       manifestManager: getManifestManagerMock(),
       appClientFactory: factory,
       security: securityMock.createStart(),
@@ -117,7 +122,6 @@ export const createMockEndpointAppContextServiceStartContract =
         Parameters<FleetStartContract['registerExternalCallback']>
       >(),
       exceptionListsClient: listMock.getExceptionListClient(),
-      packagePolicyService: createPackagePolicyServiceMock(),
       cases: {
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
