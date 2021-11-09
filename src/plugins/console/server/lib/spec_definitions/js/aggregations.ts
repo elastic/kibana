@@ -83,8 +83,8 @@ const rules = {
       __template: {
         field: '',
         compression: 0,
-        missing: 0
-      }
+        missing: 0,
+      },
     },
     adjacency_matrix: {
       filters: {},
