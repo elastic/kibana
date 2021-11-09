@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type BreadcrumbType = 'home' | 'console' | 'searchprofiler' | 'grokdebugger' | 'painless_lab';
+export type BreadcrumbType =
+  | 'home'
+  | 'console'
+  | 'searchprofiler'
+  | 'grokdebugger'
+  | 'painless_lab';
