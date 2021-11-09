@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../common/constants';
 import { findInventoryModel } from '../../common/inventory_models';
 // import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
 import { InventoryItemType } from '../../common/inventory_models/types';
@@ -12,7 +13,6 @@ import { ESSearchClient } from '../lib/metrics/types';
 
 interface Options {
   indexPattern: string;
-  timestampField: string;
   timerange: {
     from: number;
     to: number;
@@ -44,7 +44,7 @@ export const calculateMetricInterval = async (
           filter: [
             {
               range: {
-                [options.timestampField]: {
+                [TIMESTAMP_FIELD]: {
                   gte: from,
                   lte: options.timerange.to,
                   format: 'epoch_millis',

@@ -10,7 +10,7 @@ import {
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiTableSelectionType,
-  EuiBasicTable as _EuiBasicTable,
+  EuiBasicTable,
   EuiBasicTableProps,
 } from '@elastic/eui';
 import classnames from 'classnames';
@@ -40,12 +40,12 @@ interface CasesTableProps {
   selection: EuiTableSelectionType<Case>;
   showActions: boolean;
   sorting: EuiBasicTableProps<Case>['sorting'];
-  tableRef: MutableRefObject<_EuiBasicTable | undefined>;
+  tableRef: MutableRefObject<EuiBasicTable | undefined>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
   userCanCrud: boolean;
 }
 
-const EuiBasicTable: any = _EuiBasicTable;
+// @ts-expect-error TS2769
 const BasicTable = styled(EuiBasicTable)`
   ${({ theme }) => `
     .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
