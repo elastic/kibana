@@ -29,12 +29,12 @@ export interface AlertsUsage {
     avg: string;
     max: string;
   };
-  throttle_time_number: {
+  throttle_time_number_s: {
     min: number;
     avg: number;
     max: number;
   };
-  schedule_time_number: {
+  schedule_time_number_s: {
     min: number;
     avg: number;
     max: number;

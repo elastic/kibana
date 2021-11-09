@@ -110,7 +110,7 @@ Object {
     "max": "10s",
     "min": "1s",
   },
-  "schedule_time_number": Object {
+  "schedule_time_number_s": Object {
     "avg": 4.5,
     "max": 10,
     "min": 1,
@@ -120,7 +120,7 @@ Object {
     "max": "60s",
     "min": "0s",
   },
-  "throttle_time_number": Object {
+  "throttle_time_number_s": Object {
     "avg": 30,
     "max": 60,
     "min": 0,

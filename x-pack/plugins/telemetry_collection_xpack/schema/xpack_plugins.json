@@ -283,7 +283,7 @@
             }
           }
         },
-        "throttle_time_number": {
+        "throttle_time_number_s": {
           "properties": {
             "min": {
               "type": "long"
@@ -309,7 +309,7 @@
             }
           }
         },
-        "schedule_time_number": {
+        "schedule_time_number_s": {
           "properties": {
             "min": {
               "type": "long"

@@ -104,12 +104,12 @@ export function createAlertsUsageCollector(
             avg: '0s',
             max: '0s',
           },
-          throttle_time_number: {
+          throttle_time_number_s: {
             min: 0,
             avg: 0,
             max: 0,
           },
-          schedule_time_number: {
+          schedule_time_number_s: {
             min: 0,
             avg: 0,
             max: 0,
@@ -146,12 +146,12 @@ export function createAlertsUsageCollector(
         avg: { type: 'keyword' },
         max: { type: 'keyword' },
       },
-      throttle_time_number: {
+      throttle_time_number_s: {
         min: { type: 'long' },
         avg: { type: 'float' },
         max: { type: 'long' },
       },
-      schedule_time_number: {
+      schedule_time_number_s: {
         min: { type: 'long' },
         avg: { type: 'float' },
         max: { type: 'long' },
