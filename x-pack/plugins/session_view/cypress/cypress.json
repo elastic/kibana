@@ -7,10 +7,6 @@
   "retries": {
     "runMode": 2
   },
-  "env": {
-    "username": "elastic",
-    "password": "changeme"
-  },
   "screenshotsFolder": "../../../target/kibana-session-view/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
   "video": false,
