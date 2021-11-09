@@ -20,6 +20,7 @@ const TOTAL_ALERTS_CELL_COUNT = 198;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
 
   describe('Observability alerts', function () {
     this.tags('includeFirefox');
@@ -178,6 +179,10 @@ export default ({ getService }: FtrProviderContext) => {
           it('Displays a View in App button', async () => {
             await observability.alerts.common.getAlertsFlyoutViewInAppButtonOrFail();
           });
+
+          it('Displays a View rule details link', async () => {
+            await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
+          });
         });
       });
 
@@ -232,9 +237,19 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
-      it('Is disabled when a user has only read privilages', async () => {
+      // Note: By adding "View Rule Details" button in the menu, we made "more actions" button always visible and enabled.
+      // Therefore the below test case and the code covered by it became redundant.
+      // In case of we may need it later, we didn't remove the code but disabled the test case since it's always invalid.
+      it.skip('Is disabled when a user has only read privilages', async () => {
         const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
         expect(await actionsButton.getAttribute('disabled')).to.be('true');
+      });
+
+      it('Opens rule details page when click on "View Rule Details"', async () => {
+        const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+        await actionsButton.click();
+        await observability.alerts.common.viewRuleDetailsButtonClick();
+        expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
       });
     });
   });
