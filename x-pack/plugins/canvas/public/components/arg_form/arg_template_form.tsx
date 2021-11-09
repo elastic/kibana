@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useRef, RefObject } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { RenderToDom } from '../render_to_dom';
@@ -17,8 +17,8 @@ interface ArgTemplateFormProps {
     domNode: HTMLElement,
     config: ArgTemplateFormProps['argumentProps'],
     handlers: ArgTemplateFormProps['handlers'],
-    onDone?: (ref: UpdatePropsRef) => void
-  ) => RefObject<UpdatePropsRef>;
+    onMount?: (ref: UpdatePropsRef<ArgTemplateFormProps['argumentProps']> | null) => void
+  ) => void;
   argumentProps: {
     valueMissing?: boolean;
     label?: string;

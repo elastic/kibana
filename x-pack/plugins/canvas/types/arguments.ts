@@ -38,7 +38,7 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
     domNode: HTMLElement,
     config: ArgumentConfig,
     handlers: ArgumentHandlers,
-    onRef: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
+    onMount: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
   ) => void;
   /**
    * A function that renders a complex/large argument
@@ -48,7 +48,7 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
     domNode: HTMLElement,
     config: ArgumentConfig,
     handlers: ArgumentHandlers,
-    onRef: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
+    onMount: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
   ) => void;
 }
 

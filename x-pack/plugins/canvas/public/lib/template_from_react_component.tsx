@@ -60,14 +60,14 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
     domNode: HTMLElement,
     config: Props,
     handlers: ArgumentHandlers,
-    onRef?: (ref: UpdatePropsRef<Props> | null) => void
+    onMount?: (ref: UpdatePropsRef<Props> | null) => void
   ) => {
     try {
       const el = (
         <ForwardRefWrappedComponent
           {...config}
           ref={(ref) => {
-            onRef?.(ref);
+            onMount?.(ref);
           }}
         />
       );

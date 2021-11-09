@@ -24,7 +24,7 @@ type TemplateFn = (
   domNode: HTMLElement,
   config: DatasourceRenderProps,
   handlers: ExpressionFormHandlers,
-  onRef?: (ref: UpdatePropsRef<DatasourceRenderProps> | null) => void
+  onMount?: (ref: UpdatePropsRef<DatasourceRenderProps> | null) => void
 ) => void;
 
 export type DatasourceProps = {
