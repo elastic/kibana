@@ -34,6 +34,7 @@ export default function spaceSelectorFunctionalTests({
       );
 
       afterEach(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 
