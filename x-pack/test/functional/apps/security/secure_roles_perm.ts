@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'security',
     'settings',
@@ -48,9 +49,6 @@ export default function ({ getService, getPageObjects }) {
             },
           ],
         },
-        kibana: {
-          global: ['all'],
-        },
       });
     });
 
@@ -89,6 +87,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
