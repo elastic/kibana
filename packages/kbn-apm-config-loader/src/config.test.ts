@@ -94,8 +94,8 @@ describe('ApmConfiguration', () => {
         "globalLabels": Object {},
         "logUncaughtExceptions": true,
         "metricsInterval": "30s",
-        "secretToken": "7YKhoXsO4MzjhXjx2c",
-        "serverUrl": "https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io",
+        "secretToken": "JpBCcOQxN81D5yucs2",
+        "serverUrl": "https://kibana-cloud-apm-server.elastic.dev",
         "serviceName": "serviceName",
         "serviceVersion": "8.0.0",
         "transactionSampleRate": 1,
@@ -117,11 +117,11 @@ describe('ApmConfiguration', () => {
         },
         "logUncaughtExceptions": true,
         "metricsInterval": "120s",
-        "secretToken": "7YKhoXsO4MzjhXjx2c",
-        "serverUrl": "https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io",
+        "secretToken": "JpBCcOQxN81D5yucs2",
+        "serverUrl": "https://kibana-cloud-apm-server.elastic.dev",
         "serviceName": "serviceName",
         "serviceVersion": "8.0.0",
-        "transactionSampleRate": 1,
+        "transactionSampleRate": 0.1,
       }
     `);
   });
