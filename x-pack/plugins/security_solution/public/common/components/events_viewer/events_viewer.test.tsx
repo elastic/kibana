@@ -184,7 +184,7 @@ describe('EventsViewer', () => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponseWithEvents]);
     });
 
-    test('call the right reduce action to show event details', () => {
+    test('call the right reduce action to show event details', async () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulEventsViewer {...testProps} />
@@ -195,19 +195,14 @@ describe('EventsViewer', () => {
         wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       });
 
-      waitFor(() => {
-        expect(mockDispatch).toBeCalledTimes(2);
+      await waitFor(() => {
+        expect(mockDispatch).toBeCalledTimes(3);
         expect(mockDispatch.mock.calls[1][0]).toEqual({
           payload: {
-            panelView: 'eventDetail',
-            params: {
-              eventId: 'yb8TkHYBRgU82_bJu_rY',
-              indexName: 'auditbeat-7.10.1-2020.12.18-000001',
-            },
-            tabType: 'query',
-            timelineId: TimelineId.test,
+            id: 'test',
+            isLoading: false,
           },
-          type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+          type: 'x-pack/timelines/t-grid/UPDATE_LOADING',
         });
       });
     });

@@ -7,11 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/security_solution'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/plugins/security_solution/public/detections'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution/public/detections',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/security_solution/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/plugins/security_solution/public/detections/**/*.{ts,tsx}',
   ],
 };

@@ -17,5 +17,8 @@ module.exports = {
     '<rootDir>/src/plugins/vis_types/*/jest.config.js',
     '<rootDir>/test/*/jest.config.js',
     '<rootDir>/x-pack/plugins/*/jest.config.js',
+    '<rootDir>/x-pack/plugins/security_solution/*/jest.config.js',
+    '<rootDir>/x-pack/plugins/security_solution/public/*/jest.config.js',
+    '<rootDir>/x-pack/plugins/security_solution/server/*/jest.config.js',
   ],
 };
