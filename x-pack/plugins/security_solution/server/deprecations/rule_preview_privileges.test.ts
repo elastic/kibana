@@ -101,28 +101,12 @@ describe('rule preview privileges deprecation', () => {
       ]);
     });
 
-    it('returns an appropriate deprecation if no roles are found', async () => {
+    it('returns no deprecation if no roles are found', async () => {
       mockDependencies.getKibanaRoles.mockResolvedValue({
         roles: [],
       });
       const result = await deprecationHandler.getDeprecations(mockContext);
-      expect(result).toEqual([
-        {
-          correctiveActions: {
-            manualSteps: [
-              'Update your roles to include read privileges for the detection alerts preview indices appropriate for that role and space(s).',
-              'In 8.0, users will be unable to view preview results until those permissions are added.',
-            ],
-          },
-          deprecationType: 'feature',
-          documentationUrl:
-            'https://www.elastic.co/guide/en/security/some-branch/rules-ui-create.html#preview-rules',
-          level: 'warning',
-          message:
-            'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices (.alerts-security.preview.alert-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
-          title: 'The Detections Rule Preview feature is changing',
-        },
-      ]);
+      expect(result).toEqual([]);
     });
 
     it('returns an appropriate deprecation if roles are found', async () => {

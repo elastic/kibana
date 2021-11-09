@@ -74,6 +74,10 @@ export const registerRulePreviewPrivilegeDeprecations = ({
         rolesWhichReadSignals = roles?.filter((role) => roleHasReadAccess(role)) ?? [];
       }
 
+      if (rolesWhichReadSignals.length === 0) {
+        return [];
+      }
+
       const roleNamesWhichReadSignals = rolesWhichReadSignals.map((role) => role.name);
 
       return [
