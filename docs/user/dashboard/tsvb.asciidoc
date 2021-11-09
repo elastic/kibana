@@ -40,7 +40,7 @@ Creating visualizations with only {data-sources} is the default.
 
 . Open the *Index pattern selection mode* options next to the *Index pattern* dropdown.
 
-. Select *Use only Kibana {data-sources}*.
+. Select *Use only {kib} {data-sources}*.
 
 . From the *Index pattern* drodpown, select the {data-source}, then select the *Time field* and *Interval*.
 
