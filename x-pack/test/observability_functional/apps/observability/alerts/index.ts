@@ -214,5 +214,28 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('Actions Button', () => {
+      before(async () => {
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            observabilityCases: ['read'],
+            logs: ['read'],
+          })
+        );
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await observability.users.restoreDefaultTestUserRole();
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
+      it('Is disabled when a user has only read privilages', async () => {
+        const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+        expect(await actionsButton.getAttribute('disabled')).to.be('true');
+      });
+    });
   });
 };
