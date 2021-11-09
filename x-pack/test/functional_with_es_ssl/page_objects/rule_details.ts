@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
+export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
@@ -18,80 +18,76 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
     async getHeadingText() {
       return await testSubjects.getVisibleText('alertDetailsTitle');
     },
-    async getAlertType() {
+    async getRuleType() {
       return await testSubjects.getVisibleText('alertTypeLabel');
     },
     async getActionsLabels() {
       return {
-        actionType: await testSubjects.getVisibleText('actionTypeLabel'),
+        connectorType: await testSubjects.getVisibleText('actionTypeLabel'),
       };
     },
-    async getAlertInstancesList() {
+    async getAlertsList() {
       const table = await find.byCssSelector(
-        '.euiBasicTable[data-test-subj="alertInstancesList"]:not(.euiBasicTable-loading)'
+        '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
       );
       const $ = await table.parseDomContent();
-      return $.findTestSubjects('alert-instance-row')
+      return $.findTestSubjects('alert-row')
         .toArray()
         .map((row) => {
           return {
-            instance: $(row)
-              .findTestSubject('alertInstancesTableCell-instance')
+            alert: $(row)
+              .findTestSubject('alertsTableCell-alert')
               .find('.euiTableCellContent')
               .text(),
             status: $(row)
-              .findTestSubject('alertInstancesTableCell-status')
+              .findTestSubject('alertsTableCell-status')
               .find('.euiTableCellContent')
               .text(),
             start: $(row)
-              .findTestSubject('alertInstancesTableCell-start')
+              .findTestSubject('alertsTableCell-start')
               .find('.euiTableCellContent')
               .text(),
             duration: $(row)
-              .findTestSubject('alertInstancesTableCell-duration')
+              .findTestSubject('alertsTableCell-duration')
               .find('.euiTableCellContent')
               .text(),
           };
         });
     },
-    async getAlertInstanceDurationEpoch(): Promise<number> {
-      const alertInstancesDurationEpoch = await find.byCssSelector(
-        'input[data-test-subj="alertInstancesDurationEpoch"]'
+    async getAlertDurationEpoch(): Promise<number> {
+      const alertDurationEpoch = await find.byCssSelector(
+        'input[data-test-subj="alertsDurationEpoch"]'
       );
-      return parseInt(await alertInstancesDurationEpoch.getAttribute('value'), 10);
+      return parseInt(await alertDurationEpoch.getAttribute('value'), 10);
     },
-    async clickAlertInstanceMuteButton(instance: string) {
-      const muteAlertInstanceButton = await testSubjects.find(
-        `muteAlertInstanceButton_${instance}`
-      );
-      await muteAlertInstanceButton.click();
+    async clickAlertMuteButton(alert: string) {
+      const muteAlertButton = await testSubjects.find(`muteAlertButton_${alert}`);
+      await muteAlertButton.click();
     },
-    async ensureAlertInstanceMute(instance: string, isMuted: boolean) {
+    async ensureAlertMuteState(alert: string, isMuted: boolean) {
       await retry.try(async () => {
-        const muteAlertInstanceButton = await testSubjects.find(
-          `muteAlertInstanceButton_${instance}`
-        );
-        log.debug(`checked:${await muteAlertInstanceButton.getAttribute('aria-checked')}`);
-        expect(await muteAlertInstanceButton.getAttribute('aria-checked')).to.eql(
+        const muteAlertButton = await testSubjects.find(`muteAlertButton_${alert}`);
+        log.debug(`checked:${await muteAlertButton.getAttribute('aria-checked')}`);
+        expect(await muteAlertButton.getAttribute('aria-checked')).to.eql(
           isMuted ? 'true' : 'false'
         );
       });
     },
-    async ensureAlertInstanceExistance(instance: string, shouldExist: boolean) {
+    async ensureAlertExistence(alert: string, shouldExist: boolean) {
       await retry.try(async () => {
         const table = await find.byCssSelector(
-          '.euiBasicTable[data-test-subj="alertInstancesList"]:not(.euiBasicTable-loading)'
+          '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
         );
         const $ = await table.parseDomContent();
         expect(
-          $.findTestSubjects('alert-instance-row')
+          $.findTestSubjects('alert-row')
             .toArray()
             .filter(
               (row) =>
                 $(row)
-                  .findTestSubject('alertInstancesTableCell-instance')
+                  .findTestSubject('alertsTableCell-alert')
                   .find('.euiTableCellContent')
-                  .text() === instance
+                  .text() === alert
             )
         ).to.eql(shouldExist ? 1 : 0);
       });

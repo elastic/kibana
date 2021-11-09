@@ -6,21 +6,21 @@
  */
 
 import { random, mean } from 'lodash';
-import { SanitizedAlert, AlertInstanceSummary } from '../types';
+import { SanitizedAlert, AlertSummary } from '../types';
 import { IValidatedEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
-import { alertInstanceSummaryFromEventLog } from './alert_instance_summary_from_event_log';
+import { alertSummaryFromEventLog } from './alert_summary_from_event_log';
 
 const ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
 const dateStart = '2020-06-18T00:00:00.000Z';
 const dateEnd = dateString(dateStart, ONE_HOUR_IN_MILLIS);
 
-describe('alertInstanceSummaryFromEventLog', () => {
+describe('alertSummaryFromEventLog', () => {
   test('no events and muted ids', async () => {
-    const alert = createAlert({});
+    const rule = createRule({});
     const events: IValidatedEvent[] = [];
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
@@ -28,19 +28,19 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
     expect(summary).toMatchInlineSnapshot(`
       Object {
-        "alertTypeId": "123",
-        "consumer": "alert-consumer",
+        "alerts": Object {},
+        "consumer": "rule-consumer",
         "enabled": false,
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
           "values": Array [],
         },
-        "id": "alert-123",
-        "instances": Object {},
+        "id": "rule-123",
         "lastRun": undefined,
         "muteAll": false,
-        "name": "alert-name",
+        "name": "rule-name",
+        "ruleTypeId": "123",
         "status": "OK",
         "statusEndDate": "2020-06-18T01:00:00.000Z",
         "statusStartDate": "2020-06-18T00:00:00.000Z",
@@ -50,21 +50,21 @@ describe('alertInstanceSummaryFromEventLog', () => {
     `);
   });
 
-  test('different alert properties', async () => {
-    const alert = createAlert({
-      id: 'alert-456',
+  test('different rule properties', async () => {
+    const rule = createRule({
+      id: 'rule-456',
       alertTypeId: '456',
       schedule: { interval: '100s' },
       enabled: true,
-      name: 'alert-name-2',
+      name: 'rule-name-2',
       tags: ['tag-1', 'tag-2'],
-      consumer: 'alert-consumer-2',
+      consumer: 'rule-consumer-2',
       throttle: '1h',
       muteAll: true,
     });
     const events: IValidatedEvent[] = [];
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart: dateString(dateEnd, ONE_HOUR_IN_MILLIS),
       dateEnd: dateString(dateEnd, ONE_HOUR_IN_MILLIS * 2),
@@ -72,19 +72,19 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
     expect(summary).toMatchInlineSnapshot(`
       Object {
-        "alertTypeId": "456",
-        "consumer": "alert-consumer-2",
+        "alerts": Object {},
+        "consumer": "rule-consumer-2",
         "enabled": true,
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
           "values": Array [],
         },
-        "id": "alert-456",
-        "instances": Object {},
+        "id": "rule-456",
         "lastRun": undefined,
         "muteAll": true,
-        "name": "alert-name-2",
+        "name": "rule-name-2",
+        "ruleTypeId": "456",
         "status": "OK",
         "statusEndDate": "2020-06-18T03:00:00.000Z",
         "statusStartDate": "2020-06-18T02:00:00.000Z",
@@ -97,30 +97,30 @@ describe('alertInstanceSummaryFromEventLog', () => {
     `);
   });
 
-  test('two muted instances', async () => {
-    const alert = createAlert({
-      mutedInstanceIds: ['instance-1', 'instance-2'],
+  test('two muted alerts', async () => {
+    const rule = createRule({
+      mutedInstanceIds: ['alert-1', 'alert-2'],
     });
     const events: IValidatedEvent[] = [];
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
-          "instance-2": Object {
+          "alert-2": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
@@ -134,22 +134,22 @@ describe('alertInstanceSummaryFromEventLog', () => {
     `);
   });
 
-  test('active alert but no instances', async () => {
-    const alert = createAlert({});
+  test('active rule but no alerts', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {},
+        "alerts": Object {},
         "lastRun": "2020-06-18T00:00:10.000Z",
         "status": "OK",
       }
@@ -158,8 +158,8 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('active alert with no instances but has errors', async () => {
-    const alert = createAlert({});
+  test('active rule with no alerts but has errors', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute('oof!')
@@ -167,16 +167,17 @@ describe('alertInstanceSummaryFromEventLog', () => {
       .addExecute('rut roh!')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, errorMessages, instances, executionDuration } = summary;
-    expect({ lastRun, status, errorMessages, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, errorMessages, alerts, executionDuration } = summary;
+    expect({ lastRun, status, errorMessages, alerts }).toMatchInlineSnapshot(`
       Object {
+        "alerts": Object {},
         "errorMessages": Array [
           Object {
             "date": "2020-06-18T00:00:00.000Z",
@@ -187,7 +188,6 @@ describe('alertInstanceSummaryFromEventLog', () => {
             "message": "rut roh!",
           },
         ],
-        "instances": Object {},
         "lastRun": "2020-06-18T00:00:10.000Z",
         "status": "Error",
       }
@@ -196,30 +196,30 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('alert with currently inactive instance', async () => {
-    const alert = createAlert({});
+  test('rule with currently inactive alert', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewInstance('instance-1')
-      .addActiveInstance('instance-1', 'action group A')
+      .addNewAlert('alert-1')
+      .addActiveAlert('alert-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addRecoveredInstance('instance-1')
+      .addRecoveredAlert('alert-1')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
@@ -235,30 +235,30 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('legacy alert with currently inactive instance', async () => {
-    const alert = createAlert({});
+  test('legacy rule with currently inactive alert', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewInstance('instance-1')
-      .addActiveInstance('instance-1', 'action group A')
+      .addNewAlert('alert-1')
+      .addActiveAlert('alert-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addLegacyResolvedInstance('instance-1')
+      .addLegacyResolvedAlert('alert-1')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
@@ -274,29 +274,29 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('alert with currently inactive instance, no new-instance', async () => {
-    const alert = createAlert({});
+  test('rule with currently inactive alert, no new-instance', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addActiveInstance('instance-1', 'action group A')
+      .addActiveAlert('alert-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addRecoveredInstance('instance-1')
+      .addRecoveredAlert('alert-1')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
@@ -312,30 +312,30 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('alert with currently active instance', async () => {
-    const alert = createAlert({});
+  test('rule with currently active alert', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewInstance('instance-1')
-      .addActiveInstance('instance-1', 'action group A')
+      .addNewAlert('alert-1')
+      .addActiveAlert('alert-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1', 'action group A')
+      .addActiveAlert('alert-1', 'action group A')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": "action group A",
             "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
@@ -351,30 +351,30 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('alert with currently active instance with no action group in event log', async () => {
-    const alert = createAlert({});
+  test('rule with currently active alert with no action group in event log', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewInstance('instance-1')
-      .addActiveInstance('instance-1', undefined)
+      .addNewAlert('alert-1')
+      .addActiveAlert('alert-1', undefined)
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1', undefined)
+      .addActiveAlert('alert-1', undefined)
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
@@ -390,30 +390,30 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('alert with currently active instance that switched action groups', async () => {
-    const alert = createAlert({});
+  test('rule with currently active alert that switched action groups', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewInstance('instance-1')
-      .addActiveInstance('instance-1', 'action group A')
+      .addNewAlert('alert-1')
+      .addActiveAlert('alert-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1', 'action group B')
+      .addActiveAlert('alert-1', 'action group B')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": "action group B",
             "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
@@ -429,29 +429,29 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('alert with currently active instance, no new-instance', async () => {
-    const alert = createAlert({});
+  test('rule with currently active alert, no new-instance', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addActiveInstance('instance-1', 'action group A')
+      .addActiveAlert('alert-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1', 'action group A')
+      .addActiveAlert('alert-1', 'action group A')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": "action group A",
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
@@ -467,40 +467,40 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('alert with active and inactive muted alerts', async () => {
-    const alert = createAlert({ mutedInstanceIds: ['instance-1', 'instance-2'] });
+  test('rule with active and inactive muted alerts', async () => {
+    const rule = createRule({ mutedInstanceIds: ['alert-1', 'alert-2'] });
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewInstance('instance-1')
-      .addActiveInstance('instance-1', 'action group A')
-      .addNewInstance('instance-2')
-      .addActiveInstance('instance-2', 'action group B')
+      .addNewAlert('alert-1')
+      .addActiveAlert('alert-1', 'action group A')
+      .addNewAlert('alert-2')
+      .addActiveAlert('alert-2', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1', 'action group A')
-      .addRecoveredInstance('instance-2')
+      .addActiveAlert('alert-1', 'action group A')
+      .addRecoveredAlert('alert-2')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": "action group A",
             "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": true,
             "status": "Active",
           },
-          "instance-2": Object {
+          "alert-2": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
@@ -516,46 +516,46 @@ describe('alertInstanceSummaryFromEventLog', () => {
     testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
   });
 
-  test('alert with active and inactive alerts over many executes', async () => {
-    const alert = createAlert({});
+  test('rule with active and inactive alerts over many executes', async () => {
+    const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewInstance('instance-1')
-      .addActiveInstance('instance-1', 'action group A')
-      .addNewInstance('instance-2')
-      .addActiveInstance('instance-2', 'action group B')
+      .addNewAlert('alert-1')
+      .addActiveAlert('alert-1', 'action group A')
+      .addNewAlert('alert-2')
+      .addActiveAlert('alert-2', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1', 'action group A')
-      .addRecoveredInstance('instance-2')
+      .addActiveAlert('alert-1', 'action group A')
+      .addRecoveredAlert('alert-2')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1', 'action group B')
+      .addActiveAlert('alert-1', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1', 'action group B')
+      .addActiveAlert('alert-1', 'action group B')
       .getEvents();
 
-    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
-      alert,
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
       events,
       dateStart,
       dateEnd,
     });
 
-    const { lastRun, status, instances, executionDuration } = summary;
-    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
-        "instances": Object {
-          "instance-1": Object {
+        "alerts": Object {
+          "alert-1": Object {
             "actionGroupId": "action group B",
             "actionSubgroup": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
           },
-          "instance-2": Object {
+          "alert-2": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
@@ -626,10 +626,10 @@ export class EventsFactory {
     return this;
   }
 
-  addActiveInstance(instanceId: string, actionGroupId: string | undefined): EventsFactory {
+  addActiveAlert(alertId: string, actionGroupId: string | undefined): EventsFactory {
     const kibanaAlerting = actionGroupId
-      ? { instance_id: instanceId, action_group_id: actionGroupId }
-      : { instance_id: instanceId };
+      ? { instance_id: alertId, action_group_id: actionGroupId }
+      : { instance_id: alertId };
     this.events.push({
       '@timestamp': this.date,
       event: {
@@ -641,38 +641,38 @@ export class EventsFactory {
     return this;
   }
 
-  addNewInstance(instanceId: string): EventsFactory {
+  addNewAlert(alertId: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.newInstance,
       },
-      kibana: { alerting: { instance_id: instanceId } },
+      kibana: { alerting: { instance_id: alertId } },
     });
     return this;
   }
 
-  addRecoveredInstance(instanceId: string): EventsFactory {
+  addRecoveredAlert(alertId: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.recoveredInstance,
       },
-      kibana: { alerting: { instance_id: instanceId } },
+      kibana: { alerting: { instance_id: alertId } },
     });
     return this;
   }
 
-  addLegacyResolvedInstance(instanceId: string): EventsFactory {
+  addLegacyResolvedAlert(alertId: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: LEGACY_EVENT_LOG_ACTIONS.resolvedInstance,
       },
-      kibana: { alerting: { instance_id: instanceId } },
+      kibana: { alerting: { instance_id: alertId } },
     });
     return this;
   }
@@ -684,18 +684,18 @@ export class EventsFactory {
   }
 }
 
-function createAlert(overrides: Partial<SanitizedAlert>): SanitizedAlert<{ bar: boolean }> {
-  return { ...BaseAlert, ...overrides };
+function createRule(overrides: Partial<SanitizedAlert>): SanitizedAlert<{ bar: boolean }> {
+  return { ...BaseRule, ...overrides };
 }
 
-const BaseAlert: SanitizedAlert<{ bar: boolean }> = {
-  id: 'alert-123',
+const BaseRule: SanitizedAlert<{ bar: boolean }> = {
+  id: 'rule-123',
   alertTypeId: '123',
   schedule: { interval: '10s' },
   enabled: false,
-  name: 'alert-name',
+  name: 'rule-name',
   tags: [],
-  consumer: 'alert-consumer',
+  consumer: 'rule-consumer',
   throttle: null,
   notifyWhen: null,
   muteAll: false,
