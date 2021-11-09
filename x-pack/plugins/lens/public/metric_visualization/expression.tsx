@@ -148,14 +148,11 @@ export function MetricChart({
       className="lnsMetricExpression__container"
     >
       <AutoScale key={value}>
-        <div
-          data-test-subj="lns_metric_value"
-          style={{ fontSize: '60pt', fontWeight: 600, ...color }}
-        >
+        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value" style={color}>
           {value}
         </div>
         {mode === 'full' && (
-          <div data-test-subj="lns_metric_title" style={{ fontSize: '24pt' }}>
+          <div data-test-subj="lns_metric_title" className="lnsMetricExpression__title">
             {metricTitle}
           </div>
         )}

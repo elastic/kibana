@@ -6,4 +6,16 @@
   width: 100%;
   height: 100%;
   text-align: center;
+
+  .lnsMetricExpression__value {
+    font-size: 60pt;
+    font-weight: 600;
+    border-radius: $euiBorderRadius;
+    padding-left: $euiSize;
+    padding-right: $euiSize;
+  }
+
+  .lnsMetricExpression__title {
+    font-size: 24pt;
+  }
 }
