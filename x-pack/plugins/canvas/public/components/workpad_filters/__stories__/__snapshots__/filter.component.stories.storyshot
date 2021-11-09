@@ -433,3 +433,383 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
   </dl>
 </div>
 `;
+
+exports[`Storyshots components/WorkpadFilters/FilterComponent/filter_views default 1`] = `
+<div
+  className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+>
+  <dl
+    className="euiDescriptionList euiDescriptionList--column workpadFilter"
+  >
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Column
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        project
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Value
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        kibana
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Type
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Dropdown
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Filter group
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              aria-label="Change filter group"
+              className="euiSelect euiSelect--compressed"
+              onChange={[Function]}
+              onMouseUp={[Function]}
+              value="Group 1"
+            >
+              <option
+                value="no_group"
+              >
+                No group
+              </option>
+              <option
+                value="Group 1"
+              >
+                Group 1
+              </option>
+              <option
+                value="Group 2"
+              >
+                Group 2
+              </option>
+            </select>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                  size="s"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </dd>
+  </dl>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadFilters/FilterComponent/filter_views time 1`] = `
+<div
+  className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+>
+  <dl
+    className="euiDescriptionList euiDescriptionList--column workpadFilter"
+  >
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Column
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        @timestamp
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          From
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        2021-02-10 10:33:00
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          To
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        2021-02-10 10:33:00
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Type
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        Time
+      </div>
+    </dd>
+    <dt
+      className="euiDescriptionList__title eui-textBreakWord"
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <h4>
+          Filter group
+        </h4>
+      </div>
+    </dt>
+    <dd
+      className="euiDescriptionList__description eui-textBreakWord"
+      style={
+        Object {
+          "width": "70%",
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              aria-label="Change filter group"
+              className="euiSelect euiSelect--compressed"
+              onChange={[Function]}
+              onMouseUp={[Function]}
+              value="Group 2"
+            >
+              <option
+                value="no_group"
+              >
+                No group
+              </option>
+              <option
+                value="Group 1"
+              >
+                Group 1
+              </option>
+              <option
+                value="Group 2"
+              >
+                Group 2
+              </option>
+            </select>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                  size="s"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </dd>
+  </dl>
+</div>
+`;

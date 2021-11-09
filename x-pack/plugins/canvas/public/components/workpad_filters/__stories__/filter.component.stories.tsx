@@ -7,9 +7,13 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import React, { FC } from 'react';
-import { FormattedFilterViewInstance } from '../../../../types';
+import { Filter as FilterType, FormattedFilterViewInstance } from '../../../../types';
+import { createFilledFilterView } from '../../../lib/filter';
 import { Filter } from '../filter.component';
+import { filterViews } from '../filter_views';
+import { group1, group2 } from './elements';
 
 const filter: FormattedFilterViewInstance = {
   type: {
@@ -30,6 +34,24 @@ const filter: FormattedFilterViewInstance = {
   },
 };
 
+const defaultFilter: FilterType = {
+  id: 0,
+  type: 'exactly',
+  column: 'project',
+  value: 'kibana',
+  filterGroup: group1,
+};
+
+const timeFilter: FilterType = {
+  id: 0,
+  type: 'time',
+  column: '@timestamp',
+  value: { from: '2.10.2021 12:33', to: '2.10.2021 12:33' },
+  filterGroup: group2,
+};
+
+const groups = [group1, group2];
+
 const component: FC<any> = ({ value }) => (
   <EuiText>
     <EuiTextColor color="secondary">
@@ -49,5 +71,23 @@ storiesOf('components/WorkpadFilters/FilterComponent', module)
         ...filter,
         customField: { label: 'Custom Field', formattedValue: 'Some unknown field' },
       }}
+    />
+  ));
+
+storiesOf('components/WorkpadFilters/FilterComponent/filter_views', module)
+  .add('default', () => (
+    <Filter
+      filterView={createFilledFilterView(filterViews.default.view, defaultFilter)}
+      filter={defaultFilter}
+      filterGroups={groups}
+      updateFilter={action('updateFilter')}
+    />
+  ))
+  .add('time', () => (
+    <Filter
+      filterView={createFilledFilterView(filterViews.time.view, timeFilter)}
+      filter={timeFilter}
+      filterGroups={groups}
+      updateFilter={action('updateFilter')}
     />
   ));

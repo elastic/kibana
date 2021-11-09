@@ -36,7 +36,7 @@ const strings = {
 
 const NO_GROUP = 'no_group';
 
-const GroupComponent: FC<FilterFieldProps> = ({ filter, filterGroups, updateFilter }) => {
+const GroupComponent: FC<FilterFieldProps> = ({ filter, filterGroups = [], updateFilter }) => {
   const { filterGroup } = filter;
 
   const uniqueGroups = [...new Set([undefined, ...filterGroups])];

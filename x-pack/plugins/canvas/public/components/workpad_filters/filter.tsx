@@ -29,7 +29,7 @@ const InteractiveFilter: FC<Props> = (props) => {
 export const Filter: FC<Props> = (props) => {
   const { filterView } = props;
 
-  const isInteractive = Object.values(filterView).filter(({ component }) => component);
+  const isInteractive = Object.values(filterView).some(({ component }) => component);
   if (isInteractive) {
     return <InteractiveFilter {...props} />;
   }

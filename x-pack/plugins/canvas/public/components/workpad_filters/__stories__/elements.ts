@@ -23,13 +23,15 @@ const time1 = {
   from: moment('1.01.2021 8:15', timeFormat).format(),
   to: moment('2.01.2021 17:22', timeFormat).format(),
 };
-const group1 = 'Group 1';
+
+export const group1 = 'Group 1';
 
 const time2 = {
   from: moment('1.10.2021 12:20', timeFormat).format(),
   to: moment('2.10.2021 12:33', timeFormat).format(),
 };
-const group2 = 'Group 2';
+
+export const group2 = 'Group 2';
 
 export const element: CanvasElement = {
   id: '0',

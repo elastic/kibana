@@ -12,11 +12,13 @@ import moment from 'moment';
 import { WorkpadFilters } from '../workpad_filters.component';
 import { FiltersGroup as FiltersGroupType } from '../types';
 import { Filter } from '../../../../types';
+import { reduxDecorator } from '../../../../storybook';
+import { elements, group1, group2 } from './elements';
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 
 const filters: Filter[] = [
-  { id: '0', type: 'exactly', column: 'project', value: 'kibana', filterGroup: 'Group 1' },
+  { id: '0', type: 'exactly', column: 'project', value: 'kibana', filterGroup: group1 },
   {
     id: '1',
     type: 'time',
@@ -25,9 +27,9 @@ const filters: Filter[] = [
       from: moment('1.01.2021 8:15', timeFormat).format(),
       to: moment('2.01.2021 17:22', timeFormat).format(),
     },
-    filterGroup: 'Group 1',
+    filterGroup: group1,
   },
-  { id: '2', type: 'exactly', column: 'country', value: 'US', filterGroup: 'Group 2' },
+  { id: '2', type: 'exactly', column: 'country', value: 'US', filterGroup: group2 },
   {
     id: '3',
     type: 'time',
@@ -36,7 +38,7 @@ const filters: Filter[] = [
       from: moment('05.21.2021 10:50', timeFormat).format(),
       to: moment('05.22.2021 4:40', timeFormat).format(),
     },
-    filterGroup: 'Group 2',
+    filterGroup: group2,
   },
 ];
 
@@ -52,6 +54,7 @@ const filtersGroups: FiltersGroupType[] = [
 ];
 
 storiesOf('components/WorkpadFilters/WorkpadFiltersComponent', module)
+  .addDecorator(reduxDecorator({ elements }))
   .addDecorator((story) => (
     <div>
       <div className="canvasLayout__sidebar">
@@ -79,7 +82,13 @@ storiesOf('components/WorkpadFilters/WorkpadFiltersComponent', module)
       filtersGroups={[
         {
           name: null,
-          filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
+          filters: filtersGroups.reduce<Filter[]>(
+            (acc, group) => [
+              ...acc,
+              ...group.filters.map(({ filterGroup, ...rest }) => ({ ...rest, filterGroup: null })),
+            ],
+            []
+          ),
         },
       ]}
       groupFiltersByField={'filterGroup'}
