@@ -12,7 +12,6 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-import { SchemaType } from '../../../../../shared/schema/types';
 import { URL_LABEL } from '../../../../constants';
 import { getAsLocalDateTimeString } from '../../../../utils';
 
@@ -27,7 +26,6 @@ export const ExampleResultDetailCard: React.FC = () => {
     titleFieldHover,
     urlFieldHover,
     exampleDocuments,
-    schemaFields,
   } = useValues(DisplaySettingsLogic);
 
   const result = exampleDocuments[0];
@@ -65,8 +63,7 @@ export const ExampleResultDetailCard: React.FC = () => {
         {detailFields.length > 0 ? (
           detailFields.map(({ fieldName, label }, index) => {
             const value = result[fieldName];
-            const fieldType = (schemaFields as { [key: string]: SchemaType })[fieldName];
-            const dateValue = fieldType === SchemaType.Date && getAsLocalDateTimeString(value);
+            const dateValue = getAsLocalDateTimeString(value);
 
             return (
               <div
