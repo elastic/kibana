@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-export type { OverviewTestBed } from './overview.helpers';
-export { setup as setupOverviewPage } from './overview.helpers';
-export type { ElasticsearchTestBed } from './elasticsearch.helpers';
-export { setup as setupElasticsearchPage } from './elasticsearch.helpers';
-export type { KibanaTestBed } from './kibana.helpers';
-export { setup as setupKibanaPage } from './kibana.helpers';
-
-export { setupEnvironment, kibanaVersion } from './setup_environment';
+export { setupEnvironment, WithAppDependencies, kibanaVersion } from './setup_environment';
+export { advanceTime } from './time_manipulation';
