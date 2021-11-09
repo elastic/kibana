@@ -126,7 +126,7 @@ export class EndpointAppContextService {
   }
 
   public getPackagePolicyService(): PackagePolicyServiceInterface {
-    if (!this.packagePolicyService) {
+    if (!this.startDependencies?.packagePolicyService) {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies?.packagePolicyService;
