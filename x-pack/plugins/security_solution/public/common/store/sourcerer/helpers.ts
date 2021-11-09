@@ -96,16 +96,14 @@ export const validateSelectedPatterns = (
       selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
       ...(isEmpty(selectedPatterns)
-        ? id === SourcererScopeName.timeline
-          ? defaultDataViewByEventType({ state, eventType })
-          : {
-              selectedPatterns: getScopePatternListSelection(
-                dataView ?? state.defaultDataView,
-                id,
-                state.signalIndexName,
-                (dataView ?? state.defaultDataView).id === state.defaultDataView.id
-              ),
-            }
+        ? {
+            selectedPatterns: getScopePatternListSelection(
+              dataView ?? state.defaultDataView,
+              id,
+              state.signalIndexName,
+              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
+            ),
+          }
         : {}),
       loading: false,
     },

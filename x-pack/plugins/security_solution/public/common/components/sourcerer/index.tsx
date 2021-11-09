@@ -82,9 +82,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   });
   const onCheckboxChanged = useCallback(
     (e) => {
-      setDataViewId(defaultDataView.id);
-      setIndexPatternsByDataView(defaultDataView.id);
       setIsOnlyDetectionAlertsChecked(e.target.checked);
+      setDataViewId(defaultDataView.id);
+      setIndexPatternsByDataView(defaultDataView.id, e.target.checked);
     },
     [defaultDataView.id, setIndexPatternsByDataView]
   );

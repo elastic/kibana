@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererModel } from '../../store/sourcerer';
@@ -30,7 +30,7 @@ interface UsePickIndexPatterns {
   renderOption: ({ value }: EuiComboBoxOptionOption<string>) => React.ReactElement;
   selectableOptions: Array<EuiComboBoxOptionOption<string>>;
   selectedOptions: Array<EuiComboBoxOptionOption<string>>;
-  setIndexPatternsByDataView: (newSelectedDataViewId: string) => void;
+  setIndexPatternsByDataView: (newSelectedDataViewId: string, isAlerts?: boolean) => void;
 }
 
 const patternListToOptions = (patternList: string[], selectablePatterns?: string[]) =>
@@ -96,8 +96,8 @@ export const usePickIndexPatterns = ({
   );
 
   const getDefaultSelectedOptionsByDataView = useCallback(
-    (id: string): Array<EuiComboBoxOptionOption<string>> =>
-      scopeId === SourcererScopeName.detections
+    (id: string, isAlerts: boolean = false): Array<EuiComboBoxOptionOption<string>> =>
+      scopeId === SourcererScopeName.detections || isAlerts
         ? alertsOptions
         : patternListToOptions(
             getScopePatternListSelection(
@@ -148,24 +148,9 @@ export const usePickIndexPatterns = ({
     []
   );
 
-  const setIndexPatternsByDataView = (newSelectedDataViewId: string) => {
-    setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId));
+  const setIndexPatternsByDataView = (newSelectedDataViewId: string, isAlerts?: boolean) => {
+    setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
   };
-  const lastOptions = useRef<Array<EuiComboBoxOptionOption<string>>>([]);
-  useEffect(() => {
-    const newOptions = isOnlyDetectionAlerts
-      ? alertsOptions
-      : lastOptions.current.length > 0
-      ? lastOptions.current
-      : patternListToOptions(selectedPatterns);
-    setSelectedOptions((old) => {
-      if (isOnlyDetectionAlerts) {
-        lastOptions.current = old;
-      }
-      return newOptions;
-    });
-  }, [alertsOptions, isOnlyDetectionAlerts, selectedPatterns]);
-
   return {
     isModified,
     onChangeCombo,
