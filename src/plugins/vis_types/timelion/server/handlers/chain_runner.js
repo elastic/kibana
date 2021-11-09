@@ -42,7 +42,7 @@ export default function chainRunner(tlConfig) {
 
     function resolveArgument(item) {
       if (Array.isArray(item)) {
-        return Bluebird.all(_.map(item, resolveArgument));
+        return Promise.all(_.map(item, resolveArgument));
       }
 
       if (_.isObject(item)) {
@@ -94,7 +94,7 @@ export default function chainRunner(tlConfig) {
 
     args = _.map(args, resolveArgument);
 
-    return Bluebird.all(args).then(function (args) {
+    return Promise.all(args).then(function (args) {
       args.byName = indexArguments(functionDef, args);
       return functionDef.fn(args, tlConfig);
     });
@@ -128,7 +128,7 @@ export default function chainRunner(tlConfig) {
         return args;
       });
     });
-    return Bluebird.all(seriesList).then(function (args) {
+    return Promise.all(seriesList).then(function (args) {
       const list = _.chain(args).map('list').flatten().value();
       const seriesList = _.merge.apply(this, _.flatten([{}, args]));
       seriesList.list = list;
