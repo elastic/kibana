@@ -42,7 +42,7 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one', 'message-two']);
-    expect(wrapper.find(`[data-test-subj="callout-messages-${id}"]`).last().exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="calloutMessages-${id}"]`).last().exists()).toBeTruthy();
   });
 
   it('groups the messages correctly', () => {

@@ -39,7 +39,7 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one', 'message-two']);
-    expect(wrapper.find(`[data-test-subj="callout-messages-${id}"]`).last().exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="calloutMessages-${id}"]`).last().exists()).toBeTruthy();
   });
 
   it('groups the messages correctly', () => {
@@ -79,7 +79,7 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one', 'message-two']);
-    wrapper.find(`[data-test-subj="callout-onclick-${id}"]`).last().simulate('click');
+    wrapper.find(`[data-test-subj="calloutOnclick-${id}"]`).last().simulate('click');
     expect(defaultProps.onEditClick).toHaveBeenCalled();
     expect(defaultProps.configureCasesNavigation.onClick).not.toHaveBeenCalled();
   });
@@ -96,7 +96,7 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one', 'message-two']);
-    wrapper.find(`[data-test-subj="callout-onclick-${id}"]`).last().simulate('click');
+    wrapper.find(`[data-test-subj="calloutOnclick-${id}"]`).last().simulate('click');
     expect(defaultProps.onEditClick).not.toHaveBeenCalled();
     expect(defaultProps.configureCasesNavigation.onClick).toHaveBeenCalled();
   });

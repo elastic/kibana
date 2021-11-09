@@ -55,10 +55,10 @@ const CallOutComponent = ({
       data-test-subj={`caseCallout-${id}`}
       size="s"
     >
-      <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
+      <EuiDescriptionList data-test-subj={`calloutMessages-${id}`} listItems={messages} />
       {!isCaseClosed && !hasLicenseError && (
         <EuiButton
-          data-test-subj={`callout-onclick-${id}`}
+          data-test-subj={`calloutOnclick-${id}`}
           color={type === 'success' ? 'secondary' : type}
           onClick={handleCallOut}
         >
