@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import '../../common/mock/match_media';
@@ -52,6 +52,20 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
+
+const mockKibana = () => {
+  useKibanaMock.mockReturnValue({
+    services: {
+      ...createStartServicesMock(),
+      triggersActionsUi: mockTriggersActionsUiService,
+      application: {
+        navigateToApp: jest.fn(),
+        navigateToUrl: jest.fn(),
+        getUrlForApp: jest.fn(() => '/app/security'),
+      },
+    },
+  } as unknown as ReturnType<typeof useKibana>);
+};
 
 describe('AllCasesListGeneric', () => {
   const defaultAllCasesListProps: AllCasesListProps = {
@@ -125,17 +139,7 @@ describe('AllCasesListGeneric', () => {
   };
 
   beforeAll(() => {
-    useKibanaMock.mockReturnValue({
-      services: {
-        ...createStartServicesMock(),
-        triggersActionsUi: mockTriggersActionsUiService,
-        application: {
-          navigateToApp: jest.fn(),
-          navigateToUrl: jest.fn(),
-          getUrlForApp: jest.fn(() => ''),
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
+    mockKibana();
     const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
@@ -149,18 +153,7 @@ describe('AllCasesListGeneric', () => {
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useKibanaMock.mockReturnValue({
-      services: {
-        ...createStartServicesMock(),
-        triggersActionsUi: mockTriggersActionsUiService,
-        application: {
-          navigateToApp: jest.fn(),
-          navigateToUrl: jest.fn(),
-          getUrlForApp: jest.fn(() => ''),
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
-    useKibanaMock().services.application.getUrlForApp = jest.fn().mockReturnValue('/app/security');
+    mockKibana();
     moment.tz.setDefault('UTC');
   });
 

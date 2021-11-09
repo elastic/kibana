@@ -26,7 +26,7 @@ import {
   useConnectorsResponse,
   useActionTypesResponse,
 } from './__mock__';
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { ConnectorTypes } from '../../../common';
 import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 jest.mock('../../common/lib/kibana');
@@ -59,7 +59,7 @@ describe('ConfigureCases', () => {
       useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
     });
@@ -112,7 +112,7 @@ describe('ConfigureCases', () => {
       }));
       useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
     });
@@ -159,7 +159,7 @@ describe('ConfigureCases', () => {
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
     });
@@ -181,12 +181,9 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables correctly when the user cannot crud', () => {
-      const newWrapper = mount(
-        <ConfigureCases userCanCrud={false} owner={[SECURITY_SOLUTION_OWNER]} />,
-        {
-          wrappingComponent: TestProviders,
-        }
-      );
+      const newWrapper = mount(<ConfigureCases />, {
+        wrappingComponent: TestProviders,
+      });
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
         true
@@ -246,7 +243,7 @@ describe('ConfigureCases', () => {
       }));
 
       useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
     });
@@ -281,7 +278,7 @@ describe('ConfigureCases', () => {
 
       useActionTypesMock.mockImplementation(() => ({ ...useActionTypesResponse, loading: true }));
 
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
       expect(wrapper.find(Connectors).prop('isLoading')).toBe(true);
@@ -305,7 +302,7 @@ describe('ConfigureCases', () => {
 
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
     });
@@ -348,7 +345,7 @@ describe('ConfigureCases', () => {
         ...useConnectorsResponse,
       }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
     });
@@ -392,7 +389,7 @@ describe('ConfigureCases', () => {
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
     });
@@ -436,7 +433,7 @@ describe('ConfigureCases', () => {
           },
         }));
 
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
 
@@ -483,7 +480,7 @@ describe('ConfigureCases', () => {
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
     });
@@ -532,7 +529,7 @@ describe('ConfigureCases', () => {
     });
 
     test('it show the add flyout when pressing the add connector button', async () => {
-      const wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      const wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
 
@@ -579,7 +576,7 @@ describe('ConfigureCases', () => {
         .fn()
         .mockReturnValue(true);
 
-      const wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+      const wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
       });
       wrapper

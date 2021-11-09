@@ -13,22 +13,20 @@ import { NoCases } from '.';
 
 describe('RecentCases', () => {
   it('if no cases, a link to create cases will exist', () => {
-    const createCaseHref = '/create';
     const wrapper = mount(
       <TestProviders>
-        <NoCases createCaseHref={createCaseHref} hasWritePermissions />
+        <NoCases />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).first().prop('href')).toEqual(
-      createCaseHref
+      '/create'
     );
   });
 
   it('displays a message without a link to create a case when the user does not have write permissions', () => {
-    const createCaseHref = '/create';
     const wrapper = mount(
       <TestProviders>
-        <NoCases createCaseHref={createCaseHref} hasWritePermissions={false} />
+        <NoCases />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).exists()).toBeFalsy();

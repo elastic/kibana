@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import { CaseComponent, CaseComponentProps, CaseView, CaseViewProps } from '.';
@@ -18,21 +19,21 @@ import {
   getAlertUserAction,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
-import { SpacesApi } from '../../../../spaces/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { waitFor } from '@testing-library/react';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { CaseType, ConnectorTypes } from '../../../common';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 
 const mockId = basicCase.id;
 jest.mock('react-router-dom', () => ({
   useParams: () => ({ detailName: mockId }),
+  generatePath: (path: string) => path,
 }));
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
@@ -40,13 +41,13 @@ jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_action_tree/user_action_timestamp');
-jest.mock('../../common/lib/kibana');
+jest.mock('../../common/lib/kibana/kibana_react');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const onCaseDataSuccessMock = jest.fn();
 
 const spacesUiApiMock = {
@@ -84,19 +85,7 @@ const alertsHit = [
 ];
 
 export const caseProps: CaseComponentProps = {
-  allCasesNavigation: {
-    href: 'all-cases-href',
-    onClick: jest.fn(),
-  },
-  caseDetailsNavigation: {
-    href: 'case-details-href',
-    onClick: jest.fn(),
-  },
   caseId: basicCase.id,
-  configureCasesNavigation: {
-    href: 'configure-cases-href',
-    onClick: jest.fn(),
-  },
   onComponentInitialized: jest.fn(),
   actionsNavigation: {
     href: jest.fn(),
@@ -114,7 +103,6 @@ export const caseProps: CaseComponentProps = {
       'alert-id-2': alertsHit[1],
     },
   ],
-  userCanCrud: true,
   caseData: {
     ...basicCase,
     comments: [...basicCase.comments, alertComment],
@@ -180,11 +168,25 @@ describe('CaseView ', () => {
       pushCaseToExternalService,
     }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.servicenow',
-      iconClass: 'logoSecurity',
-    });
-    useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
+    useKibanaMock.mockReturnValue({
+      services: {
+        ...createStartServicesMock(),
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: jest.fn().mockReturnValue({
+              actionTypeTitle: '.servicenow',
+              iconClass: 'logoSecurity',
+            }),
+          },
+        },
+        spaces: { ui: spacesUiApiMock },
+        application: {
+          navigateToApp: jest.fn(),
+          navigateToUrl: jest.fn(),
+          getUrlForApp: jest.fn(() => '/app/security'),
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
   });
 
   it('should render CaseComponent', async () => {

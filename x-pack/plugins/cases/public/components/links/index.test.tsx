@@ -10,7 +10,7 @@ import { ReactWrapper, mount } from 'enzyme';
 import { EuiText } from '@elastic/eui';
 
 import '../../common/mock/match_media';
-import { ConfigureCaseButton, ConfigureCaseButtonProps } from './button';
+import { ConfigureCaseButton, ConfigureCaseButtonProps } from '.';
 import { TestProviders } from '../../common/mock';
 
 jest.mock('react-router-dom', () => {
@@ -27,10 +27,6 @@ jest.mock('react-router-dom', () => {
 describe('Configuration button', () => {
   let wrapper: ReactWrapper;
   const props: ConfigureCaseButtonProps = {
-    configureCasesNavigation: {
-      href: 'testHref',
-      onClick: jest.fn(),
-    },
     isDisabled: false,
     label: 'My label',
     msgTooltip: <></>,

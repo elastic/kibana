@@ -10,18 +10,15 @@ import { mount } from 'enzyme';
 
 import { AllCasesSelectorModal } from '.';
 import { TestProviders } from '../../../common/mock';
-import { AllCasesGeneric } from '../all_cases_generic';
+import { AllCasesList } from '../all_cases_list';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common';
 
 jest.mock('../../../methods');
-jest.mock('../all_cases_generic');
+jest.mock('../all_cases_list');
+
 const onRowClick = jest.fn();
-const createCaseNavigation = { href: '', onClick: jest.fn() };
 const defaultProps = {
-  createCaseNavigation,
   onRowClick,
-  userCanCrud: true,
-  owner: [SECURITY_SOLUTION_OWNER],
 };
 const updateCase = jest.fn();
 
@@ -66,19 +63,19 @@ describe('AllCasesSelectorModal', () => {
       hiddenStatuses: [],
       updateCase,
     };
+
     mount(
       <TestProviders>
         <AllCasesSelectorModal {...fullProps} />
       </TestProviders>
     );
+
     // @ts-ignore idk what this mock style is but it works ¯\_(ツ)_/¯
-    expect(AllCasesGeneric.type.mock.calls[0][0]).toEqual(
+    expect(AllCasesList.type.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         alertData: fullProps.alertData,
-        createCaseNavigation,
         hiddenStatuses: fullProps.hiddenStatuses,
         isSelectorView: true,
-        userCanCrud: fullProps.userCanCrud,
         updateCase,
       })
     );

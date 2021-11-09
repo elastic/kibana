@@ -15,7 +15,7 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/mock';
 import { schema, FormProps } from './schema';
 import { CreateCaseForm } from './form';
-import { OwnerProvider } from '../owner_context';
+import { CasesProvider } from '../cases_context';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
@@ -50,9 +50,16 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
-      <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>
+      <CasesProvider
+        value={{
+          owner: [SECURITY_SOLUTION_OWNER],
+          appId: 'securitySolution',
+          userCanCrud: true,
+          basePath: '/cases',
+        }}
+      >
         <Form form={form}>{children}</Form>
-      </OwnerProvider>
+      </CasesProvider>
     );
   };
 
