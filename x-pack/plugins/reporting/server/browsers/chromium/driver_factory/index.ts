@@ -109,7 +109,7 @@ export class HeadlessChromiumDriverFactory {
 
       await page.emulateTimezone(browserTimezone);
 
-      // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
+      // Set the default timeout for all navigation methods to the openUrl timeout
       // All waitFor methods have their own timeout config passed in to them
       page.setDefaultTimeout(durationToNumber(this.captureConfig.timeouts.openUrl));
 
