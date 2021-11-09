@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-export type AlertStatusValues = 'OK' | 'Active' | 'Error';
-export type AlertInstanceStatusValues = 'OK' | 'Active';
+export type RuleStatusValues = 'OK' | 'Active' | 'Error';
+export type AlertStatusValues = 'OK' | 'Active';
 
-export interface AlertInstanceSummary {
+export interface AlertSummary {
   id: string;
   name: string;
   tags: string[];
-  alertTypeId: string;
+  ruleTypeId: string;
   consumer: string;
   muteAll: boolean;
   throttle: string | null;
   enabled: boolean;
   statusStartDate: string;
   statusEndDate: string;
-  status: AlertStatusValues;
+  status: RuleStatusValues;
   lastRun?: string;
   errorMessages: Array<{ date: string; message: string }>;
-  instances: Record<string, AlertInstanceStatus>;
+  alerts: Record<string, AlertStatus>;
   executionDuration: {
     average: number;
     values: number[];
   };
 }
 
-export interface AlertInstanceStatus {
-  status: AlertInstanceStatusValues;
+export interface AlertStatus {
+  status: AlertStatusValues;
   muted: boolean;
   actionGroupId?: string;
   actionSubgroup?: string;

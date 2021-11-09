@@ -6,46 +6,44 @@
  */
 
 import { mean } from 'lodash';
-import { SanitizedAlert, AlertInstanceSummary, AlertInstanceStatus } from '../types';
+import { SanitizedAlert, AlertSummary, AlertStatus } from '../types';
 import { IEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
 const Millis2Nanos = 1000 * 1000;
 
-export interface AlertInstanceSummaryFromEventLogParams {
-  alert: SanitizedAlert<{ bar: boolean }>;
+export interface AlertSummaryFromEventLogParams {
+  rule: SanitizedAlert<{ bar: boolean }>;
   events: IEvent[];
   dateStart: string;
   dateEnd: string;
 }
 
-export function alertInstanceSummaryFromEventLog(
-  params: AlertInstanceSummaryFromEventLogParams
-): AlertInstanceSummary {
+export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams): AlertSummary {
   // initialize the  result
-  const { alert, events, dateStart, dateEnd } = params;
-  const alertInstanceSummary: AlertInstanceSummary = {
-    id: alert.id,
-    name: alert.name,
-    tags: alert.tags,
-    alertTypeId: alert.alertTypeId,
-    consumer: alert.consumer,
+  const { rule, events, dateStart, dateEnd } = params;
+  const alertSummary: AlertSummary = {
+    id: rule.id,
+    name: rule.name,
+    tags: rule.tags,
+    ruleTypeId: rule.alertTypeId,
+    consumer: rule.consumer,
     statusStartDate: dateStart,
     statusEndDate: dateEnd,
     status: 'OK',
-    muteAll: alert.muteAll,
-    throttle: alert.throttle,
-    enabled: alert.enabled,
+    muteAll: rule.muteAll,
+    throttle: rule.throttle,
+    enabled: rule.enabled,
     lastRun: undefined,
     errorMessages: [],
-    instances: {},
+    alerts: {},
     executionDuration: {
       average: 0,
       values: [],
     },
   };
 
-  const instances = new Map<string, AlertInstanceStatus>();
+  const alerts = new Map<string, AlertStatus>();
   const eventDurations: number[] = [];
 
   // loop through the events
@@ -61,17 +59,17 @@ export function alertInstanceSummaryFromEventLog(
     if (action === undefined) continue;
 
     if (action === EVENT_LOG_ACTIONS.execute) {
-      alertInstanceSummary.lastRun = timeStamp;
+      alertSummary.lastRun = timeStamp;
 
       const errorMessage = event?.error?.message;
       if (errorMessage !== undefined) {
-        alertInstanceSummary.status = 'Error';
-        alertInstanceSummary.errorMessages.push({
+        alertSummary.status = 'Error';
+        alertSummary.errorMessages.push({
           date: timeStamp,
           message: errorMessage,
         });
       } else {
-        alertInstanceSummary.status = 'OK';
+        alertSummary.status = 'OK';
       }
 
       if (event?.event?.duration) {
@@ -81,10 +79,10 @@ export function alertInstanceSummaryFromEventLog(
       continue;
     }
 
-    const instanceId = event?.kibana?.alerting?.instance_id;
-    if (instanceId === undefined) continue;
+    const alertId = event?.kibana?.alerting?.instance_id;
+    if (alertId === undefined) continue;
 
-    const status = getAlertInstanceStatus(instances, instanceId);
+    const status = getAlertStatus(alerts, alertId);
     switch (action) {
       case EVENT_LOG_ACTIONS.newInstance:
         status.activeStartDate = timeStamp;
@@ -103,50 +101,47 @@ export function alertInstanceSummaryFromEventLog(
     }
   }
 
-  // set the muted status of instances
-  for (const instanceId of alert.mutedInstanceIds) {
-    getAlertInstanceStatus(instances, instanceId).muted = true;
+  // set the muted status of alerts
+  for (const alertId of rule.mutedInstanceIds) {
+    getAlertStatus(alerts, alertId).muted = true;
   }
 
-  // convert the instances map to object form
-  const instanceIds = Array.from(instances.keys()).sort();
-  for (const instanceId of instanceIds) {
-    alertInstanceSummary.instances[instanceId] = instances.get(instanceId)!;
+  // convert the alerts map to object form
+  const alertIds = Array.from(alerts.keys()).sort();
+  for (const alertId of alertIds) {
+    alertSummary.alerts[alertId] = alerts.get(alertId)!;
   }
 
-  // set the overall alert status to Active if appropriate
-  if (alertInstanceSummary.status !== 'Error') {
-    if (Array.from(instances.values()).some((instance) => instance.status === 'Active')) {
-      alertInstanceSummary.status = 'Active';
+  // set the overall alert status to Active if appropriatea
+  if (alertSummary.status !== 'Error') {
+    if (Array.from(alerts.values()).some((a) => a.status === 'Active')) {
+      alertSummary.status = 'Active';
     }
   }
 
-  alertInstanceSummary.errorMessages.sort((a, b) => a.date.localeCompare(b.date));
+  alertSummary.errorMessages.sort((a, b) => a.date.localeCompare(b.date));
 
   if (eventDurations.length > 0) {
-    alertInstanceSummary.executionDuration = {
+    alertSummary.executionDuration = {
       average: Math.round(mean(eventDurations)),
       values: eventDurations,
     };
   }
 
-  return alertInstanceSummary;
+  return alertSummary;
 }
 
-// return an instance status object, creating and adding to the map if needed
-function getAlertInstanceStatus(
-  instances: Map<string, AlertInstanceStatus>,
-  instanceId: string
-): AlertInstanceStatus {
-  if (instances.has(instanceId)) return instances.get(instanceId)!;
+// return an alert status object, creating and adding to the map if needed
+function getAlertStatus(alerts: Map<string, AlertStatus>, alertId: string): AlertStatus {
+  if (alerts.has(alertId)) return alerts.get(alertId)!;
 
-  const status: AlertInstanceStatus = {
+  const status: AlertStatus = {
     status: 'OK',
     muted: false,
     actionGroupId: undefined,
     actionSubgroup: undefined,
     activeStartDate: undefined,
   };
-  instances.set(instanceId, status);
+  alerts.set(alertId, status);
   return status;
 }

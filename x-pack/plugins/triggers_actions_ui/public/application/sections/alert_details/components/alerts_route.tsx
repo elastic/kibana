@@ -8,64 +8,62 @@
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
-import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
+import { Alert, AlertSummary, AlertType } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
-import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
+import { AlertsWithApi as Alerts } from './alerts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
-type WithAlertInstanceSummaryProps = {
-  alert: Alert;
-  alertType: AlertType;
+type WithAlertSummaryProps = {
+  rule: Alert;
+  ruleType: AlertType;
   readOnly: boolean;
   requestRefresh: () => Promise<void>;
-} & Pick<AlertApis, 'loadAlertInstanceSummary'>;
+} & Pick<AlertApis, 'loadAlertSummary'>;
 
-export const AlertInstancesRoute: React.FunctionComponent<WithAlertInstanceSummaryProps> = ({
-  alert,
-  alertType,
+export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
+  rule,
+  ruleType,
   readOnly,
   requestRefresh,
-  loadAlertInstanceSummary: loadAlertInstanceSummary,
+  loadAlertSummary: loadAlertSummary,
 }) => {
   const {
     notifications: { toasts },
   } = useKibana().services;
 
-  const [alertInstanceSummary, setAlertInstanceSummary] = useState<AlertInstanceSummary | null>(
-    null
-  );
+  const [alertSummary, setAlertSummary] = useState<AlertSummary | null>(null);
 
   useEffect(() => {
-    getAlertInstanceSummary(alert.id, loadAlertInstanceSummary, setAlertInstanceSummary, toasts);
+    getAlertSummary(rule.id, loadAlertSummary, setAlertSummary, toasts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alert]);
+  }, [rule]);
 
-  return alertInstanceSummary ? (
-    <AlertInstances
+  return alertSummary ? (
+    <Alerts
       requestRefresh={requestRefresh}
-      alert={alert}
-      alertType={alertType}
+      rule={rule}
+      ruleType={ruleType}
       readOnly={readOnly}
-      alertInstanceSummary={alertInstanceSummary}
+      alertSummary={alertSummary}
     />
   ) : (
     <CenterJustifiedSpinner />
   );
 };
 
-export async function getAlertInstanceSummary(
-  alertId: string,
-  loadAlertInstanceSummary: AlertApis['loadAlertInstanceSummary'],
-  setAlertInstanceSummary: React.Dispatch<React.SetStateAction<AlertInstanceSummary | null>>,
+export async function getAlertSummary(
+  ruleId: string,
+  loadAlertSummary: AlertApis['loadAlertSummary'],
+  setAlertSummary: React.Dispatch<React.SetStateAction<AlertSummary | null>>,
   toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
-    const loadedInstanceSummary = await loadAlertInstanceSummary(alertId);
-    setAlertInstanceSummary(loadedInstanceSummary);
+    const loadedSummary = await loadAlertSummary(ruleId);
+    setAlertSummary(loadedSummary);
   } catch (e) {
     toasts.addDanger({
       title: i18n.translate(
@@ -81,4 +79,4 @@ export async function getAlertInstanceSummary(
   }
 }
 
-export const AlertInstancesRouteWithApi = withBulkAlertOperations(AlertInstancesRoute);
+export const AlertsRouteWithApi = withBulkAlertOperations(AlertsRoute);

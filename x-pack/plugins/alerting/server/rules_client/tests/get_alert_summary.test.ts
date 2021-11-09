@@ -18,7 +18,7 @@ import { ActionsAuthorization } from '../../../../actions/server';
 import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { QueryEventsBySavedObjectResult } from '../../../../event_log/server';
 import { SavedObject } from 'kibana/server';
-import { EventsFactory } from '../../lib/alert_instance_summary_from_event_log.test';
+import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
 import { RawAlert } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 
@@ -55,26 +55,26 @@ beforeEach(() => {
 
 setGlobalDate();
 
-const AlertInstanceSummaryFindEventsResult: QueryEventsBySavedObjectResult = {
+const AlertSummaryFindEventsResult: QueryEventsBySavedObjectResult = {
   page: 1,
   per_page: 10000,
   total: 0,
   data: [],
 };
 
-const AlertInstanceSummaryIntervalSeconds = 1;
+const RuleIntervalSeconds = 1;
 
-const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
+const BaseRuleSavedObject: SavedObject<RawAlert> = {
   id: '1',
   type: 'alert',
   attributes: {
     enabled: true,
-    name: 'alert-name',
+    name: 'rule-name',
     tags: ['tag-1', 'tag-2'],
     alertTypeId: '123',
-    consumer: 'alert-consumer',
+    consumer: 'rule-consumer',
     legacyId: null,
-    schedule: { interval: `${AlertInstanceSummaryIntervalSeconds}s` },
+    schedule: { interval: `${RuleIntervalSeconds}s` },
     actions: [],
     params: {},
     createdBy: null,
@@ -96,16 +96,14 @@ const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
   references: [],
 };
 
-function getAlertInstanceSummarySavedObject(
-  attributes: Partial<RawAlert> = {}
-): SavedObject<RawAlert> {
+function getRuleSavedObject(attributes: Partial<RawAlert> = {}): SavedObject<RawAlert> {
   return {
-    ...BaseAlertInstanceSummarySavedObject,
-    attributes: { ...BaseAlertInstanceSummarySavedObject.attributes, ...attributes },
+    ...BaseRuleSavedObject,
+    attributes: { ...BaseRuleSavedObject.attributes, ...attributes },
   };
 }
 
-describe('getAlertInstanceSummary()', () => {
+describe('getAlertSummary()', () => {
   let rulesClient: RulesClient;
 
   beforeEach(() => {
@@ -113,25 +111,25 @@ describe('getAlertInstanceSummary()', () => {
   });
 
   test('runs as expected with some event log data', async () => {
-    const alertSO = getAlertInstanceSummarySavedObject({
-      mutedInstanceIds: ['instance-muted-no-activity'],
+    const ruleSO = getRuleSavedObject({
+      mutedInstanceIds: ['alert-muted-no-activity'],
     });
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(alertSO);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ruleSO);
 
     const eventsFactory = new EventsFactory(mockedDateString);
     const events = eventsFactory
       .addExecute()
-      .addNewInstance('instance-currently-active')
-      .addNewInstance('instance-previously-active')
-      .addActiveInstance('instance-currently-active', 'action group A')
-      .addActiveInstance('instance-previously-active', 'action group B')
+      .addNewAlert('alert-currently-active')
+      .addNewAlert('alert-previously-active')
+      .addActiveAlert('alert-currently-active', 'action group A')
+      .addActiveAlert('alert-previously-active', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addRecoveredInstance('instance-previously-active')
-      .addActiveInstance('instance-currently-active', 'action group A')
+      .addRecoveredAlert('alert-previously-active')
+      .addActiveAlert('alert-currently-active', 'action group A')
       .getEvents();
     const eventsResult = {
-      ...AlertInstanceSummaryFindEventsResult,
+      ...AlertSummaryFindEventsResult,
       total: events.length,
       data: events,
     };
@@ -141,31 +139,26 @@ describe('getAlertInstanceSummary()', () => {
 
     const durations: number[] = eventsFactory.getExecutionDurations();
 
-    const result = await rulesClient.getAlertInstanceSummary({ id: '1', dateStart });
+    const result = await rulesClient.getAlertSummary({ id: '1', dateStart });
     const resultWithoutExecutionDuration = omit(result, 'executionDuration');
     expect(resultWithoutExecutionDuration).toMatchInlineSnapshot(`
       Object {
-        "alertTypeId": "123",
-        "consumer": "alert-consumer",
-        "enabled": true,
-        "errorMessages": Array [],
-        "id": "1",
-        "instances": Object {
-          "instance-currently-active": Object {
+        "alerts": Object {
+          "alert-currently-active": Object {
             "actionGroupId": "action group A",
             "actionSubgroup": undefined,
             "activeStartDate": "2019-02-12T21:01:22.479Z",
             "muted": false,
             "status": "Active",
           },
-          "instance-muted-no-activity": Object {
+          "alert-muted-no-activity": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
-          "instance-previously-active": Object {
+          "alert-previously-active": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
             "activeStartDate": undefined,
@@ -173,9 +166,14 @@ describe('getAlertInstanceSummary()', () => {
             "status": "OK",
           },
         },
+        "consumer": "rule-consumer",
+        "enabled": true,
+        "errorMessages": Array [],
+        "id": "1",
         "lastRun": "2019-02-12T21:01:32.479Z",
         "muteAll": false,
-        "name": "alert-name",
+        "name": "rule-name",
+        "ruleTypeId": "123",
         "status": "Active",
         "statusEndDate": "2019-02-12T21:01:22.479Z",
         "statusStartDate": "2019-02-12T21:00:22.479Z",
@@ -193,18 +191,16 @@ describe('getAlertInstanceSummary()', () => {
     });
   });
 
-  // Further tests don't check the result of `getAlertInstanceSummary()`, as the result
-  // is just the result from the `alertInstanceSummaryFromEventLog()`, which itself
+  // Further tests don't check the result of `getAlertSummary()`, as the result
+  // is just the result from the `alertSummaryFromEventLog()`, which itself
   // has a complete set of tests.  These tests just make sure the data gets
-  // sent into `getAlertInstanceSummary()` as appropriate.
+  // sent into `getAlertSummary()` as appropriate.
 
   test('calls saved objects and event log client with default params', async () => {
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
-    await rulesClient.getAlertInstanceSummary({ id: '1' });
+    await rulesClient.getAlertSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -230,20 +226,18 @@ describe('getAlertInstanceSummary()', () => {
 
     const startMillis = Date.parse(start!);
     const endMillis = Date.parse(end!);
-    const expectedDuration = 60 * AlertInstanceSummaryIntervalSeconds * 1000;
+    const expectedDuration = 60 * RuleIntervalSeconds * 1000;
     expect(endMillis - startMillis).toBeGreaterThan(expectedDuration - 2);
     expect(endMillis - startMillis).toBeLessThan(expectedDuration + 2);
   });
 
   test('calls event log client with legacy ids param', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
-      getAlertInstanceSummarySavedObject({ legacyId: '99999' })
+      getRuleSavedObject({ legacyId: '99999' })
     );
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
-    await rulesClient.getAlertInstanceSummary({ id: '1' });
+    await rulesClient.getAlertSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -268,15 +262,11 @@ describe('getAlertInstanceSummary()', () => {
   });
 
   test('calls event log client with start date', async () => {
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
-    const dateStart = new Date(
-      Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
-    ).toISOString();
-    await rulesClient.getAlertInstanceSummary({ id: '1', dateStart });
+    const dateStart = new Date(Date.now() - 60 * RuleIntervalSeconds * 1000).toISOString();
+    await rulesClient.getAlertSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -291,13 +281,11 @@ describe('getAlertInstanceSummary()', () => {
   });
 
   test('calls event log client with relative start date', async () => {
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
     const dateStart = '2m';
-    await rulesClient.getAlertInstanceSummary({ id: '1', dateStart });
+    await rulesClient.getAlertSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
@@ -312,35 +300,27 @@ describe('getAlertInstanceSummary()', () => {
   });
 
   test('invalid start date throws an error', async () => {
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
     const dateStart = 'ain"t no way this will get parsed as a date';
-    expect(
-      rulesClient.getAlertInstanceSummary({ id: '1', dateStart })
-    ).rejects.toMatchInlineSnapshot(
+    expect(rulesClient.getAlertSummary({ id: '1', dateStart })).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
     );
   });
 
   test('saved object get throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
-    expect(rulesClient.getAlertInstanceSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
-      `[Error: OMG!]`
-    );
+    expect(rulesClient.getAlertSummary({ id: '1' })).rejects.toMatchInlineSnapshot(`[Error: OMG!]`);
   });
 
   test('findEvents throws an error', async () => {
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
     // error eaten but logged
-    await rulesClient.getAlertInstanceSummary({ id: '1' });
+    await rulesClient.getAlertSummary({ id: '1' });
   });
 });

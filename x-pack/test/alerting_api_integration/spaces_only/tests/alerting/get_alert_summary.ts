@@ -19,18 +19,18 @@ import {
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function createGetAlertInstanceSummaryTests({ getService }: FtrProviderContext) {
+export default function createGetAlertSummaryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
-  describe('getAlertInstanceSummary', () => {
+  describe('getAlertSummary', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
 
-    it(`handles non-existant alert`, async () => {
+    it(`handles non-existent rule`, async () => {
       await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/1/_alert_summary`)
         .expect(404, {
@@ -40,17 +40,17 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         });
     });
 
-    it('handles no-op alert', async () => {
-      const { body: createdAlert } = await supertest
+    it('handles no-op rule', async () => {
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await waitForEvents(createdAlert.id, ['execute']);
+      await waitForEvents(createdRule.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -65,7 +65,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         'execution_duration',
       ]);
       expect(stableBody).to.eql({
-        id: createdAlert.id,
+        id: createdRule.id,
         name: 'abc',
         tags: ['foo'],
         rule_type_id: 'test.noop',
@@ -79,16 +79,16 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       });
     });
 
-    it('handles no-op alert without waiting for execution event', async () => {
-      const { body: createdAlert } = await supertest
+    it('handles no-op rule without waiting for execution event', async () => {
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -103,7 +103,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         'execution_duration',
       ]);
       expect(stableBody).to.eql({
-        id: createdAlert.id,
+        id: createdRule.id,
         name: 'abc',
         tags: ['foo'],
         rule_type_id: 'test.noop',
@@ -119,17 +119,17 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
     it('handles dateStart parameter', async () => {
       const dateStart = '2020-08-08T08:08:08.008Z';
-      const { body: createdAlert } = await supertest
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await waitForEvents(createdAlert.id, ['execute']);
+      await waitForEvents(createdRule.id, ['execute']);
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
-          createdAlert.id
+          createdRule.id
         }/_alert_summary?date_start=${dateStart}`
       );
       expect(response.status).to.eql(200);
@@ -139,18 +139,18 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
     });
 
     it('handles invalid dateStart parameter', async () => {
-      const { body: createdAlert } = await supertest
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await waitForEvents(createdAlert.id, ['execute']);
+      await waitForEvents(createdRule.id, ['execute']);
       const dateStart = 'X0X0-08-08T08:08:08.008Z';
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
-          createdAlert.id
+          createdRule.id
         }/_alert_summary?date_start=${dateStart}`
       );
       expect(response.status).to.eql(400);
@@ -161,18 +161,18 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       });
     });
 
-    it('handles muted instances', async () => {
-      const { body: createdAlert } = await supertest
+    it('handles muted alerts', async () => {
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await alertUtils.muteInstance(createdAlert.id, '1');
-      await waitForEvents(createdAlert.id, ['execute']);
+      await alertUtils.muteInstance(createdRule.id, '1');
+      await waitForEvents(createdRule.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -184,18 +184,18 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       });
     });
 
-    it('handles alert errors', async () => {
+    it('handles rule errors', async () => {
       const dateNow = Date.now();
-      const { body: createdAlert } = await supertest
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ rule_type_id: 'test.throw' }))
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await waitForEvents(createdAlert.id, ['execute']);
+      await waitForEvents(createdRule.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
       );
       const { error_messages: errorMessages } = response.body;
       expect(errorMessages.length).to.be.greaterThan(0);
@@ -204,15 +204,15 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       expect(errorMessage.message).to.be('this alert is intended to fail');
     });
 
-    it('handles multi-instance status', async () => {
-      // pattern of when the alert should fire
+    it('handles multi-alert status', async () => {
+      // pattern of when the rule should fire
       const pattern = {
-        instanceA: [true, true, true, true],
-        instanceB: [true, true, false, false],
-        instanceC: [true, true, true, true],
+        alertA: [true, true, true, true],
+        alertB: [true, true, false, false],
+        alertC: [true, true, true, true],
       };
 
-      const { body: createdAlert } = await supertest
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
@@ -223,51 +223,51 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
           })
         )
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await alertUtils.muteInstance(createdAlert.id, 'instanceC');
-      await alertUtils.muteInstance(createdAlert.id, 'instanceD');
-      await waitForEvents(createdAlert.id, ['new-instance', 'recovered-instance']);
+      await alertUtils.muteInstance(createdRule.id, 'alertC');
+      await alertUtils.muteInstance(createdRule.id, 'alertD');
+      await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
       );
 
-      const actualInstances = response.body.alerts;
-      const expectedInstances = {
-        instanceA: {
+      const actualAlerts = response.body.alerts;
+      const expectedAlerts = {
+        alertA: {
           status: 'Active',
           muted: false,
           actionGroupId: 'default',
-          activeStartDate: actualInstances.instanceA.activeStartDate,
+          activeStartDate: actualAlerts.alertA.activeStartDate,
         },
-        instanceB: {
+        alertB: {
           status: 'OK',
           muted: false,
         },
-        instanceC: {
+        alertC: {
           status: 'Active',
           muted: true,
           actionGroupId: 'default',
-          activeStartDate: actualInstances.instanceC.activeStartDate,
+          activeStartDate: actualAlerts.alertC.activeStartDate,
         },
-        instanceD: {
+        alertD: {
           status: 'OK',
           muted: true,
         },
       };
-      expect(actualInstances).to.eql(expectedInstances);
+      expect(actualAlerts).to.eql(expectedAlerts);
     });
 
     describe('legacy', () => {
-      it('handles multi-instance status', async () => {
+      it('handles multi-alert status', async () => {
         // pattern of when the alert should fire
         const pattern = {
-          instanceA: [true, true, true, true],
-          instanceB: [true, true, false, false],
-          instanceC: [true, true, true, true],
+          alertA: [true, true, true, true],
+          alertB: [true, true, false, false],
+          alertC: [true, true, true, true],
         };
 
-        const { body: createdAlert } = await supertest
+        const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(
@@ -278,39 +278,39 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
             })
           )
           .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        await alertUtils.muteInstance(createdAlert.id, 'instanceC');
-        await alertUtils.muteInstance(createdAlert.id, 'instanceD');
-        await waitForEvents(createdAlert.id, ['new-instance', 'recovered-instance']);
+        await alertUtils.muteInstance(createdRule.id, 'alertC');
+        await alertUtils.muteInstance(createdRule.id, 'alertD');
+        await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
         const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdRule.id}/_instance_summary`
         );
 
-        const actualInstances = response.body.instances;
-        const expectedInstances = {
-          instanceA: {
+        const actualAlerts = response.body.instances;
+        const expectedAlerts = {
+          alertA: {
             status: 'Active',
             muted: false,
             actionGroupId: 'default',
-            activeStartDate: actualInstances.instanceA.activeStartDate,
+            activeStartDate: actualAlerts.alertA.activeStartDate,
           },
-          instanceB: {
+          alertB: {
             status: 'OK',
             muted: false,
           },
-          instanceC: {
+          alertC: {
             status: 'Active',
             muted: true,
             actionGroupId: 'default',
-            activeStartDate: actualInstances.instanceC.activeStartDate,
+            activeStartDate: actualAlerts.alertC.activeStartDate,
           },
-          instanceD: {
+          alertD: {
             status: 'OK',
             muted: true,
           },
         };
-        expect(actualInstances).to.eql(expectedInstances);
+        expect(actualAlerts).to.eql(expectedAlerts);
       });
     });
   });

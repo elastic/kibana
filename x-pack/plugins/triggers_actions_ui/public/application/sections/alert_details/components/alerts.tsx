@@ -26,21 +26,15 @@ import { padStart, chunk } from 'lodash';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
-  AlertInstanceStatusValues,
+  AlertStatusValues,
 } from '../../../../../../alerting/common';
-import {
-  Alert,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
-  AlertType,
-  Pagination,
-} from '../../../../types';
+import { Alert, AlertSummary, AlertStatus, AlertType, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import './alert_instances.scss';
+import './alerts.scss';
 import { RuleMutedSwitch } from './rule_muted_switch';
 import { getHealthColor } from '../../alerts_list/components/alert_status_filter';
 import {
@@ -53,29 +47,28 @@ import {
 } from '../../../lib/execution_duration_utils';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
-type AlertInstancesProps = {
-  alert: Alert;
-  alertType: AlertType;
+type AlertsProps = {
+  rule: Alert;
+  ruleType: AlertType;
   readOnly: boolean;
-  alertInstanceSummary: AlertInstanceSummary;
+  alertSummary: AlertSummary;
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
-export const alertInstancesTableColumns = (
-  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>,
+export const alertsTableColumns = (
+  onMuteAction: (alert: AlertListItem) => Promise<void>,
   readOnly: boolean
 ) => [
   {
-    field: 'instance',
-    name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.alert',
-      { defaultMessage: 'Alert' }
-    ),
+    field: 'alert',
+    name: i18n.translate('xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.alert', {
+      defaultMessage: 'Alert',
+    }),
     sortable: false,
     truncateText: true,
     width: '45%',
-    'data-test-subj': 'alertInstancesTableCell-instance',
+    'data-test-subj': 'alertsTableCell-alert',
     render: (value: string) => {
       return (
         <EuiToolTip anchorClassName={'eui-textTruncate'} content={value}>
@@ -87,66 +80,64 @@ export const alertInstancesTableColumns = (
   {
     field: 'status',
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
+      'xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.status',
       { defaultMessage: 'Status' }
     ),
     width: '15%',
-    render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
+    render: (value: AlertListItemStatus) => {
       return (
-        <EuiHealth color={value.healthColor} className="actionsInstanceList__health">
+        <EuiHealth color={value.healthColor} className="alertsList__health">
           {value.label}
           {value.actionGroup ? ` (${value.actionGroup})` : ``}
         </EuiHealth>
       );
     },
     sortable: false,
-    'data-test-subj': 'alertInstancesTableCell-status',
+    'data-test-subj': 'alertsTableCell-status',
   },
   {
     field: 'start',
     width: '190px',
-    render: (value: Date | undefined, instance: AlertInstanceListItem) => {
+    render: (value: Date | undefined) => {
       return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
     },
-    name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.start',
-      { defaultMessage: 'Start' }
-    ),
+    name: i18n.translate('xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.start', {
+      defaultMessage: 'Start',
+    }),
     sortable: false,
-    'data-test-subj': 'alertInstancesTableCell-start',
+    'data-test-subj': 'alertsTableCell-start',
   },
   {
     field: 'duration',
-    render: (value: number, instance: AlertInstanceListItem) => {
+    render: (value: number) => {
       return value ? durationAsString(moment.duration(value)) : '';
     },
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.duration',
+      'xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.duration',
       { defaultMessage: 'Duration' }
     ),
     sortable: false,
     width: '80px',
-    'data-test-subj': 'alertInstancesTableCell-duration',
+    'data-test-subj': 'alertsTableCell-duration',
   },
   {
     field: '',
     align: RIGHT_ALIGNMENT,
     width: '60px',
-    name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.mute',
-      { defaultMessage: 'Mute' }
-    ),
-    render: (alertInstance: AlertInstanceListItem) => {
+    name: i18n.translate('xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.mute', {
+      defaultMessage: 'Mute',
+    }),
+    render: (alert: AlertListItem) => {
       return (
         <RuleMutedSwitch
           disabled={readOnly}
-          onMuteAction={async () => await onMuteAction(alertInstance)}
-          alertInstance={alertInstance}
+          onMuteAction={async () => await onMuteAction(alert)}
+          alert={alert}
         />
       );
     },
     sortable: false,
-    'data-test-subj': 'alertInstancesTableCell-actions',
+    'data-test-subj': 'alertsTableCell-actions',
   },
 ];
 
@@ -156,47 +147,45 @@ function durationAsString(duration: Duration): string {
     .join(':');
 }
 
-export function AlertInstances({
-  alert,
-  alertType,
+export function Alerts({
+  rule,
+  ruleType,
   readOnly,
-  alertInstanceSummary,
+  alertSummary,
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
   durationEpoch = Date.now(),
-}: AlertInstancesProps) {
+}: AlertsProps) {
   const [pagination, setPagination] = useState<Pagination>({
     index: 0,
     size: DEFAULT_SEARCH_PAGE_SIZE,
   });
 
-  const alertInstances = Object.entries(alertInstanceSummary.instances)
-    .map(([instanceId, instance]) =>
-      alertInstanceToListItem(durationEpoch, alertType, instanceId, instance)
-    )
-    .sort((leftInstance, rightInstance) => leftInstance.sortPriority - rightInstance.sortPriority);
+  const alerts = Object.entries(alertSummary.alerts)
+    .map(([alertId, alert]) => alertToListItem(durationEpoch, ruleType, alertId, alert))
+    .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
 
-  const pageOfAlertInstances = getPage(alertInstances, pagination);
+  const pageOfAlerts = getPage(alerts, pagination);
 
-  const onMuteAction = async (instance: AlertInstanceListItem) => {
-    await (instance.isMuted
-      ? unmuteAlertInstance(alert, instance.instance)
-      : muteAlertInstance(alert, instance.instance));
+  const onMuteAction = async (alert: AlertListItem) => {
+    await (alert.isMuted
+      ? unmuteAlertInstance(rule, alert.alert)
+      : muteAlertInstance(rule, alert.alert));
     requestRefresh();
   };
 
   const showDurationWarning = shouldShowDurationWarning(
-    alertType,
-    alertInstanceSummary.executionDuration.average
+    ruleType,
+    alertSummary.executionDuration.average
   );
 
-  const healthColor = getHealthColor(alert.executionStatus.status);
+  const healthColor = getHealthColor(rule.executionStatus.status);
   const isLicenseError =
-    alert.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+    rule.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
   const statusMessage = isLicenseError
     ? ALERT_STATUS_LICENSE_ERROR
-    : alertsStatusesTranslationsMapping[alert.executionStatus.status];
+    : alertsStatusesTranslationsMapping[rule.executionStatus.status];
 
   return (
     <>
@@ -205,11 +194,11 @@ export function AlertInstances({
         <EuiFlexItem grow={1}>
           <EuiPanel color="subdued" hasBorder={false}>
             <EuiStat
-              data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
+              data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
               titleSize="xs"
               title={
                 <EuiHealth
-                  data-test-subj={`ruleStatus-${alert.executionStatus.status}`}
+                  data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
                   textSize="inherit"
                   color={healthColor}
                 >
@@ -217,7 +206,7 @@ export function AlertInstances({
                 </EuiHealth>
               }
               description={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.ruleLastExecutionDescription',
+                'xpack.triggersActionsUI.sections.alertDetails.alertsList.ruleLastExecutionDescription',
                 {
                   defaultMessage: `Last response`,
                 }
@@ -244,7 +233,7 @@ export function AlertInstances({
                         type="alert"
                         color="warning"
                         content={i18n.translate(
-                          'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.ruleTypeExcessDurationMessage',
+                          'xpack.triggersActionsUI.sections.alertDetails.alertsList.ruleTypeExcessDurationMessage',
                           {
                             defaultMessage: `Duration exceeds the rule's expected run time.`,
                           }
@@ -254,12 +243,12 @@ export function AlertInstances({
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem grow={false}>
-                    {formatMillisForDisplay(alertInstanceSummary.executionDuration.average)}
+                    {formatMillisForDisplay(alertSummary.executionDuration.average)}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
               description={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.avgDurationDescription',
+                'xpack.triggersActionsUI.sections.alertDetails.alertsList.avgDurationDescription',
                 {
                   defaultMessage: `Average duration`,
                 }
@@ -268,54 +257,54 @@ export function AlertInstances({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
-          <ExecutionDurationChart executionDuration={alertInstanceSummary.executionDuration} />
+          <ExecutionDurationChart executionDuration={alertSummary.executionDuration} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
       <input
         type="hidden"
-        data-test-subj="alertInstancesDurationEpoch"
-        name="alertInstancesDurationEpoch"
+        data-test-subj="alertsDurationEpoch"
+        name="alertsDurationEpoch"
         value={durationEpoch}
       />
       <EuiBasicTable
-        items={pageOfAlertInstances}
+        items={pageOfAlerts}
         pagination={{
           pageIndex: pagination.index,
           pageSize: pagination.size,
-          totalItemCount: alertInstances.length,
+          totalItemCount: alerts.length,
         }}
         onChange={({ page: changedPage }: { page: Pagination }) => {
           setPagination(changedPage);
         }}
         rowProps={() => ({
-          'data-test-subj': 'alert-instance-row',
+          'data-test-subj': 'alert-row',
         })}
         cellProps={() => ({
           'data-test-subj': 'cell',
         })}
-        columns={alertInstancesTableColumns(onMuteAction, readOnly)}
-        data-test-subj="alertInstancesList"
+        columns={alertsTableColumns(onMuteAction, readOnly)}
+        data-test-subj="alertsList"
         tableLayout="fixed"
-        className="alertInstancesList"
+        className="alertsList"
       />
     </>
   );
 }
-export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
+export const AlertsWithApi = withBulkAlertOperations(Alerts);
 
 function getPage(items: any[], pagination: Pagination) {
   return chunk(items, pagination.size)[pagination.index] || [];
 }
 
-interface AlertInstanceListItemStatus {
+interface AlertListItemStatus {
   label: string;
   healthColor: string;
   actionGroup?: string;
 }
-export interface AlertInstanceListItem {
-  instance: string;
-  status: AlertInstanceListItemStatus;
+export interface AlertListItem {
+  alert: string;
+  status: AlertListItemStatus;
   start?: Date;
   duration: number;
   isMuted: boolean;
@@ -323,43 +312,43 @@ export interface AlertInstanceListItem {
 }
 
 const ACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.active',
+  'xpack.triggersActionsUI.sections.alertDetails.alertsList.status.active',
   { defaultMessage: 'Active' }
 );
 
 const INACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive',
+  'xpack.triggersActionsUI.sections.alertDetails.alertsList.status.inactive',
   { defaultMessage: 'Recovered' }
 );
 
-function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {
-  actionGroupId = actionGroupId || alertType.defaultActionGroupId;
-  const actionGroup = alertType?.actionGroups?.find(
+function getActionGroupName(ruleType: AlertType, actionGroupId?: string): string | undefined {
+  actionGroupId = actionGroupId || ruleType.defaultActionGroupId;
+  const actionGroup = ruleType?.actionGroups?.find(
     (group: ActionGroup<string>) => group.id === actionGroupId
   );
   return actionGroup?.name;
 }
 
-export function alertInstanceToListItem(
+export function alertToListItem(
   durationEpoch: number,
-  alertType: AlertType,
-  instanceId: string,
-  instance: AlertInstanceStatus
-): AlertInstanceListItem {
-  const isMuted = !!instance?.muted;
+  ruleType: AlertType,
+  alertId: string,
+  alert: AlertStatus
+): AlertListItem {
+  const isMuted = !!alert?.muted;
   const status =
-    instance?.status === 'Active'
+    alert?.status === 'Active'
       ? {
           label: ACTIVE_LABEL,
-          actionGroup: getActionGroupName(alertType, instance?.actionGroupId),
+          actionGroup: getActionGroupName(ruleType, alert?.actionGroupId),
           healthColor: 'primary',
         }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' };
-  const start = instance?.activeStartDate ? new Date(instance.activeStartDate) : undefined;
+  const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;
-  const sortPriority = getSortPriorityByStatus(instance?.status);
+  const sortPriority = getSortPriorityByStatus(alert?.status);
   return {
-    instance: instanceId,
+    alert: alertId,
     status,
     start,
     duration,
@@ -368,7 +357,7 @@ export function alertInstanceToListItem(
   };
 }
 
-function getSortPriorityByStatus(status?: AlertInstanceStatusValues): number {
+function getSortPriorityByStatus(status?: AlertStatusValues): number {
   switch (status) {
     case 'Active':
       return 0;
