@@ -7,7 +7,7 @@
  */
 import React, { useCallback, useEffect } from 'react';
 import { History } from 'history';
-import { EuiErrorBoundary } from '@elastic/eui/src/components/error_boundary';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
