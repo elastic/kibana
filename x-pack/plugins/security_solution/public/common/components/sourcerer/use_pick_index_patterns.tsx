@@ -94,9 +94,6 @@ export const usePickIndexPatterns = ({
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(selectedPatterns)
   );
-  useEffect(() => {
-    setSelectedOptions(patternListToOptions(selectedPatterns));
-  }, [selectedPatterns]);
 
   const getDefaultSelectedOptionsByDataView = useCallback(
     (id: string, isAlerts: boolean = false): Array<EuiComboBoxOptionOption<string>> =>
@@ -130,7 +127,6 @@ export const usePickIndexPatterns = ({
         !defaultSelectedPatternsAsOptions.every((option) =>
           modifiedPatterns.find((pattern) => option.value === pattern)
         );
-
       return setIsModified(isPatternsModified ? 'modified' : '');
     },
     [defaultSelectedPatternsAsOptions, isOnlyDetectionAlerts, selectedPatterns]
@@ -138,7 +134,12 @@ export const usePickIndexPatterns = ({
 
   // when scope updates, check modified to set/remove alerts label
   useEffect(() => {
-    onSetIsModified();
+    setSelectedOptions(
+      scopeId === SourcererScopeName.detections
+        ? alertsOptions
+        : patternListToOptions(selectedPatterns)
+    );
+    onSetIsModified(selectedPatterns);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopeId, selectedPatterns]);
 
