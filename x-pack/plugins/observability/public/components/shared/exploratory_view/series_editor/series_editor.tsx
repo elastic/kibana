@@ -134,7 +134,7 @@ export const SeriesEditor = React.memo(function () {
       <div>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label={REPORT_TYPE_LABEL} display="columnCompressed">
+            <EuiFormRow label={REPORT_TYPE_LABEL} display="columnCompressed" isDisabled={true}>
               <ReportTypesSelect />
             </EuiFormRow>
           </EuiFlexItem>
