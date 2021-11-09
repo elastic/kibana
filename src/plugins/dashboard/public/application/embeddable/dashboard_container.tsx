@@ -275,7 +275,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     super.destroy();
     this.onDestroyControlGroup?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
-  } 
+  }
 
   protected getInheritedInput(id: string): InheritedChildInput {
     const {

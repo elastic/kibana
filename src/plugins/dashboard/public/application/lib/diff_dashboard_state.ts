@@ -41,7 +41,15 @@ export const diffDashboardState = (
   const common = commonDiffFilters<DashboardState>(
     original as unknown as DashboardDiffCommonFilters,
     newState as unknown as DashboardDiffCommonFilters,
-    ['viewMode', 'panels', 'options', 'fullScreenMode', 'savedQuery', 'expandedPanelId', 'controlGroupInput'],
+    [
+      'viewMode',
+      'panels',
+      'options',
+      'fullScreenMode',
+      'savedQuery',
+      'expandedPanelId',
+      'controlGroupInput',
+    ],
     true
   );
 
@@ -124,7 +132,7 @@ const commonDiff = <T>(
     (key) => !omitKeys.includes(key)
   );
   keys.forEach((key) => {
-    if (key === undefined) return; 
+    if (key === undefined) return;
     if (!_.isEqual(originalObj[key], newObj[key])) {
       (differences as { [key: string]: unknown })[key] = newObj[key];
     }
