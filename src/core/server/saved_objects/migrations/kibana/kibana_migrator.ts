@@ -37,7 +37,6 @@ export interface KibanaMigratorOptions {
   kibanaIndex: string;
   kibanaVersion: string;
   logger: Logger;
-  migrationsRetryDelay?: number;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -64,10 +63,8 @@ export class KibanaMigrator {
     status: 'waiting_to_start',
   });
   private readonly activeMappings: IndexMapping;
-  // TODO migrationsV2: make private once we remove migrations v1
-  public readonly kibanaVersion: string;
-  // TODO migrationsV2: make private once we remove migrations v1
-  public readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
+  private readonly kibanaVersion: string;
+  private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -79,7 +76,6 @@ export class KibanaMigrator {
     soMigrationsConfig,
     kibanaVersion,
     logger,
-    migrationsRetryDelay,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;

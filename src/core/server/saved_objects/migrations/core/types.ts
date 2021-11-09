@@ -6,7 +6,18 @@
  * Side Public License, v 1.
  */
 
-export const migrationRetryCallClusterMock = jest.fn((fn) => fn());
-jest.doMock('../../../elasticsearch/client/retry_call_cluster', () => ({
-  migrationRetryCallCluster: migrationRetryCallClusterMock,
-}));
+export type MigrationStatus =
+  | 'waiting_to_start'
+  | 'waiting_for_other_nodes'
+  | 'running'
+  | 'completed';
+
+export type MigrationResult =
+  | { status: 'skipped' }
+  | { status: 'patched' }
+  | {
+      status: 'migrated';
+      destIndex: string;
+      sourceIndex: string;
+      elapsedMs: number;
+    };

@@ -13,7 +13,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AliasAction, isLeftTypeof } from '../actions';
 import { AllActionStates, MigrationLog, State } from '../types';
 import type { ResponseType } from '../next';
-import { disableUnknownTypeMappingFields } from '../../migrations/core/migration_context';
+import { disableUnknownTypeMappingFields } from '../../migrations/core';
 import {
   createInitialProgress,
   incrementProcessedProgress,

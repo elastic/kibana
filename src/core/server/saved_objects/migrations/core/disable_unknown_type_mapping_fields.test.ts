@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { disableUnknownTypeMappingFields } from './migration_context';
+import { disableUnknownTypeMappingFields } from './disable_unknown_type_mapping_fields';
 
 describe('disableUnknownTypeMappingFields', () => {
   const sourceMappings = {
