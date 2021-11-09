@@ -292,7 +292,8 @@ describe('migration actions', () => {
     });
   });
 
-  describe('cloneIndex', () => {
+  // FAILED ES PROMOTION: https://github.com/elastic/kibana/issues/117856
+  describe.skip('cloneIndex', () => {
     afterAll(async () => {
       try {
         await client.indices.delete({ index: 'clone_*' });
@@ -409,14 +410,15 @@ describe('migration actions', () => {
         timeout: '0s',
       })();
 
-      await expect(cloneIndexPromise).resolves.toMatchObject({
-        _tag: 'Left',
-        left: {
-          error: expect.any(errors.ResponseError),
-          message: expect.stringMatching(/\"timed_out\":true/),
-          type: 'retryable_es_client_error',
-        },
-      });
+      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "message": "Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
+            "type": "retryable_es_client_error",
+          },
+        }
+      `);
     });
   });
 
