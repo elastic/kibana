@@ -42,7 +42,7 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one', 'message-two']);
-    expect(wrapper.find(`[data-test-subj="calloutMessages-${id}"]`).last().exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="callout-messages-${id}"]`).last().exists()).toBeTruthy();
   });
 
   it('groups the messages correctly', () => {
@@ -69,9 +69,11 @@ describe('CaseCallOut ', () => {
     const idPrimary = createCalloutId(['message-two']);
 
     expect(
-      wrapper.find(`[data-test-subj="caseCallout-${idPrimary}"]`).last().exists()
+      wrapper.find(`[data-test-subj="case-callout-${idPrimary}"]`).last().exists()
     ).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="caseCallout-${idDanger}"]`).last().exists()).toBeTruthy();
+    expect(
+      wrapper.find(`[data-test-subj="case-callout-${idDanger}"]`).last().exists()
+    ).toBeTruthy();
   });
 
   it('dismisses the callout correctly', () => {
@@ -89,9 +91,9 @@ describe('CaseCallOut ', () => {
 
     const id = createCalloutId(['message-one']);
 
-    expect(wrapper.find(`[data-test-subj="caseCallout-${id}"]`).last().exists()).toBeTruthy();
-    wrapper.find(`[data-test-subj="calloutDismiss-${id}"]`).last().simulate('click');
-    expect(wrapper.find(`[data-test-subj="caseCallout-${id}"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-callout-${id}"]`).last().exists()).toBeTruthy();
+    wrapper.find(`[data-test-subj="callout-dismiss-${id}"]`).last().simulate('click');
+    expect(wrapper.find(`[data-test-subj="case-callout-${id}"]`).exists()).toBeFalsy();
   });
 
   it('persist the callout of type primary when dismissed', () => {
@@ -110,7 +112,7 @@ describe('CaseCallOut ', () => {
 
     const id = createCalloutId(['message-one']);
     expect(securityLocalStorageMock.getMessages).toHaveBeenCalledWith('case');
-    wrapper.find(`[data-test-subj="calloutDismiss-${id}"]`).last().simulate('click');
+    wrapper.find(`[data-test-subj="callout-dismiss-${id}"]`).last().simulate('click');
     expect(securityLocalStorageMock.addMessage).toHaveBeenCalledWith('case', id);
   });
 
@@ -135,7 +137,7 @@ describe('CaseCallOut ', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="caseCallout-${id}"]`).last().exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-callout-${id}"]`).last().exists()).toBeFalsy();
   });
 
   it('do not persist a callout of type danger', () => {
@@ -158,7 +160,7 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one']);
-    wrapper.find(`button[data-test-subj="calloutDismiss-${id}"]`).simulate('click');
+    wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
     wrapper.update();
     expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
   });
@@ -183,7 +185,7 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one']);
-    wrapper.find(`button[data-test-subj="calloutDismiss-${id}"]`).simulate('click');
+    wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
     wrapper.update();
     expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
   });
@@ -208,7 +210,7 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one']);
-    wrapper.find(`button[data-test-subj="calloutDismiss-${id}"]`).simulate('click');
+    wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
     wrapper.update();
     expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
   });

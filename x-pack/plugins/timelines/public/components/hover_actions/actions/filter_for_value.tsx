@@ -72,7 +72,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
           <Component
             aria-label={FILTER_FOR_VALUE}
             buttonRef={defaultFocusedButtonRef}
-            data-test-subj="filterForValue"
+            data-test-subj="filter-for-value"
             iconType="plusInCircle"
             onClick={filterForValueFn}
             size={size}
@@ -85,7 +85,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
             aria-label={FILTER_FOR_VALUE}
             buttonRef={defaultFocusedButtonRef}
             className="timelines__hoverActionButton"
-            data-test-subj="filterForValue"
+            data-test-subj="filter-for-value"
             iconSize="s"
             iconType="plusInCircle"
             onClick={filterForValueFn}

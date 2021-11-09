@@ -34,20 +34,20 @@ describe('Callout', () => {
 
   it('It renders the callout', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
-    expect(wrapper.find(`[data-test-subj="caseCallout-md5-hex"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="calloutMessages-md5-hex"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="calloutOnclick-md5-hex"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="case-callout-md5-hex"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="callout-onclick-md5-hex"]`).exists()).toBeTruthy();
   });
 
   it('does not shows any messages when the list is empty', () => {
     const wrapper = mount(<CallOut {...defaultProps} messages={[]} />);
-    expect(wrapper.find(`[data-test-subj="calloutMessages-md5-hex"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeFalsy();
   });
 
   it('transform the button color correctly - primary', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
     const className =
-      wrapper.find(`button[data-test-subj="calloutOnclick-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--primary')).toBeTruthy();
   });
@@ -55,7 +55,7 @@ describe('Callout', () => {
   it('transform the button color correctly - success', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'success'} />);
     const className =
-      wrapper.find(`button[data-test-subj="calloutOnclick-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--secondary')).toBeTruthy();
   });
@@ -63,7 +63,7 @@ describe('Callout', () => {
   it('transform the button color correctly - warning', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'warning'} />);
     const className =
-      wrapper.find(`button[data-test-subj="calloutOnclick-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--warning')).toBeTruthy();
   });
@@ -71,7 +71,7 @@ describe('Callout', () => {
   it('transform the button color correctly - danger', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'danger'} />);
     const className =
-      wrapper.find(`button[data-test-subj="calloutOnclick-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--danger')).toBeTruthy();
   });
@@ -94,7 +94,9 @@ describe('Callout', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`button[data-test-subj="calloutOnclick-md5-hex"]`).exists()).toEqual(false);
+    expect(wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).exists()).toEqual(
+      false
+    );
   });
 
   it('does not show the button when license error is present', () => {
@@ -109,14 +111,16 @@ describe('Callout', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`button[data-test-subj="calloutOnclick-md5-hex"]`).exists()).toEqual(false);
+    expect(wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).exists()).toEqual(
+      false
+    );
   });
 
   // use this for storage if we ever want to bring that back
   it('onClick passes id and type', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
-    expect(wrapper.find(`[data-test-subj="calloutOnclick-md5-hex"]`).exists()).toBeTruthy();
-    wrapper.find(`button[data-test-subj="calloutOnclick-md5-hex"]`).simulate('click');
+    expect(wrapper.find(`[data-test-subj="callout-onclick-md5-hex"]`).exists()).toBeTruthy();
+    wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).simulate('click');
     expect(handleButtonClick.mock.calls[0][1]).toEqual('md5-hex');
     expect(handleButtonClick.mock.calls[0][2]).toEqual('primary');
   });

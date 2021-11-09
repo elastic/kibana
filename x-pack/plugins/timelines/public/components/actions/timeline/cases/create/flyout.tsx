@@ -29,7 +29,7 @@ const StyledFlyout = styled(EuiFlyout)`
   `}
 `;
 
-const maskOverlayClassName = 'createCaseFlyout-mask-overlay';
+const maskOverlayClassName = 'create-case-flyout-mask-overlay';
 
 /**
  * We need to target the mask overlay which is a parent element
@@ -89,7 +89,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       <GlobalStyle />
       <StyledFlyout
         onClose={onCloseFlyout}
-        data-test-subj="createCaseFlyout"
+        data-test-subj="create-case-flyout"
         maskProps={{ className: maskOverlayClassName }}
       >
         <EuiFlyoutHeader hasBorder>

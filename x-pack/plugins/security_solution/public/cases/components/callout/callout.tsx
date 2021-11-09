@@ -35,10 +35,10 @@ const CallOutComponent = ({
   );
 
   return showCallOut && !isEmpty(messages) ? (
-    <EuiCallOut title={title} color={type} iconType="gear" data-test-subj={`caseCallout-${id}`}>
-      <EuiDescriptionList data-test-subj={`calloutMessages-${id}`} listItems={messages} />
+    <EuiCallOut title={title} color={type} iconType="gear" data-test-subj={`case-callout-${id}`}>
+      <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
       <EuiButton
-        data-test-subj={`calloutDismiss-${id}`}
+        data-test-subj={`callout-dismiss-${id}`}
         color={type === 'success' ? 'secondary' : type}
         onClick={handleCallOut}
       >

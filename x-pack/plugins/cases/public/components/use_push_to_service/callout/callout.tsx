@@ -52,13 +52,13 @@ const CallOutComponent = ({
       }
       color={type}
       iconType="gear"
-      data-test-subj={`caseCallout-${id}`}
+      data-test-subj={`case-callout-${id}`}
       size="s"
     >
-      <EuiDescriptionList data-test-subj={`calloutMessages-${id}`} listItems={messages} />
+      <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
       {!isCaseClosed && !hasLicenseError && (
         <EuiButton
-          data-test-subj={`calloutOnclick-${id}`}
+          data-test-subj={`callout-onclick-${id}`}
           color={type === 'success' ? 'secondary' : type}
           onClick={handleCallOut}
         >

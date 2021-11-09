@@ -116,14 +116,14 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     return Object.values(sortedData).map((action, i) => {
       if (actionsKeys[i] === 'elasticAgent' || actionsKeys[i] === 'beats') {
         return (
-          <EuiFlexItem key={`emptyPageAction-agent`} className="kbnNoDataPageContents__item">
+          <EuiFlexItem key={`empty-page-agent-action`} className="kbnNoDataPageContents__item">
             <ElasticAgentCard solution={solution} {...action} />
           </EuiFlexItem>
         );
       } else {
         return (
           <EuiFlexItem
-            key={`emptyPageAction-${actionsKeys[i]}`}
+            key={`empty-page-${actionsKeys[i]}-action`}
             className="kbnNoDataPageContents__item"
           >
             <NoDataCard {...action} />

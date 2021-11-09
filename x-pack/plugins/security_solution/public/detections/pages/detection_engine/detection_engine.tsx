@@ -314,7 +314,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
-          data-test-subj="noFeaturePermissions-alerts"
+          data-test-subj="no_feature_permissions-alerts"
           title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
         />
       ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (

@@ -59,7 +59,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
               <EuiFlexItem
                 grow={false}
                 style={{ maxWidth: maxItemWidth }}
-                key={`emptyPageAction-${titles[idx]}`}
+                key={`empty-page-${titles[idx]}-action`}
               >
                 <EuiCard
                   title={descriptionTitle ?? false}
@@ -72,7 +72,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
                       iconType={icon}
                       target={target}
                       fill={fill}
-                      data-test-subj={`emptyPageAction-${titles[idx]}`}
+                      data-test-subj={`empty-page-${titles[idx]}-action`}
                     >
                       {label}
                     </EuiButton>
@@ -83,7 +83,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
               <EuiFlexItem
                 grow={false}
                 style={{ maxWidth: maxItemWidth }}
-                key={`emptyPageAction-${titles[idx]}`}
+                key={`empty-page-${titles[idx]}-action`}
               >
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButton
@@ -91,7 +91,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
                   onClick={onClick}
                   iconType={icon}
                   target={target}
-                  data-test-subj={`emptyPageAction-${titles[idx]}`}
+                  data-test-subj={`empty-page-${titles[idx]}-action`}
                 >
                   {label}
                 </EuiButton>

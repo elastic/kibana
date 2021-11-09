@@ -167,7 +167,7 @@ exports[`NoDataPage render 1`] = `
   >
     <EuiFlexItem
       className="kbnNoDataPageContents__item"
-      key="emptyPageAction-agent"
+      key="empty-page-agent-action"
     >
       <ElasticAgentCard
         solution="Elastic"
@@ -175,7 +175,7 @@ exports[`NoDataPage render 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       className="kbnNoDataPageContents__item"
-      key="emptyPageAction-agent"
+      key="empty-page-agent-action"
     >
       <ElasticAgentCard
         solution="Elastic"
@@ -183,7 +183,7 @@ exports[`NoDataPage render 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       className="kbnNoDataPageContents__item"
-      key="emptyPageAction-custom"
+      key="empty-page-custom-action"
     >
       <NoDataCard />
     </EuiFlexItem>
