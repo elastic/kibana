@@ -116,6 +116,7 @@ export async function bootstrap({
     }
 
     if (serverAvailableTransaction) {
+      root.logger.get().info('Watching status for serverAvailable APM transaction');
       await firstValueFrom(
         coreSetup.status.overall$.pipe(
           filter((status) => status.level.toString() === 'available'),
