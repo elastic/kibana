@@ -67,9 +67,8 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
-import type { PackageUpdateEvent } from './upgrade_sender';
+import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
-import { UpdateEventType } from './upgrade_sender';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -430,7 +429,7 @@ class PackagePolicyService {
           newVersion: packagePolicy.package.version,
           status: 'success',
           dryRun: false,
-          eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
+          eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(
           appContextService.getLogger(),
@@ -677,7 +676,7 @@ class PackagePolicyService {
           status: hasErrors ? 'failure' : 'success',
           error: hasErrors ? updatedPackagePolicy.errors : undefined,
           dryRun: true,
-          eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
+          eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(
           appContextService.getLogger(),
