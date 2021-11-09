@@ -24,6 +24,7 @@ export function ElasticsearchProvider({ getService }: FtrProviderContext): Kiban
     return new Client({
       nodes: [formatUrl(config.get('servers.elasticsearch'))],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
+      headers: { 'X-Opaque-Id': 'kbn-test-client' },
     });
   } else {
     return new Client({
@@ -32,6 +33,7 @@ export function ElasticsearchProvider({ getService }: FtrProviderContext): Kiban
       },
       nodes: [formatUrl(config.get('servers.elasticsearch'))],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
+      headers: { 'X-Opaque-Id': 'kbn-test-client' },
     });
   }
 }
