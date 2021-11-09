@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { CSSObject } from '@emotion/react';
 
 const TREE_INDENT = 32;
 
@@ -18,51 +19,52 @@ export const useStyles = ({ depth }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const darkText = `
-      color: ${euiTheme.colors.text};
-    `;
+    const { colors, border, font, size } = euiTheme;
+
+    const darkText: CSSObject = {
+      color: colors.text,
+    };
 
     const searchHighlight = `
-      background-color: ${euiTheme.colors.highlight};
-      color: ${euiTheme.colors.text};
-      border-radius: 4px;
+      background-color: ${colors.highlight};
+      color: ${colors.text};
+      border-radius: ${border.radius.medium};
     `;
 
-    const children = `
-      position: relative;
-      color: white;
-      margin-left: 16px;
-      padding-left: 8px;
-      border-left: 3px dotted ${euiTheme.colors.lightShade};
-      margin-top: 8px;
+    const children: CSSObject = {
+      position: 'relative',
+      color: colors.ghost,
+      marginLeft: '16px',
+      paddingLeft: '8px',
+      borderLeft: `3px dotted ${colors.lightShade}`,
+      marginTop: '8px',
+      '&:after': {
+        position: 'absolute',
+        content: `''`,
+        bottom: 0,
+        left: '-5px',
+        backgroundColor: colors.lightShade,
+        width: '7px',
+        height: '3px',
+        borderRadius: '2px',
+      },
+    };
 
-      &:after {
-        position: absolute;
-        content: '';
-        bottom: 0;
-        left: -5px;
-        background-color: ${euiTheme.colors.lightShade};
-        width: 7px;
-        height: 3px;
-        border-radius: 2px;
-      }
-    `;
+    const button: CSSObject = {
+      lineHeight: '18px',
+      height: '20px',
+      fontSize: '11px',
+      fontFamily: font.familyCode,
+      borderRadius: border.radius.medium,
+      background: 'rgba(0, 119, 204, 0.1)',
+      border: '1px solid rgba(96, 146, 192, 0.3)',
+      color: colors.text,
+      marginLeft: size.s,
+    };
 
-    const button = `
-      line-height: 18px;
-      height: 20px;
-      font-size: 11px;
-      font-family: Roboto Mono;
-      border-radius: 4px;
-      background: rgba(0, 119, 204, 0.1);
-      border: 1px solid rgba(96, 146, 192, 0.3);
-      color: ${euiTheme.colors.text};
-      margin-left: 8px;
-    `;
-
-    const buttonArrow = `
-      margin-left: 8px;
-    `;
+    const buttonArrow: CSSObject = {
+      marginLeft: size.s,
+    };
 
     /**
      * gets border, bg and hover colors for a process
@@ -79,53 +81,50 @@ export const useStyles = ({ depth }: StylesDeps) => {
 
     const { bgColor, borderColor, hoverColor } = getHighlightColors();
 
-    const processNode = `
-      display: block;
-      cursor: pointer;
-      position: relative;
+    const processNode: CSSObject = {
+      display: 'block',
+      cursor: 'pointer',
+      position: 'relative',
+      '&:not(:first-child)': {
+        marginTop: size.s,
+      },
+      '&:hover:before': {
+        opacity: 0.24,
+        backgroundColor: hoverColor,
+      },
+      '&:before': {
+        position: 'absolute',
+        height: '100%',
+        pointerEvents: 'none',
+        content: `''`,
+        marginLeft: `-${depth * TREE_INDENT}px`,
+        borderLeft: `4px solid ${borderColor}`,
+        backgroundColor: bgColor,
+        width: `calc(100% + ${depth * TREE_INDENT}px)`,
+      },
+    };
 
-      &:not(:first-child) {
-        margin-top: 8px;
-      }
+    const wrapper: CSSObject = {
+      paddingLeft: size.s,
+      position: 'relative',
+      verticalAlign: 'middle',
+      color: colors.mediumShade,
+      wordBreak: 'break-all',
+      minHeight: '24px',
+      lineHeight: '24px',
+    };
 
-      &:hover:before {
-        opacity: 0.24;
-        background-color: ${hoverColor};
-      }
+    const workingDir: CSSObject = {
+      color: colors.successText,
+    };
 
-      &:before {
-        position: absolute;
-        height: 100%;
-        pointer-events: none;
-        content: '';
-        margin-left: -${depth * TREE_INDENT}px;
-        border-left: 4px solid ${borderColor};
-        background-color: ${bgColor};
-        width: calc(100% + ${depth * TREE_INDENT}px);
-      }
-    `;
-
-    const wrapper = `
-      padding-left: 8px;
-      position: relative;
-      vertical-align: middle;
-      color: ${euiTheme.colors.mediumShade};
-      word-break: break-all;
-      min-height: 24px;
-      line-height: 24px;
-    `;
-
-    const workingDir = `
-      color: ${euiTheme.colors.successText};
-    `;
-
-    const userEnteredIcon = `
-      position: absolute;
-      width: 9px;
-      height: 9px;
-      margin-left: -11px;
-      margin-top: 8px;
-    `;
+    const userEnteredIcon: CSSObject = {
+      position: 'absolute',
+      width: '9px',
+      height: '9px',
+      marginLeft: '-11px',
+      marginTop: '8px',
+    };
 
     return {
       darkText,
