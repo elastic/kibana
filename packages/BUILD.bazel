@@ -75,6 +75,7 @@ filegroup(
   name = "build_pkg_types",
   srcs = [
       "//packages/elastic-datemath:build_types",
+      "//packages/kbn-ace:build_types",
   ],
 )
 
