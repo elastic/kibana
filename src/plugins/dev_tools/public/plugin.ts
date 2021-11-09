@@ -53,14 +53,14 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
-        const { element, history } = params;
+        const { element, history, theme$ } = params;
         element.classList.add('devAppWrapper');
 
         const [core] = await getStartServices();
         const { application, chrome } = core;
 
         const { renderApp } = await import('./application');
-        return renderApp(element, application, chrome, history, this.getSortedDevTools());
+        return renderApp(element, application, chrome, history, theme$, this.getSortedDevTools());
       },
     });
 
