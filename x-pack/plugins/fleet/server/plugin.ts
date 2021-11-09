@@ -341,12 +341,14 @@ export class FleetPlugin
     const logger = appContextService.getLogger();
 
     const fleetSetupPromise = startFleetServerSetup()
-      .then(() =>
-        setupFleet(
+      .then(() => {
+        logger.info('Beginning fleet setup');
+
+        return setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
           core.elasticsearch.client.asInternalUser
-        )
-      )
+        );
+      })
       .then(() => {
         logger.info('Fleet setup completed');
       })

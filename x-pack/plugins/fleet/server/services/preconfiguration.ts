@@ -116,10 +116,10 @@ export async function ensurePreconfiguredOutputs(
 
       if (isCreate) {
         await outputService.create(soClient, data, { id, overwrite: true });
-        logger.info(`Created output ${id}`);
+        logger.debug(`Created output ${id}`);
       } else if (isUpdateWithNewData) {
         await outputService.update(soClient, id, data);
-        logger.info(`Updated output ${id}`);
+        logger.debug(`Updated output ${id}`);
 
         // Bump revision of all policies using that output
         if (outputData.is_default) {
@@ -143,7 +143,7 @@ export async function cleanPreconfiguredOutputs(
 
   for (const output of existingPreconfiguredOutput) {
     if (!outputs.find(({ id }) => output.id === id)) {
-      logger.info(`Deleting preconfigured output ${output.id}`);
+      logger.debug(`Deleting preconfigured output ${output.id}`);
       await outputService.delete(soClient, output.id);
     }
   }

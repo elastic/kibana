@@ -53,7 +53,6 @@ async function createSetupSideEffects(
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
-  logger.info('Beginning Fleet setup');
 
   const {
     agentPolicies: policiesOrUndefined,
@@ -64,7 +63,7 @@ async function createSetupSideEffects(
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
 
-  logger.info('Setting up Fleet outputs');
+  logger.debug('Setting up Fleet outputs');
   await Promise.all([
     ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
     settingsService.settingsSetup(soClient),
@@ -74,7 +73,7 @@ async function createSetupSideEffects(
 
   await awaitIfFleetServerSetupPending();
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
-    logger.info('Setting up Fleet Elasticsearch assets');
+    logger.debug('Setting up Fleet Elasticsearch assets');
     await ensureFleetGlobalEsAssets(soClient, esClient);
   }
 
@@ -98,7 +97,7 @@ async function createSetupSideEffects(
     ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
-  logger.info('Setting up initial Fleet packages');
+  logger.debug('Setting up initial Fleet packages');
 
   const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
     soClient,
@@ -108,13 +107,13 @@ async function createSetupSideEffects(
     defaultOutput
   );
 
-  logger.info('Cleaning up Fleet outputs');
+  logger.debug('Cleaning up Fleet outputs');
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
-  logger.info('Setting up Fleet enrollment keys');
+  logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
 
-  logger.info('Setting up Fleet Server agent policies');
+  logger.debug('Setting up Fleet Server agent policies');
   await ensureFleetServerAgentPoliciesExists(soClient, esClient);
 
   return {
@@ -132,7 +131,7 @@ export async function ensureFleetGlobalEsAssets(
 ) {
   const logger = appContextService.getLogger();
   // Ensure Global Fleet ES assets are installed
-  logger.info('Creating Fleet component template and ingest pipeline');
+  logger.debug('Creating Fleet component template and ingest pipeline');
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplate(esClient),
     ensureFleetFinalPipelineIsInstalled(esClient),
