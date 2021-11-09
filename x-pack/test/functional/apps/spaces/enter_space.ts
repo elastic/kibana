@@ -12,10 +12,10 @@ export default function enterSpaceFunctonalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/100570
-  describe.skip('Enter Space', function () {
+  describe('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/spaces/enter_space');
@@ -44,21 +44,26 @@ export default function enterSpaceFunctonalTests({
     it('allows user to navigate to different spaces, respecting the configured default route', async () => {
       const spaceId = 'another-space';
 
+      screenshots.take('debug1');
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
 
+      screenshots.take('debug2');
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
 
+      screenshots.take('debug3');
       await PageObjects.spaceSelector.expectRoute(spaceId, '/app/canvas');
 
+      screenshots.take('debug4');
       await PageObjects.spaceSelector.openSpacesNav();
-
       // change spaces
       const newSpaceId = 'default';
       await PageObjects.spaceSelector.clickSpaceAvatar(newSpaceId);
 
+      screenshots.take('debug5');
       await PageObjects.spaceSelector.expectHomePage(newSpaceId);
+      screenshots.take('debug6');
     });
   });
 }
