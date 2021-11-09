@@ -32,10 +32,19 @@ server.name
 Settings unique across each host (for example, running multiple installations on the same virtual machine):
 [source,js]
 --------
-logging.dest
 path.data
 pid.file
 server.port
+--------
+
+When using a file appender, the target file must also be unique:
+[source,yaml]
+--------
+logging:
+  appenders:
+    default:
+      type: file
+      fileName: /unique/path/per/instance
 --------
 
 Settings that must be the same:

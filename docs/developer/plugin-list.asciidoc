@@ -28,10 +28,6 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/apm_oss/README.asciidoc[apmOss]
-|undefined
-
-
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
 
@@ -92,6 +88,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 |{kib-repo}blob/{branch}/src/plugins/expression_metric/README.md[expressionMetric]
 |Expression Metric plugin adds a metric renderer and function to the expression plugin.
+
+
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_metric/README.md[expressionMetricVis]
+|Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
@@ -223,11 +223,6 @@ oss plugins.
 |The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
 
 
-|{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
-|securityOss is responsible for educating users about Elastic's free security features,
-so they can properly protect the data within their clusters.
-
-
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
 |The share plugin contains various utilities for displaying sharing context menu,
 generating deep links to other apps, and creating short URLs.
@@ -351,7 +346,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
-|Local setup documentation
+|undefined
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
@@ -363,7 +358,8 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
-|Case management in Kibana
+|[![Issues][issues-shield]][issues-url]
+[![Pull Requests][pr-shield]][pr-url]
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
@@ -397,7 +393,7 @@ adds dynamic actions to every embeddables state, in order to support drilldowns.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/encrypted_saved_objects/README.md[encryptedSavedObjects]
 |The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
-security and spaces filtering as well as performing audit logging.
+security and spaces filtering.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/enterprise_search/README.md[enterpriseSearch]
@@ -458,7 +454,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
-|The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest nodes. Please refer to the Elasticsearch documentation for more details.
+|The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
@@ -591,7 +587,7 @@ Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-produc
 
 |<<translations-plugin>>
 |Contains Elastic-supported translations. Owned by the Localizations team.
-For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/master/packages/kbn-i18n
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/packages/kbn-i18n
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
@@ -604,8 +600,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
-|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. Its primary
-purposes are to:
+|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: xpack.upgrade_assistant.readonly (#101296).
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
@@ -619,10 +614,6 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]
 |This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/xpack_legacy/README.md[xpackLegacy]
-|Contains HTTP endpoints and UiSettings that are slated for removal.
 
 
 |===

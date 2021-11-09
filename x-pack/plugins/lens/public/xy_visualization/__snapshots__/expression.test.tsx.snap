@@ -5,7 +5,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
-    allowBrushingLastHistogramBucket={false}
+    allowBrushingLastHistogramBin={false}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -46,7 +46,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
   <Connect(SpecInstance)
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -67,14 +67,15 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
   <Connect(SpecInstance)
     domain={
       Object {
         "fit": false,
-        "max": undefined,
-        "min": undefined,
+        "max": NaN,
+        "min": NaN,
       }
     }
     gridLine={
@@ -100,6 +101,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
   <XyEndzones
@@ -234,7 +236,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
-    allowBrushingLastHistogramBucket={false}
+    allowBrushingLastHistogramBin={false}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -275,7 +277,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
   <Connect(SpecInstance)
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -296,14 +298,15 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
   <Connect(SpecInstance)
     domain={
       Object {
         "fit": false,
-        "max": undefined,
-        "min": undefined,
+        "max": NaN,
+        "min": NaN,
       }
     }
     gridLine={
@@ -329,6 +332,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
   <XyEndzones
@@ -477,7 +481,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
-    allowBrushingLastHistogramBucket={false}
+    allowBrushingLastHistogramBin={false}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -518,7 +522,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
   <Connect(SpecInstance)
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -539,14 +543,15 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
   <Connect(SpecInstance)
     domain={
       Object {
         "fit": false,
-        "max": undefined,
-        "min": undefined,
+        "max": NaN,
+        "min": NaN,
       }
     }
     gridLine={
@@ -572,6 +577,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
   <XyEndzones
@@ -720,7 +726,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
-    allowBrushingLastHistogramBucket={false}
+    allowBrushingLastHistogramBin={false}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -761,7 +767,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
   <Connect(SpecInstance)
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -782,14 +788,15 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
   <Connect(SpecInstance)
     domain={
       Object {
         "fit": false,
-        "max": undefined,
-        "min": undefined,
+        "max": NaN,
+        "min": NaN,
       }
     }
     gridLine={
@@ -815,6 +822,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
   <XyEndzones
@@ -949,7 +957,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
-    allowBrushingLastHistogramBucket={false}
+    allowBrushingLastHistogramBin={false}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -990,7 +998,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
   <Connect(SpecInstance)
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -1011,14 +1019,15 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
   <Connect(SpecInstance)
     domain={
       Object {
         "fit": false,
-        "max": undefined,
-        "min": undefined,
+        "max": NaN,
+        "min": NaN,
       }
     }
     gridLine={
@@ -1044,6 +1053,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
   <XyEndzones
@@ -1186,7 +1196,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
-    allowBrushingLastHistogramBucket={false}
+    allowBrushingLastHistogramBin={false}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -1227,7 +1237,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
   <Connect(SpecInstance)
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -1248,14 +1258,15 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
   <Connect(SpecInstance)
     domain={
       Object {
         "fit": false,
-        "max": undefined,
-        "min": undefined,
+        "max": NaN,
+        "min": NaN,
       }
     }
     gridLine={
@@ -1281,6 +1292,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
   <XyEndzones
@@ -1437,7 +1449,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
   renderer="canvas"
 >
   <Connect(SpecInstance)
-    allowBrushingLastHistogramBucket={false}
+    allowBrushingLastHistogramBin={false}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -1478,7 +1490,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
   <Connect(SpecInstance)
     gridLine={
       Object {
-        "strokeWidth": 2,
+        "strokeWidth": 1,
         "visible": true,
       }
     }
@@ -1499,14 +1511,15 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
       }
     }
     tickFormat={[Function]}
+    timeAxisLayerCount={0}
     title="c"
   />
   <Connect(SpecInstance)
     domain={
       Object {
         "fit": false,
-        "max": undefined,
-        "min": undefined,
+        "max": NaN,
+        "min": NaN,
       }
     }
     gridLine={
@@ -1532,6 +1545,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
       }
     }
     tickFormat={[Function]}
+    ticks={5}
     title="a"
   />
   <XyEndzones

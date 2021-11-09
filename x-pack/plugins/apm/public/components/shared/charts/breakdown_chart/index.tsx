@@ -17,6 +17,7 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
+  XYBrushEvent,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,8 +28,8 @@ import { Annotation } from '../../../../../common/annotations';
 import { useChartTheme } from '../../../../../../observability/public';
 import {
   asAbsoluteDateTime,
-  asDuration,
   asPercent,
+  getDurationFormatter,
 } from '../../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
@@ -39,6 +40,12 @@ import { ChartContainer } from '../../charts/chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import {
+  getMaxY,
+  getResponseTimeTickFormatter,
+} from '../../../shared/charts/transaction_charts/helper';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getTimeZone } from '../helper/timezone';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -50,7 +57,6 @@ interface Props {
 }
 
 const asPercentBound = (y: number | null) => asPercent(y, 1);
-const asDurationBound = (y: number | null) => asDuration(y);
 
 export function BreakdownChart({
   fetchStatus,
@@ -62,15 +68,12 @@ export function BreakdownChart({
 }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
-
+  const { core } = useApmPluginContext();
   const { chartRef, setPointerEvent } = useChartPointerEventContext();
-
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}');
-
   const theme = useTheme();
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const min = moment.utc(start).valueOf();
@@ -82,15 +85,22 @@ export function BreakdownChart({
 
   const isEmpty = isTimeseriesEmpty(timeseries);
 
+  const maxY = getMaxY(timeseries);
   const yTickFormat: TickFormatter =
-    yAxisType === 'duration' ? asDurationBound : asPercentBound;
+    yAxisType === 'duration'
+      ? getResponseTimeTickFormatter(getDurationFormatter(maxY))
+      : asPercentBound;
+
+  const timeZone = getTimeZone(core.uiSettings);
 
   return (
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
         <Settings
           tooltip={{ stickTo: 'top' }}
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) =>
+            onBrushEnd({ x: (event as XYBrushEvent).x, history })
+          }
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
@@ -141,6 +151,7 @@ export function BreakdownChart({
           timeseries.map((serie) => {
             return (
               <AreaSeries
+                timeZone={timeZone}
                 key={serie.title}
                 id={serie.title}
                 name={serie.title}

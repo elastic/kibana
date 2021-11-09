@@ -23,17 +23,17 @@ export const RollupBetaWarning = () => (
   <EuiCallOut title={rollupBetaWarningTitle} color="warning" iconType="help">
     <p>
       <FormattedMessage
-        id="indexPatternEditor.rollupIndexPattern.warning.textParagraphOne"
-        defaultMessage="Kibana's support for rollup index patterns is in beta. You might encounter
-issues using these patterns in saved searches, visualizations, and dashboards. They
+        id="indexPatternEditor.rollupDataView.warning.textParagraphOne"
+        defaultMessage="Kibana has beta support for data views based on rollups. You might encounter
+issues using these in saved searches, visualizations, and dashboards. They
 are not supported in some advanced features, such as Timelion, and Machine Learning."
       />
     </p>
     <p>
       <FormattedMessage
-        id="indexPatternEditor.rollupIndexPattern.warning.textParagraphTwo"
-        defaultMessage="You can match a rollup index pattern against one rollup index and zero or more
-regular indices. A rollup index pattern has limited metrics, fields, intervals, and
+        id="indexPatternEditor.rollupDataView.warning.textParagraphTwo"
+        defaultMessage="You can match a rollup data view against one rollup index and zero or more
+regular indices. A rollup data view has limited metrics, fields, intervals, and
 aggregations. A rollup index is limited to indices that have one job configuration,
 or multiple jobs with compatible configurations."
       />

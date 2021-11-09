@@ -81,6 +81,20 @@ describe(`VegaParser.parseAsync`, () => {
       })
     )
   );
+
+  test(`should return a specific error in case of $schema URL not valid`, async () => {
+    const vp = new VegaParser({
+      $schema: 'https://vega.github.io/schema/vega-lite/v4.jsonanythingtobreakthis',
+      mark: 'circle',
+      encoding: { row: { field: 'a' } },
+    });
+
+    await vp.parseAsync();
+
+    expect(vp.error).toBe(
+      'The URL for the JSON "$schema" is incorrect. Correct the URL, then click Update.'
+    );
+  });
 });
 
 describe(`VegaParser._setDefaultValue`, () => {

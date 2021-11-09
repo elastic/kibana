@@ -11,7 +11,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertInstanceSummary } from '../types';
+import { AlertSummary } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -24,11 +24,11 @@ beforeEach(() => {
 
 describe('getRuleAlertSummaryRoute', () => {
   const dateString = new Date().toISOString();
-  const mockedAlertInstanceSummary: AlertInstanceSummary = {
+  const mockedAlertSummary: AlertSummary = {
     id: '',
     name: '',
     tags: [],
-    alertTypeId: '',
+    ruleTypeId: '',
     consumer: '',
     muteAll: false,
     throttle: null,
@@ -37,7 +37,11 @@ describe('getRuleAlertSummaryRoute', () => {
     statusEndDate: dateString,
     status: 'OK',
     errorMessages: [],
-    instances: {},
+    alerts: {},
+    executionDuration: {
+      average: 1,
+      values: [3, 5, 5],
+    },
   };
 
   it('gets rule alert summary', async () => {
@@ -50,7 +54,7 @@ describe('getRuleAlertSummaryRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_alert_summary"`);
 
-    rulesClient.getAlertInstanceSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
+    rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertSummary);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -65,8 +69,8 @@ describe('getRuleAlertSummaryRoute', () => {
 
     await handler(context, req, res);
 
-    expect(rulesClient.getAlertInstanceSummary).toHaveBeenCalledTimes(1);
-    expect(rulesClient.getAlertInstanceSummary.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.getAlertSummary).toHaveBeenCalledTimes(1);
+    expect(rulesClient.getAlertSummary.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "dateStart": undefined,
@@ -86,7 +90,7 @@ describe('getRuleAlertSummaryRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.getAlertInstanceSummary = jest
+    rulesClient.getAlertSummary = jest
       .fn()
       .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 

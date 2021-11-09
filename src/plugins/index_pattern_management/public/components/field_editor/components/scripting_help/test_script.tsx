@@ -178,7 +178,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     this.props.indexPattern.fields
       .getAll()
       .filter((field) => {
-        const isMultiField = field.subType && field.subType.multi;
+        const isMultiField = field.isSubtypeMulti();
         return !field.name.startsWith('_') && !isMultiField && !field.scripted;
       })
       .forEach((field) => {

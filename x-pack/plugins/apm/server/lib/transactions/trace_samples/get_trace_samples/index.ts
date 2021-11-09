@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   SERVICE_NAME,
@@ -93,19 +93,14 @@ export async function getTraceSamples({
         },
       });
 
-      return response.hits.hits;
+      return response.hits.hits.map((hit) => ({
+        transactionId: hit._source.transaction.id,
+        traceId: hit._source.trace.id,
+      }));
     }
 
-    const samplesForDistributionHits = await getTraceSamplesHits();
-
-    const traceSamples = samplesForDistributionHits.map((hit) => ({
-      transactionId: hit._source.transaction.id,
-      traceId: hit._source.trace.id,
-    }));
-
     return {
-      noHits: samplesForDistributionHits.length === 0,
-      traceSamples,
+      traceSamples: await getTraceSamplesHits(),
     };
   });
 }

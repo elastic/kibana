@@ -91,6 +91,7 @@ export function runBuildApiDocsCli() {
           ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
           owner: plugin.manifest.owner,
           description: plugin.manifest.description,
+          isPlugin: plugin.isPlugin,
         };
         return acc;
       }, {} as { [key: string]: PluginMetaInfo });
@@ -108,30 +109,36 @@ export function runBuildApiDocsCli() {
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
         const pluginStats = allPluginStats[id];
+        const pluginTeam = plugin.manifest.owner.name;
 
         reporter.metrics([
           {
             id,
+            meta: { pluginTeam },
             group: 'API count',
             value: pluginStats.apiCount,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'API count missing comments',
             value: pluginStats.missingComments.length,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'API count with any type',
             value: pluginStats.isAnyType.length,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'Non-exported public API item count',
             value: missingApiItems[id] ? Object.keys(missingApiItems[id]).length : 0,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'References to deprecated APIs',
             value: pluginStats.deprecatedAPIsReferencedCount,
           },
@@ -256,6 +263,7 @@ function getTsProject(repoPath: string) {
   });
   project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
   project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths(`${repoPath}/packages/**/*{.d.ts,.ts}`);
   project.resolveSourceFileDependencies();
   return project;
 }

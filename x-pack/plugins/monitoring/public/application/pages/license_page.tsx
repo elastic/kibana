@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import { PageTemplate } from './page_template';
 import { License } from '../../components';
-import { GlobalStateContext } from '../global_state_context';
+import { GlobalStateContext } from '../contexts/global_state_context';
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';

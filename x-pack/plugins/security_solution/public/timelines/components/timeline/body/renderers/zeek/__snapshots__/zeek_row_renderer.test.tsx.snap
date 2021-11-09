@@ -127,6 +127,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                   "packetbeat",
                 ],
                 "name": "@timestamp",
+                "readFromDocValues": true,
                 "searchable": true,
                 "type": "date",
               },

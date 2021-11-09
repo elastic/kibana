@@ -57,7 +57,7 @@ async function removeAssetsFromVersion(
   if (total > 0) {
     appContextService
       .getLogger()
-      .info(`Package "${pkgName}-${oldVersion}" still being used by policies`);
+      .debug(`Package "${pkgName}-${oldVersion}" still being used by policies`);
     return;
   }
 

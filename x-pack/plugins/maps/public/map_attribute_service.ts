@@ -15,7 +15,16 @@ import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
-type MapDoc = MapSavedObjectAttributes & { references?: SavedObjectReference[] };
+export interface SharingSavedObjectProps {
+  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+  aliasTargetId?: string;
+  sourceId?: string;
+}
+
+type MapDoc = MapSavedObjectAttributes & {
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+  references?: SavedObjectReference[];
+};
 
 export type MapAttributeService = AttributeService<MapDoc, MapByValueInput, MapByReferenceInput>;
 
@@ -58,7 +67,11 @@ export function getMapAttributeService(): MapAttributeService {
       return { id: savedObject.id };
     },
     unwrapMethod: async (savedObjectId: string): Promise<MapDoc> => {
-      const savedObject = await getSavedObjectsClient().get<MapSavedObjectAttributes>(
+      const {
+        saved_object: savedObject,
+        outcome,
+        alias_target_id: aliasTargetId,
+      } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
       );
@@ -68,7 +81,15 @@ export function getMapAttributeService(): MapAttributeService {
       }
 
       const { attributes } = injectReferences(savedObject);
-      return { ...attributes, references: savedObject.references };
+      return {
+        ...attributes,
+        references: savedObject.references,
+        sharingSavedObjectProps: {
+          aliasTargetId,
+          outcome,
+          sourceId: savedObjectId,
+        },
+      };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       return checkForDuplicateTitle(

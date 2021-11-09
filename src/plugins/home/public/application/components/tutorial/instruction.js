@@ -10,18 +10,7 @@ import React, { Suspense, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
 
-import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiCopy,
-  EuiButton,
-  EuiLoadingSpinner,
-  EuiErrorBoundary,
-} from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 
 import { getServices } from '../../kibana_services';
 
@@ -39,16 +28,21 @@ export function Instruction({
 
   let pre;
   if (textPre) {
-    pre = <Content text={replaceTemplateStrings(textPre)} />;
+    pre = (
+      <>
+        <Content text={replaceTemplateStrings(textPre)} />
+        <EuiSpacer size="m" />
+      </>
+    );
   }
 
   let post;
   if (textPost) {
     post = (
-      <div>
+      <>
         <EuiSpacer size="m" />
         <Content text={replaceTemplateStrings(textPost)} />
-      </div>
+      </>
     );
   }
   const customComponent = tutorialService.getCustomComponent(customComponentName);
@@ -59,7 +53,6 @@ export function Instruction({
     }
   }, [customComponent]);
 
-  let copyButton;
   let commandBlock;
   if (commands) {
     const cmdText = commands
@@ -67,35 +60,16 @@ export function Instruction({
         return replaceTemplateStrings(cmd, paramValues);
       })
       .join('\n');
-    copyButton = (
-      <EuiCopy textToCopy={cmdText}>
-        {(copy) => (
-          <EuiButton size="s" onClick={copy}>
-            <FormattedMessage
-              id="home.tutorial.instruction.copyButtonLabel"
-              defaultMessage="Copy snippet"
-            />
-          </EuiButton>
-        )}
-      </EuiCopy>
-    );
     commandBlock = (
-      <div>
-        <EuiSpacer size="m" />
-        <EuiCodeBlock language="bash">{cmdText}</EuiCodeBlock>
-      </div>
+      <EuiCodeBlock isCopyable language="bash">
+        {cmdText}
+      </EuiCodeBlock>
     );
   }
 
   return (
     <div>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>{pre}</EuiFlexItem>
-
-        <EuiFlexItem className="homTutorial__instruction" grow={false}>
-          {copyButton}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {pre}
 
       {commandBlock}
 
@@ -114,8 +88,6 @@ export function Instruction({
       )}
 
       {post}
-
-      <EuiSpacer />
     </div>
   );
 }

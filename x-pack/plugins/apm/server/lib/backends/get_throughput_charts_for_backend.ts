@@ -13,8 +13,8 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { getBucketSize } from '../helpers/get_bucket_size';
 
 export async function getThroughputChartsForBackend({
   backendName,
@@ -41,6 +41,12 @@ export async function getThroughputChartsForBackend({
     offset,
   });
 
+  const { intervalString } = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
+    minBucketSize: 60,
+  });
+
   const response = await apmEventClient.search('get_throughput_for_backend', {
     apm: {
       events: [ProcessorEvent.metric],
@@ -59,11 +65,12 @@ export async function getThroughputChartsForBackend({
       },
       aggs: {
         timeseries: {
-          date_histogram: getMetricsDateHistogramParams({
-            start: startWithOffset,
-            end: endWithOffset,
-            metricsInterval: 60,
-          }),
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
+          },
           aggs: {
             throughput: {
               rate: {

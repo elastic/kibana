@@ -197,5 +197,38 @@ describe('DeprecationsClient', () => {
 
       expect(result).toEqual({ status: 'fail', reason: mockResponse });
     });
+
+    it('omit deprecationDetails in the request of the body', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
+        domainId: 'testPluginId-1',
+        message: 'some-message',
+        level: 'warning',
+        correctiveActions: {
+          api: {
+            path: 'some-path',
+            method: 'POST',
+            body: {
+              extra_param: 123,
+            },
+            omitContextFromBody: true,
+          },
+          manualSteps: ['manual-step'],
+        },
+      };
+      const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
+
+      expect(http.fetch).toBeCalledTimes(1);
+      expect(http.fetch).toBeCalledWith({
+        path: 'some-path',
+        method: 'POST',
+        asSystemRequest: true,
+        body: JSON.stringify({
+          extra_param: 123,
+        }),
+      });
+      expect(result).toEqual({ status: 'ok' });
+    });
   });
 });

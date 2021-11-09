@@ -17,6 +17,23 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
+
 describe('<RequestBodyField />', () => {
   const defaultMode = Mode.PLAINTEXT;
   const defaultValue = 'sample value';

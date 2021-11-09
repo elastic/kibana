@@ -11,13 +11,13 @@ import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
 import { WebApplicationSelect } from './Panels/WebApplicationSelect';
-import { DatePicker } from '../../shared/DatePicker';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useHasRumData } from './hooks/useHasRumData';
+import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.apm.ux.title', {
@@ -37,15 +37,15 @@ export function RumHome() {
             defaultMessage: 'Observability',
           }),
           actions: {
-            beats: {
+            elasticAgent: {
               title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
-                defaultMessage: 'Add RUM data',
+                defaultMessage: 'Add the APM integration',
               }),
               description: i18n.translate(
                 'xpack.apm.ux.overview.beatsCard.description',
                 {
                   defaultMessage:
-                    'Use the RUM (JS) agent to collect user experience data.',
+                    'Enable RUM with the APM agent to collect user experience data.',
                 }
               ),
               href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
@@ -88,7 +88,7 @@ function PageHeader() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
-          <DatePicker />
+          <RumDatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup wrap>

@@ -11,7 +11,7 @@ import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { isRangeFilter } from '@kbn/es-query';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   IEsSearchResponse,
@@ -406,8 +406,8 @@ export class AggConfigs {
                     .map(([filter, field]) => ({
                       range: {
                         [field]: {
-                          gte: moment(filter?.range[field].gte).subtract(shift).toISOString(),
-                          lte: moment(filter?.range[field].lte).subtract(shift).toISOString(),
+                          gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
+                          lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
                         },
                       },
                     })),

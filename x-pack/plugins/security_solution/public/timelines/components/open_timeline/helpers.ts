@@ -20,6 +20,7 @@ import {
   TimelineType,
   TimelineTabs,
   TimelineResult,
+  SingleTimelineResolveResponse,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
@@ -50,7 +51,12 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../timeline/body/constants';
 
-import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
+import {
+  OpenTimelineResult,
+  UpdateTimeline,
+  DispatchUpdateTimeline,
+  TimelineErrorCallback,
+} from './types';
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
@@ -60,7 +66,7 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-import { getTimeline } from '../../containers/api';
+import { resolveTimeline } from '../../containers/api';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import { NoteResult } from '../../../../common/types/timeline/note';
 
@@ -200,9 +206,11 @@ const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => 
   if (dataProvider.type === DataProviderType.template) {
     return deepMerge(dataProvider, {
       type: DataProviderType.default,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       enabled: dataProvider.queryMatch!.operator !== IS_OPERATOR,
       queryMatch: {
         value:
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
       },
     });
@@ -313,6 +321,7 @@ export interface QueryTimelineById<TCache> {
   graphEventId?: string;
   timelineId: string;
   timelineType?: TimelineType;
+  onError?: TimelineErrorCallback;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ({
@@ -331,17 +340,19 @@ export const queryTimelineById = <TCache>({
   graphEventId = '',
   timelineId,
   timelineType,
+  onError,
   onOpenTimeline,
   openTimeline = true,
   updateIsLoading,
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
-  Promise.resolve(getTimeline(timelineId))
+  Promise.resolve(resolveTimeline(timelineId))
     .then((result) => {
-      const timelineToOpen: TimelineResult = omitTypenameInTimeline(
-        getOr({}, 'data.getOneTimeline', result)
-      );
+      const data: SingleTimelineResolveResponse['data'] | null = getOr(null, 'data', result);
+      if (!data) return;
+
+      const timelineToOpen = omitTypenameInTimeline(data.timeline);
 
       const { timeline, notes } = formatTimelineResultToModel(
         timelineToOpen,
@@ -361,6 +372,10 @@ export const queryTimelineById = <TCache>({
           from,
           id: TimelineId.active,
           notes,
+          resolveTimelineConfig: {
+            outcome: data.outcome,
+            alias_target_id: data.alias_target_id,
+          },
           timeline: {
             ...timeline,
             activeTab: activeTimelineTab,
@@ -370,6 +385,11 @@ export const queryTimelineById = <TCache>({
           },
           to,
         })();
+      }
+    })
+    .catch((error) => {
+      if (onError != null) {
+        onError(error, timelineId);
       }
     })
     .finally(() => {
@@ -385,6 +405,7 @@ export const dispatchUpdateTimeline =
     forceNotes = false,
     from,
     notes,
+    resolveTimelineConfig,
     timeline,
     to,
     ruleNote,
@@ -392,8 +413,9 @@ export const dispatchUpdateTimeline =
   () => {
     if (!isEmpty(timeline.indexNames)) {
       dispatch(
-        sourcererActions.initTimelineIndexPatterns({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
+          selectedDataViewId: timeline.dataViewId,
           selectedPatterns: timeline.indexNames,
           eventType: timeline.eventType,
         })
@@ -415,7 +437,9 @@ export const dispatchUpdateTimeline =
     } else {
       dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
     }
-    dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
+    dispatch(
+      dispatchAddTimeline({ id, timeline, resolveTimelineConfig, savedTimeline: duplicate })
+    );
     if (
       timeline.kqlQuery != null &&
       timeline.kqlQuery.filterQuery != null &&

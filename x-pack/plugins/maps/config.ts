@@ -8,13 +8,11 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export interface MapsConfigType {
-  enabled: boolean;
   showMapsInspectorAdapter: boolean;
   preserveDrawingBuffer: boolean;
 }
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   // flag used in functional testing
   showMapsInspectorAdapter: schema.boolean({ defaultValue: false }),
   // flag used in functional testing

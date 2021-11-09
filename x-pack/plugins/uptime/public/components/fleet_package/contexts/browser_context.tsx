@@ -22,13 +22,27 @@ interface IBrowserSimpleFieldsContextProvider {
 
 export const initialValues: IBrowserSimpleFields = {
   ...commonDefaultValues,
+  [ConfigKeys.METADATA]: {
+    script_source: {
+      is_generated_script: false,
+      file_name: '',
+    },
+    is_zip_url_tls_enabled: false,
+  },
   [ConfigKeys.MONITOR_TYPE]: DataStream.BROWSER,
   [ConfigKeys.SOURCE_ZIP_URL]: '',
   [ConfigKeys.SOURCE_ZIP_USERNAME]: '',
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: '',
   [ConfigKeys.SOURCE_ZIP_FOLDER]: '',
+  [ConfigKeys.SOURCE_ZIP_PROXY_URL]: '',
   [ConfigKeys.SOURCE_INLINE]: '',
   [ConfigKeys.PARAMS]: '',
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_KEY]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_VERSION]: undefined,
 };
 
 const defaultContext: IBrowserSimpleFieldsContext = {

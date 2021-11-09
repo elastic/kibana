@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -21,7 +21,7 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 export function BackendInventoryDependenciesTable() {
   const {
     urlParams: { comparisonEnabled, comparisonType },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
@@ -45,7 +45,7 @@ export function BackendInventoryDependenciesTable() {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/top_backends',
+        endpoint: 'GET /internal/apm/backends/top_backends',
         params: {
           query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
@@ -64,11 +64,11 @@ export function BackendInventoryDependenciesTable() {
       }
       const link = (
         <BackendLink
-          backendName={location.backendName}
           type={location.spanType}
           subtype={location.spanSubtype}
           query={{
-            comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+            backendName: location.backendName,
+            comparisonEnabled,
             comparisonType,
             environment,
             kuery,

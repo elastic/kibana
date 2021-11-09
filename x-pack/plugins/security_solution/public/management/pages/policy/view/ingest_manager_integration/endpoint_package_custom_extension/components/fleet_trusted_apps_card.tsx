@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
@@ -14,7 +14,11 @@ import { GetExceptionSummaryResponse } from '../../../../../../../../common/endp
 import { useKibana, useToasts } from '../../../../../../../common/lib/kibana';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
-import { StyledEuiFlexGridGroup, StyledEuiFlexGridItem } from './styled_components';
+import {
+  StyledEuiFlexGridGroup,
+  StyledEuiFlexGridItem,
+  StyledEuiFlexItem,
+} from './styled_components';
 
 interface FleetTrustedAppsCardProps {
   customLink: React.ReactNode;
@@ -38,7 +42,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
         try {
           const response = await trustedAppsApi.getTrustedAppsSummary({
             kuery: policyId
-              ? `exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all"`
+              ? `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`
               : undefined,
           });
           if (isMounted) {
@@ -72,21 +76,49 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
       />
     );
 
+    const cardGrid = useMemo(() => {
+      if (cardSize === 'm') {
+        return (
+          <EuiFlexGroup
+            alignItems="baseline"
+            justifyContent="flexStart"
+            gutterSize="s"
+            direction="row"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h5>{getTitleMessage()}</h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ExceptionItemsSummary stats={stats} isSmall={true} />
+            </EuiFlexItem>
+            <StyledEuiFlexItem grow={1}>{customLink}</StyledEuiFlexItem>
+          </EuiFlexGroup>
+        );
+      } else {
+        return (
+          <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
+            <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
+              <EuiText>
+                <h4>{getTitleMessage()}</h4>
+              </EuiText>
+            </StyledEuiFlexGridItem>
+            <StyledEuiFlexGridItem gridarea="summary" alignitems={'center'}>
+              <ExceptionItemsSummary stats={stats} isSmall={false} />
+            </StyledEuiFlexGridItem>
+            <StyledEuiFlexGridItem gridarea="link" alignitems="flex-end">
+              {customLink}
+            </StyledEuiFlexGridItem>
+          </StyledEuiFlexGridGroup>
+        );
+      }
+    }, [cardSize, customLink, stats]);
+
     return (
       <EuiPanel hasShadow={false} paddingSize="l" hasBorder data-test-subj="fleetTrustedAppsCard">
-        <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center" cardSize={cardSize}>
-          <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
-            <EuiText>
-              {cardSize === 'l' ? <h4>{getTitleMessage()}</h4> : <h5>{getTitleMessage()}</h5>}
-            </EuiText>
-          </StyledEuiFlexGridItem>
-          <StyledEuiFlexGridItem gridarea="summary">
-            <ExceptionItemsSummary stats={stats} isSmall={cardSize === 'm'} />
-          </StyledEuiFlexGridItem>
-          <StyledEuiFlexGridItem gridarea="link" alignitems="flex-end">
-            {customLink}
-          </StyledEuiFlexGridItem>
-        </StyledEuiFlexGridGroup>
+        {cardGrid}
       </EuiPanel>
     );
   }

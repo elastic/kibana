@@ -44,17 +44,17 @@ import { EcsUser } from './user';
 import { EcsUserAgent } from './user_agent';
 import { EcsVulnerability } from './vulnerability';
 
-export { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from './event';
+export type { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from './event';
 
 interface EcsField {
   /**
-   * These typings were written as of ECS 1.12.0.
+   * These typings were written as of ECS 8.0.0.
    * Don't change this value without checking the rest
    * of the types to conform to that ECS version.
    *
-   * https://www.elastic.co/guide/en/ecs/1.12/index.html
+   * https://www.elastic.co/guide/en/ecs/master/index.html
    */
-  version: '1.12.0';
+  version: '8.0.0';
 }
 
 /**

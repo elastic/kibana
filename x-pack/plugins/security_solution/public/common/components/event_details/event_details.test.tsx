@@ -11,7 +11,7 @@ import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
-import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId, rawEventData, TestProviders } from '../../mock';
 
 import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -23,6 +23,16 @@ import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enric
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/cti/event_enrichment');
+
+jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
+  return {
+    useRuleWithFallback: jest.fn().mockReturnValue({
+      rule: {
+        note: 'investigation guide',
+      },
+    }),
+  };
+});
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -37,6 +47,8 @@ describe('EventDetails', () => {
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
     eventView: EventsViewType.summaryView,
+    hostRisk: { fields: [], loading: true },
+    rawEventData,
   };
 
   const alertsProps = {
@@ -112,6 +124,12 @@ describe('EventDetails', () => {
       expect(
         alertsWrapper.find('[data-test-subj="enrichment-count-notification"]').hostNodes().text()
       ).toEqual('1');
+    });
+  });
+
+  describe('summary view tab', () => {
+    it('render investigation guide', () => {
+      expect(alertsWrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
     });
   });
 

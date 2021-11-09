@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { Logger } from 'src/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -24,6 +25,7 @@ import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_r
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
+  logger: Logger,
   isRuleRegistryEnabled: boolean
 ) => {
   router.get(
@@ -66,13 +68,12 @@ export const readRulesRoute = (
           const legacyRuleActions = await legacyGetRuleActionsSavedObject({
             savedObjectsClient,
             ruleAlertId: rule.id,
+            logger,
           });
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
+          const currentStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
-          const [currentStatus] = ruleStatuses;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
             currentStatus.attributes.lastFailureAt =

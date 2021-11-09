@@ -8,18 +8,41 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import { isEqual, pickBy } from 'lodash';
 import { allSeriesKey, convertAllShortSeries, useSeriesStorage } from '../hooks/use_series_storage';
 
-export function ViewActions() {
+interface Props {
+  onApply?: () => void;
+}
+
+export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {
+  return pickBy(obj, (value) => value !== undefined);
+}
+
+export function ViewActions({ onApply }: Props) {
   const { allSeries, storage, applyChanges } = useSeriesStorage();
 
-  const noChanges = isEqual(allSeries, convertAllShortSeries(storage.get(allSeriesKey) ?? []));
+  const urlAllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+
+  let noChanges = allSeries.length === urlAllSeries.length;
+
+  if (noChanges) {
+    noChanges = !allSeries.some(
+      (series, index) =>
+        !isEqual(removeUndefinedProps(series), removeUndefinedProps(urlAllSeries[index]))
+    );
+  }
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton onClick={() => applyChanges()} isDisabled={noChanges} fill size="s">
+        <EuiButton
+          onClick={() => applyChanges(onApply)}
+          isDisabled={noChanges}
+          fill
+          size="s"
+          data-test-subj={'seriesChangesApplyButton'}
+        >
           {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {
             defaultMessage: 'Apply changes',
           })}

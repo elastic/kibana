@@ -21,6 +21,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await ml.securityUI.logout();
+
         await ml.securityCommon.cleanMlUsers();
         await ml.securityCommon.cleanMlRoles();
         await ml.testResources.deleteSavedSearches();
@@ -42,7 +45,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/ml/egs_regression');
         await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
         await ml.testResources.resetKibanaTimeZone();
-        await ml.securityUI.logout();
       });
 
       loadTestFile(require.resolve('./permissions'));
@@ -50,6 +52,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./anomaly_detection'));
       loadTestFile(require.resolve('./data_visualizer'));
       loadTestFile(require.resolve('./data_frame_analytics'));
+      loadTestFile(require.resolve('./model_management'));
     });
 
     describe('', function () {
@@ -61,6 +64,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await ml.securityUI.logout();
+
         await ml.securityCommon.cleanMlUsers();
         await ml.securityCommon.cleanMlRoles();
         await ml.testResources.deleteSavedSearches();
@@ -82,7 +88,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/ml/egs_regression');
         await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
         await ml.testResources.resetKibanaTimeZone();
-        await ml.securityUI.logout();
       });
 
       loadTestFile(require.resolve('./feature_controls'));

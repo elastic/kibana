@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import { getDataPath } from '@kbn/utils';
 import del from 'del';
+import apm from 'elastic-apm-node';
 import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
@@ -23,29 +23,16 @@ import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { Metrics, getMetrics } from './metrics';
-
-// Puppeteer type definitions do not match the documentation.
-// See https://pptr.dev/#?product=Puppeteer&version=v8.0.0&show=api-puppeteerlaunchoptions
-interface ReportingLaunchOptions extends puppeteer.LaunchOptions {
-  userDataDir?: string;
-  ignoreHTTPSErrors?: boolean;
-  args?: string[];
-}
-
-declare module 'puppeteer' {
-  function launch(options: ReportingLaunchOptions): Promise<puppeteer.Browser>;
-}
+import { getMetrics, Metrics } from './metrics';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
-type ViewportConfig = CaptureConfig['viewport'];
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: string;
   private captureConfig: CaptureConfig;
   private browserConfig: BrowserConfig;
   private userDataDir: string;
-  private getChromiumArgs: (viewport: ViewportConfig) => string[];
+  private getChromiumArgs: () => string[];
   private core: ReportingCore;
 
   constructor(core: ReportingCore, binaryPath: string, logger: LevelLogger) {
@@ -60,10 +47,9 @@ export class HeadlessChromiumDriverFactory {
     }
 
     this.userDataDir = fs.mkdtempSync(path.join(getDataPath(), 'chromium-'));
-    this.getChromiumArgs = (viewport: ViewportConfig) =>
+    this.getChromiumArgs = () =>
       args({
         userDataDir: this.userDataDir,
-        viewport,
         disableSandbox: this.browserConfig.disableSandbox,
         proxy: this.browserConfig.proxy,
       });
@@ -75,7 +61,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone?: string },
+    { browserTimezone }: { browserTimezone?: string },
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     // FIXME: 'create' is deprecated
@@ -83,7 +69,7 @@ export class HeadlessChromiumDriverFactory {
       const logger = pLogger.clone(['browser-driver']);
       logger.info(`Creating browser page driver`);
 
-      const chromiumArgs = this.getChromiumArgs(viewport);
+      const chromiumArgs = this.getChromiumArgs();
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
       let browser: puppeteer.Browser;
@@ -220,6 +206,17 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
+    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
+      map((err) => {
+        logger.warning(
+          i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
+            defaultMessage: `Reporting encountered an uncaught error on the page that will be ignored: {err}`,
+            values: { err: err.toString() },
+          })
+        );
+      })
+    );
+
     const pageRequestFailed$ = Rx.fromEvent<puppeteer.HTTPRequest>(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
@@ -231,7 +228,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    return Rx.merge(consoleMessages$, pageRequestFailed$);
+    return Rx.merge(consoleMessages$, uncaughtExceptionPageError$, pageRequestFailed$);
   }
 
   getProcessLogger(browser: puppeteer.Browser, logger: LevelLogger): Rx.Observable<void> {
@@ -266,21 +263,10 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
-      mergeMap((err) => {
-        return Rx.throwError(
-          i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
-            defaultMessage: `Reporting encountered an error on the page: {err}`,
-            values: { err: err.toString() },
-          })
-        );
-      })
-    );
-
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
       mergeMap(() => Rx.throwError(getChromiumDisconnectedError()))
     );
 
-    return Rx.merge(pageError$, uncaughtExceptionPageError$, browserDisconnect$);
+    return Rx.merge(pageError$, browserDisconnect$);
   }
 }

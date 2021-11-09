@@ -26,13 +26,13 @@ describe(`enumeratePatterns`, () => {
       )
     ).toBe(true);
   });
-  it(`should resolve src/plugins/charts/public/static/color_maps/color_maps.ts to kibana-app`, () => {
+  it(`should resolve src/plugins/charts/common/static/color_maps/color_maps.ts to kibana-app`, () => {
     const actual = enumeratePatterns(REPO_ROOT)(log)(
-      new Map([['src/plugins/charts/public/static/color_maps', ['kibana-app']]])
+      new Map([['src/plugins/charts/common/static/color_maps', ['kibana-app']]])
     );
 
     expect(actual[0][0]).toBe(
-      'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app'
+      'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app'
     );
   });
   it(`should resolve x-pack/plugins/security_solution/public/common/components/exceptions/edit_exception_modal/translations.ts to kibana-security`, () => {
