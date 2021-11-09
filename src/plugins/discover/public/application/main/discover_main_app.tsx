@@ -7,6 +7,7 @@
  */
 import React, { useCallback, useEffect } from 'react';
 import { History } from 'history';
+import { EuiErrorBoundary } from '@elastic/eui/src/components/error_boundary';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
@@ -96,21 +97,23 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   }, [resetSavedSearch, savedSearch]);
 
   return (
-    <DiscoverLayoutMemoized
-      indexPattern={indexPattern}
-      indexPatternList={indexPatternList}
-      inspectorAdapters={inspectorAdapters}
-      onChangeIndexPattern={onChangeIndexPattern}
-      onUpdateQuery={onUpdateQuery}
-      resetSavedSearch={resetCurrentSavedSearch}
-      navigateTo={navigateTo}
-      savedSearch={savedSearch}
-      savedSearchData$={data$}
-      savedSearchRefetch$={refetch$}
-      searchSource={searchSource}
-      services={services}
-      state={state}
-      stateContainer={stateContainer}
-    />
+    <EuiErrorBoundary>
+      <DiscoverLayoutMemoized
+        indexPattern={indexPattern}
+        indexPatternList={indexPatternList}
+        inspectorAdapters={inspectorAdapters}
+        onChangeIndexPattern={onChangeIndexPattern}
+        onUpdateQuery={onUpdateQuery}
+        resetSavedSearch={resetCurrentSavedSearch}
+        navigateTo={navigateTo}
+        savedSearch={savedSearch}
+        savedSearchData$={data$}
+        savedSearchRefetch$={refetch$}
+        searchSource={searchSource}
+        services={services}
+        state={state}
+        stateContainer={stateContainer}
+      />
+    </EuiErrorBoundary>
   );
 }
