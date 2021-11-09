@@ -89,7 +89,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
     };
 
     const getEntryOperator = (type: string, operator: string) => {
-      if (type === 'nested') return;
+      if (type === 'nested') return '';
       return operator === 'included'
         ? OPERATOR_TYPE_LABELS_INCLUDED[type as keyof typeof OPERATOR_TYPE_LABELS_INCLUDED] ?? type
         : OPERATOR_TYPE_LABELS_EXCLUDED[type as keyof typeof OPERATOR_TYPE_LABELS_EXCLUDED] ?? type;

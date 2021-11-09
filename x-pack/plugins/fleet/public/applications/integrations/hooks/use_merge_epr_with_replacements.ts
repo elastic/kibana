@@ -8,6 +8,7 @@
 import type { PackageListItem } from '../../../../common/types/models';
 import type { CustomIntegration } from '../../../../../../../src/plugins/custom_integrations/common';
 import { filterCustomIntegrations } from '../../../../../../../src/plugins/custom_integrations/public';
+import { FLEET_APM_PACKAGE } from '../../../../common/constants';
 
 // Export this as a utility to find replacements for a package (e.g. in the overview-page for an EPR package)
 function findReplacementsForEprPackage(
@@ -22,11 +23,16 @@ function findReplacementsForEprPackage(
 }
 
 export function useMergeEprPackagesWithReplacements(
-  eprPackages: PackageListItem[],
+  rawEprPackages: PackageListItem[],
   replacements: CustomIntegration[]
 ): Array<PackageListItem | CustomIntegration> {
   const merged: Array<PackageListItem | CustomIntegration> = [];
   const filteredReplacements = replacements;
+
+  // APM EPR-packages should _never_ show. They have special handling.
+  const eprPackages = rawEprPackages.filter((p) => {
+    return p.name !== FLEET_APM_PACKAGE;
+  });
 
   // Either select replacement or select beat
   eprPackages.forEach((eprPackage: PackageListItem) => {
