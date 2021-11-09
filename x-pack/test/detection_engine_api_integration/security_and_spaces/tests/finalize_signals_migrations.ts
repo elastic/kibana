@@ -46,6 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const kbnClient = getService('kibanaServer');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
@@ -61,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
 
       ({
         body: { indices: createdMigrations },
@@ -88,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('replaces the original index alias with the migrated one', async () => {
@@ -103,31 +104,39 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indicesBefore).to.contain(createdMigration.index);
       expect(indicesBefore).not.to.contain(createdMigration.migration_index);
 
-      await waitFor(async () => {
-        const {
-          body: {
-            migrations: [{ completed }],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200);
+      await waitFor(
+        async () => {
+          const {
+            body: {
+              migrations: [{ completed }],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200);
 
-        return completed === true;
-      }, `polling finalize_migration until complete`);
+          return completed === true;
+        },
+        `polling finalize_migration until complete`,
+        log
+      );
 
       let statusAfter: StatusResponse[] = [];
-      await waitFor(async () => {
-        ({
-          body: { indices: statusAfter },
-        } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-          .query({ from: '2020-10-10' })
-          .set('kbn-xsrf', 'true')
-          .expect(200));
-        return statusAfter.some((s) => !s.is_outdated);
-      }, `polling finalize_migration until complete`);
+      await waitFor(
+        async () => {
+          ({
+            body: { indices: statusAfter },
+          } = await supertest
+            .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+            .query({ from: '2020-10-10' })
+            .set('kbn-xsrf', 'true')
+            .expect(200));
+          return statusAfter.some((s) => !s.is_outdated);
+        },
+        `polling finalize_migration until complete`,
+        log
+      );
 
       const indicesAfter = statusAfter.map((s) => s.index);
 
@@ -145,17 +154,21 @@ export default ({ getService }: FtrProviderContext): void => {
       createdMigrations = [...createdMigrations, ...body.indices];
 
       let finalizeResponse: FinalizeResponse[];
-      await waitFor(async () => {
-        ({
-          body: { migrations: finalizeResponse },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
-          .expect(200));
+      await waitFor(
+        async () => {
+          ({
+            body: { migrations: finalizeResponse },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
+            .expect(200));
 
-        return finalizeResponse.every((index) => index.completed);
-      }, `polling finalize_migration until all complete`);
+          return finalizeResponse.every((index) => index.completed);
+        },
+        `polling finalize_migration until all complete`,
+        log
+      );
 
       const { body: bodyAfter } = await supertest
         .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
@@ -171,19 +184,23 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it.skip('deletes the underlying migration task', async () => {
-      await waitFor(async () => {
-        const {
-          body: {
-            migrations: [{ completed }],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200);
+      await waitFor(
+        async () => {
+          const {
+            body: {
+              migrations: [{ completed }],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200);
 
-        return completed;
-      }, `polling finalize_migration until complete`);
+          return completed;
+        },
+        `polling finalize_migration until complete`,
+        log
+      );
 
       // const [{ taskId }] = await getMigration({ id: migration.migration_id });
       // expect(taskId.length).greaterThan(0);
@@ -192,19 +209,23 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('subsequent attempts at finalization are idempotent', async () => {
-      await waitFor(async () => {
-        const {
-          body: {
-            migrations: [{ completed }],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200);
+      await waitFor(
+        async () => {
+          const {
+            body: {
+              migrations: [{ completed }],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200);
 
-        return completed;
-      }, `polling finalize_migration until complete`);
+          return completed;
+        },
+        `polling finalize_migration until complete`,
+        log
+      );
 
       const { body } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)

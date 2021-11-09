@@ -11,14 +11,14 @@ import {
   EsQueryConfig,
   Filter,
   fromKueryExpression,
-  IndexPatternBase,
+  DataViewBase,
   Query,
   toElasticsearchQuery,
 } from '@kbn/es-query';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern?: IndexPatternBase
+  indexPattern?: DataViewBase
 ) => {
   try {
     return kueryExpression
@@ -29,10 +29,7 @@ export const convertKueryToElasticSearchQuery = (
   }
 };
 
-export const convertKueryToDslFilter = (
-  kueryExpression: string,
-  indexPattern: IndexPatternBase
-) => {
+export const convertKueryToDslFilter = (kueryExpression: string, indexPattern: DataViewBase) => {
   try {
     return kueryExpression
       ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
@@ -74,7 +71,7 @@ export const convertToBuildEsQuery = ({
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: IndexPatternBase;
+  indexPattern: DataViewBase;
   queries: Query[];
   filters: Filter[];
 }) => {

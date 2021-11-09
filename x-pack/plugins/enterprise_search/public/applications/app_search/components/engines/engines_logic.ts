@@ -119,7 +119,7 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
       const { enginesMeta } = values;
 
       try {
-        const response = await http.get('/internal/app_search/engines', {
+        const response = await http.get<EnginesAPIResponse>('/internal/app_search/engines', {
           query: {
             type: 'indexed',
             'page[current]': enginesMeta.page.current,
@@ -136,7 +136,7 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
       const { metaEnginesMeta } = values;
 
       try {
-        const response = await http.get('/internal/app_search/engines', {
+        const response = await http.get<EnginesAPIResponse>('/internal/app_search/engines', {
           query: {
             type: 'meta',
             'page[current]': metaEnginesMeta.page.current,
