@@ -52,7 +52,6 @@ test('icon exists', () => {
 
 interface CompatibilityParams {
   isEdit?: boolean;
-  isValueClickTriggerSupported?: boolean;
   isEmbeddableEnhanced?: boolean;
   rootType?: string;
   actionFactoriesTriggers?: string[];
@@ -64,7 +63,6 @@ describe('isCompatible', () => {
   async function assertCompatibility(
     {
       isEdit = true,
-      isValueClickTriggerSupported = true,
       isEmbeddableEnhanced = true,
       rootType = 'dashboard',
       actionFactoriesTriggers = ['VALUE_CLICK_TRIGGER'],
@@ -80,7 +78,7 @@ describe('isCompatible', () => {
     let embeddable = new MockEmbeddable(
       { id: '', viewMode: isEdit ? ViewMode.EDIT : ViewMode.VIEW },
       {
-        supportedTriggers: isValueClickTriggerSupported ? ['VALUE_CLICK_TRIGGER'] : [],
+        supportedTriggers: ['VALUE_CLICK_TRIGGER'],
       }
     );
 
@@ -110,12 +108,6 @@ describe('isCompatible', () => {
     });
   });
 
-  test("not compatible if 'VALUE_CLICK_TRIGGER' is not supported", async () => {
-    await assertNonCompatibility({
-      isValueClickTriggerSupported: false,
-    });
-  });
-
   test('not compatible if in view mode', async () => {
     await assertNonCompatibility({
       isEdit: false,
@@ -125,15 +117,6 @@ describe('isCompatible', () => {
   test('not compatible if root embeddable is not "dashboard"', async () => {
     await assertNonCompatibility({
       rootType: 'visualization',
-    });
-  });
-
-  test('not compatible if no triggers intersect', async () => {
-    await assertNonCompatibility({
-      actionFactoriesTriggers: [],
-    });
-    await assertNonCompatibility({
-      actionFactoriesTriggers: ['SELECT_RANGE_TRIGGER'],
     });
   });
 });
