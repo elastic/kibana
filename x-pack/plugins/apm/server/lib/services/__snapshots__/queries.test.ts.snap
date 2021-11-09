@@ -98,6 +98,9 @@ Object {
       },
     },
     "size": 1,
+    "sort": Object {
+      "_score": "desc",
+    },
   },
   "terminate_after": 1,
 }
