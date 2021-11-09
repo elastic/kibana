@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { fireEvent, render, RenderResult } from '@testing-library/react';
-import React from 'react';
+import {
+  fireEvent,
+  render,
+  RenderResult,
+  screen,
+} from '@testing-library/react';
+import React, { ReactNode } from 'react';
 import { act } from 'react-dom/test-utils';
 import { getCallApmApiSpy } from '../../../../../services/rest/callApmApiSpy';
 import { CustomLinkOverview } from '.';
 import { License } from '../../../../../../../licensing/common/license';
-import { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
-import {
-  mockApmPluginContextValue,
-  MockApmPluginContextWrapper,
-} from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../../../context/license/license_context';
 import * as hooks from '../../../../../hooks/use_fetcher';
 import {
@@ -23,6 +23,7 @@ import {
   expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './create_edit_custom_link_flyout/saveCustomLink';
+import { MockApmAppContextProvider } from '../../../../../context/mock_apm_app/mock_apm_app_context';
 
 const data = {
   customLinks: [
@@ -31,14 +32,28 @@ const data = {
   ],
 };
 
-function getMockAPMContext({ canSave }: { canSave: boolean }) {
-  return {
-    ...mockApmPluginContextValue,
-    core: {
-      ...mockApmPluginContextValue.core,
-      application: { capabilities: { apm: { save: canSave }, ml: {} } },
-    },
-  } as unknown as ApmPluginContextValue;
+function getWrapper({
+  canSave,
+  license,
+}: {
+  canSave: boolean;
+  license: License;
+}) {
+  return ({ children }: { children?: ReactNode }) => {
+    return (
+      <MockApmAppContextProvider
+        value={{
+          coreStart: {
+            application: { capabilities: { apm: { save: canSave }, ml: {} } },
+          },
+        }}
+      >
+        <LicenseContext.Provider value={license}>
+          {children}
+        </LicenseContext.Provider>
+      </MockApmAppContextProvider>
+    );
+  };
 }
 
 describe('CustomLink', () => {
@@ -71,13 +86,9 @@ describe('CustomLink', () => {
       jest.clearAllMocks();
     });
     it('shows when no link is available', () => {
-      const component = render(
-        <MockApmPluginContextWrapper>
-          <LicenseContext.Provider value={goldLicense}>
-            <CustomLinkOverview />
-          </LicenseContext.Provider>
-        </MockApmPluginContextWrapper>
-      );
+      const component = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license: goldLicense }),
+      });
       expectTextsInDocument(component, ['No links found.']);
     });
   });
@@ -95,42 +106,30 @@ describe('CustomLink', () => {
       jest.clearAllMocks();
     });
 
-    it('enables create button when user has writte privileges', () => {
-      const mockContext = getMockAPMContext({ canSave: true });
+    it('enables create button when user has write privileges', () => {
+      render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license: goldLicense }),
+      });
 
-      const { getByTestId } = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
-      const createButton = getByTestId('createButton') as HTMLButtonElement;
+      const createButton = screen.getByTestId(
+        'createButton'
+      ) as HTMLButtonElement;
+
       expect(createButton.disabled).toBeFalsy();
     });
 
     it('enables edit button on custom link table when user has writte privileges', () => {
-      const mockContext = getMockAPMContext({ canSave: true });
-
-      const { getAllByText } = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const { getAllByText } = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license: goldLicense }),
+      });
 
       expect(getAllByText('Edit').length).toEqual(2);
     });
 
     it('shows a table with all custom link', () => {
-      const component = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license: goldLicense }),
+      });
       expectTextsInDocument(component, [
         'label 1',
         'url 1',
@@ -140,15 +139,9 @@ describe('CustomLink', () => {
     });
 
     it('checks if create custom link button is available and working', () => {
-      const mockContext = getMockAPMContext({ canSave: true });
-
-      const { queryByText, getByText } = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const { queryByText, getByText } = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license: goldLicense }),
+      });
       expect(queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
         fireEvent.click(getByText('Create custom link'));
@@ -157,7 +150,7 @@ describe('CustomLink', () => {
     });
   });
 
-  describe('Flyout', () => {
+  describe('flyout', () => {
     const refetch = jest.fn();
     let saveCustomLinkSpy: jest.SpyInstance;
 
@@ -171,14 +164,9 @@ describe('CustomLink', () => {
     });
 
     const openFlyout = () => {
-      const mockContext = getMockAPMContext({ canSave: true });
-      const component = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license: goldLicense }),
+      });
       expect(component.queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
         fireEvent.click(component.getByText('Create custom link'));
@@ -207,7 +195,7 @@ describe('CustomLink', () => {
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
     });
 
-    describe('Filters', () => {
+    describe('filters', () => {
       const addFilterField = (component: RenderResult, amount: number) => {
         for (let i = 1; i <= amount; i++) {
           fireEvent.click(component.getByText('Add another filter'));
@@ -298,13 +286,9 @@ describe('CustomLink', () => {
           uid: '1',
         },
       });
-      const component = render(
-        <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license }),
+      });
       expectTextsInDocument(component, ['Start free 30-day trial']);
     });
     it('shows license prompt when user has an invalid gold license', () => {
@@ -318,13 +302,9 @@ describe('CustomLink', () => {
           uid: '1',
         },
       });
-      const component = render(
-        <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license }),
+      });
       expectTextsInDocument(component, ['Start free 30-day trial']);
     });
     it('shows license prompt when user has an invalid trial license', () => {
@@ -338,13 +318,9 @@ describe('CustomLink', () => {
           uid: '1',
         },
       });
-      const component = render(
-        <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license }),
+      });
       expectTextsInDocument(component, ['Start free 30-day trial']);
     });
     it('doesnt show license prompt when user has a trial license', () => {
@@ -358,42 +334,27 @@ describe('CustomLink', () => {
           uid: '1',
         },
       });
-      const component = render(
-        <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: true, license }),
+      });
       expectTextsNotInDocument(component, ['Start free 30-day trial']);
     });
   });
 
   describe('with read-only user', () => {
     it('disables create custom link button', () => {
-      const mockContext = getMockAPMContext({ canSave: false });
+      const { getByTestId } = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: false, license: goldLicense }),
+      });
 
-      const { getByTestId } = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
       const createButton = getByTestId('createButton') as HTMLButtonElement;
       expect(createButton.disabled).toBeTruthy();
     });
 
     it('removes edit button on custom link table', () => {
-      const mockContext = getMockAPMContext({ canSave: false });
-
-      const { queryAllByText } = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const { queryAllByText } = render(<CustomLinkOverview />, {
+        wrapper: getWrapper({ canSave: false, license: goldLicense }),
+      });
 
       expect(queryAllByText('Edit').length).toEqual(0);
     });

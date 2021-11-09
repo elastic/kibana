@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ApmIndices } from '.';
 import * as hooks from '../../../../hooks/use_fetcher';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 
 describe('ApmIndices', () => {
   it('should not get stuck in infinite loop', () => {
@@ -18,13 +18,14 @@ describe('ApmIndices', () => {
       status: hooks.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
-    const { getByText } = render(
-      <MockApmPluginContextWrapper>
-        <ApmIndices />
-      </MockApmPluginContextWrapper>
+
+    render(
+      <ApmIndices />,
+
+      { wrapper: MockApmAppContextProvider }
     );
 
-    expect(getByText('Indices')).toMatchInlineSnapshot(`
+    expect(screen.getByText('Indices')).toMatchInlineSnapshot(`
       <h2
         class="euiTitle euiTitle--small"
       >

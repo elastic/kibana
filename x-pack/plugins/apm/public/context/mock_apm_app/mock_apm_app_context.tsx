@@ -8,7 +8,7 @@
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge } from 'lodash';
-import React, { createContext, ReactNode } from 'react';
+import React, { createContext, ReactNode, useMemo } from 'react';
 import type { CoreStart } from '../../../../../../src/core/public';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
@@ -16,6 +16,15 @@ import type { ConfigSchema } from '../..';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+import type { RecursivePartial } from '../../../typings/common';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue,
+} from '../apm_plugin/apm_plugin_context';
+import { MlLocatorDefinition } from '../../../../ml/public';
+import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
+import { createCallApmApi } from '../../services/rest/createCallApmApi';
 
 // Kibana context
 
@@ -61,6 +70,46 @@ const mockCoreStart = merge(
 
 const KibanaContext = createKibanaReactContext(mockCoreStart);
 
+// APM Plugin context
+
+const urlService = new UrlService({
+  navigate: async () => {},
+  getUrl: async ({ app, path }, { absolute }) => {
+    return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
+  },
+  shortUrls: () => ({ get: () => {} } as any),
+});
+const locator = urlService.locators.create(new MlLocatorDefinition());
+
+const mockPluginsStart = {
+  embeddable: {},
+  inspector: {},
+  maps: {},
+  observability: {},
+  data: {},
+};
+
+const mockPluginsSetup = {
+  ml: {
+    locator,
+  },
+  data: {
+    query: {
+      timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+    },
+  },
+  observability: {
+    isAlertingExperienceEnabled: () => false,
+    navigation: { PageTemplate: () => null },
+    observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+  },
+};
+
+const mockApmPluginContextValue = {
+  pluginsSetup: mockPluginsSetup,
+  pluginsStart: mockPluginsStart,
+} as unknown as ApmPluginContextValue;
+
 // Mock APM app context
 
 export interface MockApmAppContextValue {
@@ -68,6 +117,11 @@ export interface MockApmAppContextValue {
   coreStart: CoreStart;
   pluginsSetup: ApmPluginSetupDeps;
   pluginsStart: ApmPluginStartDeps;
+
+  /**
+   * The router path as a string
+   */
+  path?: string;
 }
 
 export const mockApmAppContextValue = {
@@ -91,19 +145,26 @@ export function MockApmAppContextProvider({
   children,
   value = {},
 }: {
-  children: ReactNode;
-  value?: Partial<MockApmAppContextValue>;
+  children?: ReactNode;
+  value?: RecursivePartial<MockApmAppContextValue>;
 }) {
-  const history = createMemoryHistory({
-    initialEntries: ['/services/?rangeFrom=now-15m&rangeTo=now'],
-  });
+  const { path } = value;
+  const history = useMemo(() => {
+    return createMemoryHistory({
+      initialEntries: [path ?? '/services/?rangeFrom=now-15m&rangeTo=now'],
+    });
+  }, [path]);
   const coreStart = merge({}, mockCoreStart, value.coreStart);
 
+  createCallApmApi(coreStart);
+
   return (
-    <KibanaContext.Provider {...coreStart}>
-      <RouterProvider router={apmRouter as any} history={history}>
-        {children}
-      </RouterProvider>
+    <KibanaContext.Provider services={{ ...coreStart }}>
+      <ApmPluginContext.Provider value={mockApmPluginContextValue}>
+        <RouterProvider router={apmRouter as any} history={history}>
+          {children}
+        </RouterProvider>
+      </ApmPluginContext.Provider>
     </KibanaContext.Provider>
   );
 }

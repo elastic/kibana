@@ -7,15 +7,12 @@
 
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import type { CoreStart } from '../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
-import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   APMServiceContext,
   APMServiceContextValue,
 } from '../../../context/apm_service/apm_service_context';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { ServiceOverview } from './';
 
 const stories: Meta<{}> = {
@@ -47,24 +44,18 @@ const stories: Meta<{}> = {
         alerts: [],
         serviceName,
       } as unknown as APMServiceContextValue;
-      const KibanaReactContext = createKibanaReactContext(mockCore);
 
       return (
-        <MemoryRouter
-          initialEntries={[
-            `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now`,
-          ]}
+        <MockApmAppContextProvider
+          value={{
+            coreStart: mockCore,
+            path: `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now`,
+          }}
         >
-          <KibanaReactContext.Provider>
-            <MockApmPluginContextWrapper
-              value={{ core: mockCore } as ApmPluginContextValue}
-            >
-              <APMServiceContext.Provider value={serviceContextValue}>
-                <StoryComponent />
-              </APMServiceContext.Provider>
-            </MockApmPluginContextWrapper>
-          </KibanaReactContext.Provider>
-        </MemoryRouter>
+          <APMServiceContext.Provider value={serviceContextValue}>
+            <StoryComponent />
+          </APMServiceContext.Provider>
+        </MockApmAppContextProvider>
       );
     },
   ],

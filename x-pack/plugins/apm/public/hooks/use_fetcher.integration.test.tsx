@@ -9,9 +9,9 @@ import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { delay } from '../utils/testHelpers';
 import { useFetcher } from './use_fetcher';
-import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../context/mock_apm_app/mock_apm_app_context';
 
-const wrapper = MockApmPluginContextWrapper;
+const wrapper = MockApmAppContextProvider;
 
 async function asyncFn(name: string, ms: number) {
   await delay(ms);

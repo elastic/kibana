@@ -6,48 +6,37 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
-import { merge } from 'lodash';
-// import { renderWithTheme } from '../../../../utils/testHelpers';
 import React, { ReactNode } from 'react';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import {
-  mockApmPluginContextValue,
-  MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin/mock_apm_plugin_context';
-import * as fetcherHook from '../../../hooks/use_fetcher';
-import { ServiceIcons } from '.';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
-
-const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiCounter: () => {} },
-} as Partial<CoreStart>);
+import { ServiceIcons } from '.';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import * as fetcherHook from '../../../hooks/use_fetcher';
 
 const addWarning = jest.fn();
 const httpGet = jest.fn();
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  const mockPluginContext = merge({}, mockApmPluginContextValue, {
-    core: { http: { get: httpGet }, notifications: { toasts: { addWarning } } },
-  }) as unknown as ApmPluginContextValue;
-
   return (
-    <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper value={mockPluginContext}>
-        <MockUrlParamsContextProvider
-          params={{
-            rangeFrom: 'now-15m',
-            rangeTo: 'now',
-            start: 'mystart',
-            end: 'myend',
-          }}
-        >
-          {children}
-        </MockUrlParamsContextProvider>
-      </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    <MockApmAppContextProvider
+      value={{
+        coreStart: {
+          http: { get: httpGet },
+          notifications: { toasts: { addWarning } },
+        },
+      }}
+    >
+      <MockUrlParamsContextProvider
+        params={{
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          start: 'mystart',
+          end: 'myend',
+        }}
+      >
+        {children}
+      </MockUrlParamsContextProvider>
+    </MockApmAppContextProvider>
   );
 }
 

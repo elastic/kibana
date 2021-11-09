@@ -7,7 +7,6 @@
 
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   expectTextsInDocument,
@@ -17,13 +16,13 @@ import { getSelectOptions, TimeComparison } from './';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import moment from 'moment';
 import { getComparisonTypes } from './get_comparison_types';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
   TimeRangeComparisonType,
   TimeRangeComparisonEnum,
 } from '../../../../common/runtime_types/comparison_type_rt';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 
 function getWrapper({
   exactStart,
@@ -40,19 +39,17 @@ function getWrapper({
 }) {
   return ({ children }: { children?: ReactNode }) => {
     return (
-      <MemoryRouter
-        initialEntries={[
-          `/services?rangeFrom=${exactStart}&rangeTo=${exactEnd}&environment=${environment}`,
-        ]}
+      <MockApmAppContextProvider
+        value={{
+          path: `/services?rangeFrom=${exactStart}&rangeTo=${exactEnd}&environment=${environment}`,
+        }}
       >
         <MockUrlParamsContextProvider
           params={{ comparisonType, comparisonEnabled }}
         >
-          <MockApmPluginContextWrapper>
-            <EuiThemeProvider>{children}</EuiThemeProvider>
-          </MockApmPluginContextWrapper>
+          <EuiThemeProvider>{children}</EuiThemeProvider>
         </MockUrlParamsContextProvider>
-      </MemoryRouter>
+      </MockApmAppContextProvider>
     );
   };
 }

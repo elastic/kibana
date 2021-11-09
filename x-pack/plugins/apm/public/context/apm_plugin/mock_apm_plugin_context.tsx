@@ -103,7 +103,7 @@ export const mockApmPluginContextValue = {
   appMountParameters: coreMock.createAppMountParameters('/basepath'),
   config: mockConfig,
   core: mockCore,
-  plugins: mockPlugin,
+  plugins: mockPluginsSetup,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   corePlugins: mockCorePlugins,
   deps: {},
@@ -120,8 +120,8 @@ export function MockApmPluginContextWrapper({
 }) {
   const contextValue = merge({}, mockApmPluginContextValue, value);
 
-  if (contextValue.coreStart) {
-    createCallApmApi(contextValue.coreStart);
+  if (contextValue.core) {
+    createCallApmApi(contextValue.core);
   }
 
   const contextHistory = useHistory();
