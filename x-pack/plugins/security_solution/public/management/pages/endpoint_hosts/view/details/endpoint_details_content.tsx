@@ -123,7 +123,7 @@ export const EndpointDetailsContent = memo(
           description: (
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">
+                <EuiText size="xs" className={'eui-textBreakWord'}>
                   <EndpointPolicyLink
                     policyId={details.Endpoint.policy.applied.id}
                     data-test-subj="policyDetailsValue"
