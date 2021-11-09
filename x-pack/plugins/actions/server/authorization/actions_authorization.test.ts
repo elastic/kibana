@@ -22,6 +22,7 @@ function mockSecurity() {
   const security = securityMock.createSetup();
   const authorization = security.authz;
   const authentication = security.authc;
+  //
   // typescript is having trouble inferring jest's automocking
   (
     authorization.actions.savedObject.get as jest.MockedFunction<
