@@ -11,7 +11,7 @@ import { ServerApiError } from '../../../../../common/types';
 export const NAME_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.name.placeholder',
   {
-    defaultMessage: 'Host isolation exception name',
+    defaultMessage: 'New IP',
   }
 );
 
@@ -32,7 +32,7 @@ export const NAME_ERROR = i18n.translate(
 export const DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.description.placeholder',
   {
-    defaultMessage: 'Describe your host isolation exception',
+    defaultMessage: 'Describe your Host isolation exception',
   }
 );
 
