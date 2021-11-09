@@ -100,9 +100,10 @@ export interface ILayer {
 
   /*
    * ILayer.getLayerIcon returns layer icon and associated state.
-   * Set showIncompleteIndicator to true to have icon include indication when layer is showing incomplete results
+   * isTocIcon is set to true when icon is generated for Table of Contents.
+   * Icons in Table of Contents may contain additional layer status, for example, indicate when a layer has incomplete results.
    */
-  getLayerIcon(showIncompleteIndicator: boolean): LayerIcon;
+  getLayerIcon(isTocIcon: boolean): LayerIcon;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
   getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
@@ -248,7 +249,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getLayerIcon(showIncompleteIndicator: boolean): LayerIcon {
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };

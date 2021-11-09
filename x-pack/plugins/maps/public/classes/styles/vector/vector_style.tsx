@@ -92,7 +92,7 @@ export interface IVectorStyle extends IStyle {
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   isTimeAware(): boolean;
   getPrimaryColor(): string;
-  getIcon(areResultsTrimmed: boolean): ReactElement;
+  getIcon(showIncompleteIndicator: boolean): ReactElement;
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -708,7 +708,7 @@ export class VectorStyle implements IVectorStyle {
     return extractColorFromStyleProperty(this._descriptor.properties[primaryColorKey], 'grey');
   }
 
-  getIcon(areResultsTrimmed: boolean) {
+  getIcon(showIncompleteIndicator: boolean) {
     const isLinesOnly = this._getIsLinesOnly();
     const isPointsOnly = this._getIsPointsOnly();
 
@@ -731,7 +731,7 @@ export class VectorStyle implements IVectorStyle {
           'grey'
         );
 
-    const borderStyle: CSSProperties = areResultsTrimmed
+    const borderStyle: CSSProperties = showIncompleteIndicator
       ? {
           borderColor: this.getPrimaryColor(),
           borderStyle: 'dashed',
