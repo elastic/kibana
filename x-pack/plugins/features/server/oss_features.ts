@@ -32,7 +32,7 @@ export const buildOSSFeatures = ({
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['discover', 'kibana'],
       catalogue: ['discover'],
-      alerting: ['.index-threshold', 'discover-threshold'],
+      alerting: ['.index-threshold', 'discover-threshold', '.es-query'],
       privileges: {
         all: {
           app: ['discover', 'kibana'],
@@ -48,7 +48,7 @@ export const buildOSSFeatures = ({
               all: ['.index-threshold', 'discover-threshold'],
             },
             alert: {
-              all: ['.index-threshold', 'discover-threshold'],
+              all: ['.index-threshold', 'discover-threshold', '.es-query'],
             },
           },
         },
@@ -62,10 +62,10 @@ export const buildOSSFeatures = ({
           ui: ['show'],
           alerting: {
             rule: {
-              read: ['.index-threshold', 'discover-threshold'],
+              read: ['.index-threshold', 'discover-threshold', '.es-query'],
             },
             alert: {
-              read: ['.index-threshold', 'discover-threshold'],
+              read: ['.index-threshold', 'discover-threshold', '.es-query'],
             },
           },
         },

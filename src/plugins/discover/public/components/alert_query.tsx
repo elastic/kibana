@@ -10,8 +10,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
 import { useKibana } from '../../../kibana_react/public';
 import { DiscoverServices } from '../build_services';
+import { ISearchSource } from '../../../data/common';
 
-export const DiscoverAlertButton = ({ index, timeField }: { index: string; timeField: string }) => {
+export const DiscoverQueryAlertButton = ({
+  index,
+  timeField,
+  searchSource,
+}: {
+  index: string;
+  timeField: string;
+  searchSource: ISearchSource;
+}) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
   const { triggersActionsUi } = useKibana<DiscoverServices>().services;
 
@@ -19,6 +28,10 @@ export const DiscoverAlertButton = ({ index, timeField }: { index: string; timeF
     () => setAlertFlyoutVisibility(false),
     [setAlertFlyoutVisibility]
   );
+  const getQuery = useCallback(() => {
+    const clonedSearchSource = searchSource.createCopy();
+    return JSON.stringify(clonedSearchSource.getSearchRequestBody());
+  }, [searchSource]);
 
   const AddAlertFlyout = useMemo(
     () =>
@@ -26,15 +39,15 @@ export const DiscoverAlertButton = ({ index, timeField }: { index: string; timeF
         consumer: 'discover',
         onClose: onCloseAlertFlyout,
         canChangeTrigger: false,
-        alertTypeId: '.discover-threshold',
+        alertTypeId: '.es-query',
         metadata: {
           isInternal: true,
         },
         initialValues: {
-          params: { index, timeField },
+          params: { index: [index], timeField, esQuery: getQuery() },
         },
       }),
-    [onCloseAlertFlyout, triggersActionsUi, index, timeField]
+    [onCloseAlertFlyout, triggersActionsUi, index, timeField, getQuery]
   );
 
   // in render section of component
@@ -47,7 +60,7 @@ export const DiscoverAlertButton = ({ index, timeField }: { index: string; timeF
         iconSide="left"
         onClick={() => setAlertFlyoutVisibility(true)}
       >
-        <FormattedMessage id="emptyButton" defaultMessage="Create threshold alert" />
+        <FormattedMessage id="emptyButton" defaultMessage="Create ES query alert" />
       </EuiButton>
     </>
   );
