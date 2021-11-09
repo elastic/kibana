@@ -17,9 +17,10 @@ interface StylesDeps {
 
 export const useStyles = ({ depth }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
-  const { colors, border, font, size } = euiTheme;
 
   const cached = useMemo(() => {
+    const { colors, border, font, size } = euiTheme;
+
     const darkText: CSSObject = {
       color: colors.text,
     };
@@ -136,7 +137,7 @@ export const useStyles = ({ depth }: StylesDeps) => {
       workingDir,
       userEnteredIcon,
     };
-  }, [depth, colors, border, font, size]);
+  }, [depth, euiTheme]);
 
   return cached;
 };
