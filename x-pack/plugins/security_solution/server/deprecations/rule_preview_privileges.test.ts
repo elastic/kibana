@@ -14,7 +14,7 @@ import { RegisterDeprecationsConfig } from 'src/core/server';
 import { Role } from '../../../security/common/model';
 import {
   registerRulePreviewPrivilegeDeprecations,
-  roleHasSignalsReadAccess,
+  roleHasReadAccess,
 } from './rule_preview_privileges';
 
 const emptyRole: Role = {
@@ -171,7 +171,7 @@ describe('rule preview privileges deprecation', () => {
   });
 
   describe('utilities', () => {
-    describe('roleHasSignalsReadAccess', () => {
+    describe('roleHasReadAccess', () => {
       it('returns true if the role has read privilege to all signals indexes', () => {
         const role = getRoleMock([
           {
@@ -179,7 +179,7 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['read'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(true);
+        expect(roleHasReadAccess(role)).toEqual(true);
       });
 
       it('returns true if the role has read privilege to a single signals index', () => {
@@ -189,7 +189,7 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['read'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(true);
+        expect(roleHasReadAccess(role)).toEqual(true);
       });
 
       it('returns true if the role has all privilege to a single signals index', () => {
@@ -199,7 +199,7 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['all'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(true);
+        expect(roleHasReadAccess(role)).toEqual(true);
       });
 
       it('returns false if the role has read privilege to other indices', () => {
@@ -209,7 +209,7 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['read'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(false);
+        expect(roleHasReadAccess(role)).toEqual(false);
       });
 
       it('returns false if the role has all privilege to other indices', () => {
@@ -219,12 +219,12 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['all'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(false);
+        expect(roleHasReadAccess(role)).toEqual(false);
       });
 
       it('returns false if the role has no specific privileges', () => {
         const role = getRoleMock();
-        expect(roleHasSignalsReadAccess(role)).toEqual(false);
+        expect(roleHasReadAccess(role)).toEqual(false);
       });
     });
   });
