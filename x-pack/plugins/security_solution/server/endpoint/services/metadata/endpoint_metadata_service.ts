@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
 import {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-  SearchResponse,
 } from 'kibana/server';
 
 import { TransportResult } from '@elastic/elasticsearch';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   HostInfo,
   HostMetadata,
@@ -407,6 +405,7 @@ export class EndpointMetadataService {
     const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, endpointPolicyIds);
 
     let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>, unknown>;
+
     try {
       unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
     } catch (error) {

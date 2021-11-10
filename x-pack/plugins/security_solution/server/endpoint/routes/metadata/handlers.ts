@@ -6,8 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import type { TransportResult } from '@elastic/elasticsearch';
-import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { TypeOf } from '@kbn/config-schema';
 import {
@@ -47,7 +45,6 @@ import {
 } from './support/query_strategies';
 import { EndpointError, NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
-import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -467,119 +464,4 @@ async function legacyListMetadataQuery(
   );
   const hostListQueryResult = queryResponseToHostListResult(result.body);
   return mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext);
-}
-
-async function queryUnitedIndex(
-  context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest,
-  endpointAppContext: EndpointAppContext,
-  logger: Logger,
-  endpointPolicies: PackagePolicy[]
-): Promise<{
-  unitedIndexExists: boolean;
-  unitedQueryResponse: HostResultList;
-}> {
-  const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
-  const unitedIndexQuery = await buildUnitedIndexQuery(
-    request,
-    endpointAppContext,
-    IGNORED_ELASTIC_AGENT_IDS,
-    endpointPolicyIds
-  );
-
-  let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>, unknown>;
-  try {
-    unitedMetadataQueryResponse =
-      await context.core.elasticsearch.client.asCurrentUser.search<UnitedAgentMetadata>(
-        unitedIndexQuery
-      );
-  } catch (error) {
-    const errorType = error?.meta?.body?.error?.type ?? '';
-
-    // no united index means that the endpoint package hasn't been upgraded yet
-    // this is expected so we fall back to the legacy query
-    // errors other than index_not_found_exception are unexpected
-    if (errorType !== 'index_not_found_exception') {
-      logger.error(error);
-      throw error;
-    }
-    return {
-      unitedIndexExists: false,
-      unitedQueryResponse: {} as HostResultList,
-    };
-  }
-
-  const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.body?.hits || {};
-  const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
-
-  const agentPolicies =
-    (await endpointAppContext.service
-      .getAgentPolicyService()
-      ?.getByIds(context.core.savedObjects.client, agentPolicyIds)) ?? [];
-
-  const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
-    (acc, agentPolicy) => ({
-      ...acc,
-      [agentPolicy.id]: {
-        ...agentPolicy,
-      },
-    }),
-    {}
-  );
-
-  const endpointPoliciesMap: Record<string, PackagePolicy> = endpointPolicies.reduce(
-    (acc, packagePolicy) => ({
-      ...acc,
-      [packagePolicy.policy_id]: packagePolicy,
-    }),
-    {}
-  );
-
-  const hosts = docs
-    .filter((doc) => {
-      const { endpoint: metadata, agent } = doc?._source?.united ?? {};
-      return metadata && agent;
-    })
-    .map((doc) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { endpoint: metadata, agent } = doc!._source!.united!;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const agentPolicy = agentPoliciesMap[agent.policy_id!];
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
-      const fleetAgentStatus = getAgentStatus(agent as Agent);
-
-      return {
-        metadata,
-        host_status: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus),
-        policy_info: {
-          agent: {
-            applied: {
-              id: agent.policy_id || '',
-              revision: agent.policy_revision || 0,
-            },
-            configured: {
-              id: agentPolicy?.id || '',
-              revision: agentPolicy?.revision || 0,
-            },
-          },
-          endpoint: {
-            id: endpointPolicy?.id || '',
-            revision: endpointPolicy?.revision || 0,
-          },
-        },
-      } as HostInfo;
-    });
-
-  const unitedQueryResponse: HostResultList = {
-    request_page_size: unitedIndexQuery.size,
-    request_page_index: unitedIndexQuery.from,
-    total: (docsCount as SearchTotalHits).value,
-    hosts,
-  };
-
-  return {
-    unitedIndexExists: true,
-    unitedQueryResponse,
-  };
 }
