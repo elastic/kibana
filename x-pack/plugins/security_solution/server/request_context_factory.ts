@@ -47,7 +47,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const { config, core, plugins } = options;
     const { lists, ruleRegistry, security } = plugins;
 
-    const [_, startPlugins] = await core.getStartServices();
+    const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
     appClientFactory.setup({
       getSpaceId: startPlugins.spaces?.spacesService?.getSpaceId,
