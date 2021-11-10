@@ -280,6 +280,7 @@ export function DiscoverLayout({
                   <DiscoverAlertButton
                     index={indexPattern.title}
                     timeField={indexPattern.timeFieldName}
+                    searchSource={searchSource}
                   />
                   <DiscoverQueryAlertButton
                     index={indexPattern.title}

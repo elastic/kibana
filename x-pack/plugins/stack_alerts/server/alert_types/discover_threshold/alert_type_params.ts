@@ -25,6 +25,7 @@ export const ParamsSchema = schema.object(
     // the values to use as the threshold; `between` and `notBetween` require
     // two values, the others require one.
     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
+    searchSource: schema.object({}),
   },
   {
     validate: validateParams,

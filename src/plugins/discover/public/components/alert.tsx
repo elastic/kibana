@@ -10,9 +10,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
 import { useKibana } from '../../../kibana_react/public';
 import { DiscoverServices } from '../build_services';
+import { ISearchSource } from '../../../data/common';
+import { updateSearchSource } from '../application/main/utils/update_search_source';
 
-export const DiscoverAlertButton = ({ index, timeField }: { index: string; timeField: string }) => {
+export const DiscoverAlertButton = ({
+  index,
+  timeField,
+  searchSource,
+}: {
+  index: string;
+  timeField: string;
+  searchSource: ISearchSource;
+}) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+  const { services } = useKibana<DiscoverServices>();
+
   const { triggersActionsUi } = useKibana<DiscoverServices>().services;
 
   const onCloseAlertFlyout = useCallback(
@@ -20,8 +32,28 @@ export const DiscoverAlertButton = ({ index, timeField }: { index: string; timeF
     [setAlertFlyoutVisibility]
   );
 
+  const getParams = useCallback(() => {
+    const nextSearchSource = searchSource.createCopy();
+    updateSearchSource(nextSearchSource, true, {
+      indexPattern: searchSource.getField('index')!,
+      services,
+      sort: [],
+      useNewFieldsApi: true,
+    });
+    nextSearchSource.removeField('filter');
+    const serializedSearchSource = nextSearchSource.serialize();
+
+    return {
+      index,
+      timeField,
+      searchSourceJSON: serializedSearchSource.searchSourceJSON,
+      searchSourceReferencesJSON: JSON.stringify(serializedSearchSource.references),
+    };
+  }, [searchSource, index, timeField, services]);
+
   const AddAlertFlyout = useMemo(
     () =>
+      alertFlyoutVisible &&
       triggersActionsUi?.getAddAlertFlyout({
         consumer: 'discover',
         onClose: onCloseAlertFlyout,
@@ -31,16 +63,16 @@ export const DiscoverAlertButton = ({ index, timeField }: { index: string; timeF
           isInternal: true,
         },
         initialValues: {
-          params: { index, timeField },
+          params: getParams(),
         },
       }),
-    [onCloseAlertFlyout, triggersActionsUi, index, timeField]
+    [getParams, onCloseAlertFlyout, triggersActionsUi, alertFlyoutVisible]
   );
 
   // in render section of component
   return (
     <>
-      {alertFlyoutVisible && AddAlertFlyout}
+      {AddAlertFlyout}
       <EuiButton
         fill
         iconType="plusInCircle"

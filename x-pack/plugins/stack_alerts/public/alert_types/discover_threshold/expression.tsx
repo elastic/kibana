@@ -8,25 +8,27 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiCallOut, EuiEmptyPrompt, EuiText, EuiTitle } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
-  getFields,
+  EuiSpacer,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiText,
+  EuiTitle,
+  EuiExpression,
+} from '@elastic/eui';
+import {
   COMPARATORS,
   builtInComparators,
-  OfExpression,
   ThresholdExpression,
   ForLastExpression,
-  GroupByExpression,
-  WhenExpression,
   builtInAggregationTypes,
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
 import './expression.scss';
-import { IndexSelectPopover } from '../components/index_select_popover';
+import { ISearchSource, parseSearchSourceJSON } from '../../../../../../src/plugins/data/common';
+import { injectSearchSourceReferences } from '../../../../../../src/plugins/data/public';
 
 export const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -49,49 +51,34 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
-interface KibanaDeps {
-  http: HttpSetup;
-}
-
-function isString(value: unknown): value is string {
-  return typeof value === 'string';
-}
-
-// normalize the `index` parameter to be a string array
-function indexParamToArray(index: string | string[]): string[] {
-  if (!index) return [];
-  return isString(index) ? [index] : index;
-}
-
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
   const {
-    index,
-    timeField,
     aggType,
-    aggField,
     groupBy,
     termSize,
-    termField,
     thresholdComparator,
     threshold,
     timeWindowSize,
     timeWindowUnit,
+    searchSourceJSON,
+    searchSourceReferencesJSON,
   } = alertParams;
+  const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
 
-  const indexArray = indexParamToArray(index);
-  const { http } = useKibana<KibanaDeps>().services;
-
-  const [esFields, setEsFields] = useState<
-    Array<{
-      name: string;
-      type: string;
-      normalizedType: string;
-      searchable: boolean;
-      aggregatable: boolean;
-    }>
-  >([]);
+  useEffect(() => {
+    async function getSearchSource() {
+      const parsedSearchSourceJSON = parseSearchSourceJSON(searchSourceJSON);
+      const searchSourceValues = injectSearchSourceReferences(
+        parsedSearchSourceJSON as Parameters<typeof injectSearchSourceReferences>[0],
+        JSON.parse(searchSourceReferencesJSON)
+      );
+      const loadedSearchSource = await data.search.searchSource.create(searchSourceValues);
+      setUsedSearchSource(loadedSearchSource);
+    }
+    getSearchSource();
+  }, [data.search.searchSource, searchSourceJSON, searchSourceReferencesJSON]);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
@@ -121,16 +108,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+      searchSourceJSON: searchSourceJSON ?? '{}',
+      searchSourceReferencesJSON: searchSourceJSON ?? '[]',
     });
-
-    if (indexArray.length > 0) {
-      await refreshEsFields(indexArray);
-    }
-  };
-
-  const refreshEsFields = async (indices: string[]) => {
-    const currentEsFields = await getFields(http, indices);
-    setEsFields(currentEsFields);
   };
 
   useEffect(() => {
@@ -138,6 +118,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if (!usedSearchSource) {
+    return null;
+  }
   return (
     <Fragment>
       {hasExpressionErrors ? (
@@ -150,81 +133,27 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.selectIndex"
-            defaultMessage="Select an index"
+            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
+            defaultMessage="When the number of documents matching"
           />
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <IndexSelectPopover
-        index={indexArray}
-        data-test-subj="indexSelectPopover"
-        esFields={esFields}
-        timeField={timeField}
-        errors={errors}
-        onIndexChange={async (indices: string[]) => {
-          setAlertParams('index', indices);
+      <EuiExpression
+        description={'Data view'}
+        value={usedSearchSource!.getField('index')!.title}
+        isActive={true}
+        display="columns"
+      />
+      <EuiSpacer size="s" />
+      <EuiExpression
+        description={'Query'}
+        value={usedSearchSource!.getField('query')!.query}
+        isActive={true}
+        display="columns"
+      />
+      <EuiSpacer size="s" />
 
-          // reset expression fields if indices are deleted
-          if (indices.length === 0) {
-            setAlertProperty('params', {
-              ...alertParams,
-              index: indices,
-              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-              termSize: DEFAULT_VALUES.TERM_SIZE,
-              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-              groupBy: DEFAULT_VALUES.GROUP_BY,
-              threshold: DEFAULT_VALUES.THRESHOLD,
-              timeField: '',
-            });
-          } else {
-            await refreshEsFields(indices);
-          }
-        }}
-        onTimeFieldChange={(updatedTimeField: string) =>
-          setAlertParams('timeField', updatedTimeField)
-        }
-      />
-      <WhenExpression
-        display="fullWidth"
-        data-test-subj="whenExpression"
-        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-        onChangeSelectedAggType={(selectedAggType: string) =>
-          setAlertParams('aggType', selectedAggType)
-        }
-      />
-      {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
-        <OfExpression
-          aggField={aggField}
-          data-test-subj="aggTypeExpression"
-          fields={esFields}
-          aggType={aggType}
-          errors={errors}
-          display="fullWidth"
-          onChangeSelectedAggField={(selectedAggField?: string) =>
-            setAlertParams('aggField', selectedAggField)
-          }
-        />
-      ) : null}
-      <GroupByExpression
-        groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
-        data-test-subj="groupByExpression"
-        termField={termField}
-        termSize={termSize}
-        errors={errors}
-        fields={esFields}
-        display="fullWidth"
-        onChangeSelectedGroupBy={(selectedGroupBy) => setAlertParams('groupBy', selectedGroupBy)}
-        onChangeSelectedTermField={(selectedTermField) =>
-          setAlertParams('termField', selectedTermField)
-        }
-        onChangeSelectedTermSize={(selectedTermSize) =>
-          setAlertParams('termSize', selectedTermSize)
-        }
-      />
-      <EuiSpacer />
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -248,6 +177,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           setAlertParams('thresholdComparator', selectedThresholdComparator)
         }
       />
+      <EuiSpacer size="s" />
       <ForLastExpression
         data-test-subj="forLastExpression"
         popupPosition={'upLeft'}
