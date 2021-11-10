@@ -29,7 +29,7 @@ export const DataVisualizerFieldTypeFilter: FC<{
             <EuiFlexItem grow={true}> {label}</EuiFlexItem>
             {indexedFieldName && (
               <EuiFlexItem grow={false}>
-                <FieldTypeIcon type={indexedFieldName} tooltipEnabled={false} needsAria={true} />
+                <FieldTypeIcon type={indexedFieldName} tooltipEnabled={false} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
