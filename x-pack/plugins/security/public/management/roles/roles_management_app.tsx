@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Router, Switch, useParams } from 'react-router-dom';
+import { Route, Router, useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import type { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';

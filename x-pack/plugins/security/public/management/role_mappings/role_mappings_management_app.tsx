@@ -11,6 +11,7 @@ import { Route, Router, useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
@@ -119,6 +120,6 @@ export const roleMappingsManagementApp = Object.freeze({
           unmountComponentAtNode(element);
         };
       },
-    };
+    } as RegisterManagementAppArgs;
   },
 });
