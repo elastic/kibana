@@ -7,9 +7,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled } from './../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { AppDataType, ReportViewType, BuilderItem } from '../types';
 import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
 import { IndexPatternState, useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -115,23 +115,24 @@ export const SeriesEditor = React.memo(function () {
 
   return (
     <Wrapper>
-      <div>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              aria-label={REPORT_TYPE_ARIA_LABEL}
-              id="report-type-label"
-              isDisabled={true}
-            >
-              <ReportTypesSelect prepend={REPORT_TYPE_LABEL} />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ViewActions onApply={() => setItemIdToExpandedRowMap({})} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <StickyFlexGroup gutterSize="none">
+        <ReportTypeFormFlexItem grow={false}>
+          <EuiFormRow
+            css={{ alignItems: 'center' }}
+            aria-label={REPORT_TYPE_ARIA_LABEL}
+            id="report-type-label"
+            isDisabled={true}
+          >
+            <ReportTypesSelect prepend={REPORT_TYPE_LABEL} />
+          </EuiFormRow>
+        </ReportTypeFormFlexItem>
 
-        <EuiHorizontalRule margin="s" />
+        <EuiFlexItem>
+          <ViewActions onApply={() => setItemIdToExpandedRowMap({})} />
+        </EuiFlexItem>
+      </StickyFlexGroup>
+
+      <EditorRowsWrapper>
         {editorItems.map((item) => (
           <div key={item.id}>
             <Series
@@ -142,8 +143,7 @@ export const SeriesEditor = React.memo(function () {
             <EuiSpacer size="s" />
           </div>
         ))}
-        <EuiSpacer size="s" />
-      </div>
+      </EditorRowsWrapper>
     </Wrapper>
   );
 });
@@ -181,6 +181,29 @@ const Wrapper = euiStyled.div`
     }
     .isIncomplete .euiTableRowCell {
       background-color: rgba(254, 197, 20, 0.1);
+    }
+  }
+`;
+
+const StickyFlexGroup = euiStyled(EuiFlexGroup)`
+  position: sticky;
+  top: -${({ theme }) => theme.eui.paddingSizes.m};
+  background-color: ${({ theme }) => theme.eui.euiPageBackgroundColor};
+  z-index: 100;
+  padding: ${({ theme }) => theme.eui.paddingSizes.s} 0;
+  border-bottom: 2px solid ${({ theme }) => theme.eui.euiColorLightShade};
+`;
+
+const EditorRowsWrapper = euiStyled.div`
+  margin: ${({ theme }) => theme.eui.paddingSizes.m} 0;
+`;
+
+const ReportTypeFormFlexItem = euiStyled(EuiFlexItem)`
+  margin-right: ${({ theme }) => theme.eui.paddingSizes.m};
+  &&& {
+    .euiFormLabel {
+      font-size: ${({ theme }) => theme.eui.euiFontSize};
+      font-weight: ${({ theme }) => theme.eui.euiFontWeightMedium};
     }
   }
 `;

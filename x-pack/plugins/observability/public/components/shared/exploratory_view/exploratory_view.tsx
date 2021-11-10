@@ -135,19 +135,11 @@ export function ExploratoryView({
                       id="seriesPanel"
                       color="subdued"
                     >
-                      {hiddenPanel === 'chartPanel' ? (
-                        <ShowChart onClick={() => onChange('chartPanel')} iconType="arrowDown">
-                          {SHOW_CHART_LABEL}
-                        </ShowChart>
-                      ) : (
-                        <HideChart
-                          onClick={() => onChange('chartPanel')}
-                          iconType="arrowUp"
-                          color="text"
-                        >
-                          {HIDE_CHART_LABEL}
-                        </HideChart>
-                      )}
+                      <ChartToggle
+                        isCollapsed={hiddenPanel === 'chartPanel'}
+                        onClick={() => onChange('chartPanel')}
+                      />
+
                       <SeriesViews
                         seriesBuilderRef={seriesBuilderRef}
                         onSeriesPanelCollapse={onChange}
@@ -197,15 +189,22 @@ const ShowPreview = styled(EuiButtonEmpty)`
   position: absolute;
   bottom: 34px;
 `;
-const HideChart = styled(EuiButtonEmpty)`
+
+const ChartToggle = styled(({ isCollapsed, ...rest }) => (
+  <EuiButtonEmpty
+    {...(isCollapsed ? { iconType: 'arrowDown' } : { iconType: 'arrowUp', color: 'text' })}
+    {...rest}
+  >
+    {isCollapsed ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
+  </EuiButtonEmpty>
+))`
+  &:focus,
+  &:focus:enabled {
+    background: none;
+  }
   position: absolute;
-  top: -35px;
-  right: 50px;
-`;
-const ShowChart = styled(EuiButtonEmpty)`
-  position: absolute;
-  top: -10px;
-  right: 50px;
+  top: -30px;
+  right: 0;
 `;
 
 const HIDE_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.hideChart', {
