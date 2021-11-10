@@ -136,7 +136,6 @@ describe.each([
 
   describe('mergeStatuses', () => {
     it('merges statuses and converts from camelCase saved object to snake_case HTTP response', () => {
-      //
       const statusOne = exampleRuleStatus();
       statusOne.attributes.status = RuleExecutionStatus.failed;
       const statusTwo = exampleRuleStatus();
