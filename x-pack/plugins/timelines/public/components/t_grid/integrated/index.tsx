@@ -43,7 +43,7 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
-import { StatefulBody, TGridStateReporter } from '../body';
+import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
@@ -125,7 +125,6 @@ export interface TGridIntegratedProps {
   kqlMode: 'filter' | 'search';
   leadingControlColumns?: ControlColumnProps[];
   onRuleChange?: () => void;
-  onTGridStateChange?: TGridStateReporter;
   query: Query;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -166,7 +165,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   kqlMode,
   leadingControlColumns,
   onRuleChange,
-  onTGridStateChange,
   query,
   renderCellValue,
   rowRenderers,
@@ -368,7 +366,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                           leadingControlColumns={leadingControlColumns}
                           loadPage={loadPage}
                           onRuleChange={onRuleChange}
-                          onTGridStateChange={onTGridStateChange}
                           pageSize={itemsPerPage}
                           refetch={refetch}
                           renderCellValue={renderCellValue}
