@@ -138,7 +138,6 @@ export const SeriesEditor = React.memo(function () {
               aria-label={REPORT_TYPE_ARIA_LABEL}
               id="report-type-label"
               label={REPORT_TYPE_LABEL}
-              display="columnCompressed"
               isDisabled={true}
             >
               <ReportTypesSelect />
