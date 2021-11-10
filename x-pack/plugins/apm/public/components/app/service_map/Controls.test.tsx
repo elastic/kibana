@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as lightTheme } from '@kbn/ui-shared-deps-src/theme';
 import { render } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
