@@ -18,7 +18,7 @@
       {
         "detector_description" : "transaction throughput for an APM service",
         "function" : "mean",
-        "field_name" : "transactions_per_min",
+        "field_name" : "transaction_throughput",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       },

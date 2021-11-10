@@ -49,7 +49,7 @@
             "field" : "@timestamp"
           }
         },
-        "transaction_rate" : {
+        "transaction_throughput" : {
           "rate" : {
             "unit" : "minute"
           }

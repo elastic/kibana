@@ -15,8 +15,8 @@
   },
   "jobs": [
     {
-      "id": "apm_metrics",
-      "file": "apm_metrics.json"
+      "id": "apm_tx_metrics",
+      "file": "apm_tx_metrics.json"
     }
   ],
   "datafeeds": [
