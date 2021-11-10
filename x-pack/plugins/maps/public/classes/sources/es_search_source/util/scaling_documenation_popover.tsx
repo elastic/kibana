@@ -105,7 +105,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               </p>
               <p>
                 <FormattedMessage 
-                  id="xpack.maps.scalingDocs.clustersUseCase" 
+                  id="xpack.maps.scalingDocs.mvtUseCase" 
                   defaultMessage="Use this option to display large data sets with the fastest loading times. Does not support term joins, formatted labels, and data driven styling from scripted fields."
                 />
               </p>
