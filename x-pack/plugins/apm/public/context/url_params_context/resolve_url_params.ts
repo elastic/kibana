@@ -81,7 +81,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     detailTab: toString(detailTab),
     flyoutDetailTab: toString(flyoutDetailTab),
     spanId: toNumber(spanId),
-    kuery: kuery && decodeURIComponent(kuery),
+    kuery,
     transactionName,
     transactionType,
     searchTerm: toString(searchTerm),
