@@ -255,9 +255,10 @@ describe('AdvancedSettings', () => {
     );
 
     expect(
-      component
-        .find('Field')
-        .filterWhere((n: ReactWrapper) => n.prop('setting').name === defaultQuery)
+      component.find('Field').filterWhere((n: ReactWrapper) => {
+        const setting: Record<string, string> = n.prop('setting');
+        return setting.name === defaultQuery;
+      })
     ).toHaveLength(1);
   });
 
@@ -277,7 +278,10 @@ describe('AdvancedSettings', () => {
     expect(
       component
         .find('Field')
-        .filterWhere((n: ReactWrapper) => n.prop('setting').name === defaultQuery)
+        .filterWhere((n: ReactWrapper) => {
+          const setting: Record<string, string> = n.prop('setting');
+          return setting.name === defaultQuery;
+        })
         .prop('enableSaving')
     ).toBe(false);
   });
