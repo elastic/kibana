@@ -15,14 +15,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-const ADVANTAGE_TITLE = i18n.translate('xpack.maps.scalingDocs.advantagesTitle', {
-  defaultMessage: 'Advantages',
-});
-
-const DISADVANTAGE_TITLE = i18n.translate('xpack.maps.scalingDocs.disadvantagesTitle', {
-  defaultMessage: 'Disadvantages',
-});
-
 interface Props {
   limitOptionLabel: string;
   clustersOptionLabel: string;
