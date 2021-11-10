@@ -35,7 +35,7 @@ Elastic Agent is a single, unified agent
 to collect data and send it to the Elastic Stack.
 Beats are lightweight data shippers that send data to the Elastic Stack.
 For more information,
-refer to https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html[Beats and Elastic Agent capabilites].
+refer to https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html[Beats and Elastic Agent capabilities].
 
 [float]
 === Add sample data
