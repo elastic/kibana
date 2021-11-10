@@ -86,7 +86,6 @@ export class ObservabilityIndexPatterns {
     }
 
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
-
     return await this.data.indexPatterns.createAndSave({
       title: appIndicesPattern,
       id: getAppIndexPatternId(app, indices),
