@@ -5,37 +5,33 @@
  * 2.0.
  */
 
-import { ILicenseState } from '../lib/license_state';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-
 export interface SecurityHealth {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
 }
 
 export const getSecurityHealth = async (
-  licenseState: ILicenseState | null,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isEsSecurityEnabled: () => Promise<boolean | null>,
+  isAbleToEncrypt: () => Promise<boolean>,
   areApiKeysEnabled: () => Promise<boolean>
 ) => {
-  const isEsSecurityEnabled: boolean | null = licenseState
-    ? licenseState.getIsSecurityEnabled()
-    : null;
+  const esSecurityIsEnabled = await isEsSecurityEnabled();
   const apiKeysAreEnabled = await areApiKeysEnabled();
+  const ableToEncrypt = await isAbleToEncrypt();
 
   let isSufficientlySecure: boolean;
 
-  if (isEsSecurityEnabled === null) {
+  if (esSecurityIsEnabled === null) {
     isSufficientlySecure = false;
   } else {
-    // if isEsSecurityEnabled = true, then areApiKeysEnabled must be true to enable alerting
-    // if isEsSecurityEnabled = false, then it does not matter what areApiKeysEnabled is
-    isSufficientlySecure = !isEsSecurityEnabled || (isEsSecurityEnabled && apiKeysAreEnabled);
+    // if esSecurityIsEnabled = true, then areApiKeysEnabled must be true to enable alerting
+    // if esSecurityIsEnabled = false, then it does not matter what areApiKeysEnabled is
+    isSufficientlySecure = !esSecurityIsEnabled || (esSecurityIsEnabled && apiKeysAreEnabled);
   }
 
   const securityHealth: SecurityHealth = {
     isSufficientlySecure,
-    hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
+    hasPermanentEncryptionKey: ableToEncrypt,
   };
 
   return securityHealth;

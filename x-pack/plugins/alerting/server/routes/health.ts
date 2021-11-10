@@ -48,8 +48,8 @@ export const healthRoute = (
           const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
 
           const securityHealth = await getSecurityHealth(
-            licenseState,
-            encryptedSavedObjects,
+            async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
+            async () => encryptedSavedObjects.canEncrypt,
             context.alerting.areApiKeysEnabled
           );
 

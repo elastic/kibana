@@ -319,8 +319,8 @@ export class AlertingPlugin {
       },
       getSecurityHealth: async () => {
         return await getSecurityHealth(
-          this.licenseState,
-          plugins.encryptedSavedObjects,
+          async () => (this.licenseState ? this.licenseState.getIsSecurityEnabled() : null),
+          async () => plugins.encryptedSavedObjects.canEncrypt,
           async () => {
             const [, { security }] = await core.getStartServices();
             return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;

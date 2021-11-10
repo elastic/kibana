@@ -5,43 +5,20 @@
  * 2.0.
  */
 
-import { licensingMock } from '../../../licensing/server/mocks';
-import { LicenseState, ILicenseState } from './license_state';
-import { BehaviorSubject } from 'rxjs';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { getSecurityHealth } from './get_security_health';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 const createDependencies = (
   isSecurityEnabled: boolean | null,
   canEncrypt: boolean,
   apiKeysEnabled: boolean
 ) => {
-  const getLicenseState = (_isSecurityEnabled: boolean | null) => {
-    if (_isSecurityEnabled === null) return null;
-
-    const licenseMock = licensingMock.createLicense({
-      license: { status: 'active', type: 'basic' },
-      features: {
-        security: {
-          isEnabled: _isSecurityEnabled,
-          isAvailable: _isSecurityEnabled,
-        },
-      },
-    });
-
-    return new LicenseState(new BehaviorSubject(licenseMock));
-  };
-
-  const licenseState = getLicenseState(isSecurityEnabled);
-
-  const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt });
-
+  const isEsSecurityEnabled = async () => isSecurityEnabled;
+  const isAbleToEncrypt = async () => canEncrypt;
   const areApikeysEnabled = async () => apiKeysEnabled;
 
-  const deps: [ILicenseState | null, EncryptedSavedObjectsPluginSetup, () => Promise<boolean>] = [
-    licenseState,
-    encryptedSavedObjects,
+  const deps: [() => Promise<boolean | null>, () => Promise<boolean>, () => Promise<boolean>] = [
+    isEsSecurityEnabled,
+    isAbleToEncrypt,
     areApikeysEnabled,
   ];
 
