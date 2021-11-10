@@ -50,7 +50,7 @@ export const metricVis = () => ({
       displayName: strings.getColorModeColumnDisplayName(),
       help: strings.getColorModeColumnHelp(),
       argType: 'select',
-      default: 'single',
+      default: 'Labels',
       options: {
         choices: [
           { value: 'None', name: strings.getColorModeNoneOption() },

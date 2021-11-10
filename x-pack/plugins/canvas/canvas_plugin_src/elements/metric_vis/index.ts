@@ -15,6 +15,6 @@ export const metricVis: ElementFactory = () => ({
   expression: `filters
   | demodata
   | head 1
-  | metricVis metric={visdimension "percent_uptime"}
+  | metricVis metric={visdimension "percent_uptime"} colorMode="Labels"
   | render`,
 });
