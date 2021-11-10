@@ -24,7 +24,7 @@ import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 import { OverlayRef } from '../../../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types';
+import { IEditableControlFactory, ControlInput } from '../../types';
 import { EmbeddableFactoryNotFoundError } from '../../../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
 
