@@ -9,6 +9,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { last } from 'lodash';
+import { PANEL_TYPES } from '../../../../common/enums';
 import type { TimeseriesVisData } from '../../../../common/types';
 import { FormValidationContext } from '../../contexts/form_validation_context';
 import { VisDataContext } from '../../contexts/vis_data_context';
@@ -20,6 +22,9 @@ import { TopNPanelConfig as topN } from './top_n';
 import { TablePanelConfig as table } from './table';
 import { GaugePanelConfig as gauge } from './gauge';
 import { MarkdownPanelConfig as markdown } from './markdown';
+import { checkIfNumericMetric } from '../lib/check_if_numeric_metric';
+
+const TOP_HIT_FIELD_KEY = 'top_hit field';
 
 const panelConfigTypes = {
   timeseries,
@@ -38,7 +43,7 @@ const checkModelValidity = (validationResults: FormValidationResults) =>
   Object.values(validationResults).every((isValid) => isValid);
 
 export function PanelConfig(props: PanelConfigProps) {
-  const { model, onChange } = props;
+  const { model, fields, onChange } = props;
   const Component = panelConfigTypes[model.type];
   const formValidationResults = useRef<FormValidationResults>({});
   const [visData, setVisData] = useState<TimeseriesVisData>({} as TimeseriesVisData);
@@ -58,6 +63,17 @@ export function PanelConfig(props: PanelConfigProps) {
     },
     [onChange]
   );
+
+  useEffect(() => {
+    const isInvalid = [PANEL_TYPES.GAUGE, PANEL_TYPES.TOP_N].includes(model.type)
+      ? model.series.some(
+          ({ hidden, metrics }) =>
+            !hidden && !checkIfNumericMetric(last(metrics)!, fields, model.index_pattern)
+        )
+      : false;
+
+    updateControlValidity(TOP_HIT_FIELD_KEY, !isInvalid);
+  }, [fields, model.type, model.series, model.index_pattern, updateControlValidity]);
 
   if (Component) {
     return (
