@@ -11,7 +11,8 @@ import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: trial', function () {
-    this.tags('ciGroup25');
+    // Fastest ciGroup for the moment.
+    this.tags('ciGroup13');
 
     before(async () => {
       await createSpacesAndUsers(getService);

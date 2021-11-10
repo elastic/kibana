@@ -11,7 +11,7 @@ import { createUsersAndRoles } from '../../common/lib';
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('saved objects tagging - functional tests', function () {
-    this.tags('ciGroup14');
+    this.tags('ciGroup2');
 
     before(async () => {
       await createUsersAndRoles(getService);

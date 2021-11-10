@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection exceptions data types and operators', function () {
     describe('', function () {
-      this.tags('ciGroup23');
+      this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./date'));
       loadTestFile(require.resolve('./double'));
@@ -20,7 +20,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     });
 
     describe('', function () {
-      this.tags('ciGroup24');
+      this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./ip'));
       loadTestFile(require.resolve('./ip_array'));
