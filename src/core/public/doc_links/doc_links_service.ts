@@ -158,7 +158,7 @@ export class DocLinksService {
           introduction: `${KIBANA_DOCS}index-patterns.html`,
           fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
           fieldFormattersString: `${KIBANA_DOCS}field-formatters-string.html`,
-          runtimeFields: `${KIBANA_DOCS}managing-index-patterns.html#runtime-fields`,
+          runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
         },
         addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
         kibana: `${KIBANA_DOCS}index.html`,
@@ -489,6 +489,7 @@ export class DocLinksService {
           fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+          settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
           elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
@@ -500,6 +501,7 @@ export class DocLinksService {
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
           apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
+          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -765,6 +767,7 @@ export interface DocLinksStart {
       fleetServerAddFleetServer: string;
       settings: string;
       settingsFleetServerHostSettings: string;
+      settingsFleetServerProxySettings: string;
       troubleshooting: string;
       elasticAgent: string;
       datastreams: string;
@@ -774,6 +777,7 @@ export interface DocLinksStart {
       upgradeElasticAgent712lower: string;
       learnMoreBlog: string;
       apiKeysLearnMore: string;
+      onPremRegistry: string;
     }>;
     readonly ecs: {
       readonly guide: string;

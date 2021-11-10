@@ -34,7 +34,7 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
         body={
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.listEmpty.message"
-            defaultMessage="There are currently no host isolation exceptions"
+            defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
           />
         }
         actions={
