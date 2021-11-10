@@ -7,10 +7,10 @@
  */
 
 import { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
-import { buildActiveMappings } from '../core';
+import { buildActiveMappings } from './core';
 
 const { mergeTypes } = jest.requireActual('./kibana_migrator');
-import { SavedObjectsType } from '../../types';
+import { SavedObjectsType } from '../types';
 import { BehaviorSubject } from 'rxjs';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
