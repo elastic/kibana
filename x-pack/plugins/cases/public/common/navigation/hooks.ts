@@ -9,69 +9,65 @@ import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigation } from '../lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
-import { CasesDeepLinkIds } from './deep_links';
+import { CasesDeepLinkId, ICasesDeepLinkId } from './deep_links';
 import { CaseViewPathParams, generateCaseViewPath } from './paths';
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
 
-export const useAllCasesNavigation = () => {
+type GetCasesUrl = (absolute?: boolean) => string;
+type NavigateToCases = () => void;
+type UseCasesNavigation = [GetCasesUrl, NavigateToCases];
+
+export const useCasesNavigation = (deepLinkId: ICasesDeepLinkId): UseCasesNavigation => {
   const { appId } = useCasesContext();
   const { navigateTo, getAppUrl } = useNavigation(appId);
-  const getAllCasesUrl = useCallback(
-    (absolute?: boolean) => getAppUrl({ deepLinkId: CasesDeepLinkIds.cases, absolute }),
-    [getAppUrl]
+  const getCasesUrl = useCallback<GetCasesUrl>(
+    (absolute) => getAppUrl({ deepLinkId, absolute }),
+    [getAppUrl, deepLinkId]
   );
-  const navigateToAllCases = useCallback(
-    () => navigateTo({ deepLinkId: CasesDeepLinkIds.cases }),
-    [navigateTo]
+  const navigateToCases = useCallback<NavigateToCases>(
+    () => navigateTo({ deepLinkId }),
+    [navigateTo, deepLinkId]
   );
+  return [getCasesUrl, navigateToCases];
+};
+
+export const useAllCasesNavigation = () => {
+  const [getAllCasesUrl, navigateToAllCases] = useCasesNavigation(CasesDeepLinkId.cases);
   return { getAllCasesUrl, navigateToAllCases };
 };
 
 export const useCreateCaseNavigation = () => {
-  const { appId } = useCasesContext();
-  const { navigateTo, getAppUrl } = useNavigation(appId);
-  const getCreateCaseUrl = useCallback(
-    (absolute?: boolean) => getAppUrl({ deepLinkId: CasesDeepLinkIds.casesCreate, absolute }),
-    [getAppUrl]
-  );
-  const navigateToCreateCase = useCallback(
-    () => navigateTo({ deepLinkId: CasesDeepLinkIds.casesCreate }),
-    [navigateTo]
-  );
+  const [getCreateCaseUrl, navigateToCreateCase] = useCasesNavigation(CasesDeepLinkId.casesCreate);
   return { getCreateCaseUrl, navigateToCreateCase };
 };
+
+export const useConfigureCasesNavigation = () => {
+  const [getConfigureCasesUrl, navigateToConfigureCases] = useCasesNavigation(
+    CasesDeepLinkId.casesConfigure
+  );
+  return { getConfigureCasesUrl, navigateToConfigureCases };
+};
+
+type GetCaseViewUrl = (pathParams: CaseViewPathParams, absolute?: boolean) => string;
+type NavigateToCaseView = (pathParams: CaseViewPathParams) => void;
 
 export const useCaseViewNavigation = () => {
   const { appId } = useCasesContext();
   const { navigateTo, getAppUrl } = useNavigation(appId);
-  const getCaseViewUrl = useCallback(
-    (pathParams: CaseViewPathParams, absolute?: boolean) =>
+  const getCaseViewUrl = useCallback<GetCaseViewUrl>(
+    (pathParams, absolute) =>
       getAppUrl({
-        deepLinkId: CasesDeepLinkIds.cases,
+        deepLinkId: CasesDeepLinkId.cases,
         absolute,
         path: generateCaseViewPath(pathParams),
       }),
     [getAppUrl]
   );
-  const navigateToCaseView = useCallback(
-    (pathParams: CaseViewPathParams) =>
-      navigateTo({ deepLinkId: CasesDeepLinkIds.cases, path: generateCaseViewPath(pathParams) }),
+  const navigateToCaseView = useCallback<NavigateToCaseView>(
+    (pathParams) =>
+      navigateTo({ deepLinkId: CasesDeepLinkId.cases, path: generateCaseViewPath(pathParams) }),
     [navigateTo]
   );
   return { getCaseViewUrl, navigateToCaseView };
-};
-
-export const useConfigureCasesNavigation = () => {
-  const { appId } = useCasesContext();
-  const { navigateTo, getAppUrl } = useNavigation(appId);
-  const getConfigureCasesUrl = useCallback(
-    (absolute?: boolean) => getAppUrl({ deepLinkId: CasesDeepLinkIds.casesConfigure, absolute }),
-    [getAppUrl]
-  );
-  const navigateToConfigureCases = useCallback(
-    () => navigateTo({ deepLinkId: CasesDeepLinkIds.casesConfigure }),
-    [navigateTo]
-  );
-  return { getConfigureCasesUrl, navigateToConfigureCases };
 };

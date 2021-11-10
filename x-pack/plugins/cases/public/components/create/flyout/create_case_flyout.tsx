@@ -11,12 +11,13 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 
 import * as i18n from '../translations';
 import { Case } from '../../../../common';
-import { CreateCase } from '..';
+import { CreateCaseForm } from '../form';
 
 export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
   onClose: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
+  disableAlerts?: boolean;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -43,7 +44,6 @@ const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZLevel5: number } } }
 
 // Adding bottom padding because timeline's
 // bottom bar gonna hide the submit button.
-// might not need for obs, test this when implementing this component
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   ${({ theme }) => `
       && .euiFlyoutBody__overflow {
@@ -64,7 +64,7 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess }) => (
+  ({ afterCaseCreated, onClose, onSuccess, disableAlerts }) => (
     <>
       <GlobalStyle />
       <StyledFlyout onClose={onClose} data-test-subj="create-case-flyout">
@@ -75,12 +75,12 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
         </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>
           <FormWrapper>
-            <CreateCase
+            <CreateCaseForm
               afterCaseCreated={afterCaseCreated}
               onCancel={onClose}
               onSuccess={onSuccess}
               withSteps={false}
-              disableAlerts={true}
+              disableAlerts={disableAlerts}
             />
           </FormWrapper>
         </StyledEuiFlyoutBody>

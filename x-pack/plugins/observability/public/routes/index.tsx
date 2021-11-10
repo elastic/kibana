@@ -7,12 +7,10 @@
 
 import * as t from 'io-ts';
 import React from 'react';
+import { casesPath } from '../../common';
 import { ExploratoryViewPage } from '../components/shared/exploratory_view';
 import { AlertsPage } from '../pages/alerts';
-import { AllCasesPage } from '../pages/cases/all_cases';
-import { CaseDetailsPage } from '../pages/cases/case_details';
-import { ConfigureCasesPage } from '../pages/cases/configure_cases';
-import { CreateCasePage } from '../pages/cases/create_case';
+import { CasesPage } from '../pages/cases';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
@@ -29,7 +27,17 @@ export interface Params {
   path?: t.HasProps;
 }
 
-export const routes = {
+interface Route {
+  handler: (params?: any) => JSX.Element;
+  params: Params;
+  exact?: boolean;
+}
+
+interface Routes {
+  [path: string]: Route;
+}
+
+export const routes: Routes = {
   '/': {
     handler: () => {
       return <HomePage />;
@@ -43,7 +51,7 @@ export const routes = {
     params: {},
   },
   '/overview': {
-    handler: ({ query }: any) => {
+    handler: ({ query }) => {
       return <OverviewPage routeParams={{ query }} />;
     },
     params: {
@@ -55,33 +63,12 @@ export const routes = {
       }),
     },
   },
-  '/cases': {
+  [casesPath]: {
     handler: () => {
-      return <AllCasesPage />;
+      return <CasesPage />;
     },
+    exact: false,
     params: {},
-  },
-  '/cases/create': {
-    handler: () => {
-      return <CreateCasePage />;
-    },
-    params: {},
-  },
-  '/cases/configure': {
-    handler: () => {
-      return <ConfigureCasesPage />;
-    },
-    params: {},
-  },
-  '/cases/:detailName': {
-    handler: () => {
-      return <CaseDetailsPage />;
-    },
-    params: {
-      path: t.partial({
-        detailName: t.string,
-      }),
-    },
   },
   '/alerts': {
     handler: () => {

@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { toMountPoint, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityAppServices } from '../../../../application/types';
-import { AllCasesSelectorModalProps } from '../../../../../../cases/public';
+import { GetAllCasesSelectorModalProps } from '../../../../../../cases/public';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { Case, SubCase } from '../../../../../../cases/common';
-import { observabilityFeatureId } from '../../../../../common';
+import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
 
 export interface AddToCaseProps {
   timeRange?: { from: string; to: string };
@@ -31,19 +31,15 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
     [http.basePath]
   );
 
-  const { createCaseUrl, goToCreateCase, onCaseClicked, isCasesOpen, setIsCasesOpen, isSaving } =
-    useAddToCase({
-      lensAttributes,
-      getToastText,
-      timeRange,
-    });
+  const { onCaseClicked, isCasesOpen, setIsCasesOpen, isSaving } = useAddToCase({
+    lensAttributes,
+    getToastText,
+    timeRange,
+  });
 
-  const getAllCasesSelectorModalProps: AllCasesSelectorModalProps = {
-    createCaseNavigation: {
-      href: createCaseUrl,
-      onClick: goToCreateCase,
-    },
+  const getAllCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
     onRowClick: onCaseClicked,
+    appId: observabilityAppId,
     userCanCrud: true,
     owner: [observabilityFeatureId],
     onClose: () => {

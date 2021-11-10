@@ -19,11 +19,19 @@ export const getCreateCaseFlyoutLazy = ({
   owner,
   appId,
   userCanCrud,
-  ...props
+  afterCaseCreated,
+  onClose,
+  onSuccess,
+  disableAlerts,
 }: GetCreateCaseFlyoutProps) => (
   <CasesProvider value={{ owner, appId, userCanCrud }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CreateCaseFlyoutLazy {...props} />
+      <CreateCaseFlyoutLazy
+        afterCaseCreated={afterCaseCreated}
+        onClose={onClose}
+        onSuccess={onSuccess}
+        disableAlerts={disableAlerts}
+      />
     </Suspense>
   </CasesProvider>
 );

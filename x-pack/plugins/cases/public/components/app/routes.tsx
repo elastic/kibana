@@ -59,6 +59,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           <CreateCase
             onSuccess={onCreateCaseSuccess}
             onCancel={navigateToAllCases}
+            disableAlerts={disableAlerts}
             timelineIntegration={timelineIntegration}
           />
         ) : (

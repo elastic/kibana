@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { observabilityFeatureId, observabilityAppId, casesPath } from '../../../common';
 
-export const DISMISS_CALLOUT = i18n.translate(
-  'xpack.observability.cases.dismissErrorsPushServiceCallOutTitle',
-  {
-    defaultMessage: 'Dismiss',
-  }
-);
+export const CASES_OWNER = observabilityFeatureId;
+export const APP_ID = observabilityAppId;
+export const CASES_PATH = casesPath;

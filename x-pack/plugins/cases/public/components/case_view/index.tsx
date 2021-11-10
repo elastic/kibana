@@ -18,7 +18,7 @@ import {
   Ecs,
   CaseViewRefreshPropInterface,
 } from '../../../common';
-import { HeaderPage, BackOptions } from '../header_page';
+import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
@@ -43,7 +43,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import {
   generateCaseViewPath,
-  useAllCasesNavigation,
   useCaseViewNavigation,
   useCaseViewParams,
 } from '../../common/navigation';
@@ -104,7 +103,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     hideSyncAlerts = false,
   }) => {
     const { userCanCrud } = useCasesContext();
-    const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
     const { getCaseViewUrl } = useCaseViewNavigation();
 
     const [initLoadingData, setInitLoadingData] = useState(true);
@@ -358,21 +356,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       }
     }, [initLoadingData, isLoadingUserActions]);
 
-    const backOptions = useMemo<BackOptions>(
-      () => ({
-        href: getAllCasesUrl(),
-        text: i18n.BACK_TO_ALL,
-        dataTestSubj: 'backToCases',
-        onClick: (e) => {
-          if (e) {
-            e.preventDefault();
-          }
-          navigateToAllCases();
-        },
-      }),
-      [getAllCasesUrl, navigateToAllCases]
-    );
-
     const onShowAlertDetails = useCallback(
       (alertId: string, index: string) => {
         if (showAlertDetails) {
@@ -396,7 +379,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       <>
         <HeaderWrapper>
           <HeaderPage
-            backOptions={backOptions}
+            showBackButton={true}
             data-test-subj="case-view-title"
             titleNode={
               <EditableTitle

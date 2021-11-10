@@ -12,11 +12,39 @@ import { CasesProvider, CasesContextProps } from '../components/cases_context';
 
 export type GetCasesProps = CasesProps & CasesContextProps;
 
-const CasesLazy = lazy(() => import('../components/app'));
-export const getCasesLazy = ({ owner, appId, userCanCrud, basePath, ...props }: GetCasesProps) => (
+const CasesLazy: React.FC<CasesProps> = lazy(() => import('../components/app'));
+export const getCasesLazy = ({
+  owner,
+  appId,
+  userCanCrud,
+  basePath,
+  disableAlerts,
+  showTitle,
+  onComponentInitialized,
+  actionsNavigation,
+  ruleDetailsNavigation,
+  showAlertDetails,
+  useFetchAlertData,
+  refreshRef,
+  hideSyncAlerts,
+  onCaseDataSuccess,
+  timelineIntegration,
+}: GetCasesProps) => (
   <CasesProvider value={{ owner, appId, userCanCrud, basePath }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesLazy userCanCrud={userCanCrud} {...props} />
+      <CasesLazy
+        disableAlerts={disableAlerts}
+        showTitle={showTitle}
+        onComponentInitialized={onComponentInitialized}
+        actionsNavigation={actionsNavigation}
+        ruleDetailsNavigation={ruleDetailsNavigation}
+        showAlertDetails={showAlertDetails}
+        useFetchAlertData={useFetchAlertData}
+        refreshRef={refreshRef}
+        hideSyncAlerts={hideSyncAlerts}
+        onCaseDataSuccess={onCaseDataSuccess}
+        timelineIntegration={timelineIntegration}
+      />
     </Suspense>
   </CasesProvider>
 );

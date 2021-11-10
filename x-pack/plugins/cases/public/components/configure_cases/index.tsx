@@ -28,9 +28,8 @@ import { ClosureOptions } from './closure_options';
 import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
 import * as i18n from './translations';
 import { getConnectorById } from '../utils';
-import { HeaderPage, BackOptions } from '../header_page';
+import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useAllCasesNavigation } from '../../common/navigation';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -53,7 +52,6 @@ const FormWrapper = styled.div`
 export const ConfigureCases: React.FC = React.memo(() => {
   const { userCanCrud } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
-  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -183,26 +181,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
     [connector.id, editFlyoutVisible]
   );
 
-  const backOptions = useMemo<BackOptions>(
-    () => ({
-      href: getAllCasesUrl(),
-      text: i18n.BACK_TO_ALL,
-      dataTestSubj: 'backToCases',
-      onClick: (e) => {
-        if (e) {
-          e.preventDefault();
-        }
-        navigateToAllCases();
-      },
-    }),
-    [getAllCasesUrl, navigateToAllCases]
-  );
-
   return (
     <>
       <HeaderWrapper>
         <HeaderPage
-          backOptions={backOptions}
+          showBackButton={true}
           data-test-subj="case-configure-title"
           title={i18n.CONFIGURE_CASES_PAGE_TITLE}
         />

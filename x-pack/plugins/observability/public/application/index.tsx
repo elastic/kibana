@@ -29,14 +29,13 @@ function App() {
   return (
     <>
       <Switch>
-        {Object.keys(routes).map((key) => {
-          const path = key as keyof typeof routes;
-          const route = routes[path];
+        {Object.keys(routes).map((path) => {
+          const { handler, exact = true } = routes[path];
           const Wrapper = () => {
             const params = useRouteParams(path);
-            return route.handler(params);
+            return handler(params);
           };
-          return <Route key={path} path={path} exact={true} component={Wrapper} />;
+          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
         })}
       </Switch>
     </>

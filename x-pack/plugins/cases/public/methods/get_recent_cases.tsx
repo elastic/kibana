@@ -12,16 +12,18 @@ import { RecentCasesProps } from '../components/recent_cases';
 
 export type GetRecentCasesProps = RecentCasesProps & CasesContextProps;
 
-const RecentCasesLazy = lazy(() => import('../components/recent_cases'));
+const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
+  () => import('../components/recent_cases')
+);
 export const getRecentCasesLazy = ({
   owner,
   appId,
   userCanCrud,
-  ...props
+  maxCasesToShow,
 }: GetRecentCasesProps) => (
   <CasesProvider value={{ appId, owner, userCanCrud }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <RecentCasesLazy {...props} />
+      <RecentCasesLazy maxCasesToShow={maxCasesToShow} />
     </Suspense>
   </CasesProvider>
 );

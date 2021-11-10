@@ -19,11 +19,21 @@ export const getAllCasesSelectorModalLazy = ({
   owner,
   appId,
   userCanCrud,
-  ...props
+  alertData,
+  hiddenStatuses,
+  onRowClick,
+  updateCase,
+  onClose,
 }: GetAllCasesSelectorModalProps) => (
   <CasesProvider value={{ owner, appId, userCanCrud }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <AllCasesSelectorModalLazy {...props} />
+      <AllCasesSelectorModalLazy
+        alertData={alertData}
+        hiddenStatuses={hiddenStatuses}
+        onRowClick={onRowClick}
+        updateCase={updateCase}
+        onClose={onClose}
+      />
     </Suspense>
   </CasesProvider>
 );

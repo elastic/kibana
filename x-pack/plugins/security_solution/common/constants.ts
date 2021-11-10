@@ -84,7 +84,7 @@ export enum SecurityPageName {
   authentications = 'authentications',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * The 3 following Cases page names must match `CasesDeepLinkIds` in x-pack/plugins/cases/public/common/navigation.ts
+   * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
    */
   case = 'cases',
   caseConfigure = 'cases_configure',

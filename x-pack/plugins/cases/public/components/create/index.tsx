@@ -6,41 +6,15 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 
 import { Field, getUseField } from '../../common/shared_imports';
 import * as i18n from './translations';
-import { CreateCaseForm } from './form';
-import { FormContext } from './form_context';
-import { SubmitCaseButton } from './submit_button';
-import { Case } from '../../containers/types';
-import { CaseType } from '../../../common';
-import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
-import { fieldName as descriptionFieldName } from './description';
-import { InsertTimeline } from '../insert_timeline';
-import { UsePostComment } from '../../containers/use_post_comment';
+import { CreateCaseForm, CreateCaseFormProps } from './form';
+import { HeaderPage } from '../header_page';
 
 export const CommonUseField = getUseField({ component: Field });
 
-const Container = styled.div`
-  ${({ theme }) => `
-    margin-top: ${theme.eui.euiSize};
-  `}
-`;
-
-export interface CreateCaseProps {
-  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
-  caseType?: CaseType;
-  disableAlerts?: boolean;
-  hideConnectorServiceNowSir?: boolean;
-  onCancel: () => void;
-  onSuccess: (theCase: Case) => Promise<void>;
-  timelineIntegration?: CasesTimelineIntegration;
-  withSteps?: boolean;
-}
-
-export const CreateCase = React.memo<CreateCaseProps>(
+export const CreateCase = React.memo<CreateCaseFormProps>(
   ({
     afterCaseCreated,
     caseType,
@@ -51,45 +25,23 @@ export const CreateCase = React.memo<CreateCaseProps>(
     timelineIntegration,
     withSteps,
   }) => (
-    <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-      <FormContext
+    <>
+      <HeaderPage
+        showBackButton={true}
+        data-test-subj="case-create-title"
+        title={i18n.CREATE_PAGE_TITLE}
+      />
+      <CreateCaseForm
         afterCaseCreated={afterCaseCreated}
         caseType={caseType}
         hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+        disableAlerts={disableAlerts}
+        onCancel={onCancel}
         onSuccess={onSuccess}
-        // if we are disabling alerts, then we should not sync alerts
-        syncAlertsDefaultValue={!disableAlerts}
-      >
-        <CreateCaseForm
-          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-          disableAlerts={disableAlerts}
-          withSteps={withSteps}
-        />
-        <Container>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="xs"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="create-case-cancel"
-                iconType="cross"
-                onClick={onCancel}
-                size="s"
-              >
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SubmitCaseButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Container>
-        <InsertTimeline fieldName={descriptionFieldName} />
-      </FormContext>
-    </CasesTimelineIntegrationProvider>
+        timelineIntegration={timelineIntegration}
+        withSteps={withSteps}
+      />
+    </>
   )
 );
 

@@ -8,4 +8,4 @@ import { CreateCaseFlyout, CreateCaseFlyoutProps } from './create_case_flyout';
 
 export { CreateCaseFlyout, CreateCaseFlyoutProps };
 // eslint-disable-next-line import/no-default-export
-export default CreateCaseFlyout;
+export { CreateCaseFlyout as default };

@@ -7,8 +7,7 @@
 
 import React from 'react';
 
-import { AllCases } from '../../components/app/cases/all_cases';
-import * as i18n from '../../components/app/cases/translations';
+import { Cases } from './cases';
 
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
@@ -20,7 +19,7 @@ import { useHasData } from '../../hooks/use_has_data';
 import { LoadingObservability } from '../overview/loading_observability';
 import { getNoDataConfig } from '../../utils/no_data_config';
 
-export const AllCasesPage = React.memo(() => {
+export const CasesPage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
   const { core, ObservabilityPageTemplate } = usePluginContext();
   useReadonlyHeader();
@@ -45,15 +44,12 @@ export const AllCasesPage = React.memo(() => {
     <ObservabilityPageTemplate
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       noDataConfig={noDataConfig}
-      pageHeader={{
-        pageTitle: <>{i18n.PAGE_TITLE}</>,
-      }}
     >
-      <AllCases userCanCrud={userPermissions?.crud ?? false} />
+      <Cases userCanCrud={userPermissions?.crud ?? false} />
     </ObservabilityPageTemplate>
   ) : (
     <CaseFeatureNoPermissions />
   );
 });
 
-AllCasesPage.displayName = 'AllCasesPage';
+CasesPage.displayName = 'CasesPage';

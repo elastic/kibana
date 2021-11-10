@@ -7,11 +7,11 @@
 import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import { parseAlert } from '../../../../pages/alerts/parse_alert';
-import { TopAlert } from '../../../../pages/alerts/';
-import { useKibana } from '../../../../utils/kibana_react';
-import { Ecs } from '../../../../../../cases/common';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { parseAlert } from '../../pages/alerts/parse_alert';
+import { TopAlert } from '../../pages/alerts/';
+import { useKibana } from '../../utils/kibana_react';
+import { Ecs } from '../../../../cases/common';
 
 // no alerts in observability so far
 // dummy hook for now as hooks cannot be called conditionally
