@@ -12,7 +12,7 @@ including vulnerability detection, compliance monitoring, incident investigation
 With Osquery in {kib}, you can:
 
  * Run live queries for one or more agents
- * Schedule queries to capture changes to OS state over time
+ * Schedule query packs to capture changes to OS state over time
  * View a history of past queries and their results
  * Save queries and build a library of queries for specific use cases
 
@@ -120,45 +120,6 @@ image::images/scheduled-pack.png[Shows queries in the pack and details about eac
 . View scheduled query results in <<discover,*Discover*> or the drag-and-drop <<lens,*Lens*>> editor.
 
 [float]
-[[osquery-map-fields]]
-== Map result fields to ECS
-
-When you save queries or add queries to a pack, you can optionally map osquery results or static values to fields in
-the {ecs-ref}/ecs-reference.html[Elastic Common Schema] (ECS),
-which standardizes your Osquery data for use across detections, machine learning,
-and any other areas that rely on ECS-compliant data.
-When the query is run, the results include the original `osquery.<fields>`
-and the mapped ECS fields. For example, if you update a query to map `osquery.name` to `user.name`, the query results include both fields. 
-
-. Edit saved queries or queries in a pack to map fields:
-
-* For *Saved queries*: Open the *Saved queries* tab, and then click the edit icon for the query that you want to map.
-
-* For *Packs*: Open the *Packs* tab, edit a pack, and then click the edit icon for the query that you want to map.
-
-. In the **ECS mapping** section, select the ECS fields you want to map. 
-+
-The fields available in the **Osquery.results** column are based on the SQL query entered,
-and only include fields that the query returns.
-
-. Save your changes.
-
-When mapping fields:
-
-* To add a new row for additional fields to map, click the plus icon.
-
-* To remove any mapped rows, click the trash icon.
-
-* Note:
-
-** Some ECS fields are restricted and cannot be mapped. These are not available in the ECS dropdown.
-
-** Some ECS fields are restricted to a set of allowed values, like {ecs-ref}/ecs-event.html#field-event-category[event.category]. Use the {ecs-ref}/ecs-field-reference.html[ECS Field Reference] for help when mapping fields. 
-
-** Osquery date fields have a variety of data types (including integer, text, or bigint). When mapping an Osquery date field to an ECS date field, you may need to use SQL operators in the query to get an {es}-compatible 
-{es-ref}/date.html[date] type. 
-
-[float]
 [[osquery-manage-query]]
 == Edit saved queries
 
@@ -188,6 +149,48 @@ Add or edit saved queries from the *Saved queries* tab.
 * From the *Test query* panel, select agents or groups to test the query, then click *Submit*. This runs a live query for those selected. Result columns that are mapped are marked with image:images/mapped-icon.png[mapping icon]. Hover over the icon to see the mapped ECS field.
 
 . Click **Save query**.
+
+[float]
+[[osquery-map-fields]]
+== Map result fields to ECS
+
+When you save queries or add queries to a pack, you can optionally map osquery results or static values to fields in
+the {ecs-ref}/ecs-reference.html[Elastic Common Schema] (ECS),
+which standardizes your Osquery data for use across detections, machine learning,
+and any other areas that rely on ECS-compliant data.
+When the query is run, the results include the original `osquery.<fields>`
+and the mapped ECS fields. For example, if you update a query to map `osquery.name` to `user.name`, the query results include both fields. 
+
+. Edit saved queries or queries in a pack to map fields:
+
+* For *Saved queries*: Open the *Saved queries* tab, and then click the edit icon for the query that you want to map.
+
+* For *Packs*: Open the *Packs* tab, edit a pack, and then click the edit icon for the query that you want to map.
+
+. In the **ECS mapping** section, select an **ECS field** to map. 
+
+. In the **Value** column, use the dropdown on the left to choose what type of value to map to the ECS field: 
+
+** **Osquery value**: Select an Osquery field. The fields available are based on the SQL query entered, and only include fields that the query returns. When the query runs, the ECS field is set dynamically to the value of the osquery field selected.
+
+** **Static value**: Enter a static value. When the query runs, the ECS field is set to the value entered. For example, static fields can be used to apply `tags` or your preferred `event.category` to the query results. 
+
+. Map more fields, as needed.
+
+** To add a new row for additional fields to map, click the plus icon.
+
+** To remove any mapped rows, click the trash icon.
+
+. Save your changes.
+
+Note:
+
+** Some ECS fields are restricted and cannot be mapped. These are not available in the ECS dropdown.
+
+** Some ECS fields are restricted to a set of allowed values, like {ecs-ref}/ecs-event.html#field-event-category[event.category]. Use the {ecs-ref}/ecs-field-reference.html[ECS Field Reference] for help when mapping fields. 
+
+** Osquery date fields have a variety of data types (including integer, text, or bigint). When mapping an Osquery date field to an ECS date field, you may need to use SQL operators in the query to get an {es}-compatible 
+{es-ref}/date.html[date] type. 
 
 [float]
 [[osquery-extended-tables]]
@@ -288,7 +291,7 @@ NOTE: Take caution when editing this configuration. The changes you make are dis
 
 . From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
 
-. Click the name of the agent policy where you want to adjust the osquery configuration. The configuration changes you make only apply to the policy you select.
+. Click the name of the agent policy where you want to adjust the Osquery configuration. The configuration changes you make only apply to the policy you select.
 
 . Click the name of the Osquery Manager integration, or add the integration first if the agent policy does not yet have it.
 
