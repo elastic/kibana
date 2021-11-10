@@ -401,6 +401,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -447,6 +448,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -485,6 +487,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicyUpdated.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             revision: 3,
             meta: {
               package: {
