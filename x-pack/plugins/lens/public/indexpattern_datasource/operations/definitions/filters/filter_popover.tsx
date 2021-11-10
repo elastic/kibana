@@ -7,7 +7,7 @@
 
 import './filter_popover.scss';
 
-import React, { MouseEventHandler, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
 import { IndexPattern } from '../../../types';
@@ -21,14 +21,14 @@ export const FilterPopover = ({
   indexPattern,
   Button,
   isOpen,
-  onClose,
+  triggerClose,
 }: {
   filter: FilterValue;
   setFilter: Function;
   indexPattern: IndexPattern;
   Button: React.FunctionComponent;
   isOpen: boolean;
-  onClose: () => void;
+  triggerClose: () => void;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>();
@@ -58,7 +58,7 @@ export const FilterPopover = ({
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isPopoverOpen}
       ownFocus
-      closePopover={() => onClose()}
+      closePopover={() => triggerClose()}
       button={<Button />}
     >
       <QueryInput
@@ -76,7 +76,7 @@ export const FilterPopover = ({
         onChange={setFilterLabel}
         placeholder={getPlaceholder(filter.input.query)}
         inputRef={inputRef}
-        onSubmit={() => onClose()}
+        onSubmit={() => triggerClose()}
         dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>

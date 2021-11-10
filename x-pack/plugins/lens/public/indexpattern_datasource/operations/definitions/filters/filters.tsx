@@ -243,7 +243,7 @@ export const FilterList = ({
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
                 isOpen={filter.id === activeFilterPopoverId}
-                onClose={() => setActiveFilterPopoverId('')}
+                triggerClose={() => setActiveFilterPopoverId('')}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {
