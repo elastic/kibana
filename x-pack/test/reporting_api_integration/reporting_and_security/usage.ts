@@ -10,6 +10,11 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import * as GenerationUrls from '../services/generation_urls';
 import { ReportingUsageStats } from '../services/usage';
 
+const JOB_PARAMS_CSV_DEFAULT_SPACE =
+  `columns:!(order_date,category,customer_full_name,taxful_total_price,currency),objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true))` +
+  `,filter:!((meta:(field:order_date,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,params:()),query:(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-02T12:28:40.866Z'` +
+  `,lte:'2019-07-18T20:59:57.136Z'))))),index:aac3e500-f2c7-11ea-8250-fb138aa491e7,parent:(filter:!(),highlightAll:!t,index:aac3e500-f2c7-11ea-8250-fb138aa491e7` +
+  `,query:(language:kuery,query:''),version:!t),sort:!((order_date:desc)),trackTotalHits:!t)`;
 const OSS_KIBANA_ARCHIVE_PATH = 'test/functional/fixtures/es_archiver/dashboard/current/kibana';
 const OSS_DATA_ARCHIVE_PATH = 'test/functional/fixtures/es_archiver/dashboard/current/data';
 
@@ -20,30 +25,14 @@ interface UsageStats {
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
   const retry = getService('retry');
   const usageAPI = getService('usageAPI');
 
   describe('Usage', () => {
-    before(async () => {
-      await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
-      await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
-
-      await kibanaServer.uiSettings.update({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-      });
-      await reportingAPI.deleteAllReports();
-    });
-
-    after(async () => {
-      await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
-      await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
-    });
-
-    afterEach(async () => {
-      await reportingAPI.deleteAllReports();
-    });
+    const deleteAllReports = () => reportingAPI.deleteAllReports();
+    beforeEach(deleteAllReports);
+    after(deleteAllReports);
 
     describe('initial state', () => {
       let usage: UsageStats;
@@ -69,8 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 0);
+        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv_searchsource', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 0);
       });
@@ -123,10 +112,24 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('from new jobs posted', () => {
-      it('should handle csv', async () => {
+      before(async () => {
+        await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
+        await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
+        await reportingAPI.initEcommerce();
+      });
+
+      after(async () => {
+        await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
+        await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
+        await reportingAPI.teardownEcommerce();
+      });
+
+      it('should handle csv_searchsource', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
-            reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
+            reportingAPI.postJob(
+              `/api/reporting/generate/csv_searchsource?jobParams=(${JOB_PARAMS_CSV_DEFAULT_SPACE})`
+            ),
           ])
         );
 
@@ -135,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 1);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 1);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
       });
 
@@ -152,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 1);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 2);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
 
@@ -171,14 +174,14 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 1);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 2);
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
 
         reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 1);
         reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 1);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 2);
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 0);
+        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv_searchsource', 0);
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
     });

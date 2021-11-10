@@ -72,10 +72,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await ml.securityUI.logout();
+
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.securityUI.logout();
     });
 
     for (const testData of testDataList) {
