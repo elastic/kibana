@@ -107,6 +107,7 @@ export const getHeatmapVisualization = ({
       }),
       groupLabel: groupLabelForHeatmap,
       showExperimentalBadge: true,
+      sortPriority: 1,
     },
   ],
 

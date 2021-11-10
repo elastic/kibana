@@ -55,6 +55,7 @@ import {
   CalloutWarning,
   LabelInput,
   getErrorMessage,
+  DimensionEditorTab,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 
@@ -704,8 +705,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const hasTabs = !isFullscreen && (hasFormula || supportStaticValue);
 
-  const tabs = {
-    [staticValueOperationName]: {
+  const tabs: DimensionEditorTab[] = [
+    {
       id: staticValueOperationName,
       enabled: Boolean(supportStaticValue),
       state: showStaticValueFunction,
@@ -721,7 +722,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         defaultMessage: 'Static value',
       }),
     },
-    [quickFunctionsName]: {
+    {
       id: quickFunctionsName,
       enabled: true,
       state: showQuickFunctions,
@@ -735,7 +736,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         defaultMessage: 'Quick functions',
       }),
     },
-    [formulaOperationName]: {
+    {
       id: formulaOperationName,
       enabled: hasFormula,
       state: temporaryState === 'none' && selectedColumn?.operationType === formulaOperationName,
@@ -757,7 +758,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         defaultMessage: 'Formula',
       }),
     },
-  };
+  ];
 
   return (
     <div id={columnId}>

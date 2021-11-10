@@ -79,9 +79,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
         isOpen={open}
         closePopover={() => {
           setOpen(false);
-          if (handleClose) {
-            handleClose();
-          }
+          handleClose?.();
         }}
         anchorPosition="downRight"
       >

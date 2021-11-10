@@ -144,32 +144,22 @@ export const CalloutWarning = ({
   );
 };
 
-type DimensionEditorTabsType =
-  | typeof quickFunctionsName
-  | typeof staticValueOperationName
-  | typeof formulaOperationName;
+export interface DimensionEditorTab {
+  enabled: boolean;
+  state: boolean;
+  onClick: () => void;
+  id: typeof quickFunctionsName | typeof staticValueOperationName | typeof formulaOperationName;
+  label: string;
+}
 
-export const DimensionEditorTabs = ({
-  tabs,
-}: {
-  tabs: Record<
-    DimensionEditorTabsType,
-    {
-      enabled: boolean;
-      state: boolean;
-      onClick: () => void;
-      id: string;
-      label: string;
-    }
-  >;
-}) => {
+export const DimensionEditorTabs = ({ tabs }: { tabs: DimensionEditorTab[] }) => {
   return (
     <EuiTabs
       size="s"
       className="lnsIndexPatternDimensionEditor__header"
       data-test-subj="lens-dimensionTabs"
     >
-      {Object.entries(tabs).map(([id, { enabled, state, onClick, label }]) => {
+      {tabs.map(({ id, enabled, state, onClick, label }) => {
         return enabled ? (
           <EuiTab isSelected={state} data-test-subj={`lens-dimensionTabs-${id}`} onClick={onClick}>
             {label}

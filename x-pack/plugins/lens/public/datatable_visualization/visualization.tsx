@@ -51,7 +51,7 @@ export const getDatatableVisualization = ({
       groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
         defaultMessage: 'Tabular',
       }),
-      sortPriority: 3,
+      sortPriority: 5,
     },
   ],
 
