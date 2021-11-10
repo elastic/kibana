@@ -269,9 +269,11 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 
   const unseenApps = new Set(app);
 
-  const managementSets = Object.entries(management).map((entry) => [entry[0], new Set(entry[1])]);
+  const managementSets = Object.entries(management).map(
+    (entry) => [entry[0], new Set(entry[1])] as const
+  );
 
-  const unseenManagement = new Map<string, Set<string>>(managementSets);
+  const unseenManagement = new Map(managementSets);
 
   const unseenCatalogue = new Set(catalogue);
 
