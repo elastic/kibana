@@ -24,7 +24,9 @@ import {
   IngestManagerError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
+  RegistryConnectionError,
   RegistryError,
+  RegistryResponseError,
 } from './index';
 
 type IngestErrorHandler = (
@@ -40,7 +42,12 @@ interface IngestErrorHandlerParams {
 // this type is based on BadRequest values observed while debugging https://github.com/elastic/kibana/issues/75862
 
 const getHTTPResponseCode = (error: IngestManagerError): number => {
-  if (error instanceof RegistryError) {
+  if (error instanceof RegistryResponseError) {
+    // 4xx/5xx's from EPR
+    return 500;
+  }
+  if (error instanceof RegistryConnectionError || error instanceof RegistryError) {
+    // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
     return 502; // Bad Gateway
   }
   if (error instanceof PackageNotFoundError) {
