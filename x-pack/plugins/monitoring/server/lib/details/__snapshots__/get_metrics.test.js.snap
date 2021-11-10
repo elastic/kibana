@@ -2247,7 +2247,7 @@ Object {
         "isDerivative": false,
         "label": "Version Map",
         "metricAgg": "max",
-        "title": "Index Memory - Lucene",
+        "title": "Index Memory",
         "units": "B",
       },
       "timeRange": Object {

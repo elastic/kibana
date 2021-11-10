@@ -322,6 +322,9 @@ export const metrics = {
   }),
   index_mem_fixed_bit_set: new SingleIndexMemoryMetric({
     field: 'fixed_bit_set_memory_in_bytes',
+    title: i18n.translate('xpack.monitoring.metrics.esIndex.fixedBitsetsTitle', {
+      defaultMessage: 'Index Memory - Lucene',
+    }),
     label: i18n.translate('xpack.monitoring.metrics.esIndex.fixedBitsetsLabel', {
       defaultMessage: 'Fixed Bitsets',
     }),
@@ -950,6 +953,9 @@ export const metrics = {
   }),
   node_index_mem_fixed_bit_set: new NodeIndexMemoryMetric({
     field: 'fixed_bit_set_memory_in_bytes',
+    title: i18n.translate('xpack.monitoring.metrics.esNode.fixedBitsetsTitle', {
+      defaultMessage: 'Index Memory - Lucene',
+    }),
     label: i18n.translate('xpack.monitoring.metrics.esNode.fixedBitsetsLabel', {
       defaultMessage: 'Fixed Bitsets',
     }),
