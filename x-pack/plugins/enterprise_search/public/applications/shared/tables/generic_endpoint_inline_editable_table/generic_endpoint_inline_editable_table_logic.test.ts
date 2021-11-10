@@ -131,7 +131,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         expect(logic.actions.clearLoading).toHaveBeenCalled();
       });
 
-      it('passes API errors to the nested inline editable taable', async () => {
+      it('passes API errors to the nested inline editable table', async () => {
         http.post.mockReturnValueOnce(Promise.reject('error'));
         const logic = mountLogic();
         logic.actions.addItem(item, onSuccess);
