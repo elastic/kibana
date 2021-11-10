@@ -43,8 +43,8 @@ describe('checkbox control column', () => {
     test('calls onRowSelected when checked', () => {
       const onRowSelected = jest.fn();
       const { container } = render(<RowCheckBox {...defaultProps} onRowSelected={onRowSelected} />);
-
-      fireEvent.click(container.querySelector('[data-test-subj~="select-event"]'));
+      const checkbox = container.querySelector('[data-test-subj~="select-event"]');
+      fireEvent.click(checkbox!);
 
       expect(onRowSelected).toHaveBeenCalled();
     });
