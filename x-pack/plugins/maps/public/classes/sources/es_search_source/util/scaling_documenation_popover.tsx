@@ -54,6 +54,12 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
   _renderContent() {
     return (
       <div>
+        <EuiPopoverTitle>
+          <FormattedMessage 
+            id="xpack.maps.scalingDocs.title" 
+            defaultMessage="Scaling"
+          />
+        </EuiPopoverTitle>
         <EuiText grow={false}>
           <p>
             <FormattedMessage 
@@ -71,30 +77,12 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                   values={{ maxResultWindow: this.props.maxResultWindow }}
                 />
               </p>
-              <h6>{ADVANTAGE_TITLE}</h6>
-              <ul>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.termJoins" 
-                    defaultMessage="Supports term joins"
-                  />
-                </li>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.fieldFormatters" 
-                    defaultMessage="Supports field formatters"
-                  />
-                </li>
-              </ul>
-              <h6>{DISADVANTAGE_TITLE}</h6>
-              <ul>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.noLargeData" 
-                    defaultMessage="Can not display large data sets"
-                  />
-                </li>
-              </ul>
+              <p>
+                <FormattedMessage 
+                  id="xpack.maps.scalingDocs.limitUseCase" 
+                  defaultMessage="Use this option to display medium data sets and create choropleth maps to compare statistics across boundaries."
+                />
+              </p>
             </dd>
           
             <dt>{this.props.clustersOptionLabel}</dt>
@@ -106,30 +94,12 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                   values={{ maxResultWindow: this.props.maxResultWindow }}
                 />
               </p>
-              <h6>{ADVANTAGE_TITLE}</h6>
-              <ul>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.largeDataSets" 
-                    defaultMessage="Displays large data sets"
-                  />
-                </li>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.fieldFormatters" 
-                    defaultMessage="Supports field formatters"
-                  />
-                </li>
-              </ul>
-              <h6>{DISADVANTAGE_TITLE}</h6>
-              <ul>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.noTermJoins" 
-                    defaultMessage="Does not support term joins"
-                  />
-                </li>
-              </ul>
+              <p>
+                <FormattedMessage 
+                  id="xpack.maps.scalingDocs.clustersUseCase" 
+                  defaultMessage="Use this option to display large data sets. Does not support term joins."
+                />
+              </p>
             </dd>
           
             <dt>{this.props.mvtOptionLabel}</dt>
@@ -141,30 +111,12 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                   values={{ maxResultWindow: this.props.maxResultWindow }}
                 />
               </p>
-              <h6>{ADVANTAGE_TITLE}</h6>
-              <ul>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.largeDataSets" 
-                    defaultMessage="Displays large data sets"
-                  />
-                </li>
-              </ul>
-              <h6>{DISADVANTAGE_TITLE}</h6>
-              <ul>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.noFieldFormatters" 
-                    defaultMessage="Does not support field formatters"
-                  />
-                </li>
-                <li>
-                  <FormattedMessage 
-                    id="xpack.maps.scalingDocs.noTermJoins" 
-                    defaultMessage="Does not support term joins"
-                  />
-                </li>
-              </ul>
+              <p>
+                <FormattedMessage 
+                  id="xpack.maps.scalingDocs.clustersUseCase" 
+                  defaultMessage="Use this option to display large data sets with the fastest loading times. Does not support term joins, formatted labels, and data driven styling from scripted fields."
+                />
+              </p>
             </dd>
           </dl>
         </EuiText>
