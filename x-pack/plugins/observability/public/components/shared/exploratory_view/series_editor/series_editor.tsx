@@ -222,10 +222,6 @@ export const SELECT_REPORT_TYPE = i18n.translate(
   }
 );
 
-export const RESET_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.reset', {
-  defaultMessage: 'Reset',
-});
-
 export const REPORT_TYPE_LABEL = i18n.translate(
   'xpack.observability.expView.seriesBuilder.reportType',
   {
