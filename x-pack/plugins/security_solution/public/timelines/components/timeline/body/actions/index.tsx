@@ -169,7 +169,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
             key="investigate-in-timeline"
             ecsRowData={ecsData}
-            nonEcsRowData={data}
           />
         )}
 

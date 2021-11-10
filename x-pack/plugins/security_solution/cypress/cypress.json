@@ -12,5 +12,10 @@
   "video": false,
   "videosFolder": "../../../target/kibana-security-solution/cypress/videos",
   "viewportHeight": 900,
-  "viewportWidth": 1440
+  "viewportWidth": 1440,
+  "env": {
+    "protocol": "http",
+    "hostname": "localhost",
+    "configport": "5601"
+  }
 }

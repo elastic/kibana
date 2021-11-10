@@ -15,6 +15,7 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiOverlayMaskProps } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
@@ -477,6 +478,9 @@ export interface DocLinksStart {
     readonly links: {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -600,7 +604,11 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+            readonly remoteReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
@@ -703,6 +711,7 @@ export interface DocLinksStart {
             fleetServerAddFleetServer: string;
             settings: string;
             settingsFleetServerHostSettings: string;
+            settingsFleetServerProxySettings: string;
             troubleshooting: string;
             elasticAgent: string;
             datastreams: string;
@@ -712,6 +721,7 @@ export interface DocLinksStart {
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
             apiKeysLearnMore: string;
+            onPremRegistry: string;
         }>;
         readonly ecs: {
             readonly guide: string;
@@ -727,6 +737,9 @@ export interface DocLinksStart {
             readonly pythonGuide: string;
             readonly rubyOverview: string;
             readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
         };
     };
 }
@@ -805,17 +818,17 @@ export interface HttpFetchQuery {
 // @public
 export interface HttpHandler {
     // (undocumented)
-    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
+    <TResponseBody = unknown>(path: string, options: HttpFetchOptions & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+    <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 // @public
@@ -867,7 +880,7 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse<TResponseBody = any> {
+export interface HttpResponse<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
     readonly request: Readonly<Request>;
@@ -934,9 +947,9 @@ export interface IExternalUrlPolicy {
 }
 
 // @public (undocumented)
-export interface IHttpFetchError extends Error {
+export interface IHttpFetchError<TResponseBody = unknown> extends Error {
     // (undocumented)
-    readonly body?: any;
+    readonly body?: TResponseBody;
     // (undocumented)
     readonly name: string;
     // @deprecated (undocumented)
@@ -956,7 +969,7 @@ export interface IHttpInterceptController {
 }
 
 // @public
-export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly response?: Readonly<Response>;
 }
@@ -1047,6 +1060,8 @@ export interface OverlayFlyoutOpenOptions {
     closeButtonAriaLabel?: string;
     // (undocumented)
     hideCloseButton?: boolean;
+    // (undocumented)
+    maskProps?: EuiOverlayMaskProps;
     // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
@@ -1186,6 +1201,16 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
+}
+
+// @public (undocumented)
+export interface ResponseErrorBody {
+    // (undocumented)
+    attributes?: Record<string, unknown>;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
 }
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
