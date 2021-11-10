@@ -12,7 +12,6 @@ import { IEsSearchResponse } from 'src/plugins/data/common';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import type { IRouter } from 'src/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
-import { reportServerError } from '../../../../src/plugins/kibana_utils/server';
 
 export function registerServerSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(
@@ -60,7 +59,12 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
           },
         });
       } catch (e) {
-        return reportServerError(response, e);
+        return response.customError({
+          statusCode: e.statusCode ?? 500,
+          body: {
+            message: e.message,
+          },
+        });
       }
     }
   );
