@@ -459,6 +459,34 @@ describe('reference_line helpers', () => {
         ).toEqual({ min: 0, max: 375 });
     });
 
+    it('should compute the correct value for a histogram on stacked chart for the xAccessor', () => {
+      for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked'])
+        expect(
+          computeOverallDataDomain(
+            [
+              { layerId: 'id-a', seriesType, accessors: ['c'] },
+              { layerId: 'id-b', seriesType, accessors: ['f'] },
+            ] as XYLayerConfig[],
+            ['c', 'f'],
+            getActiveData([
+              {
+                id: 'id-a',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({ a: 50 * i, b: 100 * i, c: i })),
+              },
+              {
+                id: 'id-b',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({ d: 25 * (i + 1), e: i % 2 ? 100 : null, f: i })),
+              },
+            ]),
+            false // this will avoid the stacking behaviour
+          )
+        ).toEqual({ min: 0, max: 2 });
+    });
+
     it('should compute the correct value for a histogram non-stacked chart', () => {
       for (const seriesType of ['bar', 'bar_horizontal', 'line', 'area'])
         expect(
