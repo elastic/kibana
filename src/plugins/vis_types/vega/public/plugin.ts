@@ -18,7 +18,6 @@ import {
   setInjectedVars,
   setUISettings,
   setInjectedMetadata,
-  setMapServiceSettings,
   setDocLinks,
 } from './services';
 
@@ -29,7 +28,6 @@ import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
-import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settings';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -72,10 +70,6 @@ export class VegaPlugin implements Plugin<void, void> {
     });
 
     setUISettings(core.uiSettings);
-
-    setMapServiceSettings(
-      new MapServiceSettings(mapsEms.config, this.initializerContext.env.packageInfo.version)
-    );
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,

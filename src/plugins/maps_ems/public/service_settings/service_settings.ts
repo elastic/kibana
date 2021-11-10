@@ -64,6 +64,9 @@ export class ServiceSettings implements IServiceSettings {
     });
   }
 
+  getMapConfig(): MapsEmsConfig {
+    return this._mapConfig;
+  }
   __debugStubManifestCalls(manifestRetrieval: () => Promise<unknown>): { removeStub: () => void } {
     const oldGetManifest = this._emsClient.getManifest;
 
@@ -252,6 +255,10 @@ export class ServiceSettings implements IServiceSettings {
       url = fileLayerConfig.url;
     }
     return url;
+  }
+
+  getAttributionsFromTMSServce(tmsService: TMSService) {
+    return getAttributionString(tmsService);
   }
 }
 

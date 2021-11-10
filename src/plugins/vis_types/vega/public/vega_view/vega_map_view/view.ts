@@ -15,18 +15,12 @@ import { mapboxgl } from '@kbn/mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
-import { getMapServiceSettings, getUISettings } from '../../services';
-import { getAttributionsForTmsService } from './map_service_settings';
-import type { MapServiceSettings } from './map_service_settings';
+import { getUISettings } from '../../services';
 
-import {
-  defaultMapConfig,
-  defaultMabBoxStyle,
-  userConfiguredLayerId,
-  vegaLayerId,
-} from './constants';
+import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 import './vega_map_view.scss';
+import { TMS_IN_YML_ID } from '../../../../../maps_ems/public';
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   const mapCanvas = mapBoxInstance.getCanvas();
@@ -57,7 +51,6 @@ export class VegaMapView extends VegaBaseView {
 
   constructor(a) {
     super(a);
-    console.log('SERVICE_SETTINGS', this._serviceSettings);
   }
 
   // private getEmsTileLayer() {
@@ -95,7 +88,6 @@ export class VegaMapView extends VegaBaseView {
     //
     if (mapStyle) {
       const isDarkMode: boolean = getUISettings().get('theme:darkMode');
-      console.log('this', this._serviceSettings);
       return emsTileServiceId
         ? emsTileServiceId
         : await this._serviceSettings.getDefaultTmsLayer(isDarkMode);
@@ -111,7 +103,7 @@ export class VegaMapView extends VegaBaseView {
     };
 
     const emsTileLayer = await this.getEmsTileLayerId();
-    if (emsTileLayer && emsTileLayer !== userConfiguredLayerId) {
+    if (emsTileLayer && emsTileLayer !== TMS_IN_YML_ID) {
       const tmsService = await this._serviceSettings.getTmsService(emsTileLayer);
 
       if (!tmsService) {
@@ -125,12 +117,11 @@ export class VegaMapView extends VegaBaseView {
       }
       zoomSettings.maxZoom = (await tmsService.getMaxZoom()) ?? defaultMapConfig.maxZoom;
       zoomSettings.minZoom = (await tmsService.getMinZoom()) ?? defaultMapConfig.minZoom;
-      customAttribution = getAttributionsForTmsService(tmsService);
+      customAttribution = this._serviceSettings.getAttributionsFromTMSServce(tmsService);
       style = (await tmsService.getVectorStyleSheet()) as Style;
     } else {
-      console.log('TODO must specifcy map config');
-      // customAttribution = this.mapServiceSettings.config.tilemap.options.attribution;
-      customAttribution = 'foobar';
+      const config = this._serviceSettings.getMapConfig();
+      customAttribution = config.tilemap.options.attribution;
     }
 
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
@@ -153,8 +144,8 @@ export class VegaMapView extends VegaBaseView {
           if (mapBoxInstance.getLayer(vegaLayerId)) {
             mapBoxInstance.removeLayer(vegaLayerId);
           }
-          if (mapBoxInstance.getLayer(userConfiguredLayerId)) {
-            mapBoxInstance.removeLayer(userConfiguredLayerId);
+          if (mapBoxInstance.getLayer(TMS_IN_YML_ID)) {
+            mapBoxInstance.removeLayer(TMS_IN_YML_ID);
           }
           mapBoxInstance.remove();
         });
@@ -179,15 +170,13 @@ export class VegaMapView extends VegaBaseView {
   }
 
   private initLayers(mapBoxInstance: Map, vegaView: View, emsTileLayer: string) {
-    const shouldShowUserConfiguredLayer = emsTileLayer === userConfiguredLayerId;
+    const shouldShowUserConfiguredLayer = emsTileLayer === TMS_IN_YML_ID;
 
     if (shouldShowUserConfiguredLayer) {
-      console.log('TODO');
-      // const { url, options } = this.mapServiceSettings.config.tilemap;
-      const { url, options } = { url: 'http://foobar', options: {} };
+      const { url, options } = this._serviceSettings.getMapConfig().tilemap;
 
       initTmsRasterLayer({
-        id: userConfiguredLayerId,
+        id: TMS_IN_YML_ID,
         map: mapBoxInstance,
         context: {
           tiles: [url!],
