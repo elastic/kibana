@@ -272,7 +272,7 @@ function ObservabilityActions({
                   iconType="boxesHorizontal"
                   aria-label={actionsToolTip}
                   onClick={() => toggleActionsPopover(eventId)}
-                  data-test-subj="alerts-table-row-action-more"
+                  data-test-subj="alertsTableRowActionMore"
                 />
               </EuiToolTip>
             }
