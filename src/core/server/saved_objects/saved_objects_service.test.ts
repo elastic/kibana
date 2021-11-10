@@ -117,7 +117,7 @@ describe('SavedObjectsService', () => {
     });
 
     it('registers the deprecation provider with the correct kibanaVersion', async () => {
-      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json'));
+      const pkg = loadJsonFile.sync<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
       const kibanaVersion = pkg.version;
 
       const coreContext = createCoreContext({
@@ -136,7 +136,7 @@ describe('SavedObjectsService', () => {
     });
 
     it('calls registerRoutes with the correct kibanaVersion', async () => {
-      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json'));
+      const pkg = loadJsonFile.sync<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
       const kibanaVersion = pkg.version;
 
       const coreContext = createCoreContext({
@@ -263,7 +263,7 @@ describe('SavedObjectsService', () => {
     });
 
     it('calls KibanaMigrator with correct version', async () => {
-      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json'));
+      const pkg = loadJsonFile.sync<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
       const kibanaVersion = pkg.version;
 
       const coreContext = createCoreContext({
