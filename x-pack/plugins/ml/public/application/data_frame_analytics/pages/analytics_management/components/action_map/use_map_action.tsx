@@ -24,7 +24,7 @@ export const useMapAction = () => {
 
   const clickHandler = useCallback(
     async (item: DataFrameAnalyticsListRow) => {
-      const globalStateClone = cloneDeep(globalState);
+      const globalStateClone = cloneDeep(globalState || {});
       delete globalStateClone.ml;
 
       const path = await mlLocator.getUrl({
