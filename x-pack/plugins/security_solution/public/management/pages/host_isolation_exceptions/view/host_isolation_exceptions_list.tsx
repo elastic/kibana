@@ -37,7 +37,6 @@ import {
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
-import { HostIsolationExceptionsPageAction } from '../store/action';
 import { getHostIsolationExceptionItems } from '../service';
 import { parseQueryFilterToKQL } from '../../../common/utils';
 
