@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { AllCases } from '../../components/app/cases/all_cases';
-import * as i18n from '../../components/app/cases/translations';
 
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
