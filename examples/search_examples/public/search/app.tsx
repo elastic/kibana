@@ -47,6 +47,7 @@ import {
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
 import { IMyStrategyResponse } from '../../common/types';
+import { AbortError } from '../../../../src/plugins/kibana_utils/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
@@ -102,6 +103,7 @@ export const SearchExamplesApp = ({
     IndexPatternField | null | undefined
   >();
   const [request, setRequest] = useState<Record<string, any>>({});
+  const [abortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -187,12 +189,17 @@ export const SearchExamplesApp = ({
       ...(strategy ? { get_cool: getCool } : {}),
     };
 
+    const abortController = new AbortController();
+    setAbortController(abortController);
+
     // Submit the search request using the `data.search` service.
     setRequest(req.params.body);
+
     const searchSubscription$ = data.search
       .search(req, {
         strategy,
         sessionId,
+        abortSignal: abortController.signal,
       })
       .subscribe({
         next: (res) => {
@@ -240,10 +247,16 @@ export const SearchExamplesApp = ({
           }
         },
         error: (e) => {
-          notifications.toasts.addDanger({
-            title: 'Failed to run search',
-            text: e.message,
-          });
+          if (e instanceof AbortError) {
+            notifications.toasts.addWarning({
+              title: e.message,
+            });
+          } else {
+            notifications.toasts.addDanger({
+              title: 'Failed to run search',
+              text: e.message,
+            });
+          }
         },
       });
   };
@@ -286,7 +299,11 @@ export const SearchExamplesApp = ({
       }
 
       setRequest(searchSource.getSearchRequestBody());
-      const { rawResponse: res } = await searchSource.fetch$().toPromise();
+      const abortController = new AbortController();
+      setAbortController(abortController);
+      const { rawResponse: res } = await searchSource
+        .fetch$({ abortSignal: abortController.signal })
+        .toPromise();
       setRawResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
@@ -301,7 +318,16 @@ export const SearchExamplesApp = ({
       );
     } catch (e) {
       setRawResponse(e.body);
-      notifications.toasts.addWarning(`An error has occurred: ${e.message}`);
+      if (e instanceof AbortError) {
+        notifications.toasts.addWarning({
+          title: e.message,
+        });
+      } else {
+        notifications.toasts.addDanger({
+          title: 'Failed to run search',
+          text: e.message,
+        });
+      }
     }
   };
 
@@ -329,11 +355,15 @@ export const SearchExamplesApp = ({
       },
     };
 
+    const abortController = new AbortController();
+    setAbortController(abortController);
+
     // Submit the search request using the `data.search` service.
     setRequest(req.params);
-    const searchSubscription$ = data.search
+    data.search
       .search(req, {
         strategy: 'fibonacciStrategy',
+        abortSignal: abortController.signal,
       })
       .subscribe({
         next: (res) => {
@@ -343,18 +373,22 @@ export const SearchExamplesApp = ({
               title: 'Query result',
               text: 'Query finished',
             });
-            searchSubscription$.unsubscribe();
           } else if (isErrorResponse(res)) {
             // TODO: Make response error status clearer
             notifications.toasts.addWarning('An error has occurred');
-            searchSubscription$.unsubscribe();
           }
         },
         error: (e) => {
-          notifications.toasts.addDanger({
-            title: 'Failed to run search',
-            text: e.message,
-          });
+          if (e instanceof AbortError) {
+            notifications.toasts.addWarning({
+              title: e.message,
+            });
+          } else {
+            notifications.toasts.addDanger({
+              title: 'Failed to run search',
+              text: e.message,
+            });
+          }
         },
       });
   };
@@ -365,17 +399,29 @@ export const SearchExamplesApp = ({
 
   const onServerClickHandler = async () => {
     if (!indexPattern || !selectedNumericField) return;
+    const abortController = new AbortController();
+    setAbortController(abortController);
     try {
       const res = await http.get(SERVER_SEARCH_ROUTE_PATH, {
         query: {
           index: indexPattern.title,
           field: selectedNumericField!.name,
         },
+        signal: abortController.signal,
       });
 
       notifications.toasts.addSuccess(`Server returned ${JSON.stringify(res)}`);
     } catch (e) {
-      notifications.toasts.addDanger('Failed to run search');
+      if (e?.name === 'AbortError') {
+        notifications.toasts.addWarning({
+          title: e.message,
+        });
+      } else {
+        notifications.toasts.addDanger({
+          title: 'Failed to run search',
+          text: e.message,
+        });
+      }
     }
   };
 
@@ -721,6 +767,10 @@ export const SearchExamplesApp = ({
                 strategy. This request does not take the configuration of{' '}
                 <EuiCode>TopNavMenu</EuiCode> into account, but you could pass those down to the
                 server as well.
+                <br />
+                When executing search on the server, make sure to cancel the search in case user
+                cancels corresponding network request. This could happen in case user re-runs a
+                query or leaves the page without waiting for the result.
                 <EuiSpacer />
                 <EuiButtonEmpty size="xs" onClick={onServerClickHandler} iconType="play">
                   <FormattedMessage
@@ -737,6 +787,15 @@ export const SearchExamplesApp = ({
                 selectedTab={reqTabs[selectedTab]}
                 onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
               />
+              <EuiSpacer />
+              {abortController && (
+                <EuiButtonEmpty size="xs" onClick={() => abortController?.abort()}>
+                  <FormattedMessage
+                    id="searchExamples.abortButtonText"
+                    defaultMessage="Abort request"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPageContentBody>
