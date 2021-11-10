@@ -154,4 +154,3 @@ describe('spacesManagementApp', () => {
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 });
-
