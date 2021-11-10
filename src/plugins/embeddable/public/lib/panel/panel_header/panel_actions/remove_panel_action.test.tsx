@@ -8,7 +8,6 @@
 
 import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
-import { EmbeddableStart } from '../../../../plugin';
 import {
   MockFilter,
   FILTERABLE_EMBEDDABLE,

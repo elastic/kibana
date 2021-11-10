@@ -19,7 +19,6 @@ import { inspectorPluginMock } from '../../../../../../../plugins/inspector/publ
 import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
 import { embeddablePluginMock } from '../../../../mocks';
-import { EmbeddableStart } from '../../../../plugin';
 
 const setupTests = async () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
