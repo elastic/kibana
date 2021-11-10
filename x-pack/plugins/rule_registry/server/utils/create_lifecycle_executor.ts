@@ -216,8 +216,6 @@ export const createLifecycleExecutor =
           collapse: {
             field: ALERT_UUID,
           },
-          _source: false,
-          fields: [{ field: '*', include_unmapped: true }],
           sort: {
             [TIMESTAMP]: 'desc' as const,
           },
@@ -226,7 +224,7 @@ export const createLifecycleExecutor =
       });
 
       hits.hits.forEach((hit) => {
-        const fields = parseTechnicalFields(hit.fields);
+        const fields = parseTechnicalFields(hit._source);
         const indexName = hit._index;
         const alertId = fields[ALERT_INSTANCE_ID];
         trackedAlertsDataMap[alertId] = {
