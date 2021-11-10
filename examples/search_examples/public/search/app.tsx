@@ -103,7 +103,7 @@ export const SearchExamplesApp = ({
     IndexPatternField | null | undefined
   >();
   const [request, setRequest] = useState<Record<string, any>>({});
-  const [abortController, setAbortController] = useState<AbortController>();
+  const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -195,7 +195,7 @@ export const SearchExamplesApp = ({
     // Submit the search request using the `data.search` service.
     setRequest(req.params.body);
 
-    const searchSubscription$ = data.search
+    data.search
       .search(req, {
         strategy,
         sessionId,
@@ -233,7 +233,6 @@ export const SearchExamplesApp = ({
                 toastLifeTimeMs: 300000,
               }
             );
-            searchSubscription$.unsubscribe();
             if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
@@ -243,7 +242,6 @@ export const SearchExamplesApp = ({
           } else if (isErrorResponse(res)) {
             // TODO: Make response error status clearer
             notifications.toasts.addDanger('An error has occurred');
-            searchSubscription$.unsubscribe();
           }
         },
         error: (e) => {
@@ -788,8 +786,8 @@ export const SearchExamplesApp = ({
                 onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
               />
               <EuiSpacer />
-              {abortController && (
-                <EuiButtonEmpty size="xs" onClick={() => abortController?.abort()}>
+              {currentAbortController && (
+                <EuiButtonEmpty size="xs" onClick={() => currentAbortController?.abort()}>
                   <FormattedMessage
                     id="searchExamples.abortButtonText"
                     defaultMessage="Abort request"
