@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ADD_TO_EXISTING_CASE_SELECTOR = 'add-existing-case-menu-item';
 const ADD_TO_NEW_CASE_SELECTOR = 'add-new-case-item';
-const CREATE_CASE_FLYOUT = 'createCaseFlyout';
+const CREATE_CASE_FLYOUT = 'create-case-flyout';
 const SELECT_CASE_MODAL = 'all-cases-modal';
 
 export function ObservabilityAlertsAddToCaseProvider({ getService }: FtrProviderContext) {
