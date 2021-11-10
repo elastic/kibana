@@ -272,13 +272,9 @@ describe('createLifecycleRuleTypeFactory', () => {
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
           ) as Record<string, any>;
 
-        const stored = mapValues(lastOpbeansNodeDoc, (val) => {
-          return castArray(val);
-        });
-
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
-            hits: [{ fields: stored } as any],
+            hits: [{ _source: lastOpbeansNodeDoc } as any],
             total: {
               value: 1,
               relation: 'eq',
@@ -356,13 +352,9 @@ describe('createLifecycleRuleTypeFactory', () => {
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
           ) as Record<string, any>;
 
-        const stored = mapValues(lastOpbeansNodeDoc, (val) => {
-          return castArray(val);
-        });
-
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
-            hits: [{ fields: stored } as any],
+            hits: [{ _source: lastOpbeansNodeDoc } as any],
             total: {
               value: 1,
               relation: 'eq',
