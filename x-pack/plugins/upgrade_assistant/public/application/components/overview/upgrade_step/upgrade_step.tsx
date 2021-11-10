@@ -17,24 +17,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import type { DocLinksStart } from 'src/core/public';
-import { useKibana } from '../../../../shared_imports';
+import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
-  upgradeStepTitle: (nextMajor: number) =>
-    i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-      defaultMessage: 'Install {nextMajor}.0',
-      values: { nextMajor },
-    }),
+  upgradeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
+    defaultMessage: 'Upgrade to Elastic 8.x',
+  }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack.",
+      'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8.x. Be sure to back up your data again before upgrading.',
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
     {
       defaultMessage:
-        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack. Upgrade your deployment on Elastic Cloud.",
+        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8.x. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
     }
   ),
   upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
@@ -48,20 +45,23 @@ const i18nTexts = {
   }),
 };
 
-const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
-  const { cloud } = useKibana().services;
-
+const UpgradeStep = () => {
+  const {
+    plugins: { cloud },
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
   const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
-  const cloudDeploymentUrl: string = `${cloud?.baseUrl ?? ''}/deployments/${cloud?.cloudId ?? ''}`;
-
   let callToAction;
 
   if (isCloudEnabled) {
+    const upgradeOnCloudUrl = cloud!.deploymentUrl + '?show_upgrade=true';
     callToAction = (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
-            href={cloudDeploymentUrl}
+            href={upgradeOnCloudUrl}
             target="_blank"
             data-test-subj="upgradeSetupCloudLink"
             iconSide="right"
@@ -73,7 +73,7 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            href={docLinks.links.elasticsearch.setupUpgrade}
+            href={docLinks.links.upgrade.upgradingElasticStack}
             target="_blank"
             data-test-subj="upgradeSetupDocsLink"
             iconSide="right"
@@ -87,7 +87,7 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
   } else {
     callToAction = (
       <EuiButton
-        href={docLinks.links.elasticsearch.setupUpgrade}
+        href={docLinks.links.upgrade.upgradingElasticStack}
         target="_blank"
         data-test-subj="upgradeSetupDocsLink"
         iconSide="right"
@@ -115,15 +115,11 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
   );
 };
 
-interface Props {
-  docLinks: DocLinksStart;
-  nextMajor: number;
-}
-
-export const getUpgradeStep = ({ docLinks, nextMajor }: Props): EuiStepProps => {
+export const getUpgradeStep = (): EuiStepProps => {
   return {
-    title: i18nTexts.upgradeStepTitle(nextMajor),
+    title: i18nTexts.upgradeStepTitle,
     status: 'incomplete',
-    children: <UpgradeStep docLinks={docLinks} />,
+    'data-test-subj': 'upgradeStep',
+    children: <UpgradeStep />,
   };
 };
