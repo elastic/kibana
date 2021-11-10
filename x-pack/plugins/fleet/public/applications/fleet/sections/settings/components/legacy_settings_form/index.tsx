@@ -18,7 +18,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiCode,
-  EuiLink,
   EuiPanel,
   EuiTextColor,
 } from '@elastic/eui';
@@ -31,16 +30,15 @@ import {
   useStartServices,
   useGetSettings,
   useInput,
-  sendPutSettings,
   useDefaultOutput,
   sendPutOutput,
 } from '../../../../../../hooks';
-import { isDiffPathProtocol, normalizeHostsForAgents } from '../../../../../../../common';
+import { normalizeHostsForAgents } from '../../../../../../../common';
 import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { HostsInput } from '../hosts_input';
 
 import { SettingsConfirmModal } from './confirm_modal';
 import type { SettingsConfirmModalProps } from './confirm_modal';
-import { HostsInput } from './hosts_input';
 
 const CodeEditorContainer = styled.div`
   min-height: 0;
@@ -83,63 +81,6 @@ function isSameArrayValueWithNormalizedHosts(arrayA: string[] = [], arrayB: stri
 function useSettingsForm(outputId: string | undefined) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useStartServices();
-
-  const fleetServerHostsInput = useComboInput('fleetServerHostsComboBox', [], (value) => {
-    if (value.length === 0) {
-      return [
-        {
-          message: i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
-            defaultMessage: 'At least one URL is required',
-          }),
-        },
-      ];
-    }
-
-    const res: Array<{ message: string; index: number }> = [];
-    const hostIndexes: { [key: string]: number[] } = {};
-    value.forEach((val, idx) => {
-      if (!val.match(URL_REGEX)) {
-        res.push({
-          message: i18n.translate('xpack.fleet.settings.fleetServerHostsError', {
-            defaultMessage: 'Invalid URL',
-          }),
-          index: idx,
-        });
-      }
-      const curIndexes = hostIndexes[val] || [];
-      hostIndexes[val] = [...curIndexes, idx];
-    });
-
-    Object.values(hostIndexes)
-      .filter(({ length }) => length > 1)
-      .forEach((indexes) => {
-        indexes.forEach((index) =>
-          res.push({
-            message: i18n.translate('xpack.fleet.settings.fleetServerHostsDuplicateError', {
-              defaultMessage: 'Duplicate URL',
-            }),
-            index,
-          })
-        );
-      });
-
-    if (res.length) {
-      return res;
-    }
-
-    if (value.length && isDiffPathProtocol(value)) {
-      return [
-        {
-          message: i18n.translate(
-            'xpack.fleet.settings.fleetServerHostsDifferentPathOrProtocolError',
-            {
-              defaultMessage: 'Protocol and path must be the same for each URL',
-            }
-          ),
-        },
-      ];
-    }
-  });
 
   const elasticsearchUrlInput = useComboInput('esHostsComboxBox', [], (value) => {
     const res: Array<{ message: string; index: number }> = [];
@@ -190,16 +131,15 @@ function useSettingsForm(outputId: string | undefined) {
   });
 
   const validate = useCallback(() => {
-    const fleetServerHostsValid = fleetServerHostsInput.validate();
     const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
 
-    if (!fleetServerHostsValid || !elasticsearchUrlsValid || !additionalYamlConfigValid) {
+    if (!elasticsearchUrlsValid || !additionalYamlConfigValid) {
       return false;
     }
 
     return true;
-  }, [fleetServerHostsInput, elasticsearchUrlInput, additionalYamlConfigInput]);
+  }, [elasticsearchUrlInput, additionalYamlConfigInput]);
 
   return {
     isLoading,
@@ -217,15 +157,10 @@ function useSettingsForm(outputId: string | undefined) {
         if (outputResponse.error) {
           throw outputResponse.error;
         }
-        const settingsResponse = await sendPutSettings({
-          fleet_server_hosts: fleetServerHostsInput.value,
-        });
-        if (settingsResponse.error) {
-          throw settingsResponse.error;
-        }
+
         notifications.toasts.addSuccess(
           i18n.translate('xpack.fleet.settings.success.message', {
-            defaultMessage: 'Settings saved',
+            defaultMessage: 'Output saved',
           })
         );
         setIsloading(false);
@@ -237,7 +172,6 @@ function useSettingsForm(outputId: string | undefined) {
       }
     },
     inputs: {
-      fleetServerHosts: fleetServerHostsInput,
       elasticsearchUrl: elasticsearchUrlInput,
       additionalYamlConfig: additionalYamlConfigInput,
     },
@@ -245,8 +179,6 @@ function useSettingsForm(outputId: string | undefined) {
 }
 
 export const LegacySettingsForm: React.FunctionComponent = () => {
-  const { docLinks } = useStartServices();
-
   const settingsRequest = useGetSettings();
   const settings = settingsRequest?.data?.item;
   const { output } = useDefaultOutput();
@@ -277,22 +209,11 @@ export const LegacySettingsForm: React.FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [output]);
 
-  useEffect(() => {
-    if (settings) {
-      inputs.fleetServerHosts.setValue([...settings.fleet_server_hosts]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings]);
-
   const isUpdated = React.useMemo(() => {
     if (!settings || !output) {
       return false;
     }
     return (
-      !isSameArrayValueWithNormalizedHosts(
-        settings.fleet_server_hosts,
-        inputs.fleetServerHosts.value
-      ) ||
       !isSameArrayValueWithNormalizedHosts(output.hosts, inputs.elasticsearchUrl.value) ||
       (output.config_yaml || '') !== inputs.additionalYamlConfig.value
     );
@@ -319,26 +240,6 @@ export const LegacySettingsForm: React.FunctionComponent = () => {
       );
     }
 
-    if (
-      !isSameArrayValueWithNormalizedHosts(
-        settings.fleet_server_hosts,
-        inputs.fleetServerHosts.value
-      )
-    ) {
-      tmpChanges.push(
-        {
-          type: 'fleet_server',
-          direction: 'removed',
-          urls: normalizeHosts(settings.fleet_server_hosts || []),
-        },
-        {
-          type: 'fleet_server',
-          direction: 'added',
-          urls: normalizeHosts(inputs.fleetServerHosts.value),
-        }
-      );
-    }
-
     return tmpChanges;
   }, [settings, inputs, output, isConfirmModalVisible]);
 
@@ -353,35 +254,6 @@ export const LegacySettingsForm: React.FunctionComponent = () => {
           }}
         />
       </EuiText>
-      <EuiSpacer size="m" />
-      <EuiPanel hasShadow={false} hasBorder={true}>
-        <HostsInput
-          {...inputs.fleetServerHosts.props}
-          label={i18n.translate('xpack.fleet.settings.fleetServerHostsLabel', {
-            defaultMessage: 'Fleet Server hosts',
-          })}
-          helpText={
-            <FormattedMessage
-              id="xpack.fleet.settings.fleetServerHostsHelpTect"
-              defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Fleet Server uses port 8220 by default. Refer to the {link}."
-              values={{
-                link: (
-                  <EuiLink
-                    href={docLinks.links.fleet.settingsFleetServerHostSettings}
-                    target="_blank"
-                    external
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.settings.userGuideLink"
-                      defaultMessage="Fleet and Elastic Agent Guide"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-        />
-      </EuiPanel>
       <EuiSpacer size="m" />
       <EuiPanel hasShadow={false} hasBorder={true}>
         <HostsInput
@@ -456,11 +328,11 @@ export const LegacySettingsForm: React.FunctionComponent = () => {
       )}
       <>
         <>
-          <EuiTitle size="m">
+          <EuiTitle size="s">
             <h2 id="IngestManagerSettingsFlyoutTitle">
               <FormattedMessage
                 id="xpack.fleet.settings.flyoutTitle"
-                defaultMessage="Fleet settings"
+                defaultMessage="Fleet Outputs"
               />
             </h2>
           </EuiTitle>
