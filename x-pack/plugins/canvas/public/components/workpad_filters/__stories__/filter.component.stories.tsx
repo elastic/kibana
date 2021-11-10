@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import React, { FC } from 'react';
-import moment from 'moment';
 import { Filter as FilterType, FormattedFilterViewInstance } from '../../../../types';
 import { createFilledFilterView } from '../../../lib/filter';
 import { Filter } from '../filter.component';
