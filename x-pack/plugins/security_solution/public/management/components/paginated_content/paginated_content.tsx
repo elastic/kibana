@@ -164,9 +164,9 @@ export const PaginatedContent = memo(
 
     const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
       (pageSize) => {
-        onChange({ pageSize, pageIndex: pagination?.pageIndex || 0 });
+        onChange({ pageSize, pageIndex: 0 });
       },
-      [onChange, pagination?.pageIndex]
+      [onChange]
     );
 
     const handlePageChange: EuiTablePaginationProps['onChangePage'] = useCallback(
