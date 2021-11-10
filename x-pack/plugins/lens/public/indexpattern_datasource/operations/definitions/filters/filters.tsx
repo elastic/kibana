@@ -6,7 +6,7 @@
  */
 
 import './filters.scss';
-import React, { MouseEventHandler, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -173,9 +173,16 @@ export const FilterList = ({
   defaultQuery: Filter;
 }) => {
   const [isOpenByCreation, setIsOpenByCreation] = useState(false);
+  const [activeFilterPopoverId, setActiveFilterPopoverId] = useState('');
   const [localFilters, setLocalFilters] = useState(() =>
     filters.map((filter) => ({ ...filter, id: generateId() }))
   );
+
+  useEffect(() => {
+    if (isOpenByCreation) {
+      setActiveFilterPopoverId(localFilters[localFilters.length - 1].id);
+    }
+  }, [isOpenByCreation, localFilters]);
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
@@ -235,17 +242,18 @@ export const FilterList = ({
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
-                initiallyOpen={idx === localFilters.length - 1 && isOpenByCreation}
+                isOpen={filter.id === activeFilterPopoverId}
+                onClose={() => setActiveFilterPopoverId('')}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {
                   onChangeValue(f.id, f.input, f.label);
                 }}
-                Button={({ onClick }: { onClick: MouseEventHandler }) => (
+                Button={() => (
                   <EuiLink
                     className="lnsFiltersOperation__popoverButton"
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
-                    onClick={onClick}
+                    onClick={() => setActiveFilterPopoverId(filter.id)}
                     color={isInvalid ? 'danger' : 'text'}
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',

@@ -20,28 +20,23 @@ export const FilterPopover = ({
   setFilter,
   indexPattern,
   Button,
-  initiallyOpen,
+  isOpen,
+  onClose,
 }: {
   filter: FilterValue;
   setFilter: Function;
   indexPattern: IndexPattern;
-  Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  initiallyOpen: boolean;
+  Button: React.FunctionComponent;
+  isOpen: boolean;
+  onClose: () => void;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>();
 
   // set popover open on start to work around EUI bug
   useEffect(() => {
-    setIsPopoverOpen(initiallyOpen);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const closePopover = () => {
-    if (isPopoverOpen) {
-      setIsPopoverOpen(false);
-    }
-  };
+    setIsPopoverOpen(isOpen);
+  }, [isOpen]);
 
   const setFilterLabel = (label: string) => setFilter({ ...filter, label });
   const setFilterQuery = (input: Query) => setFilter({ ...filter, input });
@@ -63,14 +58,8 @@ export const FilterPopover = ({
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isPopoverOpen}
       ownFocus
-      closePopover={() => closePopover()}
-      button={
-        <Button
-          onClick={() => {
-            setIsPopoverOpen((open) => !open);
-          }}
-        />
-      }
+      closePopover={() => onClose()}
+      button={<Button />}
     >
       <QueryInput
         isInvalid={!isQueryValid(filter.input, indexPattern)}
@@ -87,7 +76,7 @@ export const FilterPopover = ({
         onChange={setFilterLabel}
         placeholder={getPlaceholder(filter.input.query)}
         inputRef={inputRef}
-        onSubmit={() => closePopover()}
+        onSubmit={() => onClose()}
         dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>
