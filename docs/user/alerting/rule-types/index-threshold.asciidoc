@@ -17,7 +17,7 @@ Define properties to detect the condition.
 [role="screenshot"]
 image::user/alerting/images/rule-types-index-threshold-conditions.png[Five clauses define the condition to detect]
 
-Index:: This clause requires an *index or index pattern* and a *time field* that will be used for the *time window*.
+Index:: This clause requires an *index or data view* and a *time field* that will be used for the *time window*.
 When:: This clause specifies how the value to be compared to the threshold is calculated. The value is calculated by aggregating a numeric field a the *time window*. The aggregation options are: `count`, `average`, `sum`, `min`, and `max`. When using `count` the document count is used, and an aggregation field is not necessary. 
 Over/Grouped Over:: This clause lets you configure whether the aggregation is applied over all documents, or should be split into groups using a grouping field. If grouping is used, an  <<alerting-concepts-alerts, alert>> will be created for each group when it exceeds the threshold. To limit the number of alerts on high cardinality fields, you must specify the number of groups to check against the threshold. Only the *top* groups are checked.
 Threshold:: This clause defines a threshold value and a comparison operator  (one of `is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The result of the aggregation is compared to this threshold. 
