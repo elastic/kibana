@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { ExpressionsServerStart, ExpressionsServerSetup } from '../../../expressions/server';
-import { heatmapFunction } from '../common';
+import { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from '../common';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;
@@ -27,6 +27,8 @@ export class ExpressionHeatmapPlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionHeatmapPluginSetup {
     expressions.registerFunction(heatmapFunction);
+    expressions.registerFunction(heatmapLegendConfig);
+    expressions.registerFunction(heatmapGridConfig);
   }
 
   public start(core: CoreStart): ExpressionHeatmapPluginStart {}

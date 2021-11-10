@@ -7,14 +7,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-// import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
+import type { DatatableColumn } from '../../../../expressions/public';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
 import { HeatmapExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_GRID_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
+
+const convertToVisDimension = (columns: DatatableColumn[], accessor: string | undefined) => {
+  const column = columns.find((c) => c.id === accessor);
+  if (!column) return;
+  return {
+    accessor: column.id,
+    format: column.meta.params,
+    type: 'vis_dimension',
+  } as unknown as ExpressionValueVisDimension;
+};
 
 export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
   name: EXPRESSION_HEATMAP_NAME,
@@ -34,7 +45,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
     shape: {
       types: ['string'],
-      help: '',
+      help: 'TBD',
     },
     palette: {
       types: ['palette'],
@@ -95,48 +106,49 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
   },
   fn(data, args, handlers) {
-    // @Todo make it work for lens
+    const valueDimension = args.valueAccessor
+      ? convertToVisDimension(data.columns, args.valueAccessor)
+      : undefined;
+    const yDimension = args.yAccessor
+      ? convertToVisDimension(data.columns, args.yAccessor)
+      : undefined;
 
-    // if (handlers?.inspectorAdapters?.tables) {
-    //   const argsTable: Dimension[] = [
-    //     [
-    //       args.yDimension,
-    //       i18n.translate('visTypeHeatmap.function.dimension.metric', {
-    //         defaultMessage: 'Metric',
-    //       }),
-    //     ],
-    //     [
-    //       args.seriesDimension,
-    //       i18n.translate('visTypeHeatmap.function.adimension.dotSize', {
-    //         defaultMessage: 'Y axis',
-    //       }),
-    //     ],
-    //     [
-    //       args.splitColumnDimension,
-    //       i18n.translate('visTypeHeatmap.function.dimension.splitcolumn', {
-    //         defaultMessage: 'Column split',
-    //       }),
-    //     ],
-    //     [
-    //       args.splitRowDimension,
-    //       i18n.translate('visTypeHeatmap.function.dimension.splitrow', {
-    //         defaultMessage: 'Row split',
-    //       }),
-    //     ],
-    //   ];
+    const xDimension = args.xAccessor
+      ? convertToVisDimension(data.columns, args.xAccessor)
+      : undefined;
 
-    //   if (args.xDimension) {
-    //     argsTable.push([
-    //       [args.xDimension],
-    //       i18n.translate('visTypeHeatmap.function.adimension.bucket', {
-    //         defaultMessage: 'X axis',
-    //       }),
-    //     ]);
-    //   }
+    if (handlers?.inspectorAdapters?.tables) {
+      const argsTable: Dimension[] = [];
+      if (yDimension) {
+        argsTable.push([
+          [yDimension],
+          i18n.translate('visTypeHeatmap.function.dimension.yaxis', {
+            defaultMessage: 'Y axis',
+          }),
+        ]);
+      }
 
-    //   const logTable = prepareLogTable(context, argsTable);
-    //   handlers.inspectorAdapters.tables.logDatatable('default', logTable);
-    // }
+      if (valueDimension) {
+        argsTable.push([
+          [valueDimension],
+          i18n.translate('visTypeHeatmap.function.dimension.metric', {
+            defaultMessage: 'Metric',
+          }),
+        ]);
+      }
+
+      if (xDimension) {
+        argsTable.push([
+          [xDimension],
+          i18n.translate('visTypeHeatmap.function.adimension.xaxis', {
+            defaultMessage: 'X axis',
+          }),
+        ]);
+      }
+
+      const logTable = prepareLogTable(data, argsTable);
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+    }
     return {
       type: 'render',
       as: EXPRESSION_HEATMAP_NAME,
