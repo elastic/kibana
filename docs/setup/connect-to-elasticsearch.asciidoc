@@ -22,8 +22,9 @@ Each integration comes pre-packaged with assets that support your needs:
 * Pre-built, custom dashboards and visualizations
 * Documentation
 
-To view the full list of available integrations, go to *Management > Integrations*.
-{kib} automatically guides you to this view when it doesn't detect any data.
+To view the full list of available integrations, open the main
+menu and click *Add integrations*.
+{kib} automatically guides you to the *Integrations* view when no data is detected.
 
 [role="screenshot"]
 image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]
