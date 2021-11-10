@@ -12,7 +12,7 @@ import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: basic', function () {
     // Fastest ciGroup for the moment.
-    this.tags('ciGroup27');
+    this.tags('ciGroup13');
 
     before(async () => {
       await createSpacesAndUsers(getService);
