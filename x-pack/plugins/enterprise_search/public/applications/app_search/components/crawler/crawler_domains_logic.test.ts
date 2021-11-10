@@ -18,6 +18,8 @@ import { Meta } from '../../../../../common/types';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers/error_handling';
+
 import { CrawlerDomainsLogic, CrawlerDomainsValues } from './crawler_domains_logic';
 import { CrawlerDataFromServer, CrawlerDomain, CrawlerDomainFromServer } from './types';
 import { crawlerDataServerToClient } from './utils';
@@ -193,13 +195,8 @@ describe('CrawlerDomainsLogic', () => {
         );
       });
 
-      it('calls flashApiErrors when there is an error', async () => {
-        http.delete.mockReturnValue(Promise.reject('error'));
-
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         CrawlerDomainsLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });
