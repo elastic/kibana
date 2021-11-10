@@ -143,11 +143,12 @@ export function runCli() {
           $ node scripts/es_archiver save test/functional/es_archives/my_test_data logstash-*
       `,
       flags: {
-        boolean: ['raw'],
+        boolean: ['raw', 'keep-index-names'],
         string: ['query'],
         help: `
-          --raw              don't gzip the archives
-          --query            query object to limit the documents being archived, needs to be properly escaped JSON
+          --raw                    don't gzip the archives
+          --keep-index-names       don't change the names of Kibana indices to .kibana_1
+          --query                  query object to limit the documents being archived, needs to be properly escaped JSON
         `,
       },
       async run({ flags, esArchiver, statsMeta }) {
@@ -168,6 +169,11 @@ export function runCli() {
           throw createFlagError('--raw does not take a value');
         }
 
+        const keepIndexNames = flags['keep-index-names'];
+        if (typeof keepIndexNames !== 'boolean') {
+          throw createFlagError('--keep-index-names does not take a value');
+        }
+
         const query = flags.query;
         let parsedQuery;
         if (typeof query === 'string' && query.length > 0) {
@@ -178,7 +184,7 @@ export function runCli() {
           }
         }
 
-        await esArchiver.save(path, indices, { raw, query: parsedQuery });
+        await esArchiver.save(path, indices, { raw, keepIndexNames, query: parsedQuery });
       },
     })
     .command({
