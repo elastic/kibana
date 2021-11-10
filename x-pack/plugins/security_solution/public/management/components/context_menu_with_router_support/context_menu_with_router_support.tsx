@@ -33,6 +33,11 @@ export interface ContextMenuWithRouterSupportProps
    */
   maxWidth?: CSSProperties['maxWidth'];
   /**
+   * If `true`, then the menu will have a fixed width and will not be adjusted if the content it holds
+   * is shorter than `maxWidth` prop value.
+   */
+  fixedWidth?: boolean;
+  /**
    * The max height for the popup menu. Default is `255px`.
    */
   maxHeight?: CSSProperties['maxHeight'];
@@ -57,6 +62,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     anchorPosition,
     maxWidth = '32ch',
     maxHeight = '255px',
+    fixedWidth = false,
     title,
     loading = false,
     hoverInfo,
@@ -103,24 +109,27 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
 
     type AdditionalPanelProps = Partial<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>>;
     const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
-      const newAdditionalProps: AdditionalPanelProps = {
+      const newAdditionalProps: Omit<AdditionalPanelProps, 'style'> & {
+        style: AdditionalPanelProps['style'];
+      } = {
         style: {},
       };
 
-      if (maxWidth) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newAdditionalProps.style!.maxWidth = maxWidth;
+      if (maxWidth && !fixedWidth) {
+        newAdditionalProps.style.maxWidth = maxWidth;
       }
 
       if (maxHeight) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newAdditionalProps.style!.overflowY = 'scroll';
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newAdditionalProps.style!.maxHeight = maxHeight;
+        newAdditionalProps.style.overflowY = 'scroll';
+        newAdditionalProps.style.maxHeight = maxHeight;
+      }
+
+      if (fixedWidth) {
+        newAdditionalProps.style.width = maxWidth ?? '32ch';
       }
 
       return newAdditionalProps;
-    }, [maxWidth, maxHeight]);
+    }, [maxWidth, fixedWidth, maxHeight]);
 
     return (
       <EuiPopover
