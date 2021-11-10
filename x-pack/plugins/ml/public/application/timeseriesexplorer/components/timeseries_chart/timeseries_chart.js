@@ -1199,7 +1199,7 @@ class TimeseriesChartIntl extends Component {
 
     contextGroup
       .append('g')
-      .attr('class', 'x brush smvTimeSlider')
+      .attr('class', 'x brush')
       .call(brush)
       .selectAll('rect')
       .attr('y', -1)
