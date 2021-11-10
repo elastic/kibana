@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { ActionProps, HeaderActionProps, TimelineTabs } from '../../../../../common';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
 import React from 'react';
@@ -42,11 +42,9 @@ describe('checkbox control column', () => {
 
     test('calls onRowSelected when checked', () => {
       const onRowSelected = jest.fn();
-      const { getByTestId } = render(
-        <RowCheckBox {...defaultProps} onRowSelected={onRowSelected} />
-      );
+      const { container } = render(<RowCheckBox {...defaultProps} onRowSelected={onRowSelected} />);
 
-      fireEvent.click(getByTestId('select-event'));
+      fireEvent.click(container.querySelector('[data-test-subj~="select-event"]'));
 
       expect(onRowSelected).toHaveBeenCalled();
     });
