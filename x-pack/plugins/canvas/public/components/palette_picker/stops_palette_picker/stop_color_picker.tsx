@@ -33,7 +33,7 @@ interface ValidationResult {
 const strings = {
   getDeleteStopColorLabel: () =>
     i18n.translate('xpack.canvas.stopsColorPicker.deleteColorStopLabel', {
-      defaultMessage: 'None',
+      defaultMessage: 'Delete',
     }),
 };
 

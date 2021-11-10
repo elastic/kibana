@@ -335,7 +335,7 @@ export const ArgumentStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.arguments.stopsPaletteLabel', {
-        defaultMessage: 'Provides colors for the values, based on the bounds.',
+        defaultMessage: 'Provides colors for the values, based on the bounds',
       }),
   },
 };

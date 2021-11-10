@@ -15,7 +15,7 @@ import { astToPalette } from './utils';
 import { ColorPaletteName, getPaletteType } from './palette_types';
 import { CustomColorPalette } from '../../../../public/components/palette_picker';
 
-const { Palette: strings } = ArgumentStrings;
+const { Palette: strings, StopsPalette: stopsPaletteStrings } = ArgumentStrings;
 
 interface Props {
   onValueChange: (value: ExpressionAstExpression) => void;
@@ -78,15 +78,19 @@ export const SimplePaletteArgInput: FC<Props> = (props) => {
   const { typeInstance } = props;
   const { type, ...restOptions } = typeInstance.options ?? {};
   return (
-    <PaletteArgInput
-      {...props}
-      typeInstance={{
-        ...props.typeInstance,
-        options: restOptions,
-      }}
-    />
+    <PaletteArgInput {...props} typeInstance={{ ...props.typeInstance, options: restOptions }} />
   );
 };
+
+export const StopsPaletteArgInput: FC<Props> = (props) => (
+  <PaletteArgInput
+    {...props}
+    typeInstance={{
+      ...props.typeInstance,
+      options: { ...(props.typeInstance.options ?? {}), type: 'stops' },
+    }}
+  />
+);
 
 PaletteArgInput.propTypes = {
   argId: PropTypes.string,
@@ -96,20 +100,22 @@ PaletteArgInput.propTypes = {
 };
 
 const defaultPaletteOptions = {
-  displayName: strings.getDisplayName(),
-  help: strings.getHelp(),
   default:
     '{palette #882E72 #B178A6 #D6C1DE #1965B0 #5289C7 #7BAFDE #4EB265 #90C987 #CAE0AB #F7EE55 #F6C141 #F1932D #E8601C #DC050C}',
 };
 
 export const palette = () => ({
   name: 'palette',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(SimplePaletteArgInput),
   ...defaultPaletteOptions,
 });
 
-export const extendedPalette = () => ({
-  name: 'extended_palette',
-  template: templateFromReactComponent(PaletteArgInput),
+export const stopsPalette = () => ({
+  name: 'stops_palette',
+  help: stopsPaletteStrings.getHelp(),
+  displayName: stopsPaletteStrings.getDisplayName(),
+  template: templateFromReactComponent(StopsPaletteArgInput),
   ...defaultPaletteOptions,
 });

@@ -33,10 +33,7 @@ export const metricVis = () => ({
     },
     {
       name: 'palette',
-      argType: 'extended_palette',
-      options: {
-        type: 'stops',
-      },
+      argType: 'stops_palette',
     },
     {
       name: 'font',

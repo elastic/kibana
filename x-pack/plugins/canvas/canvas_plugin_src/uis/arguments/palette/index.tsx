@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { PaletteArgInput, SimplePaletteArgInput, palette, extendedPalette } from './palette';
+export { PaletteArgInput, SimplePaletteArgInput, palette, stopsPalette } from './palette';
