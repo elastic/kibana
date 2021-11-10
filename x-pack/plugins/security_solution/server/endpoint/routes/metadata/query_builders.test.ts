@@ -16,8 +16,6 @@ import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { get } from 'lodash';
-import { KibanaRequest } from 'kibana/server';
-import { EndpointAppContext } from '../../types';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
 
 describe('query builder', () => {

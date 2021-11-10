@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/api/types';
+import type { UnwrapPromise } from '@kbn/utility-types';
 import {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  SearchResponse,
 } from 'kibana/server';
 
+import { TransportResult } from '@elastic/elasticsearch';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import {
   HostInfo,
   HostMetadata,
@@ -404,7 +406,7 @@ export class EndpointMetadataService {
     const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
     const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, endpointPolicyIds);
 
-    let unitedMetadataQueryResponse: ApiResponse<SearchResponse<UnitedAgentMetadata>>;
+    let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>, unknown>;
     try {
       unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
     } catch (error) {
@@ -460,7 +462,7 @@ export class EndpointMetadataService {
       data: hosts,
       pageSize: unitedIndexQuery.size,
       page: unitedIndexQuery.from + 1,
-      total: (docsCount as SearchTotalHits).value,
+      total: (docsCount as unknown as SearchTotalHits).value,
     };
   }
 }
