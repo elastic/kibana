@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, ViewMode } from '../../../services/embeddable';
+import { ViewMode } from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
