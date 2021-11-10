@@ -130,9 +130,7 @@ export class HeadlessChromiumDriverFactory {
           }
 
           try {
-            if (browser) {
-              await browser.close();
-            }
+            await browser?.close();
           } catch (err) {
             // do not throw
             logger.error(err);
