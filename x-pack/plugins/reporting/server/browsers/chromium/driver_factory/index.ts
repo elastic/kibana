@@ -35,7 +35,7 @@ export class HeadlessChromiumDriverFactory {
   private getChromiumArgs: () => string[];
   private core: ReportingCore;
 
-  constructor(core: ReportingCore, binaryPath: string, logger: LevelLogger) {
+  constructor(core: ReportingCore, binaryPath: string, private logger: LevelLogger) {
     this.core = core;
     this.binaryPath = binaryPath;
     const config = core.getConfig();
@@ -62,7 +62,7 @@ export class HeadlessChromiumDriverFactory {
    */
   createPage(
     { browserTimezone }: { browserTimezone?: string },
-    pLogger: LevelLogger
+    pLogger = this.logger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     // FIXME: 'create' is deprecated
     return Rx.Observable.create(async (observer: InnerSubscriber<unknown, unknown>) => {
