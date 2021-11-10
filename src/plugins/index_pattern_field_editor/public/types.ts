@@ -66,16 +66,24 @@ export interface EsRuntimeField {
 
 export type CloseEditor = () => void;
 
-export type FieldPreviewContext =
-  | 'boolean_field'
-  | 'date_field'
-  | 'double_field'
-  | 'geo_point_field'
-  | 'ip_field'
-  | 'keyword_field'
-  | 'long_field';
+export type PainlessErrorCode = 'CAST_ERROR' | 'UNKNOWN';
 
-export interface FieldPreviewResponse {
-  values: unknown[];
-  error?: Record<string, any>;
+export interface RuntimeFieldPainlessError {
+  message: string;
+  reason: string;
+  position: {
+    offset: number;
+    start: number;
+    end: number;
+  } | null;
+  scriptStack: string[];
+  code: PainlessErrorCode;
+}
+
+export interface MonacoEditorErrorMarker {
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  message: string;
 }
