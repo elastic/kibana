@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { skipWhile } from 'rxjs/operators';
 
 import { migrateAppState } from '.';
 import { DashboardSavedObject } from '../..';
@@ -25,6 +26,8 @@ import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 
 type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: DashboardSavedObject };
 
+let awaitingRemoval = false;
+
 export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
   getLatestDashboardState,
@@ -40,6 +43,7 @@ export const syncDashboardUrlState = ({
 
   const appStateSubscription = kbnUrlStateStorage
     .change$(DASHBOARD_STATE_STORAGE_KEY)
+    .pipe(skipWhile(() => awaitingRemoval))
     .subscribe(() => {
       const stateFromUrl = loadDashboardUrlState(loadDashboardStateProps);
 
@@ -89,6 +93,7 @@ const loadDashboardUrlState = ({
     : undefined;
 
   // remove state from URL
+  awaitingRemoval = true;
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
     if (nextUrl.includes(DASHBOARD_STATE_STORAGE_KEY)) {
       return replaceUrlHashQuery(nextUrl, (query) => {
@@ -96,6 +101,7 @@ const loadDashboardUrlState = ({
         return query;
       });
     }
+    awaitingRemoval = false;
     return nextUrl;
   }, true);
 
