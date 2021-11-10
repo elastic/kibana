@@ -25,6 +25,7 @@ import {
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
+import { useReadonlyHeader } from './use_readonly_header';
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   showTitle,
@@ -42,6 +43,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   const { basePath, userCanCrud } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
+  useReadonlyHeader();
 
   const onCreateCaseSuccess = useCallback(
     async ({ id }) => navigateToCaseView({ detailName: id }),

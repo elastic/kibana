@@ -11,7 +11,6 @@ import { useParams } from 'react-router-dom';
 import { CaseView } from '../../components/app/cases/case_view';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useKibana } from '../../utils/kibana_react';
-import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { observabilityAppId } from '../../../common';
 
@@ -26,7 +25,6 @@ export const CaseDetailsPage = React.memo(() => {
     detailName?: string;
     subCaseId?: string;
   }>();
-  useReadonlyHeader();
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.read) {
