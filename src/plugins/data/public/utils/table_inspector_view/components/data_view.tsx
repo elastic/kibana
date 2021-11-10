@@ -118,7 +118,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
       return DataViewComponent.renderNoData();
     }
 
-    const datatables = Object.values(this.state.adapters.tables.tables);
+    const datatables: Datatable[] = Object.values(this.state.adapters.tables.tables);
 
     return (
       <>

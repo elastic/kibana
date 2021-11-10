@@ -10,7 +10,6 @@ import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
-import { Filter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '../../../../expressions/common';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
