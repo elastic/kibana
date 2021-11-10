@@ -16,8 +16,12 @@ import { mockEventViewerResponse, mockEventViewerResponseWithEvents } from './mo
 import { StatefulEventsViewer } from '.';
 import { EventsViewer } from './events_viewer';
 import { defaultHeaders } from './default_headers';
-import { useSourcererScope } from '../../containers/sourcerer';
-import { mockBrowserFields, mockDocValueFields } from '../../containers/source/mock';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import {
+  mockBrowserFields,
+  mockDocValueFields,
+  mockRuntimeMappings,
+} from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { inputsModel } from '../../store/inputs';
@@ -91,7 +95,7 @@ jest.mock('../../../timelines/containers', () => ({
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
-const mockUseSourcererScope: jest.Mock = useSourcererScope as jest.Mock;
+const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../containers/sourcerer');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -107,6 +111,7 @@ const to = '2019-08-27T22:10:56.794Z';
 const defaultMocks = {
   browserFields: mockBrowserFields,
   docValueFields: mockDocValueFields,
+  runtimeMappings: mockRuntimeMappings,
   indexPattern: mockIndexPattern,
   loading: false,
   selectedPatterns: mockIndexNames,
@@ -139,6 +144,7 @@ const eventsViewerDefaultProps = {
   },
   renderCellValue: DefaultCellRenderer,
   rowRenderers: defaultRowRenderers,
+  runtimeMappings: {},
   start: from,
   sort: [
     {
@@ -169,7 +175,7 @@ describe('EventsViewer', () => {
     mockUseTimelineEvents.mockReset();
   });
   beforeAll(() => {
-    mockUseSourcererScope.mockImplementation(() => defaultMocks);
+    mockUseSourcererDataView.mockImplementation(() => defaultMocks);
   });
 
   describe('event details', () => {
@@ -178,7 +184,7 @@ describe('EventsViewer', () => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponseWithEvents]);
     });
 
-    test('call the right reduce action to show event details', () => {
+    test('call the right reduce action to show event details', async () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulEventsViewer {...testProps} />
@@ -189,19 +195,14 @@ describe('EventsViewer', () => {
         wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       });
 
-      waitFor(() => {
-        expect(mockDispatch).toBeCalledTimes(2);
+      await waitFor(() => {
+        expect(mockDispatch).toBeCalledTimes(3);
         expect(mockDispatch.mock.calls[1][0]).toEqual({
           payload: {
-            panelView: 'eventDetail',
-            params: {
-              eventId: 'yb8TkHYBRgU82_bJu_rY',
-              indexName: 'auditbeat-7.10.1-2020.12.18-000001',
-            },
-            tabType: 'query',
-            timelineId: TimelineId.test,
+            id: 'test',
+            isLoading: false,
           },
-          type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+          type: 'x-pack/timelines/t-grid/UPDATE_LOADING',
         });
       });
     });
@@ -278,7 +279,7 @@ describe('EventsViewer', () => {
 
   describe('loading', () => {
     beforeAll(() => {
-      mockUseSourcererScope.mockImplementation(() => ({ ...defaultMocks, loading: true }));
+      mockUseSourcererDataView.mockImplementation(() => ({ ...defaultMocks, loading: true }));
     });
     beforeEach(() => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);

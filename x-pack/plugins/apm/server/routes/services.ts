@@ -6,7 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { jsonRt, isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { isoToEpochRt } from '@kbn/io-ts-utils/iso_to_epoch_rt';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
@@ -191,18 +193,9 @@ const serviceAgentRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
-      start,
-      end,
-      kuery: '',
-    });
-
     return getServiceAgent({
       serviceName,
       setup,
-      searchAggregatedTransactions,
       start,
       end,
     });

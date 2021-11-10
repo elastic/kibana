@@ -41,7 +41,7 @@ import {
   sendPutSettings,
   sendGetFleetStatus,
   useFleetStatus,
-  useUrlModal,
+  useLink,
 } from '../../../../hooks';
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
@@ -368,7 +368,7 @@ const AgentPolicySelectionStep = ({
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.selectAgentPolicyDescriptionText"
-            defaultMessage="Agent policies allow you to configure and mange your agents remotely. We recommend using the “Default Fleet Server policy” which includes the necessary configuration to run a Fleet Server."
+            defaultMessage="Agent policies allow you to configure and manage your agents remotely. We recommend using the “Default Fleet Server policy” which includes the necessary configuration to run a Fleet Server."
           />
         </EuiText>
         <EuiSpacer size="m" />
@@ -416,7 +416,8 @@ export const AddFleetServerHostStepContent = ({
   const [isLoading, setIsLoading] = useState(false);
   const [fleetServerHost, setFleetServerHost] = useState('');
   const [error, setError] = useState<undefined | string>();
-  const { getModalHref } = useUrlModal();
+
+  const { getHref } = useLink();
 
   const validate = useCallback(
     (host: string) => {
@@ -519,7 +520,7 @@ export const AddFleetServerHostStepContent = ({
               values={{
                 host: calloutHost,
                 fleetSettingsLink: (
-                  <EuiLink href={getModalHref('settings')}>
+                  <EuiLink href={getHref('settings')}>
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                       defaultMessage="Fleet Settings"
@@ -685,20 +686,11 @@ export const OnPremInstructions: React.FC = () => {
     installCommand,
     platform,
     setPlatform,
-    refresh,
     deploymentMode,
     setDeploymentMode,
     fleetServerHost,
     addFleetServerHost,
   } = useFleetServerInstructions(policyId);
-
-  const { modal } = useUrlModal();
-  useEffect(() => {
-    // Refresh settings when the settings modal is closed
-    if (!modal) {
-      refresh();
-    }
-  }, [modal, refresh]);
 
   const { docLinks } = useStartServices();
 
