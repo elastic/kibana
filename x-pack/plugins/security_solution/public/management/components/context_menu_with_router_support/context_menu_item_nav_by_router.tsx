@@ -36,6 +36,7 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
 const StyledEuiContextMenuItem = styled(EuiContextMenuItem)`
   .additional-info {
     display: none;
+    max-width: 50%;
   }
   &:hover {
     .additional-info {
@@ -89,7 +90,9 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
                 {children}
               </div>
               {hoverInfo && (
-                <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
+                <StyledEuiFlexItem className="additional-info eui-textTruncate">
+                  {hoverInfo}
+                </StyledEuiFlexItem>
               )}
             </>
           ) : (
