@@ -10,7 +10,7 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
-import { getKibanaVersion } from '../kibana_services';
+import { getIsEnterprisePlus, getKibanaVersion } from '../kibana_services';
 import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
 import { ORIGIN, TMS_IN_YML_ID } from '../../common';
 import { EMSSettings } from '../../common';
@@ -31,9 +31,7 @@ export class ServiceSettings implements IServiceSettings {
     this._tilemapsConfig = tilemapsConfig;
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
-    const emsSettings = new EMSSettings(mapConfig, () => {
-      return false;
-    });
+    const emsSettings = new EMSSettings(mapConfig, getIsEnterprisePlus);
 
     this._emsClient = new EMSClient({
       language: i18n.getLocale(),
@@ -155,7 +153,7 @@ export class ServiceSettings implements IServiceSettings {
     return this._emsClient.findTMSServiceById(id);
   }
 
-  async getDefaultTmsLayer(isDarkMode: boolean) {
+  async getDefaultTmsLayer(isDarkMode: boolean): Promise<string> {
     const { dark, desaturated } = this._mapConfig.emsTileLayerId;
 
     if (hasUserConfiguredTmsLayer(this._mapConfig)) {
@@ -257,12 +255,12 @@ export class ServiceSettings implements IServiceSettings {
     return url;
   }
 
-  getAttributionsFromTMSServce(tmsService: TMSService) {
+  getAttributionsFromTMSServce(tmsService: TMSService): string {
     return getAttributionString(tmsService);
   }
 }
 
-function getAttributionString(emsService: EMSFileLayer | TMSService) {
+function getAttributionString(emsService: EMSFileLayer | TMSService): string {
   const attributions = emsService.getAttributions();
   const attributionSnippets = attributions.map((attribution) => {
     const anchorTag = document.createElement('a');

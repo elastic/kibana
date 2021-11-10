@@ -7,12 +7,16 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { setKibanaVersion, setMapsEmsConfig } from './kibana_services';
+import { setKibanaVersion, setLicensingPluginStart, setMapsEmsConfig } from './kibana_services';
 import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
 import type { MapsEmsConfig } from '../config';
 import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
 import { EMSSettings } from '../common';
 import { IEMSConfig } from '../common/ems_settings';
+import {
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from '../../../../x-pack/plugins/licensing/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -20,10 +24,12 @@ import { IEMSConfig } from '../common/ems_settings';
  * @public
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MapsEmsStartDependencies {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MapsEmsSetupDependencies {}
+export interface MapsEmsStartDependencies {
+  licensing: LicensingPluginStart;
+}
+export interface MapsEmsSetupDependencies {
+  licensing: LicensingPluginSetup;
+}
 
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginStart> {
   readonly _initializerContext: PluginInitializerContext<MapsEmsConfig>;
@@ -48,5 +54,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginSt
     };
   }
 
-  public start(core: CoreStart, plugins: MapsEmsStartDependencies) {}
+  public start(core: CoreStart, plugins: MapsEmsStartDependencies) {
+    setLicensingPluginStart(plugins.licensing);
+  }
 }

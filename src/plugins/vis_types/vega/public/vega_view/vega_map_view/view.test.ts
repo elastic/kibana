@@ -17,7 +17,7 @@ import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
-import type { IServiceSettings, MapsEmsConfig } from '../../../../../maps_ems/public';
+import type { IServiceSettings } from '../../../../../maps_ems/public';
 import { setInjectedVars, setData, setNotifications, setUISettings } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
 
@@ -81,17 +81,6 @@ describe('vega_map_view/view', () => {
       getMinZoom: async () => 0,
       getAttributions: () => [{ url: 'tms_attributions' }],
     } as unknown as TMSService);
-    const config = {
-      tilemap: {
-        url: 'test',
-        options: {
-          attribution: 'tilemap-attribution',
-          minZoom: 0,
-          maxZoom: 20,
-        },
-      },
-    } as MapsEmsConfig;
-
     async function createVegaMapView() {
       await vegaParser.parseAsync();
       return new VegaMapView({

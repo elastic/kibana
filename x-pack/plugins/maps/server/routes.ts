@@ -76,7 +76,9 @@ export async function initRoutes(core: CoreSetup, logger: Logger): Promise<void>
         const resp = await context.core.elasticsearch.client.asCurrentUser.indices.getSettings({
           index: query.indexPatternTitle,
         });
-        const indexPatternSettings = getIndexPatternSettings(resp.body);
+        const indexPatternSettings = getIndexPatternSettings(
+          resp.body as unknown as Record<string, string | number | boolean>
+        );
         return response.ok({
           body: indexPatternSettings,
         });

@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { TMSService } from '@elastic/ems-client';
+import { MapsEmsConfig } from '../../config';
 
 export interface TmsLayer {
   id: string;
@@ -49,4 +51,9 @@ export interface IServiceSettings {
     isDesaturated: boolean,
     isDarkMode: boolean
   ): any;
+
+  getDefaultTmsLayer(isDarkMode: boolean): Promise<string>;
+  getTmsService(id: string): Promise<TMSService>;
+  getMapConfig(): MapsEmsConfig;
+  getAttributionsFromTMSServce(tmsService: TMSService): string;
 }

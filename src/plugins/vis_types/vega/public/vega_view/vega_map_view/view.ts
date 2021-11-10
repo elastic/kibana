@@ -46,21 +46,6 @@ async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
 }
 
 export class VegaMapView extends VegaBaseView {
-  // private mapServiceSettings: MapServiceSettings = getMapServiceSettings();
-  // private emsTileLayer = this.getEmsTileLayer();
-
-  constructor(a) {
-    super(a);
-  }
-
-  // private getEmsTileLayer() {
-  //   const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
-  //
-  //   if (mapStyle) {
-  //     return emsTileServiceId ?? this.mapServiceSettings.defaultTmsLayer();
-  //   }
-  // }
-
   private get shouldShowZoomControl() {
     return Boolean(this._parser.mapConfig.zoomControl);
   }
