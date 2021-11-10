@@ -137,13 +137,12 @@ export const staticValueOperation: OperationDefinition<
   },
 
   paramEditor: function StaticValueEditor({
-    layer,
     updateLayer,
     currentColumn,
     columnId,
     activeData,
     layerId,
-    indexPattern,
+    paramEditorCustomProps,
   }) {
     const onChange = useCallback(
       (newValue) => {
@@ -201,11 +200,7 @@ export const staticValueOperation: OperationDefinition<
 
     return (
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>
-          {i18n.translate('xpack.lens.indexPattern.staticValue.label', {
-            defaultMessage: 'Reference line value',
-          })}
-        </EuiFormLabel>
+        <EuiFormLabel>{paramEditorCustomProps?.label || defaultLabel}</EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiFieldNumber
           data-test-subj="lns-indexPattern-static_value-input"
