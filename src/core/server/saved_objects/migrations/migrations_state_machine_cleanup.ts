@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-export type { MigrationResult } from './core';
-export { KibanaMigrator } from './kibana_migrator';
-export type { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
-export type {
-  SavedObjectMigrationFn,
-  SavedObjectMigrationMap,
-  SavedObjectMigrationContext,
-} from './types';
+import type { ElasticsearchClient } from '../../elasticsearch';
+import * as Actions from './actions';
+import type { State } from './state';
+
+export async function cleanup(client: ElasticsearchClient, state?: State) {
+  if (!state) return;
+  if ('sourceIndexPitId' in state) {
+    await Actions.closePit({ client, pitId: state.sourceIndexPitId })();
+  }
+}
