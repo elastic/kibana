@@ -165,7 +165,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
         'The new Document Explorer in Discover offers better data sorting, resizeable columns, and a full screen view. ' +
-        'Turn on this option to use the classic discover. Turn off to use the new Document Explorer. ',
+        'Turn on this option to use the classic Discover. Turn off to use the new Document Explorer. ',
     }),
     category: ['discover'],
     schema: schema.boolean(),
