@@ -40,6 +40,7 @@ const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
+  useLegacyTimeAxis: false,
 });
 
 describe('xy_visualization', () => {
