@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-export type { MigrationResult } from './core';
-export { KibanaMigrator } from './kibana_migrator';
-export type { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
-export type {
-  SavedObjectMigrationFn,
-  SavedObjectMigrationMap,
-  SavedObjectMigrationContext,
-} from './types';
+export type MigrationStatus =
+  | 'waiting_to_start'
+  | 'waiting_for_other_nodes'
+  | 'running'
+  | 'completed';
+
+export type MigrationResult =
+  | { status: 'skipped' }
+  | { status: 'patched' }
+  | {
+      status: 'migrated';
+      destIndex: string;
+      sourceIndex: string;
+      elapsedMs: number;
+    };
