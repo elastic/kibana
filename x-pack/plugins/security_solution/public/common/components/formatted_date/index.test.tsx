@@ -166,5 +166,28 @@ describe('formatted_date', () => {
 
       expect(wrapper.text()).toBe(getEmptyValue());
     });
+
+    test('renders time as relative under 24hrs, configured through relativeThresholdInHrs', () => {
+      const timeThwentyThreeHrsAgo = new Date(
+        new Date().getTime() - 23 * 60 * 60 * 1000
+      ).toISOString();
+      const wrapper = shallow(
+        <FormattedRelativePreferenceDate
+          relativeThresholdInHrs={24}
+          value={timeThwentyThreeHrsAgo}
+        />
+      );
+
+      expect(wrapper.find('[data-test-subj="relative-time"]').exists()).toBe(true);
+    });
+
+    test('renders time as absolute over 24hrs, configured through relativeThresholdInHrs', () => {
+      const timeThirtyHrsAgo = new Date(new Date().getTime() - 30 * 60 * 60 * 1000).toISOString();
+      const wrapper = shallow(
+        <FormattedRelativePreferenceDate relativeThresholdInHrs={24} value={timeThirtyHrsAgo} />
+      );
+
+      expect(wrapper.find('[data-test-subj="preference-time"]').exists()).toBe(true);
+    });
   });
 });
