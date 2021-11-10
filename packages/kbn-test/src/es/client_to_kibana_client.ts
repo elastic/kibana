@@ -18,12 +18,12 @@ import { Transport } from '@elastic/elasticsearch';
 class KibanaTransport extends Transport {
   request(params: TransportRequestParams, options?: TransportRequestOptions) {
     const opts: TransportRequestOptions = options || {};
-    // Enforce the client to return TransportResult.
-    // It's required for bwc with responses in 7.x version.
     if (opts?.meta === undefined) {
       opts.meta = true;
     }
-    return super.request(params, opts);
+    // Enforce the client to return TransportResult.
+    // It's required for bwc with responses in 7.x version.
+    return super.request<TransportResult<any, any>>(params, opts);
   }
 }
 
