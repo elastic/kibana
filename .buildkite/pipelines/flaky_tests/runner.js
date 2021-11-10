@@ -65,34 +65,67 @@ for (const testSuite of testSuites) {
 
   const JOB_PARTS = TEST_SUITE.split('/');
   const IS_XPACK = JOB_PARTS[0] === 'xpack';
+  const TASK = JOB_PARTS[1];
   const CI_GROUP = JOB_PARTS.length > 2 ? JOB_PARTS[2] : '';
 
   if (RUN_COUNT < 1) {
     continue;
   }
 
-  if (IS_XPACK) {
-    steps.push({
-      command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/xpack_cigroup.sh`,
-      label: `Default CI Group ${CI_GROUP}`,
-      agents: { queue: 'ci-group-6' },
-      depends_on: 'build',
-      parallelism: RUN_COUNT,
-      concurrency: concurrency,
-      concurrency_group: UUID,
-      concurrency_method: 'eager',
-    });
-  } else {
-    steps.push({
-      command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/oss_cigroup.sh`,
-      label: `OSS CI Group ${CI_GROUP}`,
-      agents: { queue: 'ci-group-4d' },
-      depends_on: 'build',
-      parallelism: RUN_COUNT,
-      concurrency: concurrency,
-      concurrency_group: UUID,
-      concurrency_method: 'eager',
-    });
+  switch (TASK) {
+    case 'cigroup':
+      if (IS_XPACK) {
+        steps.push({
+          command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/xpack_cigroup.sh`,
+          label: `Default CI Group ${CI_GROUP}`,
+          agents: { queue: 'n2-4' },
+          depends_on: 'build',
+          parallelism: RUN_COUNT,
+          concurrency: concurrency,
+          concurrency_group: UUID,
+          concurrency_method: 'eager',
+        });
+      } else {
+        steps.push({
+          command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/oss_cigroup.sh`,
+          label: `OSS CI Group ${CI_GROUP}`,
+          agents: { queue: 'ci-group-4d' },
+          depends_on: 'build',
+          parallelism: RUN_COUNT,
+          concurrency: concurrency,
+          concurrency_group: UUID,
+          concurrency_method: 'eager',
+        });
+      }
+      break;
+
+    case 'firefox':
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${IS_XPACK ? 'xpack' : 'oss'}_firefox.sh`,
+        label: `${IS_XPACK ? 'Default' : 'OSS'} Firefox`,
+        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        depends_on: 'build',
+        parallelism: RUN_COUNT,
+        concurrency: concurrency,
+        concurrency_group: UUID,
+        concurrency_method: 'eager',
+      });
+      break;
+
+    case 'accessibility':
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${
+          IS_XPACK ? 'xpack' : 'oss'
+        }_accessibility.sh`,
+        label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
+        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        depends_on: 'build',
+        parallelism: RUN_COUNT,
+        concurrency: concurrency,
+        concurrency_group: UUID,
+        concurrency_method: 'eager',
+      });
+      break;
   }
 }
 
