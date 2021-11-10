@@ -68,6 +68,14 @@ export const HostIsolationExceptionDeleteModal = memo(
       }
     );
 
+    const handleConfirmButton = () => {
+      mutation.mutate();
+    };
+
+    const handleCancelButton = () => {
+      onCancel();
+    };
+
     return (
       <EuiModal onClose={() => onCancel()}>
         <EuiModalHeader data-test-subj="hostIsolationExceptionsDeleteModalHeader">
@@ -99,7 +107,7 @@ export const HostIsolationExceptionDeleteModal = memo(
 
         <EuiModalFooter>
           <EuiButtonEmpty
-            onClick={() => onCancel()}
+            onClick={handleCancelButton}
             isDisabled={mutation.isLoading}
             data-test-subj="hostIsolationExceptionsDeleteModalCancelButton"
           >
@@ -112,9 +120,7 @@ export const HostIsolationExceptionDeleteModal = memo(
           <EuiButton
             fill
             color="danger"
-            onClick={() => {
-              mutation.mutate();
-            }}
+            onClick={handleConfirmButton}
             isLoading={mutation.isLoading}
             data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"
           >
