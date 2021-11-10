@@ -67,55 +67,57 @@ export interface SuggestionPanelProps {
   frame: FramePublicAPI;
 }
 
-const PreviewRenderer = ({
-  withLabel,
-  ExpressionRendererComponent,
-  expression,
-  hasError,
-}: {
-  withLabel: boolean;
-  expression: string | null | undefined;
-  ExpressionRendererComponent: ReactExpressionRendererType;
-  hasError: boolean;
-}) => {
-  const onErrorMessage = (
-    <div className="lnsSuggestionPanel__suggestionIcon">
-      <EuiIconTip
-        size="xl"
-        color="danger"
-        type="alert"
-        aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-          defaultMessage: 'Preview rendering failed',
-        })}
-        content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-          defaultMessage: 'Preview rendering failed',
-        })}
-      />
-    </div>
-  );
-  return (
-    <div
-      className={classNames('lnsSuggestionPanel__chartWrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
-      })}
-    >
-      {!expression || hasError ? (
-        onErrorMessage
-      ) : (
-        <ExpressionRendererComponent
-          className="lnsSuggestionPanel__expressionRenderer"
-          padding="s"
-          expression={expression}
-          debounce={2000}
-          renderError={() => {
-            return onErrorMessage;
-          }}
+const PreviewRenderer = React.memo(
+  ({
+    withLabel,
+    ExpressionRendererComponent,
+    expression,
+    hasError,
+  }: {
+    withLabel: boolean;
+    expression: string | null | undefined;
+    ExpressionRendererComponent: ReactExpressionRendererType;
+    hasError: boolean;
+  }) => {
+    const onErrorMessage = (
+      <div className="lnsSuggestionPanel__suggestionIcon">
+        <EuiIconTip
+          size="xl"
+          color="danger"
+          type="alert"
+          aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+            defaultMessage: 'Preview rendering failed',
+          })}
+          content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+            defaultMessage: 'Preview rendering failed',
+          })}
         />
-      )}
-    </div>
-  );
-};
+      </div>
+    );
+    return (
+      <div
+        className={classNames('lnsSuggestionPanel__chartWrapper', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
+        })}
+      >
+        {!expression || hasError ? (
+          onErrorMessage
+        ) : (
+          <ExpressionRendererComponent
+            className="lnsSuggestionPanel__expressionRenderer"
+            padding="s"
+            expression={expression}
+            debounce={2000}
+            renderError={() => {
+              return onErrorMessage;
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+);
 
 const SuggestionPreview = ({
   preview,

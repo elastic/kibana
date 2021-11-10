@@ -8,17 +8,30 @@
 
 const id = Symbol('id');
 
+const isBucketLike = (bucket: unknown): bucket is { key: unknown } => {
+  return Boolean(bucket && typeof bucket === 'object' && 'key' in bucket);
+};
+
+function getKeysFromBucket(bucket: unknown) {
+  if (!isBucketLike(bucket)) {
+    throw new Error('bucket malformed - no key found');
+  }
+  return Array.isArray(bucket.key)
+    ? bucket.key.map((keyPart) => String(keyPart))
+    : [String(bucket.key)];
+}
+
 export class MultiFieldKey {
   [id]: string;
-  keys: string[] | string;
+  keys: string[];
 
-  constructor(bucket: any) {
-    this.keys = bucket.key;
+  constructor(bucket: unknown) {
+    this.keys = getKeysFromBucket(bucket);
 
     this[id] = MultiFieldKey.idBucket(bucket);
   }
-  static idBucket(bucket: any) {
-    return Array.isArray(bucket.key) ? bucket.key.join(',,,,,') : bucket.key;
+  static idBucket(bucket: unknown) {
+    return getKeysFromBucket(bucket).join(',');
   }
 
   toString() {

@@ -87,7 +87,7 @@ export const samplePieVis = {
             title: 'Split slices',
             min: 0,
             max: null,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             editor: false,
             params: [],
           },
@@ -98,7 +98,7 @@ export const samplePieVis = {
             mustBeFirst: true,
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [
               {
                 name: 'row',

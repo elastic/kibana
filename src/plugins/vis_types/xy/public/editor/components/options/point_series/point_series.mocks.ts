@@ -625,7 +625,7 @@ export const getVis = (bucketType: string) => {
             title: 'X-axis',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [],
           },
           {
@@ -634,7 +634,7 @@ export const getVis = (bucketType: string) => {
             title: 'Split series',
             min: 0,
             max: 3,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [],
           },
           {
@@ -643,7 +643,7 @@ export const getVis = (bucketType: string) => {
             title: 'Split chart',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [
               {
                 name: 'row',
@@ -688,7 +688,7 @@ export const getVis = (bucketType: string) => {
             title: 'X-axis',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [],
           },
           {
@@ -697,7 +697,7 @@ export const getVis = (bucketType: string) => {
             title: 'Split series',
             min: 0,
             max: 3,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [],
           },
           {
@@ -706,7 +706,7 @@ export const getVis = (bucketType: string) => {
             title: 'Split chart',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [
               {
                 name: 'row',
@@ -722,7 +722,7 @@ export const getVis = (bucketType: string) => {
             title: 'X-axis',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [],
           },
           {
@@ -731,7 +731,7 @@ export const getVis = (bucketType: string) => {
             title: 'Split series',
             min: 0,
             max: 3,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [],
           },
           {
@@ -740,7 +740,7 @@ export const getVis = (bucketType: string) => {
             title: 'Split chart',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [
               {
                 name: 'row',
