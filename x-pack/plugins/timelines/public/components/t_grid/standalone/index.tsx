@@ -35,9 +35,9 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { combineQueries, getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
-import type { State } from '../../../store/t_grid';
+import type { State, TGridModel } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
-import { StatefulBody, TGridStateReporter, TGridExportableState } from '../body';
+import { StatefulBody } from '../body';
 import { LastUpdatedAt } from '../..';
 import {
   SELECTOR_TIMELINE_GLOBAL_CONTAINER,
@@ -104,11 +104,11 @@ export interface TGridStandaloneProps {
   }) => boolean;
   height?: number;
   indexNames: string[];
-  initialSelectedEventIds?: TGridExportableState['selectedEventIds'];
+  initialSelectedEventIds?: TGridModel['selectedEventIds'];
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
-  onTGridStateChange?: TGridStateReporter;
+  onTGridStateChange?: (state: State) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
@@ -142,7 +142,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   initialSelectedEventIds,
   itemsPerPageOptions,
   onRuleChange,
-  onTGridStateChange,
   query,
   renderCellValue,
   rowRenderers,
@@ -401,7 +400,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       renderCellValue={renderCellValue}
                       rowRenderers={rowRenderers}
                       onRuleChange={onRuleChange}
-                      onTGridStateChange={onTGridStateChange}
                       pageSize={itemsPerPageStore}
                       tabType={TimelineTabs.query}
                       tableView="gridView"

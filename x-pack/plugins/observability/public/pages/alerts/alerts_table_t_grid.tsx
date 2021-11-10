@@ -41,7 +41,7 @@ import {
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { get, pick, isEmpty } from 'lodash';
+import { get, pick } from 'lodash';
 import {
   getAlertsPermissions,
   useGetUserAlertsPermissions,
@@ -49,8 +49,8 @@ import {
 import type {
   TimelinesUIStart,
   TGridType,
-  TGridStateReporter,
-  TGridExportableState,
+  TGridState,
+  TGridModel,
   SortDirection,
 } from '../../../../timelines/public';
 import { useStatusBulkActionItems } from '../../../../timelines/public';
@@ -320,9 +320,17 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
-  const [tGridState, setTGridState] = useState<TGridExportableState | null>(
+  const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
     JSON.parse(localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY) ?? 'null')
   );
+  const [initialSelectedEventIds, setInitialSelectedEventIds] = useState<
+    TGridModel['selectedEventIds'] | undefined
+  >(undefined);
+  useEffect(() => {
+    if (!initialSelectedEventIds && tGridState?.selectedEventIds) {
+      setInitialSelectedEventIds(tGridState.selectedEventIds);
+    }
+  }, [tGridState, initialSelectedEventIds, setInitialSelectedEventIds]);
 
   const casePermissions = useGetUserCasesPermissions();
 
@@ -348,7 +356,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     if (tGridState) {
       const newState = JSON.stringify({
         ...tGridState,
-        columns: tGridState.columns.map((c) =>
+        columns: tGridState.columns?.map((c) =>
           pick(c, ['columnHeaderType', 'displayAsText', 'id', 'initialWidth', 'linkField'])
         ),
       });
@@ -386,10 +394,15 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     ];
   }, [workflowStatus, setEventsDeleted]);
 
-  const onTGridStateChange: TGridStateReporter = useCallback(
-    (state) => {
-      if (JSON.stringify(state) !== JSON.stringify(tGridState)) {
-        setTGridState(JSON.parse(JSON.stringify(state)));
+  const onTGridStateChange = useCallback(
+    (state: TGridState) => {
+      const pickedState = pick(state.timelineById['standalone-t-grid'], [
+        'columns',
+        'sort',
+        'selectedEventIds',
+      ]);
+      if (JSON.stringify(pickedState) !== JSON.stringify(tGridState)) {
+        setTGridState(pickedState);
       }
     },
     [tGridState]
@@ -403,14 +416,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       casesOwner: observabilityFeatureId,
       casePermissions,
       type,
-      columns: tGridState && !isEmpty(tGridState?.columns) ? tGridState.columns : columns,
+      columns: tGridState?.columns ?? columns,
       deletedEventIds,
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
       hasAlertsCrudPermissions,
       indexNames,
-      initialSelectedEventIds: tGridState?.selectedEventIds ?? {},
+      initialSelectedEventIds,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.loadingTextLabel,
       footerText: translations.footerTextLabel,
@@ -425,16 +438,13 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       runtimeMappings: {},
       start: rangeFrom,
       setRefetch,
-      sort:
-        tGridState && !isEmpty(tGridState?.sort)
-          ? tGridState.sort
-          : [
-              {
-                columnId: '@timestamp',
-                columnType: 'date',
-                sortDirection,
-              },
-            ],
+      sort: tGridState?.sort ?? [
+        {
+          columnId: '@timestamp',
+          columnType: 'date',
+          sortDirection,
+        },
+      ],
       filterStatus: workflowStatus as AlertWorkflowStatus,
       leadingControlColumns,
       trailingControlColumns,
@@ -453,6 +463,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     leadingControlColumns,
     deletedEventIds,
     onTGridStateChange,
+    initialSelectedEventIds,
     tGridState,
   ]);
 

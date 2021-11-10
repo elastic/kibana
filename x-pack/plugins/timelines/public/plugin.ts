@@ -6,6 +6,7 @@
  */
 
 import { Store } from 'redux';
+import { throttle } from 'lodash';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { CoreSetup, Plugin, CoreStart } from '../../../../src/core/public';
@@ -43,6 +44,11 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
           const state = getState();
           if (state && state.app) {
             this._store = undefined;
+          } else {
+            if (props.onTGridStateChange) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              this._store.subscribe(throttle(() => props.onTGridStateChange!(getState()), 500));
+            }
           }
         }
         return getTGridLazy(props, {

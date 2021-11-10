@@ -82,14 +82,6 @@ const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
 );
 
-export interface TGridExportableState {
-  columns: ColumnHeaderOptions[];
-  sort: SortColumnTimeline[];
-  selectedEventIds: Record<string, TimelineNonEcsData[]>;
-}
-
-export type TGridStateReporter = (state: TGridExportableState) => void;
-
 interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
@@ -109,7 +101,6 @@ interface OwnProps {
   leadingControlColumns?: ControlColumnProps[];
   loadPage: (newActivePage: number) => void;
   onRuleChange?: () => void;
-  onTGridStateChange?: TGridStateReporter;
   pageSize: number;
   refetch: Refetch;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -342,7 +333,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     loadingEventIds,
     loadPage,
     onRuleChange,
-    onTGridStateChange,
     pageSize,
     refetch,
     renderCellValue,
@@ -823,16 +813,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
     });
-
-    useEffect(() => {
-      if (onTGridStateChange) {
-        onTGridStateChange({
-          columns: columnsWithCellActions as ColumnHeaderOptions[],
-          sort,
-          selectedEventIds,
-        });
-      }
-    }, [columnsWithCellActions, sort, selectedEventIds, onTGridStateChange]);
 
     return (
       <>
