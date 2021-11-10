@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import { INDEXING_DELAY } from '../common/constants';
+import { INDEXING_DELAY } from '../../constants';
 
 export const createTransactionMetric = (override: Record<string, any>) => {
   const now = Date.now();

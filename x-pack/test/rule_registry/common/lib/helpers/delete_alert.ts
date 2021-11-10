@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import { APM_METRIC_INDEX_NAME } from '../common/constants';
-import { GetService } from '../common/types';
-import { User, TEST_PASSWORD } from '../common/users';
+import { APM_METRIC_INDEX_NAME } from '../../constants';
+import { GetService } from '../../types';
+import { getSpaceUrlPrefix } from '../authentication/spaces';
+import { User } from '../authentication/types';
 import { getAlertsTargetIndices } from './get_alerts_target_indices';
 
-export const deleteAlert = async (getService: GetService, user: User, id: string | undefined) => {
+export const deleteAlert = async (
+  getService: GetService,
+  user: User,
+  spaceId: string,
+  id: string | undefined
+) => {
   const es = getService('es');
-  const supertest = getService('supertest');
-  const { body: targetIndices } = await getAlertsTargetIndices(getService, user);
+  const supertest = getService('supertestWithoutAuth');
+  const { body: targetIndices } = await getAlertsTargetIndices(getService, user, spaceId);
   if (id) {
     const { body, status } = await supertest
-      .delete(`/api/alerts/alert/${id}`)
-      .auth(user, TEST_PASSWORD)
+      .delete(`${getSpaceUrlPrefix(spaceId)}/api/alerts/alert/${id}`)
+      .auth(user.username, user.password)
       .set('kbn-xsrf', 'foo');
 
     if (status >= 300) {

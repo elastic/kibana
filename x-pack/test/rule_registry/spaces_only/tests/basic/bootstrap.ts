@@ -6,23 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createUser, User } from '../../common/users';
-import { getAlertsTargetIndices } from '../../lib';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { obsOnlyRead } from '../../../common/lib/authentication/users';
+import { getAlertsTargetIndices } from '../../../common/lib/helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function registryRulesApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
-  const security = getService('security');
 
   describe('Rule Registry API', () => {
-    before(async () => {
-      await createUser(security, User.apmReadUser);
-    });
-
     describe('with read permissions', () => {
       it('does not bootstrap the apm rule indices', async () => {
-        const { body: targetIndices } = await getAlertsTargetIndices(getService, User.apmReadUser);
+        const { body: targetIndices } = await getAlertsTargetIndices(
+          getService,
+          obsOnlyRead,
+          'space1'
+        );
         const errorOrUndefined = await es.indices
           .get({
             index: targetIndices[0],

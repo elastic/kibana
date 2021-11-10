@@ -4,20 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { User, TEST_PASSWORD } from '../common/users';
-import { GetService } from '../common/types';
+import { GetService } from '../../types';
 import { getAlertsTargetIndices } from './get_alerts_target_indices';
-import { BULK_INDEX_DELAY, MAX_POLLS } from '../common/constants';
-import { Alert } from '../../../plugins/alerting/common';
+import { BULK_INDEX_DELAY, MAX_POLLS } from '../../constants';
+import { Alert } from '../../../../../plugins/alerting/common';
+import { getSpaceUrlPrefix } from '../authentication/spaces';
+import { User } from '../authentication/types';
 
 export async function waitUntilNextExecution(
   getService: GetService,
   user: User,
   alert: Alert,
+  spaceId: string,
   intervalInSeconds: number = 1,
   count: number = 0
 ): Promise<Alert> {
-  const supertest = getService('supertest');
+  const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
 
   await new Promise((resolve) => {
@@ -25,16 +27,17 @@ export async function waitUntilNextExecution(
   });
 
   const { body, status } = await supertest
-    .get(`/api/alerts/alert/${alert.id}`)
-    .auth(user, TEST_PASSWORD)
+    .get(`${getSpaceUrlPrefix(spaceId)}/api/alerts/alert/${alert.id}`)
+    .auth(user.username, user.password)
     .set('kbn-xsrf', 'foo');
 
   const { body: targetIndices, status: targetIndicesStatus } = await getAlertsTargetIndices(
     getService,
-    user
+    user,
+    spaceId
   );
   if (targetIndices.length === 0) {
-    const error = new Error('Error getting alert');
+    const error = new Error('Error getting target indices');
     Object.assign(error, { response: { body: targetIndices, status: targetIndicesStatus } });
     throw error;
   }
@@ -74,5 +77,5 @@ export async function waitUntilNextExecution(
     throw new Error('Maximum number of polls exceeded');
   }
 
-  return waitUntilNextExecution(getService, user, alert, intervalInSeconds, count + 1);
+  return waitUntilNextExecution(getService, user, alert, spaceId, intervalInSeconds, count + 1);
 }

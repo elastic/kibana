@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Observability specs (trial) Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 1`] = `
+exports[`rule registry spaces only: trial Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 1`] = `
 Object {
   "event.action": Array [
     "open",
@@ -45,7 +45,7 @@ Object {
     "open",
   ],
   "kibana.space_ids": Array [
-    "default",
+    "space1",
   ],
   "processor.event": Array [
     "transaction",
@@ -63,7 +63,7 @@ Object {
 }
 `;
 
-exports[`Observability specs (trial) Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 2`] = `
+exports[`rule registry spaces only: trial Rule Registry API with write permissions when creating a rule writes alerts data to the alert indices 2`] = `
 Object {
   "event.action": Array [
     "close",
@@ -105,7 +105,7 @@ Object {
     "open",
   ],
   "kibana.space_ids": Array [
-    "default",
+    "space1",
   ],
   "processor.event": Array [
     "transaction",

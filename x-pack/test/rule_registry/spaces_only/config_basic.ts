@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createTestConfig } from '../common/config';
 
 // eslint-disable-next-line import/no-default-export
-export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('Observability specs (trial)', function () {
-    this.tags('ciGroup1');
-    loadTestFile(require.resolve('./annotations'));
-  });
-}
+export default createTestConfig('spaces_only', {
+  license: 'basic',
+  disabledPlugins: ['security'],
+  ssl: false,
+  testFiles: [require.resolve('./tests/basic')],
+});

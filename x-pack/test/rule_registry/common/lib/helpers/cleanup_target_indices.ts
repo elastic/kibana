@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { GetService } from '../common/types';
-import { User } from '../common/users';
+import { GetService } from '../../types';
+import { User } from '../authentication/types';
 import { getAlertsTargetIndices } from './get_alerts_target_indices';
 
-export const cleanupTargetIndices = async (getService: GetService, user: User) => {
+export const cleanupTargetIndices = async (getService: GetService, user: User, spaceId: string) => {
   const es = getService('es');
-  const { body: targetIndices } = await getAlertsTargetIndices(getService, user);
+  const { body: targetIndices } = await getAlertsTargetIndices(getService, user, spaceId);
   try {
     const aliasMap = await es.indices.getAlias({
       name: targetIndices,

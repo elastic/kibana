@@ -17,8 +17,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createUser, User } from '../../common/users';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getAlertsTargetIndices,
   createApmMetricIndex,
@@ -27,24 +26,22 @@ import {
   createTransactionMetric,
   cleanupTargetIndices,
   deleteAlert,
-} from '../../lib';
-import { AlertDef, AlertParams } from '../../common/types';
-import { Alert } from '../../../../plugins/alerting/common';
-import { APM_METRIC_INDEX_NAME } from '../../common/constants';
+} from '../../../common/lib/helpers';
+import { AlertDef, AlertParams } from '../../../common/types';
+import { Alert } from '../../../../../plugins/alerting/common';
+import { APM_METRIC_INDEX_NAME } from '../../../common/constants';
+import { obsOnly } from '../../../common/lib/authentication/users';
+
+const SPACE_ID = 'space1';
 
 // eslint-disable-next-line import/no-default-export
 export default function registryRulesApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
-  const security = getService('security');
 
   describe('Rule Registry API', () => {
-    before(async () => {
-      await createUser(security, User.apmWriteUser);
-    });
-
     describe('with write permissions', () => {
       it('does not bootstrap indices on plugin startup', async () => {
-        const { body: targetIndices } = await getAlertsTargetIndices(getService, User.apmWriteUser);
+        const { body: targetIndices } = await getAlertsTargetIndices(getService, obsOnly, SPACE_ID);
         try {
           const res = await es.indices.get({
             index: targetIndices[0],
@@ -81,11 +78,11 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             notifyWhen: 'onActionGroupChange',
             name: 'Failed transaction rate threshold | opbeans-go',
           };
-          createResponse = await createAlert(getService, User.apmWriteUser, alertDef);
+          createResponse = await createAlert(getService, obsOnly, SPACE_ID, alertDef);
         });
         after(async () => {
-          await deleteAlert(getService, User.apmWriteUser, createResponse.alert.id);
-          await cleanupTargetIndices(getService, User.apmWriteUser);
+          await deleteAlert(getService, obsOnly, SPACE_ID, createResponse.alert.id);
+          await cleanupTargetIndices(getService, obsOnly, SPACE_ID);
         });
 
         it('writes alerts data to the alert indices', async () => {
@@ -94,13 +91,15 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
           expect(createResponse.alert).not.to.be(undefined);
           let alert = await waitUntilNextExecution(
             getService,
-            User.apmWriteUser,
-            createResponse.alert
+            obsOnly,
+            createResponse.alert,
+            SPACE_ID
           );
 
           const { body: targetIndices } = await getAlertsTargetIndices(
             getService,
-            User.apmWriteUser
+            obsOnly,
+            SPACE_ID
           );
 
           try {
@@ -133,7 +132,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             refresh: true,
           });
 
-          alert = await waitUntilNextExecution(getService, User.apmWriteUser, alert);
+          alert = await waitUntilNextExecution(getService, obsOnly, alert, SPACE_ID);
 
           try {
             const res = await es.search({
@@ -165,7 +164,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             refresh: true,
           });
 
-          alert = await waitUntilNextExecution(getService, User.apmWriteUser, alert);
+          alert = await waitUntilNextExecution(getService, obsOnly, alert, SPACE_ID);
 
           const afterViolatingDataResponse = await es.search({
             index: targetIndices[0],
@@ -213,7 +212,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             refresh: true,
           });
 
-          alert = await waitUntilNextExecution(getService, User.apmWriteUser, alert);
+          alert = await waitUntilNextExecution(getService, obsOnly, alert, SPACE_ID);
 
           const afterRecoveryResponse = await es.search({
             index: targetIndices[0],
@@ -247,26 +246,6 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             omit(recoveredAlertEvent, exclude.concat([ALERT_DURATION, ALERT_END]))
           ).toMatch();
         });
-      });
-    });
-
-    describe('with read permissions', () => {
-      it('does not bootstrap the apm rule indices', async () => {
-        const { body: targetIndices } = await getAlertsTargetIndices(getService, User.apmReadUser);
-        const errorOrUndefined = await es.indices
-          .get({
-            index: targetIndices[0],
-            expand_wildcards: 'open',
-            allow_no_indices: false,
-          })
-          .then(() => {})
-          .catch((error) => {
-            return error.toString();
-          });
-
-        expect(errorOrUndefined).not.to.be(undefined);
-
-        expect(errorOrUndefined).to.contain('index_not_found_exception');
       });
     });
   });

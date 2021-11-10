@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { APM_METRIC_INDEX_NAME } from '../common/constants';
-import { GetService } from '../common/types';
+import { APM_METRIC_INDEX_NAME } from '../../constants';
+import { GetService } from '../../types';
 
 export const createApmMetricIndex = async (getService: GetService) => {
   const es = getService('es');
-  return es.indices.create({
+  await es.indices.create({
     index: APM_METRIC_INDEX_NAME,
     body: {
       mappings: {
