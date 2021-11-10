@@ -247,6 +247,14 @@ export function TopValues({
       {Array.isArray(fieldValueStats?.topValues) && (
         <>
           <EuiHorizontalRule margin="s" />
+          <EuiSpacer size="s" />
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.apm.correlations.fieldContextPopover.notTopTenValueMessage"
+              defaultMessage="Selected term is not in the top 10"
+            />
+          </EuiText>
+
           {fieldValueStats?.topValues.map((value) => {
             const valueText =
               progressBarMax !== undefined
