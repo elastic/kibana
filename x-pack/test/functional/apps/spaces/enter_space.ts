@@ -45,26 +45,28 @@ export default function enterSpaceFunctonalTests({
     it('allows user to navigate to different spaces, respecting the configured default route', async () => {
       const spaceId = 'another-space';
 
-      screenshots.take('debug1');
+      await screenshots.take('debug1');
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
+      await screenshots.take('debug2');
 
-      screenshots.take('debug2');
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
+      await screenshots.take('debug3');
 
-      screenshots.take('debug3');
       await PageObjects.spaceSelector.expectRoute(spaceId, '/app/canvas');
+      await screenshots.take('debug4');
 
-      screenshots.take('debug4');
       await PageObjects.spaceSelector.openSpacesNav();
+      await screenshots.take('debug5');
+
       // change spaces
       const newSpaceId = 'default';
       await PageObjects.spaceSelector.clickSpaceAvatar(newSpaceId);
+      await screenshots.take('debug6');
 
-      screenshots.take('debug5');
       await PageObjects.spaceSelector.expectHomePage(newSpaceId);
-      screenshots.take('debug6');
+      await screenshots.take('debug7');
     });
   });
 }
