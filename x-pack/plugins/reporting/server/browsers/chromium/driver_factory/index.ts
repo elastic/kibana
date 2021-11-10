@@ -73,7 +73,6 @@ export class HeadlessChromiumDriverFactory {
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
       let browser: puppeteer.Browser | null = null;
-      let browserError: Error | null = null;
 
       try {
         browser = await puppeteer.launch({
@@ -88,12 +87,7 @@ export class HeadlessChromiumDriverFactory {
           },
         });
       } catch (err) {
-        browser = null;
-        browserError = err;
-      }
-
-      if (!browser) {
-        observer.error(new Error(`Error spawning Chromium browser! ${browserError}`));
+        observer.error(new Error(`Error spawning Chromium browser! ${err}`));
         return;
       }
 
