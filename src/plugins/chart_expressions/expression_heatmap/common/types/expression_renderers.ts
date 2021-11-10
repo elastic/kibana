@@ -9,6 +9,7 @@
 import type { ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
 import type { IFieldFormat, SerializedFieldFormat } from '../../../../field_formats/common';
 import type { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
+import type { PersistedState } from '../../../../visualizations/public';
 import type { HeatmapExpressionProps } from './expression_functions';
 
 export interface FilterEvent {
@@ -30,6 +31,7 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   onClickValue: (data: FilterEvent['data']) => void;
   onSelectRange: (data: BrushEvent['data']) => void;
   paletteService: PaletteRegistry;
+  uiState: PersistedState;
 };
 
 export interface ColorStop {

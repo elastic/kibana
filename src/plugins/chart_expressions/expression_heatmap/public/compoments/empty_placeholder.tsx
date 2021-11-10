@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export const EmptyPlaceholder = (props: { icon: IconType }) => (
   <>
-    <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
+    <EuiText className="heatmap-chart__empty" textAlign="center" color="subdued" size="xs">
       <EuiIcon type={props.icon} color="subdued" size="l" />
       <EuiSpacer size="s" />
       <p>

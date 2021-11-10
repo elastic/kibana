@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { ColorSchemas, getHeatmapColors } from '../../../../charts/common';
-import { CustomPaletteState } from '../../../../charts/public';
 import { Range } from '../../../../expressions';
 
 export interface PaletteConfig {
@@ -23,43 +22,6 @@ const getColor = (
 ) => {
   const value = invertColors ? 1 - index / elementsCount : index / elementsCount;
   return getHeatmapColors(value, colorSchema);
-};
-
-function getStops(
-  { colors, stops, range }: CustomPaletteState,
-  { min, max }: { min: number; max: number }
-) {
-  if (stops.length) {
-    return stops.slice(0, stops.length - 1);
-  }
-  // Do not use relative values here
-  const maxValue = range === 'percent' ? 100 : max;
-  const minValue = range === 'percent' ? 0 : min;
-  const step = (maxValue - minValue) / colors.length;
-  return colors.slice(0, colors.length - 1).map((_, i) => minValue + (i + 1) * step);
-}
-
-// temporary functions, move to charts plugin
-// same functions as lens
-export const shiftAndNormalizeStops = (
-  params: CustomPaletteState,
-  { min, max }: { min: number; max: number }
-) => {
-  const absMin = params.range === 'percent' ? 0 : min;
-  // data min is the fallback in case of default options
-  return [params.stops.length ? params.rangeMin : absMin, ...getStops(params, { min, max })].map(
-    (value) => {
-      let result = value;
-      if (params.range === 'percent') {
-        result = min + ((max - min) * value) / 100;
-      }
-      // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
-      if (Number.isNaN(result)) {
-        return 1;
-      }
-      return Number(result.toFixed(2));
-    }
-  );
 };
 
 export const getStopsWithColorsFromColorsNumber = (

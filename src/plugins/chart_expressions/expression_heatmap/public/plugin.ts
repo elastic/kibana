@@ -9,7 +9,13 @@ import { ChartsPluginSetup } from '../../../charts/public';
 import { CoreSetup, CoreStart } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from '../common';
-import { setFormatService, setPaletteService, setUISettings, setThemeService } from './services';
+import {
+  setFormatService,
+  setPaletteService,
+  setUISettings,
+  setThemeService,
+  setDocLinks,
+} from './services';
 import { heatmapRenderer } from './expression_renderers';
 import { FieldFormatsStart } from '../../../field_formats/public';
 
@@ -40,5 +46,6 @@ export class ExpressionHeatmapPlugin {
 
   public start(core: CoreStart, { fieldFormats }: ExpressionHeatmapPluginStart) {
     setFormatService(fieldFormats);
+    setDocLinks(core.docLinks);
   }
 }

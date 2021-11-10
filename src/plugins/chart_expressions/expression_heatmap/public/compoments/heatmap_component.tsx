@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState, useCallback } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -16,10 +16,19 @@ import {
   HeatmapSpec,
   ScaleType,
   Settings,
+  TooltipType,
+  TooltipProps,
 } from '@elastic/charts';
-import type { CustomPaletteState } from 'src/plugins/charts/public';
+import type { CustomPaletteState } from '../../../../charts/public';
+import { LegendToggle } from '../../../../charts/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
-import { applyPaletteParams, findMinMaxByColumnId } from './utils';
+import {
+  applyPaletteParams,
+  findMinMaxByColumnId,
+  accessorIsNotNumber,
+  getSortPredicate,
+} from './helpers';
+import { getColorPicker } from '../utils/get_color_picker';
 import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
 import { EmptyPlaceholder } from './empty_placeholder';
 import { HeatmapIcon } from './heatmap_icon';
@@ -111,32 +120,84 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   onClickValue,
   onSelectRange,
   paletteService,
+  uiState,
 }) => {
   const chartTheme = chartsThemeService.useChartsTheme();
   const isDarkTheme = chartsThemeService.useDarkMode();
+  // legacy heatmap legend is handled by the uiState
+  const [showLegend, setShowLegend] = useState<boolean>(() => {
+    const bwcLegendStateDefault = args.legend.isVisible == null ? true : args.legend.isVisible;
+    return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
+  });
+
+  const toggleLegend = useCallback(() => {
+    setShowLegend((value) => {
+      const newValue = !value;
+      if (uiState?.set) {
+        uiState.set('vis.legendOpen', newValue);
+      }
+      return newValue;
+    });
+  }, [uiState]);
+
+  const setColor = useCallback(
+    (newColor: string | null, seriesLabel: string | number) => {
+      const colors = uiState?.get('vis.colors') || {};
+      if (colors[seriesLabel] === newColor || !newColor) {
+        delete colors[seriesLabel];
+      } else {
+        colors[seriesLabel] = newColor;
+      }
+      uiState?.setSilent('vis.colors', null);
+      uiState?.set('vis.colors', colors);
+      uiState?.emit('reload');
+    },
+    [uiState]
+  );
+
+  const legendColorPicker = useMemo(
+    () => getColorPicker(args.legend.position, setColor, uiState),
+    [args.legend.position, setColor, uiState]
+  );
+
+  const tooltip: TooltipProps = {
+    type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
+  };
 
   const table = data;
 
   const paletteParams = args.palette?.params;
+  const xAccessor = accessorIsNotNumber(args.xAccessor)
+    ? args.xAccessor
+    : table.columns[Number(args.xAccessor) ?? 0].id;
+  const yAccessor = accessorIsNotNumber(args.yAccessor)
+    ? args.yAccessor
+    : table.columns[Number(args.yAccessor) ?? 0].id;
+  const valueAccessor = accessorIsNotNumber(args.valueAccessor)
+    ? args.valueAccessor
+    : table.columns[Number(args.valueAccessor) ?? 0].id;
 
-  const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
-  const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
+  const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
+  const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
 
   const xAxisColumn = table.columns[xAxisColumnIndex];
   const yAxisColumn = table.columns[yAxisColumnIndex];
-  const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
+  const valueColumn = table.columns.find((v) => v.id === valueAccessor);
 
   const minMaxByColumnId = useMemo(
-    () => findMinMaxByColumnId([args.valueAccessor!], table),
-    [args.valueAccessor, table]
+    () => findMinMaxByColumnId([valueAccessor!], table),
+    [valueAccessor, table]
   );
 
-  if (!xAxisColumn || !valueColumn) {
+  if (!valueColumn) {
     // Chart is not ready
     return null;
   }
 
-  let chartData = table.rows.filter((v) => typeof v[args.valueAccessor!] === 'number');
+  let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+  if (!chartData || !chartData.length) {
+    return <EmptyPlaceholder icon={HeatmapIcon} />;
+  }
 
   if (!yAxisColumn) {
     // required for tooltip
@@ -148,32 +209,60 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     });
   }
 
-  const xAxisMeta = xAxisColumn.meta;
-  const isTimeBasedSwimLane = xAxisMeta.type === 'date';
+  const xAxisMeta = xAxisColumn?.meta;
+  const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
 
   // Fallback to the ordinal scale type when a single row of data is provided.
   // Related issue https://github.com/elastic/elastic-charts/issues/1184
   const xScaleType =
     isTimeBasedSwimLane && chartData.length > 1 ? ScaleType.Time : ScaleType.Ordinal;
 
-  const xValuesFormatter = formatFactory(xAxisMeta.params);
-  const valueFormatter = formatFactory(valueColumn.meta.params);
+  const xValuesFormatter = formatFactory(xAxisMeta?.params);
+  const metricFormatter = args.percentageMode
+    ? formatFactory({
+        id: 'percent',
+        params: {
+          pattern: args.percentageFormatPattern,
+        },
+      })
+    : formatFactory(valueColumn.meta.params);
+
+  const { min, max } = minMaxByColumnId[valueAccessor!];
+  const valueFormatter = (d: number) => {
+    let value = d;
+
+    if (args.percentageMode) {
+      const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
+      value = parseInt(percentageNumber.toString(), 10) / 100;
+    }
+    return metricFormatter.convert(value);
+  };
 
   const { colors, ranges } = computeColorRanges(
     paletteService,
     paletteParams,
     isDarkTheme ? '#000' : '#fff',
-    minMaxByColumnId[args.valueAccessor!]
+    minMaxByColumnId[valueAccessor!]
   );
 
+  const endValue =
+    paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max + 0.00000001;
+  const overwriteColors = uiState?.get('vis.colors', {}) ?? {};
+
   const bands = ranges.map((start, index, array) => {
+    // with the default continuity:above the last range is right-open
+    let end = index === array.length - 1 ? Infinity : array[index + 1];
+    if (args.useDistinctBands) {
+      end = array[index + 1] ?? endValue;
+    }
+    const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
+    const overwriteColor = overwriteColors[overwriteArrayIdx];
     return {
       // with the default continuity:above the every range is left-closed
       start,
-      // with the default continuity:above the last range is right-open
-      end: index === array.length - 1 ? Infinity : array[index + 1],
+      end,
       // the current colors array contains a duplicated color at the beginning that we need to skip
-      color: colors[index + 1],
+      color: overwriteColor ?? colors[index + 1],
     };
   });
 
@@ -300,11 +389,11 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
         : {}),
     },
     xAxisLabel: {
-      visible: args.gridConfig.isXAxisLabelVisible,
+      visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
       // eui color subdued
       textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
       formatter: (v: number | string) => xValuesFormatter.convert(v),
-      name: xAxisColumn.name,
+      name: xAxisColumn?.name ?? '',
     },
     brushMask: {
       fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
@@ -315,43 +404,52 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     timeZone,
   };
 
-  if (!chartData || !chartData.length) {
-    return <EmptyPlaceholder icon={HeatmapIcon} />;
-  }
-
   return (
-    <Chart>
-      <Settings
-        onElementClick={onElementClick}
-        showLegend={args.legend.isVisible}
-        legendPosition={args.legend.position}
-        debugState={window._echDebugStateFlag ?? false}
-        theme={{
-          ...chartTheme,
-          legend: {
-            labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
-          },
-        }}
-        onBrushEnd={onBrushEnd as BrushEndListener}
-      />
-      <Heatmap
-        id="heatmap"
-        name={valueColumn.name}
-        colorScale={{
-          type: 'bands',
-          bands,
-        }}
-        data={chartData}
-        xAccessor={args.xAccessor}
-        yAccessor={args.yAccessor || 'unifiedY'}
-        valueAccessor={args.valueAccessor}
-        valueFormatter={(v: number) => valueFormatter.convert(v)}
-        xScaleType={xScaleType}
-        ySortPredicate="dataIndex"
-        config={config}
-        xSortPredicate="dataIndex"
-      />
-    </Chart>
+    <>
+      {showLegend !== undefined && (
+        <LegendToggle
+          onClick={toggleLegend}
+          showLegend={showLegend}
+          legendPosition={args.legend.position}
+        />
+      )}
+      <Chart>
+        <Settings
+          onElementClick={onElementClick}
+          showLegend={showLegend ?? args.legend.isVisible}
+          legendPosition={args.legend.position}
+          legendColorPicker={uiState ? legendColorPicker : undefined}
+          debugState={window._echDebugStateFlag ?? false}
+          tooltip={tooltip}
+          theme={{
+            ...chartTheme,
+            legend: {
+              labelOptions: {
+                maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+              },
+            },
+          }}
+          onBrushEnd={onBrushEnd as BrushEndListener}
+        />
+        <Heatmap
+          id="heatmap"
+          name={valueColumn.name}
+          colorScale={{
+            type: 'bands',
+            bands,
+          }}
+          data={chartData}
+          xAccessor={xAccessor}
+          yAccessor={yAccessor || 'unifiedY'}
+          valueAccessor={valueAccessor}
+          valueFormatter={valueFormatter}
+          xScaleType={xScaleType}
+          ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
+          config={config}
+          xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
+        />
+      </Chart>
+    </>
   );
 };
 

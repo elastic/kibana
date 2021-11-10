@@ -5,13 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { DocLinksStart } from 'src/core/public';
+import { createGetterSetter } from '../../../../kibana_utils/public';
 
-export { getFormatService, setFormatService } from './format_service';
-export {
-  getPaletteService,
-  setPaletteService,
-  setThemeService,
-  getThemeService,
-} from './palette_service';
-export { getUISettings, setUISettings } from './ui_settings';
-export { getDocLinks, setDocLinks } from './doc_links_service';
+export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('docLinks');

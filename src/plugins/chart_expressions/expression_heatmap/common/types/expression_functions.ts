@@ -67,14 +67,17 @@ export type HeatmapGridConfigResult = HeatmapGridConfig & {
 
 export interface HeatmapArguments {
   percentageMode?: boolean;
+  percentageFormatPattern?: string;
   useDistinctBands?: boolean;
   showTooltip?: boolean;
-  enableHover?: boolean;
+  highlightInHover?: boolean;
   palette?: PaletteOutput<CustomPaletteState>;
   shape: ChartShapes;
   xAccessor?: string;
   yAccessor?: string;
   valueAccessor?: string;
+  splitRowAccessor?: string;
+  splitColumnAccessor?: string;
   legend: HeatmapLegendConfigResult;
   gridConfig: HeatmapGridConfigResult;
 }

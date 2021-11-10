@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { VisualizationContainer } from '../../../../visualizations/public';
+import type { PersistedState } from '../../../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -16,8 +16,16 @@ import {
   FilterEvent,
   BrushEvent,
 } from '../../common';
-import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
+import {
+  getFormatService,
+  getPaletteService,
+  getUISettings,
+  getThemeService,
+  getDocLinks,
+} from '../services';
 import { getTimeZone } from '../utils/get_timezone';
+import { SplitChartWarning } from './split_chart_warning';
+
 import HeatmapComponent from '../compoments/heatmap_component';
 import './index.scss';
 const MemoizedChart = memo(HeatmapComponent);
@@ -39,10 +47,13 @@ export const heatmapRenderer = (): ExpressionRenderDefinition<HeatmapExpressionP
       handlers.event({ name: 'brush', data });
     };
 
-    const timeZone = getTimeZone(getUISettings());
+    // split chart will not be supported in the first release of the new implementation
+    const isSplitChart = Boolean(config.args.splitRowAccessor || config.args.splitColumnAccessor);
 
+    const timeZone = getTimeZone(getUISettings());
     render(
       <div className="heatmap-container" data-test-subj="heatmapContainer">
+        {isSplitChart && <SplitChartWarning docLinks={getDocLinks()} />}
         <MemoizedChart
           {...config}
           onClickValue={onClickValue}
@@ -51,6 +62,7 @@ export const heatmapRenderer = (): ExpressionRenderDefinition<HeatmapExpressionP
           formatFactory={getFormatService().deserialize}
           chartsThemeService={getThemeService()}
           paletteService={getPaletteService()}
+          uiState={handlers.uiState as PersistedState}
         />
       </div>,
       domNode,

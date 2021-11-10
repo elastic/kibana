@@ -43,6 +43,13 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
         defaultMessage: 'When is on, tooltip and legends appear as percentages.',
       }),
     },
+    // used only in legacy heatmap, consider it as @deprecated
+    percentageFormatPattern: {
+      types: ['string'],
+      help: i18n.translate('expressionHeatmap.function.percentageFormatPattern.help', {
+        defaultMessage: 'Pattern of the percentage format.',
+      }),
+    },
     shape: {
       types: ['string'],
       help: 'TBD',
@@ -72,9 +79,9 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       }),
       default: true,
     },
-    enableHover: {
+    highlightInHover: {
       types: ['boolean'],
-      help: i18n.translate('expressionHeatmap.function.args.enableHoverHelpText', {
+      help: i18n.translate('expressionHeatmap.function.args.highlightInHoverHelpText', {
         defaultMessage:
           'When this is enabled, it highlights the ranges of the same color on legend hover',
       }),
@@ -84,24 +91,36 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('visTypeHeatmap.function.args.useDistinctBandsHelpText', {
         defaultMessage: 'TBD',
       }),
-      default: true,
+      default: false,
     },
     xAccessor: {
       types: ['string'],
       help: i18n.translate('visTypeHeatmap.function.args.xAccessorHelpText', {
-        defaultMessage: 'TBD',
+        defaultMessage: 'Id of the x axis column or column index',
       }),
     },
     yAccessor: {
       types: ['string'],
       help: i18n.translate('visTypeHeatmap.function.args.yAccessorHelpText', {
-        defaultMessage: 'TBD',
+        defaultMessage: 'Id of the y axis column or column index',
       }),
     },
     valueAccessor: {
       types: ['string'],
       help: i18n.translate('visTypeHeatmap.function.args.valueAccessorHelpText', {
-        defaultMessage: 'TBD',
+        defaultMessage: 'Id of the value column or column index',
+      }),
+    },
+    splitRowAccessor: {
+      types: ['string'],
+      help: i18n.translate('visTypeHeatmap.function.args.splitRowAccessorHelpText', {
+        defaultMessage: 'Id of the splitRow column or column index',
+      }),
+    },
+    splitColumnAccessor: {
+      types: ['string'],
+      help: i18n.translate('visTypeHeatmap.function.args.splitColumnAccessorHelpText', {
+        defaultMessage: 'Id of the spliColumn column or column index',
       }),
     },
   },
@@ -115,6 +134,12 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
 
     const xDimension = args.xAccessor
       ? convertToVisDimension(data.columns, args.xAccessor)
+      : undefined;
+    const splitRowDimension = args.splitRowAccessor
+      ? convertToVisDimension(data.columns, args.splitRowAccessor)
+      : undefined;
+    const splitColumnDimension = args.splitColumnAccessor
+      ? convertToVisDimension(data.columns, args.splitColumnAccessor)
       : undefined;
 
     if (handlers?.inspectorAdapters?.tables) {
@@ -140,8 +165,26 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       if (xDimension) {
         argsTable.push([
           [xDimension],
-          i18n.translate('visTypeHeatmap.function.adimension.xaxis', {
+          i18n.translate('visTypeHeatmap.function.dimension.xaxis', {
             defaultMessage: 'X axis',
+          }),
+        ]);
+      }
+
+      if (splitRowDimension) {
+        argsTable.push([
+          [splitRowDimension],
+          i18n.translate('visTypeHeatmap.function.dimension.splitRow', {
+            defaultMessage: 'Split by row',
+          }),
+        ]);
+      }
+
+      if (splitColumnDimension) {
+        argsTable.push([
+          [splitColumnDimension],
+          i18n.translate('visTypeHeatmap.function.dimension.splitColumn', {
+            defaultMessage: 'Split by row',
           }),
         ]);
       }

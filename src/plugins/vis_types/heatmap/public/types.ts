@@ -15,13 +15,6 @@ import type {
   ColorSchemas,
 } from '../../../charts/public';
 import { Range } from '../../../expressions/public';
-import type {
-  SchemaConfig,
-  FakeParams,
-  HistogramParams,
-  DateHistogramParams,
-  ExpressionValueVisDimension,
-} from '../../../visualizations/public';
 
 export interface HeatmapTypeProps {
   showElasticChartsOptions?: boolean;
@@ -29,7 +22,7 @@ export interface HeatmapTypeProps {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
-interface HeatmapCommonParams {
+export interface HeatmapVisParams {
   addLegend: boolean;
   addTooltip: boolean;
   enableHover: boolean;
@@ -37,23 +30,6 @@ interface HeatmapCommonParams {
   useDistinctBands: boolean;
   percentageMode: boolean;
   isCellLabelVisible?: boolean;
-}
-
-export interface HeatmapVisConfig extends HeatmapCommonParams {
-  xDimension: ExpressionValueVisDimension | null;
-  yDimension: ExpressionValueVisDimension[];
-  seriesDimension?: ExpressionValueVisDimension[];
-  splitRowDimension?: ExpressionValueVisDimension[];
-  splitColumnDimension?: ExpressionValueVisDimension[];
-  palette: PaletteOutput;
-}
-
-export interface HeatmapVisParams extends HeatmapCommonParams {
-  xDimension: Dimension | null;
-  yDimension: Dimension[];
-  seriesDimension: Dimension[];
-  splitRowDimension?: Dimension[];
-  splitColumnDimension?: Dimension[];
   palette: PaletteOutput;
   valueAxes: ValueAxis[];
   colorSchema: ColorSchemas;
@@ -107,17 +83,4 @@ interface CategoryAxis {
 
 export interface ValueAxis extends CategoryAxis {
   name: string;
-}
-
-export type Dimension = Omit<SchemaConfig, 'params'> & {
-  params: DateHistogramParams | HistogramParams | FakeParams | {};
-};
-
-export interface Dimensions {
-  x: Dimension | null;
-  y: Dimension[];
-  z?: Dimension[];
-  series?: Dimension[];
-  splitRow?: Dimension[];
-  splitColumn?: Dimension[];
 }

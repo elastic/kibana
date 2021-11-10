@@ -6,22 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, DocLinksStart, IUiSettingsClient } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 import type { VisualizationsSetup } from '../../../visualizations/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import type { ChartsPluginSetup } from '../../../charts/public';
 import type { FieldFormatsStart } from '../../../field_formats/public';
 import type { UsageCollectionSetup } from '../../../usage_collection/public';
 import type { DataPublicPluginStart } from '../../../data/public';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
-import { createHeatmapVisFn } from './heatmap_fn';
-import { getHeatmapVisRenderer } from './heatmap_renderer';
 import { heatmapVisType } from './vis_type';
 
 /** @internal */
 export interface VisTypeHeatmapSetupDependencies {
   visualizations: VisualizationsSetup;
-  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   charts: ChartsPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
@@ -32,42 +28,17 @@ export interface VisTypeHeatmapPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
-/** @internal */
-export interface VisTypeHeatmapDependencies {
-  theme: ChartsPluginSetup['theme'];
-  palettes: ChartsPluginSetup['palettes'];
-  getStartDeps: () => Promise<{
-    data: DataPublicPluginStart;
-    docLinks: DocLinksStart;
-    uiSettings: IUiSettingsClient;
-    fieldFormats: FieldFormatsStart;
-  }>;
-}
-
 export class VisTypePiePlugin {
   setup(
     core: CoreSetup<VisTypeHeatmapPluginStartDependencies>,
-    { expressions, visualizations, charts, usageCollection }: VisTypeHeatmapSetupDependencies
+    { visualizations, charts, usageCollection }: VisTypeHeatmapSetupDependencies
   ) {
     if (!core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY, false)) {
-      const getStartDeps = async () => {
-        const [coreStart, deps] = await core.getStartServices();
-        return {
-          data: deps.data,
-          docLinks: coreStart.docLinks,
-          uiSettings: coreStart.uiSettings,
-          fieldFormats: deps.fieldFormats,
-        };
-      };
       const trackUiMetric = usageCollection?.reportUiCounter.bind(
         usageCollection,
         'vis_type_heatmap'
       );
 
-      expressions.registerFunction(createHeatmapVisFn);
-      expressions.registerRenderer(
-        getHeatmapVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
-      );
       visualizations.createBaseVisualization(
         heatmapVisType({
           showElasticChartsOptions: true,

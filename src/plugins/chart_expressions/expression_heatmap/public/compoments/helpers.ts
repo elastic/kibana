@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import type { Datatable } from 'src/plugins/expressions/public';
+import type { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import type { CustomPaletteParams, ColorStop } from '../../common';
 import {
   CUSTOM_PALETTE,
@@ -219,4 +219,35 @@ export const findMinMaxByColumnId = (
     }
   }
   return minMax;
+};
+
+// Checks if accessor is a string or number. Lens and legacy heatmap treat the accessors differently
+// For legacy, accessor indicates the column number while in Lens the column id
+export const accessorIsNotNumber = (value: string | undefined) => isNaN(value as unknown as number);
+
+interface SourceParams {
+  order?: string;
+  orderBy?: string;
+  otherBucket?: boolean;
+}
+
+export const getSortPredicate = (column: DatatableColumn) => {
+  const params = column.meta?.sourceParams?.params as SourceParams | undefined;
+  if (params?.otherBucket) return 'dataIndex';
+  const sort: string | undefined = params?.orderBy;
+  // metric sorting
+  if (sort && sort !== '_key') {
+    if (params?.order === 'desc') {
+      return 'numDesc';
+    } else {
+      return 'numAsc';
+    }
+    // alphabetical sorting
+  } else {
+    if (params?.order === 'desc') {
+      return 'alphaDesc';
+    } else {
+      return 'alphaAsc';
+    }
+  }
 };
