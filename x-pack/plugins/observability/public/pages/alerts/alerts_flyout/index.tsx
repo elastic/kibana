@@ -180,7 +180,7 @@ export function AlertsFlyout({
                 data-test-subj="alertsFlyoutViewInAppButton"
                 fill
               >
-                {translations.alertsFlyout.viewInApButtonText}
+                {translations.alertsFlyout.viewInAppButtonText}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
