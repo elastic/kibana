@@ -432,7 +432,7 @@ describe('Exception helpers', () => {
           entries: [
             {
               ...getEntryMatchMock(),
-              field: 'signal.original_event.kind',
+              field: 'kibana.alert.original_event.kind',
             },
             getEntryMatchMock(),
           ],
@@ -442,7 +442,7 @@ describe('Exception helpers', () => {
           entries: [
             {
               ...getEntryMatchMock(),
-              field: 'signal.original_event.module',
+              field: 'kibana.alert.original_event.module',
             },
           ],
         },
