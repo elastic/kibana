@@ -6,10 +6,7 @@
  */
 
 import { useDynamicDataViewFetcher } from '../../../../hooks/use_dynamic_data_view';
-import {
-  DataView,
-  DataViewSpec,
-} from '../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
@@ -26,8 +23,8 @@ export function useDataView() {
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
     if (dataView?.title) {
       return dataViews.create({
-        pattern: dataView?.title,
-      } as DataViewSpec);
+        title: dataView?.title,
+      });
     }
   }, [dataView?.title, dataViews]);
 
