@@ -33,7 +33,7 @@ describe('Split panel', () => {
     // the DOMElement width so that we have a lightweight test for width calculation
     // logic.
     const div = mount(<div />);
-    const proto = div.find('div').first().getDOMNode().__proto__;
+    const proto = Object.getPrototypeOf(div.find('div').first().getDOMNode());
     const originalGetBoundingClientRect = proto.getBoundingClientRect;
 
     proto.getBoundingClientRect = spy(() => {
