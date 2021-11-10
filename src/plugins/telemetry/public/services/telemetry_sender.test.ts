@@ -193,6 +193,7 @@ describe('TelemetrySender', () => {
   describe('sendUsageData', () => {
     let originalFetch: typeof window['fetch'];
     let mockFetch: jest.Mock<typeof window['fetch']>;
+    let consoleWarnMock: jest.SpyInstance;
 
     beforeAll(() => {
       originalFetch = window.fetch;
@@ -201,11 +202,18 @@ describe('TelemetrySender', () => {
     beforeEach(() => {
       window.fetch = mockFetch = jest.fn();
       jest.useFakeTimers();
+      consoleWarnMock = jest.spyOn(global.console, 'warn').mockImplementation(() => {});
     });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
     afterAll(() => {
       window.fetch = originalFetch;
       jest.useRealTimers();
     });
+
     it('sends the report', async () => {
       const mockClusterUuid = 'mk_uuid';
       const mockTelemetryUrl = 'telemetry_cluster_url';
@@ -284,6 +292,7 @@ describe('TelemetrySender', () => {
       expect(telemetrySender['retryCount']).toBe(1);
       expect(setTimeout).toBeCalledTimes(1);
       expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 120000);
+      expect(consoleWarnMock).not.toBeCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
     });
 
     it('catches fetch errors and sets a new timeout if fetch fails more than once', async () => {
@@ -306,6 +315,7 @@ describe('TelemetrySender', () => {
       await telemetrySender['sendUsageData']();
       expect(telemetrySender['retryCount']).toBe(5);
       expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 1920000);
+      expect(consoleWarnMock).not.toBeCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
     });
 
     it('stops trying to resend the data after 20 retries', async () => {
@@ -318,36 +328,28 @@ describe('TelemetrySender', () => {
       telemetrySender['retryCount'] = 21;
       await telemetrySender['sendUsageData']();
       expect(setTimeout).not.toBeCalled();
+      expect(consoleWarnMock.mock.calls[0][0]).toBe(
+        'TelemetrySender.sendUsageData exceeds number of retry attempts with Error fetching usage'
+      );
     });
   });
 
-  describe('delay Retry Send', () => {
+  describe('getRetryDelay', () => {
     beforeEach(() => jest.useFakeTimers());
     afterAll(() => jest.useRealTimers());
 
     it('sets a minimum retry delay of 60 seconds', () => {
-      const telemetryService = mockTelemetryService();
-      const telemetrySender = new TelemetrySender(telemetryService);
-      expect(telemetrySender['retryCount']).toBe(0);
-      expect(telemetrySender['delayRetrySend']()).toBe(60000);
+      expect(TelemetrySender.getRetryDelay(0)).toBe(60000);
     });
 
     it('changes the retry delay depending on the retry count', () => {
-      const telemetryService = mockTelemetryService();
-      const telemetrySender = new TelemetrySender(telemetryService);
-      telemetrySender['retryCount'] = 3;
-      expect(telemetrySender['delayRetrySend']()).toBe(480000);
-      telemetrySender['retryCount'] = 5;
-      expect(telemetrySender['delayRetrySend']()).toBe(1920000);
+      expect(TelemetrySender.getRetryDelay(3)).toBe(480000);
+      expect(TelemetrySender.getRetryDelay(5)).toBe(1920000);
     });
 
     it('sets a maximum retry delay of 64 min', () => {
-      const telemetryService = mockTelemetryService();
-      const telemetrySender = new TelemetrySender(telemetryService);
-      telemetrySender['retryCount'] = 8;
-      expect(telemetrySender['delayRetrySend']()).toBe(3840000);
-      telemetrySender['retryCount'] = 10;
-      expect(telemetrySender['delayRetrySend']()).toBe(3840000);
+      expect(TelemetrySender.getRetryDelay(8)).toBe(3840000);
+      expect(TelemetrySender.getRetryDelay(10)).toBe(3840000);
     });
   });
 

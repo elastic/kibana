@@ -22,6 +22,10 @@ export class TelemetrySender {
   private intervalId: number = 0; // setInterval returns a positive integer, 0 means no interval is set
   private retryCount: number = 0;
 
+  static getRetryDelay(retryCount: number) {
+    return 60 * (1000 * Math.min(Math.pow(2, retryCount), 64)); // 120s, 240s, 480s, 960s, 1920s, 3840s, 3840s, 3840s
+  }
+
   constructor(telemetryService: TelemetryService) {
     this.telemetryService = telemetryService;
     this.storage = new Storage(window.localStorage);
@@ -51,10 +55,6 @@ export class TelemetrySender {
     }
 
     return false;
-  };
-
-  private delayRetrySend = () => {
-    return 60 * (1000 * Math.min(Math.pow(2, this.retryCount), 64)); // 120s, 240s, 480s, 960s, 1920s, 3840s, 3840s, 3840s
   };
 
   private sendIfDue = async (): Promise<void> => {
@@ -94,7 +94,12 @@ export class TelemetrySender {
       this.retryCount = this.retryCount + 1;
       if (this.retryCount < 20) {
         // exponentially backoff the time between subsequent retries to up to 19 attempts, after which we give up until the next report is due
-        window.setTimeout(this.sendUsageData, this.delayRetrySend());
+        window.setTimeout(this.sendUsageData, TelemetrySender.getRetryDelay(this.retryCount));
+      } else {
+        /* eslint no-console: ["error", { allow: ["warn"] }] */
+        console.warn(
+          `TelemetrySender.sendUsageData exceeds number of retry attempts with ${err.message}`
+        );
       }
     }
   };
