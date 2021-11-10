@@ -80,18 +80,21 @@ export class EsArchiver {
    * @property {Boolean} options.skipExisting - should existing indices
    *                                           be ignored or overwritten
    * @property {Boolean} options.useCreate - use a create operation instead of index for documents
+   * @property {Boolean} options.docsOnly - load only documents, not indices
    */
   async load(
     path: string,
     {
       skipExisting = false,
       useCreate = false,
-    }: { skipExisting?: boolean; useCreate?: boolean } = {}
+      docsOnly = false,
+    }: { skipExisting?: boolean; useCreate?: boolean; docsOnly?: boolean } = {}
   ) {
     return await loadAction({
       inputDir: this.findArchive(path),
       skipExisting: !!skipExisting,
       useCreate: !!useCreate,
+      docsOnly,
       client: this.client,
       log: this.log,
       kbnClient: this.kbnClient,

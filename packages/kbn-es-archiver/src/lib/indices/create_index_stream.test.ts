@@ -167,6 +167,21 @@ describe('esArchiver: createCreateIndexStream()', () => {
     });
   });
 
+  describe('docsOnly = true', () => {
+    it('passes through "hit" records without attempting to create indices', async () => {
+      const client = createStubClient();
+      const stats = createStubStats();
+      const output = await createPromiseFromStreams([
+        createListStream([createStubIndexRecord('index'), createStubDocRecord('index', 1)]),
+        createCreateIndexStream({ client, stats, log, docsOnly: true }),
+        createConcatStream([]),
+      ]);
+
+      sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
+      expect(output).toEqual([createStubDocRecord('index', 1)]);
+    });
+  });
+
   describe('skipExisting = true', () => {
     it('ignores preexisting indexes', async () => {
       const client = createStubClient(['existing-index']);

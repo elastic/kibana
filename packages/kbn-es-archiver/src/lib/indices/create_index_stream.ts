@@ -29,11 +29,13 @@ export function createCreateIndexStream({
   client,
   stats,
   skipExisting = false,
+  docsOnly = false,
   log,
 }: {
   client: Client;
   stats: Stats;
   skipExisting?: boolean;
+  docsOnly?: boolean;
   log: ToolingLog;
 }) {
   const skipDocsFromIndices = new Set();
@@ -54,6 +56,10 @@ export function createCreateIndexStream({
   async function handleIndex(record: DocRecord) {
     const { index, settings, mappings, aliases } = record.value;
     const isKibana = index.startsWith('.kibana');
+
+    if (docsOnly) {
+      return;
+    }
 
     async function attemptToCreate(attemptNumber = 1) {
       try {

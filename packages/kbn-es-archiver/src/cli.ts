@@ -202,9 +202,10 @@ export function runCli() {
           $ node scripts/es_archiver load my_test_data --config ../config.js
       `,
       flags: {
-        boolean: ['use-create'],
+        boolean: ['use-create', 'docs-only'],
         help: `
           --use-create       use create instead of index for loading documents
+          --docs-only        load only documents, not indices
         `,
       },
       async run({ flags, esArchiver, statsMeta }) {
@@ -223,7 +224,12 @@ export function runCli() {
           throw createFlagError('--use-create does not take a value');
         }
 
-        await esArchiver.load(path, { useCreate });
+        const docsOnly = flags['docs-only'];
+        if (typeof docsOnly !== 'boolean') {
+          throw createFlagError('--docs-only does not take a value');
+        }
+
+        await esArchiver.load(path, { useCreate, docsOnly });
       },
     })
     .command({
