@@ -110,7 +110,7 @@ export function getStaticValue(
     activeData,
     groupId !== 'x' // histogram axis should compute the min based on the current data
   );
-  return typeof computedValue === 'number' ? computedValue : fallbackValue;
+  return computedValue ?? fallbackValue;
 }
 
 function getAccessorCriteriaForGroup(
