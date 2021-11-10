@@ -7,23 +7,7 @@
 
 import type { SavedObjectMigrationFn } from 'kibana/server';
 
-import type { Agent, AgentPolicy, PackagePolicy, EnrollmentAPIKey, Settings } from '../../types';
-
-export const migrateAgentToV7100: SavedObjectMigrationFn<
-  Exclude<Agent, 'policy_id' | 'policy_revision'> & {
-    config_id?: string;
-    config_revision?: number | null;
-  },
-  Agent
-> = (agentDoc) => {
-  agentDoc.attributes.policy_id = agentDoc.attributes.config_id;
-  delete agentDoc.attributes.config_id;
-
-  agentDoc.attributes.policy_revision = agentDoc.attributes.config_revision;
-  delete agentDoc.attributes.config_revision;
-
-  return agentDoc;
-};
+import type { AgentPolicy, PackagePolicy, Settings } from '../../types';
 
 export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
   Exclude<AgentPolicy, 'package_policies'> & {
@@ -36,18 +20,6 @@ export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
   delete agentPolicyDoc.attributes.package_configs;
 
   return agentPolicyDoc;
-};
-
-export const migrateEnrollmentApiKeysToV7100: SavedObjectMigrationFn<
-  Exclude<EnrollmentAPIKey, 'policy_id'> & {
-    config_id?: string;
-  },
-  EnrollmentAPIKey
-> = (enrollmentApiKeyDoc) => {
-  enrollmentApiKeyDoc.attributes.policy_id = enrollmentApiKeyDoc.attributes.config_id;
-  delete enrollmentApiKeyDoc.attributes.config_id;
-
-  return enrollmentApiKeyDoc;
 };
 
 export const migratePackagePolicyToV7100: SavedObjectMigrationFn<
