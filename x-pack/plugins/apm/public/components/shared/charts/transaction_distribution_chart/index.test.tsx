@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HistogramItem } from '../../../../../common/search_strategies/types';
+import type { HistogramItem } from '../../../../../common/correlations/types';
 
 import { replaceHistogramDotsWithBars } from './index';
 
