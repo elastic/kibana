@@ -3,29 +3,29 @@
   "groups": [
     "apm"
   ],
-  "description": "Detects anomalies in transaction duration, throughput and error percentage for metric data.",
+  "description": "Detects anomalies in transaction latency, throughput and error percentage for metric data.",
   "analysis_config": {
     "bucket_span": "15m",
     "summary_count_field_name" : "doc_count",
     "detectors" : [
       {
-        "detector_description" : "high duration by transaction type for an APM service",
+        "detector_description" : "high latency by transaction type for an APM service",
         "function" : "high_mean",
-        "field_name" : "transaction_duration",
+        "field_name" : "transaction_latency",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       },
       {
-        "detector_description" : "transactions per minute for an APM service",
+        "detector_description" : "transaction throughput for an APM service",
         "function" : "mean",
         "field_name" : "transactions_per_min",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       },
       {
-        "detector_description" : "percent failed for an APM service",
+        "detector_description" : "failed transaction rate for an APM service",
         "function" : "high_mean",
-        "field_name" : "transaction_failure_percentage",
+        "field_name" : "failed_transaction_rate",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       }

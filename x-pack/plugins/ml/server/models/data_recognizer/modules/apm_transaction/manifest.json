@@ -1,7 +1,7 @@
 {
   "id": "apm_transaction",
   "title": "APM",
-  "description": "Detect anomalies in transactions from your APM services for metric data.",
+  "description": "Detect anomalies in transaction latency, throughput and failure rate from your APM services for metric data.",
   "type": "Transaction data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*-metric,metrics-apm*",
@@ -21,9 +21,9 @@
   ],
   "datafeeds": [
     {
-      "id": "datafeed-apm_metrics",
-      "file": "datafeed_apm_metrics.json",
-      "job_id": "apm_metrics"
+      "id": "datafeed-apm_tx_metrics",
+      "file": "datafeed_apm_tx_metrics.json",
+      "job_id": "apm_tx_metrics"
     }
   ]
 }

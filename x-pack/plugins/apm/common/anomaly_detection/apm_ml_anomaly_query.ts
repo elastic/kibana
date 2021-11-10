@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export function apmMlAnomalyQuery(detectorIndex: 0 | 1 | 2) {
+import { ApmMlDetectorIndex } from './apm_ml_detectors';
+
+export function apmMlAnomalyQuery(detectorIndex: ApmMlDetectorIndex) {
   return [
     {
       bool: {

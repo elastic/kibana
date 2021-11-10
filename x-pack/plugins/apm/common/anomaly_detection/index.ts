@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ANOMALY_SEVERITY } from './ml_constants';
+import { ANOMALY_SEVERITY } from '../ml_constants';
 import {
   getSeverityType,
   getSeverityColor as mlGetSeverityColor,
-} from '../../ml/common';
-import { ServiceHealthStatus } from './service_health_status';
+} from '../../../ml/common';
+import { ServiceHealthStatus } from '../service_health_status';
 
 export interface ServiceAnomalyStats {
   transactionType?: string;
@@ -32,8 +32,6 @@ export function getSeverity(score: number | undefined) {
 export function getSeverityColor(score: number) {
   return mlGetSeverityColor(score);
 }
-
-export const ML_TRANSACTION_LATENCY_DETECTOR_INDEX = 0;
 
 export const ML_ERRORS = {
   INVALID_LICENSE: i18n.translate(
