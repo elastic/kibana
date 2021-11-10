@@ -9,7 +9,6 @@
     "embeddable",
     "inspector",
     "fieldFormats",
-    "kibanaLegacy",
     "urlForwarding",
     "navigation",
     "uiActions",
