@@ -13,16 +13,7 @@ import '../../common/mock/match_media';
 import { ConfigureCaseButton, ConfigureCaseButtonProps } from '.';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
+jest.mock('../../common/navigation/hooks');
 
 describe('Configuration button', () => {
   let wrapper: ReactWrapper;
@@ -46,7 +37,7 @@ describe('Configuration button', () => {
 
   test('it pass the correct props to the button', () => {
     expect(wrapper.find('[data-test-subj="configure-case-button"]').first().props()).toMatchObject({
-      href: `testHref`,
+      href: `/app/security/cases/configure`,
       iconType: 'controlsHorizontal',
       isDisabled: false,
       'aria-label': 'My label',

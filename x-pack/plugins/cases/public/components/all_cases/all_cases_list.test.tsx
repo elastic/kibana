@@ -28,7 +28,7 @@ import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList, AllCasesListProps } from './all_cases_list';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
@@ -41,7 +41,8 @@ jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/configure/use_connectors');
-jest.mock('../../common/lib/kibana/kibana_react');
+jest.mock('../../common/lib/kibana');
+jest.mock('../../common/navigation/hooks');
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -58,11 +59,6 @@ const mockKibana = () => {
     services: {
       ...createStartServicesMock(),
       triggersActionsUi: mockTriggersActionsUiService,
-      application: {
-        navigateToApp: jest.fn(),
-        navigateToUrl: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/security'),
-      },
     },
   } as unknown as ReturnType<typeof useKibana>);
 };
@@ -171,7 +167,7 @@ describe('AllCasesListGeneric', () => {
 
     await waitFor(() => {
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).first().prop('href')).toEqual(
-        `/app/security`
+        `/app/security/cases/test`
       );
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).first().text()).toEqual(
         useGetCasesMockState.data.cases[0].title

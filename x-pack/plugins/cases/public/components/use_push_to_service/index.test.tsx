@@ -20,20 +20,10 @@ import { connectorsMock } from '../../containers/configure/mock';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import * as i18n from './translations';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
-
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/configure/api');
+jest.mock('../../common/navigation/hooks');
 
 describe('usePushToService', () => {
   const caseId = '12345';
@@ -81,7 +71,7 @@ describe('usePushToService', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     (usePostPushToService as jest.Mock).mockImplementation(() => mockPostPush);
     (useGetActionLicense as jest.Mock).mockImplementation(() => ({
       isLoading: false,

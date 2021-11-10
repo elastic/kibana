@@ -11,7 +11,9 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../../common/mock';
 import { NoCases } from '.';
 
-describe('RecentCases', () => {
+jest.mock('../../../common/navigation/hooks');
+
+describe('NoCases', () => {
   it('if no cases, a link to create cases will exist', () => {
     const wrapper = mount(
       <TestProviders>
@@ -19,13 +21,13 @@ describe('RecentCases', () => {
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).first().prop('href')).toEqual(
-      '/create'
+      '/app/security/cases/create'
     );
   });
 
   it('displays a message without a link to create a case when the user does not have write permissions', () => {
     const wrapper = mount(
-      <TestProviders>
+      <TestProviders userCanCrud={false}>
         <NoCases />
       </TestProviders>
     );

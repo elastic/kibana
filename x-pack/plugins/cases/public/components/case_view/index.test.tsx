@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import { CaseComponent, CaseComponentProps, CaseView, CaseViewProps } from '.';
@@ -19,6 +19,7 @@ import {
   getAlertUserAction,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
+import { SpacesApi } from '../../../../spaces/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
@@ -27,21 +28,16 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { CaseType, ConnectorTypes } from '../../../common';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
-import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { useKibana } from '../../common/lib/kibana';
 
-const mockId = basicCase.id;
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ detailName: mockId }),
-  generatePath: (path: string) => path,
-}));
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_action_tree/user_action_timestamp');
-jest.mock('../../common/lib/kibana/kibana_react');
+jest.mock('../../common/lib/kibana');
+jest.mock('../../common/navigation/hooks');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
@@ -168,25 +164,11 @@ describe('CaseView ', () => {
       pushCaseToExternalService,
     }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useKibanaMock.mockReturnValue({
-      services: {
-        ...createStartServicesMock(),
-        triggersActionsUi: {
-          actionTypeRegistry: {
-            get: jest.fn().mockReturnValue({
-              actionTypeTitle: '.servicenow',
-              iconClass: 'logoSecurity',
-            }),
-          },
-        },
-        spaces: { ui: spacesUiApiMock },
-        application: {
-          navigateToApp: jest.fn(),
-          navigateToUrl: jest.fn(),
-          getUrlForApp: jest.fn(() => '/app/security'),
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
+    useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
   });
 
   it('should render CaseComponent', async () => {
@@ -473,7 +455,7 @@ describe('CaseView ', () => {
       expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
       expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
       expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith(
-        `cases/${resolveAliasId}`,
+        `/cases/${resolveAliasId}`,
         'case'
       );
     });
@@ -499,7 +481,7 @@ describe('CaseView ', () => {
         objectNoun: 'case',
         currentObjectId: defaultGetCase.data.id,
         otherObjectId: resolveAliasId,
-        otherObjectPath: `cases/${resolveAliasId}`,
+        otherObjectPath: `/cases/${resolveAliasId}`,
       });
     });
   });
@@ -750,53 +732,57 @@ describe('CaseView ', () => {
   describe('when a `refreshRef` prop is provided', () => {
     let refreshRef: CaseViewProps['refreshRef'];
 
-    beforeEach(() => {
+    beforeEach(async () => {
       (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
       refreshRef = React.createRef();
 
-      mount(
-        <TestProviders>
-          <CaseView
-            {...{
-              refreshRef,
-              allCasesNavigation: {
-                href: 'all-cases-href',
-                onClick: jest.fn(),
-              },
-              caseDetailsNavigation: {
-                href: 'case-details-href',
-                onClick: jest.fn(),
-              },
-              caseId: '1234',
-              configureCasesNavigation: {
-                href: 'configure-cases-href',
-                onClick: jest.fn(),
-              },
-              onComponentInitialized: jest.fn(),
-              ruleDetailsNavigation: {
-                href: jest.fn(),
-                onClick: jest.fn(),
-              },
-              showAlertDetails: jest.fn(),
-              useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-              userCanCrud: true,
-            }}
-          />
-        </TestProviders>
-      );
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <CaseView
+              {...{
+                refreshRef,
+                allCasesNavigation: {
+                  href: 'all-cases-href',
+                  onClick: jest.fn(),
+                },
+                caseDetailsNavigation: {
+                  href: 'case-details-href',
+                  onClick: jest.fn(),
+                },
+                caseId: '1234',
+                configureCasesNavigation: {
+                  href: 'configure-cases-href',
+                  onClick: jest.fn(),
+                },
+                onComponentInitialized: jest.fn(),
+                ruleDetailsNavigation: {
+                  href: jest.fn(),
+                  onClick: jest.fn(),
+                },
+                showAlertDetails: jest.fn(),
+                useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+                userCanCrud: true,
+              }}
+            />
+          </TestProviders>
+        );
+      });
     });
 
     it('should set it with expected refresh interface', async () => {
-      expect(refreshRef!.current).toEqual({
-        refreshUserActionsAndComments: expect.any(Function),
-        refreshCase: expect.any(Function),
+      await waitFor(() => {
+        expect(refreshRef!.current).toEqual({
+          refreshUserActionsAndComments: expect.any(Function),
+          refreshCase: expect.any(Function),
+        });
       });
     });
 
     it('should refresh actions and comments', async () => {
       await waitFor(() => {
         refreshRef!.current!.refreshUserActionsAndComments();
-        expect(fetchCaseUserActions).toBeCalledWith('1234', 'resilient-2', undefined);
+        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2', undefined);
         expect(fetchCase).toBeCalledWith(true);
       });
     });
