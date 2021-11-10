@@ -177,7 +177,7 @@ export class ThreadPoolRejectedMetric extends ElasticsearchMetric {
 export class IndexMemoryMetric extends ElasticsearchMetric {
   constructor(opts) {
     super({
-      title: 'Index Memory - Lucene',
+      title: 'Index Memory',
       ...opts,
       format: SMALL_BYTES,
       metricAgg: 'max',
