@@ -245,6 +245,12 @@ export const TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX = `${TIMELINE_ROW_RENDE
 
 export const TIMELINE_ROW_RENDERERS_SEARCHBOX = `${TIMELINE_ROW_RENDERERS_MODAL} input[type="search"]`;
 
+export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE = `${TIMELINE_ROW_RENDERERS_MODAL} [data-test-subj="render-content-suricata.eve.alert.signature"]`;
+
+export const TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP = `[data-test-subj="externalLinkTooltip"]`;
+
+export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP = `[data-test-subj="suricata.eve.alert.signature-tooltip"]`;
+
 export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-renderers-gear"]';
 
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
