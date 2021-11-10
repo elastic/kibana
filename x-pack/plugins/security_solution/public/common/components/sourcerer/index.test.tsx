@@ -268,9 +268,8 @@ describe('Sourcerer component', () => {
           [SourcererScopeName.default]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
             loading: false,
-            patternList,
             selectedDataViewId: id,
-            selectedPatterns: patternList.slice(0, 2),
+            selectedPatterns: patternListNoSignals.slice(0, 2),
           },
         },
       },
@@ -284,7 +283,7 @@ describe('Sourcerer component', () => {
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
-    expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
+    expect(checkOptionsAndSelections(wrapper, patternListNoSignals.slice(0, 2))).toEqual({
       // should hide signal index
       availableOptionCount: title.split(',').length - 3,
       optionsSelected: true,
@@ -358,7 +357,7 @@ describe('Sourcerer component', () => {
               ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
               loading: false,
               selectedDataViewId: id,
-              selectedPatterns: patternList.slice(0, 2),
+              selectedPatterns: patternListNoSignals.slice(0, 2),
             },
           },
         },
@@ -374,13 +373,12 @@ describe('Sourcerer component', () => {
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
-    expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
+    expect(checkOptionsAndSelections(wrapper, patternListNoSignals.slice(0, 2))).toEqual({
       availableOptionCount: title.split(',').length - 3,
       optionsSelected: true,
     });
-
     wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).first().simulate('click');
-    expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 3))).toEqual({
+    expect(checkOptionsAndSelections(wrapper, patternListNoSignals.slice(0, 3))).toEqual({
       availableOptionCount: title.split(',').length - 4,
       optionsSelected: true,
     });
@@ -391,7 +389,7 @@ describe('Sourcerer component', () => {
       sourcererActions.setSelectedDataView({
         id: SourcererScopeName.default,
         selectedDataViewId: id,
-        selectedPatterns: patternList.slice(0, 3),
+        selectedPatterns: patternListNoSignals.slice(0, 3),
       })
     );
   });
@@ -411,7 +409,7 @@ describe('Sourcerer component', () => {
 
     wrapper
       .find(
-        `[data-test-subj="sourcerer-combo-box"] [title="${patternList[0]}"] button.euiBadge__iconButton`
+        `[data-test-subj="sourcerer-combo-box"] [title="${patternListNoSignals[0]}"] button.euiBadge__iconButton`
       )
       .first()
       .simulate('click');
@@ -483,9 +481,8 @@ describe('Sourcerer component', () => {
           [SourcererScopeName.timeline]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
             loading: false,
-            patternList,
             selectedDataViewId: id,
-            selectedPatterns: patternList.slice(0, 2),
+            selectedPatterns: patternListNoSignals.slice(0, 2),
           },
         },
       },
@@ -499,7 +496,7 @@ describe('Sourcerer component', () => {
     );
     wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxToggleListButton"]`).first().simulate('click');
-    expect(wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).at(6).text()).toEqual(
+    expect(wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).at(0).text()).toEqual(
       mockGlobalState.sourcerer.signalIndexName
     );
   });
@@ -528,9 +525,8 @@ describe('Sourcerer component', () => {
           [SourcererScopeName.default]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
             loading: false,
-            patternList,
             selectedDataViewId: id,
-            selectedPatterns: patternList.slice(0, 2),
+            selectedPatterns: patternListNoSignals.slice(0, 2),
           },
         },
       },
@@ -716,9 +712,8 @@ describe('Sourcerer integration tests', () => {
         [SourcererScopeName.default]: {
           ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
           loading: false,
-          patternList,
           selectedDataViewId: id,
-          selectedPatterns: patternList.slice(0, 2),
+          selectedPatterns: patternListNoSignals.slice(0, 2),
         },
       },
     },
