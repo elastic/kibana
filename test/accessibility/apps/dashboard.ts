@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('add a visualization', async () => {
-      await listingTable.searchForItemWithName('[Flights]');
+      await testSubjects.setValue('savedObjectFinderSearchInput', '[Flights]');
       await testSubjects.click('savedObjectTitle[Flights]-Delay-Buckets');
       await a11y.testAppSnapshot();
     });
