@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockHttpValues,
-  mockFlashMessageHelpers,
-} from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'some-engine' } },
@@ -17,12 +13,13 @@ jest.mock('../engine', () => ({
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { EngineOverviewLogic } from './';
 
 describe('EngineOverviewLogic', () => {
   const { mount } = new LogicMounter(EngineOverviewLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const mockEngineMetrics = {
     documentCount: 10,
@@ -83,14 +80,9 @@ describe('EngineOverviewLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-        http.get.mockReturnValue(Promise.reject('An error occurred'));
-
         EngineOverviewLogic.actions.loadOverviewMetrics();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred');
       });
     });
   });
