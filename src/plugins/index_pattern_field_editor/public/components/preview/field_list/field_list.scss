@@ -10,6 +10,10 @@ $previewShowMoreHeight: 40px; /* [2] */
 .indexPatternFieldEditor__previewFieldList {
   position: relative;
 
+  &--ligthWeight {
+    font-weight: 400;
+  }
+
   &__item {
     border-bottom: $euiBorderThin;
     height: $previewFieldItemHeight;
@@ -17,7 +21,7 @@ $previewShowMoreHeight: 40px; /* [2] */
     overflow: hidden;
 
     &--highlighted {
-      $backgroundColor: tintOrShade($euiColorWarning, 90%, 70%);
+      $backgroundColor: tintOrShade($euiColorPrimary, 90%, 70%);
       background: $backgroundColor;
       font-weight: 600;
     }
