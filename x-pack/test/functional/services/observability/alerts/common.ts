@@ -196,7 +196,7 @@ export function ObservabilityAlertsCommonProvider({
 
   const setWorkflowStatusFilter = async (workflowStatus: WorkflowStatus) => {
     const buttonGroupButton = await testSubjects.find(
-      `workflow-status-filter-${workflowStatus}-button`
+      `workflowStatusFilterButton-${workflowStatus}`
     );
     await buttonGroupButton.click();
   };
