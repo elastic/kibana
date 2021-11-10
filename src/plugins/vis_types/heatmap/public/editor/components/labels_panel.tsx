@@ -55,7 +55,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="visTypeVislib.controls.heatmapOptions.labelsTitle"
+            id="visTypeHeatmap.controls.heatmapOptions.labelsTitle"
             defaultMessage="Labels"
           />
         </h3>
@@ -64,7 +64,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
 
       {isNewLibrary && (
         <SwitchOption
-          label={i18n.translate('visTypeVislib.controls.heatmapOptions.showLabelsTitle', {
+          label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.showLabelsTitle', {
             defaultMessage: 'Show labels',
           })}
           paramName="isCellLabelVisible"
@@ -75,7 +75,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
 
       {!isNewLibrary && (
         <SwitchOption
-          label={i18n.translate('visTypeVislib.controls.heatmapOptions.showLabelsTitle', {
+          label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.showLabelsTitle', {
             defaultMessage: 'Show labels',
           })}
           paramName="show"
@@ -86,13 +86,13 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
 
       <SwitchOption
         disabled={!valueAxis.labels.show || isNewLibrary}
-        label={i18n.translate('visTypeVislib.controls.heatmapOptions.rotateLabel', {
+        label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.rotateLabel', {
           defaultMessage: 'Rotate',
         })}
         paramName="rotate"
         value={rotateLabels}
         setValue={setRotateLabels}
-        tooltip={i18n.translate('visTypeVislib.editors.heatmap.rotateLabelNotAvailable', {
+        tooltip={i18n.translate('visTypeHeatmap.editors.heatmap.rotateLabelNotAvailable', {
           defaultMessage:
             'Rotate label is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
         })}
@@ -101,7 +101,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
       <SwitchOption
         disabled={!valueAxis.labels.show || isNewLibrary}
         label={i18n.translate(
-          'visTypeVislib.controls.heatmapOptions.overwriteAutomaticColorLabel',
+          'visTypeHeatmap.controls.heatmapOptions.overwriteAutomaticColorLabel',
           {
             defaultMessage: 'Overwrite automatic color',
           }
@@ -109,7 +109,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
         paramName="overwriteColor"
         value={Boolean(valueAxis.labels.overwriteColor)}
         setValue={setValueAxisLabels}
-        tooltip={i18n.translate('visTypeVislib.editors.heatmap.overwriteColorlNotAvailable', {
+        tooltip={i18n.translate('visTypeHeatmap.editors.heatmap.overwriteColorlNotAvailable', {
           defaultMessage:
             'Overwrite automatic color is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
         })}
@@ -118,7 +118,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
       <EuiFormRow
         display="rowCompressed"
         fullWidth
-        label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorLabel', {
+        label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.colorLabel', {
           defaultMessage: 'Color',
         })}
       >

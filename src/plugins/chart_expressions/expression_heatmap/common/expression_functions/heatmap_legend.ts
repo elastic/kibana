@@ -29,27 +29,27 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
   args: {
     isVisible: {
       types: ['boolean'],
-      help: i18n.translate('expressionHeatmap.function.legend.isVisible.help', {
+      help: i18n.translate('expressionHeatmap.function.args.legend.isVisible.help', {
         defaultMessage: 'Specifies whether or not the legend is visible.',
       }),
     },
     position: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: i18n.translate('expressionHeatmap.function.legend.position.help', {
+      help: i18n.translate('expressionHeatmap.function.args.legend.position.help', {
         defaultMessage: 'Specifies the legend position.',
       }),
     },
     maxLines: {
       types: ['number'],
-      help: i18n.translate('expressionHeatmap.function.legend.maxLines.help', {
+      help: i18n.translate('expressionHeatmap.function.args.legend.maxLines.help', {
         defaultMessage: 'Specifies the number of lines per legend item.',
       }),
     },
     shouldTruncate: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('expressionHeatmap.function.legend.shouldTruncate.help', {
+      help: i18n.translate('expressionHeatmap.function.args.legend.shouldTruncate.help', {
         defaultMessage: 'Specifies whether or not the legend items should be truncated.',
       }),
     },

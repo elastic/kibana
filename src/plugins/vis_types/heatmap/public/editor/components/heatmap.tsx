@@ -69,7 +69,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="visTypeVislib.editors.heatmap.basicSettingsTitle"
+              id="visTypeHeatmap.editors.heatmap.basicSettingsTitle"
               defaultMessage="Basic settings"
             />
           </h3>
@@ -79,7 +79,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
         <BasicOptions {...props} legendPositions={legendPositions} />
 
         <SwitchOption
-          label={i18n.translate('visTypeVislib.editors.heatmap.highlightLabel', {
+          label={i18n.translate('visTypeHeatmap.editors.heatmap.highlightLabel', {
             defaultMessage: 'Highlight range',
           })}
           paramName="enableHover"
@@ -87,11 +87,11 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
           setValue={setValue}
           tooltip={
             showElasticChartsOptions
-              ? i18n.translate('visTypeVislib.editors.heatmap.highlightLabelTooltipNotAvailable', {
+              ? i18n.translate('visTypeHeatmap.editors.heatmap.highlightLabelTooltipNotAvailable', {
                   defaultMessage:
                     'Highlight hovered range is not yet supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
                 })
-              : i18n.translate('visTypeVislib.editors.heatmap.highlightLabelTooltip', {
+              : i18n.translate('visTypeHeatmap.editors.heatmap.highlightLabelTooltip', {
                   defaultMessage:
                     'Highlight hovered range in the chart and corresponding label in the legend.',
                 })
@@ -106,7 +106,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="visTypeVislib.editors.heatmap.heatmapSettingsTitle"
+              id="visTypeHeatmap.editors.heatmap.heatmapSettingsTitle"
               defaultMessage="Heatmap settings"
             />
           </h3>
@@ -123,18 +123,19 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
         <EuiSpacer size="s" />
 
         <SelectOption
-          label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorScaleLabel', {
+          label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.colorScaleLabel', {
             defaultMessage: 'Color scale',
           })}
           options={scaleTypes}
           paramName="type"
           value={valueAxis.scale.type}
           setValue={setValueAxisScale}
+          disabled={showElasticChartsOptions}
         />
 
         {!showElasticChartsOptions && (
           <SwitchOption
-            label={i18n.translate('visTypeVislib.controls.heatmapOptions.scaleToDataBoundsLabel', {
+            label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.scaleToDataBoundsLabel', {
               defaultMessage: 'Scale to data bounds',
             })}
             paramName="defaultYExtents"
@@ -156,7 +157,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
           data-test-subj="heatmapColorsNumber"
           disabled={stateParams.setColorRange}
           isInvalid={isColorsNumberInvalid}
-          label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorsNumberLabel', {
+          label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.colorsNumberLabel', {
             defaultMessage: 'Number of colors',
           })}
           max={10}
@@ -168,7 +169,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
 
         <SwitchOption
           data-test-subj="heatmapUseCustomRanges"
-          label={i18n.translate('visTypeVislib.controls.heatmapOptions.useCustomRangesLabel', {
+          label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.useCustomRangesLabel', {
             defaultMessage: 'Use custom ranges',
           })}
           paramName="setColorRange"

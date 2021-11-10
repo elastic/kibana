@@ -16,10 +16,7 @@ export const EmptyPlaceholder = (props: { icon: IconType }) => (
       <EuiIcon type={props.icon} color="subdued" size="l" />
       <EuiSpacer size="s" />
       <p>
-        <FormattedMessage
-          id="xpack.lens.xyVisualization.noDataLabel"
-          defaultMessage="No results found"
-        />
+        <FormattedMessage id="expressionHeatmap.noDataLabel" defaultMessage="No results found" />
       </p>
     </EuiText>
   </>

@@ -88,38 +88,38 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
     useDistinctBands: {
       types: ['boolean'],
-      help: i18n.translate('visTypeHeatmap.function.args.useDistinctBandsHelpText', {
+      help: i18n.translate('expressionHeatmap.function.args.useDistinctBandsHelpText', {
         defaultMessage: 'TBD',
       }),
       default: false,
     },
     xAccessor: {
       types: ['string'],
-      help: i18n.translate('visTypeHeatmap.function.args.xAccessorHelpText', {
+      help: i18n.translate('expressionHeatmap.function.args.xAccessorHelpText', {
         defaultMessage: 'Id of the x axis column or column index',
       }),
     },
     yAccessor: {
       types: ['string'],
-      help: i18n.translate('visTypeHeatmap.function.args.yAccessorHelpText', {
+      help: i18n.translate('expressionHeatmap.function.args.yAccessorHelpText', {
         defaultMessage: 'Id of the y axis column or column index',
       }),
     },
     valueAccessor: {
       types: ['string'],
-      help: i18n.translate('visTypeHeatmap.function.args.valueAccessorHelpText', {
+      help: i18n.translate('expressionHeatmap.function.args.valueAccessorHelpText', {
         defaultMessage: 'Id of the value column or column index',
       }),
     },
     splitRowAccessor: {
       types: ['string'],
-      help: i18n.translate('visTypeHeatmap.function.args.splitRowAccessorHelpText', {
+      help: i18n.translate('expressionHeatmap.function.args.splitRowAccessorHelpText', {
         defaultMessage: 'Id of the splitRow column or column index',
       }),
     },
     splitColumnAccessor: {
       types: ['string'],
-      help: i18n.translate('visTypeHeatmap.function.args.splitColumnAccessorHelpText', {
+      help: i18n.translate('expressionHeatmap.function.args.splitColumnAccessorHelpText', {
         defaultMessage: 'Id of the spliColumn column or column index',
       }),
     },
@@ -147,7 +147,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       if (yDimension) {
         argsTable.push([
           [yDimension],
-          i18n.translate('visTypeHeatmap.function.dimension.yaxis', {
+          i18n.translate('expressionHeatmap.function.dimension.yaxis', {
             defaultMessage: 'Y axis',
           }),
         ]);
@@ -156,7 +156,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       if (valueDimension) {
         argsTable.push([
           [valueDimension],
-          i18n.translate('visTypeHeatmap.function.dimension.metric', {
+          i18n.translate('expressionHeatmap.function.dimension.metric', {
             defaultMessage: 'Metric',
           }),
         ]);
@@ -165,7 +165,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       if (xDimension) {
         argsTable.push([
           [xDimension],
-          i18n.translate('visTypeHeatmap.function.dimension.xaxis', {
+          i18n.translate('expressionHeatmap.function.dimension.xaxis', {
             defaultMessage: 'X axis',
           }),
         ]);
@@ -174,7 +174,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       if (splitRowDimension) {
         argsTable.push([
           [splitRowDimension],
-          i18n.translate('visTypeHeatmap.function.dimension.splitRow', {
+          i18n.translate('expressionHeatmap.function.dimension.splitRow', {
             defaultMessage: 'Split by row',
           }),
         ]);
@@ -183,7 +183,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       if (splitColumnDimension) {
         argsTable.push([
           [splitColumnDimension],
-          i18n.translate('visTypeHeatmap.function.dimension.splitColumn', {
+          i18n.translate('expressionHeatmap.function.dimension.splitColumn', {
             defaultMessage: 'Split by row',
           }),
         ]);

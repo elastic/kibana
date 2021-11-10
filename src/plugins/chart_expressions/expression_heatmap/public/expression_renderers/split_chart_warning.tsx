@@ -23,20 +23,20 @@ export function SplitChartWarning({ docLinks }: SplitChartWarningProps) {
   return (
     <I18nProvider>
       <EuiCallOut
-        title={i18n.translate('visTypeHeatmap.splitChartWarning.title', {
+        title={i18n.translate('expressionHeatmap.splitChartWarning.title', {
           defaultMessage: 'Warning',
         })}
         color="warning"
         iconType="help"
       >
         <FormattedMessage
-          id="visTypeHeatmap.splitChartWarning.content"
+          id="expressionHeatmap.splitChartWarning.content"
           defaultMessage="The new charts library does not yet support split chart aggregation. Please enable the {link} advanced setting to use split chart aggregation."
           values={{
             link: (
               <EuiLink href={advancedSettingsLink} target="_blank" external>
                 <FormattedMessage
-                  id="visTypeHeatmap.splitChartWarning.link"
+                  id="expressionHeatmap.splitChartWarning.link"
                   defaultMessage="Heatmap legacy charts library"
                 />
               </EuiLink>

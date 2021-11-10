@@ -15,3 +15,11 @@
   align-items: center;
   justify-content: center;
 }
+
+.heatmap-chart-icon__subdued {
+  fill: $euiTextSubduedColor;
+}
+
+.heatmap-chart-icon__accent {
+  fill: $euiColorVis0;
+}
