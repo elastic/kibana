@@ -61,6 +61,7 @@
 /examples/partial_results_example/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
+/packages/kbn-react-field/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
 /src/plugins/data_views/ @elastic/kibana-app-services
@@ -232,6 +233,7 @@
 /src/core/  @elastic/kibana-core
 /src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core
+/typings/ @elastic/kibana-core
 /x-pack/plugins/banners/  @elastic/kibana-core
 /x-pack/plugins/features/  @elastic/kibana-core
 /x-pack/plugins/licensing/  @elastic/kibana-core
@@ -402,6 +404,12 @@
 /x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
+
+## Security Solution sub teams - security-engineering-productivity
+x-pack/plugins/security_solution/cypress/ccs_integration
+x-pack/plugins/security_solution/cypress/upgrade_integration
+x-pack/plugins/security_solution/cypress/README.md
+x-pack/test/security_solution_cypress
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

@@ -65,7 +65,7 @@ import {
   updateRange,
   updateSort,
   upsertColumn,
-  updateIndexNames,
+  updateDataView,
   updateTimeline,
   updateTitleAndDescription,
   updateAutoSaveMsg,
@@ -109,7 +109,7 @@ const timelineActionsType = [
   updateProviders.type,
   updateTitleAndDescription.type,
 
-  updateIndexNames.type,
+  updateDataView.type,
   removeColumn.type,
   updateColumns.type,
   updateSort.type,
@@ -326,6 +326,7 @@ export const createTimelineEpic =
 const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
+  dataViewId: null,
   description: null,
   eqlOptions: null,
   eventType: null,
