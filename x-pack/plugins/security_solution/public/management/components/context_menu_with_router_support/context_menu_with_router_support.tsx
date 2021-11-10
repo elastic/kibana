@@ -107,11 +107,13 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
       });
     }, [getTestId, handleCloseMenu, items, maxWidth, loading, hoverInfo]);
 
-    type AdditionalPanelProps = Partial<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>>;
+    type AdditionalPanelProps = Partial<
+      Omit<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>, 'style'>
+    > & {
+      style: Required<HTMLAttributes<HTMLDivElement>>['style'];
+    };
     const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
-      const newAdditionalProps: Omit<AdditionalPanelProps, 'style'> & {
-        style: AdditionalPanelProps['style'];
-      } = {
+      const newAdditionalProps: AdditionalPanelProps = {
         style: {},
       };
 
@@ -120,7 +122,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
       }
 
       if (maxHeight) {
-        newAdditionalProps.style.overflowY = 'scroll';
+        newAdditionalProps.style.overflowY = 'auto';
         newAdditionalProps.style.maxHeight = maxHeight;
       }
 
