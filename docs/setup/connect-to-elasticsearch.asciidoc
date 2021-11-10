@@ -1,34 +1,40 @@
 [[connect-to-elasticsearch]]
 == Add your data
 ++++
-<titleabbrev>Add data</titleabbrev>
+<titleabbrev>Add an integration</titleabbrev>
 ++++
 
 The best way to add data is to use one of our many integrations.
-Alternatively, you add a sample data set or upload a file.
+Alternatively, you can add a sample data set or upload a file.
 
 
 [float]
 [[add-data-tutorial-kibana]]
 === Add an integration
 
-Integrations periodically collect logs, metrics, security,
-and other application data and send it to {es}.
-Each integration provides dashboards and visualizations, so you can quickly get insights into your data.
+Elastic integrations are a streamlined way to connect your data to the Elastic Stack.
+Integrations are available for popular services and platforms, like Nginx, AWS, and MongoDB,
+as well as many generic input types like log files.
+Each integration comes pre-packaged with assets that support your needs:
 
-{kib} automatically guides you to add an integration when it doesn't detect any data.
-Alternatively, follow these steps.
+* Data ingestion, storage, and transformation rules
+* Configuration options
+* Pre-built, custom dashboards and visualizations
+* Documentation
 
-. On the home page, click *Add integrations*.
+To view the full list of available integrations, go to *Management > Integrations*.
+{kib} automatically guides you to this view when it doesn't detect any data.
 
-. Select the integration for the type of data that you want to collect.
-+
 [role="screenshot"]
 image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]
 
-NOTE: {kib} uses *Elastic Agent* to ingest data. For more information,
-refer to
-{observability-guide}/ingest-logs-metrics-uptime.html[Ingest logs, metrics, and uptime data with {agent}].
+Use the controls on the bottom left of the **Integrations** view to determine whether to show
+Elastic Agent integrations, Beats integrations, or both.
+Elastic Agent is a single, unified agent
+to collect data and send it to the Elastic Stack.
+Beats are lightweight data shippers that send data to the Elastic Stack.
+For more information,
+refer to https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html[Beats and Elastic Agent capabilites].
 
 [float]
 === Add sample data
@@ -53,12 +59,14 @@ view its fields and metrics, and optionally import it into {es}.
 NOTE: The upload feature is not intended for use as part of a repeated production
 process, but rather for the initial exploration of your data.
 
-. To upload a file, you’ll need the following privileges,
-which you can manage in **{stack-manage-app}**.
-* [ ] `Data Views Management: All` {kib} feature privileges
+Required privileges:
+
+* `Data Views Management: All` {kib} feature privileges
 * `all` {kib} privileges for *Discover*
 * `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
 * `create`, `create_index`, `manage`, and `read` index privileges for the index
+
+To upload a file:
 
 . On the home page, click **Upload a file**.
 
