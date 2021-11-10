@@ -47,7 +47,11 @@ export function WaterfallLegends({ legends, type }: Props) {
         <EuiFlexGroup direction="row" gutterSize="s">
           {legends.map((legend) => (
             <EuiFlexItem grow={false} key={legend.value}>
-              <Legend color={legend.color} text={legend.value} />
+              <Legend
+                color={legend.color}
+                text={legend.value}
+                data-test-subj="traceWaterfallTimelineLegend"
+              />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

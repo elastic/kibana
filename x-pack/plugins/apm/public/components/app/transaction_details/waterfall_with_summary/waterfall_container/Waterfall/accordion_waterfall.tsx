@@ -104,6 +104,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
 
   return (
     <StyledAccordion
+      data-test-subj="transactionDetailWaterfallAccordian"
       className="waterfall_accordion"
       style={{ position: 'relative' }}
       buttonClassName={`button_${item.id}`}

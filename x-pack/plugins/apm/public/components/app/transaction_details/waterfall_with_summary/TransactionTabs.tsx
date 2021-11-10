@@ -33,9 +33,10 @@ export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
   return (
     <React.Fragment>
       <EuiTabs>
-        {tabs.map(({ key, label }) => {
+        {tabs.map(({ dataTestSubj, key, label }) => {
           return (
             <EuiTab
+              data-test-subj={dataTestSubj}
               onClick={() => {
                 history.replace({
                   ...history.location,
@@ -66,6 +67,7 @@ export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
 }
 
 const timelineTab = {
+  dataTestSubj: 'transactionDetailsTimelineTab',
   key: 'timeline',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
     defaultMessage: 'Timeline',
@@ -74,6 +76,7 @@ const timelineTab = {
 };
 
 const metadataTab = {
+  dataTestSubj: 'transactionDetailsMetadataTab',
   key: 'metadata',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
     defaultMessage: 'Metadata',
@@ -82,6 +85,7 @@ const metadataTab = {
 };
 
 const logsTab = {
+  dataTestSubj: 'transactionDetailsLogsTab',
   key: 'logs',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.logsLabel', {
     defaultMessage: 'Logs',

@@ -58,7 +58,11 @@ export function MetadataTable({ sections, isLoading }: Props) {
   const noResultFound = Boolean(searchTerm) && isEmpty(filteredSections);
   return (
     <React.Fragment>
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        alignItems="center"
+        data-test-subj="apmMetadataTable"
+      >
         <EuiFlexItem grow={false}>
           <EuiLink href={docLinks.links.apm.metaData}>
             <EuiText size="s">

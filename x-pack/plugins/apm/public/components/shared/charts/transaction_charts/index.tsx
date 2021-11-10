@@ -36,13 +36,16 @@ export function TransactionCharts({
       >
         <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
-            <EuiFlexItem data-cy={`transaction-duration-charts`}>
+            <EuiFlexItem data-cy={`transaction-latency-chart`}>
               <EuiPanel hasBorder={true}>
                 <LatencyChart kuery={kuery} environment={environment} />
               </EuiPanel>
             </EuiFlexItem>
 
-            <EuiFlexItem style={{ flexShrink: 1 }}>
+            <EuiFlexItem
+              style={{ flexShrink: 1 }}
+              data-cy={`transaction-throughput-chart`}
+            >
               <ServiceOverviewThroughputChart
                 environment={environment}
                 kuery={kuery}
@@ -54,13 +57,13 @@ export function TransactionCharts({
           <EuiSpacer size="s" />
 
           <EuiFlexGrid columns={2} gutterSize="s">
-            <EuiFlexItem>
+            <EuiFlexItem data-cy={`transaction-failed-transaction-chart`}>
               <FailedTransactionRateChart
                 kuery={kuery}
                 environment={environment}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem data-cy={`transaction-breakdown-chart`}>
               <TransactionBreakdownChart
                 kuery={kuery}
                 environment={environment}
