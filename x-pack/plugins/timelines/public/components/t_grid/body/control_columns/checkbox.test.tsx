@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { ActionProps, HeaderActionProps, TimelineTabs } from '../../../../../common';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
 import React from 'react';
