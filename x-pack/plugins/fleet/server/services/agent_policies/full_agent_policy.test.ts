@@ -51,13 +51,15 @@ jest.mock('../agent_policy');
 jest.mock('../output', () => {
   return {
     outputService: {
-      getDefaultOutputId: () => 'test-id',
+      getDefaultDataOutputId: async () => 'test-id',
+      getDefaultMonitoringOutputId: async () => 'test-id',
       get: (soClient: any, id: string): Output => {
         switch (id) {
           case 'data-output-id':
             return {
               id: 'data-output-id',
               is_default: false,
+              is_default_monitoring: false,
               name: 'Data output',
               // @ts-ignore
               type: 'elasticsearch',
@@ -67,6 +69,7 @@ jest.mock('../output', () => {
             return {
               id: 'monitoring-output-id',
               is_default: false,
+              is_default_monitoring: false,
               name: 'Monitoring output',
               // @ts-ignore
               type: 'elasticsearch',
@@ -76,6 +79,7 @@ jest.mock('../output', () => {
             return {
               id: 'test-id',
               is_default: true,
+              is_default_monitoring: true,
               name: 'default',
               // @ts-ignore
               type: 'elasticsearch',
