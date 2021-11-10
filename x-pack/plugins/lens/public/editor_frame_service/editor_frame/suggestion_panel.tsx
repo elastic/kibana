@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   EuiButtonEmpty,
   EuiAccordion,
+  EuiProgress,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
@@ -72,12 +73,37 @@ const PreviewRenderer = ({
   ExpressionRendererComponent,
   expression,
   hasError,
+  activeData,
+  isCurrentVis,
+  searchContext,
+  searchSessionId,
 }: {
   withLabel: boolean;
   expression: string | null | undefined;
   ExpressionRendererComponent: ReactExpressionRendererType;
   hasError: boolean;
+  activeData: any;
+  isCurrentVis: boolean;
+  searchContext: any;
+  searchSessionId?: string;
 }) => {
+  const [localParams, setLocalParams] = useState<any>({
+    searchContext,
+    searchSessionId,
+    expression: null,
+  });
+
+  // need so that we start re-render suggestion only when main chart got the data.
+  useEffect(() => {
+    if (activeData) {
+      setLocalParams({
+        searchContext,
+        searchSessionId,
+        expression,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeData]);
   const onErrorMessage = (
     <div className="lnsSuggestionPanel__suggestionIcon">
       <EuiIconTip
@@ -93,6 +119,7 @@ const PreviewRenderer = ({
       />
     </div>
   );
+
   return (
     <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
@@ -100,13 +127,20 @@ const PreviewRenderer = ({
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
     >
+      {!isCurrentVis &&
+        (expression !== localParams.expression ||
+          !isEqual(searchContext, localParams.searchContext)) && (
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        )}
       {!expression || hasError ? (
         onErrorMessage
       ) : (
         <ExpressionRendererComponent
           className="lnsSuggestionPanel__expressionRenderer"
           padding="s"
-          expression={expression}
+          expression={isCurrentVis ? expression : localParams.expression}
+          searchContext={isCurrentVis ? searchContext : localParams.searchContext}
+          searchSessionId={isCurrentVis ? searchSessionId : localParams.searchSessionId}
           renderError={() => {
             return onErrorMessage;
           }}
@@ -122,6 +156,10 @@ const SuggestionPreview = ({
   selected,
   onSelect,
   showTitleAsLabel,
+  activeData,
+  isCurrentVis,
+  searchContext,
+  searchSessionId,
 }: {
   onSelect: () => void;
   preview: {
@@ -132,7 +170,11 @@ const SuggestionPreview = ({
   };
   ExpressionRenderer: ReactExpressionRendererType;
   selected: boolean;
+  activeData: any;
+  searchContext: any;
+  searchSessionId?: string;
   showTitleAsLabel?: boolean;
+  isCurrentVis?: boolean;
 }) => {
   return (
     <EuiToolTip content={preview.title}>
@@ -156,6 +198,10 @@ const SuggestionPreview = ({
               expression={preview.expression && toExpression(preview.expression)}
               withLabel={Boolean(showTitleAsLabel)}
               hasError={Boolean(preview.error)}
+              isCurrentVis={Boolean(isCurrentVis)}
+              searchContext={searchContext}
+              searchSessionId={searchSessionId}
+              activeData={activeData}
             />
           ) : (
             <span className="lnsSuggestionPanel__suggestionIcon">
@@ -266,7 +312,7 @@ export function SuggestionPanel({
             frame
           )
         : undefined;
-
+        
     return {
       suggestions: newSuggestions,
       currentStateExpression: newStateExpression,
@@ -290,27 +336,6 @@ export function SuggestionPanel({
 
   const sessionIdRef = useRef<string>(searchSessionId);
   sessionIdRef.current = searchSessionId;
-
-  const suggestionsRef = useRef(suggestions);
-  suggestionsRef.current = suggestions;
-  const [localSuggestions, setLocalSuggestions] = useState<typeof suggestions>([]);
-
-  useEffect(() => {
-    if (frame.activeData && !isEqual(sortBy(localSuggestions), sortBy(suggestionsRef.current))) {
-      setLocalSuggestions(suggestionsRef.current);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [frame.activeData]);
-
-  const AutoRefreshExpressionRenderer = useMemo(() => {
-    return (props: ReactExpressionRendererProps) => (
-      <ExpressionRendererComponent
-        {...props}
-        searchContext={contextRef.current}
-        searchSessionId={sessionIdRef.current}
-      />
-    );
-  }, [ExpressionRendererComponent]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
@@ -395,14 +420,18 @@ export function SuggestionPanel({
                   defaultMessage: 'Current visualization',
                 }),
               }}
-              ExpressionRenderer={AutoRefreshExpressionRenderer}
+              ExpressionRenderer={ExpressionRendererComponent}
               onSelect={rollbackToCurrentVisualization}
               selected={lastSelectedSuggestion === -1}
+              isCurrentVis={true}
               showTitleAsLabel
+              searchContext={contextRef.current}
+              searchSessionId={sessionIdRef.current}
+              activeData={frame.activeData}
             />
           )}
           {!hideSuggestions &&
-            localSuggestions.map((suggestion, index) => {
+            suggestions.map((suggestion, index) => {
               return (
                 <SuggestionPreview
                   preview={{
@@ -410,7 +439,7 @@ export function SuggestionPanel({
                     icon: suggestion.previewIcon,
                     title: suggestion.title,
                   }}
-                  ExpressionRenderer={AutoRefreshExpressionRenderer}
+                  ExpressionRenderer={ExpressionRendererComponent}
                   key={index}
                   onSelect={() => {
                     trackUiEvent('suggestion_clicked');
@@ -422,6 +451,9 @@ export function SuggestionPanel({
                     }
                   }}
                   selected={index === lastSelectedSuggestion}
+                  searchContext={contextRef.current}
+                  searchSessionId={sessionIdRef.current}
+                  activeData={frame.activeData}
                 />
               );
             })}
