@@ -108,8 +108,10 @@ export async function ensurePreconfiguredOutputs(
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
 
       if (isCreate) {
+        logger.debug(`Creating output ${output.id}`);
         await outputService.create(soClient, data, { id, fromPreconfiguration: true });
       } else if (isUpdateWithNewData) {
+        logger.debug(`Updating output ${output.id}`);
         await outputService.update(soClient, id, data, { fromPreconfiguration: true });
         // Bump revision of all policies using that output
         if (outputData.is_default || outputData.is_default_monitoring) {
