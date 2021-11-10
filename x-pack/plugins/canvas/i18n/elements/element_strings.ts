@@ -230,7 +230,6 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Tagcloud visualization',
     }),
   },
-  /*
   metricVis: {
     displayName: i18n.translate('xpack.canvas.elements.metricVisDisplayName', {
       defaultMessage: '(New) Metric Vis',
@@ -239,5 +238,4 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Metric visualization',
     }),
   },
-  */
 });
