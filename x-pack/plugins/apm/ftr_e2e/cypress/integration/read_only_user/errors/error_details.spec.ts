@@ -39,8 +39,8 @@ describe('Error details', () => {
       await synthtrace.clean();
     });
 
-    describe('No data', () => {
-      it('shows empty message', () => {
+    describe('when error has no occurrences', () => {
+      it('shows empty an message', () => {
         cy.visit(
           url.format({
             pathname:
@@ -56,31 +56,34 @@ describe('Error details', () => {
       });
     });
 
-    describe('when service has errors', () => {
-      // ///!!!!!!!!! Change describe
+    describe('when error has data', () => {
       it('shows errors distribution chart', () => {
         cy.visit(errorDetailsPageHref);
         cy.contains('Error group 00000');
         cy.get('[data-test-subj="errorDistribution"]').contains('Occurrences');
       });
 
-      it('click on related transaction sample redirects to the transaction details page', () => {
-        cy.visit(errorDetailsPageHref);
-        cy.contains('Error group 00000');
-        cy.contains('a', 'GET /apple 🍎').click();
-        cy.url().should('include', 'opbeans-java/transactions/view');
-      });
-
-      it('shows a stacktrace and metadata tabs', () => {
+      it('shows a Stacktrace and Metadata tabs', () => {
         cy.visit(errorDetailsPageHref);
         cy.contains('button', 'Exception stack trace');
         cy.contains('button', 'Metadata');
       });
 
-      it('click on View X occurrences in discover redirect the user to discover', () => {
-        cy.visit(errorDetailsPageHref);
-        cy.contains('span', 'Discover').click();
-        cy.url().should('include', 'app/discover');
+      describe('when clicking on related transaction sample', () => {
+        it('should redirects to the transaction details page', () => {
+          cy.visit(errorDetailsPageHref);
+          cy.contains('Error group 00000');
+          cy.contains('a', 'GET /apple 🍎').click();
+          cy.url().should('include', 'opbeans-java/transactions/view');
+        });
+      });
+
+      describe('when clicking on View x occurences in discover', () => {
+        it('should redirects the user to discover', () => {
+          cy.visit(errorDetailsPageHref);
+          cy.contains('span', 'Discover').click();
+          cy.url().should('include', 'app/discover');
+        });
       });
     });
   });
