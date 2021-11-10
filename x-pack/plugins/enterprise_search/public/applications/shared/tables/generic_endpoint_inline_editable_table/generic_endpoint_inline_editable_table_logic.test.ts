@@ -23,6 +23,8 @@ import {
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { GenericEndpointInlineEditableTableLogic } from './generic_endpoint_inline_editable_table_logic';
 
 describe('GenericEndpointInlineEditableTableLogic', () => {
@@ -129,10 +131,9 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         expect(logic.actions.clearLoading).toHaveBeenCalled();
       });
 
-      it('handles errors', async () => {
+      it('passes API errors to the nested inline editable taable', async () => {
         http.post.mockReturnValueOnce(Promise.reject('error'));
         const logic = mountLogic();
-
         logic.actions.addItem(item, onSuccess);
         await nextTick();
 
@@ -177,10 +178,9 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         expect(logic.actions.clearLoading).toHaveBeenCalled();
       });
 
-      it('handles errors', async () => {
+      it('passes errors to the nested inline editable table', async () => {
         http.delete.mockReturnValueOnce(Promise.reject('error'));
         const logic = mountLogic();
-
         logic.actions.deleteItem(item, onSuccess);
         await nextTick();
 
@@ -231,10 +231,9 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         expect(logic.actions.clearLoading).toHaveBeenCalled();
       });
 
-      it('handles errors', async () => {
+      it('passes errors to the nested inline editable table', async () => {
         http.put.mockReturnValueOnce(Promise.reject('error'));
         const logic = mountLogic();
-
         logic.actions.updateItem(item, onSuccess);
         await nextTick();
 
