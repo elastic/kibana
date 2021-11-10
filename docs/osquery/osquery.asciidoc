@@ -203,6 +203,9 @@ In addition to the Osquery schema, the Elastic-provided version of Osquery also 
 
 * `host_processes`
 
+When querying these tables, the expectation is that the `/etc/passwd`, `/etc/group`, and `/proc` are available in the container under `/hostfs` as:
+`/hostfs/etc/passwd`, `/hostfs/etc/group`, and `/hostfs/proc`. For information about the fields available in these tables, see the
+https://docs.elastic.co/en/integrations/osquery_manager#exported-fields[exported fields] reference. 
 
 [float]
 [[osquery-status]]
