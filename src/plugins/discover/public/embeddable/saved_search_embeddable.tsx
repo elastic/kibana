@@ -45,9 +45,9 @@ import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
 import { getDefaultSort } from '../components/doc_table';
 import { SortOrder } from '../components/doc_table/components/table_header/helpers';
-import { updateSearchSource } from './utils/update_search_source';
 import { VIEW_MODE } from '../components/view_mode_toggle';
-import { FieldStatsTableEmbeddable } from '../components/data_visualizer_grid/field_stats_table_embeddable';
+import { updateSearchSource } from './utils/update_search_source';
+import { FieldStatsTableSavedSearchEmbeddable } from '../application/components/field_stats_table';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -391,7 +391,7 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <FieldStatsTableEmbeddable
+        <FieldStatsTableSavedSearchEmbeddable
           services={searchProps.services}
           indexPattern={searchProps.indexPattern}
           columns={searchProps.columns}

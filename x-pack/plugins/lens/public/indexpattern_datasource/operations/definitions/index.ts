@@ -51,7 +51,7 @@ import {
 } from './formula';
 import { staticValueOperation, StaticValueIndexPatternColumn } from './static_value';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
+import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../common';
@@ -197,6 +197,7 @@ export interface ParamEditorProps<C> {
   data: DataPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  paramEditorCustomProps?: ParamEditorCustomProps;
 }
 
 export interface HelpProps<C> {
