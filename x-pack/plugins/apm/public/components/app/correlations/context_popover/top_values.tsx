@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -45,6 +45,7 @@ interface TopValueProps {
   fieldName: string;
   onAddFilter?: OnAddFilter;
   valueText?: string;
+  reverseLabel?: boolean;
 }
 export function TopValue({
   progressBarMax,
@@ -54,6 +55,7 @@ export function TopValue({
   fieldName,
   onAddFilter,
   valueText,
+  reverseLabel = false,
 }: TopValueProps) {
   const theme = useTheme();
   return (
@@ -61,6 +63,7 @@ export function TopValue({
       <EuiFlexItem
         data-test-subj="apmCorrelationsContextPopoverTopValueBar"
         className="eui-textTruncate"
+        style={reverseLabel ? { flexFlow: 'column-reverse' } : undefined}
       >
         <EuiProgress
           value={value.doc_count}
@@ -247,14 +250,13 @@ export function TopValues({
       {Array.isArray(fieldValueStats?.topValues) && (
         <>
           <EuiHorizontalRule margin="s" />
-          <EuiSpacer size="s" />
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.apm.correlations.fieldContextPopover.notTopTenValueMessage"
               defaultMessage="Selected term is not in the top 10"
             />
           </EuiText>
-
+          <EuiSpacer size="s" />
           {fieldValueStats?.topValues.map((value) => {
             const valueText =
               progressBarMax !== undefined
@@ -270,6 +272,7 @@ export function TopValues({
                 progressBarMax={progressBarMax}
                 isHighlighted={true}
                 fieldName={fieldName}
+                reverseLabel={true}
               />
             );
           })}
@@ -277,18 +280,19 @@ export function TopValues({
       )}
 
       {topValueStats.topValuesSampleSize !== undefined && (
-        <Fragment>
+        <>
           <EuiSpacer size="s" />
           <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.apm.correlations.fieldContextPopover.calculatedFromSampleDescription"
-              defaultMessage="Calculated from sample of {sampleSize} documents"
-              values={{
-                sampleSize: topValueStats.topValuesSampleSize,
-              }}
-            />
+            {i18n.translate(
+              'xpack.apm.correlations.fieldContextPopover.calculatedFromSampleDescription',
+              {
+                defaultMessage:
+                  'Calculated from sample of {sampleSize} documents',
+                values: { sampleSize: topValueStats.topValuesSampleSize },
+              }
+            )}
           </EuiText>
-        </Fragment>
+        </>
       )}
     </div>
   );
