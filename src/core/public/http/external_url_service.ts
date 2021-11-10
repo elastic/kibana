@@ -14,7 +14,7 @@ import { InjectedMetadataSetup } from '../injected_metadata';
 import { Sha256 } from '../utils';
 
 interface SetupDeps {
-  location: Pick<Location, 'origin'>;
+  location: Pick<Location, 'href'>;
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -52,11 +52,11 @@ function normalizeProtocol(protocol: string) {
 
 const createExternalUrlValidation = (
   rules: IExternalUrlPolicy[],
-  location: Pick<Location, 'origin'>,
+  location: Pick<Location, 'href'>,
   serverBasePath: string
 ) => {
-  const base = new URL(location.origin + serverBasePath);
   return function validateExternalUrl(next: string) {
+    const base = new URL(location.href);
     const url = new URL(next, base);
 
     const isInternalURL =

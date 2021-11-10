@@ -14,11 +14,11 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../../com
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
-import { useLicense } from '../../../../common/hooks/use_license';
+import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 
-jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 
@@ -29,7 +29,7 @@ describe('When on the host isolation exceptions page', () => {
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let mockedContext: AppContextTestRender;
 
-  const isPlatinumPlusMock = useLicense().isPlatinumPlus as jest.Mock;
+  const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
 
   beforeEach(() => {
     getHostIsolationExceptionItemsMock.mockReset();
@@ -94,10 +94,13 @@ describe('When on the host isolation exceptions page', () => {
         expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
       });
 
-      it('should display the search bar', async () => {
+      it('should display the search bar and item count', async () => {
         render();
         await dataReceived();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+        expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
+          'Showing 1 exception'
+        );
       });
 
       it('should show items on the list', async () => {
@@ -124,37 +127,72 @@ describe('When on the host isolation exceptions page', () => {
           renderResult.getByTestId('hostIsolationExceptionsContent-error').textContent
         ).toEqual(' Server is too far away');
       });
+
+      it('should show the searchbar when no results from search', async () => {
+        // render the page with data
+        render();
+        await dataReceived();
+
+        // check if the searchbar is there
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+
+        // simulate a no-data scenario
+        getHostIsolationExceptionItemsMock.mockReturnValueOnce({
+          data: [],
+          page: 1,
+          per_page: 10,
+          total: 0,
+        });
+
+        // type something to search and press the button
+        userEvent.type(renderResult.getByTestId('searchField'), 'this does not exists');
+        userEvent.click(renderResult.getByTestId('searchButton'));
+
+        // wait for the page render
+        await dataReceived();
+
+        // check the url changed
+        expect(mockedContext.history.location.search).toBe('?filter=this%20does%20not%20exists');
+
+        // check the searchbar is still there
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+      });
     });
 
-    describe('is license platinum plus', () => {
-      beforeEach(() => {
-        isPlatinumPlusMock.mockReturnValue(true);
+    describe('has canIsolateHost privileges', () => {
+      beforeEach(async () => {
+        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
+        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
+
       it('should show the create flyout when the add button is pressed', async () => {
         render();
         await dataReceived();
-        act(() => {
-          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsEmptyStateAddButton'));
-        });
+        userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+        await dataReceived();
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
-      it('should show the create flyout when the show location is create', () => {
+
+      it('should show the create flyout when the show location is create', async () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
         render();
+        await dataReceived();
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
     });
 
-    describe('is not license platinum plus', () => {
+    describe('does not have canIsolateHost privileges', () => {
       beforeEach(() => {
-        isPlatinumPlusMock.mockReturnValue(false);
+        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
       });
+
       it('should not show the create flyout if the user navigates to the create url', () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
         render();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
       });
+
       it('should not show the create flyout if the user navigates to the edit url', () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit`);
         render();

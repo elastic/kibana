@@ -33,7 +33,7 @@ export function getApmSettings({
         'xpack.apm.fleet_integration.settings.apm.hostDescription',
         {
           defaultMessage:
-            'Choose a name and description to help identify how this integration will be used.',
+            'Host defines the host and port the server is listening on. URL is the unchangeable, publicly reachable server URL for deployments on Elastic Cloud or ECK.',
         }
       ),
 
@@ -164,10 +164,7 @@ export function getApmSettings({
           ),
           rowDescription: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.responseHeadersDescription',
-            {
-              defaultMessage:
-                'Set limits on request headers sizes and timing configurations.',
-            }
+            { defaultMessage: 'Custom HTTP headers added to HTTP responses' }
           ),
         },
         {
