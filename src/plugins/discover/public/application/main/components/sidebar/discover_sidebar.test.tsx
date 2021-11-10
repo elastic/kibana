@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { each, cloneDeep } from 'lodash';
+import { cloneDeep, each } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
