@@ -224,7 +224,7 @@ export class ScalingForm extends Component<Props, State> {
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage id="xpack.maps.esSearch.scaleTitle" defaultMessage="Scaling" />
-            <ScalingDocumenationPopover 
+            <ScalingDocumenationPopover
               limitOptionLabel={this._getLimitOptionLabel()}
               clustersOptionLabel={this._getClustersOptionLabel()}
               maxResultWindow={this.state.maxResultWindow}
