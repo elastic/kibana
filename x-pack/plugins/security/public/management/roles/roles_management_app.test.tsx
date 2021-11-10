@@ -36,19 +36,19 @@ async function mountApp(basePath: string, pathname: string) {
   let unmount: Unmount = noop;
   await act(async () => {
     unmount = await rolesManagementApp
-    .create({
-      license: licenseMock.create(),
-      fatalErrors,
-      getStartServices: jest
-        .fn()
-        .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
-    })
-    .mount({
-      basePath,
-      element: container,
-      setBreadcrumbs,
-      history: scopedHistoryMock.create({ pathname }),
-    });
+      .create({
+        license: licenseMock.create(),
+        fatalErrors,
+        getStartServices: jest
+          .fn()
+          .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
+      })
+      .mount({
+        basePath,
+        element: container,
+        setBreadcrumbs,
+        history: scopedHistoryMock.create({ pathname }),
+      });
   });
 
   return { unmount, container, setBreadcrumbs, docTitle: coreStart.chrome.docTitle };
@@ -123,10 +123,7 @@ describe('rolesManagementApp', () => {
     );
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `/`, text: 'Roles' },
-      { text: roleName },
-    ]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }, { text: roleName }]);
     expect(docTitle.change).toHaveBeenCalledWith('Roles');
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`

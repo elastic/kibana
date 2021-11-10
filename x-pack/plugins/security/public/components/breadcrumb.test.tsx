@@ -6,7 +6,9 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
+
 import { coreMock } from 'src/core/public/mocks';
+
 import { Breadcrumb, BreadcrumbsProvider, createBreadcrumbsChangeHandler } from './breadcrumb';
 
 describe('security breadcrumbs', () => {
@@ -21,28 +23,24 @@ describe('security breadcrumbs', () => {
 
   it('rendering one breadcrumb and it should NOT have an href attributes', async () => {
     render(
-      <BreadcrumbsProvider
-        onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
-      >
-        <Breadcrumb text={"Find"} href="/">
-          <div>{"Find"}</div>
-          </Breadcrumb>
+      <BreadcrumbsProvider onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}>
+        <Breadcrumb text={'Find'} href="/">
+          <div>{'Find'}</div>
+        </Breadcrumb>
       </BreadcrumbsProvider>
     );
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Find' }]);
-  })
+  });
 
   it('rendering two breadcrumb and our last breadcrumb should NOT have an href attributes', async () => {
     render(
-      <BreadcrumbsProvider
-        onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
-      >
-        <Breadcrumb text={"Find"} href="/">
-          <div>{"Find"}</div>
-          <Breadcrumb text={"Sandy"} href="/sandy">
-            <div>{"Sandy is a sweet dog"}</div>
+      <BreadcrumbsProvider onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}>
+        <Breadcrumb text={'Find'} href="/">
+          <div>{'Find'}</div>
+          <Breadcrumb text={'Sandy'} href="/sandy">
+            <div>{'Sandy is a sweet dog'}</div>
           </Breadcrumb>
         </Breadcrumb>
       </BreadcrumbsProvider>
@@ -50,19 +48,17 @@ describe('security breadcrumbs', () => {
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '/', text: 'Find' }, { text: 'Sandy' }]);
-  })
+  });
 
   it('rendering three breadcrumb and our last breadcrumb should NOT have an href attributes', async () => {
     render(
-      <BreadcrumbsProvider
-        onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
-      >
-        <Breadcrumb text={"Find"} href="/">
-          <div>{"Find"}</div>
-          <Breadcrumb text={"Sandy"} href="/sandy">
-            <div>{"Sandy is a sweet dog"}</div>
-            <Breadcrumb text={"Breed"} href="/sandy/breed">
-              <div>{"Sandy is a mutts"}</div>
+      <BreadcrumbsProvider onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}>
+        <Breadcrumb text={'Find'} href="/">
+          <div>{'Find'}</div>
+          <Breadcrumb text={'Sandy'} href="/sandy">
+            <div>{'Sandy is a sweet dog'}</div>
+            <Breadcrumb text={'Breed'} href="/sandy/breed">
+              <div>{'Sandy is a mutts'}</div>
             </Breadcrumb>
           </Breadcrumb>
         </Breadcrumb>
@@ -70,6 +66,10 @@ describe('security breadcrumbs', () => {
     );
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '/', text: 'Find' }, { href: "/sandy", text: 'Sandy' }, { text: 'Breed' }]);
-  })
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: '/', text: 'Find' },
+      { href: '/sandy', text: 'Sandy' },
+      { text: 'Breed' },
+    ]);
+  });
 });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
@@ -41,13 +40,13 @@ async function mountApp(basePath: string, pathname: string) {
   let unmount: Unmount = noop;
   await act(async () => {
     unmount = await roleMappingsManagementApp
-    .create({ getStartServices: () => Promise.resolve(startServices) as any })
-    .mount({
-      basePath,
-      element: container,
-      setBreadcrumbs,
-      history: scopedHistoryMock.create({ pathname }),
-    });
+      .create({ getStartServices: () => Promise.resolve(startServices) as any })
+      .mount({
+        basePath,
+        element: container,
+        setBreadcrumbs,
+        history: scopedHistoryMock.create({ pathname }),
+      });
   });
 
   return { unmount, container, setBreadcrumbs, docTitle: startServices[0].chrome.docTitle };

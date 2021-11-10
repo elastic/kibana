@@ -28,13 +28,13 @@ describe('usersManagementApp', () => {
 
     let unmount: Unmount = noop;
     await act(async () => {
-      unmount =  await usersManagementApp.create({ authc, getStartServices }).mount({
-      basePath: '/',
-      element,
-      setBreadcrumbs,
-      history,
+      unmount = await usersManagementApp.create({ authc, getStartServices }).mount({
+        basePath: '/',
+        element,
+        setBreadcrumbs,
+        history,
+      });
     });
-  });
 
     expect(setBreadcrumbs).toHaveBeenLastCalledWith([
       { href: '/', text: 'Users' },
