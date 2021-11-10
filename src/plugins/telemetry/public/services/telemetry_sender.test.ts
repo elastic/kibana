@@ -249,7 +249,6 @@ describe('TelemetrySender', () => {
     });
 
     it('sends report separately for every cluster', async () => {
-      // this now all needs to go into a new test for `sendUsageData`
       const mockTelemetryUrl = 'telemetry_cluster_url';
       const mockTelemetryPayload = ['hashed_cluster_usage_data1', 'hashed_cluster_usage_data2'];
 
