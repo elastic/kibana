@@ -7,11 +7,11 @@
 
 import { LoggerFactory } from 'kibana/server';
 
+import { TypeOf } from '@kbn/config-schema';
 import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { HostMetadata } from '../../common/endpoint/types';
 import { ExperimentalFeatures } from '../../common/experimental_features';
-import { TypeOf } from '../../../../../../../../../private/var/tmp/_bazel_ptavares/a4a237a05d507fc23e0818d3647eedfe/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-config-schema';
 import { endpointFilters } from './routes/metadata';
 
 /**
