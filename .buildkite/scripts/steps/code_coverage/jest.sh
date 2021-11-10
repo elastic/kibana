@@ -9,7 +9,7 @@ is_test_execution_step
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Jest with coverage'
-node scripts/jest --ci --verbose --maxWorkers=10 --coverage || true
+node scripts/jest --ci --maxWorkers=10 --coverage || true
 
 echo '--- Jest Integration Tests with coverage'
 node --max-old-space-size=5120 scripts/jest_integration  --ci --coverage || true
