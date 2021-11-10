@@ -86,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add one more saved object to cancel it', async () => {
+      await testSubjects.setValue('savedObjectFinderSearchInput', '[Flights]');
       await testSubjects.click('savedObjectTitle[Flights]-Destination-Weather');
       await a11y.testAppSnapshot();
     });
