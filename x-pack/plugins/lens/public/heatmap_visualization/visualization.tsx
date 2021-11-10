@@ -306,8 +306,8 @@ export const getHeatmapVisualization = ({
           type: 'function',
           function: FUNCTION_NAME,
           arguments: {
-            title: [attributes?.title ?? ''],
-            description: [attributes?.description ?? ''],
+            // title: [attributes?.title ?? ''],
+            // description: [attributes?.description ?? ''],
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
@@ -394,8 +394,8 @@ export const getHeatmapVisualization = ({
           type: 'function',
           function: FUNCTION_NAME,
           arguments: {
-            title: [''],
-            description: [''],
+            // title: [''],
+            // description: [''],
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],

@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -18,18 +18,11 @@ import {
   Settings,
 } from '@elastic/charts';
 import type { CustomPaletteState } from 'src/plugins/charts/public';
-import { VisualizationContainer } from '../visualization_container';
-import type { HeatmapRenderProps } from './types';
-import './index.scss';
-import type { LensBrushEvent, LensFilterEvent } from '../types';
-import {
-  applyPaletteParams,
-  defaultPaletteParams,
-  EmptyPlaceholder,
-  findMinMaxByColumnId,
-} from '../shared_components';
-import { LensIconChartHeatmap } from '../assets/chart_heatmap';
-import { DEFAULT_PALETTE_NAME } from './constants';
+import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
+import { applyPaletteParams, findMinMaxByColumnId } from './utils';
+import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
+import { EmptyPlaceholder } from './empty_placeholder';
+import { HeatmapIcon } from './heatmap_icon';
 
 declare global {
   interface Window {
@@ -109,8 +102,7 @@ function computeColorRanges(
 
   return { colors, ranges };
 }
-
-export const HeatmapComponent: FC<HeatmapRenderProps> = ({
+const HeatmapComponent: FC<HeatmapRenderProps> = ({
   data,
   args,
   timeZone,
@@ -123,8 +115,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const chartTheme = chartsThemeService.useChartsTheme();
   const isDarkTheme = chartsThemeService.useDarkMode();
 
-  const tableId = Object.keys(data.tables)[0];
-  const table = data.tables[tableId];
+  const table = data;
 
   const paletteParams = args.palette?.params;
 
@@ -210,7 +201,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         : []),
     ];
 
-    const context: LensFilterEvent['data'] = {
+    const context: FilterEvent['data'] = {
       data: points.map((point) => ({
         row: point.row,
         column: point.column,
@@ -229,7 +220,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
 
     if (isTimeBasedSwimLane) {
-      const context: LensBrushEvent['data'] = {
+      const context: BrushEvent['data'] = {
         range: x as number[],
         table,
         column: xAxisColumnIndex,
@@ -257,7 +248,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         });
       });
 
-      const context: LensFilterEvent['data'] = {
+      const context: FilterEvent['data'] = {
         data: points.map((point) => ({
           row: point.row,
           column: point.column,
@@ -325,7 +316,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   if (!chartData || !chartData.length) {
-    return <EmptyPlaceholder icon={LensIconChartHeatmap} />;
+    return <EmptyPlaceholder icon={HeatmapIcon} />;
   }
 
   return (
@@ -344,7 +335,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         onBrushEnd={onBrushEnd as BrushEndListener}
       />
       <Heatmap
-        id={tableId}
+        id="heatmap"
         name={valueColumn.name}
         colorScale={{
           type: 'bands',
@@ -364,27 +355,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   );
 };
 
-const MemoizedChart = React.memo(HeatmapComponent);
-
-export function HeatmapChartReportable(props: HeatmapRenderProps) {
-  const [state, setState] = useState({
-    isReady: false,
-  });
-
-  // It takes a cycle for the chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setState({ isReady: true });
-  }, [setState]);
-
-  return (
-    <VisualizationContainer
-      className="lnsHeatmapExpression__container"
-      isReady={state.isReady}
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
-      <MemoizedChart {...props} />
-    </VisualizationContainer>
-  );
-}
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { HeatmapComponent as default };

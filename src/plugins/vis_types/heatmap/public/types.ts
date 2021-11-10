@@ -34,7 +34,6 @@ interface HeatmapCommonParams {
   addTooltip: boolean;
   enableHover: boolean;
   legendPosition: Position;
-  colorsRange?: Range[];
   useDistinctBands: boolean;
   percentageMode: boolean;
   isCellLabelVisible?: boolean;
@@ -61,6 +60,7 @@ export interface HeatmapVisParams extends HeatmapCommonParams {
   invertColors: boolean;
   colorsNumber: number | '';
   setColorRange: boolean;
+  colorsRange?: Range[];
   percentageFormatPattern?: string;
 }
 

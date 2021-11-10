@@ -1,8 +1,9 @@
-.lnsHeatmapExpression__container {
+.heatmap-container {
+  @include euiScrollBar;
   height: 100%;
   width: 100%;
   // the FocusTrap is adding extra divs which are making the visualization redraw twice
   // with a visible glitch. This make the chart library resilient to this extra reflow
-  overflow-x: hidden;
-
+  overflow: auto hidden;
+  user-select: text;
 }
