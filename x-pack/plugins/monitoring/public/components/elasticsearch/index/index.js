@@ -34,7 +34,6 @@ export const Index = ({
     metrics.index_size,
     metrics.index_search_request_rate,
     metrics.index_request_rate,
-    metrics.index_segment_count,
     metrics.index_document_count,
   ];
 

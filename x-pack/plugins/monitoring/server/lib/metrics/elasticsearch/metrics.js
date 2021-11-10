@@ -47,12 +47,6 @@ const indexIndexingRateTitle = i18n.translate(
 const nodeIoRateTitle = i18n.translate('xpack.monitoring.metrics.esNode.ioRateTitle', {
   defaultMessage: 'I/O Operations Rate',
 });
-const indexSegmentCountTitle = i18n.translate(
-  'xpack.monitoring.metrics.esIndex.segmentCountTitle',
-  {
-    defaultMessage: 'Segment Count',
-  }
-);
 const indexDiskTitle = i18n.translate('xpack.monitoring.metrics.esIndex.diskTitle', {
   defaultMessage: 'Disk',
 });
@@ -493,37 +487,6 @@ export const metrics = {
     ),
     type: 'index',
     derivative: true,
-    format: LARGE_FLOAT,
-    metricAgg: 'max',
-    units: '',
-  }),
-  index_segment_count_primaries: new ElasticsearchMetric({
-    field: 'index_stats.primaries.segments.count',
-    title: indexSegmentCountTitle,
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.segmentCount.primariesLabel', {
-      defaultMessage: 'Primaries',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.esIndex.segmentCount.primariesDescription',
-      {
-        defaultMessage: 'Number of segments for primary shards.',
-      }
-    ),
-    type: 'index',
-    format: LARGE_FLOAT,
-    metricAgg: 'max',
-    units: '',
-  }),
-  index_segment_count_total: new ElasticsearchMetric({
-    field: 'index_stats.total.segments.count',
-    title: indexSegmentCountTitle,
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.segmentCount.totalLabel', {
-      defaultMessage: 'Total',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esIndex.segmentCount.totalDescription', {
-      defaultMessage: 'Number of segments for primary and replica shards.',
-    }),
-    type: 'index',
     format: LARGE_FLOAT,
     metricAgg: 'max',
     units: '',

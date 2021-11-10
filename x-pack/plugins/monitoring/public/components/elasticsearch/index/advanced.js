@@ -30,7 +30,6 @@ export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {
     metrics.index_refresh,
     metrics.index_throttling,
     metrics.index_disk,
-    metrics.index_segment_count,
     metrics.index_latency,
   ];
 
