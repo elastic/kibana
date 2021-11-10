@@ -125,7 +125,7 @@ describe('import_rules_type_dependents', () => {
     ]);
   });
 
-  test('You cannot action params.message be empty actions are present', () => {
+  test('You cannot have action.params.message be empty when actions are present', () => {
     const schema: ImportRulesSchema = {
       ...getImportRulesSchemaMock(),
       actions: [
@@ -135,6 +135,26 @@ describe('import_rules_type_dependents', () => {
           action_type_id: '.slack',
           params: {
             message: '',
+          },
+        },
+      ],
+    };
+    const errors = importRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "actions" exist, "actions.params.message" requires a non empty "message" value - "action" with "id" of "123"',
+    ]);
+  });
+
+  test('You cannot have action.params.message be null when actions are present', () => {
+    const schema: ImportRulesSchema = {
+      ...getImportRulesSchemaMock(),
+      actions: [
+        {
+          id: '123',
+          group: 'group',
+          action_type_id: '.slack',
+          params: {
+            message: null,
           },
         },
       ],
