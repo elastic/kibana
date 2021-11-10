@@ -35,7 +35,7 @@ import { refreshPage } from '../../tasks/security_header';
 import { ALERTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 
-describe.skip('From rule', () => {
+describe('From rule', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
   beforeEach(() => {
     cleanKibana();
