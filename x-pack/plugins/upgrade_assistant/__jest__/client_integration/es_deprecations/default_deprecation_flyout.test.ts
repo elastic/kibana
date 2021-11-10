@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
-
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
 
 describe('Default deprecation flyout', () => {
@@ -35,15 +35,18 @@ describe('Default deprecation flyout', () => {
     testBed.component.update();
   });
 
-  it('renders a flyout with deprecation details', async () => {
+  test('renders a flyout with deprecation details', async () => {
     const multiFieldsDeprecation = esDeprecationsMockResponse.deprecations[2];
     const { actions, find, exists } = testBed;
 
-    await actions.clickDefaultDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('default', 0);
 
     expect(exists('defaultDeprecationDetails')).toBe(true);
     expect(find('defaultDeprecationDetails.flyoutTitle').text()).toContain(
       multiFieldsDeprecation.message
+    );
+    expect(find('defaultDeprecationDetails.documentationLink').props().href).toBe(
+      multiFieldsDeprecation.url
     );
     expect(find('defaultDeprecationDetails.flyoutDescription').text()).toContain(
       multiFieldsDeprecation.index

@@ -68,3 +68,6 @@ export const mockDeleteLegacyUrlAliases = jest.fn() as jest.MockedFunction<
 jest.mock('./legacy_url_aliases', () => ({
   deleteLegacyUrlAliases: mockDeleteLegacyUrlAliases,
 }));
+
+export const mockGetSearchDsl = jest.fn();
+jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: mockGetSearchDsl }));
