@@ -23,6 +23,17 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
+  "deep_exact_rt/package.json",
+  "iso_to_epoch_rt/package.json",
+  "json_rt/package.json",
+  "merge_rt/package.json",
+  "non_empty_string_rt/package.json",
+  "parseable_types/package.json",
+  "props_to_schema/package.json",
+  "strict_keys_rt/package.json",
+  "to_boolean_rt/package.json",
+  "to_json_schema/package.json",
+  "to_number_rt/package.json",
 ]
 
 RUNTIME_DEPS = [

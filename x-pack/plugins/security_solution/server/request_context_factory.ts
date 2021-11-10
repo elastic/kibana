@@ -36,13 +36,7 @@ export class RequestContextFactory implements IRequestContextFactory {
   private readonly appClientFactory: AppClientFactory;
 
   constructor(private readonly options: ConstructorOptions) {
-    const { config, plugins } = options;
-
     this.appClientFactory = new AppClientFactory();
-    this.appClientFactory.setup({
-      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
-      config,
-    });
   }
 
   public async create(
@@ -51,10 +45,14 @@ export class RequestContextFactory implements IRequestContextFactory {
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
     const { config, core, plugins } = options;
-    const { lists, ruleRegistry, security, spaces } = plugins;
+    const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
+    appClientFactory.setup({
+      getSpaceId: startPlugins.spaces?.spacesService?.getSpaceId,
+      config,
+    });
 
     return {
       core: context.core,
@@ -65,7 +63,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAppClient: () => appClientFactory.create(request),
 
-      getSpaceId: () => spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
+      getSpaceId: () => startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
 
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
