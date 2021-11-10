@@ -75,7 +75,6 @@ const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
       alertIds={alertIds}
       key="investigate-in-timeline"
       ecsRowData={null}
-      nonEcsRowData={[]}
     />
   );
 };
