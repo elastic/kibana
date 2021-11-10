@@ -286,8 +286,8 @@ export function alertingServiceProvider(
         topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
           return {
             ...h._source,
-            typical: h._source.typical.map((t: number) => formatters.numberFormatter(t)),
-            actual: h._source.actual.map((t: number) => formatters.numberFormatter(t)),
+            typical: h._source.typical?.map((t: number) => formatters.numberFormatter(t)),
+            actual: h._source.actual?.map((t: number) => formatters.numberFormatter(t)),
             score: Math.floor(
               h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),

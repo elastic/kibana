@@ -94,12 +94,12 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
                         id="xpack.ml.previewAlert.typicalLabel"
                         defaultMessage="Typical:"
                       />{' '}
-                      {i.typical},{' '}
+                      {i.typical ?? '-'},{' '}
                       <FormattedMessage
                         id="xpack.ml.previewAlert.actualLabel"
                         defaultMessage="Actual:"
                       />{' '}
-                      {i.actual})
+                      {i.actual ?? '-'})
                     </li>
                   ))}
                 </ul>
