@@ -32,10 +32,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await security.role.delete('global_all_role');
-
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+
+      await security.role.delete('global_all_role');
     });
 
     describe('machine_learning_user', () => {

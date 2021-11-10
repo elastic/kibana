@@ -138,6 +138,34 @@ export default ({ getService }: FtrProviderContext): void => {
           lastLookBackDate: null,
         });
       });
+
+      // If alertId is not a string/null ensure it is removed as the mapping was removed and so the migration would fail.
+      // Specific test for this as e2e tests will not catch the mismatch and we can't use the migration test harness
+      // since this SO is not importable/exportable via the SOM.
+      // For details see: https://github.com/elastic/kibana/issues/116423
+      it('migrates legacy siem-detection-engine-rule-status and removes alertId when not a string', async () => {
+        const response = await es.get<{
+          'siem-detection-engine-rule-status': IRuleStatusSOAttributes;
+        }>({
+          index: '.kibana',
+          id: 'siem-detection-engine-rule-status:d62d2980-27c4-11ec-92b0-f7b47106bb36',
+        });
+        expect(response.statusCode).to.eql(200);
+
+        expect(response.body._source?.['siem-detection-engine-rule-status']).to.eql({
+          statusDate: '2021-10-11T20:51:26.622Z',
+          status: 'succeeded',
+          lastFailureAt: '2021-10-11T18:10:08.982Z',
+          lastSuccessAt: '2021-10-11T20:51:26.622Z',
+          lastFailureMessage:
+            '4 days (323690920ms) were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances. name: "Threshy" id: "fb1046a0-0452-11ec-9b15-d13d79d162f3" rule id: "b789c80f-f6d8-41f1-8b4f-b4a23342cde2" signals index: ".siem-signals-spong-default"',
+          lastSuccessMessage: 'succeeded',
+          gap: '4 days',
+          bulkCreateTimeDurations: ['34.49'],
+          searchAfterTimeDurations: ['62.58'],
+          lastLookBackDate: null,
+        });
+      });
     });
   });
 };

@@ -516,6 +516,9 @@ export class DocLinksService {
           rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
           rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/current/index.html`,
         },
+        endpoints: {
+          troubleshooting: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/ts-management.html#ts-endpoints`,
+        },
       },
     });
   }
@@ -785,6 +788,9 @@ export interface DocLinksStart {
       readonly pythonGuide: string;
       readonly rubyOverview: string;
       readonly rustGuide: string;
+    };
+    readonly endpoints: {
+      readonly troubleshooting: string;
     };
   };
 }
