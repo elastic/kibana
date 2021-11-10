@@ -52,6 +52,7 @@ export function ReportTypesSelect() {
 
   return (
     <EuiSuperSelect
+      aria-labelledby="report-type-label"
       options={options}
       valueOfSelected={selectedReportType ?? SELECT_REPORT_TYPE}
       onChange={(value) => onReportTypeChange(value as ReportViewType)}
