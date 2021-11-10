@@ -25,6 +25,7 @@ import {
   QueryCreateSchema,
   ThresholdCreateSchema,
 } from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { ALERT_THRESHOLD_RESULT } from '../../../../../plugins/security_solution/common/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -105,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits
-          .map((hit) => hit._source?.threshold_result ?? null)
+          .map((hit) => hit._source?.[ALERT_THRESHOLD_RESULT] ?? null)
           .sort();
         expect(hits).to.eql([
           {
