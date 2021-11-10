@@ -14,6 +14,7 @@ import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { CrawlerDomainsLogic } from './crawler_domains_logic';
 import { CrawlerLogic, CrawlerValues } from './crawler_logic';
 import {
   CrawlerData,
@@ -159,6 +160,16 @@ describe('CrawlerLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('CrawlerDomainsLogic.actionTypes.crawlerDomainDeleted', () => {
+      it('updates data in state when a domain is deleted', () => {
+        jest.spyOn(CrawlerLogic.actions, 'onReceiveCrawlerData');
+        CrawlerDomainsLogic.actions.crawlerDomainDeleted(MOCK_CLIENT_CRAWLER_DATA);
+        expect(CrawlerLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
+          MOCK_CLIENT_CRAWLER_DATA
+        );
+      });
+    });
+
     describe('fetchCrawlerData', () => {
       it('updates logic with data that has been converted from server to client', async () => {
         jest.spyOn(CrawlerLogic.actions, 'onReceiveCrawlerData');
