@@ -6,12 +6,11 @@
  */
 import { HttpSetup } from 'kibana/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { AlertInstanceSummary } from '../../../types';
+import { AlertSummary } from '../../../types';
 import { RewriteRequestCase, AsApiContract } from '../../../../../actions/common';
 
-const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
-  alerts,
-  rule_type_id: alertTypeId,
+const rewriteBodyRes: RewriteRequestCase<AlertSummary> = ({
+  rule_type_id: ruleTypeId,
   mute_all: muteAll,
   status_start_date: statusStartDate,
   status_end_date: statusEndDate,
@@ -21,25 +20,24 @@ const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   ...rest
 }: any) => ({
   ...rest,
-  alertTypeId,
+  ruleTypeId,
   muteAll,
   statusStartDate,
   statusEndDate,
   errorMessages,
   lastRun,
-  instances: alerts,
   executionDuration,
 });
 
-export async function loadAlertInstanceSummary({
+export async function loadAlertSummary({
   http,
-  alertId,
+  ruleId,
 }: {
   http: HttpSetup;
-  alertId: string;
-}): Promise<AlertInstanceSummary> {
-  const res = await http.get<AsApiContract<AlertInstanceSummary>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(alertId)}/_alert_summary`
+  ruleId: string;
+}): Promise<AlertSummary> {
+  const res = await http.get<AsApiContract<AlertSummary>>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/_alert_summary`
   );
   return rewriteBodyRes(res);
 }
