@@ -93,7 +93,7 @@ describe('When navigating to the service inventory', () => {
       cy.wait(aliasNames);
     });
 
-    it('when selecting a different time range and clicking the refresh button', () => {
+    it.skip('when selecting a different time range and clicking the refresh button', () => {
       cy.wait(aliasNames);
 
       cy.changeTimeRange('Last 30 days');
