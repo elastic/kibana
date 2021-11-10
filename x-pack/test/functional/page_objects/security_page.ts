@@ -540,7 +540,10 @@ export class SecurityPageObject extends FtrService {
     return confirmText;
   }
 
-  async addRole(roleName: string, roleObj: Role) {
+  async addRole(
+    roleName: string,
+    roleObj: { elasticsearch: Pick<Role['elasticsearch'], 'indices'> }
+  ) {
     const self = this;
 
     await this.clickCreateNewRole();
@@ -558,21 +561,14 @@ export class SecurityPageObject extends FtrService {
       await this.monacoEditor.setCodeEditorValue(roleObj.elasticsearch.indices[0].query);
     }
 
-    const globalPrivileges = (roleObj.kibana as any).global;
-    if (globalPrivileges) {
-      for (const privilegeName of globalPrivileges) {
-        await this.testSubjects.click('addSpacePrivilegeButton');
+    await this.testSubjects.click('addSpacePrivilegeButton');
+    await this.testSubjects.click('spaceSelectorComboBox');
 
-        await this.testSubjects.click('spaceSelectorComboBox');
+    const globalSpaceOption = await this.find.byCssSelector(`#spaceOption_\\*`);
+    await globalSpaceOption.click();
 
-        const globalSpaceOption = await this.find.byCssSelector(`#spaceOption_\\*`);
-        await globalSpaceOption.click();
-
-        await this.testSubjects.click(`basePrivilege_${privilegeName}`);
-
-        await this.testSubjects.click('createSpacePrivilegeButton');
-      }
-    }
+    await this.testSubjects.click('basePrivilege_all');
+    await this.testSubjects.click('createSpacePrivilegeButton');
 
     const addPrivilege = (privileges: string[]) => {
       return privileges.reduce((promise: Promise<any>, privilegeName: string) => {

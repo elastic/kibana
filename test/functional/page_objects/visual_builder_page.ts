@@ -878,6 +878,10 @@ export class VisualBuilderPageObject extends FtrService {
     await optionInput.type(query);
   }
 
+  public async clickSeriesLegendItem(name: string) {
+    await this.find.clickByCssSelector(`[data-ech-series-name="${name}"] .echLegendItem__label`);
+  }
+
   public async toggleNewChartsLibraryWithDebug(enabled: boolean) {
     await this.elasticChart.setNewChartUiDebugFlag(enabled);
   }
