@@ -274,7 +274,7 @@ export const getXyVisualization = ({
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
-      return { groups: [], supportStaticValue: true };
+      return { groups: [] };
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
@@ -345,8 +345,6 @@ export const getXyVisualization = ({
         frame?.activeData
       );
       return {
-        supportFieldFormat: false,
-        supportStaticValue: true,
         // Each reference lines layer panel will have sections for each available axis
         // (horizontal axis, vertical axis left, vertical axis right).
         // Only axes that support numeric reference lines should be shown
@@ -362,6 +360,13 @@ export const getXyVisualization = ({
           supportsMoreColumns: true,
           required: false,
           enableDimensionEditor: true,
+          supportStaticValue: true,
+          paramEditorCustomProps: {
+            label: i18n.translate('xpack.lens.indexPattern.staticValue.label', {
+              defaultMessage: 'Reference line value',
+            }),
+          },
+          supportFieldFormat: false,
           dataTestSubj,
           invalid: !valid,
           invalidMessage:
