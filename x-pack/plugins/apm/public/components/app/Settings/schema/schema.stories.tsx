@@ -7,10 +7,8 @@
 
 import type { Meta, Story } from '@storybook/react';
 import React, { ComponentType } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { Schema } from './';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 
@@ -79,7 +77,6 @@ export default {
       }
       const coreMock = {
         http: {
-          basePath: { prepend: () => {} },
           get: () => {
             return {
               has_cloud_agent_policy: args?.hasCloudAgentPolicy,
@@ -89,17 +86,12 @@ export default {
             };
           },
         },
-        uiSettings: { get: () => '' },
       } as unknown as CoreStart;
 
-      createCallApmApi(coreMock);
-
       return (
-        <MockApmPluginContextWrapper>
-          <MemoryRouter>
-            <StoryComponent />
-          </MemoryRouter>
-        </MockApmPluginContextWrapper>
+        <MockApmAppContextProvider value={{ coreStart: coreMock }}>
+          <StoryComponent />
+        </MockApmAppContextProvider>
       );
     },
   ],

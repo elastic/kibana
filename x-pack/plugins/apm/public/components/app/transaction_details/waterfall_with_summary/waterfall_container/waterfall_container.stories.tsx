@@ -7,8 +7,7 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../../../context/mock_apm_app/mock_apm_app_context';
 import { WaterfallContainer } from './index';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import {
@@ -27,15 +26,13 @@ const stories: Meta<Args> = {
   component: WaterfallContainer,
   decorators: [
     (StoryComponent) => (
-      <MemoryRouter
-        initialEntries={[
-          '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
-        ]}
+      <MockApmAppContextProvider
+        value={{
+          path: '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
+        }}
       >
-        <MockApmPluginContextWrapper>
-          <StoryComponent />
-        </MockApmPluginContextWrapper>
-      </MemoryRouter>
+        <StoryComponent />
+      </MockApmAppContextProvider>
     ),
   ],
 };

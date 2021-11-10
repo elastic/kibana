@@ -8,40 +8,37 @@
 import { act, waitFor } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { CytoscapeContext } from './Cytoscape';
 import { EmptyBanner } from './EmptyBanner';
 
 const cy = cytoscape({});
 
-function wrapper({ children }: { children: ReactNode }) {
+function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper>
-        <CytoscapeContext.Provider value={cy}>
-          {children}
-        </CytoscapeContext.Provider>
-      </MockApmPluginContextWrapper>
-    </MemoryRouter>
+    <MockApmAppContextProvider>
+      <CytoscapeContext.Provider value={cy}>
+        {children}
+      </CytoscapeContext.Provider>
+    </MockApmAppContextProvider>
   );
 }
 
 describe('EmptyBanner', () => {
   describe('when cy is undefined', () => {
     it('renders null', () => {
-      function noCytoscapeWrapper({ children }: { children: ReactNode }) {
+      function NoCytoscapeWrapper({ children }: { children: ReactNode }) {
         return (
-          <MockApmPluginContextWrapper>
+          <MockApmAppContextProvider>
             <CytoscapeContext.Provider value={undefined}>
               {children}
             </CytoscapeContext.Provider>
-          </MockApmPluginContextWrapper>
+          </MockApmAppContextProvider>
         );
       }
       const component = renderWithTheme(<EmptyBanner />, {
-        wrapper: noCytoscapeWrapper,
+        wrapper: NoCytoscapeWrapper,
       });
 
       expect(component.container.children).toHaveLength(0);
@@ -51,7 +48,7 @@ describe('EmptyBanner', () => {
   describe('with no nodes', () => {
     it('renders null', () => {
       const component = renderWithTheme(<EmptyBanner />, {
-        wrapper,
+        wrapper: Wrapper,
       });
 
       expect(component.container.children).toHaveLength(0);
@@ -60,7 +57,7 @@ describe('EmptyBanner', () => {
 
   describe('with one node', () => {
     it('does not render null', async () => {
-      const component = renderWithTheme(<EmptyBanner />, { wrapper });
+      const component = renderWithTheme(<EmptyBanner />, { wrapper: Wrapper });
 
       await act(async () => {
         cy.add({ data: { id: 'test id' } });

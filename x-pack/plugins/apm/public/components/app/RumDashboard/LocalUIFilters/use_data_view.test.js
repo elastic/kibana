@@ -8,7 +8,6 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import * as dynamicDataView from '../../../../hooks/use_dynamic_data_view';
 import { useDataView } from './use_data_view';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 
 describe('useDataView', () => {
@@ -29,11 +28,9 @@ describe('useDataView', () => {
   it('returns result as expected', async () => {
     const { waitForNextUpdate } = renderHook(() => useDataView(), {
       wrapper: ({ children }) => (
-        <MockApmPluginContextWrapper>
-          <KibanaContextProvider services={mockDataService}>
-            {children}
-          </KibanaContextProvider>
-        </MockApmPluginContextWrapper>
+        <KibanaContextProvider services={mockDataService}>
+          {children}
+        </KibanaContextProvider>
       ),
     });
 

@@ -8,7 +8,7 @@
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../../../../../context/mock_apm_app/mock_apm_app_context';
 import { SpanFlyout } from './';
 
 type Args = ComponentProps<typeof SpanFlyout>;
@@ -19,15 +19,13 @@ export default {
   decorators: [
     (StoryComponent: ComponentType) => {
       return (
-        <MemoryRouter
-          initialEntries={[
-            '/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c',
-          ]}
+        <MockApmAppContextProvider
+          value={{
+            path: '/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c',
+          }}
         >
-          <MockApmPluginContextWrapper>
-            <StoryComponent />
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+          <StoryComponent />
+        </MockApmAppContextProvider>
       );
     },
   ],

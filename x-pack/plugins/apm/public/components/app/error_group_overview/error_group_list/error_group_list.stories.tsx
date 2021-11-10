@@ -7,11 +7,8 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
-
 import { ErrorGroupList } from '.';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 
 type Args = ComponentProps<typeof ErrorGroupList>;
 
@@ -21,13 +18,9 @@ const stories: Meta<Args> = {
   decorators: [
     (StoryComponent) => {
       return (
-        <MemoryRouter>
-          <MockApmPluginContextWrapper>
-            <MockUrlParamsContextProvider>
-              <StoryComponent />
-            </MockUrlParamsContextProvider>
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+        <MockApmAppContextProvider>
+          <StoryComponent />
+        </MockApmAppContextProvider>
       );
     },
   ],

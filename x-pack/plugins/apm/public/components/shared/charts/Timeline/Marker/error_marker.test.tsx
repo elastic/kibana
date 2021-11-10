@@ -8,8 +8,8 @@
 import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockUrlParamsContextProvider } from '../../../../../context/url_params_context/mock_url_params_context_provider';
 import {
   expectTextsInDocument,
   renderWithTheme,
@@ -19,9 +19,9 @@ import { ErrorMarker } from './error_marker';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-    </MemoryRouter>
+    <MockApmAppContextProvider>
+      <MockUrlParamsContextProvider>{children}</MockUrlParamsContextProvider>
+    </MockApmAppContextProvider>
   );
 }
 
@@ -57,16 +57,14 @@ describe('ErrorMarker', () => {
     return component;
   }
   function getKueryDecoded(url: string) {
-    return decodeURIComponent(
-      url.substring(url.indexOf('kuery='), url.indexOf('&'))
-    );
+    return new URLSearchParams(url).get('kuery');
   }
   it('renders link with trace and transaction', () => {
     const component = openPopover(mark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
 
     expect(getKueryDecoded(errorLink.search)).toEqual(
-      'kuery=trace.id : "123" and transaction.id : "456"'
+      'trace.id : "123" and transaction.id : "456"'
     );
   });
   it('renders link with trace', () => {
@@ -77,7 +75,7 @@ describe('ErrorMarker', () => {
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
-    expect(getKueryDecoded(errorLink.search)).toEqual('kuery=trace.id : "123"');
+    expect(getKueryDecoded(errorLink.search)).toEqual('trace.id : "123"');
   });
   it('renders link with transaction', () => {
     const { trace, ...withoutTrace } = mark.error;
@@ -87,9 +85,7 @@ describe('ErrorMarker', () => {
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
-    expect(getKueryDecoded(errorLink.search)).toEqual(
-      'kuery=transaction.id : "456"'
-    );
+    expect(getKueryDecoded(errorLink.search)).toEqual('transaction.id : "456"');
   });
   it('renders link without trance and transaction', () => {
     const { trace, transaction, ...withoutTraceAndTransaction } = mark.error;
@@ -99,7 +95,7 @@ describe('ErrorMarker', () => {
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
-    expect(getKueryDecoded(errorLink.search)).toEqual('kuery=');
+    expect(getKueryDecoded(errorLink.search)).toEqual('');
   });
   it('truncates the error message text', () => {
     const { trace, transaction, ...withoutTraceAndTransaction } = mark.error;

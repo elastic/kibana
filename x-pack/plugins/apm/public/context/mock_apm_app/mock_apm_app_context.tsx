@@ -10,7 +10,6 @@ import { createMemoryHistory } from 'history';
 import { merge } from 'lodash';
 import React, { createContext, ReactNode, useMemo } from 'react';
 import type { CoreStart } from '../../../../../../src/core/public';
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import type { ConfigSchema } from '../..';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
@@ -28,47 +27,49 @@ import { createCallApmApi } from '../../services/rest/createCallApmApi';
 
 // Kibana context
 
-const mockCoreStart = merge(
-  {},
-  coreMock.createStart({ basePath: '/basepath' }),
-  {
-    application: {
-      capabilities: {
-        apm: {},
-        ml: {},
-      },
+const mockCoreStart = {
+  application: {
+    capabilities: {
+      apm: { save: true },
+      ml: {},
     },
-    uiSettings: {
-      get: (key: string) => {
-        const uiSettings: Record<string, unknown> = {
-          [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
-            {
-              from: 'now/d',
-              to: 'now/d',
-              display: 'Today',
-            },
-            {
-              from: 'now/w',
-              to: 'now/w',
-              display: 'This week',
-            },
-          ],
-          [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
-            from: 'now-15m',
-            to: 'now',
+    getUrlForApp: () => {},
+  },
+  chrome: { docTitle: { change: () => {} } },
+  docLinks: { links: { apm: {}, observability: {} } },
+  http: {
+    basePath: { get: () => '', prepend: (str) => `/basepath${str}` },
+    get: () => ({}),
+  },
+  notifications: { toasts: { add: () => {}, addDanger: () => {} } },
+  uiSettings: {
+    get: (key: string) => {
+      const uiSettings: Record<string, unknown> = {
+        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
+          {
+            from: 'now/d',
+            to: 'now/d',
+            display: 'Today',
           },
-          [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
-            pause: false,
-            value: 100000,
+          {
+            from: 'now/w',
+            to: 'now/w',
+            display: 'This week',
           },
-        };
-        return uiSettings[key];
-      },
+        ],
+        [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
+          from: 'now-15m',
+          to: 'now',
+        },
+        [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
+          pause: false,
+          value: 100000,
+        },
+      };
+      return uiSettings[key];
     },
-  }
-);
-
-const KibanaContext = createKibanaReactContext(mockCoreStart);
+  },
+};
 
 // APM Plugin context
 
@@ -85,7 +86,7 @@ const mockPluginsStart = {
   embeddable: {},
   inspector: {},
   maps: {},
-  observability: {},
+  observability: { navigation: { PageTemplate: () => null } },
   data: {},
 };
 
@@ -136,7 +137,7 @@ export const MockApmAppContext = createContext<MockApmAppContextValue>(
  * A mock provider for APM contexts which includes mocks for:
  *
  * - ApmPluginContext
- * - KibanaConfigContext
+ * - Router
  * - KibanaContext
  *
  * Provided values are deep-merged with mocked defaults.
@@ -148,19 +149,28 @@ export function MockApmAppContextProvider({
   children?: ReactNode;
   value?: RecursivePartial<MockApmAppContextValue>;
 }) {
-  const { path } = value;
+  const { path, pluginsSetup, pluginsStart } = value;
   const history = useMemo(() => {
     return createMemoryHistory({
       initialEntries: [path ?? '/services/?rangeFrom=now-15m&rangeTo=now'],
     });
   }, [path]);
-  const coreStart = merge({}, mockCoreStart, value.coreStart);
-
+  const coreStart = merge(
+    {},
+    mockCoreStart,
+    value.coreStart
+  ) as unknown as CoreStart;
   createCallApmApi(coreStart);
+  const KibanaContext = createKibanaReactContext(coreStart);
 
   return (
-    <KibanaContext.Provider services={{ ...coreStart }}>
-      <ApmPluginContext.Provider value={mockApmPluginContextValue}>
+    <KibanaContext.Provider>
+      <ApmPluginContext.Provider
+        value={merge({}, mockApmPluginContextValue, {
+          pluginsSetup,
+          pluginsStart,
+        })}
+      >
         <RouterProvider router={apmRouter as any} history={history}>
           {children}
         </RouterProvider>

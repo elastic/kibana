@@ -8,32 +8,29 @@
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
-  ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
   ALERT_INSTANCE_ID,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
-  TIMESTAMP,
-  ALERT_RULE_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
   SPACE_IDS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import {
   APIReturnType,
@@ -61,65 +58,47 @@ const stories: Meta<Args> = {
       const { alertsResponse, latencyChartResponse } = args as Args;
       const serviceName = 'testService';
 
-      const apmPluginContextMock = {
-        core: {
-          notifications: {
-            toasts: { addWarning: () => {}, addDanger: () => {} },
-          },
-          http: {
-            basePath: { prepend: () => {} },
-            get: (endpoint: string) => {
-              switch (endpoint) {
-                case `/internal/apm/services/${serviceName}/transactions/charts/latency`:
-                  return latencyChartResponse;
-                default:
-                  return {};
-              }
-            },
-          },
-          uiSettings: { get: () => '' },
-        },
-        pluginsSetup: {
-          observability: {
-            isAlertingExperienceEnabled: () => true,
-            observabilityRuleTypeRegistry: { getFormatter: () => undefined },
+      const coreStart = {
+        http: {
+          get: (endpoint: string) => {
+            switch (endpoint) {
+              case `/internal/apm/services/${serviceName}/transactions/charts/latency`:
+                return latencyChartResponse;
+              default:
+                return {};
+            }
           },
         },
-      } as unknown as ApmPluginContextValue;
-
-      createCallApmApi(apmPluginContextMock.core);
+      };
 
       const transactionType = `${Math.random()}`; // So we don't memoize
 
       return (
-        <MemoryRouter
-          initialEntries={[
-            `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&transactionType=request&comparisonEnabled=true&comparisonType=day`,
-          ]}
+        <MockApmAppContextProvider
+          value={{
+            coreStart,
+            path: `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&transactionType=request&comparisonEnabled=true&comparisonType=day`,
+          }}
         >
-          <MockApmPluginContextWrapper value={apmPluginContextMock}>
-            <KibanaContextProvider services={{ ...apmPluginContextMock.core }}>
-              <MockUrlParamsContextProvider
-                params={{
-                  latencyAggregationType: LatencyAggregationType.avg,
-                }}
-              >
-                <APMServiceContext.Provider
-                  value={{
-                    alerts: alertsResponse.alerts,
-                    serviceName,
-                    transactionType,
-                    transactionTypes: [],
-                  }}
-                >
-                  <ChartPointerEventContextProvider>
-                    <StoryComponent />
-                  </ChartPointerEventContextProvider>
-                </APMServiceContext.Provider>
-              </MockUrlParamsContextProvider>
-            </KibanaContextProvider>
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+          <MockUrlParamsContextProvider
+            params={{
+              latencyAggregationType: LatencyAggregationType.avg,
+            }}
+          >
+            <APMServiceContext.Provider
+              value={{
+                alerts: alertsResponse.alerts,
+                serviceName,
+                transactionType,
+                transactionTypes: [],
+              }}
+            >
+              <ChartPointerEventContextProvider>
+                <StoryComponent />
+              </ChartPointerEventContextProvider>
+            </APMServiceContext.Provider>
+          </MockUrlParamsContextProvider>
+        </MockApmAppContextProvider>
       );
     },
   ],

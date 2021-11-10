@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
-import React, { ComponentProps, ComponentType } from 'react';
-import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
+import { Meta, Story } from '@storybook/react';
+import React, { ComponentProps } from 'react';
+import { MockApmAppContextProvider } from '../../context/mock_apm_app/mock_apm_app_context';
 import { ServiceLink } from './service_link';
 
 type Args = ComponentProps<typeof ServiceLink>;
 
-export default {
+const stories: Meta<Args> = {
   title: 'shared/ServiceLink',
   component: ServiceLink,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent) => {
       return (
-        <MockApmPluginContextWrapper>
+        <MockApmAppContextProvider>
           <StoryComponent />
-        </MockApmPluginContextWrapper>
+        </MockApmAppContextProvider>
       );
     },
   ],
 };
+export default stories;
 
 export const Example: Story<Args> = (args) => {
   return <ServiceLink {...args} />;

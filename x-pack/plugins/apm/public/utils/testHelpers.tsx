@@ -24,7 +24,7 @@ import { PromiseReturnType } from '../../../observability/typings/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
 import { UxUIFilters } from '../../typings/ui_filters';
-import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../context/mock_apm_app/mock_apm_app_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
@@ -65,15 +65,13 @@ export function mockMoment() {
 }
 
 // Useful for getting the rendered href from any kind of link component
-export async function getRenderedHref(Component: React.FC, location: Location) {
+export async function getRenderedHref(Component: React.FC, path: Location) {
   const el = render(
-    <MemoryRouter initialEntries={[location]}>
-      <MockApmPluginContextWrapper>
-        <UrlParamsProvider>
-          <Component />
-        </UrlParamsProvider>
-      </MockApmPluginContextWrapper>
-    </MemoryRouter>
+    <MockApmAppContextProvider value={{ path }}>
+      <UrlParamsProvider>
+        <Component />
+      </UrlParamsProvider>
+    </MockApmAppContextProvider>
   );
   const a = el.container.querySelector('a');
 

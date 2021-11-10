@@ -7,12 +7,9 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { ServiceList } from './';
 import { items } from './__fixtures__/service_api_mock_data';
 
@@ -20,15 +17,11 @@ type Args = ComponentProps<typeof ServiceList>;
 
 const coreMock = {
   http: {
-    get: async () => {
+    get: () => {
       return { fallBackToTransactions: false };
     },
   },
-  notifications: { toasts: { add: () => {} } },
-  uiSettings: { get: () => ({}) },
 } as unknown as CoreStart;
-
-const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const stories: Meta<Args> = {
   title: 'app/ServiceInventory/ServiceList',
@@ -36,17 +29,14 @@ const stories: Meta<Args> = {
   decorators: [
     (StoryComponent) => {
       return (
-        <KibanaReactContext.Provider>
-          <MemoryRouter
-            initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}
-          >
-            <MockApmPluginContextWrapper
-              value={{ core: coreMock } as unknown as ApmPluginContextValue}
-            >
-              <StoryComponent />
-            </MockApmPluginContextWrapper>
-          </MemoryRouter>
-        </KibanaReactContext.Provider>
+        <MockApmAppContextProvider
+          value={{
+            coreStart: coreMock,
+            path: '/services?rangeFrom=now-15m&rangeTo=now',
+          }}
+        >
+          <StoryComponent />
+        </MockApmAppContextProvider>
       );
     },
   ],

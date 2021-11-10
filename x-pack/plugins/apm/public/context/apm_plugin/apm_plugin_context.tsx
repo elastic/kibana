@@ -13,4 +13,6 @@ export interface ApmPluginContextValue {
   pluginsStart: ApmPluginStartDeps;
 }
 
-export const ApmPluginContext = createContext({} as ApmPluginContextValue);
+export const ApmPluginContext = createContext<ApmPluginContextValue>(
+  {} as ApmPluginContextValue
+);

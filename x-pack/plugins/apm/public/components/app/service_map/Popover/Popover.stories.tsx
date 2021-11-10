@@ -9,13 +9,11 @@ import { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { Popover } from '.';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
-import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { CytoscapeContext } from '../Cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
@@ -42,28 +40,23 @@ const stories: Meta<Args> = {
             };
           },
         },
-        notifications: { toasts: { add: () => {} } },
-        uiSettings: { get: () => ({}) },
       } as unknown as CoreStart;
 
-      const KibanaReactContext = createKibanaReactContext(coreMock);
-
-      createCallApmApi(coreMock);
-
       return (
-        <MemoryRouter
-          initialEntries={['/service-map?rangeFrom=now-15m&rangeTo=now']}
+        <MockApmAppContextProvider
+          value={{
+            coreStart: coreMock,
+            path: '/service-map?rangeFrom=now-15m&rangeTo=now',
+          }}
         >
-          <KibanaReactContext.Provider>
-            <MockUrlParamsContextProvider>
-              <MockApmPluginContextWrapper>
-                <div style={{ height: 325 }}>
-                  <StoryComponent />
-                </div>
-              </MockApmPluginContextWrapper>
-            </MockUrlParamsContextProvider>
-          </KibanaReactContext.Provider>
-        </MemoryRouter>
+          <MockUrlParamsContextProvider>
+            <MockApmPluginContextWrapper>
+              <div style={{ height: 325 }}>
+                <StoryComponent />
+              </div>
+            </MockApmPluginContextWrapper>
+          </MockUrlParamsContextProvider>
+        </MockApmAppContextProvider>
       );
     },
     (StoryComponent, { args }) => {

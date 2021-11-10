@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { Story, StoryContext } from '@storybook/react';
-import React, { ComponentType } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { Story } from '@storybook/react';
+import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { AnalyzeDataButton } from './analyze_data_button';
 
 interface Args {
@@ -22,47 +19,44 @@ interface Args {
   serviceName: string;
 }
 
-export default {
+const stories: Meta<Args> = {
   title: 'routing/templates/ApmServiceTemplate/AnalyzeDataButton',
   component: AnalyzeDataButton,
   decorators: [
-    (StoryComponent: ComponentType, { args }: StoryContext) => {
+    (StoryComponent, { args }) => {
       const { agentName, canShowDashboard, environment, serviceName } = args;
 
-      const KibanaContext = createKibanaReactContext({
+      const coreStart = {
         application: {
           capabilities: { dashboard: { show: canShowDashboard } },
         },
-        http: { basePath: { get: () => '' } },
-      } as unknown as Partial<CoreStart>);
+      };
 
       return (
-        <MemoryRouter
-          initialEntries={[
-            `/services/${serviceName}/overview?rangeFrom=now-15m&rangeTo=now&environment=${
+        <MockApmAppContextProvider
+          value={{
+            coreStart,
+            path: `/services/${serviceName}/overview?rangeFrom=now-15m&rangeTo=now&environment=${
               environment ?? ENVIRONMENT_ALL.value
             }&kuery=`,
-          ]}
+          }}
         >
-          <MockApmPluginContextWrapper>
-            <APMServiceContext.Provider
-              value={{
-                agentName,
-                alerts: [],
-                transactionTypes: [],
-                serviceName,
-              }}
-            >
-              <KibanaContext.Provider>
-                <StoryComponent />
-              </KibanaContext.Provider>
-            </APMServiceContext.Provider>
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+          <APMServiceContext.Provider
+            value={{
+              agentName,
+              alerts: [],
+              transactionTypes: [],
+              serviceName,
+            }}
+          >
+            <StoryComponent />
+          </APMServiceContext.Provider>
+        </MockApmAppContextProvider>
       );
     },
   ],
 };
+export default stories;
 
 export const Example: Story<Args> = () => {
   return <AnalyzeDataButton />;
