@@ -46,7 +46,7 @@ const timeFilter: FilterType = {
   id: 0,
   type: 'time',
   column: '@timestamp',
-  value: { from: '2.10.2021 15:33', to: '2.10.2021 20:33' },
+  value: { from: '2011-09-10T14:48:00', to: '2011-10-10T14:48:00' },
   filterGroup: group2,
 };
 

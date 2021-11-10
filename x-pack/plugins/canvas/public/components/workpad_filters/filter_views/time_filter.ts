@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import { FilterType, FilterViewSpec, SimpleFilterViewField } from '../../../../types';
@@ -42,7 +41,8 @@ const formatTime = (str: string, roundUp: boolean) => {
   if (!m || !m.isValid()) {
     return strings.getInvalidDateLabel(str);
   }
-  return moment(m.toISOString()).format('YYYY-MM-DD HH:mm:ss');
+
+  return m.format('YYYY-MM-DD HH:mm:ss');
 };
 
 export const timeFilter: FilterViewSpec<TimeFilterValue> = {
