@@ -53,7 +53,7 @@ export interface IServiceSettings {
   ): any;
 
   getDefaultTmsLayer(isDarkMode: boolean): Promise<string>;
-  getTmsService(id: string): Promise<TMSService>;
+  getTmsService(id: string): Promise<TMSService | undefined>;
   getMapConfig(): MapsEmsConfig;
   getAttributionsFromTMSServce(tmsService: TMSService): string;
 }
