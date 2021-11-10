@@ -91,7 +91,7 @@ export const spacesManagementApp = Object.freeze({
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
-              ...spacesBreadcrumbs,
+              spacesFirstBreadcrumb,
               {
                 text: space.name,
               },
