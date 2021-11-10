@@ -82,6 +82,14 @@ const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
 );
 
+export interface TGridExportableState {
+  columns: ColumnHeaderOptions[];
+  sort: SortColumnTimeline[];
+  selectedEventIds: Record<string, TimelineNonEcsData[]>;
+}
+
+export type TGridStateReporter = (state: TGridExportableState) => void;
+
 interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
@@ -95,11 +103,13 @@ interface OwnProps {
   filterStatus?: AlertStatus;
   id: string;
   indexNames: string[];
+  initialSelectedEventIds?: Record<string, TimelineNonEcsData[]>;
   isEventViewer?: boolean;
   itemsPerPageOptions: number[];
   leadingControlColumns?: ControlColumnProps[];
   loadPage: (newActivePage: number) => void;
   onRuleChange?: () => void;
+  onTGridStateChange?: TGridStateReporter;
   pageSize: number;
   refetch: Refetch;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -323,6 +333,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     hasAlertsCrudPermissions,
     id,
     indexNames,
+    initialSelectedEventIds,
     isEventViewer = false,
     isLoading,
     isSelectAllChecked,
@@ -331,6 +342,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     loadingEventIds,
     loadPage,
     onRuleChange,
+    onTGridStateChange,
     pageSize,
     refetch,
     renderCellValue,
@@ -346,6 +358,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
+    const [initialized, setInitialized] = useState(false);
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
@@ -396,6 +409,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           : clearSelected({ id }),
       [setSelected, id, data, queryFields, hasAlertsCrud, hasAlertsCrudPermissions, clearSelected]
     );
+
+    useEffect(() => {
+      if (!initialized && initialSelectedEventIds) {
+        // Wait for component to fully intialize before dispatching the select action
+        requestAnimationFrame(() =>
+          onRowSelected({ eventIds: Object.keys(initialSelectedEventIds), isSelected: true })
+        );
+      }
+      setInitialized(true);
+    }, [initialSelectedEventIds, initialized, setInitialized, onRowSelected]);
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
@@ -800,6 +823,17 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
     });
+
+    useEffect(() => {
+      if (onTGridStateChange) {
+        onTGridStateChange({
+          columns: columnsWithCellActions as ColumnHeaderOptions[],
+          sort,
+          selectedEventIds,
+        });
+      }
+    }, [columnsWithCellActions, sort, selectedEventIds, onTGridStateChange]);
+
     return (
       <>
         <StatefulEventContext.Provider value={activeStatefulEventContext}>

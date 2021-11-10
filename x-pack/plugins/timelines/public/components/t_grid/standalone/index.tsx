@@ -37,7 +37,7 @@ import { combineQueries, getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
-import { StatefulBody } from '../body';
+import { StatefulBody, TGridStateReporter, TGridExportableState } from '../body';
 import { LastUpdatedAt } from '../..';
 import {
   SELECTOR_TIMELINE_GLOBAL_CONTAINER,
@@ -104,9 +104,11 @@ export interface TGridStandaloneProps {
   }) => boolean;
   height?: number;
   indexNames: string[];
+  initialSelectedEventIds?: TGridExportableState['selectedEventIds'];
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
+  onTGridStateChange?: TGridStateReporter;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
@@ -137,8 +139,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filterStatus,
   hasAlertsCrudPermissions,
   indexNames,
+  initialSelectedEventIds,
   itemsPerPageOptions,
   onRuleChange,
+  onTGridStateChange,
   query,
   renderCellValue,
   rowRenderers,
@@ -397,6 +401,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       renderCellValue={renderCellValue}
                       rowRenderers={rowRenderers}
                       onRuleChange={onRuleChange}
+                      onTGridStateChange={onTGridStateChange}
                       pageSize={itemsPerPageStore}
                       tabType={TimelineTabs.query}
                       tableView="gridView"
@@ -405,6 +410,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       unit={unit}
                       filterStatus={filterStatus}
                       trailingControlColumns={trailingControlColumns}
+                      initialSelectedEventIds={initialSelectedEventIds}
                     />
                   </ScrollableFlexItem>
                 </FullWidthFlexGroup>
