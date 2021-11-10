@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import rison from 'rison-node';
 import { Duration } from 'moment/moment';
+import { memoize } from 'lodash';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -30,6 +31,9 @@ import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
+import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/field_formats/common';
+import type { AwaitReturnType } from '../../../common/types/common';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -57,7 +61,21 @@ const resultTypeScoreMapping = {
  * @param mlClient
  * @param datafeedsService
  */
-export function alertingServiceProvider(mlClient: MlClient, datafeedsService: DatafeedsService) {
+export function alertingServiceProvider(
+  mlClient: MlClient,
+  datafeedsService: DatafeedsService,
+  getFieldsFormatRegistry: FieldFormatsRegistryProvider
+) {
+  type FieldFormatters = AwaitReturnType<ReturnType<typeof getFormatters>>;
+
+  const getFormatters = memoize(async () => {
+    const fieldFormatsRegistry = await getFieldsFormatRegistry();
+    const numberFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.NUMBER });
+    return {
+      numberFormatter: numberFormatter.convert.bind(numberFormatter),
+    };
+  });
+
   const getAggResultsLabel = (resultType: AnomalyResultType) => {
     return {
       aggGroupLabel: `${resultType}_results` as PreviewResultsKeys,
@@ -230,7 +248,11 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
    * to the alert context.
    * @param resultType
    */
-  const getResultsFormatter = (resultType: AnomalyResultType, useInitialScore: boolean = false) => {
+  const getResultsFormatter = (
+    resultType: AnomalyResultType,
+    useInitialScore: boolean = false,
+    formatters: FieldFormatters
+  ) => {
     const resultsLabel = getAggResultsLabel(resultType);
     return (v: AggResultsResponse): AlertExecutionResult | undefined => {
       const aggTypeResults = v[resultsLabel.aggGroupLabel];
@@ -264,6 +286,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
         topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
           return {
             ...h._source,
+            typical: h._source.typical.map((t: number) => formatters.numberFormatter(t)),
+            actual: h._source.actual.map((t: number) => formatters.numberFormatter(t)),
             score: Math.floor(
               h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
@@ -389,7 +413,13 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const formatter = getResultsFormatter(params.resultType, !!previewTimeInterval);
+    const fieldsFormatters = await getFormatters();
+
+    const formatter = getResultsFormatter(
+      params.resultType,
+      !!previewTimeInterval,
+      fieldsFormatters
+    );
 
     return (
       previewTimeInterval
@@ -545,7 +575,9 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       prev.max_score.value > current.max_score.value ? prev : current
     );
 
-    return getResultsFormatter(params.resultType)(topResult);
+    const formatters = await getFormatters();
+
+    return getResultsFormatter(params.resultType, false, formatters)(topResult);
   };
 
   /**

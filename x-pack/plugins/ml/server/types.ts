@@ -28,6 +28,7 @@ import type {
   FieldFormatsSetup,
   FieldFormatsStart,
 } from '../../../../src/plugins/field_formats/server';
+import { SharedServices } from './shared_services';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -74,4 +75,5 @@ export interface RouteInitialization {
   router: IRouter;
   mlLicense: MlLicense;
   routeGuard: RouteGuard;
+  sharedServicesProviders: SharedServices;
 }

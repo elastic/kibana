@@ -21,10 +21,12 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
-              alertingServiceProvider(mlClient, datafeedsProvider(scopedClient, mlClient)).preview(
-                ...args
-              )
+            .ok(({ mlClient, scopedClient, getFieldsFormatRegistry }) =>
+              alertingServiceProvider(
+                mlClient,
+                datafeedsProvider(scopedClient, mlClient),
+                getFieldsFormatRegistry
+              ).preview(...args)
             );
         },
         execute: async (
@@ -33,10 +35,12 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
-              alertingServiceProvider(mlClient, datafeedsProvider(scopedClient, mlClient)).execute(
-                ...args
-              )
+            .ok(({ mlClient, scopedClient, getFieldsFormatRegistry }) =>
+              alertingServiceProvider(
+                mlClient,
+                datafeedsProvider(scopedClient, mlClient),
+                getFieldsFormatRegistry
+              ).execute(...args)
             );
         },
       };
