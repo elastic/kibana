@@ -43,7 +43,6 @@ export const syncDashboardUrlState = ({
 
   const appStateSubscription = kbnUrlStateStorage
     .change$(DASHBOARD_STATE_STORAGE_KEY)
-    .pipe(skipWhile(() => awaitingRemoval))
     .subscribe(() => {
       const stateFromUrl = loadDashboardUrlState(loadDashboardStateProps);
 
@@ -93,17 +92,19 @@ const loadDashboardUrlState = ({
     : undefined;
 
   // remove state from URL
-  awaitingRemoval = true;
-  kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
-    if (nextUrl.includes(DASHBOARD_STATE_STORAGE_KEY)) {
-      return replaceUrlHashQuery(nextUrl, (query) => {
-        delete query[DASHBOARD_STATE_STORAGE_KEY];
-        return query;
-      });
-    }
-    awaitingRemoval = false;
-    return nextUrl;
-  }, true);
+  if (!awaitingRemoval) {
+    awaitingRemoval = true;
+    kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
+      if (nextUrl.includes(DASHBOARD_STATE_STORAGE_KEY)) {
+        return replaceUrlHashQuery(nextUrl, (query) => {
+          delete query[DASHBOARD_STATE_STORAGE_KEY];
+          return query;
+        });
+      }
+      awaitingRemoval = false;
+      return nextUrl;
+    }, true);
+  }
 
   return {
     ..._.omit(rawAppStateInUrl, ['panels', 'query']),
