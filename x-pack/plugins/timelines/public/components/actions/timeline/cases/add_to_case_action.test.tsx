@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
+import {
+  TestProviders,
+  mockGetAllCasesSelectorModal,
+  mockGetCreateCaseFlyout,
+} from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
 import { AddToCaseActionButton } from './add_to_case_action_button';
@@ -68,7 +72,7 @@ describe('AddToCaseAction', () => {
     expect(wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).exists()).toBeTruthy();
   });
 
-  it('it opens the create case modal', () => {
+  it('it opens the create case flyout', () => {
     const wrapper = mount(
       <TestProviders>
         <AddToCaseActionButton {...props} />
@@ -78,7 +82,7 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-    expect(wrapper.find('[data-test-subj="create-case-flyout"]').exists()).toBeTruthy();
+    expect(mockGetCreateCaseFlyout).toHaveBeenCalled();
   });
 
   it('it opens the all cases modal', () => {
@@ -92,7 +96,7 @@ describe('AddToCaseAction', () => {
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
 
-    expect(wrapper.find('[data-test-subj="all-cases-modal"]')).toBeTruthy();
+    expect(mockGetAllCasesSelectorModal).toHaveBeenCalled();
   });
 
   it('it set rule information as null when missing', () => {
