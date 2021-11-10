@@ -673,7 +673,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent/filter_views time 
       <div
         className="euiText euiText--small"
       >
-        2021-02-10 10:33:00
+        2021-02-10 13:33:00
       </div>
     </dd>
     <dt
@@ -703,7 +703,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent/filter_views time 
       <div
         className="euiText euiText--small"
       >
-        2021-02-10 10:33:00
+        2021-02-10 18:33:00
       </div>
     </dd>
     <dt

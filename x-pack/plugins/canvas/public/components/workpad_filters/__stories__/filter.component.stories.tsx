@@ -9,6 +9,7 @@ import { EuiText, EuiTextColor } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React, { FC } from 'react';
+import moment from 'moment';
 import { Filter as FilterType, FormattedFilterViewInstance } from '../../../../types';
 import { createFilledFilterView } from '../../../lib/filter';
 import { Filter } from '../filter.component';
@@ -46,7 +47,7 @@ const timeFilter: FilterType = {
   id: 0,
   type: 'time',
   column: '@timestamp',
-  value: { from: '2.10.2021 12:33', to: '2.10.2021 12:33' },
+  value: { from: '2.10.2021 15:33', to: '2.10.2021 20:33' },
   filterGroup: group2,
 };
 
