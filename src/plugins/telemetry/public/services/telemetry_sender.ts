@@ -17,10 +17,14 @@ import type { EncryptedTelemetryPayload } from '../../common/types';
 
 export class TelemetrySender {
   private readonly telemetryService: TelemetryService;
-  private isSending: boolean = false;
   private lastReported?: string;
   private readonly storage: Storage;
-  private intervalId?: number;
+  private intervalId: number = 0; // setInterval returns a positive integer, 0 means no interval is set
+  private retryCount: number = 0;
+
+  static getRetryDelay(retryCount: number) {
+    return 60 * (1000 * Math.min(Math.pow(2, retryCount), 64)); // 120s, 240s, 480s, 960s, 1920s, 3840s, 3840s, 3840s
+  }
 
   constructor(telemetryService: TelemetryService) {
     this.telemetryService = telemetryService;
@@ -54,12 +58,17 @@ export class TelemetrySender {
   };
 
   private sendIfDue = async (): Promise<void> => {
-    if (this.isSending || !this.shouldSendReport()) {
+    if (!this.shouldSendReport()) {
       return;
     }
+    // optimistically update the report date and reset the retry counter for a new time report interval window
+    this.lastReported = `${Date.now()}`;
+    this.saveToBrowser();
+    this.retryCount = 0;
+    await this.sendUsageData();
+  };
 
-    // mark that we are working so future requests are ignored until we're done
-    this.isSending = true;
+  private sendUsageData = async (): Promise<void> => {
     try {
       const telemetryUrl = this.telemetryService.getTelemetryUrl();
       const telemetryPayload: EncryptedTelemetryPayload =
@@ -80,17 +89,23 @@ export class TelemetrySender {
             })
         )
       );
-      this.lastReported = `${Date.now()}`;
-      this.saveToBrowser();
     } catch (err) {
-      // ignore err
-    } finally {
-      this.isSending = false;
+      // ignore err and try again but after a longer wait period.
+      this.retryCount = this.retryCount + 1;
+      if (this.retryCount < 20) {
+        // exponentially backoff the time between subsequent retries to up to 19 attempts, after which we give up until the next report is due
+        window.setTimeout(this.sendUsageData, TelemetrySender.getRetryDelay(this.retryCount));
+      } else {
+        /* eslint no-console: ["error", { allow: ["warn"] }] */
+        console.warn(
+          `TelemetrySender.sendUsageData exceeds number of retry attempts with ${err.message}`
+        );
+      }
     }
   };
 
   public startChecking = () => {
-    if (typeof this.intervalId === 'undefined') {
+    if (this.intervalId === 0) {
       this.intervalId = window.setInterval(this.sendIfDue, 60000);
     }
   };
