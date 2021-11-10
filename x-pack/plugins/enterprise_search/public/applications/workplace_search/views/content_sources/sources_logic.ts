@@ -163,7 +163,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         : '/internal/workplace_search/account/sources';
 
       try {
-        const response = await HttpLogic.values.http.get<ISourcesServerResponse>(route);
+        const response = await HttpLogic.values.http.get(route);
         breakpoint(); // Prevents errors if logic unmounts while fetching
         actions.pollForSourceStatusChanges();
         actions.onInitializeSources(response);
@@ -256,7 +256,7 @@ export const fetchSourceStatuses = async (
   let response;
 
   try {
-    response = await HttpLogic.values.http.get<ContentSourceStatus[]>(route);
+    response = await HttpLogic.values.http.get(route);
     breakpoint();
     SourcesLogic.actions.setServerSourceStatuses(response);
   } catch (e) {
@@ -267,8 +267,7 @@ export const fetchSourceStatuses = async (
     }
   }
 
-  // TODO: remove casting. return type should be ContentSourceStatus[] | undefined
-  return response as ContentSourceStatus[];
+  return response;
 };
 
 const updateSourcesOnToggle = (

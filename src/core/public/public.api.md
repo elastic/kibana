@@ -728,6 +728,9 @@ export interface DocLinksStart {
             readonly rubyOverview: string;
             readonly rustGuide: string;
         };
+        readonly endpoints: {
+            readonly troubleshooting: string;
+        };
     };
 }
 
@@ -805,17 +808,17 @@ export interface HttpFetchQuery {
 // @public
 export interface HttpHandler {
     // (undocumented)
-    <TResponseBody = unknown>(path: string, options: HttpFetchOptions & {
+    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & {
+    <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
     // (undocumented)
-    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
+    <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 // @public
@@ -867,7 +870,7 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse<TResponseBody = unknown> {
+export interface HttpResponse<TResponseBody = any> {
     readonly body?: TResponseBody;
     readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
     readonly request: Readonly<Request>;
@@ -934,9 +937,9 @@ export interface IExternalUrlPolicy {
 }
 
 // @public (undocumented)
-export interface IHttpFetchError<TResponseBody = unknown> extends Error {
+export interface IHttpFetchError extends Error {
     // (undocumented)
-    readonly body?: TResponseBody;
+    readonly body?: any;
     // (undocumented)
     readonly name: string;
     // @deprecated (undocumented)
@@ -956,7 +959,7 @@ export interface IHttpInterceptController {
 }
 
 // @public
-export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
+export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
     readonly body?: TResponseBody;
     readonly response?: Readonly<Response>;
 }
@@ -1186,16 +1189,6 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
-}
-
-// @public (undocumented)
-export interface ResponseErrorBody {
-    // (undocumented)
-    attributes?: Record<string, unknown>;
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    statusCode: number;
 }
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

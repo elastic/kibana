@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import { AsApiContract } from '../../../../../actions/common';
 import { Alert } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { transformAlert } from './common_transformations';
@@ -17,8 +16,6 @@ export async function loadAlert({
   http: HttpSetup;
   alertId: string;
 }): Promise<Alert> {
-  const res = await http.get<AsApiContract<Alert>>(
-    `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(alertId)}`
-  );
+  const res = await http.get(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(alertId)}`);
   return transformAlert(res);
 }

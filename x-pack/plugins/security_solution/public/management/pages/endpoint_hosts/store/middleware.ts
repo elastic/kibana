@@ -9,9 +9,9 @@ import { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
 
 import { CoreStart, HttpStart } from 'kibana/public';
+import { DataViewBase, Query } from '@kbn/es-query';
 import {
   ActivityLog,
-  GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
   HostIsolationResponse,
@@ -67,7 +67,6 @@ import {
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../../common/endpoint/constants';
-import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 import {
   createFailedResourceState,
   createLoadedResourceState,
@@ -94,7 +93,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   // or else wrong pattern might be loaded
   async function fetchIndexPatterns(
     state: ImmutableObject<EndpointState>
-  ): Promise<IIndexPattern[]> {
+  ): Promise<DataViewBase[]> {
     const packageVersion = endpointPackageVersion(state) ?? '';
     const parsedPackageVersion = packageVersion.includes('-')
       ? packageVersion.substring(0, packageVersion.indexOf('-'))
@@ -108,7 +107,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     const fields = await indexPatterns.getFieldsForWildcard({
       pattern: indexPatternToFetch,
     });
-    const indexPattern: IIndexPattern = {
+    const indexPattern: DataViewBase = {
       title: indexPatternToFetch,
       fields,
     };
@@ -397,7 +396,7 @@ async function endpointDetailsListMiddleware({
 }: {
   store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
   coreStart: CoreStart;
-  fetchIndexPatterns: (state: ImmutableObject<EndpointState>) => Promise<IIndexPattern[]>;
+  fetchIndexPatterns: (state: ImmutableObject<EndpointState>) => Promise<DataViewBase[]>;
 }) {
   const { getState, dispatch } = store;
 
@@ -578,10 +577,9 @@ async function loadEndpointDetails({
 
   // call the policy response api
   try {
-    const policyResponse = await coreStart.http.get<GetHostPolicyResponse>(
-      BASE_POLICY_RESPONSE_ROUTE,
-      { query: { agentId: selectedEndpoint } }
-    );
+    const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
+      query: { agentId: selectedEndpoint },
+    });
     dispatch({
       type: 'serverReturnedEndpointPolicyResponse',
       payload: policyResponse,
@@ -612,7 +610,7 @@ async function endpointDetailsMiddleware({
   if (listData(getState()).length === 0) {
     const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
     try {
-      const response = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
+      const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
         body: JSON.stringify({
           paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
         }),

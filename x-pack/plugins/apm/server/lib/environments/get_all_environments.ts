@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { termQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
 import {
@@ -37,11 +38,6 @@ export async function getAllEnvironments({
 
   const { apmEventClient } = setup;
 
-  // omit filter for service.name if "All" option is selected
-  const serviceNameFilter = serviceName
-    ? [{ term: { [SERVICE_NAME]: serviceName } }]
-    : [];
-
   const params = {
     apm: {
       events: [
@@ -57,7 +53,7 @@ export async function getAllEnvironments({
       size: 0,
       query: {
         bool: {
-          filter: [...serviceNameFilter],
+          filter: [...termQuery(SERVICE_NAME, serviceName)],
         },
       },
       aggs: {

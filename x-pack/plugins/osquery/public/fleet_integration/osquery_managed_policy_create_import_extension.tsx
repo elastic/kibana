@@ -257,14 +257,11 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     if (editMode && policyAgentsCount === null) {
       const fetchAgentsCount = async () => {
         try {
-          const response = await http.fetch<{ results: { total: number } }>(
-            agentRouteService.getStatusPath(),
-            {
-              query: {
-                policyId: policy?.policy_id,
-              },
-            }
-          );
+          const response = await http.fetch(agentRouteService.getStatusPath(), {
+            query: {
+              policyId: policy?.policy_id,
+            },
+          });
           if (response.results) {
             setPolicyAgentsCount(response.results.total);
           }
@@ -275,7 +272,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       const fetchAgentPolicyDetails = async () => {
         if (policy?.policy_id) {
           try {
-            const response = await http.fetch<{ item: AgentPolicy }>(
+            const response = await http.fetch(
               agentPolicyRouteService.getInfoPath(policy?.policy_id)
             );
             if (response.item) {
@@ -318,6 +315,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               streams: [],
               policy_template: 'osquery_manager',
             });
+          } else {
+            if (!draft.inputs[0].type) {
+              set(draft, 'inputs[0].type', 'osquery');
+            }
+            if (!draft.inputs[0].policy_template) {
+              set(draft, 'inputs[0].policy_template', 'osquery_manager');
+            }
+            if (!draft.inputs[0].enabled) {
+              set(draft, 'inputs[0].enabled', true);
+            }
           }
         });
         onChange({

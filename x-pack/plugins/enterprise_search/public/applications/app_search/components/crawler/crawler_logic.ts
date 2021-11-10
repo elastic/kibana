@@ -12,14 +12,9 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import {
-  CrawlerData,
-  CrawlerDomain,
-  CrawlEvent,
-  CrawlRequest,
-  CrawlerStatus,
-  CrawlerDataFromServer,
-} from './types';
+import { CrawlerDomainsLogic } from './crawler_domains_logic';
+
+import { CrawlerData, CrawlerDomain, CrawlEvent, CrawlRequest, CrawlerStatus } from './types';
 import { crawlerDataServerToClient } from './utils';
 
 const POLLING_DURATION = 1000;
@@ -111,9 +106,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get<CrawlerDataFromServer>(
-          `/internal/app_search/engines/${engineName}/crawler`
-        );
+        const response = await http.get(`/internal/app_search/engines/${engineName}/crawler`);
 
         const crawlerData = crawlerDataServerToClient(response);
         actions.onReceiveCrawlerData(crawlerData);
@@ -165,6 +158,9 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       }, duration);
 
       actions.onCreateNewTimeout(timeoutIdId);
+    },
+    [CrawlerDomainsLogic.actionTypes.crawlerDomainDeleted]: ({ data }) => {
+      actions.onReceiveCrawlerData(data);
     },
   }),
   events: ({ values }) => ({

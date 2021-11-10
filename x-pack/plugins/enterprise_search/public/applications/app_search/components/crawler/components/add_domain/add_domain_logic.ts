@@ -23,7 +23,6 @@ import {
   CrawlerDomain,
   CrawlerDomainValidationResult,
   CrawlerDomainValidationResultChange,
-  CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationStepName,
 } from '../../types';
 import { crawlDomainValidationToResult, crawlerDataServerToClient } from '../../utils';
@@ -208,7 +207,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const route = '/internal/app_search/crawler/validate_url';
 
       try {
-        const data = await http.post<CrawlerDomainValidationResultFromServer>(route, {
+        const data = await http.post(route, {
           body: JSON.stringify({ url: values.addDomainFormInputValue.trim(), checks }),
         });
         const result = crawlDomainValidationToResult(data);
