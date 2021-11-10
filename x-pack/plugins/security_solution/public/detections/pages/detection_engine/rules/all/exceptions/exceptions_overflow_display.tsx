@@ -27,7 +27,10 @@ interface OverflowListComponentProps {
 }
 
 const ExceptionOverflowWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
+  .euiBadgeGroup__item {
+    display: block;
+    width: 100%;
+  }
 `;
 
 const ExceptionOverflowPopoverWrapper = styled(EuiBadgeGroup)`
@@ -87,7 +90,6 @@ const ExceptionOverflowDisplayComponent = ({
 
           <EuiPopover
             ownFocus
-            display="block"
             data-test-subj="rules-display-popover"
             button={
               <ExceptionOverflowPopoverButton

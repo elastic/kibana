@@ -35,7 +35,7 @@ describe('get_time', () => {
         } as unknown as IIndexPattern,
         { from: 'now-60y', to: 'now' }
       ) as RangeFilter;
-      expect(filter.range.date).toEqual({
+      expect(filter.query.range.date).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
         lte: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',
@@ -73,7 +73,7 @@ describe('get_time', () => {
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
-      expect(filter.range.myCustomDate).toEqual({
+      expect(filter.query.range.myCustomDate).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
         lte: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',
@@ -111,7 +111,7 @@ describe('get_time', () => {
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
 
-      expect(filter.range.myCustomDate).toEqual({
+      expect(filter.query.range.myCustomDate).toEqual({
         gte: 'now-60y',
         lte: 'now',
         format: 'strict_date_optional_time',
@@ -150,7 +150,7 @@ describe('get_time', () => {
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
 
-      expect(filter.range.myCustomDate).toEqual({
+      expect(filter.query.range.myCustomDate).toEqual({
         gte: '2020-09-01T08:30:00.000Z',
         lte: 'now',
         format: 'strict_date_optional_time',

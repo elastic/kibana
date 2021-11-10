@@ -48,13 +48,13 @@ export const IndexNamesConfigurationPanel: React.FC<{
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiCallOut title={deprecationCalloutTitle} color="warning" iconType="alert">
+      <EuiCallOut title={indexPatternInformationCalloutTitle} iconType="wrench">
         <FormattedMessage
           tagName="p"
-          id="xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationDescription"
-          defaultMessage="Referring to Elasticsearch indices directly is a deprecated way of configuring a log source. Instead, log source now integrate with Kibana index patterns to configure the used indices."
+          id="xpack.infra.logSourceConfiguration.indexPatternInformationCalloutDescription"
+          defaultMessage="The Logs UI can now integrate with Kibana index patterns to configure the used indices."
         />
-        <EuiButton color="warning" onClick={onSwitchToIndexPatternReference}>
+        <EuiButton onClick={onSwitchToIndexPatternReference}>
           <FormattedMessage
             id="xpack.infra.logSourceConfiguration.switchToIndexPatternReferenceButtonLabel"
             defaultMessage="Use Kibana index patterns"
@@ -119,9 +119,9 @@ const getIndexNamesInputFieldProps = getInputFieldProps<LogIndexNameReference>(
   ({ indexName }) => indexName
 );
 
-const deprecationCalloutTitle = i18n.translate(
-  'xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationTitle',
+const indexPatternInformationCalloutTitle = i18n.translate(
+  'xpack.infra.logSourceConfiguration.indexPatternInformationCalloutTitle',
   {
-    defaultMessage: 'Deprecated configuration option',
+    defaultMessage: 'New configuration option',
   }
 );

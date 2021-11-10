@@ -9,6 +9,8 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
 import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
+import type { FilterValueLabelProps } from './filter_value_label/filter_value_label';
+import type { SelectableUrlListProps } from './exploratory_view/components/url_search/selectable_url_list';
 
 export { createLazyObservabilityPageTemplate } from './page_template';
 export type { LazyObservabilityPageTemplateProps } from './page_template';
@@ -39,6 +41,28 @@ export function FieldValueSuggestions(props: FieldValueSuggestionsProps) {
   return (
     <Suspense fallback={null}>
       <FieldValueSuggestionsLazy {...props} />
+    </Suspense>
+  );
+}
+
+const FilterValueLabelLazy = lazy(() => import('./filter_value_label/filter_value_label'));
+
+export function FilterValueLabel(props: FilterValueLabelProps) {
+  return (
+    <Suspense fallback={null}>
+      <FilterValueLabelLazy {...props} />
+    </Suspense>
+  );
+}
+
+const SelectableUrlListLazy = lazy(
+  () => import('./exploratory_view/components/url_search/selectable_url_list')
+);
+
+export function SelectableUrlList(props: SelectableUrlListProps) {
+  return (
+    <Suspense fallback={null}>
+      <SelectableUrlListLazy {...props} />
     </Suspense>
   );
 }

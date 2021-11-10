@@ -7,6 +7,7 @@
 
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+
 import { init as initHttpRequests } from './http_requests';
 import { setHttpClient, setSavedObjectsClient } from '../../../public/application/lib/api';
 

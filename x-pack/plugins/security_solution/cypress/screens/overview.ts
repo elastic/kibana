@@ -166,3 +166,5 @@ export const OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON =
 export const OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT = `${OVERVIEW_RISKY_HOSTS_LINKS} [data-test-subj="header-panel-subtitle"]`;
 export const OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON =
   '[data-test-subj="risky-hosts-enable-module-button"]';
+
+export const OVERVIEW_ALERTS_HISTOGRAM = '[data-test-subj="alerts-histogram-panel"]';

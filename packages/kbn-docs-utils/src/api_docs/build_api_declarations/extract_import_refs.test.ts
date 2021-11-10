@@ -7,14 +7,18 @@
  */
 
 import { REPO_ROOT } from '@kbn/utils';
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { getPluginApiDocId } from '../utils';
 import { extractImportReferences } from './extract_import_refs';
-import { ApiScope, Reference } from '../types';
-import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
+import { ApiScope, PluginOrPackage, Reference } from '../types';
+import {
+  getKibanaPlatformPackage,
+  getKibanaPlatformPlugin,
+} from '../tests/kibana_platform_plugin_mock';
 
 const plugin = getKibanaPlatformPlugin('pluginA');
-const plugins: KibanaPlatformPlugin[] = [plugin];
+const packageA = getKibanaPlatformPackage('@kbn/package-a');
+const plugins: PluginOrPackage[] = [plugin, packageA];
 
 const log = new ToolingLog({
   level: 'debug',
@@ -41,6 +45,23 @@ it('test extractImportReference', () => {
     section: 'def-public.Bar',
     pluginId: 'pluginA',
     scope: ApiScope.CLIENT,
+  });
+});
+
+it('test extractImportReference with a package', () => {
+  const results = extractImportReferences(
+    `(param: string) => import("Users/foo/node_modules/${packageA.manifest.id}/target_types").Bar`,
+    plugins,
+    log
+  );
+  expect(results.length).toBe(2);
+  expect(results[0]).toBe('(param: string) => ');
+  expect(results[1]).toEqual({
+    text: 'Bar',
+    docId: getPluginApiDocId(packageA.manifest.id),
+    section: 'def-common.Bar',
+    pluginId: packageA.manifest.id,
+    scope: ApiScope.COMMON,
   });
 });
 

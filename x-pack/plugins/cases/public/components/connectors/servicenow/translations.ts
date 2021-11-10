@@ -30,11 +30,11 @@ export const CHOICES_API_ERROR = i18n.translate(
 );
 
 export const MALWARE_URL = i18n.translate('xpack.cases.connectors.serviceNow.malwareURLTitle', {
-  defaultMessage: 'Malware URL',
+  defaultMessage: 'Malware URLs',
 });
 
 export const MALWARE_HASH = i18n.translate('xpack.cases.connectors.serviceNow.malwareHashTitle', {
-  defaultMessage: 'Malware Hash',
+  defaultMessage: 'Malware Hashes',
 });
 
 export const CATEGORY = i18n.translate('xpack.cases.connectors.serviceNow.categoryTitle', {
@@ -46,11 +46,11 @@ export const SUBCATEGORY = i18n.translate('xpack.cases.connectors.serviceNow.sub
 });
 
 export const SOURCE_IP = i18n.translate('xpack.cases.connectors.serviceNow.sourceIPTitle', {
-  defaultMessage: 'Source IP',
+  defaultMessage: 'Source IPs',
 });
 
 export const DEST_IP = i18n.translate('xpack.cases.connectors.serviceNow.destinationIPTitle', {
-  defaultMessage: 'Destination IP',
+  defaultMessage: 'Destination IPs',
 });
 
 export const PRIORITY = i18n.translate(

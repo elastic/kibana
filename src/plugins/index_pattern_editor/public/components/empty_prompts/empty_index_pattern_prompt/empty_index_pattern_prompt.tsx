@@ -52,15 +52,15 @@ export const EmptyIndexPatternPrompt = ({
               />
               <br />
               <FormattedMessage
-                id="indexPatternEditor.emptyIndexPatternPrompt.nowCreate"
-                defaultMessage="Now, create an index pattern."
+                id="indexPatternEditor.emptyDataViewPrompt.nowCreate"
+                defaultMessage="Now, create a data view."
               />
             </h2>
             <p>
               <FormattedMessage
-                id="indexPatternEditor.emptyIndexPatternPrompt.indexPatternExplanation"
-                defaultMessage="Kibana requires an index pattern to identify which data streams, indices, and index aliases you want to explore. An
-                index pattern can point to a specific index, for example, your log data from
+                id="indexPatternEditor.emptyDataViewPrompt.indexPatternExplanation"
+                defaultMessage="Kibana requires a data view to identify which data streams, indices, and index aliases you want to explore. A
+                data view can point to a specific index, for example, your log data from
                 yesterday, or all indices that contain your log data."
               />
             </p>
@@ -72,8 +72,8 @@ export const EmptyIndexPatternPrompt = ({
                 data-test-subj="createIndexPatternButtonFlyout"
               >
                 <FormattedMessage
-                  id="indexPatternEditor.indexPatternTable.createBtn"
-                  defaultMessage="Create index pattern"
+                  id="indexPatternEditor.dataViewTable.createBtn"
+                  defaultMessage="Create data view"
                 />
               </EuiButton>
             )}

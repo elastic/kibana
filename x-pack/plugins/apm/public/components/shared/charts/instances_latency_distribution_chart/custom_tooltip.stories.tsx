@@ -12,7 +12,7 @@ import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { CustomTooltip } from './custom_tooltip';
 
 type ServiceInstanceMainStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem =
   ServiceInstanceMainStatistics['currentPeriod'][0];
 

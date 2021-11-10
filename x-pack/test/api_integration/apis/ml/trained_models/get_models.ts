@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
-      testModelIds = await ml.api.createdTestTrainedModels('regression', 5, true);
+      testModelIds = await ml.api.createTestTrainedModels('regression', 5, true);
       await ml.api.createModelAlias('dfa_regression_model_n_0', 'dfa_regression_model_alias');
       await ml.api.createIngestPipeline('dfa_regression_model_alias');
     });

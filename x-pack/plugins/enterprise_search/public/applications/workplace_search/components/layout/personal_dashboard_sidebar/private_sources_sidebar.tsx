@@ -35,10 +35,10 @@ export const PrivateSourcesSidebar = () => {
     : PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION;
 
   const {
-    contentSource: { id = '', name = '' },
+    contentSource: { id = '' },
   } = useValues(SourceLogic);
 
-  const navItems = [{ id, name, items: useSourceSubNav() }];
+  const navItems = [{ id, name: '', items: useSourceSubNav() }];
 
   return (
     <>

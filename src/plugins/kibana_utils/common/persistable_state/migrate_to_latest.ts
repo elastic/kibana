@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { compare } from 'semver';
+import compare from 'semver/functions/compare';
 import { SerializableRecord } from '@kbn/utility-types';
 import { VersionedState, MigrateFunctionsObject } from './types';
 

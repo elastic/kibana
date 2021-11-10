@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest, RequestHandlerContext } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
-import type { SecuritySolutionRequestHandlerContext } from '../../types';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkRequest extends Pick<KibanaRequest, 'body'> {
   [internalFrameworkRequest]: KibanaRequest;
-  context: SecuritySolutionRequestHandlerContext;
+  context: RequestHandlerContext;
   user: AuthenticatedUser | null;
 }

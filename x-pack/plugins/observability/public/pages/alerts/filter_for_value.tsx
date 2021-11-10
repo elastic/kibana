@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const filterForValueButtonLabel = i18n.translate(
   'xpack.observability.hoverActions.filterForValueButtonLabel',
   {
-    defaultMessage: 'Filter for value',
+    defaultMessage: 'Filter in',
   }
 );
 

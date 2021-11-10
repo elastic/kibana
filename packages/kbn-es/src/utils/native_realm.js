@@ -13,15 +13,12 @@ const { log: defaultLog } = require('./log');
 
 exports.NativeRealm = class NativeRealm {
   constructor({ elasticPassword, port, log = defaultLog, ssl = false, caCert }) {
-    this._client = new Client({
-      node: `${ssl ? 'https' : 'http'}://elastic:${elasticPassword}@localhost:${port}`,
-      ssl: ssl
-        ? {
-            ca: caCert,
-            rejectUnauthorized: true,
-          }
-        : undefined,
-    });
+    const auth = { username: 'elastic', password: elasticPassword };
+    this._client = new Client(
+      ssl
+        ? { node: `https://localhost:${port}`, tls: { ca: caCert, rejectUnauthorized: true }, auth }
+        : { node: `http://localhost:${port}`, auth }
+    );
     this._elasticPassword = elasticPassword;
     this._log = log;
   }
@@ -70,9 +67,7 @@ exports.NativeRealm = class NativeRealm {
   async getReservedUsers(retryOpts = {}) {
     return await this._autoRetry(retryOpts, async () => {
       const resp = await this._client.security.getUser();
-      const usernames = Object.keys(resp.body).filter(
-        (user) => resp.body[user].metadata._reserved === true
-      );
+      const usernames = Object.keys(resp).filter((user) => resp[user].metadata._reserved === true);
 
       if (!usernames?.length) {
         throw new Error('no reserved users found, unable to set native realm passwords');
@@ -85,9 +80,7 @@ exports.NativeRealm = class NativeRealm {
   async isSecurityEnabled(retryOpts = {}) {
     try {
       return await this._autoRetry(retryOpts, async () => {
-        const {
-          body: { features },
-        } = await this._client.xpack.info({ categories: 'features' });
+        const { features } = await this._client.xpack.info({ categories: 'features' });
         return features.security && features.security.enabled && features.security.available;
       });
     } catch (error) {

@@ -28,7 +28,7 @@ const createStartContract = (): Start => ({
   palettes: paletteServiceMock.setup({} as any),
 });
 
-export { colorMapsMock } from './static/color_maps/mock';
+export { colorMapsMock } from '../common/static/color_maps/mock';
 
 export const chartPluginMock = {
   createSetupContract,

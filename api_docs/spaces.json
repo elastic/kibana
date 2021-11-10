@@ -297,6 +297,45 @@
       },
       {
         "parentPluginId": "spaces",
+        "id": "def-public.EmbeddableLegacyUrlConflictProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddableLegacyUrlConflictProps",
+        "description": [
+          "\nProperties for the EmbeddableLegacyUrlConflict component."
+        ],
+        "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.EmbeddableLegacyUrlConflictProps.targetType",
+            "type": "string",
+            "tags": [],
+            "label": "targetType",
+            "description": [
+              "\nThe target type of the legacy URL alias."
+            ],
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.EmbeddableLegacyUrlConflictProps.sourceId",
+            "type": "string",
+            "tags": [],
+            "label": "sourceId",
+            "description": [
+              "\nThe source ID of the legacy URL alias."
+            ],
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
         "id": "def-public.GetSpaceResult",
         "type": "Interface",
         "tags": [],
@@ -359,7 +398,7 @@
         "description": [
           "\nProperties for the LegacyUrlConflict component."
         ],
-        "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
+        "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -374,7 +413,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false
           },
           {
@@ -386,7 +425,7 @@
             "description": [
               "\nThe ID of the object that is currently shown on the page."
             ],
-            "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false
           },
           {
@@ -398,7 +437,7 @@
             "description": [
               "\nThe ID of the other object that the legacy URL alias points to."
             ],
-            "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false
           },
           {
@@ -408,9 +447,9 @@
             "tags": [],
             "label": "otherObjectPath",
             "description": [
-              "\nThe path to use for the new URL, optionally including `search` and/or `hash` URL components."
+              "\n The path within your application to use for the new URL, optionally including `search` and/or `hash` URL components. Do not include\n `/app/my-app` or the current base path."
             ],
-            "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false
           }
         ],
@@ -1291,6 +1330,45 @@
               {
                 "parentPluginId": "spaces",
                 "id": "def-public.SpacesApiUiComponent.getSpaceList.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesApiUiComponent.getEmbeddableLegacyUrlConflict",
+            "type": "Function",
+            "tags": [],
+            "label": "getEmbeddableLegacyUrlConflict",
+            "description": [
+              "\nDisplays a callout that needs to be used if an embeddable component call to `SavedObjectsClient.resolve()` results in an `\"conflict\"`\noutcome, which indicates that the user has loaded an embeddable which is associated directly with one object (A), *and* with a legacy\nURL that points to a different object (B)."
+            ],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.EmbeddableLegacyUrlConflictProps",
+                "text": "EmbeddableLegacyUrlConflictProps"
+              },
+              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+            ],
+            "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesApiUiComponent.getEmbeddableLegacyUrlConflict.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -2544,7 +2622,7 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/index_pattern.ts"
+                "path": "x-pack/plugins/apm/server/routes/data_view.ts"
               },
               {
                 "plugin": "infra",
@@ -2560,7 +2638,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/plugin.ts"
+                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -3107,7 +3189,7 @@
             "section": "def-server.SavedObjectsRepository",
             "text": "SavedObjectsRepository"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
@@ -3306,7 +3388,7 @@
             },
             {
               "plugin": "apm",
-              "path": "x-pack/plugins/apm/server/routes/index_pattern.ts"
+              "path": "x-pack/plugins/apm/server/routes/data_view.ts"
             },
             {
               "plugin": "infra",
@@ -3326,7 +3408,11 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/plugin.ts"
+              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
             },
             {
               "plugin": "securitySolution",

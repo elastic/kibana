@@ -9,36 +9,55 @@
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiPanel, EuiSteps } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useTimeoutFn from 'react-use/lib/useTimeoutFn';
 
 import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError } from 'kibana/public';
 
-import { useHttp } from './use_http';
+import type { StatusResponse } from '../../../core/types/status';
+import { useKibana } from './use_kibana';
 
 export interface ProgressIndicatorProps {
   onSuccess?(): void;
 }
 
+function isKibanaPastPreboot(response?: Response, body?: StatusResponse) {
+  if (!response?.headers.get('content-type')?.includes('application/json')) {
+    return false;
+  }
+
+  return (
+    // Status endpoint may require authentication after `preboot` stage.
+    response?.status === 401 ||
+    // We're only interested in the availability of the critical core services.
+    (body?.status?.core?.elasticsearch?.level === 'available' &&
+      body?.status?.core?.savedObjects?.level === 'available')
+  );
+}
+
 export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ onSuccess }) => {
-  const http = useHttp();
+  const { http } = useKibana();
   const [status, checkStatus] = useAsyncFn(async () => {
     let isAvailable: boolean | undefined = false;
     let isPastPreboot: boolean | undefined = false;
     try {
-      const { response } = await http.get('/api/status', { asResponse: true });
+      const { response, body } = await http.get<StatusResponse | undefined>('/api/status', {
+        asResponse: true,
+      });
       isAvailable = response ? response.status < 500 : undefined;
-      isPastPreboot = response?.headers.get('content-type')?.includes('application/json');
-    } catch ({ response }) {
+      isPastPreboot = isKibanaPastPreboot(response, body);
+    } catch (error) {
+      const { response, body = {} } = error as IHttpFetchError;
       isAvailable = response ? response.status < 500 : undefined;
-      isPastPreboot = response?.headers.get('content-type')?.includes('application/json');
+      isPastPreboot = isKibanaPastPreboot(response, body as StatusResponse);
     }
-    return isAvailable === true && isPastPreboot === true
+    return isAvailable === true && isPastPreboot
       ? 'complete'
       : isAvailable === false
       ? 'unavailable'
-      : isAvailable === true && isPastPreboot === false
+      : isAvailable === true && !isPastPreboot
       ? 'preboot'
       : 'unknown';
   });
@@ -91,16 +110,20 @@ export interface LoadingStepsProps {
 }
 
 export const LoadingSteps: FunctionComponent<LoadingStepsProps> = ({ currentStepId, steps }) => {
+  const [stepIndex, setStepIndex] = useState(0);
   const currentStepIndex = steps.findIndex((step) => step.id === currentStepId);
+
+  // Ensure that loading progress doesn't move backwards
+  useEffect(() => {
+    if (currentStepIndex > stepIndex) {
+      setStepIndex(currentStepIndex);
+    }
+  }, [currentStepIndex, stepIndex]);
+
   return (
     <EuiSteps
       steps={steps.map((step, i) => ({
-        status:
-          i <= currentStepIndex
-            ? 'complete'
-            : steps[i - 1]?.id === currentStepId
-            ? 'loading'
-            : 'incomplete',
+        status: i <= stepIndex ? 'complete' : i - 1 === stepIndex ? 'loading' : 'incomplete',
         children: null,
         ...step,
       }))}

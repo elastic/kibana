@@ -759,7 +759,7 @@ describe('Exceptions Lists API', () => {
       });
 
       expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_export', {
-        method: 'GET',
+        method: 'POST',
         query: {
           id: 'some-id',
           list_id: 'list-id',

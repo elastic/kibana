@@ -29,14 +29,10 @@ export class SecuredFeature extends KibanaFeature {
       ([id, privilege]) => new PrimaryFeaturePrivilege(id, privilege, actionMapping[id])
     );
 
-    if (this.config.subFeatures?.length ?? 0 > 0) {
-      this.minimalPrimaryFeaturePrivileges = Object.entries(this.config.privileges || {}).map(
-        ([id, privilege]) =>
-          new PrimaryFeaturePrivilege(`minimal_${id}`, privilege, actionMapping[`minimal_${id}`])
-      );
-    } else {
-      this.minimalPrimaryFeaturePrivileges = [];
-    }
+    this.minimalPrimaryFeaturePrivileges = Object.entries(this.config.privileges || {}).map(
+      ([id, privilege]) =>
+        new PrimaryFeaturePrivilege(`minimal_${id}`, privilege, actionMapping[`minimal_${id}`])
+    );
 
     this.securedSubFeatures =
       this.config.subFeatures?.map((sf) => new SecuredSubFeature(sf, actionMapping)) ?? [];

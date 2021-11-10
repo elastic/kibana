@@ -11,8 +11,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../../observability/server';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { rangeQuery, termQuery } from '../../../../observability/server';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 
 /**
@@ -40,20 +40,10 @@ export async function getEnvironments({
 
   const { apmEventClient } = setup;
 
-  const filter = rangeQuery(start, end);
-
-  if (serviceName) {
-    filter.push({
-      term: { [SERVICE_NAME]: serviceName },
-    });
-  }
-
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.metric,
         ProcessorEvent.error,
       ],
@@ -62,7 +52,10 @@ export async function getEnvironments({
       size: 0,
       query: {
         bool: {
-          filter,
+          filter: [
+            ...rangeQuery(start, end),
+            ...termQuery(SERVICE_NAME, serviceName),
+          ],
         },
       },
       aggs: {

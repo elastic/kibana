@@ -17,6 +17,10 @@ export function LogEntryCategoriesPageProvider({ getPageObjects, getService }: F
       await pageObjects.infraLogs.navigateToTab('log-categories');
     },
 
+    async getNoDataScreen(): Promise<WebElementWrapper> {
+      return await testSubjects.find('noDataPage');
+    },
+
     async getSetupScreen(): Promise<WebElementWrapper> {
       return await testSubjects.find('logEntryCategoriesSetupPage');
     },

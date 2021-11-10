@@ -10,6 +10,10 @@ jest.mock('crypto', () => ({
   constants: jest.requireActual('crypto').constants,
 }));
 
+jest.mock('@kbn/utils', () => ({
+  getLogsPath: () => '/mock/kibana/logs/path',
+}));
+
 import { loggingSystemMock } from 'src/core/server/mocks';
 
 import { ConfigSchema, createConfig } from './config';
@@ -27,6 +31,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -55,16 +60,16 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -79,6 +84,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -107,16 +113,16 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -131,6 +137,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -159,15 +166,15 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
   });
@@ -308,6 +315,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "oidc": Object {
@@ -339,6 +347,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "oidc": Object {
@@ -370,6 +379,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -388,6 +398,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -409,6 +420,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -1482,6 +1494,7 @@ describe('createConfig()', () => {
           "enabled": true,
           "schemes": Array [
             "apikey",
+            "bearer",
           ],
         },
         "providers": Object {
@@ -1694,6 +1707,50 @@ describe('createConfig()', () => {
     `);
   });
 
+  it('creates a default audit appender when audit logging is enabled', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          audit: {
+            enabled: true,
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).audit.appender
+    ).toMatchInlineSnapshot(`
+      Object {
+        "fileName": "/mock/kibana/logs/path/audit.log",
+        "layout": Object {
+          "type": "json",
+        },
+        "policy": Object {
+          "interval": "PT24H",
+          "type": "time-interval",
+        },
+        "strategy": Object {
+          "max": 10,
+          "type": "numeric",
+        },
+        "type": "rolling-file",
+      }
+    `);
+  });
+
+  it('does not create a default audit appender when audit logging is disabled', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          audit: {
+            enabled: false,
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).audit.appender
+    ).toBeUndefined();
+  });
+
   it('accepts an audit appender', () => {
     expect(
       ConfigSchema.validate({
@@ -1729,20 +1786,7 @@ describe('createConfig()', () => {
           },
         },
       })
-    ).toThrow('[audit.appender.2.type]: expected value to equal [legacy-appender]');
-  });
-
-  it('rejects an ignore_filter when no appender is configured', () => {
-    expect(() =>
-      ConfigSchema.validate({
-        audit: {
-          enabled: true,
-          ignore_filters: [{ actions: ['some_action'] }],
-        },
-      })
-    ).toThrow(
-      '[audit]: xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.'
-    );
+    ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
   });
 
   describe('#getExpirationTimeouts', () => {
@@ -1756,7 +1800,7 @@ describe('createConfig()', () => {
       expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "P30D",
         }
       `);
@@ -1806,7 +1850,7 @@ describe('createConfig()', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "PT0.456S",
         }
       `);
@@ -1840,7 +1884,7 @@ describe('createConfig()', () => {
           createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
         ).toMatchInlineSnapshot(`
           Object {
-            "idleTimeout": "PT1H",
+            "idleTimeout": "PT8H",
             "lifespan": "PT0.456S",
           }
         `);
@@ -1921,14 +1965,14 @@ describe('createConfig()', () => {
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "PT0.654S",
         }
       `);
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "PT11M5.544S",
         }
       `);
@@ -1945,7 +1989,7 @@ describe('createConfig()', () => {
       expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "PT0.654S",
         }
       `);

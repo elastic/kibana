@@ -16,6 +16,7 @@ export const KibanaTemplate: React.FC<PageTemplateProps> = ({ ...props }) => {
         defaultMessage: 'Overview',
       }),
       route: '/kibana',
+      testSubj: 'kibanaOverviewPage',
     },
     {
       id: 'instances',
@@ -23,6 +24,7 @@ export const KibanaTemplate: React.FC<PageTemplateProps> = ({ ...props }) => {
         defaultMessage: 'Instances',
       }),
       route: '/kibana/instances',
+      testSubj: 'kibanaInstancesPage',
     },
   ];
 

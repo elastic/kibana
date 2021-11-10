@@ -17,6 +17,7 @@ import { AlertTypeModel, ValidationResult } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
+  parseDuration,
 } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
@@ -79,6 +80,7 @@ const alertTypeFromApi = {
   authorizedConsumers: {
     [ALERTS_FEATURE_ID]: { read: true, all: true },
   },
+  ruleTaskTimeout: '1m',
 };
 ruleTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
@@ -170,6 +172,7 @@ describe('alerts_list component with items', () => {
       mutedInstanceIds: [],
       executionStatus: {
         status: 'active',
+        lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
       },
@@ -192,6 +195,7 @@ describe('alerts_list component with items', () => {
       mutedInstanceIds: [],
       executionStatus: {
         status: 'ok',
+        lastDuration: 61000,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
       },
@@ -214,6 +218,7 @@ describe('alerts_list component with items', () => {
       mutedInstanceIds: [],
       executionStatus: {
         status: 'pending',
+        lastDuration: 30234,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
       },
@@ -236,6 +241,7 @@ describe('alerts_list component with items', () => {
       mutedInstanceIds: [],
       executionStatus: {
         status: 'error',
+        lastDuration: 122000,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
           reason: AlertExecutionStatusErrorReasons.Unknown,
@@ -246,7 +252,7 @@ describe('alerts_list component with items', () => {
     {
       id: '5',
       name: 'test alert license error',
-      tags: ['tag1'],
+      tags: [],
       enabled: true,
       alertTypeId: 'test_alert_type',
       schedule: { interval: '5d' },
@@ -261,6 +267,7 @@ describe('alerts_list component with items', () => {
       mutedInstanceIds: [],
       executionStatus: {
         status: 'error',
+        lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
           reason: AlertExecutionStatusErrorReasons.License,
@@ -324,6 +331,53 @@ describe('alerts_list component with items', () => {
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(mockedAlertsData.length);
+
+    // Enabled switch column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-enabled"]').length
+    ).toEqual(mockedAlertsData.length);
+
+    // Name and rule type column
+    const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-name"]');
+    expect(ruleNameColumns.length).toEqual(mockedAlertsData.length);
+    mockedAlertsData.forEach((rule, index) => {
+      expect(ruleNameColumns.at(index).text()).toEqual(`Name${rule.name}${alertTypeFromApi.name}`);
+    });
+
+    // Tags column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-tagsPopover"]').length
+    ).toEqual(mockedAlertsData.length);
+    // only show tags popover if tags exist on rule
+    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagsBadge"]');
+    expect(tagsBadges.length).toEqual(
+      mockedAlertsData.filter((data) => data.tags.length > 0).length
+    );
+
+    // Last run column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-lastExecutionDate"]').length
+    ).toEqual(mockedAlertsData.length);
+
+    // Schedule interval column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-interval"]').length
+    ).toEqual(mockedAlertsData.length);
+
+    // Duration column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-duration"]').length
+    ).toEqual(mockedAlertsData.length);
+    // show warning if duration is long
+    const durationWarningIcon = wrapper.find('EuiIconTip[data-test-subj="ruleDurationWarning"]');
+    expect(durationWarningIcon.length).toEqual(
+      mockedAlertsData.filter(
+        (data) =>
+          data.executionStatus.lastDuration > parseDuration(alertTypeFromApi.ruleTaskTimeout)
+      ).length
+    );
+
+    // Status column
     expect(wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-status"]').length).toEqual(
       mockedAlertsData.length
     );
@@ -331,7 +385,6 @@ describe('alerts_list component with items', () => {
     expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-ok"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-pending"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-unknown"]').length).toEqual(0);
-
     expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-error"]').length).toEqual(2);
     expect(wrapper.find('[data-test-subj="alertStatus-error-tooltip"]').length).toEqual(2);
     expect(
@@ -437,7 +490,7 @@ describe('alerts_list component with items', () => {
   it('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
     await setup(false);
     expect(wrapper.find('[data-test-subj="alertSidebarEditAction"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="alertSidebarDeleteAction"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="alertSidebarDeleteAction"]').exists()).toBeTruthy();
   });
 });
 
@@ -487,7 +540,7 @@ describe('alerts_list component empty with show only capability', () => {
 describe('alerts_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
-  async function setup() {
+  async function setup(editable: boolean = true) {
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -553,7 +606,20 @@ describe('alerts_list with show only capability', () => {
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
-    ruleTypeRegistry.has.mockReturnValue(false);
+    const ruleTypeMock: AlertTypeModel = {
+      id: 'test_alert_type',
+      iconClass: 'test',
+      description: 'Alert when testing',
+      documentationUrl: 'https://localhost.local/docs',
+      validate: () => {
+        return { errors: {} };
+      },
+      alertParamsExpression: jest.fn(),
+      requiresAppContext: !editable,
+    };
+
+    ruleTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -568,17 +634,26 @@ describe('alerts_list with show only capability', () => {
   }
 
   it('renders table of alerts with edit button disabled', async () => {
-    await setup();
+    await setup(false);
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="editActionHoverButton"]')).toHaveLength(0);
   });
 
   it('renders table of alerts with delete button disabled', async () => {
-    await setup();
+    const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
+    hasAllPrivilege.mockReturnValue(false);
+    await setup(false);
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
+  });
+
+  it('renders table of alerts with actions menu collapsedItemActions', async () => {
+    await setup(false);
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="collapsedItemActions"]').length).toBeGreaterThan(0);
   });
 });
 

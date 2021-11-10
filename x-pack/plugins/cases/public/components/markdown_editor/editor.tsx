@@ -37,7 +37,7 @@ interface MarkdownEditorProps {
   value: string;
 }
 
-type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
+export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
 
 export interface MarkdownEditorRef {
   textarea: HTMLTextAreaElement | null;
@@ -95,5 +95,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     );
   }
 );
+
+MarkdownEditorComponent.displayName = 'MarkdownEditorComponent';
 
 export const MarkdownEditor = memo(MarkdownEditorComponent);

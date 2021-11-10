@@ -13,6 +13,7 @@ export interface MockWorkpadRouteContext extends CanvasRouteHandlerContext {
       create: jest.Mock;
       get: jest.Mock;
       update: jest.Mock;
+      resolve: jest.Mock;
     };
   };
 }
@@ -23,6 +24,7 @@ export const workpadRouteContextMock = {
       create: jest.fn(),
       get: jest.fn(),
       update: jest.fn(),
+      resolve: jest.fn(),
     },
   }),
 };

@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { setupTestUsers } from './test_users';
+
+export default function ({ loadTestFile, getService }) {
   describe('Fleet Endpoints', function () {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
+
     // EPM
-    loadTestFile(require.resolve('./epm/index'));
+    loadTestFile(require.resolve('./epm'));
 
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup'));

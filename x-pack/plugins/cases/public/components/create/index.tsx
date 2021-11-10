@@ -58,6 +58,8 @@ const CreateCaseComponent = ({
       caseType={caseType}
       hideConnectorServiceNowSir={hideConnectorServiceNowSir}
       onSuccess={onSuccess}
+      // if we are disabling alerts, then we should not sync alerts
+      syncAlertsDefaultValue={!disableAlerts}
     >
       <CreateCaseForm
         hideConnectorServiceNowSir={hideConnectorServiceNowSir}
@@ -96,5 +98,8 @@ export const CreateCase: React.FC<CreateCaseProps> = React.memo((props) => (
     <CreateCaseComponent {...props} />
   </OwnerProvider>
 ));
+
+CreateCase.displayName = 'CreateCase';
+
 // eslint-disable-next-line import/no-default-export
 export { CreateCase as default };

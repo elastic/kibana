@@ -22,8 +22,8 @@ import { TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { useKibana } from '../../common/lib/kibana';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -86,14 +86,10 @@ describe('Connector', () => {
     return <Form form={form}>{children}</Form>;
   };
 
-  const { createMockActionTypeModel } = actionTypeRegistryMock;
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
 
   beforeAll(() => {
-    connectorsMock.forEach((connector) =>
-      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
-      )
-    );
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
   beforeEach(() => {

@@ -21,7 +21,12 @@ export function addTypeToTermJoin({
     return attributes;
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
 
   layerList.forEach((layer: LayerDescriptor) => {
     if (!('joins' in layer)) {

@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
 import { maxSuggestions } from '../../../../observability/common';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
@@ -24,7 +24,7 @@ import {
   serviceRt,
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
 import { syncAgentConfigsToApmPackagePolicies } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
 

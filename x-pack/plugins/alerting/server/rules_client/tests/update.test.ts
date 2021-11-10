@@ -140,6 +140,7 @@ describe('update()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
+      minimumScheduleInterval: '5s',
     });
   });
 
@@ -1965,5 +1966,50 @@ describe('update()', () => {
         })
       );
     });
+  });
+
+  test('throws error when updating with an interval less than the minimum configured one', async () => {
+    await expect(
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '2',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error updating rule: the interval is less than the minimum interval of 5s"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 });

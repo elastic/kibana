@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { KibanaRequest, RouteRegistrar } from 'src/core/server';
-import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import { ServerRouteRepository } from '@kbn/server-route-repository';
 import { merge } from 'lodash';
@@ -17,11 +17,12 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
+import { mergeRt } from '@kbn/io-ts-utils/merge_rt';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-import { InspectResponse } from '../../../typings/common';
+import { InspectResponse } from '../../../../observability/typings/common';
 
 const inspectRt = t.exact(
   t.partial({
@@ -170,7 +171,7 @@ export function registerRoutes({
             },
           };
 
-          if (error instanceof RequestAbortedError) {
+          if (error instanceof errors.RequestAbortedError) {
             return response.custom(merge(opts, CLIENT_CLOSED_REQUEST));
           }
 
