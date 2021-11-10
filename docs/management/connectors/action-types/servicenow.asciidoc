@@ -8,6 +8,14 @@
 The ServiceNow connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow incidents.
 
 [float]
+[[servicenow-connector-prerequisites]]
+==== Prerequisites
+Create a {sn} integration user and assign it the following roles:
+
+* `incident_manager`: Allows the user read, create, and update access to the Incident table.
+* `personalize_choices`: Allows the user to retrieve Choice element options, such as Severity.
+
+[float]
 [[servicenow-connector-configuration]]
 ==== Connector configuration
 
@@ -17,8 +25,6 @@ Name::      The name of the connector. The name is used to identify a  connector
 URL::       ServiceNow instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
-
-The ServiceNow user requires at minimum read, create, and update access to the Incident table and read access to the https://docs.servicenow.com/bundle/paris-platform-administration/page/administer/localization/reference/r_ChoicesTable.html[sys_choice]. If you don't provide access to sys_choice, then the choices will not render.
 
 [float]
 [[servicenow-connector-networking-configuration]]

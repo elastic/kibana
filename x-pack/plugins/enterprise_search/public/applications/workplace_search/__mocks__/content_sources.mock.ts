@@ -350,7 +350,7 @@ export const exampleResult = {
       source: 'custom',
     },
   ],
-  schemaFields: {},
+  schemaFields: { cats: 'text', dogs: 'text' },
 };
 
 export const mostRecentIndexJob = {
