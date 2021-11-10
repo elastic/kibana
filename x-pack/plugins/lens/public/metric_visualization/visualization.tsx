@@ -83,9 +83,9 @@ export const getMetricVisualization = ({
         defaultMessage: 'Metric',
       }),
       groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
-        defaultMessage: 'Tabular and single value',
+        defaultMessage: 'Single value',
       }),
-      sortPriority: 1,
+      sortPriority: 3,
     },
   ],
 
