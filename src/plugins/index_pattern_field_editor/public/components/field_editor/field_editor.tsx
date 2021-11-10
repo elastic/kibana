@@ -42,7 +42,6 @@ import {
   ScriptField,
   FormatField,
   PopularityField,
-  ScriptSyntaxError,
 } from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
@@ -50,6 +49,7 @@ import { AdvancedParametersSection } from './advanced_parameters_section';
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
+  isSubmitting: boolean;
   submit: FormHook<Field>['submit'];
 }
 
@@ -70,7 +70,6 @@ export interface Props {
   onChange?: (state: FieldEditorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
-  syntaxError: ScriptSyntaxError;
 }
 
 const geti18nTexts = (): {
@@ -150,12 +149,11 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxError }: Props) => {
+const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
   const { links, namesNotAllowed, existingConcreteFields, fieldTypeToProcess } =
     useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
-    panel: { setIsVisible: setIsPanelVisible },
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -163,8 +161,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
-  const { submit, isValid: isFormValid, isSubmitted, getFields } = form;
-  const { clear: clearSyntaxError } = syntaxError;
+  const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
@@ -191,19 +188,12 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
   const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
-  const isFormatVisible = get(formData, '__meta__.isFormatVisible');
 
   useEffect(() => {
     if (onChange) {
-      onChange({ isValid: isFormValid, isSubmitted, submit });
+      onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit });
     }
-  }, [onChange, isFormValid, isSubmitted, submit]);
-
-  useEffect(() => {
-    // Whenever the field "type" changes we clear any possible painless syntax
-    // error as it is possibly stale.
-    clearSyntaxError();
-  }, [updatedType, clearSyntaxError]);
+  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit]);
 
   useEffect(() => {
     updatePreviewParams({
@@ -218,14 +208,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
   }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
 
   useEffect(() => {
-    if (isValueVisible || isFormatVisible) {
-      setIsPanelVisible(true);
-    } else {
-      setIsPanelVisible(false);
-    }
-  }, [isValueVisible, isFormatVisible, setIsPanelVisible]);
-
-  useEffect(() => {
     if (onFormModifiedChange) {
       onFormModifiedChange(isFormModified);
     }
@@ -236,6 +218,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
       form={form}
       className="indexPatternFieldEditor__form"
       data-test-subj="indexPatternFieldEditorForm"
+      isInvalid={isSubmitted && isFormValid === false}
+      error={form.getErrors()}
     >
       <EuiFlexGroup>
         {/* Name */}
@@ -296,11 +280,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
           data-test-subj="valueRow"
           withDividerRule
         >
-          <ScriptField
-            existingConcreteFields={existingConcreteFields}
-            links={links}
-            syntaxError={syntaxError}
-          />
+          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
         </FormRow>
       )}
 
