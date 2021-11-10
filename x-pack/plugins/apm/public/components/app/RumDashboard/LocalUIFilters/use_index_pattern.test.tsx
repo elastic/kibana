@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import * as dynamicDataView from '../../../../hooks/use_dynamic_index_pattern';
+import * as dynamicIndexPattern from '../../../../hooks/use_dynamic_index_pattern';
 import { useIndexPattern } from './use_index_pattern';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -15,7 +15,7 @@ describe('useIndexPattern', () => {
   const create = jest.fn();
   const mockDataService = {
     data: {
-      dataViews: {
+      indexPatterns: {
         create,
       },
     },
@@ -23,8 +23,8 @@ describe('useIndexPattern', () => {
 
   const title = 'apm-*';
   jest
-    .spyOn(dynamicDataView, 'useDynamicIndexPatternFetcher')
-    .mockReturnValue({ dataView: { title } });
+    .spyOn(dynamicIndexPattern, 'useDynamicIndexPatternFetcher')
+    .mockReturnValue({ indexPattern: { title } });
 
   it('returns result as expected', async () => {
     const { waitForNextUpdate } = renderHook(() => useIndexPattern(), {
