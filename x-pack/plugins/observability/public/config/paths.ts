@@ -12,8 +12,8 @@ export const paths = {
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',
     ruleDetails: (ruleId: string) =>
-      `/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`,
+      `/app/management/insightsAndAlerting/triggersActions/rule/${encodeURI(ruleId)}`,
     alertDetails: (alertId: string) =>
-      `/app/management/insightsAndAlerting/triggersActions/alert/${alertId}`,
+      `/app/management/insightsAndAlerting/triggersActions/alert/${encodeURI(alertId)}`,
   },
 };

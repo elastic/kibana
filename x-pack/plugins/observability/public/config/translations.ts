@@ -97,7 +97,7 @@ export const translations = {
     documentSummaryTitle: i18n.translate('xpack.observability.alertsFlyout.documentSummaryTitle', {
       defaultMessage: 'Document Summary',
     }),
-    viewInApButtonText: i18n.translate('xpack.observability.alertsFlyout.viewInApButtonText', {
+    viewInAppButtonText: i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
       defaultMessage: 'View in app',
     }),
   },

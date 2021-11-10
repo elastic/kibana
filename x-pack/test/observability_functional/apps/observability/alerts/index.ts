@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
 
-  describe('Observability alerts', function () {
+  describe('Observability alerts 1', function () {
     this.tags('includeFirefox');
 
     const testSubjects = getService('testSubjects');
@@ -218,38 +218,23 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
       });
-    });
 
-    describe('Actions Button', () => {
-      before(async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['read'],
-            logs: ['read'],
-          })
-        );
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-        await observability.alerts.common.navigateToTimeWithData();
-      });
+      describe('Actions Button', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await observability.alerts.common.navigateToTimeWithData();
+        });
 
-      after(async () => {
-        await observability.users.restoreDefaultTestUserRole();
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      });
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        });
 
-      // Note: By adding "View Rule Details" button in the menu, we made "more actions" button always visible and enabled.
-      // Therefore the below test case and the code covered by it became redundant.
-      // In case of we may need it later, we didn't remove the code but disabled the test case since it's always invalid.
-      it.skip('Is disabled when a user has only read privilages', async () => {
-        const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
-        expect(await actionsButton.getAttribute('disabled')).to.be('true');
-      });
-
-      it('Opens rule details page when click on "View Rule Details"', async () => {
-        const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
-        await actionsButton.click();
-        await observability.alerts.common.viewRuleDetailsButtonClick();
-        expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
+        it('Opens rule details page when click on "View Rule Details"', async () => {
+          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+          await actionsButton.click();
+          await observability.alerts.common.viewRuleDetailsButtonClick();
+          expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
+        });
       });
     });
   });

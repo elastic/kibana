@@ -93,7 +93,7 @@ export function AlertsFlyout({
     return null;
   }
 
-  const ruleId = alertData.fields['kibana.alert.rule.uuid'] || null;
+  const ruleId = alertData.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
 
   const overviewListItems = [
@@ -139,9 +139,9 @@ export function AlertsFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
+        <EuiTitle size="xs">
           <h4>{translations.alertsFlyout.reasonTitle}</h4>
-        </EuiText>
+        </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">{alertData.reason}</EuiText>
         <EuiSpacer size="s" />
@@ -151,9 +151,9 @@ export function AlertsFlyout({
           </EuiLink>
         )}
         <EuiHorizontalRule size="full" />
-        <EuiText>
+        <EuiTitle size="xs">
           <h4>{translations.alertsFlyout.documentSummaryTitle}</h4>
-        </EuiText>
+        </EuiTitle>
         <EuiSpacer size="m" />
         <EuiDescriptionList
           compressed={true}

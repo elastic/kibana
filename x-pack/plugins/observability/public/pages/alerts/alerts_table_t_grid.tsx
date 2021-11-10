@@ -222,7 +222,7 @@ function ObservabilityActions({
     onUpdateFailure: onAlertStatusUpdated,
   });
 
-  const ruleId = alert.fields['kibana.alert.rule.uuid'] || null;
+  const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
 
   const actionsMenuItems = useMemo(() => {
