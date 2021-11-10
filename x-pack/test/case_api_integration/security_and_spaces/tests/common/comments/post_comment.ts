@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils/technical_field_names';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
