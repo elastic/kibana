@@ -80,6 +80,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   log.messages.length = 0;
   process.execArgv = ['--inheritted', '--exec', '--argv'];
+  process.env.FORCE_COLOR = process.env.FORCE_COLOR || '1';
   currentProc = undefined;
 });
 
@@ -117,12 +118,9 @@ afterEach(() => {
   subscriptions.length = 0;
 });
 
-describe.skip('#run$', () => {
+describe('#run$', () => {
   it('starts the dev server with the right options', () => {
     run(new DevServer(defaultOptions)).unsubscribe();
-
-    // ensure that FORCE_COLOR is in the env for consistency in snapshot
-    process.env.FORCE_COLOR = process.env.FORCE_COLOR || 'true';
 
     expect(execa.node.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -136,6 +134,7 @@ describe.skip('#run$', () => {
             "env": Object {
               "<inheritted process.env>": true,
               "ELASTIC_APM_SERVICE_NAME": "kibana",
+              "FORCE_COLOR": "true",
               "isDevCliChild": "true",
             },
             "nodeOptions": Array [
