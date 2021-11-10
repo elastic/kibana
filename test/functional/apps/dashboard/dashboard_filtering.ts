@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  describe.only('dashboard filtering', function () {
+  describe('dashboard filtering', function () {
     this.tags('includeFirefox');
 
     const populateDashboard = async () => {
