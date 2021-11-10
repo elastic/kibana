@@ -7,8 +7,10 @@
  */
 
 import React, { Fragment, useContext, useEffect } from 'react';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import {
+  euiLightVars as themeLight,
+  euiDarkVars as themeDark,
+} from '@kbn/ui-shared-deps-src/theme';
 import type { IndexPattern } from 'src/plugins/data/common';
 
 import {
