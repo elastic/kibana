@@ -7,7 +7,6 @@
  */
 
 import _ from 'lodash';
-import { skipWhile } from 'rxjs/operators';
 
 import { migrateAppState } from '.';
 import { DashboardSavedObject } from '../..';
