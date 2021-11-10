@@ -39,7 +39,7 @@ import {
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
-import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../../migrations/core';
+import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../core';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
 import Path from 'path';
 

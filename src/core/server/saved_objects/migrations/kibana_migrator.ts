@@ -27,7 +27,7 @@ import { createIndexMap } from './core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
-import { runResilientMigrator } from '../migrationsv2';
+import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 
 export interface KibanaMigratorOptions {

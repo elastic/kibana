@@ -8,12 +8,13 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { AliasAction, isLeftTypeof } from '../actions';
-import { AllActionStates, MigrationLog, State } from '../types';
+import { MigrationLog } from '../types';
+import { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
-import { disableUnknownTypeMappingFields } from '../../migrations/core';
+import { disableUnknownTypeMappingFields } from '../core';
 import {
   createInitialProgress,
   incrementProcessedProgress,

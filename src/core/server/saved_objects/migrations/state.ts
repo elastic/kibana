@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ControlState } from './state_action_machine';
@@ -14,23 +13,8 @@ import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
 import { TransformErrorObjects } from '../migrations/core';
-import {
-  DocumentsTransformFailed,
-  DocumentsTransformSuccess,
-} from '../migrations/core/migrate_raw_docs';
 import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
-
-export type MigrationLogLevel = 'error' | 'info' | 'warning';
-
-export interface MigrationLog {
-  level: MigrationLogLevel;
-  message: string;
-}
-
-export interface Progress {
-  processed: number | undefined;
-  total: number | undefined;
-}
+import { MigrationLog, Progress } from './types';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -462,7 +446,3 @@ export type AllControlStates = State['controlState'];
  * 'FATAL' and 'DONE').
  */
 export type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
-
-export type TransformRawDocs = (
-  rawDocs: SavedObjectsRawDoc[]
-) => TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;

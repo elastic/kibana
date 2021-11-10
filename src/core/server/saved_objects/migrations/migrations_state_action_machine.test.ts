@@ -15,7 +15,7 @@ import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { LoggerAdapter } from '../../logging/logger_adapter';
-import { AllControlStates, State } from './types';
+import { AllControlStates, State } from './state';
 import { createInitialState } from './initial_state';
 import { ByteSizeValue } from '@kbn/config-schema';
 

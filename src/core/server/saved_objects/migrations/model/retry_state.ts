@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { State } from '../types';
+import { State } from '../state';
 
 export const delayRetryState = <S extends State>(
   state: S,

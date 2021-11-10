@@ -31,7 +31,6 @@ import type {
   CloneTempToSource,
   SetTempWriteBlock,
   WaitForYellowSourceState,
-  TransformRawDocs,
   TransformedDocumentsBulkIndex,
   ReindexSourceToTempIndexBulk,
   OutdatedDocumentsSearchOpenPit,
@@ -41,7 +40,8 @@ import type {
   OutdatedDocumentsRefresh,
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
-} from './types';
+} from './state';
+import { TransformRawDocs } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
 
