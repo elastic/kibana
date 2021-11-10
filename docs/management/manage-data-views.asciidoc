@@ -1,26 +1,29 @@
-[[managing-index-patterns]]
-== Manage index pattern data fields
+[[managing-data-views]]
+== Manage data views
 
-To customize the data fields in your index pattern, you can add runtime fields to the existing documents, add scrited fields to compute data on the fly, and change how {kib} displays the data fields. 
+To customize the data fields in your data view,
+you can add runtime fields to the existing documents,
+add scripted fields to compute data on the fly, and change how {kib} displays the data fields.
 
 [float]
 [[runtime-fields]]
-=== Explore your data with runtime fields 
+=== Explore your data with runtime fields
 
-Runtime fields are fields that you add to documents after you've ingested your data, and are evaluated at query time. With runtime fields, you allow for a smaller index and faster ingest time so that you can use less resources and reduce your operating costs. You can use runtime fields anywhere index patterns are used, for example, you can explore runtime fields in *Discover* and create visualizations with runtime fields for your dashboard.
+Runtime fields are fields that you add to documents after you've ingested your data, and are evaluated at query time. With runtime fields, you allow for a smaller index and faster ingest time so that you can use less resources and reduce your operating costs.
+You can use runtime fields anywhere data views are used, for example, you can explore runtime fields in *Discover* and create visualizations with runtime fields for your dashboard.
 
 With runtime fields, you can:
 
-* Define fields for a specific use case without modifying the underlying schema. 
+* Define fields for a specific use case without modifying the underlying schema.
 
 * Override the returned values from index fields.
 
-* Start working on your data without understanding the structure. 
+* Start working on your data without understanding the structure.
 
-* Add fields to existing documents without reindexing your data. 
+* Add fields to existing documents without reindexing your data.
 
-WARNING: Runtime fields can impact {kib} performance. When you run a query, {es} uses the fields you index first to shorten the response time. 
-Index the fields that you commonly search for and filter on, such as `timestamp`, then use runtime fields to limit the number of fields {es} uses to calculate values. 
+WARNING: Runtime fields can impact {kib} performance. When you run a query, {es} uses the fields you index first to shorten the response time.
+Index the fields that you commonly search for and filter on, such as `timestamp`, then use runtime fields to limit the number of fields {es} uses to calculate values.
 
 For detailed information on how to use runtime fields with {es}, refer to {ref}/runtime.html[Runtime fields].
 
@@ -28,17 +31,21 @@ For detailed information on how to use runtime fields with {es}, refer to {ref}/
 [[create-runtime-fields]]
 ==== Add runtime fields
 
-To add runtime fields to your index patterns, open the index pattern you want to change, then define the field values by emitting a single value using the {ref}/modules-scripting-painless.html[Painless scripting language]. You can also add runtime fields in <<add-field-in-discover,*Discover*>> and <<change-the-fields,*Lens*>>.
+To add runtime fields to your data views, open the data view you want to change,
+then define the field values by emitting a single value using
+the {ref}/modules-scripting-painless.html[Painless scripting language].
+You can also add runtime fields in <<add-field-in-discover,*Discover*>> and <<change-the-fields,*Lens*>>.
 
-. Open the main menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
-. Select the index pattern you want to add the runtime field to, then click *Add field*.
+. Select the data view that you want to add the runtime field to, then click *Add field*.
 
 . Enter the field *Name*, then select the *Type*.
 
-. Select *Set custom label*, then enter the label you want to display where the index pattern is used, such as *Discover*.
+. Select *Set custom label*, then enter the label you want to display where the data view is used,
+such as *Discover*.
 
-. Select *Set value*, then define the script. The script must match the *Type*, or the index pattern fails anywhere it is used.
+. Select *Set value*, then define the script. The script must match the *Type*, or the data view fails anywhere it is used.
 
 . To help you define the script, use the *Preview*:
 
@@ -46,7 +53,8 @@ To add runtime fields to your index patterns, open the index pattern you want to
 
 * To filter the fields list, enter the keyword in *Filter fields*.
 
-* To pin frequently used fields to the top of the list, hover over the field, then click image:images/stackManagement-indexPatterns-pinRuntimeField-7.15.png[Icon to pin field to the top of the list].
+* To pin frequently used fields to the top of the list, hover over the field,
+then click image:images/stackManagement-indexPatterns-pinRuntimeField-7.15.png[Icon to pin field to the top of the list].
 
 . Click *Create field*.
 
@@ -54,7 +62,7 @@ To add runtime fields to your index patterns, open the index pattern you want to
 [[runtime-field-examples]]
 ==== Runtime field examples
 
-Try the runtime field examples on your own using the <<gs-get-data-into-kibana,*Sample web logs*>> data index pattern. 
+Try the runtime field examples on your own using the <<gs-get-data-into-kibana,*Sample web logs*>> data.
 
 [float]
 [[simple-hello-world-example]]
@@ -110,7 +118,7 @@ if (source != null) {
 	emit(source);
 	return;
 }
-else { 
+else {
 	emit("None");
 }
 ----
@@ -123,7 +131,7 @@ def source = doc['machine.os.keyword'].value;
 if (source != "") {
 	emit(source);
 }
-else { 
+else {
 	emit("None");
 }
 ----
@@ -132,15 +140,15 @@ else {
 [[manage-runtime-fields]]
 ==== Manage runtime fields
 
-Edit the settings for runtime fields, or remove runtime fields from index patterns. 
+Edit the settings for runtime fields, or remove runtime fields from data views.
 
-. Open the main menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
-. Select the index pattern that contains the runtime field you want to manage, then open the runtime field edit options or delete the runtime field.
+. Select the data view that contains the runtime field you want to manage, then open the runtime field edit options or delete the runtime field.
 
 [float]
 [[scripted-fields]]
-=== Add scripted fields to index patterns
+=== Add scripted fields to data views
 
 deprecated::[7.13,Use {ref}/runtime.html[runtime fields] instead of scripted fields. Runtime fields support Painless scripts and provide greater flexibility.]
 
@@ -168,11 +176,11 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 [[create-scripted-field]]
 ==== Create scripted fields
 
-Create and add scripted fields to your index patterns.
+Create and add scripted fields to your data views.
 
-. Open the main menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
-. Select the index pattern you want to add a scripted field to.
+. Select the data view you want to add a scripted field to.
 
 . Select the *Scripted fields* tab, then click *Add scripted field*.
 
@@ -186,9 +194,9 @@ For more information about scripted fields in {es}, refer to {ref}/modules-scrip
 [[update-scripted-field]]
 ==== Manage scripted fields
 
-. Open the main menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
-. Select the index pattern that contains the scripted field you want to manage.
+. Select the data view that contains the scripted field you want to manage.
 
 . Select the *Scripted fields* tab, then open the scripted field edit options or delete the scripted field.
 
@@ -202,9 +210,9 @@ exceptions when you view the dynamically generated data.
 {kib} uses the same field types as {es}, however, some {es} field types are unsupported in {kib}.
 To customize how {kib} displays data fields, use the formatting options.
 
-. Open the main menu, then click *Stack Management > Index Patterns*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
-. Click the index pattern that contains the field you want to change.
+. Click the data view that contains the field you want to change.
 
 . Find the field, then open the edit options (image:management/index-patterns/images/edit_icon.png[Data field edit icon]).
 
