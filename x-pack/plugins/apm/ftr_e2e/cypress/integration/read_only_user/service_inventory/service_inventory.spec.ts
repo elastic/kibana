@@ -93,6 +93,7 @@ describe('When navigating to the service inventory', () => {
       cy.wait(aliasNames);
     });
 
+    // FAILING, @caue.marcondes will be fixing soon
     it.skip('when selecting a different time range and clicking the refresh button', () => {
       cy.wait(aliasNames);
 
