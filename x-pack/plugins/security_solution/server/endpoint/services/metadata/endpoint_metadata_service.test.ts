@@ -9,11 +9,7 @@ import {
   createEndpointMetadataServiceTestContextMock,
   EndpointMetadataServiceTestContextMock,
 } from './mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 import {
@@ -27,17 +23,17 @@ import {
 } from '../../routes/metadata/query_builders';
 import { EndpointError } from '../../errors';
 import { HostMetadata } from '../../../../common/endpoint/types';
-import { KibanaRequest } from '../../../../../../../src/core/server';
-import { EndpointAppContext } from '../../types';
-import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
+import { Agent } from '../../../../../fleet/common';
 import { AgentPolicyServiceInterface } from '../../../../../fleet/server/services';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;
   let metadataService: EndpointMetadataServiceTestContextMock['endpointMetadataService'];
   let esClient: ElasticsearchClientMock;
+  let endpointDocGenerator: EndpointDocGenerator;
 
   beforeEach(() => {
+    endpointDocGenerator = new EndpointDocGenerator('seed');
     testMockedContext = createEndpointMetadataServiceTestContextMock();
     metadataService = testMockedContext.endpointMetadataService;
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
@@ -49,7 +45,7 @@ describe('EndpointMetadataService', () => {
 
     beforeEach(() => {
       fleetAgentIds = ['one', 'two'];
-      endpointMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
+      endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
       esClient.search.mockReturnValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise(
           legacyMetadataSearchResponseMock(endpointMetadataDoc)
@@ -111,27 +107,9 @@ describe('EndpointMetadataService', () => {
   });
 
   describe('#getHostMetadataList', () => {
-    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
-    let mockRequest: KibanaRequest;
-    let endpointAppContextMock: EndpointAppContext;
     let agentPolicyServiceMock: jest.Mocked<AgentPolicyServiceInterface>;
 
     beforeEach(() => {
-      soClient = savedObjectsClientMock.create();
-      mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          paging_properties: [
-            {
-              page_size: 10,
-            },
-            {
-              page_index: 0,
-            },
-          ],
-        },
-      });
-
-      endpointAppContextMock = { config: () => ({}) } as EndpointAppContext;
       agentPolicyServiceMock = testMockedContext.agentPolicyService;
       esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     });
@@ -139,34 +117,29 @@ describe('EndpointMetadataService', () => {
     it('should throw wrapped error if es error', async () => {
       const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({});
       esClient.search.mockResolvedValue(esMockResponse);
-      const metadataListResponse = metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        mockRequest,
-        endpointAppContextMock,
-        []
-      );
+      const metadataListResponse = metadataService.getHostMetadataList(esClient);
       await expect(metadataListResponse).rejects.toThrow(EndpointError);
     });
 
     it('should correctly list HostMetadata', async () => {
       const policyId = 'test-agent-policy-id';
       const packagePolicies = [
-        {
+        Object.assign(endpointDocGenerator.generatePolicyPackagePolicy(), {
           id: 'test-package-policy-id',
           policy_id: policyId,
           revision: 1,
-        } as PackagePolicy,
+        }),
       ];
       const packagePolicyIds = packagePolicies.map((policy) => policy.policy_id);
       const agentPolicies = [
-        {
+        Object.assign(endpointDocGenerator.generateAgentPolicy(), {
           id: policyId,
           revision: 2,
-        } as AgentPolicy,
+          package_policies: packagePolicies,
+        }),
       ];
       const agentPolicyIds = agentPolicies.map((policy) => policy.id);
-      const endpointMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
+      const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
       const mockAgent = {
         policy_id: agentPolicies[0].id,
         policy_revision: agentPolicies[0].revision,
@@ -178,27 +151,36 @@ describe('EndpointMetadataService', () => {
 
       esClient.search.mockResolvedValue(esMockResponse);
       agentPolicyServiceMock.getByIds.mockResolvedValue(agentPolicies);
+      testMockedContext.packagePolicyService.list.mockImplementation(
+        async (_, { page, perPage }) => {
+          const response = {
+            items: packagePolicies,
+            page: page ?? 1,
+            total: packagePolicies.length,
+            perPage: packagePolicies.length,
+          };
 
-      const metadataListResponse = await metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        mockRequest,
-        endpointAppContextMock,
-        packagePolicies
+          if ((page ?? 1) > 1) {
+            response.items = [];
+          }
+
+          return response;
+        }
       );
+
+      const metadataListResponse = await metadataService.getHostMetadataList(esClient);
       const unitedIndexQuery = await buildUnitedIndexQuery(
-        mockRequest,
-        endpointAppContextMock,
+        { page: 1, pageSize: 10, filters: {} },
         packagePolicyIds
       );
 
       expect(esClient.search).toBeCalledWith(unitedIndexQuery);
-      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(soClient, agentPolicyIds);
+      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), agentPolicyIds);
       expect(metadataListResponse).toEqual({
-        request_page_size: 10,
-        request_page_index: 0,
+        pageSize: 10,
+        page: 1,
         total: 1,
-        hosts: [
+        data: [
           {
             metadata: endpointMetadataDoc,
             host_status: 'unhealthy',

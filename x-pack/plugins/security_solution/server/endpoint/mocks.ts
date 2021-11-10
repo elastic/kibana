@@ -104,6 +104,15 @@ export const createMockEndpointAppContextServiceStartContract =
       logger
     );
 
+    packagePolicyService.list.mockImplementation(async (_, options) => {
+      return {
+        items: [],
+        total: 0,
+        page: options.page ?? 1,
+        perPage: options.perPage ?? 10,
+      };
+    });
+
     return {
       agentService,
       agentPolicyService,
