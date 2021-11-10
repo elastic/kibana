@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { buildAlertsQuery } from './helpers';
+import { buildAlertsQuery } from './alerts';
 
-describe('Case view helpers', () => {
+describe('Alerts helpers', () => {
   describe('buildAlertsQuery', () => {
     it('it builds the alerts query', () => {
       expect(buildAlertsQuery(['alert-id-1', 'alert-id-2'])).toEqual({

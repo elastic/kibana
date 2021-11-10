@@ -13,3 +13,11 @@ export const SEND_ALERT_TO_TIMELINE = i18n.translate(
     defaultMessage: 'Investigate in timeline',
   }
 );
+
+export const PAGE_TITLE = i18n.translate('xpack.securitySolution.cases.pageTitle', {
+  defaultMessage: 'Cases',
+});
+
+export const CREATE_BC_TITLE = i18n.translate('xpack.securitySolution.cases.caseView.breadcrumb', {
+  defaultMessage: 'Create',
+});

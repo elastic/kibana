@@ -26,7 +26,7 @@ import { useInsertTimeline } from '../components/use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { DetailsPanel } from '../../timelines/components/side_panel';
 import { InvestigateInTimelineAction } from '../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import { useFetchAlertData } from './helpers';
+import { useFetchAlertData } from './use_fetch_alert_data';
 
 const TimelineDetailsPanel = () => {
   const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
