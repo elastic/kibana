@@ -423,8 +423,7 @@ export function XYChart({
         const { min: computedMin, max: computedMax } = computeOverallDataDomain(
           filteredLayers,
           axis.series.map(({ accessor }) => accessor),
-          data.tables,
-          axis.groupId === 'left' ? 'yLeft' : 'yRight'
+          data.tables
         );
 
         if (computedMin != null && computedMax != null) {

@@ -110,7 +110,7 @@ export function getStaticValue(
       accessors,
       activeData,
       groupId !== 'x', // histogram axis should compute the min based on the current data
-      groupId
+      groupId !== 'x'
     ) || fallbackValue
   );
 }
@@ -154,14 +154,14 @@ export function computeOverallDataDomain(
   dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
-  groupId: 'x' | 'yLeft' | 'yRight'
+  allowStacking: boolean = true
 ) {
   const accessorMap = new Set(accessorIds);
   let min: number | undefined;
   let max: number | undefined;
   const [stacked, unstacked] = partition(
     dataLayers,
-    ({ seriesType }) => isStackedChart(seriesType) && groupId !== 'x'
+    ({ seriesType }) => isStackedChart(seriesType) && allowStacking
   );
   for (const { layerId, accessors } of unstacked) {
     const table = activeData[layerId];
@@ -219,7 +219,7 @@ function computeStaticValueForGroup(
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
   minZeroOrNegativeBase: boolean = true,
-  groupId: 'x' | 'yLeft' | 'yRight'
+  allowStacking: boolean = true
 ) {
   const defaultReferenceLineFactor = 3 / 4;
 
@@ -228,7 +228,12 @@ function computeStaticValueForGroup(
       return defaultReferenceLineFactor;
     }
 
-    const { min, max } = computeOverallDataDomain(dataLayers, accessorIds, activeData, groupId);
+    const { min, max } = computeOverallDataDomain(
+      dataLayers,
+      accessorIds,
+      activeData,
+      allowStacking
+    );
 
     if (min != null && max != null && isFinite(min) && isFinite(max)) {
       // Custom axis bounds can go below 0, so consider also lower values than 0
