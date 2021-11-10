@@ -10,6 +10,6 @@ import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
-jest.doMock('../../migrations/kibana/kibana_migrator', () => ({
+jest.doMock('../../migrations/kibana_migrator', () => ({
   KibanaMigrator: KibanaMigratorMock,
 }));

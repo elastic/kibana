@@ -12,7 +12,7 @@ import { typeRegistryMock } from './saved_objects_type_registry.mock';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
-jest.doMock('./migrations/kibana/kibana_migrator', () => ({
+jest.doMock('./migrations/kibana_migrator', () => ({
   KibanaMigrator: KibanaMigratorMock,
 }));
 
