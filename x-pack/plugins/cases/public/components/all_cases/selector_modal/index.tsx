@@ -6,6 +6,7 @@
  */
 import { AllCasesSelectorModal, AllCasesSelectorModalProps } from './all_cases_selector_modal';
 
-export { AllCasesSelectorModal, AllCasesSelectorModalProps };
+export type { AllCasesSelectorModalProps };
+export { AllCasesSelectorModal };
 // eslint-disable-next-line import/no-default-export
 export { AllCasesSelectorModal as default };
