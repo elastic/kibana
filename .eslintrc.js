@@ -704,6 +704,7 @@ module.exports = {
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
+        '**/jest.config.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
