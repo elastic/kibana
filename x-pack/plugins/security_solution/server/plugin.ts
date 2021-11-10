@@ -130,7 +130,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    const { pluginContext, config, logger } = this;
+    const { appClientFactory, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
     this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
@@ -303,6 +303,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     core.getStartServices().then(([_, depsStart]) => {
+      appClientFactory.setup({
+        getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
+        config,
+      });
+
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext
@@ -335,11 +340,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger, appClientFactory } = this;
-
-    appClientFactory.setup({
-      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
-      config,
-    });
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
