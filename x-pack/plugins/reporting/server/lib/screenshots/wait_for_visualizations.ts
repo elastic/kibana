@@ -11,10 +11,23 @@ import { HeadlessChromiumDriver } from '../../browsers';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
-type SelectorArgs = Record<string, string>;
+interface CompletedItemsCountParameters {
+  context: string;
+  count: number;
+  renderCompleteSelector: string;
+}
 
-const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
-  return document.querySelectorAll(renderCompleteSelector).length;
+const getCompletedItemsCount = ({
+  context,
+  count,
+  renderCompleteSelector,
+}: CompletedItemsCountParameters) => {
+  const { length } = document.querySelectorAll(renderCompleteSelector);
+
+  // eslint-disable-next-line no-console
+  console.debug(`evaluate ${context}: waitng for ${count} elements, got ${length}.`);
+
+  return length >= count;
 };
 
 /*
@@ -40,11 +53,11 @@ export const waitForVisualizations = async (
   );
 
   try {
-    await browser.waitFor(
-      { fn: getCompletedItemsCount, args: [{ renderCompleteSelector }], toEqual, timeout },
-      { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },
-      logger
-    );
+    await browser.waitFor({
+      fn: getCompletedItemsCount,
+      args: [{ renderCompleteSelector, context: CONTEXT_WAITFORELEMENTSTOBEINDOM, count: toEqual }],
+      timeout,
+    });
 
     logger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
