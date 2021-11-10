@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
 import { ImportRulesSchema } from './import_rules_schema';
@@ -108,6 +109,27 @@ export const validateThreshold = (rule: ImportRulesSchema): string[] => {
   return [];
 };
 
+export const validateActions = (rule: ImportRulesSchema): string[] => {
+  if (rule?.actions?.length) {
+    return rule.actions.reduce<string[]>((errors, action) => {
+      if (isEmpty(action.params)) {
+        return [
+          ...errors,
+          `when "actions" exist, "actions.params" requires a "message" property - "action" with "id" of "${action.id}"`,
+        ];
+      } else if (isEmpty(action.params.message)) {
+        return [
+          ...errors,
+          `when "actions" exist, "actions.params.message" requires a non empty "message" value - "action" with "id" of "${action.id}"`,
+        ];
+      } else {
+        return errors;
+      }
+    }, []);
+  }
+  return [];
+};
+
 export const importRuleValidateTypeDependents = (schema: ImportRulesSchema): string[] => {
   return [
     ...validateAnomalyThreshold(schema),
@@ -118,5 +140,6 @@ export const importRuleValidateTypeDependents = (schema: ImportRulesSchema): str
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
     ...validateThreshold(schema),
+    ...validateActions(schema),
   ];
 };
