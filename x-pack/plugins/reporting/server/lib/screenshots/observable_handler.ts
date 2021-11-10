@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, mergeMap, timeout } from 'rxjs/operators';
+import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { numberToDuration } from '../../../common/schema_utils';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
@@ -33,7 +33,6 @@ export class ScreenshotObservableHandler {
   private conditionalHeaders: ScreenshotObservableOpts['conditionalHeaders'];
   private layout: ScreenshotObservableOpts['layout'];
   private logger: ScreenshotObservableOpts['logger'];
-  private waitErrorRegistered = false;
 
   constructor(
     private readonly driver: HeadlessChromiumDriver,
@@ -50,35 +49,27 @@ export class ScreenshotObservableHandler {
    */
   public waitUntil<O>(phase: PhaseInstance) {
     const { timeoutValue, label, configValue } = phase;
-    return (source: Rx.Observable<O>) => {
-      return source.pipe(
-        timeout(timeoutValue),
-        catchError((error: string | Error) => {
-          if (this.waitErrorRegistered) {
-            throw error; // do not create a stack of errors within the error
-          }
 
-          this.logger.error(error);
-          let throwError = new Error(`The "${label}" phase encountered an error: ${error}`);
-
-          if (error instanceof Rx.TimeoutError) {
-            throwError = new Error(
-              `The "${label}" phase took longer than` +
-                ` ${numberToDuration(timeoutValue).asSeconds()} seconds.` +
-                ` You may need to increase "${configValue}": ${error}`
-            );
-          }
-
-          this.waitErrorRegistered = true;
-          this.logger.error(throwError);
-          throw throwError;
-        })
+    return (source: Rx.Observable<O>) =>
+      source.pipe(
+        catchError((error) => {
+          throw new Error(`The "${label}" phase encountered an error: ${error}`);
+        }),
+        timeoutWith(
+          timeoutValue,
+          Rx.throwError(
+            new Error(
+              `The "${label}" phase took longer than ${numberToDuration(
+                timeoutValue
+              ).asSeconds()} seconds. You may need to increase "${configValue}"`
+            )
+          )
+        )
       );
-    };
   }
 
   private openUrl(index: number, urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple) {
-    return mergeMap(() =>
+    return Rx.defer(() =>
       openUrl(
         this.timeouts.openUrl.timeoutValue,
         this.driver,
@@ -87,24 +78,25 @@ export class ScreenshotObservableHandler {
         this.conditionalHeaders,
         this.logger
       )
-    );
+    ).pipe(this.waitUntil(this.timeouts.openUrl));
   }
 
   private waitForElements() {
     const driver = this.driver;
     const waitTimeout = this.timeouts.waitForElements.timeoutValue;
-    return (withPageOpen: Rx.Observable<void>) =>
-      withPageOpen.pipe(
-        mergeMap(() => getNumberOfItems(waitTimeout, driver, this.layout, this.logger)),
-        mergeMap(async (itemsCount) => {
-          // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
-          const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-          await Promise.all([
-            driver.setViewport(viewport, this.logger),
-            waitForVisualizations(waitTimeout, driver, itemsCount, this.layout, this.logger),
-          ]);
-        })
-      );
+
+    return Rx.defer(() => getNumberOfItems(waitTimeout, driver, this.layout, this.logger)).pipe(
+      mergeMap((itemsCount) => {
+        // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
+        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
+
+        return Rx.forkJoin([
+          driver.setViewport(viewport, this.logger),
+          waitForVisualizations(waitTimeout, driver, itemsCount, this.layout, this.logger),
+        ]);
+      }),
+      this.waitUntil(this.timeouts.waitForElements)
+    );
   }
 
   private completeRender(apmTrans: apm.Transaction | null) {
@@ -112,32 +104,27 @@ export class ScreenshotObservableHandler {
     const layout = this.layout;
     const logger = this.logger;
 
-    return (withElements: Rx.Observable<void>) =>
-      withElements.pipe(
-        mergeMap(async () => {
-          // Waiting till _after_ elements have rendered before injecting our CSS
-          // allows for them to be displayed properly in many cases
-          await injectCustomCss(driver, layout, logger);
+    return Rx.defer(async () => {
+      // Waiting till _after_ elements have rendered before injecting our CSS
+      // allows for them to be displayed properly in many cases
+      await injectCustomCss(driver, layout, logger);
 
-          const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
-          // position panel elements for print layout
-          await layout.positionElements?.(driver, logger);
-          apmPositionElements?.end();
+      const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
+      // position panel elements for print layout
+      await layout.positionElements?.(driver, logger);
+      apmPositionElements?.end();
 
-          await waitForRenderComplete(this.timeouts.loadDelay, driver, layout, logger);
-        }),
-        mergeMap(() =>
-          Promise.all([
-            getTimeRange(driver, layout, logger),
-            getElementPositionAndAttributes(driver, layout, logger),
-            getRenderErrors(driver, layout, logger),
-          ]).then(([timeRange, elementsPositionAndAttributes, renderErrors]) => ({
-            elementsPositionAndAttributes,
-            timeRange,
-            renderErrors,
-          }))
-        )
-      );
+      await waitForRenderComplete(this.timeouts.loadDelay, driver, layout, logger);
+    }).pipe(
+      mergeMap(() =>
+        Rx.forkJoin({
+          timeRange: getTimeRange(driver, layout, logger),
+          elementsPositionAndAttributes: getElementPositionAndAttributes(driver, layout, logger),
+          renderErrors: getRenderErrors(driver, layout, logger),
+        })
+      ),
+      this.waitUntil(this.timeouts.renderComplete)
+    );
   }
 
   public setupPage(
@@ -145,15 +132,10 @@ export class ScreenshotObservableHandler {
     urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
     apmTrans: apm.Transaction | null
   ) {
-    return (initial: Rx.Observable<unknown>) =>
-      initial.pipe(
-        this.openUrl(index, urlOrUrlLocatorTuple),
-        this.waitUntil(this.timeouts.openUrl),
-        this.waitForElements(),
-        this.waitUntil(this.timeouts.waitForElements),
-        this.completeRender(apmTrans),
-        this.waitUntil(this.timeouts.renderComplete)
-      );
+    return this.openUrl(index, urlOrUrlLocatorTuple).pipe(
+      switchMapTo(this.waitForElements()),
+      switchMapTo(this.completeRender(apmTrans))
+    );
   }
 
   public getScreenshots() {
