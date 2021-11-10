@@ -22,7 +22,6 @@ import {
 } from '../constants';
 
 import {
-  migrateAgentActionToV7100,
   migrateAgentPolicyToV7100,
   migrateAgentToV7100,
   migrateEnrollmentApiKeysToV7100,
@@ -130,9 +129,7 @@ const getSavedObjectTypes = (
         created_at: { type: 'date' },
       },
     },
-    migrations: {
-      '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
-    },
+    migrations: {},
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
     name: AGENT_POLICY_SAVED_OBJECT_TYPE,
