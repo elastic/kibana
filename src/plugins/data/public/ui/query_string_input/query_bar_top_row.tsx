@@ -26,7 +26,6 @@ import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
-import { AutocompleteFtuePopover } from './autocomplete_ftue_popover';
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
@@ -174,26 +173,24 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
     return (
       <EuiFlexItem>
-        <AutocompleteFtuePopover storage={storage} isVisible={isQueryInputFocused}>
-          <QueryStringInput
-            disableAutoFocus={props.disableAutoFocus}
-            indexPatterns={props.indexPatterns!}
-            prepend={props.prepend}
-            query={props.query!}
-            screenTitle={props.screenTitle}
-            onChange={onQueryChange}
-            onChangeQueryInputFocus={onChangeQueryInputFocus}
-            onSubmit={onInputSubmit}
-            persistedLog={persistedLog}
-            dataTestSubj={props.dataTestSubj}
-            placeholder={props.placeholder}
-            isClearable={props.isClearable}
-            iconType={props.iconType}
-            nonKqlMode={props.nonKqlMode}
-            nonKqlModeHelpText={props.nonKqlModeHelpText}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-          />
-        </AutocompleteFtuePopover>
+        <QueryStringInput
+          disableAutoFocus={props.disableAutoFocus}
+          indexPatterns={props.indexPatterns!}
+          prepend={props.prepend}
+          query={props.query!}
+          screenTitle={props.screenTitle}
+          onChange={onQueryChange}
+          onChangeQueryInputFocus={onChangeQueryInputFocus}
+          onSubmit={onInputSubmit}
+          persistedLog={persistedLog}
+          dataTestSubj={props.dataTestSubj}
+          placeholder={props.placeholder}
+          isClearable={props.isClearable}
+          iconType={props.iconType}
+          nonKqlMode={props.nonKqlMode}
+          nonKqlModeHelpText={props.nonKqlModeHelpText}
+          timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+        />
       </EuiFlexItem>
     );
   }
