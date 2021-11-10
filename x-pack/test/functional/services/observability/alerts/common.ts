@@ -16,7 +16,7 @@ const DATE_WITH_DATA = {
 };
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
-const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filter-for-value';
+const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const ACTION_COLUMN_INDEX = 1;
 
@@ -71,7 +71,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getExperimentalDisclaimer = async () => {
-    return testSubjects.existOrFail('o11y-experimental-disclaimer');
+    return testSubjects.existOrFail('o11yExperimentalDisclaimer');
   };
 
   const getTableCellsInRows = async () => {
@@ -173,7 +173,7 @@ export function ObservabilityAlertsCommonProvider({
   const openActionsMenuForRow = async (rowIndex: number) => {
     const rows = await getTableCellsInRows();
     const actionsOverflowButton = await testSubjects.findDescendant(
-      'alerts-table-row-action-more',
+      'alertsTableRowActionMore',
       rows[rowIndex][ACTION_COLUMN_INDEX]
     );
     await actionsOverflowButton.click();
@@ -196,7 +196,7 @@ export function ObservabilityAlertsCommonProvider({
 
   const setWorkflowStatusFilter = async (workflowStatus: WorkflowStatus) => {
     const buttonGroupButton = await testSubjects.find(
-      `workflow-status-filter-${workflowStatus}-button`
+      `workflowStatusFilterButton-${workflowStatus}`
     );
     await buttonGroupButton.click();
   };
@@ -223,7 +223,7 @@ export function ObservabilityAlertsCommonProvider({
 
   const getActionsButtonByIndex = async (index: number) => {
     const actionsOverflowButtons = await find.allByCssSelector(
-      '[data-test-subj="alerts-table-row-action-more"]'
+      '[data-test-subj="alertsTableRowActionMore"]'
     );
     return actionsOverflowButtons[index] || null;
   };

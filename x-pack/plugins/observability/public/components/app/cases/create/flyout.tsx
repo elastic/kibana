@@ -54,7 +54,7 @@ function CreateCaseFlyoutComponent({
 }: CreateCaseModalProps) {
   const { cases } = useKibana().services;
   return (
-    <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
+    <StyledFlyout onClose={onCloseFlyout} data-test-subj="createCaseFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{i18n.CREATE_TITLE}</h2>
