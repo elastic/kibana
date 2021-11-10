@@ -27,7 +27,8 @@ export const getFieldValues = (
       ? field.replace('kibana.alert', 'signal').replace('rule.uuid', 'rule.id')
       : field;
   return (
-    find({ category, field }, data)?.values ?? find({ categoryCompat, fieldCompat }, data)?.values
+    find({ category, field }, data)?.values ??
+    find({ category: categoryCompat, field: fieldCompat }, data)?.values
   );
 };
 
