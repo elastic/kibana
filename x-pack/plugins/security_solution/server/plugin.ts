@@ -339,7 +339,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, appClientFactory } = this;
+    const { config, logger } = this;
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
@@ -407,7 +407,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.fleet?.agentPolicyService!,
         logger
       ),
-      appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config,
