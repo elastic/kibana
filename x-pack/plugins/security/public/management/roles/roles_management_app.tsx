@@ -143,7 +143,6 @@ export const rolesManagementApp = Object.freeze({
         );
 
         return () => {
-          chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

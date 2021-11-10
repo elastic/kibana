@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
+import { noop } from 'lodash';
+
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import type { Unmount } from 'src/plugins/management/public/types';
 
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { licenseMock } from '../../../common/licensing/index.mock';
@@ -29,7 +33,9 @@ async function mountApp(basePath: string, pathname: string) {
   const featuresStart = featuresPluginMock.createStart();
   const coreStart = coreMock.createStart();
 
-  const unmount = await rolesManagementApp
+  let unmount: Unmount = noop;
+  await act(async () => {
+    unmount = await rolesManagementApp
     .create({
       license: licenseMock.create(),
       fatalErrors,
@@ -43,6 +49,7 @@ async function mountApp(basePath: string, pathname: string) {
       setBreadcrumbs,
       history: scopedHistoryMock.create({ pathname }),
     });
+  });
 
   return { unmount, container, setBreadcrumbs, docTitle: coreStart.chrome.docTitle };
 }
@@ -71,7 +78,7 @@ describe('rolesManagementApp', () => {
     const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Roles' }]);
     expect(docTitle.change).toHaveBeenCalledWith('Roles');
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
@@ -118,7 +125,7 @@ describe('rolesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Roles' },
-      { href: `/edit/${encodeURIComponent(roleName)}`, text: roleName },
+      { text: roleName },
     ]);
     expect(docTitle.change).toHaveBeenCalledWith('Roles');
     expect(docTitle.reset).not.toHaveBeenCalled();
@@ -169,7 +176,6 @@ describe('rolesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Roles' },
       {
-        href: '/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20role',
         text: roleName,
       },
     ]);

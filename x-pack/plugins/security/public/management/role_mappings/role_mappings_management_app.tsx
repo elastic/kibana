@@ -116,7 +116,6 @@ export const roleMappingsManagementApp = Object.freeze({
         );
 
         return () => {
-          core.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },
