@@ -41,11 +41,11 @@ export function OptionsPopover(props: OptionsPopoverProps) {
   const isLegacy = uiSettings.get(DOC_TABLE_LEGACY);
 
   const mode = isLegacy
-    ? i18n.translate('discover.openOptionsPopover.legacyTableText', {
-        defaultMessage: 'Classic table',
+    ? i18n.translate('discover.openOptionsPopover.classicDiscoverText', {
+        defaultMessage: 'Classic Discover',
       })
-    : i18n.translate('discover.openOptionsPopover.dataGridText', {
-        defaultMessage: 'New table',
+    : i18n.translate('discover.openOptionsPopover.documentExplorerText', {
+        defaultMessage: 'Document Explorer',
       });
 
   return (
@@ -72,21 +72,33 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
-          <FormattedMessage
-            id="discover.topNav.openOptionsPopover.description"
-            defaultMessage="Great news! Discover has better ways to sort data, drag and drop columns, and compare documents. Toggle 'Use classic table' in Advanced Settings to get started."
-          />
+          {isLegacy ? (
+            <FormattedMessage
+              id="discover.topNav.openOptionsPopover.documentExplorerDisabledHint"
+              defaultMessage="Great news! Discover has a new Document Explorer offering resizable columns, a full screen mode and comparing of documents.
+                Toggle 'Disable Document Explorer' off in Advanced Settings to get started."
+            />
+          ) : (
+            <FormattedMessage
+              id="discover.topNav.openOptionsPopover.documentExplorerEnabledHint"
+              defaultMessage="You're using the new Document Explorer. You can disable Document Explorer in the options."
+            />
+          )}
         </EuiText>
-        <EuiSpacer />
-        <EuiButton
-          iconType="tableDensityNormal"
-          fullWidth
-          href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
-        >
-          {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
-            defaultMessage: 'Get started',
-          })}
-        </EuiButton>
+        {isLegacy && (
+          <>
+            <EuiSpacer />
+            <EuiButton
+              iconType="tableDensityNormal"
+              fullWidth
+              href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
+            >
+              {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
+                defaultMessage: 'Get started',
+              })}
+            </EuiButton>
+          </>
+        )}
         <EuiHorizontalRule margin="s" />
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
