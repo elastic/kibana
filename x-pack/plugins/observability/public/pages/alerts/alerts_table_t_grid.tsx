@@ -222,8 +222,8 @@ function ObservabilityActions({
     onUpdateFailure: onAlertStatusUpdated,
   });
 
-  const ruleId = alert.fields['kibana.alert.rule.uuid'];
-  const linkToRule = prepend(paths.management.ruleDetails(ruleId));
+  const ruleId = alert.fields['kibana.alert.rule.uuid'] || null;
+  const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
 
   const actionsMenuItems = useMemo(() => {
     return [
@@ -246,9 +246,17 @@ function ObservabilityActions({
           ]
         : []),
       ...(alertPermissions.crud ? statusActionItems : []),
-      <EuiContextMenuItem key="viewRuleDetails" data-test-subj="viewRuleDetails" href={linkToRule}>
-        {translations.alertsTable.viewRuleDetailsButtonText}
-      </EuiContextMenuItem>,
+      ...(!!linkToRule
+        ? [
+            <EuiContextMenuItem
+              key="viewRuleDetails"
+              data-test-subj="viewRuleDetails"
+              href={linkToRule}
+            >
+              {translations.alertsTable.viewRuleDetailsButtonText}
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ];
   }, [
     afterCaseSelection,

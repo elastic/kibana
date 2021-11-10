@@ -42,14 +42,13 @@ import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-util
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
 import type { TopAlert } from '../';
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { ExperimentalBadge } from '../../../components/shared/experimental_badge';
 import { translations, paths } from '../../../config';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -77,14 +76,9 @@ export function AlertsFlyout({
   selectedAlertId,
 }: AlertsFlyoutProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
-
-  const {
-    core: {
-      http: {
-        basePath: { prepend },
-      },
-    },
-  } = usePluginContext();
+  const { services } = useKibana();
+  const { http } = services;
+  const prepend = http?.basePath.prepend;
 
   const decoratedAlerts = useMemo(() => {
     const parseObservabilityAlert = parseAlert(observabilityRuleTypeRegistry);
@@ -99,8 +93,8 @@ export function AlertsFlyout({
     return null;
   }
 
-  const ruleId = alertData.fields['kibana.alert.rule.uuid'];
-  const linkToRule = prepend(paths.management.ruleDetails(ruleId));
+  const ruleId = alertData.fields['kibana.alert.rule.uuid'] || null;
+  const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
 
   const overviewListItems = [
     {
@@ -151,9 +145,11 @@ export function AlertsFlyout({
         <EuiSpacer size="s" />
         <EuiText size="s">{alertData.reason}</EuiText>
         <EuiSpacer size="s" />
-        <EuiLink href={linkToRule} data-test-subj="viewRuleDetailsFlyout">
-          {translations.alertsFlyout.viewRulesDetailsLinkText}
-        </EuiLink>
+        {!!linkToRule && (
+          <EuiLink href={linkToRule} data-test-subj="viewRuleDetailsFlyout">
+            {translations.alertsFlyout.viewRulesDetailsLinkText}
+          </EuiLink>
+        )}
         <EuiHorizontalRule size="full" />
         <EuiText>
           <h4>{translations.alertsFlyout.documentSummaryTitle}</h4>
@@ -180,7 +176,7 @@ export function AlertsFlyout({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
-                href={prepend(alertData.link)}
+                href={prepend && prepend(alertData.link)}
                 data-test-subj="alertsFlyoutViewInAppButton"
                 fill
               >
