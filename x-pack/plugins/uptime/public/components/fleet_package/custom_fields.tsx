@@ -18,7 +18,6 @@ import {
   EuiSwitch,
   EuiCallOut,
   EuiLink,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { ConfigKeys, DataStream, Validation } from './types';
 import { usePolicyConfigContext } from './contexts';
