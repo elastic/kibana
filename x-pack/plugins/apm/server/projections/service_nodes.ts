@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { SERVICE_NODE_NAME } from '../../common/elasticsearch_fieldnames';
-import { mergeProjection } from './util/merge_projection';
-import { getMetricsProjection } from './metrics';
+import {
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+} from '../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../common/processor_event';
+import { kqlQuery, rangeQuery } from '../../../observability/server';
+import {
+  environmentQuery,
+  serviceNodeNameQuery,
+} from '../../common/utils/environment_query';
 
 export function getServiceNodesProjection({
   serviceName,
@@ -24,25 +31,29 @@ export function getServiceNodesProjection({
   start: number;
   end: number;
 }) {
-  return mergeProjection(
-    getMetricsProjection({
-      serviceName,
-      serviceNodeName,
-      environment,
-      kuery,
-      start,
-      end,
-    }),
-    {
-      body: {
-        aggs: {
-          nodes: {
-            terms: {
-              field: SERVICE_NODE_NAME,
-            },
+  return {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...serviceNodeNameQuery(serviceNodeName),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
+        },
+      },
+      aggs: {
+        nodes: {
+          terms: {
+            field: SERVICE_NODE_NAME,
           },
         },
       },
-    }
-  );
+    },
+  };
 }

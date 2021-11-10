@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { first } from 'lodash';
 import { MetricsChartsByAgentAPIResponse } from '../../../../plugins/apm/server/lib/metrics/get_metrics_chart_data_by_agent';
-import { GenericMetricsChart } from '../../../../plugins/apm/server/lib/metrics/transform_metrics_chart';
+import { GenericMetricsChart } from '../../../../plugins/apm/server/lib/metrics/fetch_and_transform_metrics';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 interface ChartResponse {
