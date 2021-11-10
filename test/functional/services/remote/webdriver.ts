@@ -289,15 +289,16 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
+    const profile = process.env.KBN_NETWORK_TEST_PROFILE ?? 'DEFAULT';
     const {
       DOWNLOAD: downloadThroughput,
       UPLOAD: uploadThroughput,
       LATENCY: latency,
-    } = NETWORK_PROFILES[process.env.KBN_NETWORK_TEST_PROFILE ?? 'DEFAULT'];
+    } = NETWORK_PROFILES[`${profile}`];
 
     // Only chrome supports this option.
     log.debug(
-      `NETWORK THROTTLED: ${downloadThroughput}kb/s down, ${uploadThroughput}kb/s up, ${latency} ms latency.`
+      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput}kbps down, ${uploadThroughput}kbps up, ${latency} ms latency.`
     );
 
     (session as any).setNetworkConditions({
