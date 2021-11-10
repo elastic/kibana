@@ -6,6 +6,7 @@
  */
 import { CreateCaseFlyout, CreateCaseFlyoutProps } from './create_case_flyout';
 
-export { CreateCaseFlyout, CreateCaseFlyoutProps };
+export type { CreateCaseFlyoutProps };
+export { CreateCaseFlyout };
 // eslint-disable-next-line import/no-default-export
 export { CreateCaseFlyout as default };

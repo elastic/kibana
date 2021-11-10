@@ -40,6 +40,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
       }
       setIsModalOpen(false);
     }, [onClose]);
+
     const onClick = useCallback(
       (theCase?: Case | SubCase) => {
         closeModal();
@@ -47,6 +48,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
       },
       [closeModal, onRowClick]
     );
+
     return isModalOpen ? (
       <Modal onClose={closeModal} data-test-subj="all-cases-modal">
         <EuiModalHeader>

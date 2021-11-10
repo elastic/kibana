@@ -12,7 +12,6 @@ import { Cases } from './cases';
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 import { casesBreadcrumbs } from './links';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useHasData } from '../../hooks/use_has_data';
@@ -22,7 +21,6 @@ import { getNoDataConfig } from '../../utils/no_data_config';
 export const CasesPage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
   const { core, ObservabilityPageTemplate } = usePluginContext();
-  useReadonlyHeader();
   useBreadcrumbs([casesBreadcrumbs.cases]);
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();

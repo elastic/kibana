@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Case, CaseViewRefreshPropInterface } from '../../../../cases/common';
 import { TimelineId } from '../../../common/types/timeline';
@@ -26,7 +26,7 @@ import { useInsertTimeline } from '../components/use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { DetailsPanel } from '../../timelines/components/side_panel';
 import { InvestigateInTimelineAction } from '../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import { useFetchAlertData } from './helpers';
+import { useFetchAlertData } from './use_fetch_alert_data';
 
 const TimelineDetailsPanel = () => {
   const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
@@ -57,28 +57,13 @@ const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
 };
 
 const CaseContainerComponent: React.FC = () => {
-  const { chrome, cases: casesUi } = useKibana().services;
+  const { cases: casesUi } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
   );
-
-  useEffect(() => {
-    // if the user is read only then display the glasses badge in the global navigation header
-    if (userPermissions != null && !userPermissions.crud && userPermissions.read) {
-      chrome.setBadge({
-        text: i18n.READ_ONLY_BADGE_TEXT,
-        tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
-        iconType: 'glasses',
-      });
-    }
-    // remove the icon after the component unmounts
-    return () => {
-      chrome.setBadge();
-    };
-  }, [userPermissions, chrome]);
 
   const [spyState, setSpyState] = useState<{ caseTitle: string | undefined }>({
     caseTitle: undefined,

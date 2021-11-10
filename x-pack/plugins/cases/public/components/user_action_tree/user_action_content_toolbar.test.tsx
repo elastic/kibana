@@ -12,15 +12,7 @@ import {
   UserActionContentToolbarProps,
 } from './user_action_content_toolbar';
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-
-  return {
-    ...originalModule,
-    useParams: jest.fn().mockReturnValue({ detailName: 'case-1' }),
-  };
-});
-
+jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/lib/kibana');
 
 const props: UserActionContentToolbarProps = {

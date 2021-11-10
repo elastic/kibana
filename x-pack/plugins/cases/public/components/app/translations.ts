@@ -25,6 +25,21 @@ export const NO_PRIVILEGES_BUTTON = i18n.translate('xpack.cases.noPrivileges.but
 export const CREATE_CASE_PAGE_NAME = i18n.translate('xpack.cases.createCase', {
   defaultMessage: 'Create Case',
 });
+
 export const CONFIGURE_CASES_PAGE_NAME = i18n.translate('xpack.cases.configureCases', {
   defaultMessage: 'Configure Cases',
 });
+
+export const READ_ONLY_BADGE_TEXT = i18n.translate(
+  'xpack.securitySolution.cases.badge.readOnly.text',
+  {
+    defaultMessage: 'Read only',
+  }
+);
+
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.cases.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to create or edit cases',
+  }
+);

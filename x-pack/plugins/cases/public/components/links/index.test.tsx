@@ -10,27 +10,14 @@ import { ReactWrapper, mount } from 'enzyme';
 import { EuiText } from '@elastic/eui';
 
 import '../../common/mock/match_media';
-import { ConfigureCaseButton, ConfigureCaseButtonProps } from './button';
+import { ConfigureCaseButton, ConfigureCaseButtonProps } from '.';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
+jest.mock('../../common/navigation/hooks');
 
 describe('Configuration button', () => {
   let wrapper: ReactWrapper;
   const props: ConfigureCaseButtonProps = {
-    configureCasesNavigation: {
-      href: 'testHref',
-      onClick: jest.fn(),
-    },
     isDisabled: false,
     label: 'My label',
     msgTooltip: <></>,
@@ -50,7 +37,7 @@ describe('Configuration button', () => {
 
   test('it pass the correct props to the button', () => {
     expect(wrapper.find('[data-test-subj="configure-case-button"]').first().props()).toMatchObject({
-      href: `testHref`,
+      href: `/app/security/cases/configure`,
       iconType: 'controlsHorizontal',
       isDisabled: false,
       'aria-label': 'My label',

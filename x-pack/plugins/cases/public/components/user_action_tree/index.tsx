@@ -17,7 +17,6 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import classNames from 'classnames';
 import { get, isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { isRight } from 'fp-ts/Either';
 
@@ -58,6 +57,7 @@ import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { useCaseViewParams } from '../../common/navigation';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -161,15 +161,7 @@ export const UserActionTree = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const {
-      detailName: caseId,
-      commentId,
-      subCaseId,
-    } = useParams<{
-      detailName: string;
-      commentId?: string;
-      subCaseId?: string;
-    }>();
+    const { detailName: caseId, subCaseId, commentId } = useCaseViewParams();
     const handlerTimeoutId = useRef(0);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
