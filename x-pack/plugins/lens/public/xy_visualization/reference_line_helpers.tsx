@@ -108,9 +108,9 @@ export function getStaticValue(
     filteredLayers,
     accessors,
     activeData,
-    groupId !== 'x' // histogram axis should compute the min based on the current data
+    groupId !== 'x', // histogram axis should compute the min based on the current data
     groupId !== 'x'
-  )
+  );
   return computedValue ?? fallbackValue;
 }
 
