@@ -13,13 +13,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
 
-import { EuiLoadingChart } from '@elastic/eui';
-import { fetchIndexPattern } from '../common/index_patterns_utils';
 import { VisualizationContainer, PersistedState } from '../../../visualizations/public';
 
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
-import { getCharts, getDataStart } from './services';
 
 import type { TimeseriesVisParams } from './types';
 import type { ExpressionRenderDefinition } from '../../../expressions/common';
@@ -44,57 +41,40 @@ export const getTimeseriesVisRenderer: (deps: {
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    // Build optimization. Move app styles from main bundle
+    // @ts-expect-error TS error, cannot find type declaration for scss
+    import('./application/index.scss');
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
     const { visParams: model, visData, syncColors } = config;
-    const { palettes } = getCharts();
-    const { indexPatterns } = getDataStart();
 
     const showNoResult = !checkIfDataExists(visData, model);
 
-    let servicesLoaded;
-
-    Promise.all([
-      palettes.getPalettes(),
-      fetchIndexPattern(model.index_pattern, indexPatterns),
-    ]).then(([palettesService, { indexPattern }]) => {
-      servicesLoaded = true;
-
-      unmountComponentAtNode(domNode);
-
-      render(
-        <I18nProvider>
-          <VisualizationContainer
-            data-test-subj="timeseriesVis"
+    render(
+      <I18nProvider>
+        <VisualizationContainer
+          data-test-subj="timeseriesVis"
+          handlers={handlers}
+          showNoResult={showNoResult}
+          error={get(visData, [model.id, 'error'])}
+        >
+          <TimeseriesVisualization
+            // it is mandatory to bind uiSettings because of "this" usage inside "get" method
+            getConfig={uiSettings.get.bind(uiSettings)}
             handlers={handlers}
-            showNoResult={showNoResult}
-            error={get(visData, [model.id, 'error'])}
-          >
-            <TimeseriesVisualization
-              // it is mandatory to bind uiSettings because of "this" usage inside "get" method
-              getConfig={uiSettings.get.bind(uiSettings)}
-              handlers={handlers}
-              indexPattern={indexPattern}
-              model={model}
-              visData={visData as TimeseriesVisData}
-              syncColors={syncColors}
-              uiState={handlers.uiState! as PersistedState}
-              palettesService={palettesService}
-            />
-          </VisualizationContainer>
-        </I18nProvider>,
-        domNode
-      );
-    });
-
-    if (!servicesLoaded) {
-      render(
-        <div className="visChart__spinner">
-          <EuiLoadingChart mono size="l" />
-        </div>,
-        domNode
-      );
-    }
+            model={model}
+            visData={visData as TimeseriesVisData}
+            syncColors={syncColors}
+            uiState={handlers.uiState! as PersistedState}
+          />
+        </VisualizationContainer>
+      </I18nProvider>,
+      domNode,
+      () => {
+        handlers.done();
+      }
+    );
   },
 });
