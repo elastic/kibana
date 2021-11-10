@@ -10,7 +10,7 @@ import {
   EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiLink,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -315,18 +315,20 @@ export const useCasesColumns = ({
     ...(isSelectorView
       ? [
           {
+            align: RIGHT_ALIGNMENT,
             render: (theCase: Case) => {
               if (theCase.id != null) {
                 return (
-                  <EuiButtonEmpty
+                  <EuiButton
                     data-test-subj={`cases-table-row-select-${theCase.id}`}
                     onClick={() => {
                       assignCaseAction(theCase);
                     }}
                     size="s"
+                    fill={true}
                   >
                     {i18n.SELECT}
-                  </EuiButtonEmpty>
+                  </EuiButton>
                 );
               }
               return getEmptyTagValue();
