@@ -281,36 +281,4 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       }
     })
   );
-
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /api/ml/trained_models/:modelId/deployment/_stats Get trained model deployment stats
-   * @apiName GetTrainedModelDeploymentStats
-   * @apiDescription Gets trained model deployment stats.
-   */
-  router.get(
-    {
-      path: '/api/ml/trained_models/{modelId}/deployment/_stats',
-      validate: {
-        params: modelIdSchema,
-      },
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const { modelId } = request.params;
-        const { body } = await mlClient.getTrainedModelDeploymentStats({
-          model_id: modelId,
-        });
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
 }

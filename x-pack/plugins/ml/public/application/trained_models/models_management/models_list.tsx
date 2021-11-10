@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { omit } from 'lodash';
 import {
   EuiBadge,
   EuiButton,
@@ -153,9 +152,7 @@ export const ModelsList: FC = () => {
       }
 
       // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchAndPopulateDeploymentStats(
-        newItems.filter((v) => v.model_type.includes('pytorch'))
-      );
+      await fetchModelsStats(newItems.filter((v) => v.model_type.includes('pytorch')));
 
       setItems(newItems);
 
@@ -232,39 +229,6 @@ export const ModelsList: FC = () => {
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
           defaultMessage: 'Fetch model stats failed',
-        })
-      );
-    }
-  }, []);
-
-  /**
-   * Updates model items with deployment stats;
-   *
-   * We have to fetch all deployment stats on each update,
-   * because for stopped models the API returns 404 response.
-   */
-  const fetchAndPopulateDeploymentStats = useCallback(async (modelItems: ModelItem[]) => {
-    try {
-      const { deployment_stats: deploymentStats } =
-        await trainedModelsApiService.getTrainedModelDeploymentStats('*');
-
-      for (const deploymentStat of deploymentStats) {
-        const deployedModel = modelItems.find(
-          (model) => model.model_id === deploymentStat.model_id
-        );
-
-        if (deployedModel) {
-          deployedModel.stats = {
-            ...(deployedModel.stats ?? {}),
-            deployment_stats: omit(deploymentStat, 'model_id'),
-          };
-        }
-      }
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeploymentStatsErrorMessage', {
-          defaultMessage: 'Fetch deployment stats failed',
         })
       );
     }

@@ -104,8 +104,16 @@ describe('Model service', () => {
     },
   } as unknown as jest.Mocked<IScopedClusterClient>;
   const mlClient = {
-    getTrainedModelDeploymentStats: jest.fn(() => {
-      return Promise.resolve({ body: mockResponse });
+    getTrainedModelsStats: jest.fn(() => {
+      return Promise.resolve({
+        body: {
+          trained_model_stats: mockResponse.map((v) => {
+            return {
+              deployment_stats: v,
+            };
+          }),
+        },
+      });
     }),
   } as unknown as jest.Mocked<MlClient>;
   const memoryOverviewService = {
