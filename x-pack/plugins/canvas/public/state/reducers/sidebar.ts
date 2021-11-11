@@ -9,9 +9,6 @@ import { handleActions } from 'redux-actions';
 import { State } from '../../../types';
 import { SetGroupFiltersByOptionType, SetGroupFiltersByOptionPayload } from '../actions/sidebar';
 
-// @ts-expect-error untyped local
-import { assignNodeProperties } from './elements';
-
 export const sidebarReducer = handleActions<
   State['persistent']['workpad'],
   SetGroupFiltersByOptionPayload
