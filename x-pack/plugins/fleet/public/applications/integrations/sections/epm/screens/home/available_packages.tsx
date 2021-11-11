@@ -348,7 +348,7 @@ export const AvailablePackages: React.FC = memo(() => {
             <EuiCard
               data-test-sub="integration-card:epr:app_search_web_crawler:featured"
               icon={<EuiIcon type="logoAppSearch" size="xxl" />}
-              href={addBasePath('/app/enterprise_search/app_search')}
+              href={addBasePath('/app/enterprise_search/app_search/engines/new?method=crawler')}
               title={i18n.translate('xpack.fleet.featuredSearchTitle', {
                 defaultMessage: 'Web site crawler',
               })}
