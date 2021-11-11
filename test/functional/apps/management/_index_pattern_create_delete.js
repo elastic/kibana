@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.only('validation', function () {
+    describe('validation', function () {
       it('can display errors', async function () {
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.settings.setIndexPatternField('log-fake*');
