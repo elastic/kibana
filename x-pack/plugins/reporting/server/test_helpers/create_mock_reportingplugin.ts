@@ -11,7 +11,7 @@ jest.mock('../browsers');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
-import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, statusServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
@@ -45,6 +45,7 @@ export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup =
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
     taskManager: taskManagerMock.createSetup(),
     logger: createMockLevelLogger(),
+    status: statusServiceMock.createSetupContract(),
     ...setupMock,
   };
 };
