@@ -138,7 +138,7 @@ export class TelemetryEventsSender {
         clusterInfo?.version?.number
       );
     } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
+      this.logger.debug(`Error sending telemetry events data: ${err}`);
       queue.clearEvents();
     }
   }
@@ -175,7 +175,7 @@ export class TelemetryEventsSender {
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
-      this.logger.warn(
+      this.logger.debug(
         `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
       );
     }

@@ -134,7 +134,7 @@ jest.mock('./epm/packages/cleanup', () => {
   };
 });
 
-jest.mock('./upgrade_usage', () => {
+jest.mock('./upgrade_sender', () => {
   return {
     sendTelemetryEvents: jest.fn(),
   };

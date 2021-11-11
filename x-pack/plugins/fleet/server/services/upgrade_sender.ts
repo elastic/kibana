@@ -8,15 +8,23 @@
 import type { Logger } from 'src/core/server';
 
 import type { TelemetryEventsSender } from '../telemetry/sender';
+import type { InstallType } from '../types';
 
-export interface PackagePolicyUpgradeUsage {
-  package_name: string;
-  current_version: string;
-  new_version: string;
+export interface PackageUpdateEvent {
+  packageName: string;
+  currentVersion: string;
+  newVersion: string;
   status: 'success' | 'failure';
-  error?: UpgradeError[];
   dryRun?: boolean;
-  error_message?: string[];
+  errorMessage?: string[] | string;
+  error?: UpgradeError[];
+  eventType: UpdateEventType;
+  installType?: InstallType;
+}
+
+export enum UpdateEventType {
+  PACKAGE_POLICY_UPGRADE = 'package-policy-upgrade',
+  PACKAGE_INSTALL = 'package-install',
 }
 
 export interface UpgradeError {
@@ -30,19 +38,19 @@ export const FLEET_UPGRADES_CHANNEL_NAME = 'fleet-upgrades';
 export function sendTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender | undefined,
-  upgradeUsage: PackagePolicyUpgradeUsage
+  upgradeEvent: PackageUpdateEvent
 ) {
   if (eventsTelemetry === undefined) {
     return;
   }
 
   try {
-    const cappedErrors = capErrorSize(upgradeUsage.error || [], MAX_ERROR_SIZE);
+    const cappedErrors = capErrorSize(upgradeEvent.error || [], MAX_ERROR_SIZE);
     eventsTelemetry.queueTelemetryEvents(FLEET_UPGRADES_CHANNEL_NAME, [
       {
-        ...upgradeUsage,
-        error: upgradeUsage.error ? cappedErrors : undefined,
-        error_message: makeErrorGeneric(cappedErrors),
+        ...upgradeEvent,
+        error: upgradeEvent.error ? cappedErrors : undefined,
+        errorMessage: upgradeEvent.errorMessage || makeErrorGeneric(cappedErrors),
       },
     ]);
   } catch (exc) {

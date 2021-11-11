@@ -11,8 +11,8 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 
-import { sendTelemetryEvents, capErrorSize } from './upgrade_usage';
-import type { PackagePolicyUpgradeUsage } from './upgrade_usage';
+import { sendTelemetryEvents, capErrorSize, UpdateEventType } from './upgrade_sender';
+import type { PackageUpdateEvent } from './upgrade_sender';
 
 describe('sendTelemetryEvents', () => {
   let eventsTelemetryMock: jest.Mocked<TelemetryEventsSender>;
@@ -24,23 +24,24 @@ describe('sendTelemetryEvents', () => {
   });
 
   it('should queue telemetry events with generic error', () => {
-    const upgardeMessage: PackagePolicyUpgradeUsage = {
-      package_name: 'aws',
-      current_version: '0.6.1',
-      new_version: '1.3.0',
+    const upgradeMessage: PackageUpdateEvent = {
+      packageName: 'aws',
+      currentVersion: '0.6.1',
+      newVersion: '1.3.0',
       status: 'failure',
       error: [
         { key: 'queueUrl', message: ['Queue URL is required'] },
         { message: 'Invalid format' },
       ],
       dryRun: true,
+      eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
     };
 
-    sendTelemetryEvents(loggerMock, eventsTelemetryMock, upgardeMessage);
+    sendTelemetryEvents(loggerMock, eventsTelemetryMock, upgradeMessage);
 
     expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith('fleet-upgrades', [
       {
-        current_version: '0.6.1',
+        currentVersion: '0.6.1',
         error: [
           {
             key: 'queueUrl',
@@ -50,11 +51,12 @@ describe('sendTelemetryEvents', () => {
             message: 'Invalid format',
           },
         ],
-        error_message: ['Field is required', 'Invalid format'],
-        new_version: '1.3.0',
-        package_name: 'aws',
+        errorMessage: ['Field is required', 'Invalid format'],
+        newVersion: '1.3.0',
+        packageName: 'aws',
         status: 'failure',
         dryRun: true,
+        eventType: 'package-policy-upgrade',
       },
     ]);
   });
