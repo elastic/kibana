@@ -43,10 +43,10 @@ const getMockObject = (
 ): RouteSpyState & TabNavigationProps => ({
   detailName,
   navTabs: {
-    case: {
+    cases: {
       disabled: false,
       href: '/app/security/cases',
-      id: 'case',
+      id: 'cases',
       name: 'Cases',
       urlKey: 'cases',
     },
