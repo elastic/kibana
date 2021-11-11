@@ -107,19 +107,21 @@ const mockPluginsStart = {
 };
 
 const mockPluginsSetup = {
-  ml: {
-    locator,
-  },
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
+  },
+  licensing: { license$: new Observable() },
+  ml: {
+    locator,
   },
   observability: {
     isAlertingExperienceEnabled: () => false,
     navigation: { PageTemplate: () => null },
     observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   },
+  usageCollection: { reportUiCounter: () => {} },
 };
 
 const mockApmPluginContextValue = {
