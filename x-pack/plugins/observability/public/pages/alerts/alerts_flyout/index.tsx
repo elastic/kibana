@@ -15,11 +15,12 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutProps,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
@@ -41,6 +42,7 @@ import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observ
 import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { ExperimentalBadge } from '../../../components/shared/experimental_badge';
+import { translations, paths } from '../../../config';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -62,6 +64,7 @@ export function AlertsFlyout({
   const { services } = useKibana();
   const { http } = services;
   const prepend = http?.basePath.prepend;
+
   const decoratedAlerts = useMemo(() => {
     const parseObservabilityAlert = parseAlert(observabilityRuleTypeRegistry);
     return (alerts ?? []).map(parseObservabilityAlert);
@@ -75,11 +78,12 @@ export function AlertsFlyout({
     return null;
   }
 
+  const ruleId = alertData.fields['kibana.alert.rule.uuid'] ?? null;
+  const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
+
   const overviewListItems = [
     {
-      title: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
-        defaultMessage: 'Status',
-      }),
+      title: translations.alertsFlyout.statusLabel,
       description: (
         <AlertStatusIndicator
           alertStatus={alertData.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
@@ -87,52 +91,55 @@ export function AlertsFlyout({
       ),
     },
     {
-      title: i18n.translate('xpack.observability.alertsFlyout.lastUpdatedLabel', {
-        defaultMessage: 'Last updated',
-      }),
+      title: translations.alertsFlyout.lastUpdatedLabel,
       description: (
         <span title={alertData.start.toString()}>{moment(alertData.start).format(dateFormat)}</span>
       ),
     },
     {
-      title: i18n.translate('xpack.observability.alertsFlyout.durationLabel', {
-        defaultMessage: 'Duration',
-      }),
+      title: translations.alertsFlyout.durationLabel,
       description: asDuration(alertData.fields[ALERT_DURATION], { extended: true }),
     },
     {
-      title: i18n.translate('xpack.observability.alertsFlyout.expectedValueLabel', {
-        defaultMessage: 'Expected value',
-      }),
+      title: translations.alertsFlyout.expectedValueLabel,
       description: alertData.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
     },
     {
-      title: i18n.translate('xpack.observability.alertsFlyout.actualValueLabel', {
-        defaultMessage: 'Actual value',
-      }),
+      title: translations.alertsFlyout.actualValueLabel,
       description: alertData.fields[ALERT_EVALUATION_VALUE] ?? '-',
     },
     {
-      title: i18n.translate('xpack.observability.alertsFlyout.ruleTypeLabel', {
-        defaultMessage: 'Rule type',
-      }),
+      title: translations.alertsFlyout.ruleTypeLabel,
       description: alertData.fields[ALERT_RULE_CATEGORY] ?? '-',
     },
   ];
 
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <ExperimentalBadge />
         <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s">{alertData.reason}</EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiTitle size="xs">
+          <h4>{translations.alertsFlyout.reasonTitle}</h4>
+        </EuiTitle>
         <EuiSpacer size="s" />
+        <EuiText size="s">{alertData.reason}</EuiText>
+        <EuiSpacer size="s" />
+        {!!linkToRule && (
+          <EuiLink href={linkToRule} data-test-subj="viewRuleDetailsFlyout">
+            {translations.alertsFlyout.viewRulesDetailsLinkText}
+          </EuiLink>
+        )}
+        <EuiHorizontalRule size="full" />
+        <EuiTitle size="xs">
+          <h4>{translations.alertsFlyout.documentSummaryTitle}</h4>
+        </EuiTitle>
+        <EuiSpacer size="m" />
         <EuiDescriptionList
           compressed={true}
           type="responsiveColumn"
@@ -158,7 +165,7 @@ export function AlertsFlyout({
                 data-test-subj="alertsFlyoutViewInAppButton"
                 fill
               >
-                View in app
+                {translations.alertsFlyout.viewInAppButtonText}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -29,26 +29,27 @@ describe('MetaRewritePolicy', () => {
       // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: 'before' });
       const policy = createPolicy('update', [{ path: 'a', value: 'after' }]);
+      // @ts-expect-error ECS custom meta
       expect(policy.rewrite(log).meta!.a).toBe('after');
     });
 
     it('updates nested properties in LogMeta', () => {
-      // @ts-expect-error ECS custom meta
-      const log = createLogRecord({ a: 'before a', b: { c: 'before b.c' }, d: [0, 1] });
+      const log = createLogRecord({
+        error: { message: 'before b.c' },
+        tags: ['0', '1'],
+      });
       const policy = createPolicy('update', [
-        { path: 'a', value: 'after a' },
-        { path: 'b.c', value: 'after b.c' },
-        { path: 'd[1]', value: 2 },
+        { path: 'error.message', value: 'after b.c' },
+        { path: 'tags[1]', value: '2' },
       ]);
       expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
-          "a": "after a",
-          "b": Object {
-            "c": "after b.c",
+          "error": Object {
+            "message": "after b.c",
           },
-          "d": Array [
-            0,
-            2,
+          "tags": Array [
+            "0",
+            "2",
           ],
         }
       `);
@@ -80,14 +81,13 @@ describe('MetaRewritePolicy', () => {
 
     it(`does not add properties which don't exist yet`, () => {
       const policy = createPolicy('update', [
-        { path: 'a.b', value: 'foo' },
-        { path: 'a.c', value: 'bar' },
+        { path: 'error.message', value: 'foo' },
+        { path: 'error.id', value: 'bar' },
       ]);
-      // @ts-expect-error ECS custom meta
-      const log = createLogRecord({ a: { b: 'existing meta' } });
+      const log = createLogRecord({ error: { message: 'existing meta' } });
       const { meta } = policy.rewrite(log);
-      expect(meta!.a.b).toBe('foo');
-      expect(meta!.a.c).toBeUndefined();
+      expect(meta?.error?.message).toBe('foo');
+      expect(meta?.error?.id).toBeUndefined();
     });
 
     it('does not touch anything outside of LogMeta', () => {
@@ -110,22 +110,19 @@ describe('MetaRewritePolicy', () => {
 
   describe('mode: remove', () => {
     it('removes existing properties in LogMeta', () => {
-      // @ts-expect-error ECS custom meta
-      const log = createLogRecord({ a: 'goodbye' });
-      const policy = createPolicy('remove', [{ path: 'a' }]);
-      expect(policy.rewrite(log).meta!.a).toBeUndefined();
+      const log = createLogRecord({ error: { message: 'before' } });
+      const policy = createPolicy('remove', [{ path: 'error' }]);
+      expect(policy.rewrite(log).meta?.error).toBeUndefined();
     });
 
     it('removes nested properties in LogMeta', () => {
-      // @ts-expect-error ECS custom meta
-      const log = createLogRecord({ a: 'a', b: { c: 'b.c' }, d: [0, 1] });
-      const policy = createPolicy('remove', [{ path: 'b.c' }, { path: 'd[1]' }]);
+      const log = createLogRecord({ error: { message: 'reason' }, tags: ['0', '1'] });
+      const policy = createPolicy('remove', [{ path: 'error.message' }, { path: 'tags[1]' }]);
       expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
-          "a": "a",
-          "b": Object {},
-          "d": Array [
-            0,
+          "error": Object {},
+          "tags": Array [
+            "0",
             undefined,
           ],
         }
@@ -133,12 +130,11 @@ describe('MetaRewritePolicy', () => {
     });
 
     it('has no effect if property does not exist', () => {
-      // @ts-expect-error ECS custom meta
-      const log = createLogRecord({ a: 'a' });
+      const log = createLogRecord({ error: {} });
       const policy = createPolicy('remove', [{ path: 'b' }]);
       expect(policy.rewrite(log).meta).toMatchInlineSnapshot(`
         Object {
-          "a": "a",
+          "error": Object {},
         }
       `);
     });
