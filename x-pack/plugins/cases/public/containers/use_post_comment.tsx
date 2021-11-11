@@ -41,7 +41,7 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
   }
 };
 
-interface PostComment {
+export interface PostComment {
   caseId: string;
   data: CommentRequest;
   updateCase?: (newCase: Case) => void;
