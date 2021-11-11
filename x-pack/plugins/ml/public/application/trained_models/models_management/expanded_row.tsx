@@ -5,35 +5,31 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { omit } from 'lodash';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiListGroup,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import { ModelItemFull } from './models_list';
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlLocator } from '../../contexts/kibana';
 import { timeFormatter } from '../../../../common/util/date_utils';
 import { isDefined } from '../../../../common/types/guards';
 import { isPopulatedObject } from '../../../../common';
 import { ML_PAGES } from '../../../../common/constants/locator';
+import { ModelPipelines } from './pipelines';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -124,10 +120,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     default_field_map,
     license_level,
   };
-
-  const {
-    services: { share },
-  } = useMlKibana();
 
   useEffect(
     function updateDeploymentState() {
@@ -335,114 +327,13 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       </EuiPanel>
                     </EuiFlexItem>
                   )}
-                  {stats.ingest?.total && (
-                    <EuiFlexItem>
-                      <EuiPanel style={{ maxHeight: '400px', overflow: 'auto' }}>
-                        <EuiTitle size={'xs'}>
-                          <h5>
-                            <FormattedMessage
-                              id="xpack.ml.trainedModels.modelsList.expandedRow.ingestStatsTitle"
-                              defaultMessage="Ingest stats"
-                            />
-                          </h5>
-                        </EuiTitle>
-                        <EuiSpacer size={'m'} />
-                        <EuiDescriptionList
-                          compressed={true}
-                          type="column"
-                          listItems={formatToListItems(stats.ingest.total)}
-                        />
-
-                        {stats.ingest?.pipelines && (
-                          <>
-                            <EuiSpacer size={'m'} />
-                            <EuiTitle size={'xs'}>
-                              <h5>
-                                <FormattedMessage
-                                  id="xpack.ml.trainedModels.modelsList.expandedRow.byPipelineTitle"
-                                  defaultMessage="By pipeline"
-                                />
-                              </h5>
-                            </EuiTitle>
-                            <EuiSpacer size={'s'} />
-                            {Object.entries(stats.ingest.pipelines).map(
-                              ([pipelineName, { processors, ...pipelineStats }], i) => {
-                                return (
-                                  <Fragment key={pipelineName}>
-                                    <EuiFlexGroup>
-                                      <EuiFlexItem grow={false}>
-                                        <EuiTitle size={'xs'}>
-                                          <EuiTextColor color="subdued">
-                                            <h5>
-                                              {i + 1}. {pipelineName}
-                                            </h5>
-                                          </EuiTextColor>
-                                        </EuiTitle>
-                                      </EuiFlexItem>
-                                      <EuiFlexItem>
-                                        <EuiHorizontalRule size={'full'} margin={'s'} />
-                                      </EuiFlexItem>
-                                    </EuiFlexGroup>
-                                    <EuiSpacer size={'m'} />
-                                    <EuiDescriptionList
-                                      compressed={true}
-                                      type="column"
-                                      listItems={formatToListItems(pipelineStats)}
-                                    />
-                                    <EuiSpacer size={'m'} />
-                                    <EuiTitle size={'xxs'}>
-                                      <h6>
-                                        <FormattedMessage
-                                          id="xpack.ml.trainedModels.modelsList.expandedRow.byProcessorTitle"
-                                          defaultMessage="By processor"
-                                        />
-                                      </h6>
-                                    </EuiTitle>
-                                    <EuiSpacer size={'s'} />
-                                    <>
-                                      {processors.map((processor) => {
-                                        const name = Object.keys(processor)[0];
-                                        const { stats: processorStats } = processor[name];
-                                        return (
-                                          <Fragment key={name}>
-                                            <EuiFlexGroup>
-                                              <EuiFlexItem grow={false}>
-                                                <EuiTitle size={'xxs'}>
-                                                  <EuiTextColor color="subdued">
-                                                    <h6>{name}</h6>
-                                                  </EuiTextColor>
-                                                </EuiTitle>
-                                              </EuiFlexItem>
-                                              <EuiFlexItem>
-                                                <EuiHorizontalRule size={'full'} margin={'s'} />
-                                              </EuiFlexItem>
-                                            </EuiFlexGroup>
-                                            <EuiSpacer size={'m'} />
-                                            <EuiDescriptionList
-                                              compressed={true}
-                                              type="column"
-                                              listItems={formatToListItems(processorStats)}
-                                            />
-                                          </Fragment>
-                                        );
-                                      })}
-                                    </>
-                                  </Fragment>
-                                );
-                              }
-                            )}
-                          </>
-                        )}
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  )}
                 </EuiFlexGrid>
               </>
             ),
           },
         ]
       : []),
-    ...(pipelines && Object.keys(pipelines).length > 0
+    ...((pipelines && Object.keys(pipelines).length > 0) || stats.ingest
       ? [
           {
             id: 'pipelines',
@@ -458,65 +349,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             content: (
               <>
                 <EuiSpacer size={'m'} />
-                <EuiFlexGrid columns={2} gutterSize={'m'}>
-                  {Object.entries(pipelines).map(
-                    ([pipelineName, { processors, description: pipelineDescription }]) => {
-                      return (
-                        <EuiFlexItem key={pipelineName}>
-                          <EuiPanel>
-                            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                              <EuiFlexItem grow={false}>
-                                <EuiTitle size={'xs'}>
-                                  <h5>{pipelineName}</h5>
-                                </EuiTitle>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiButtonEmpty
-                                  onClick={() => {
-                                    const locator = share.url.locators.get(
-                                      'INGEST_PIPELINES_APP_LOCATOR'
-                                    );
-                                    if (!locator) return;
-                                    locator.navigate({
-                                      page: 'pipeline_edit',
-                                      pipelineId: pipelineName,
-                                      absolute: true,
-                                    });
-                                  }}
-                                >
-                                  <FormattedMessage
-                                    id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
-                                    defaultMessage="Edit"
-                                  />
-                                </EuiButtonEmpty>
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-
-                            {pipelineDescription && <EuiText>{pipelineDescription}</EuiText>}
-                            <EuiSpacer size={'m'} />
-                            <EuiTitle size={'xxs'}>
-                              <h6>
-                                <FormattedMessage
-                                  id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
-                                  defaultMessage="Processors"
-                                />
-                              </h6>
-                            </EuiTitle>
-                            <EuiCodeBlock
-                              language="json"
-                              fontSize="m"
-                              paddingSize="m"
-                              overflowHeight={300}
-                              isCopyable
-                            >
-                              {JSON.stringify(processors, null, 2)}
-                            </EuiCodeBlock>
-                          </EuiPanel>
-                        </EuiFlexItem>
-                      );
-                    }
-                  )}
-                </EuiFlexGrid>
+                <ModelPipelines pipelines={pipelines!} ingestStats={stats.ingest} />
               </>
             ),
           },
