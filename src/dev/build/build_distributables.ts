@@ -14,6 +14,7 @@ import * as Tasks from './tasks';
 export interface BuildOptions {
   isRelease: boolean;
   downloadFreshNode: boolean;
+  downloadCloudDependencies: boolean;
   initialize: boolean;
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
@@ -129,7 +130,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
 
   if (options.createDockerCloud) {
-    // control w/ --docker-images and --docker-cloud
+    // control w/ --docker-images and --skip-docker-cloud
+    if (options.downloadCloudDependencies) {
+      // control w/ --skip-cloud-dependencies-download
+      await run(Tasks.DownloadCloudDependencies);
+    }
     await run(Tasks.CreateDockerCloud);
   }
 

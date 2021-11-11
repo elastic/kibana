@@ -13,7 +13,7 @@ export { deleteAlerts } from './delete';
 export { disableAlert, disableAlerts } from './disable';
 export { enableAlert, enableAlerts } from './enable';
 export { loadAlert } from './get_rule';
-export { loadAlertInstanceSummary } from './alert_summary';
+export { loadAlertSummary } from './alert_summary';
 export { muteAlertInstance } from './mute_alert';
 export { muteAlert, muteAlerts } from './mute';
 export { loadAlertTypes } from './rule_types';
