@@ -14,6 +14,8 @@ import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { CrawlerDomainsLogic } from './crawler_domains_logic';
 import { CrawlerLogic, CrawlerValues } from './crawler_logic';
 import {
@@ -280,15 +282,8 @@ describe('CrawlerLogic', () => {
         });
       });
 
-      describe('on failure', () => {
-        it('flashes an error message', async () => {
-          http.post.mockReturnValueOnce(Promise.reject('error'));
-
-          CrawlerLogic.actions.startCrawl();
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('error');
-        });
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        CrawlerLogic.actions.startCrawl();
       });
     });
 
@@ -308,16 +303,8 @@ describe('CrawlerLogic', () => {
         });
       });
 
-      describe('on failure', () => {
-        it('flashes an error message', async () => {
-          jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
-          http.post.mockReturnValueOnce(Promise.reject('error'));
-
-          CrawlerLogic.actions.stopCrawl();
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('error');
-        });
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        CrawlerLogic.actions.stopCrawl();
       });
     });
 

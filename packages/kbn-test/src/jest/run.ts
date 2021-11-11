@@ -44,6 +44,7 @@ declare global {
 
 export function runJest(configName = 'jest.config.js') {
   const argv = buildArgv(process.argv);
+  const devConfigName = 'jest.config.dev.js';
 
   const log = new ToolingLog({
     level: argv.verbose ? 'verbose' : 'info',
@@ -67,16 +68,23 @@ export function runJest(configName = 'jest.config.js') {
     log.verbose('commonTestFiles:', commonTestFiles);
 
     let configPath;
+    let devConfigPath;
 
     // sets the working directory to the cwd or the common
     // base directory of the provided test files
     let wd = testFilesProvided ? commonTestFiles : cwd;
 
+    devConfigPath = resolve(wd, devConfigName);
     configPath = resolve(wd, configName);
 
-    while (!existsSync(configPath)) {
+    while (!existsSync(configPath) && !existsSync(devConfigPath)) {
       wd = resolve(wd, '..');
+      devConfigPath = resolve(wd, devConfigName);
       configPath = resolve(wd, configName);
+    }
+
+    if (existsSync(devConfigPath)) {
+      configPath = devConfigPath;
     }
 
     log.verbose(`no config provided, found ${configPath}`);

@@ -149,6 +149,8 @@ export const TIMELINE_ADD_FIELD_BUTTON = '[data-test-subj="addField"]';
 
 export const TIMELINE_DATA_PROVIDER_FIELD = '[data-test-subj="field"]';
 
+export const TIMELINE_DATA_PROVIDER_FIELD_INPUT = '[data-test-subj="comboBoxSearchInput"]';
+
 export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
 
 export const TIMELINE_DATA_PROVIDER_VALUE = `[data-test-subj="value"]`;

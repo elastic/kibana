@@ -56,7 +56,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
       data: distribution.currentPeriod,
       color: theme.eui.euiColorVis1,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
-        defaultMessage: 'Occurences',
+        defaultMessage: 'Occurrences',
       }),
     },
     ...(comparisonEnabled
