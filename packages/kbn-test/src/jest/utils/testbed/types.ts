@@ -7,10 +7,13 @@
  */
 
 import { Store } from 'redux';
-import { ReactWrapper } from 'enzyme';
+import { ReactWrapper as GenericReactWrapper } from 'enzyme';
 import { LocationDescriptor } from 'history';
 
+export type AsyncSetupFunc<T> = (props?: any) => Promise<TestBed<T>>;
+export type SyncSetupFunc<T> = (props?: any) => TestBed<T>;
 export type SetupFunc<T> = (props?: any) => TestBed<T> | Promise<TestBed<T>>;
+export type ReactWrapper = GenericReactWrapper<any>;
 
 export interface EuiTableMetaData {
   /** Array of rows of the table. Each row exposes its reactWrapper and its columns */
@@ -51,7 +54,7 @@ export interface TestBed<T = string> {
     find('myForm.nameInput');
     ```
    */
-  find: (testSubject: T, reactWrapper?: ReactWrapper) => ReactWrapper<any>;
+  find: (testSubject: T, reactWrapper?: ReactWrapper) => ReactWrapper;
   /**
    * Update the props of the mounted component
    *
@@ -147,15 +150,23 @@ export interface TestBed<T = string> {
   };
 }
 
-export interface TestBedConfig {
+export interface BaseTestBedConfig {
   /** The default props to pass to the mounted component. */
   defaultProps?: Record<string, any>;
   /** Configuration object for the react-router `MemoryRouter. */
   memoryRouter?: MemoryRouterConfig;
   /** An optional redux store. You can also provide a function that returns a store. */
   store?: (() => Store) | Store | null;
+}
+
+export interface AsyncTestBedConfig extends BaseTestBedConfig {
   /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
-  doMountAsync?: boolean;
+  doMountAsync: true;
+}
+
+export interface TestBedConfig extends BaseTestBedConfig {
+  /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
+  doMountAsync?: false;
 }
 
 export interface MemoryRouterConfig {
