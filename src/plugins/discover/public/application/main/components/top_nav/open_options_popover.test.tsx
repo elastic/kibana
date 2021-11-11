@@ -45,5 +45,5 @@ test('should display the correct text if legacy table is selected', () => {
   uiSettings.set('doc_table:legacy', true);
   const element = document.createElement('div');
   const component = mountWithIntl(<OptionsPopover onClose={jest.fn()} anchorElement={element} />);
-  expect(findTestSubject(component, 'docTableMode').text()).toBe('Classic Discover');
+  expect(findTestSubject(component, 'docTableMode').text()).toBe('Classic');
 });

@@ -42,7 +42,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
 
   const mode = isLegacy
     ? i18n.translate('discover.openOptionsPopover.classicDiscoverText', {
-        defaultMessage: 'Classic Discover',
+        defaultMessage: 'Classic',
       })
     : i18n.translate('discover.openOptionsPopover.documentExplorerText', {
         defaultMessage: 'Document Explorer',
@@ -60,8 +60,8 @@ export function OptionsPopover(props: OptionsPopoverProps) {
                 viewModeLabel: (
                   <strong>
                     <FormattedMessage
-                      id="discover.topNav.optionsPopover.currentViewModeLabel"
-                      defaultMessage="Current view mode"
+                      id="discover.topNav.optionsPopover.discoverViewModeLabel"
+                      defaultMessage="Discover view mode"
                     />
                   </strong>
                 ),
@@ -75,13 +75,13 @@ export function OptionsPopover(props: OptionsPopoverProps) {
           {isLegacy ? (
             <FormattedMessage
               id="discover.topNav.openOptionsPopover.documentExplorerDisabledHint"
-              defaultMessage="Great news! Discover has a new Document Explorer offering resizable columns, a full screen mode and comparing of documents.
-                Toggle 'Disable Document Explorer' off in Advanced Settings to get started."
+              defaultMessage="Did you know Discover has a new Document Explorer with better data sorting, resizable columns,
+                and a full screen view? You can change the view mode in Advanced Settings."
             />
           ) : (
             <FormattedMessage
               id="discover.topNav.openOptionsPopover.documentExplorerEnabledHint"
-              defaultMessage="You're using the new Document Explorer. You can disable Document Explorer in the options."
+              defaultMessage="You can switch back to the classic Discover view in Advanced Settings."
             />
           )}
         </EuiText>
@@ -106,8 +106,8 @@ export function OptionsPopover(props: OptionsPopoverProps) {
             size="s"
             href={addBasePath(`/app/management/kibana/settings?query=category:(discover)`)}
           >
-            {i18n.translate('discover.openOptionsPopover.gotToAllSettings', {
-              defaultMessage: 'All Discover options',
+            {i18n.translate('discover.openOptionsPopover.gotToSettings', {
+              defaultMessage: 'Go to Discover settings',
             })}
           </EuiButtonEmpty>
         </EuiTextAlign>
