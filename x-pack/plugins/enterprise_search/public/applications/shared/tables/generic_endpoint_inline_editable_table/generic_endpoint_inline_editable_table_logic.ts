@@ -7,9 +7,14 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../flash_messages';
+import { toastAPIErrors } from '../../flash_messages';
+import { getErrorsFromHttpResponse } from '../../flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../http';
+import {
+  InlineEditableTableLogic,
+  InlineEditableTableProps as InlineEditableTableLogicProps,
+} from '../inline_editable_table/inline_editable_table_logic';
 
 import { ItemWithAnID } from '../types';
 
@@ -89,7 +94,10 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onAdd(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        const errors = getErrorsFromHttpResponse(e);
+        InlineEditableTableLogic({
+          instanceId: props.instanceId,
+        } as InlineEditableTableLogicProps<ItemWithAnID>).actions.setRowErrors(errors);
       } finally {
         actions.clearLoading();
       }
@@ -105,7 +113,10 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onDelete(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        const errors = getErrorsFromHttpResponse(e);
+        InlineEditableTableLogic({
+          instanceId: props.instanceId,
+        } as InlineEditableTableLogicProps<ItemWithAnID>).actions.setRowErrors(errors);
       } finally {
         actions.clearLoading();
       }
@@ -124,7 +135,10 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onUpdate(item, itemsFromResponse);
         onSuccess();
       } catch (e) {
-        flashAPIErrors(e);
+        const errors = getErrorsFromHttpResponse(e);
+        InlineEditableTableLogic({
+          instanceId: props.instanceId,
+        } as InlineEditableTableLogicProps<ItemWithAnID>).actions.setRowErrors(errors);
       } finally {
         actions.clearLoading();
       }
@@ -150,7 +164,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
         onSuccess();
       } catch (e) {
         onReorder(oldItems);
-        flashAPIErrors(e);
+        toastAPIErrors(e);
       }
 
       actions.clearLoading();
