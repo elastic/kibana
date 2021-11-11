@@ -278,7 +278,7 @@ export function createTestEsCluster<
             log.error(`Found ${deps.length} deprecation warnings.`);
           }
           deps.forEach((m) => {
-            log.error(m);
+            log.error('ES DEPRECATION WARNING: ' + m);
           });
         });
       const nodeStopPromises = [];
