@@ -70,6 +70,7 @@ export const getTermsBucketAgg = () =>
     },
     createFilter: createFilterTerms,
     postFlightRequest: otherBucketPostFlightRequest,
+    hasPrecisionError: (aggBucket) => Boolean(aggBucket?.doc_count_error_upper_bound),
     params: [
       {
         name: 'field',

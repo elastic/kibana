@@ -67,7 +67,7 @@ describe('Aggs service', () => {
           "date_range",
           "ip_range",
           "terms",
-          "multi_terms,
+          "multi_terms",
           "filter",
           "filters",
           "significant_terms",

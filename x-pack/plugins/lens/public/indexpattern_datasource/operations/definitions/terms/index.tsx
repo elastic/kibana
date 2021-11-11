@@ -242,11 +242,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, orderedColumnIds) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
+    return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
       schema: 'segment',
-      fields: [column.sourceField, 'geo.dest'],
+      field: column.sourceField,
       orderBy:
         column.params.orderBy.type === 'alphabetical'
           ? '_key'
