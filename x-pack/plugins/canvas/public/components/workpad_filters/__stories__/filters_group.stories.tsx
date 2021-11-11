@@ -41,5 +41,7 @@ const filtersGroup: FiltersGroupType = {
 
 storiesOf('components/WorkpadFilters/FiltersGroup', module)
   .addDecorator((story) => <div className="canvasLayout__sidebar">{story()}</div>)
-  .add('default', () => <FiltersGroup filtersGroup={filtersGroup} />)
-  .add('empty group', () => <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} />);
+  .add('default', () => <FiltersGroup filtersGroup={filtersGroup} id="0" />)
+  .add('empty group', () => (
+    <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} id="0" />
+  ));
