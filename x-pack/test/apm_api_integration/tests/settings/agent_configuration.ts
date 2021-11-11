@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { inspect } from 'util';
+
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '../../../../plugins/apm/server/routes/settings/agent_configuration';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
   const log = getService('log');
@@ -133,19 +135,19 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
         it('can create and delete config', async () => {
           // assert that config does not exist
-          await expectStatusCode(() => searchConfigurations(searchParams), 404);
+          await expectMissing(() => searchConfigurations(searchParams));
 
           // create config
           await createConfiguration(newConfig);
 
           // assert that config now exists
-          await expectStatusCode(() => searchConfigurations(searchParams), 200);
+          await expectExists(() => searchConfigurations(searchParams));
 
           // delete config
           await deleteConfiguration(newConfig);
 
           // assert that config was deleted
-          await expectStatusCode(() => searchConfigurations(searchParams), 404);
+          await expectMissing(() => searchConfigurations(searchParams));
         });
 
         describe('when a configuration exists', () => {
@@ -439,6 +441,16 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
     }
   );
+
+  async function expectExists(fn: () => ReturnType<typeof searchConfigurations>) {
+    const response = await fn();
+    expect(response.body).not.to.be.empty();
+  }
+
+  async function expectMissing(fn: () => ReturnType<typeof searchConfigurations>) {
+    const response = await fn();
+    expect(response.body).to.be.empty();
+  }
 }
 
 async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolean> {
@@ -464,10 +476,23 @@ async function expectStatusCode(
   }>,
   statusCode: number
 ) {
+  let res;
   try {
-    const res = await fn();
-    expect(res.status).to.be(statusCode);
+    res = await fn();
   } catch (e) {
-    expect(e.res.status).to.be(statusCode);
+    if (e && e.res && e.res.status) {
+      if (e.res.status === statusCode) {
+        return;
+      }
+      throw new Error(
+        `Expected a [${statusCode}] response, got [${e.res.status}]: ${inspect(e.res)}`
+      );
+    } else {
+      throw new Error(
+        `Unexpected rejection value, expected error with .res response property: ${inspect(e)}`
+      );
+    }
   }
+
+  expect(res.status).to.be(statusCode);
 }

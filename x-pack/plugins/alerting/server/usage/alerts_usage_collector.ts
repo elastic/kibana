@@ -75,11 +75,21 @@ export function createAlertsUsageCollector(
           count_active_total: 0,
           count_disabled_total: 0,
           throttle_time: {
+            min: '0s',
+            avg: '0s',
+            max: '0s',
+          },
+          schedule_time: {
+            min: '0s',
+            avg: '0s',
+            max: '0s',
+          },
+          throttle_time_number_s: {
             min: 0,
             avg: 0,
             max: 0,
           },
-          schedule_time: {
+          schedule_time_number_s: {
             min: 0,
             avg: 0,
             max: 0,
@@ -100,11 +110,21 @@ export function createAlertsUsageCollector(
       count_active_total: { type: 'long' },
       count_disabled_total: { type: 'long' },
       throttle_time: {
+        min: { type: 'keyword' },
+        avg: { type: 'keyword' },
+        max: { type: 'keyword' },
+      },
+      schedule_time: {
+        min: { type: 'keyword' },
+        avg: { type: 'keyword' },
+        max: { type: 'keyword' },
+      },
+      throttle_time_number_s: {
         min: { type: 'long' },
         avg: { type: 'float' },
         max: { type: 'long' },
       },
-      schedule_time: {
+      schedule_time_number_s: {
         min: { type: 'long' },
         avg: { type: 'float' },
         max: { type: 'long' },
