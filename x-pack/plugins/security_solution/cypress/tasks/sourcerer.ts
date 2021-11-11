@@ -24,7 +24,7 @@ export const openSourcerer = (sourcererScope?: string) => {
   cy.get(SOURCERER.trigger).should('be.enabled');
   cy.get(SOURCERER.trigger).should('be.visible');
   cy.get(SOURCERER.trigger).click();
-  cy.get(SOURCERER.wrapperTimeline).should('be.visible');
+  cy.get(SOURCERER.wrapper).should('be.visible');
 };
 export const openTimelineSourcerer = () => {
   cy.get(SOURCERER.triggerTimeline).should('be.enabled');
