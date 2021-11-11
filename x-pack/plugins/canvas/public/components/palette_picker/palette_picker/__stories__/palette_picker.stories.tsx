@@ -8,12 +8,13 @@
 import React, { FC, useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
-import { PalettePicker } from '../palette_picker';
+import { PalettePicker } from '../../palette_picker';
 
-import { paulTor14, ColorPalette } from '../../../../common/lib/palettes';
+import { paulTor14, ColorPalette } from '../../../../../common/lib/palettes';
+import { CustomColorPalette } from '../../types';
 
 const Interactive: FC = () => {
-  const [palette, setPalette] = useState<ColorPalette | null>(paulTor14);
+  const [palette, setPalette] = useState<ColorPalette | CustomColorPalette | null>(paulTor14);
   return <PalettePicker palette={palette} onChange={setPalette} clearable={true} />;
 };
 
