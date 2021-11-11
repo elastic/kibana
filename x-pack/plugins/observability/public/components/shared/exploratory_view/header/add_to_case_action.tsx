@@ -14,7 +14,7 @@ import { GetAllCasesSelectorModalProps } from '../../../../../../cases/public';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { Case, SubCase } from '../../../../../../cases/common';
-import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
+import { casesPath, observabilityAppId, observabilityFeatureId } from '../../../../../common';
 
 export interface AddToCaseProps {
   timeRange?: { from: string; to: string };
@@ -75,7 +75,7 @@ function CaseToastText({ theCase, basePath }: { theCase: Case | SubCase; basePat
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem>
-        <EuiLink href={`${basePath}/app/observability/cases/${theCase.id}`} target="_blank">
+        <EuiLink href={`${basePath}/app/observability${casesPath}/${theCase.id}`} target="_blank">
           {i18n.translate('xpack.observability.expView.heading.addToCase.notification.viewCase', {
             defaultMessage: 'View case',
           })}
