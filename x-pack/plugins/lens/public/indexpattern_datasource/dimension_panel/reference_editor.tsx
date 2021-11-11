@@ -34,7 +34,7 @@ import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { VisualizationDimensionGroupConfig } from '../../types';
+import { ParamEditorCustomProps, VisualizationDimensionGroupConfig } from '../../types';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 
 const operationPanels = getOperationDisplay();
@@ -65,6 +65,7 @@ export interface ReferenceEditorProps {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   data: DataPublicPluginStart;
+  paramEditorCustomProps?: ParamEditorCustomProps;
 }
 
 export function ReferenceEditor(props: ReferenceEditorProps) {
@@ -84,6 +85,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     isFullscreen,
     toggleFullscreen,
     setIsCloseable,
+    paramEditorCustomProps,
     ...services
   } = props;
 
@@ -364,6 +366,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               isFullscreen={isFullscreen}
               toggleFullscreen={toggleFullscreen}
               setIsCloseable={setIsCloseable}
+              paramEditorCustomProps={paramEditorCustomProps}
               {...services}
             />
           </>
