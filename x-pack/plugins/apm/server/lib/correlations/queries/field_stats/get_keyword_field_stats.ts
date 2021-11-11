@@ -32,9 +32,6 @@ export const getKeywordFieldStatsRequest = (
       terms: {
         field: fieldName,
         size: 10,
-        order: {
-          _count: 'desc',
-        },
       },
     },
   };

@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { LatencyCorrelationsResponse } from '../../../../plugins/apm/common/correlations/latency_correlations/types';
+import { SAMPLER_SHARD_SIZE } from '../../../../plugins/apm/common/correlations/constants';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
@@ -195,7 +196,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             body: {
               ...getOptions(),
               fieldsToSample: [...fieldsToSample],
-              samplerShardSize: 5000,
+              samplerShardSize: SAMPLER_SHARD_SIZE,
             },
           },
         });

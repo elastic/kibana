@@ -250,7 +250,7 @@ export function TopValues({
       {Array.isArray(fieldValueStats?.topValues) && (
         <>
           <EuiHorizontalRule margin="s" />
-          <EuiText size="xs">
+          <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.apm.correlations.fieldContextPopover.notTopTenValueMessage"
               defaultMessage="Selected term is not in the top 10"

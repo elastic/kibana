@@ -12,6 +12,7 @@ import { getBooleanFieldStatsRequest } from './get_boolean_field_stats';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 import { fetchFieldsStats } from './get_fields_stats';
+import { SAMPLER_SHARD_SIZE } from '../../../../../common/correlations/constants';
 
 const params = {
   index: 'apm-*',
@@ -20,7 +21,7 @@ const params = {
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
-  samplerShardSize: 10000,
+  samplerShardSize: SAMPLER_SHARD_SIZE,
 };
 
 export const getExpectedQuery = (aggs: any) => {
@@ -69,7 +70,7 @@ describe('field_stats', () => {
               },
             },
           },
-          sampler: { shard_size: 10000 },
+          sampler: { shard_size: SAMPLER_SHARD_SIZE },
         },
       };
       expect(req).toEqual(getExpectedQuery(expectedAggs));
@@ -81,7 +82,7 @@ describe('field_stats', () => {
 
       const expectedAggs = {
         sample: {
-          sampler: { shard_size: 10000 },
+          sampler: { shard_size: SAMPLER_SHARD_SIZE },
           aggs: {
             sampled_top: {
               terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
@@ -98,7 +99,7 @@ describe('field_stats', () => {
 
       const expectedAggs = {
         sample: {
-          sampler: { shard_size: 10000 },
+          sampler: { shard_size: SAMPLER_SHARD_SIZE },
           aggs: {
             sampled_value_count: {
               filter: { exists: { field: 'url.path' } },
