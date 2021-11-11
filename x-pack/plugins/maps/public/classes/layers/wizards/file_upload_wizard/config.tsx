@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
-import { getFileUpload } from '../../../kibana_services';
+import { getFileUpload } from '../../../../kibana_services';
 
 export const uploadLayerWizardConfig: LayerWizard = {
   categories: [],

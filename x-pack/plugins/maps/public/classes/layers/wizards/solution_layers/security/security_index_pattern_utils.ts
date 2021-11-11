@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import minimatch from 'minimatch';
-import { getIndexPatternService, getUiSettings } from '../../../../kibana_services';
+import { getIndexPatternService, getUiSettings } from '../../../../../kibana_services';
 
 export type IndexPatternMeta = {
   id: string;

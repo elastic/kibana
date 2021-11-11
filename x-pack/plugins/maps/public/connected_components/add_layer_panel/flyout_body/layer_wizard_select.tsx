@@ -24,7 +24,7 @@ import {
   getLayerWizards,
   LayerWizard,
   LayerWizardWithMeta,
-} from '../../../classes/layers/layer_wizard_registry';
+} from '../../../classes/layers';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import './layer_wizard_select.scss';
 

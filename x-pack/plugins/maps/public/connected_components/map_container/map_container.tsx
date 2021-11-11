@@ -26,7 +26,7 @@ import { RawValue } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../reducers/map';
 import { MapSettingsPanel } from '../map_settings_panel';
-import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
+import { registerLayerWizards } from '../../classes/layers/wizards/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
 
