@@ -48,12 +48,12 @@ export function startTrackingEventLoopDelaysThreshold(
       finalize(() => eventLoopDelaysMonitor.stop())
     )
     .subscribe(async () => {
-      const { mean } = eventLoopDelaysMonitor.collect();
+      const { mean: meanMS } = eventLoopDelaysMonitor.collect();
       const meanDurationMs = moment
-        .duration(mean / ONE_MILLISECOND_AS_NANOSECONDS)
+        .duration(meanMS / ONE_MILLISECOND_AS_NANOSECONDS) // this will now be in ms
         .asMilliseconds();
 
-      if (meanDurationMs > warnThreshold) {
+      if (meanMS > warnThreshold) {
         logger.warn(
           `Average event loop delay threshold exceeded ${warnThreshold}ms. Received ${meanDurationMs}ms. ` +
             `See https://ela.st/kibana-scaling-considerations for more information about scaling Kibana.`

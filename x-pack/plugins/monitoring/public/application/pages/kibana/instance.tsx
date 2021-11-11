@@ -36,6 +36,8 @@ import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 
 const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();
+  console.log('do we interpret the data correctly here? I think we do', data);
+  console.log('--------->>>>>data.metrics.kibana_process_delay', data.metrics.kibana_process_delay);
 
   return (
     <EuiPage>
@@ -148,6 +150,7 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
           },
         }),
       });
+      console.log('what is the raw response to the http call in monitoring public post?', response);
       setData(response);
       setInstanceName(response.kibanaSummary.name);
       const alertsResponse = await fetchAlerts({
