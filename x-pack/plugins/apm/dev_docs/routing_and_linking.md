@@ -6,7 +6,7 @@ This document describes routing in the APM plugin.
 
 ### Server-side
 
-Route definitions for APM's server-side API are in the [server/routes directory](../server/routes). Routes are created with [the `createApmServerRoute` function](../server/routes/create_apm_server_route.ts). Routes are added to the API in [the `registerRoutes` function](../server/routes/register_routes.ts), which is initialized in the plugin `setup` lifecycle method.
+Route definitions for APM's server-side API are in the [server/routes directory](../server/routes). Routes are created with [the `createApmServerRoute` function](../server/routes/apm_routes/create_apm_server_route.ts). Routes are added to the API in [the `registerRoutes` function](../server/routes/apm_routes/register_apm_server_routes.ts), which is initialized in the plugin `setup` lifecycle method.
 
 The path and query string parameters are defined in the calls to `createApmServerRoute` with io-ts types, so that each route has its parameters type checked.
 
@@ -52,7 +52,7 @@ const {
 
 `useApmParams` will strip query parameters for which there is no validation. The route path should match exactly, but you can also use wildcards: `useApmParams('/*)`. In that case, the return type will be a union type of all possible matching routes.
 
-Previously we used `useUrlParams` for path and query parameters, which we are trying to get away from. When possible, any usage of `useUrlParams` should be replaced by `useApmParams` or other custom hooks that use `useApmParams` internally.
+Previously we used `useLegacyUrlParams` for path and query parameters, which we are trying to get away from. When possible, any usage of `useLegacyUrlParams` should be replaced by `useApmParams` or other custom hooks that use `useApmParams` internally.
 
 ## Linking
 

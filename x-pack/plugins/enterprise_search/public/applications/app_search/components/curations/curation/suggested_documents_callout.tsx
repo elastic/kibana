@@ -22,19 +22,20 @@ export const SuggestedDocumentsCallout: React.FC = () => {
     curation: { suggestion, queries },
   } = useValues(CurationLogic);
   const {
-    engine: { search_relevance_suggestions_active: searchRelevanceSuggestionsActive },
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
   } = useValues(EngineLogic);
 
   if (
     typeof suggestion === 'undefined' ||
     suggestion.status !== 'pending' ||
-    searchRelevanceSuggestionsActive === false
+    adaptiveRelevanceSuggestionsActive === false
   ) {
     return null;
   }
 
   return (
     <SuggestionsCallout
+      style={{ marginTop: '24px' }}
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curation.suggestedDocumentsCallout.title',
         { defaultMessage: 'New suggested documents for this query' }

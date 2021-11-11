@@ -410,12 +410,16 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies
+    // Copy all package policies and append (copy) to their names
     if (baseAgentPolicy.package_policies.length) {
       const newPackagePolicies = (baseAgentPolicy.package_policies as PackagePolicy[]).map(
         (packagePolicy: PackagePolicy) => {
           const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
-          return newPackagePolicy;
+          const updatedPackagePolicy = {
+            ...newPackagePolicy,
+            name: `${packagePolicy.name} (copy)`,
+          };
+          return updatedPackagePolicy;
         }
       );
       await packagePolicyService.bulkCreate(
@@ -668,7 +672,7 @@ class AgentPolicyService {
   ) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
-    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
 
     if (!defaultOutputId) {
       return;

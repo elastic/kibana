@@ -36,6 +36,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { FieldButton } from '@kbn/react-field/field_button';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { EuiHighlight } from '@elastic/eui';
 import {
@@ -45,7 +46,6 @@ import {
   Filter,
   esQuery,
 } from '../../../../../src/plugins/data/public';
-import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
