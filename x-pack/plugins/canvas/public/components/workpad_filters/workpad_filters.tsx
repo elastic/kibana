@@ -11,7 +11,7 @@ import { State, FilterField } from '../../../types';
 import { groupFiltersBy } from '../../lib/filter';
 import { setGroupFiltersByOption } from '../../state/actions/sidebar';
 import { getGroupFiltersByOption } from '../../state/selectors/sidebar';
-import { useCanvasFilters } from '../hooks/sidebar/use_canvas_filters';
+import { useCanvasFilters } from './hooks';
 import { WorkpadFilters as Component } from './workpad_filters.component';
 
 const DEFAULT_GROUP_BY: FilterField = 'filterGroup';
