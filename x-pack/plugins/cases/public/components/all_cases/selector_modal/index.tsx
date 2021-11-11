@@ -85,7 +85,7 @@ const AllCasesSelectorModalComponent: React.FC<AllCasesSelectorModalProps> = ({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton color="text" onClick={closeModal}>
-          {i18n.CANCEL_ADD_TO_CASE_BUTTON}
+          {i18n.CANCEL}
         </EuiButton>
       </EuiModalFooter>
     </Modal>

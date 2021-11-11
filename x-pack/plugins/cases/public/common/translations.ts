@@ -232,12 +232,6 @@ export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
 });
-export const CANCEL_ADD_TO_CASE_BUTTON = i18n.translate(
-  'xpack.cases.common.allCases.caseModal.cancelButton',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
 
 export const MAX_LENGTH_ERROR = (field: string, length: number) =>
   i18n.translate('xpack.cases.createCase.maxLengthError', {

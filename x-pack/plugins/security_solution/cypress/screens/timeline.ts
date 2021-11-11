@@ -20,10 +20,6 @@ export const ATTACH_TIMELINE_TO_EXISTING_CASE_ICON =
 
 export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
-export const CASE = (id: string) => {
-  return `[data-test-subj="cases-table-row-${id}"]`;
-};
-
 export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
