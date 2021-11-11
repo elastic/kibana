@@ -6619,7 +6619,6 @@
     "xpack.apm.settings.schema.confirm.apmServerSettingsCloudLinkText": "クラウドでAPMサーバー設定に移動",
     "xpack.apm.settings.schema.confirm.cancelText": "キャンセル",
     "xpack.apm.settings.schema.confirm.checkboxLabel": "データストリームに切り替えることを確認する",
-    "xpack.apm.settings.schema.confirm.descriptionText": "現在、スタック監視はFleetで管理されたAPMではサポートされていません。",
     "xpack.apm.settings.schema.confirm.irreversibleWarning.message": "移行中には一時的にAPMデータ収集に影響する可能性があります。移行プロセスは数分で完了します。",
     "xpack.apm.settings.schema.confirm.irreversibleWarning.title": "データストリームへの切り替えは元に戻せません。",
     "xpack.apm.settings.schema.confirm.switchButtonText": "データストリームに切り替える",

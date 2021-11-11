@@ -6672,7 +6672,6 @@
     "xpack.apm.settings.schema.confirm.apmServerSettingsCloudLinkText": "前往 Cloud 中的 APM Server 设置",
     "xpack.apm.settings.schema.confirm.cancelText": "取消",
     "xpack.apm.settings.schema.confirm.checkboxLabel": "我确认我想切换到数据流",
-    "xpack.apm.settings.schema.confirm.descriptionText": "请注意 Fleet 托管的 APM 当前不支持堆栈监测。",
     "xpack.apm.settings.schema.confirm.irreversibleWarning.message": "迁移在进行中时，可能会暂时影响 APM 数据收集。迁移的过程应只需花费几分钟。",
     "xpack.apm.settings.schema.confirm.irreversibleWarning.title": "切换到数据流是不可逆的操作",
     "xpack.apm.settings.schema.confirm.switchButtonText": "切换到数据流",
