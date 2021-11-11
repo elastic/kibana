@@ -25,20 +25,5 @@ describe('correlations', () => {
         ignore_unavailable: true,
       });
     });
-
-    it('defaults ignore_throttled to true', () => {
-      const requestBase = getRequestBase({
-        index: 'apm-*',
-        environment: ENVIRONMENT_ALL.value,
-        kuery: '',
-        start: 1577836800000,
-        end: 1609459200000,
-      });
-      expect(requestBase).toEqual({
-        index: 'apm-*',
-        ignore_throttled: true,
-        ignore_unavailable: true,
-      });
-    });
   });
 });
