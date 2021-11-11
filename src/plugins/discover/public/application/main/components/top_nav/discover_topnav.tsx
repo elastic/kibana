@@ -12,6 +12,7 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
+import { DataViewType } from '../../../../../../data_views/common';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -39,7 +40,10 @@ export const DiscoverTopNav = ({
   resetSavedSearch,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-  const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
+  const showDatePicker = useMemo(
+    () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
+    [indexPattern]
+  );
   const { TopNavMenu } = services.navigation.ui;
 
   const onOpenSavedSearch = useCallback(

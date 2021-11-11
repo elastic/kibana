@@ -13,6 +13,7 @@ import {
   isCompleteResponse,
   ISearchSource,
 } from '../../../../../data/public';
+import { DataViewType } from '../../../../../data_views/common';
 import { Adapters } from '../../../../../inspector/common';
 import { FetchStatus } from '../../types';
 import { SavedSearchData } from './use_saved_search';
@@ -36,13 +37,18 @@ export function fetchTotalHits(
   }
 ) {
   const { totalHits$ } = data$;
-  const indexPattern = searchSource.getField('index');
   searchSource.setField('trackTotalHits', true);
-  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
   searchSource.setField('size', 0);
   searchSource.removeField('sort');
   searchSource.removeField('fields');
   searchSource.removeField('aggs');
+  if (searchSource.getField('index')?.type === DataViewType.ROLLUP) {
+    // We treat that index pattern as "normal" even if it was a rollup index pattern,
+    // since the rollup endpoint does not support querying individual documents, but we
+    // can get them from the regular _search API that will be used if the index pattern
+    // not a rollup index pattern.
+    searchSource.setOverwriteDataViewType(undefined);
+  }
 
   sendLoadingMsg(totalHits$);
 
