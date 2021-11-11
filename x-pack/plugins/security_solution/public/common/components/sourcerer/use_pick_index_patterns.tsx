@@ -34,7 +34,7 @@ interface UsePickIndexPatterns {
 }
 
 const patternListToOptions = (patternList: string[], selectablePatterns?: string[]) =>
-  patternList.map((s) => ({
+  patternList.sort().map((s) => ({
     label: s,
     value: s,
     ...(selectablePatterns != null ? { disabled: !selectablePatterns.includes(s) } : {}),
