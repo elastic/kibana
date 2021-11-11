@@ -112,7 +112,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [initialLoad, setInitialLoad] = useState<boolean>(true);
-  const [noData, setNoData] = useState<boolean>(false);
+  const [noData, setNoData] = useState<boolean>(true);
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -222,48 +222,50 @@ export const AlertsList: React.FunctionComponent = () => {
   }, []);
 
   async function loadAlertsData() {
-    const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
-    if (hasAnyAuthorizedAlertType) {
-      setAlertsState({ ...alertsState, isLoading: true });
-      try {
-        const alertsResponse = await loadAlerts({
-          http,
-          page,
-          searchText,
-          typesFilter,
-          actionTypesFilter,
-          alertStatusesFilter,
-          sort,
-        });
-        await loadAlertAggs();
-        setAlertsState({
-          isLoading: false,
-          data: alertsResponse.data,
-          totalItemCount: alertsResponse.total,
-        });
+    if (alertTypesState.isInitialized) {
+      const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
+      if (hasAnyAuthorizedAlertType) {
+        setAlertsState({ ...alertsState, isLoading: true });
+        try {
+          const alertsResponse = await loadAlerts({
+            http,
+            page,
+            searchText,
+            typesFilter,
+            actionTypesFilter,
+            alertStatusesFilter,
+            sort,
+          });
+          await loadAlertAggs();
+          setAlertsState({
+            isLoading: false,
+            data: alertsResponse.data,
+            totalItemCount: alertsResponse.total,
+          });
 
-        if (!alertsResponse.data?.length && page.index > 0) {
-          setPage({ ...page, index: 0 });
+          if (!alertsResponse.data?.length && page.index > 0) {
+            setPage({ ...page, index: 0 });
+          }
+
+          const isFilterApplied = !(
+            isEmpty(searchText) &&
+            isEmpty(typesFilter) &&
+            isEmpty(actionTypesFilter) &&
+            isEmpty(alertStatusesFilter)
+          );
+
+          setNoData(alertsResponse.data.length === 0 && !isFilterApplied);
+        } catch (e) {
+          toasts.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.alertsList.unableToLoadRulesMessage',
+              {
+                defaultMessage: 'Unable to load rules',
+              }
+            ),
+          });
+          setAlertsState({ ...alertsState, isLoading: false });
         }
-
-        const isFilterApplied = !(
-          isEmpty(searchText) &&
-          isEmpty(typesFilter) &&
-          isEmpty(actionTypesFilter) &&
-          isEmpty(alertStatusesFilter)
-        );
-
-        setNoData(alertsResponse.data.length === 0 && !isFilterApplied);
-      } catch (e) {
-        toasts.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.unableToLoadRulesMessage',
-            {
-              defaultMessage: 'Unable to load rules',
-            }
-          ),
-        });
-        setAlertsState({ ...alertsState, isLoading: false });
       }
       setInitialLoad(false);
     }
