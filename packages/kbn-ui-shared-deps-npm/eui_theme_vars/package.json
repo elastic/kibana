@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/eui_theme_vars.js",
-  "types": "../target_types/eui_theme_vars.d.ts"
-}
