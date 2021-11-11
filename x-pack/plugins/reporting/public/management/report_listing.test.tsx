@@ -11,12 +11,14 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { Observable } from 'rxjs';
+import type { IUiSettingsClient } from 'src/core/public';
 import { ListingProps as Props, ReportListing } from '.';
 import type { NotificationsSetup } from '../../../../../src/core/public';
 import {
   applicationServiceMock,
   httpServiceMock,
   notificationServiceMock,
+  coreMock,
 } from '../../../../../src/core/public/mocks';
 import type { LocatorPublic, SharePluginSetup } from '../../../../../src/plugins/share/public';
 import type { ILicense } from '../../../licensing/public';
@@ -65,12 +67,18 @@ const mockJobs: ReportApiJSON[] = [
     id: 'k90e51pk1ieucbae0c3t8wo2',
     attempts: 0,
     created_at: '2020-04-14T21:01:13.064Z',
-    jobtype: 'printable_pdf',
+    jobtype: 'printable_pdf_v2',
     meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
     payload: {
+      spaceId: 'my-space',
       objectType: 'canvas workpad',
       title: 'My Canvas Workpad',
-    },
+      locatorParams: [
+        {
+          id: 'MY_APP',
+        },
+      ],
+    } as any,
     status: 'pending',
   }),
   buildMockReport({
@@ -201,12 +209,6 @@ const mockJobs: ReportApiJSON[] = [
   }),
 ];
 
-const reportingAPIClient = {
-  list: jest.fn(() => Promise.resolve(mockJobs.map((j) => new Job(j)))),
-  total: jest.fn(() => Promise.resolve(18)),
-  migrateReportingIndicesIlmPolicy: jest.fn(),
-} as unknown as DeeplyMockedKeys<ReportingAPIClient>;
-
 const validCheck = {
   check: () => ({
     state: 'VALID',
@@ -233,11 +235,13 @@ const mockPollConfig = {
 
 describe('ReportListing', () => {
   let httpService: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let uiSettingsClient: IUiSettingsClient;
   let applicationService: ReturnType<typeof applicationServiceMock.createStartContract>;
   let ilmLocator: undefined | LocatorPublic<SerializableRecord>;
   let urlService: SharePluginSetup['url'];
   let testBed: UnwrapPromise<ReturnType<typeof setup>>;
   let toasts: NotificationsSetup['toasts'];
+  let reportingAPIClient: ReportingAPIClient;
 
   const createTestBed = registerTestBed(
     (props?: Partial<Props>) => (
@@ -290,6 +294,7 @@ describe('ReportListing', () => {
   beforeEach(async () => {
     toasts = notificationServiceMock.createSetupContract().toasts;
     httpService = httpServiceMock.createSetupContract();
+    uiSettingsClient = coreMock.createSetup().uiSettings;
     applicationService = applicationServiceMock.createStartContract();
     applicationService.capabilities = {
       catalogue: {},
@@ -299,6 +304,16 @@ describe('ReportListing', () => {
     ilmLocator = {
       getUrl: jest.fn(),
     } as unknown as LocatorPublic<SerializableRecord>;
+
+    reportingAPIClient = new ReportingAPIClient(httpService, uiSettingsClient, 'x.x.x');
+
+    jest
+      .spyOn(reportingAPIClient, 'list')
+      .mockImplementation(() => Promise.resolve(mockJobs.map((j) => new Job(j))));
+    jest.spyOn(reportingAPIClient, 'total').mockImplementation(() => Promise.resolve(18));
+    jest
+      .spyOn(reportingAPIClient, 'migrateReportingIndicesIlmPolicy')
+      .mockImplementation(jest.fn());
 
     urlService = {
       locators: {
@@ -331,6 +346,21 @@ describe('ReportListing', () => {
     expect(unsubscribeMock).not.toHaveBeenCalled();
     testBed.component.unmount();
     expect(unsubscribeMock).toHaveBeenCalled();
+  });
+
+  it('navigates to a Kibana App in a new tab and is spaces aware', () => {
+    const { find } = testBed;
+
+    jest.spyOn(window, 'open').mockImplementation(jest.fn());
+    jest.spyOn(window, 'focus').mockImplementation(jest.fn());
+
+    find('euiCollapsedItemActionsButton').first().simulate('click');
+    find('reportOpenInKibanaApp').first().simulate('click');
+
+    expect(window.open).toHaveBeenCalledWith(
+      '/s/my-space/app/reportingRedirect?jobId=k90e51pk1ieucbae0c3t8wo2',
+      '_blank'
+    );
   });
 
   describe('ILM policy', () => {
