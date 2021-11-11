@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { ConnectorTypes } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
@@ -36,7 +36,7 @@ import {
   useGetChoicesResponse,
 } from './mock';
 import { FormContext } from './form_context';
-import { CreateCaseForm } from './form';
+import { CreateCaseFormFields, CreateCaseFormFieldsProps } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
@@ -77,10 +77,12 @@ const defaultPostCase = {
   postCase,
 };
 
-const defaultCreateCaseForm = {
+const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
-  owner: SECURITY_SOLUTION_OWNER,
+  disableAlerts: false,
+  withSteps: true,
+  hideConnectorServiceNowSir: false,
 };
 
 const defaultPostPushToService = {
@@ -150,7 +152,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -174,7 +176,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -192,7 +194,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -224,7 +226,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -248,7 +250,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess} syncAlertsDefaultValue={false}>
-            <CreateCaseForm {...defaultCreateCaseForm} disableAlerts={true} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} disableAlerts={true} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -282,7 +284,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -332,7 +334,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -357,7 +359,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -424,7 +426,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -494,7 +496,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -584,7 +586,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -682,7 +684,7 @@ describe('Create case', () => {
     const wrapper = mount(
       <TestProviders>
         <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
-          <CreateCaseForm {...defaultCreateCaseForm} />
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       </TestProviders>
@@ -719,7 +721,7 @@ describe('Create case', () => {
     const wrapper = mount(
       <TestProviders>
         <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
-          <CreateCaseForm {...defaultCreateCaseForm} />
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       </TestProviders>
