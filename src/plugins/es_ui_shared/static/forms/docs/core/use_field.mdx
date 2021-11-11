@@ -207,6 +207,14 @@ For example: when we add an item to the ComboBox array, we don't want to block t
 
 By default, when any of the validation fails, the following validation are not executed. If you still want to execute the following validation(s), set the `exitOnFail` to `false`.
 
+##### isAsync
+
+**Type:** `boolean`
+**Default:** `false`
+
+Flag to indicate if the validation is asynchronous. If not specified the lib will first try to run all the validations synchronously and if it detects a Promise it will run the validations a second time asynchronously. This means that HTTP request will be called twice which is not ideal.  
+**It is thus recommended** to set the `isAsync` flag to `true` for all asynchronous validations.
+
 #### deserializer
 
 **Type:** `SerializerFunc`
@@ -342,9 +350,9 @@ Use this prop to pass down dynamic data to your field validator. The data is the
 
 See an example on how to use this prop in the <DocLink id="formLibExampleValidation" section="dynamic-data-inside-your-validation" text="dynamic data inside your validation" /> section.
 
-### validationData$
+### validationDataProvider
 
-Use this prop to pass down an Observable into which you can send, asynchronously, dynamic data required inside your validation.
+Use this prop to pass down a Promise to provide dynamic data asynchronously in your validation.
 
 See an example on how to use this prop in the <DocLink id="formLibExampleValidation" section="asynchronous-dynamic-data-in-the-validator" text="asynchronous dynamic data in the validator" /> section.
 
