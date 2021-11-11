@@ -55,6 +55,9 @@ export const HostIsolationExceptionsList = () => {
   const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
+  const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
+
+
   const { isLoading, data, error, refetch } = useQuery<
     FoundExceptionListItemSchema,
     ServerApiError

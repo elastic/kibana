@@ -84,9 +84,6 @@ async function createHostIsolationException(
   } catch (error) {
     dispatch({
       type: 'hostIsolationExceptionsFormStateChanged',
-      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
-    });
-  }
 }
 
 async function loadHostIsolationExceptionsItem(
