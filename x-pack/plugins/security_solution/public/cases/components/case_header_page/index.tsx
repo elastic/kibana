@@ -9,8 +9,6 @@ import React from 'react';
 
 import { HeaderPage, HeaderPageProps } from '../../../common/components/header_page';
 
-const CaseHeaderPageComponent: React.FC<HeaderPageProps> = (props) => (
-  <HeaderPage hideSourcerer={true} {...props} />
-);
+const CaseHeaderPageComponent: React.FC<HeaderPageProps> = (props) => <HeaderPage {...props} />;
 
 export const CaseHeaderPage = React.memo(CaseHeaderPageComponent);

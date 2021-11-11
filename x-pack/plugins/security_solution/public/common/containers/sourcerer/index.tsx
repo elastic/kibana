@@ -13,7 +13,15 @@ import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { SelectedDataView, SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { ALERTS_PATH, CASES_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
+import {
+  ALERTS_PATH,
+  CASES_PATH,
+  HOSTS_PATH,
+  NETWORK_PATH,
+  OVERVIEW_PATH,
+  RULES_PATH,
+  UEBA_PATH,
+} from '../../../../common/constants';
 import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
@@ -300,3 +308,24 @@ export const getScopeFromPath = (
   }) == null
     ? SourcererScopeName.default
     : SourcererScopeName.detections;
+
+export const sourcererPaths = [
+  ALERTS_PATH,
+  `${RULES_PATH}/id/:id`,
+  HOSTS_PATH,
+  NETWORK_PATH,
+  OVERVIEW_PATH,
+  UEBA_PATH,
+];
+
+export const showSourcererByPath = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: sourcererPaths,
+    strict: false,
+  }) != null;
+
+export const isAlertsOrRulesDetailsPage = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`],
+    strict: false,
+  }) != null;

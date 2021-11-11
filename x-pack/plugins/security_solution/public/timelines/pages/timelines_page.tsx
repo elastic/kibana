@@ -46,7 +46,7 @@ export const TimelinesPageComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper>
-            <HeaderPage hideSourcerer={true} title={i18n.PAGE_TITLE}>
+            <HeaderPage title={i18n.PAGE_TITLE}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem>
                   {capabilitiesCanUserCRUD && (
@@ -93,6 +93,7 @@ export const TimelinesPageComponent: React.FC = () => {
         </>
       ) : (
         <SecuritySolutionPageWrapper>
+          <HeaderPage border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
