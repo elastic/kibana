@@ -6,6 +6,8 @@
  */
 
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+
+import { handleEsError } from '../shared_imports';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
@@ -26,6 +28,7 @@ describe('ML snapshots APIs', () => {
     mockRouter = createMockRouter();
     routeDependencies = {
       router: mockRouter,
+      lib: { handleEsError },
     };
     registerMlSnapshotRoutes(routeDependencies);
   });
@@ -169,6 +172,28 @@ describe('ML snapshots APIs', () => {
           kibanaResponseFactory
         )
       ).rejects.toThrow('scary error!');
+    });
+  });
+
+  describe('GET /api/upgrade_assistant/ml_upgrade_mode', () => {
+    it('Retrieves ml upgrade mode', async () => {
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
+      ).mockResolvedValue({
+        body: {
+          upgrade_mode: true,
+        },
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_upgrade_mode',
+      })(routeHandlerContextMock, createRequestMock({}), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        mlUpgradeModeEnabled: true,
+      });
     });
   });
 

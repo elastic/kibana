@@ -19,6 +19,7 @@ export { rulesClientMock };
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
+    getSecurityHealth: jest.fn(),
   };
   return mock;
 };
