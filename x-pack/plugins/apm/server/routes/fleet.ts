@@ -24,8 +24,8 @@ import { getUnsupportedApmServerSchema } from '../lib/fleet/get_unsupported_apm_
 import { isSuperuser } from '../lib/fleet/is_superuser';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_data',

@@ -14,9 +14,11 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
   registry.when('CSM Services without data', { config: 'trial', archives: [] }, () => {
     it('returns empty list', async () => {
-      const response = await supertest.get(
-        '/api/apm/rum-client/services?start=2020-06-28T10%3A24%3A46.055Z&end=2020-07-29T10%3A24%3A46.055Z&uiFilters=%7B%22agentName%22%3A%5B%22js-base%22%2C%22rum-js%22%5D%7D'
-      );
+      const response = await supertest.get('/internal/apm/ux/services').query({
+        start: '2020-06-28T10:24:46.055Z',
+        end: '2020-07-29T10:24:46.055Z',
+        uiFilters: '{"agentName":["js-base","rum-js"]}',
+      });
 
       expect(response.status).to.be(200);
       expect(response.body.rumServices).to.eql([]);
@@ -28,9 +30,11 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
     { config: 'trial', archives: ['8.0.0', 'rum_8.0.0'] },
     () => {
       it('returns rum services list', async () => {
-        const response = await supertest.get(
-          '/api/apm/rum-client/services?start=2020-06-28T10%3A24%3A46.055Z&end=2020-07-29T10%3A24%3A46.055Z&uiFilters=%7B%22agentName%22%3A%5B%22js-base%22%2C%22rum-js%22%5D%7D'
-        );
+        const response = await supertest.get('/internal/apm/ux/services').query({
+          start: '2020-06-28T10:24:46.055Z',
+          end: '2020-07-29T10:24:46.055Z',
+          uiFilters: '{"agentName":["js-base","rum-js"]}',
+        });
 
         expect(response.status).to.be(200);
 
