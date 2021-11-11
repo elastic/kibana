@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ANOMALY_SEVERITY } from './ml_constants';
+import { ANOMALY_SEVERITY } from '../ml_constants';
 import {
   getSeverityType,
   getSeverityColor as mlGetSeverityColor,
-} from '../../ml/common';
-import { ServiceHealthStatus } from './service_health_status';
+} from '../../../ml/common';
+import { ServiceHealthStatus } from '../service_health_status';
 
 export interface ServiceAnomalyStats {
   transactionType?: string;
