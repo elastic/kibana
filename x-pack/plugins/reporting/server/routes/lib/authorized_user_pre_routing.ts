@@ -13,7 +13,7 @@ import type { ReportingRequestHandlerContext } from '../../types';
 
 const superuserRole = 'superuser';
 
-export type ReportingRequestUser = AuthenticatedUser | false;
+type ReportingRequestUser = AuthenticatedUser | false;
 
 export type RequestHandlerUser<P, Q, B> = RequestHandler<
   P,
