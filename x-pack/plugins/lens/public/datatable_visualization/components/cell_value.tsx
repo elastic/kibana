@@ -31,8 +31,8 @@ export const createGridCell = (
     const currentAlignment = alignments && alignments[columnId];
     const alignmentClassName = `lnsTableCell--${currentAlignment}`;
     const className = classNames(alignmentClassName, {
-      'lnsTableCell': !fitRowToContent
-    })
+      lnsTableCell: !fitRowToContent,
+    });
 
     const { colorMode, palette } =
       columnConfig.columns.find(({ columnId: id }) => id === columnId) || {};
