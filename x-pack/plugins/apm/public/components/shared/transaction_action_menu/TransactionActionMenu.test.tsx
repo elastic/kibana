@@ -9,7 +9,7 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { License } from '../../../../../licensing/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
 import * as apmApi from '../../../services/rest/createCallApmApi';
@@ -24,7 +24,7 @@ const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
     <TransactionActionMenu transaction={transaction as Transaction} />,
     {
-      wrapper: MockApmAppContextProvider,
+      wrapper: MockContextProvider,
     }
   );
 
@@ -249,7 +249,7 @@ describe('TransactionActionMenu component', () => {
             transaction={Transactions.transactionWithMinimalData as Transaction}
           />
         </LicenseContext.Provider>,
-        { wrapper: MockApmAppContextProvider }
+        { wrapper: MockContextProvider }
       );
     }
     it('doesnt show custom links when license is not valid', () => {
@@ -286,7 +286,7 @@ describe('TransactionActionMenu component', () => {
             transaction={Transactions.transactionWithMinimalData as Transaction}
           />
         </LicenseContext.Provider>,
-        { wrapper: MockApmAppContextProvider }
+        { wrapper: MockContextProvider }
       );
       act(() => {
         fireEvent.click(component.getByText('Investigate'));

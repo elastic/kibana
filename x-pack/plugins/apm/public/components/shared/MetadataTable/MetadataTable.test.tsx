@@ -8,11 +8,11 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { MetadataTable } from '.';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import { expectTextsInDocument } from '../../../utils/testHelpers';
 import type { SectionDescriptor } from './types';
 const renderOptions = {
-  wrapper: MockApmAppContextProvider,
+  wrapper: MockContextProvider,
 };
 
 describe('MetadataTable', () => {

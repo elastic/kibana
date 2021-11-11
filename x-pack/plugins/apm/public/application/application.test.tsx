@@ -13,7 +13,7 @@ import React from 'react';
 import type { AppMountParameters } from 'src/core/public';
 import { ConfigSchema } from '..';
 import { RumHome } from '../components/app/RumDashboard/RumHome';
-import { mockContextValue } from '../context/mock_apm_app/mock_apm_app_context';
+import { mockContextValue } from '../context/mock/mock_context';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { renderApp as renderApmApp } from './';

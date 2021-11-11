@@ -7,7 +7,7 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../context/mock/mock_context';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
@@ -15,7 +15,7 @@ import {
 import { CustomLinkToolbar } from './CustomLinkToolbar';
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  return <MockApmAppContextProvider>{children}</MockApmAppContextProvider>;
+  return <MockContextProvider>{children}</MockContextProvider>;
 }
 
 describe('CustomLinkToolbar', () => {

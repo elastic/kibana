@@ -30,7 +30,7 @@ import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../context/mock/mock_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { LatencyChart } from './';
@@ -71,7 +71,7 @@ const stories: Meta<Args> = {
       const transactionType = `${Math.random()}`; // So we don't memoize
 
       return (
-        <MockApmAppContextProvider
+        <MockContextProvider
           value={{
             coreStart,
             path: `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&transactionType=request&comparisonEnabled=true&comparisonType=day`,
@@ -95,7 +95,7 @@ const stories: Meta<Args> = {
               </ChartPointerEventContextProvider>
             </APMServiceContext.Provider>
           </MockUrlParamsContextProvider>
-        </MockApmAppContextProvider>
+        </MockContextProvider>
       );
     },
   ],

@@ -11,7 +11,7 @@ import React from 'react';
 import { Popover } from '.';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { MockContextValue } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../../context/mock/mock_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { CytoscapeContext } from '../Cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';

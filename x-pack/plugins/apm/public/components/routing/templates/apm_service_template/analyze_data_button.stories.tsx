@@ -9,7 +9,7 @@ import type { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../context/mock/mock_context';
 import { AnalyzeDataButton } from './analyze_data_button';
 
 interface Args {
@@ -33,7 +33,7 @@ const stories: Meta<Args> = {
       };
 
       return (
-        <MockApmAppContextProvider
+        <MockContextProvider
           value={{
             coreStart,
             path: `/services/${serviceName}/overview?rangeFrom=now-15m&rangeTo=now&environment=${
@@ -51,7 +51,7 @@ const stories: Meta<Args> = {
           >
             <StoryComponent />
           </APMServiceContext.Provider>
-        </MockApmAppContextProvider>
+        </MockContextProvider>
       );
     },
   ],

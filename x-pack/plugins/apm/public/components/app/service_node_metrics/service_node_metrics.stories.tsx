@@ -12,7 +12,7 @@ import {
   APMServiceContextValue,
 } from '../../../context/apm_service/apm_service_context';
 import { BreadcrumbsContext } from '../../../context/breadcrumbs/context';
-import { MockContextValue } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../context/mock/mock_context';
 import { ServiceNodeMetrics } from './';
 
 type Args = MockContextValue;

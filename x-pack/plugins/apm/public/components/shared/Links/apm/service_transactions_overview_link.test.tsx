@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../context/mock/mock_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import {
   ServiceOrTransactionsOverviewLink,
@@ -21,11 +21,11 @@ function getWrapper({
   queryParams?: Record<string, unknown>;
 }) {
   return ({ children }: { children: React.ReactElement }) => (
-    <MockApmAppContextProvider>
+    <MockContextProvider>
       <MockUrlParamsContextProvider params={queryParams}>
         {children}
       </MockUrlParamsContextProvider>
-    </MockApmAppContextProvider>
+    </MockContextProvider>
   );
 }
 

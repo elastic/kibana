@@ -12,7 +12,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import qs from 'query-string';
 import React, { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../context/mock/mock_context';
 import { UrlParamsContext } from '../../../../context/url_params_context/url_params_context';
 import { RumDatePicker } from './';
 
@@ -63,7 +63,7 @@ function mountDatePicker(
   mockHistoryReplace = jest.spyOn(history, 'replace');
 
   const wrapper = mount(
-    <MockApmAppContextProvider
+    <MockContextProvider
       value={{
         history,
         pluginsSetup: {
@@ -80,7 +80,7 @@ function mountDatePicker(
       <MockUrlParamsProvider>
         <RumDatePicker />
       </MockUrlParamsProvider>
-    </MockApmAppContextProvider>
+    </MockContextProvider>
   );
 
   return { wrapper, setTimeSpy, getTimeSpy };

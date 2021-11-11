@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import { delay } from '../../../utils/testHelpers';
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 
@@ -67,14 +67,14 @@ function Wrapper({
   };
 
   return (
-    <MockApmAppContextProvider
+    <MockContextProvider
       value={{
         coreStart: { http: { get: httpMethodMock, post: httpMethodMock } },
         path: '/services/the-service-name/transactions/view?transactionName=the-transaction-name&rangeFrom=now-15m&rangeTo=now',
       }}
     >
       {children}
-    </MockApmAppContextProvider>
+    </MockContextProvider>
   );
 }
 

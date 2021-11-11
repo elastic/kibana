@@ -9,7 +9,7 @@ import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { MockContextValue } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../../context/mock/mock_context';
 import { ServiceList } from './';
 import { items } from './__fixtures__/service_api_mock_data';
 

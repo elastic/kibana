@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import { delay } from '../../../utils/testHelpers';
 import { useLatencyCorrelations } from './use_latency_correlations';
 
@@ -62,7 +62,7 @@ function Wrapper({
   };
 
   return (
-    <MockApmAppContextProvider
+    <MockContextProvider
       value={{
         coreStart: {
           http: { get: httpMethodMock, post: httpMethodMock },
@@ -71,7 +71,7 @@ function Wrapper({
       }}
     >
       {children}
-    </MockApmAppContextProvider>
+    </MockContextProvider>
   );
 }
 

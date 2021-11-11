@@ -7,7 +7,7 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MockContextValue } from '../../../../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../../../../../context/mock/mock_context';
 import { TransactionFlyout } from './';
 
 type Args = ComponentProps<typeof TransactionFlyout> & MockContextValue;

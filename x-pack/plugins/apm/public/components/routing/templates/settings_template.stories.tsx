@@ -7,7 +7,7 @@
 
 import type { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import type { MockContextValue } from '../../../context/mock_apm_app/mock_apm_app_context';
+import type { MockContextValue } from '../../../context/mock/mock_context';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { SettingsTemplate } from './settings_template';
 

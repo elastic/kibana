@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import { License } from '../../../../../licensing/common/license';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { LicenseContext } from '../../../context/license/license_context';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 
 const activeLicense = new License({
@@ -41,13 +41,13 @@ function createWrapper(license: License | null) {
   return ({ children }: { children?: ReactNode }) => {
     return (
       <EuiThemeProvider>
-        <MockApmAppContextProvider
+        <MockContextProvider
           value={{ path: '/service-map?rangeFrom=now-15m&rangeTo=now' }}
         >
           <LicenseContext.Provider value={license || undefined}>
             {children}
           </LicenseContext.Provider>
-        </MockApmAppContextProvider>
+        </MockContextProvider>
       </EuiThemeProvider>
     );
   };

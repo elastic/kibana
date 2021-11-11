@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ApmIndices } from '.';
 import * as hooks from '../../../../hooks/use_fetcher';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../context/mock/mock_context';
 
 describe('ApmIndices', () => {
   it('should not get stuck in infinite loop', () => {
@@ -22,7 +22,7 @@ describe('ApmIndices', () => {
     render(
       <ApmIndices />,
 
-      { wrapper: MockApmAppContextProvider }
+      { wrapper: MockContextProvider }
     );
 
     expect(screen.getByText('Indices')).toMatchInlineSnapshot(`

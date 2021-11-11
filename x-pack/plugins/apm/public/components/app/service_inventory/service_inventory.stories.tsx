@@ -10,7 +10,7 @@ import React from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { AnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
-import { MockContextValue } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../context/mock/mock_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ServiceInventory } from './';

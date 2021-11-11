@@ -9,20 +9,20 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import { LatencyCorrelations } from './latency_correlations';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <IntlProvider locale="en">
       <EuiThemeProvider>
-        <MockApmAppContextProvider
+        <MockContextProvider
           value={{
             path: '/services/the-service-name/transactions/view?transactionName=the-transaction-name&rangeFrom=now-15m&rangeTo=now',
           }}
         >
           {children}
-        </MockApmAppContextProvider>
+        </MockContextProvider>
       </EuiThemeProvider>
     </IntlProvider>
   );

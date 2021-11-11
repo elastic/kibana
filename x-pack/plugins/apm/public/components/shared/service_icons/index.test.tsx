@@ -9,7 +9,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { ServiceIcons } from '.';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as fetcherHook from '../../../hooks/use_fetcher';
 
@@ -18,7 +18,7 @@ const httpGet = jest.fn();
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <MockApmAppContextProvider
+    <MockContextProvider
       value={{
         coreStart: {
           http: { get: httpGet },
@@ -36,7 +36,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
       >
         {children}
       </MockUrlParamsContextProvider>
-    </MockApmAppContextProvider>
+    </MockContextProvider>
   );
 }
 

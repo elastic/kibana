@@ -8,7 +8,7 @@
 import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
-import { MockApmAppContextProvider } from '../../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../../context/mock/mock_context';
 import { MockUrlParamsContextProvider } from '../../../../../context/url_params_context/mock_url_params_context_provider';
 import {
   expectTextsInDocument,
@@ -19,9 +19,9 @@ import { ErrorMarker } from './error_marker';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <MockApmAppContextProvider>
+    <MockContextProvider>
       <MockUrlParamsContextProvider>{children}</MockUrlParamsContextProvider>
-    </MockApmAppContextProvider>
+    </MockContextProvider>
   );
 }
 

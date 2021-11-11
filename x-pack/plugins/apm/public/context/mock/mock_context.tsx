@@ -40,6 +40,7 @@ const mockCoreStart = {
   application: {
     capabilities: {
       apm: { save: true },
+      dashboard: {},
       ml: {},
     },
     currentAppId$: new Observable(),
@@ -150,8 +151,7 @@ export const mockContextValue = {
   ...mockApmPluginContextValue,
 } as unknown as MockContextValue;
 
-export const MockApmAppContext =
-  createContext<MockContextValue>(mockContextValue);
+export const MockContext = createContext<MockContextValue>(mockContextValue);
 
 /**
  * A mock provider for APM contexts which includes mocks for:
@@ -162,7 +162,7 @@ export const MockApmAppContext =
  *
  * Provided values are deep-merged with mocked defaults.
  */
-export function MockApmAppContextProvider({
+export function MockContextProvider({
   children,
   value = {},
 }: {
@@ -185,11 +185,12 @@ export function MockApmAppContextProvider({
     mockCoreStart,
     value.coreStart
   ) as unknown as CoreStart;
-  createCallApmApi(coreStart);
   const KibanaContext = createKibanaReactContext({
     ...coreStart,
     usageCollection: { reportUiCounter: () => {} },
   });
+
+  createCallApmApi(coreStart);
 
   return (
     <KibanaContext.Provider>
@@ -218,9 +219,5 @@ export function MockApmAppContextProvider({
  * Storybook decorator for mock context
  */
 export const MockContextDecorator: DecoratorFn = (storyFn, { args }) => {
-  return (
-    <MockApmAppContextProvider value={args}>
-      {storyFn()}
-    </MockApmAppContextProvider>
-  );
+  return <MockContextProvider value={args}>{storyFn()}</MockContextProvider>;
 };

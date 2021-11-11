@@ -7,7 +7,7 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MockContextValue } from '../../../../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../../../../../context/mock/mock_context';
 import { SpanFlyout } from './';
 
 type Args = ComponentProps<typeof SpanFlyout> & MockContextValue;

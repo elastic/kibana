@@ -8,12 +8,12 @@
 import { act, render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import * as useApmParamsHooks from '../../../hooks/use_apm_params';
 import * as hooks from '../../../hooks/use_fetcher';
 import { TraceLink } from './';
 
-const renderOptions = { wrapper: MockApmAppContextProvider };
+const renderOptions = { wrapper: MockContextProvider };
 
 describe('TraceLink', () => {
   afterAll(() => {

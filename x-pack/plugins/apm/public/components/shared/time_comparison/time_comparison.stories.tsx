@@ -12,7 +12,7 @@ import {
   TimeRangeComparisonEnum,
   TimeRangeComparisonType,
 } from '../../../../common/runtime_types/comparison_type_rt';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { TimeComparison } from './';
 
@@ -38,7 +38,7 @@ const stories: Meta<Args> = {
       } = args;
 
       return (
-        <MockApmAppContextProvider
+        <MockContextProvider
           value={{
             path: `/services?rangeFrom=${exactStart}&rangeTo=${exactEnd}&environment=${environment}`,
           }}
@@ -48,7 +48,7 @@ const stories: Meta<Args> = {
           >
             <StoryComponent />
           </MockUrlParamsContextProvider>
-        </MockApmAppContextProvider>
+        </MockContextProvider>
       );
     },
   ],

@@ -8,7 +8,7 @@
 import type { Meta, Story } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { CoreStart } from '../../../../../../../../src/core/public';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../context/mock/mock_context';
 import { Schema } from './';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 
@@ -89,9 +89,9 @@ export default {
       } as unknown as CoreStart;
 
       return (
-        <MockApmAppContextProvider value={{ coreStart: coreMock }}>
+        <MockContextProvider value={{ coreStart: coreMock }}>
           <StoryComponent />
-        </MockApmAppContextProvider>
+        </MockContextProvider>
       );
     },
   ],

@@ -8,7 +8,7 @@
 import { act, waitFor } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../context/mock/mock_context';
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { CytoscapeContext } from './Cytoscape';
 import { EmptyBanner } from './EmptyBanner';
@@ -17,11 +17,11 @@ const cy = cytoscape({});
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
-    <MockApmAppContextProvider>
+    <MockContextProvider>
       <CytoscapeContext.Provider value={cy}>
         {children}
       </CytoscapeContext.Provider>
-    </MockApmAppContextProvider>
+    </MockContextProvider>
   );
 }
 
@@ -30,11 +30,11 @@ describe('EmptyBanner', () => {
     it('renders null', () => {
       function NoCytoscapeWrapper({ children }: { children: ReactNode }) {
         return (
-          <MockApmAppContextProvider>
+          <MockContextProvider>
             <CytoscapeContext.Provider value={undefined}>
               {children}
             </CytoscapeContext.Provider>
-          </MockApmAppContextProvider>
+          </MockContextProvider>
         );
       }
       const component = renderWithTheme(<EmptyBanner />, {

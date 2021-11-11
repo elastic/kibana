@@ -10,7 +10,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { ApmServiceContextProvider } from '../../context/apm_service/apm_service_context';
 import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
-import { MockApmAppContextProvider } from '../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../context/mock/mock_context';
 import type { ApmUrlParams } from '../../context/url_params_context/types';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import * as useFetcherHook from '../../hooks/use_fetcher';
@@ -40,13 +40,13 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return renderWithTheme(
-    <MockApmAppContextProvider value={{ history }}>
+    <MockContextProvider value={{ history }}>
       <UrlParamsProvider>
         <ApmServiceContextProvider>
           <SearchBar showTransactionTypeSelector />
         </ApmServiceContextProvider>
       </UrlParamsProvider>
-    </MockApmAppContextProvider>
+    </MockContextProvider>
   );
 }
 

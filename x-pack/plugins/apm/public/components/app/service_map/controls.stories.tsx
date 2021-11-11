@@ -8,7 +8,7 @@
 import { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
-import { MockContextValue } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../context/mock/mock_context';
 import { Controls } from './Controls';
 import { CytoscapeContext } from './Cytoscape';
 

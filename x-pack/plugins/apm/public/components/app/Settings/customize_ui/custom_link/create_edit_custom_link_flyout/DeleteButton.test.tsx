@@ -9,14 +9,14 @@ import { fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
-import { MockApmAppContextProvider } from '../../../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../../../context/mock/mock_context';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 import { DeleteButton } from './DeleteButton';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <EuiThemeProvider>
-      <MockApmAppContextProvider>{children}</MockApmAppContextProvider>
+      <MockContextProvider>{children}</MockContextProvider>
     </EuiThemeProvider>
   );
 }

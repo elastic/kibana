@@ -23,7 +23,7 @@ import {
   expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './create_edit_custom_link_flyout/saveCustomLink';
-import { MockApmAppContextProvider } from '../../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextProvider } from '../../../../../context/mock/mock_context';
 
 const data = {
   customLinks: [
@@ -41,7 +41,7 @@ function getWrapper({
 }) {
   return ({ children }: { children?: ReactNode }) => {
     return (
-      <MockApmAppContextProvider
+      <MockContextProvider
         value={{
           coreStart: {
             application: { capabilities: { apm: { save: canSave }, ml: {} } },
@@ -51,7 +51,7 @@ function getWrapper({
         <LicenseContext.Provider value={license}>
           {children}
         </LicenseContext.Provider>
-      </MockApmAppContextProvider>
+      </MockContextProvider>
     );
   };
 }
