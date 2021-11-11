@@ -6,28 +6,18 @@
  */
 
 import { Story } from '@storybook/react';
-import React, { ComponentProps, ComponentType } from 'react';
-import { MockApmAppContextProvider } from '../../../../../../../context/mock_apm_app/mock_apm_app_context';
+import React, { ComponentProps } from 'react';
+import { MockContextValue } from '../../../../../../../context/mock_apm_app/mock_apm_app_context';
 import { SpanFlyout } from './';
 
-type Args = ComponentProps<typeof SpanFlyout>;
+type Args = ComponentProps<typeof SpanFlyout> & MockContextValue;
 
 export default {
   title: 'app/TransactionDetails/Waterfall/SpanFlyout',
   component: SpanFlyout,
-  decorators: [
-    (StoryComponent: ComponentType) => {
-      return (
-        <MockApmAppContextProvider
-          value={{
-            path: '/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c',
-          }}
-        >
-          <StoryComponent />
-        </MockApmAppContextProvider>
-      );
-    },
-  ],
+  args: {
+    path: '/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c',
+  },
 };
 
 export const TransactionSpan: Story<Args> = (args) => {

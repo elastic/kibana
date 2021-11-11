@@ -8,22 +8,12 @@
 import type { Meta, Story } from '@storybook/react';
 import React from 'react';
 import type { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
-import { MockApmAppContextProvider } from '../../../../../context/mock_apm_app/mock_apm_app_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { AgentConfigurationCreateEdit } from './index';
 
 const stories: Meta<{}> = {
   title: 'app/Settings/AgentConfigurations/AgentConfigurationCreateEdit',
   component: AgentConfigurationCreateEdit,
-  decorators: [
-    (StoryComponent) => {
-      return (
-        <MockApmAppContextProvider>
-          <StoryComponent />
-        </MockApmAppContextProvider>
-      );
-    },
-  ],
 };
 export default stories;
 

@@ -12,12 +12,17 @@ import {
   APMServiceContextValue,
 } from '../../../context/apm_service/apm_service_context';
 import { BreadcrumbsContext } from '../../../context/breadcrumbs/context';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { ServiceNodeMetrics } from './';
 
-const stories: Meta<{}> = {
+type Args = MockContextValue;
+
+const stories: Meta<Args> = {
   title: 'app/ServiceNodeMetrics',
   component: ServiceNodeMetrics,
+  args: {
+    path: '/services/testServiceName/nodes/testServiceNodeName/metrics?rangeFrom=now-15m&rangeTo=now&kuery=',
+  },
   decorators: [
     (StoryComponent) => {
       const serviceContextValue = {
@@ -26,25 +31,19 @@ const stories: Meta<{}> = {
       } as unknown as APMServiceContextValue;
 
       return (
-        <MockApmAppContextProvider
-          value={{
-            path: '/services/testServiceName/nodes/testServiceNodeName/metrics?rangeFrom=now-15m&rangeTo=now&kuery=',
-          }}
+        <BreadcrumbsContext.Provider
+          value={{ getBreadcrumbs: () => [], set: () => {}, unset: () => {} }}
         >
-          <BreadcrumbsContext.Provider
-            value={{ getBreadcrumbs: () => [], set: () => {}, unset: () => {} }}
-          >
-            <APMServiceContext.Provider value={serviceContextValue}>
-              <StoryComponent />
-            </APMServiceContext.Provider>
-          </BreadcrumbsContext.Provider>
-        </MockApmAppContextProvider>
+          <APMServiceContext.Provider value={serviceContextValue}>
+            <StoryComponent />
+          </APMServiceContext.Provider>
+        </BreadcrumbsContext.Provider>
       );
     },
   ],
 };
 export default stories;
 
-export const Example: Story<{}> = () => {
+export const Example: Story<Args> = () => {
   return <ServiceNodeMetrics />;
 };

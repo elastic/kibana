@@ -9,50 +9,48 @@ import type { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import { Popover } from '.';
+import { CoreStart } from '../../../../../../../../src/core/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { CytoscapeContext } from '../Cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
-interface Args {
+interface Args extends MockContextValue {
   nodeData: cytoscape.NodeDataDefinition;
 }
+
+const coreMock = {
+  http: {
+    get: () => {
+      return {
+        avgCpuUsage: 0.32809666568309237,
+        avgErrorRate: 0.556068173242986,
+        avgMemoryUsage: 0.5504868173242986,
+        transactionStats: {
+          avgRequestsPerMinute: 164.47222031860858,
+          avgTransactionDuration: 61634.38905590272,
+        },
+      };
+    },
+  },
+} as unknown as CoreStart;
 
 const stories: Meta<Args> = {
   title: 'app/ServiceMap/Popover',
   component: Popover,
+  args: {
+    coreStart: coreMock,
+    path: '/service-map?rangeFrom=now-15m&rangeTo=now',
+  },
   decorators: [
     (StoryComponent) => {
-      const coreMock = {
-        http: {
-          get: () => {
-            return {
-              avgCpuUsage: 0.32809666568309237,
-              avgErrorRate: 0.556068173242986,
-              avgMemoryUsage: 0.5504868173242986,
-              transactionStats: {
-                avgRequestsPerMinute: 164.47222031860858,
-                avgTransactionDuration: 61634.38905590272,
-              },
-            };
-          },
-        },
-      };
-
       return (
-        <MockApmAppContextProvider
-          value={{
-            coreStart: coreMock,
-            path: '/service-map?rangeFrom=now-15m&rangeTo=now',
-          }}
-        >
-          <MockUrlParamsContextProvider>
-            <div style={{ height: 325 }}>
-              <StoryComponent />
-            </div>
-          </MockUrlParamsContextProvider>
-        </MockApmAppContextProvider>
+        <MockUrlParamsContextProvider>
+          <div style={{ height: 325 }}>
+            <StoryComponent />
+          </div>
+        </MockUrlParamsContextProvider>
       );
     },
     (StoryComponent, { args }) => {

@@ -7,10 +7,11 @@
 
 import type { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import type { MockContextValue } from '../../../context/mock_apm_app/mock_apm_app_context';
+import type { ApmPluginStartDeps } from '../../../plugin';
 import { SettingsTemplate } from './settings_template';
 
-type Args = ComponentProps<typeof SettingsTemplate>;
+type Args = ComponentProps<typeof SettingsTemplate> & MockContextValue;
 
 const pluginsStartMock = {
   observability: {
@@ -25,15 +26,7 @@ const pluginsStartMock = {
 const stories: Meta<Args> = {
   title: 'routing/templates/SettingsTemplate',
   component: SettingsTemplate,
-  decorators: [
-    (StoryComponent) => {
-      return (
-        <MockApmAppContextProvider value={{ pluginsStart: pluginsStartMock }}>
-          <StoryComponent />
-        </MockApmAppContextProvider>
-      );
-    },
-  ],
+  args: { pluginsStart: pluginsStartMock as unknown as ApmPluginStartDeps },
 };
 export default stories;
 

@@ -8,13 +8,18 @@
 import { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { Controls } from './Controls';
 import { CytoscapeContext } from './Cytoscape';
 
-const stories: Meta<{}> = {
+type Args = MockContextValue;
+
+const stories: Meta<Args> = {
   title: 'app/ServiceMap/Controls',
   component: Controls,
+  args: {
+    path: '/service-map?rangeFrom=now-15m&rangeTo=now&kuery=',
+  },
   decorators: [
     (StoryComponent) => {
       const cy = cytoscape({
@@ -23,13 +28,7 @@ const stories: Meta<{}> = {
 
       return (
         <CytoscapeContext.Provider value={cy}>
-          <MockApmAppContextProvider
-            value={{
-              path: '/service-map?rangeFrom=now-15m&rangeTo=now&kuery=',
-            }}
-          >
-            <StoryComponent />
-          </MockApmAppContextProvider>
+          <StoryComponent />
         </CytoscapeContext.Provider>
       );
     },
@@ -37,6 +36,6 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const Example: Story<{}> = () => {
+export const Example: Story<Args> = () => {
   return <Controls />;
 };

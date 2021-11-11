@@ -10,6 +10,7 @@ import {
   RouteMatch,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
+import type { DecoratorFn } from '@storybook/react';
 import { createMemoryHistory, History } from 'history';
 import { merge } from 'lodash';
 import React, { createContext, ReactNode, useMemo } from 'react';
@@ -210,3 +211,16 @@ export function MockApmAppContextProvider({
     </KibanaContext.Provider>
   );
 }
+
+/* eslint-disable react/function-component-definition */
+
+/**
+ * Storybook decorator for mock context
+ */
+export const MockContextDecorator: DecoratorFn = (storyFn, { args }) => {
+  return (
+    <MockApmAppContextProvider value={args}>
+      {storyFn()}
+    </MockApmAppContextProvider>
+  );
+};

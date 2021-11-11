@@ -9,11 +9,11 @@ import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { ServiceList } from './';
 import { items } from './__fixtures__/service_api_mock_data';
 
-type Args = ComponentProps<typeof ServiceList>;
+type Args = ComponentProps<typeof ServiceList> & MockContextValue;
 
 const coreMock = {
   http: {
@@ -26,20 +26,10 @@ const coreMock = {
 const stories: Meta<Args> = {
   title: 'app/ServiceInventory/ServiceList',
   component: ServiceList,
-  decorators: [
-    (StoryComponent) => {
-      return (
-        <MockApmAppContextProvider
-          value={{
-            coreStart: coreMock,
-            path: '/services?rangeFrom=now-15m&rangeTo=now',
-          }}
-        >
-          <StoryComponent />
-        </MockApmAppContextProvider>
-      );
-    },
-  ],
+  args: {
+    coreStart: coreMock,
+    path: '/services?rangeFrom=now-15m&rangeTo=now',
+  },
 };
 export default stories;
 

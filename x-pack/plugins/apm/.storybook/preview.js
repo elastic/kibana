@@ -6,5 +6,6 @@
  */
 
 import { EuiThemeProviderDecorator } from '../../../../src/plugins/kibana_react/common';
+import { MockContextDecorator } from '../public/context/mock_apm_app/mock_apm_app_context';
 
-export const decorators = [EuiThemeProviderDecorator];
+export const decorators = [EuiThemeProviderDecorator, MockContextDecorator];

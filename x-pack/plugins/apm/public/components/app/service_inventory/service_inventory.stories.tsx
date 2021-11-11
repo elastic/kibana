@@ -10,32 +10,35 @@ import React from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { AnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ServiceInventory } from './';
 
-const stories: Meta<{}> = {
+type Args = MockContextValue;
+
+const coreMock = {
+  http: {
+    get: (endpoint: string) => {
+      switch (endpoint) {
+        case '/internal/apm/services':
+          return { items: [] };
+        default:
+          return {};
+      }
+    },
+  },
+};
+
+const stories: Meta<Args> = {
   title: 'app/ServiceInventory',
   component: ServiceInventory,
+  args: {
+    path: '/services?rangeFrom=now-15m&rangeTo=now',
+    coreStart: coreMock as CoreStart,
+  },
   decorators: [
     (StoryComponent) => {
-      const coreMock = {
-        http: {
-          get: (endpoint: string) => {
-            switch (endpoint) {
-              case '/internal/apm/services':
-                return { items: [] };
-              default:
-                return {};
-            }
-            return {};
-          },
-        },
-        notifications: { toasts: { add: () => {}, addWarning: () => {} } },
-        uiSettings: { get: () => [] },
-      } as unknown as CoreStart;
-
       const anomlyDetectionJobsContextValue = {
         anomalyDetectionJobsData: { jobs: [], hasLegacyJobs: false },
         anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
@@ -43,31 +46,24 @@ const stories: Meta<{}> = {
       };
 
       return (
-        <MockApmAppContextProvider
-          value={{
-            coreStart: coreMock,
-            path: '/services?rangeFrom=now-15m&rangeTo=now',
+        <MockUrlParamsContextProvider
+          params={{
+            comparisonEnabled: true,
+            comparisonType: TimeRangeComparisonEnum.DayBefore,
           }}
         >
-          <MockUrlParamsContextProvider
-            params={{
-              comparisonEnabled: true,
-              comparisonType: TimeRangeComparisonEnum.DayBefore,
-            }}
+          <AnomalyDetectionJobsContext.Provider
+            value={anomlyDetectionJobsContextValue}
           >
-            <AnomalyDetectionJobsContext.Provider
-              value={anomlyDetectionJobsContextValue}
-            >
-              <StoryComponent />
-            </AnomalyDetectionJobsContext.Provider>
-          </MockUrlParamsContextProvider>
-        </MockApmAppContextProvider>
+            <StoryComponent />
+          </AnomalyDetectionJobsContext.Provider>
+        </MockUrlParamsContextProvider>
       );
     },
   ],
 };
 export default stories;
 
-export const Example: Story<{}> = () => {
+export const Example: Story<Args> = () => {
   return <ServiceInventory />;
 };

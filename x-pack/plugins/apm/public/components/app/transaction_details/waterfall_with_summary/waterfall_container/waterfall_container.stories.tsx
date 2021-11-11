@@ -7,7 +7,7 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MockApmAppContextProvider } from '../../../../../context/mock_apm_app/mock_apm_app_context';
+import { MockContextValue } from '../../../../../context/mock_apm_app/mock_apm_app_context';
 import { WaterfallContainer } from './index';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import {
@@ -19,22 +19,14 @@ import {
   urlParams as testUrlParams,
 } from './waterfall_container.stories.data';
 
-type Args = ComponentProps<typeof WaterfallContainer>;
+type Args = ComponentProps<typeof WaterfallContainer> & MockContextValue;
 
 const stories: Meta<Args> = {
   title: 'app/TransactionDetails/Waterfall',
   component: WaterfallContainer,
-  decorators: [
-    (StoryComponent) => (
-      <MockApmAppContextProvider
-        value={{
-          path: '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
-        }}
-      >
-        <StoryComponent />
-      </MockApmAppContextProvider>
-    ),
-  ],
+  args: {
+    path: '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
+  },
 };
 export default stories;
 

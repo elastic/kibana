@@ -8,22 +8,12 @@
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { ErrorGroupList } from '.';
-import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 
 type Args = ComponentProps<typeof ErrorGroupList>;
 
 const stories: Meta<Args> = {
   title: 'app/ErrorGroupOverview/ErrorGroupList',
   component: ErrorGroupList,
-  decorators: [
-    (StoryComponent) => {
-      return (
-        <MockApmAppContextProvider>
-          <StoryComponent />
-        </MockApmAppContextProvider>
-      );
-    },
-  ],
 };
 export default stories;
 

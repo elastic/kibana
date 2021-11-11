@@ -5,29 +5,22 @@
  * 2.0.
  */
 
-import React, { ComponentProps, ComponentType } from 'react';
+import { Meta, Story } from '@storybook/react';
+import React, { ComponentProps } from 'react';
 import { LicensePrompt } from '.';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 
-export default {
+type Args = ComponentProps<typeof LicensePrompt>;
+
+export const stories: Meta<Args> = {
   title: 'shared/LicensePrompt',
   component: LicensePrompt,
-  decorators: [
-    (Story: ComponentType) => (
-      <MockApmAppContextProvider>
-        <Story />
-      </MockApmAppContextProvider>
-    ),
-  ],
 };
+export default stories;
 
-export function Example({
-  showBetaBadge,
-  text,
-}: ComponentProps<typeof LicensePrompt>) {
-  return <LicensePrompt showBetaBadge={showBetaBadge} text={text} />;
-}
+export const Example: Story<Args> = (args) => {
+  return <LicensePrompt {...args} />;
+};
 Example.args = {
   showBetaBadge: false,
   text: 'To create Feature name, you must be subscribed to an Elastic X license or above.',
-} as ComponentProps<typeof LicensePrompt>;
+};

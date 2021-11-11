@@ -7,7 +7,6 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MockApmAppContextProvider } from '../../context/mock_apm_app/mock_apm_app_context';
 import { BackendLink } from './backend_link';
 
 type Args = ComponentProps<typeof BackendLink>;
@@ -15,15 +14,6 @@ type Args = ComponentProps<typeof BackendLink>;
 const stories: Meta<Args> = {
   title: 'shared/BackendLink',
   component: BackendLink,
-  decorators: [
-    (StoryComponent) => {
-      return (
-        <MockApmAppContextProvider>
-          <StoryComponent />
-        </MockApmAppContextProvider>
-      );
-    },
-  ],
 };
 export default stories;
 
