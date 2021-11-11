@@ -5,54 +5,21 @@
  * 2.0.
  */
 
+import { composeStories } from '@storybook/testing-react';
 import { render } from '@testing-library/react';
-import React, { ReactNode } from 'react';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import moment from 'moment';
+import React from 'react';
+import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../utils/testHelpers';
-import { getSelectOptions, TimeComparison } from './';
 import * as urlHelpers from '../../shared/Links/url_helpers';
-import moment from 'moment';
+import { getSelectOptions } from './';
 import { getComparisonTypes } from './get_comparison_types';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import {
-  TimeRangeComparisonType,
-  TimeRangeComparisonEnum,
-} from '../../../../common/runtime_types/comparison_type_rt';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import * as stories from './time_comparison.stories';
 
-function getWrapper({
-  exactStart,
-  exactEnd,
-  comparisonType,
-  comparisonEnabled,
-  environment = ENVIRONMENT_ALL.value,
-}: {
-  exactStart: string;
-  exactEnd: string;
-  comparisonType?: TimeRangeComparisonType;
-  comparisonEnabled?: boolean;
-  environment?: string;
-}) {
-  return ({ children }: { children?: ReactNode }) => {
-    return (
-      <MockApmAppContextProvider
-        value={{
-          path: `/services?rangeFrom=${exactStart}&rangeTo=${exactEnd}&environment=${environment}`,
-        }}
-      >
-        <MockUrlParamsContextProvider
-          params={{ comparisonType, comparisonEnabled }}
-        >
-          <EuiThemeProvider>{children}</EuiThemeProvider>
-        </MockUrlParamsContextProvider>
-      </MockApmAppContextProvider>
-    );
-  };
-}
+const { Example } = composeStories(stories);
 
 describe('TimeComparison', () => {
   beforeAll(() => {
@@ -182,16 +149,21 @@ describe('TimeComparison', () => {
 
   describe('TimeComparison component', () => {
     const spy = jest.spyOn(urlHelpers, 'replace');
+
     beforeEach(() => {
       jest.resetAllMocks();
     });
+
     describe('Time range is between 0 - 24 hours', () => {
       it('sets default values', () => {
-        const Wrapper = getWrapper({
+        const props = {
+          comparisonEnabled: undefined,
+          comparisonType: undefined,
           exactStart: '2021-06-04T16:17:02.335Z',
           exactEnd: '2021-06-04T16:32:02.335Z',
-        });
-        render(<TimeComparison />, { wrapper: Wrapper });
+        };
+        render(<Example {...props} />);
+
         expect(spy).toHaveBeenCalledWith(expect.anything(), {
           query: {
             comparisonEnabled: 'true',
@@ -199,14 +171,16 @@ describe('TimeComparison', () => {
           },
         });
       });
+
       it('selects day before and enables comparison', () => {
-        const Wrapper = getWrapper({
+        const props = {
           exactStart: '2021-06-04T16:17:02.335Z',
           exactEnd: '2021-06-04T16:32:02.335Z',
           comparisonEnabled: true,
           comparisonType: TimeRangeComparisonEnum.DayBefore,
-        });
-        const component = render(<TimeComparison />, { wrapper: Wrapper });
+        };
+        const component = render(<Example {...props} />);
+
         expectTextsInDocument(component, ['Day before', 'Week before']);
         expect(
           (component.getByTestId('comparisonSelect') as HTMLSelectElement)
@@ -215,13 +189,14 @@ describe('TimeComparison', () => {
       });
 
       it('enables day before option when date difference is equal to 24 hours', () => {
-        const Wrapper = getWrapper({
+        const props = {
           exactStart: '2021-06-03T16:31:35.748Z',
           exactEnd: '2021-06-04T16:31:35.748Z',
           comparisonEnabled: true,
           comparisonType: TimeRangeComparisonEnum.DayBefore,
-        });
-        const component = render(<TimeComparison />, { wrapper: Wrapper });
+        };
+        const component = render(<Example {...props} />);
+
         expectTextsInDocument(component, ['Day before', 'Week before']);
         expect(
           (component.getByTestId('comparisonSelect') as HTMLSelectElement)
@@ -232,26 +207,27 @@ describe('TimeComparison', () => {
 
     describe('Time range is between 24 hours - 1 week', () => {
       it("doesn't show day before option when date difference is greater than 24 hours", () => {
-        const Wrapper = getWrapper({
+        const props = {
           exactStart: '2021-06-02T12:32:00.000Z',
           exactEnd: '2021-06-03T13:32:09.079Z',
           comparisonEnabled: true,
           comparisonType: TimeRangeComparisonEnum.WeekBefore,
-        });
-        const component = render(<TimeComparison />, {
-          wrapper: Wrapper,
-        });
+        };
+        const component = render(<Example {...props} />);
+
         expectTextsNotInDocument(component, ['Day before']);
         expectTextsInDocument(component, ['Week before']);
       });
+
       it('sets default values', () => {
-        const Wrapper = getWrapper({
+        const props = {
+          comparisonEnabled: undefined,
+          comparisonType: undefined,
           exactStart: '2021-06-02T12:32:00.000Z',
           exactEnd: '2021-06-03T13:32:09.079Z',
-        });
-        render(<TimeComparison />, {
-          wrapper: Wrapper,
-        });
+        };
+        render(<Example {...props} />);
+
         expect(spy).toHaveBeenCalledWith(expect.anything(), {
           query: {
             comparisonEnabled: 'true',
@@ -259,16 +235,16 @@ describe('TimeComparison', () => {
           },
         });
       });
+
       it('selects week before and enables comparison', () => {
-        const Wrapper = getWrapper({
+        const props = {
           exactStart: '2021-06-02T12:32:00.000Z',
           exactEnd: '2021-06-03T13:32:09.079Z',
           comparisonEnabled: true,
           comparisonType: TimeRangeComparisonEnum.WeekBefore,
-        });
-        const component = render(<TimeComparison />, {
-          wrapper: Wrapper,
-        });
+        };
+        const component = render(<Example {...props} />);
+
         expectTextsNotInDocument(component, ['Day before']);
         expectTextsInDocument(component, ['Week before']);
         expect(
@@ -280,15 +256,14 @@ describe('TimeComparison', () => {
 
     describe('Time range is greater than 7 days', () => {
       it('Shows absolute times without year when within the same year', () => {
-        const Wrapper = getWrapper({
+        const props = {
           exactStart: '2021-05-27T16:32:46.747Z',
           exactEnd: '2021-06-04T16:32:46.747Z',
           comparisonEnabled: true,
           comparisonType: TimeRangeComparisonEnum.PeriodBefore,
-        });
-        const component = render(<TimeComparison />, {
-          wrapper: Wrapper,
-        });
+        };
+        const component = render(<Example {...props} />);
+
         expect(spy).not.toHaveBeenCalled();
         expectTextsInDocument(component, ['19/05 18:32 - 27/05 18:32']);
         expect(
@@ -298,15 +273,14 @@ describe('TimeComparison', () => {
       });
 
       it('Shows absolute times with year when on different year', () => {
-        const Wrapper = getWrapper({
+        const props = {
           exactStart: '2020-05-27T16:32:46.747Z',
           exactEnd: '2021-06-04T16:32:46.747Z',
           comparisonEnabled: true,
           comparisonType: TimeRangeComparisonEnum.PeriodBefore,
-        });
-        const component = render(<TimeComparison />, {
-          wrapper: Wrapper,
-        });
+        };
+        const component = render(<Example {...props} />);
+
         expect(spy).not.toHaveBeenCalled();
         expectTextsInDocument(component, ['20/05/19 18:32 - 27/05/20 18:32']);
         expect(

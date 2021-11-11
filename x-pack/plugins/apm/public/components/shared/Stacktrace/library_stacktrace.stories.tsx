@@ -20,4 +20,7 @@ export default stories;
 export const Example: Story<Args> = (args) => {
   return <LibraryStacktrace {...args} />;
 };
-Example.args = {};
+Example.args = {
+  id: 'testId',
+  stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
+};

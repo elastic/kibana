@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from '@testing-library/react';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { act } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
+import React from 'react';
 import { Observable } from 'rxjs';
 import type {
   AppMountParameters,
-  CoreStart,
   DocLinksStart,
   HttpStart,
 } from 'src/core/public';
-import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
-import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { renderApp as renderApmApp } from './';
-import { UXAppRoot } from './uxApp';
-import { disableConsoleWarning } from '../utils/testHelpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { RumHome } from '../components/app/RumDashboard/RumHome';
+import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
+import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
+import { disableConsoleWarning } from '../utils/testHelpers';
+import { renderApp as renderApmApp } from './';
+import { UXAppRoot } from './uxApp';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),

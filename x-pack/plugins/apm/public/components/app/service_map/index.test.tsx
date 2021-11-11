@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import { License } from '../../../../../licensing/common/license';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { LicenseContext } from '../../../context/license/license_context';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_a/mock_apm_app_context';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 
 const activeLicense = new License({

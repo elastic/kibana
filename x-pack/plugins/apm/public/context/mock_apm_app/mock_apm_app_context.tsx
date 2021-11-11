@@ -19,7 +19,10 @@ import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import type { RecursivePartial } from '../../../typings/common';
-import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
+import {
+  createObservabilityRuleTypeRegistryMock,
+  enableComparisonByDefault,
+} from '../../../../observability/public';
 import {
   ApmPluginContext,
   ApmPluginContextValue,
@@ -48,6 +51,7 @@ const mockCoreStart = {
   uiSettings: {
     get: (key: string) => {
       const uiSettings: Record<string, unknown> = {
+        [enableComparisonByDefault]: true,
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
           {
             from: 'now/d',
@@ -168,7 +172,10 @@ export function MockApmAppContextProvider({
     value.coreStart
   ) as unknown as CoreStart;
   createCallApmApi(coreStart);
-  const KibanaContext = createKibanaReactContext(coreStart);
+  const KibanaContext = createKibanaReactContext({
+    ...coreStart,
+    usageCollection: { reportUiCounter: () => {} },
+  });
 
   return (
     <KibanaContext.Provider>
