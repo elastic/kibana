@@ -6,8 +6,8 @@
  */
 
 import { MouseEventHandler } from 'react';
-import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 // @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';
 import { canUserWrite } from '../../state/selectors/app';
@@ -17,6 +17,8 @@ import { withElementsLoadedTelemetry } from './workpad_telemetry';
 import { State } from '../../../types';
 
 export { WORKPAD_CONTAINER_ID } from './workpad_app.component';
+
+const WorkpadAppComponent = withElementsLoadedTelemetry(Component);
 
 const mapDispatchToProps = (dispatch: Dispatch): { deselectElement: MouseEventHandler } => ({
   deselectElement: (ev) => {
@@ -31,4 +33,4 @@ export const WorkpadApp = connect(
     workpad: getWorkpad(state),
   }),
   mapDispatchToProps
-)(withElementsLoadedTelemetry(Component));
+)(WorkpadAppComponent);

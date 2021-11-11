@@ -40,8 +40,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
@@ -82,7 +80,6 @@ import {
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
 import { RouterWrappers } from './routes/security';
-import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -132,8 +129,6 @@ const allSavedObjectTypes = [
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 ];
 
@@ -340,26 +335,21 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    const fleetSetupPromise = startFleetServerSetup()
-      .then(() => {
-        logger.info('Beginning fleet setup');
-
-        return setupFleet(
-          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-          core.elasticsearch.client.asInternalUser
-        );
-      })
-      .then(() => {
-        logger.info('Fleet setup completed');
-      })
-      .catch((error) => {
-        logger.warn('Fleet setup failed');
-        logger.warn(error);
-      });
-
     return {
       fleetSetupCompleted: async () => {
-        return fleetSetupPromise;
+        try {
+          logger.info('Beginning fleet setup');
+
+          await setupFleet(
+            new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+            core.elasticsearch.client.asInternalUser
+          );
+
+          logger.info('Fleet setup completed');
+        } catch (error) {
+          logger.warn('Fleet setup failed');
+          logger.warn(error);
+        }
       },
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {

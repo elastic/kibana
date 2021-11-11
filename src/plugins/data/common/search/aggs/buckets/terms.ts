@@ -85,6 +85,7 @@ export const getTermsBucketAgg = () =>
       };
     },
     createFilter: createFilterTerms,
+    hasPrecisionError: (aggBucket) => Boolean(aggBucket?.doc_count_error_upper_bound),
     postFlightRequest: async (
       resp,
       aggConfigs,

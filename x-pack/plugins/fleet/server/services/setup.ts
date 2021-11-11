@@ -26,7 +26,6 @@ import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetServerAgentPoliciesExists } from './agents';
-import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
 import { getInstallations, installPackage } from './epm/packages';
@@ -71,7 +70,6 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
 
-  await awaitIfFleetServerSetupPending();
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');
     await ensureFleetGlobalEsAssets(soClient, esClient);
