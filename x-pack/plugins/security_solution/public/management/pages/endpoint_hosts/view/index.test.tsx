@@ -7,6 +7,7 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media';
 
@@ -885,16 +886,14 @@ describe('when on the endpoint list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const hostNameLinks = renderResult.getAllByTestId('hostnameCellLink');
-        reactTestingLibrary.fireEvent.click(hostNameLinks[0]);
+        userEvent.click(hostNameLinks[0]);
       });
 
       afterEach(reactTestingLibrary.cleanup);
 
       it('should show the endpoint details flyout', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
@@ -905,9 +904,7 @@ describe('when on the endpoint list page', () => {
 
       it('should display log accurately', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
@@ -920,9 +917,7 @@ describe('when on the endpoint list page', () => {
 
       it('should display log accurately with endpoint responses', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged(
@@ -939,9 +934,7 @@ describe('when on the endpoint list page', () => {
 
       it('should display empty state when API call has failed', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('failed', getMockData());
@@ -952,9 +945,7 @@ describe('when on the endpoint list page', () => {
 
       it('should not display empty state when no log data', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
+        userEvent.click(activityLogTab);
         await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', {
