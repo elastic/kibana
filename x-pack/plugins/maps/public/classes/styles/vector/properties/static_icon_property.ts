@@ -37,10 +37,10 @@ export class StaticIconProperty extends StaticStyleProperty<IconStaticOptions> {
   }
 
   async _customIconCheck(mbMap: MbMap) {
-    const { value: symbolId, svg } = this._options;
+    const { value: symbolId, svg, cutoff, radius } = this._options;
     if (!mbMap.hasImage(symbolId)) {
-      const imageData = await createSdfIcon(svg);
-      mbMap.addImage(symbolId, imageData, { pixelRatio: 4, sdf: true });
+      const { imageData, pixelRatio } = await createSdfIcon(svg, cutoff, radius);
+      mbMap.addImage(symbolId, imageData, { pixelRatio, sdf: true });
     }
   }
 }

@@ -10,8 +10,14 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
-// @ts-expect-error
-import { createSdfIcon, CUSTOM_ICON_PREFIX_SDF, getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
+import {
+  createSdfIcon,
+  CUSTOM_ICON_PREFIX_SDF,
+  getIconPalette,
+  getMakiIconId,
+  getMakiSymbolAnchor,
+  // @ts-expect-error
+} from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';
@@ -49,18 +55,32 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
   async _syncCustomIconsWithMb(mbMap: MbMap) {
     if (this._options.useCustomIconMap && this._options.customIconStops) {
-      await Promise.all(this._options.customIconStops.map(({ icon, svg }) => {
-        if (icon.startsWith(CUSTOM_ICON_PREFIX_SDF) && svg) {
-          this._customIconCheck(icon, svg, mbMap)
-        }
-      }));
+      await Promise.all(
+        this._options.customIconStops.map(({ icon, svg, cutoff, radius }) => {
+          if (icon.startsWith(CUSTOM_ICON_PREFIX_SDF) && svg) {
+            this._customIconCheck({ symbolId: icon, svg, cutoff, radius, mbMap });
+          }
+        })
+      );
     }
   }
 
-  async _customIconCheck(symbolId: string, svg: string, mbMap: MbMap) {
+  async _customIconCheck({
+    symbolId,
+    svg,
+    cutoff,
+    radius,
+    mbMap,
+  }: {
+    symbolId: string;
+    svg: string;
+    cutoff?: number;
+    radius?: number;
+    mbMap: MbMap;
+  }) {
     if (!mbMap.hasImage(symbolId)) {
-      const imageData = await createSdfIcon(svg);
-      mbMap.addImage(symbolId, imageData, { pixelRatio: 4, sdf: true });
+      const { imageData, pixelRatio } = await createSdfIcon(svg, cutoff, radius);
+      mbMap.addImage(symbolId, imageData, { pixelRatio, sdf: true });
     }
   }
 
@@ -68,17 +88,20 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (this._options.useCustomIconMap && this._options.customIconStops) {
       const stops = [];
       for (let i = 1; i < this._options.customIconStops.length; i++) {
-        const { stop, icon, svg } = this._options.customIconStops[i];
+        const { stop, icon, svg, cutoff, radius } = this._options.customIconStops[i];
         stops.push({
           stop,
           style: icon,
           svg,
+          cutoff,
+          radius,
         });
       }
 
       return {
         stops,
-        fallbackSymbol: this._options.customIconStops.length > 0 ? this._options.customIconStops[0] : null,
+        fallbackSymbol:
+          this._options.customIconStops.length > 0 ? this._options.customIconStops[0] : null,
       };
     }
 
@@ -129,6 +152,8 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
       if (!style.startsWith(CUSTOM_ICON_PREFIX_SDF)) {
         // then use maki anchor
         mbStops.push(getMakiSymbolAnchor(style));
+      } else {
+        mbStops.push('center')
       }
     });
 

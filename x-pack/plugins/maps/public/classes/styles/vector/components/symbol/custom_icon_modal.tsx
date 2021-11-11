@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
+// @ts-expect-error
+import { ValidatedRange } from '../../../../../components/validated_range';
 
 const MAX_NAME_LENGTH = 40;
 
@@ -42,6 +44,10 @@ const strings = {
         numberOfRemainingCharacter,
       },
     }),
+  getCutoffRangeLabel: () =>
+    i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
+      defaultMessage: 'Alpha Threshold',
+    }),
   getIconPreviewTitle: () =>
     i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
       defaultMessage: 'Icon preview',
@@ -53,15 +59,19 @@ const strings = {
   getImageInputDescription: () =>
     i18n.translate('xpack.maps.customIconModal.imageInputDescription', {
       defaultMessage:
-        'Take a screenshot of your element and upload it here. This can also be done after saving.',
+        'Upload your SVG icon here and preview it on the right.',
     }),
   getImageInputLabel: () =>
     i18n.translate('xpack.maps.customIconModal.imageInputLabel', {
-      defaultMessage: 'Thumbnail image',
+      defaultMessage: 'SVG Icon',
     }),
   getNameInputLabel: () =>
     i18n.translate('xpack.maps.customIconModal.nameInputLabel', {
       defaultMessage: 'Name',
+    }),
+  getRadiusRangeLabel: () =>
+    i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
+      defaultMessage: 'Radius',
     }),
   getSaveButtonLabel: () =>
     i18n.translate('xpack.maps.customIconModal.saveButtonLabel', {
@@ -78,13 +88,21 @@ interface Props {
    */
   image?: string;
   /**
+   * intial value of alpha threshold for signed-distance field
+   */
+  cutoff: number;
+  /**
+   * intial value of radius for signed-distance field
+   */
+  radius: number;
+  /**
    * title of the modal
    */
   title: string;
   /**
    * A click handler for the save button
    */
-  onSave: (name: string, image: string) => void;
+  onSave: (name: string, image: string, cutoff: number, radius: number) => void;
   /**
    * A click handler for the cancel button
    */
@@ -100,13 +118,17 @@ interface State {
    * image of the custom element to be saved
    */
   image?: string;
+
+  cutoff?: number;
+  radius?: number;
 }
 
 export class CustomIconModal extends PureComponent<Props, State> {
   public static propTypes = {
     name: PropTypes.string,
-    description: PropTypes.string,
     image: PropTypes.string,
+    cutoff: PropTypes.number.isRequired,
+    radius: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
     onSave: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
@@ -115,11 +137,21 @@ export class CustomIconModal extends PureComponent<Props, State> {
   public state = {
     name: this.props.name || '',
     image: this.props.image || '',
+    cutoff: this.props.cutoff,
+    radius: this.props.radius,
   };
 
-  private _handleChange = (type: 'name' | 'id' | 'image', img: string) => {
-    this.setState({ [type]: img });
+  private _handleChange = (type: 'name' | 'id' | 'image' | 'cutoff' | 'radius', value: string) => {
+    this.setState({ [type]: value });
   };
+
+  private _handleCutoffChange = (value: number) => {
+    this.setState({ cutoff: value });
+  };
+
+  private _handleRadiusChange = (value: number) => {
+    this.setState({ radius: value });
+  }
 
   private _handleUpload = (files: FileList | null) => {
     if (files == null) return;
@@ -132,7 +164,7 @@ export class CustomIconModal extends PureComponent<Props, State> {
 
   public render() {
     const { onSave, onCancel, title, ...rest } = this.props;
-    const { name, image } = this.state;
+    const { name, image, cutoff, radius } = this.state;
 
     return (
       <EuiModal
@@ -181,6 +213,41 @@ export class CustomIconModal extends PureComponent<Props, State> {
               <EuiText className="mapsCustomIconForm__thumbnailHelp" size="xs">
                 <p>{strings.getImageInputDescription()}</p>
               </EuiText>
+              <EuiSpacer />
+              <EuiFormRow
+                className="mapsCustomIconForm__cutoff"
+                label={strings.getCutoffRangeLabel()}
+                display="rowCompressed"
+              >
+                <ValidatedRange
+                  min={0}
+                  max={1}
+                  value={cutoff}
+                  step={0.001}
+                  showInput
+                  showLabels
+                  compressed
+                  className="mapsCutoffRange"
+                  onChange={this._handleCutoffChange}
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                className="mapsCustomIconForm__radius"
+                label={strings.getRadiusRangeLabel()}
+                display="rowCompressed"
+              >
+                <ValidatedRange
+                  min={0}
+                  max={1}
+                  value={radius}
+                  step={0.001}
+                  showInput
+                  showLabels
+                  compressed
+                  className="mapsRadiusRange"
+                  onChange={this._handleRadiusChange}
+                />
+              </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem
               className="mapsIconPreview__wrapper mapsCustomIconForm__preview"
@@ -192,6 +259,8 @@ export class CustomIconModal extends PureComponent<Props, State> {
               <EuiSpacer size="s" />
                 <IconPreview
                   svg={image}
+                  cutoff={cutoff}
+                  radius={radius}
                 />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -205,7 +274,7 @@ export class CustomIconModal extends PureComponent<Props, State> {
               <EuiButton
                 fill
                 onClick={() => {
-                  onSave(name, image);
+                  onSave(name, image, cutoff, radius);
                 }}
                 data-test-subj="mapsCustomIconForm-submit"
               >

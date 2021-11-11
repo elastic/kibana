@@ -9,7 +9,9 @@ import React from 'react';
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
 import uuid from 'uuid/v4';
-import { Image2SDF } from '../../util/image_to_sdf';
+import Canvg from 'canvg';
+import calcSDF  from 'bitmap-sdf';
+import { isRetina } from '../../../util';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
@@ -75,53 +77,81 @@ export function getCustomIconId() {
   return `${CUSTOM_ICON_PREFIX_SDF}${uuid()}`;
 }
 
-export async function createSdfIcon(svgString) {
-  const w = 256;
-  const h = 256;
-  const size = Math.max(w, h);
-  const buffer = size / 8;
-  const radius = size / 3;
+export async function createSdfIcon(svgString, cutoff, radius) {
+  const svgCanvas = document.createElement('canvas');
+  const svgCtx = svgCanvas.getContext('2d');
+  const size = 256;
+  const v = Canvg.fromString(svgCtx, svgString);
+  v.resize(size, size, true);
+  await v.render();
 
-  const imgUrl = buildSrcUrl(svgString);
-  const image = await loadImage(imgUrl);
-
-  const sdf = new Image2SDF({ buffer, radius, size });
-  const { data: alphaChannel, bufferWidth, bufferHeight } = sdf.draw(image, w, h);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = bufferWidth;
-  canvas.height = bufferHeight;
-  const ctx = canvas.getContext('2d');
-
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  const imageData = ctx.createImageData(bufferWidth, bufferHeight);
-  for (let i = 0; i < alphaChannel.length; i++) {
-    imageData.data[4 * i + 0] = 0;
-    imageData.data[4 * i + 1] = 0;
-    imageData.data[4 * i + 2] = 0;
-    imageData.data[4 * i + 3] = alphaChannel[i];
-  }
-
-  // Scale image
-  const ratioX = 60 / bufferWidth;
-  const ratioY = 60 / bufferHeight;
-  const ratio = Math.min(ratioX, ratioY);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.putImageData(imageData, 0, 0);
-  ctx.drawImage(ctx.canvas, 0, 0, bufferWidth, bufferHeight, 0, 0, bufferWidth * ratio, bufferHeight * ratio);
-  const scaledImageData = ctx.getImageData(0, 0, bufferWidth * ratio, bufferHeight * ratio);
-
-  // Debugging section (uncomment to download SDF image)
+  // Debugging section (uncomment to download SVG image on canvas)
   // TODO Remove this for production
 
   // const a = document.createElement('a');
-  // const canvas2 = document.createElement('canvas');
-  // canvas2.width = 60;
-  // canvas2.height = 60;
-  // const ctx2 = canvas2.getContext('2d');
-  // ctx2.putImageData(scaledImageData, 0, 0);
-  // const blob = await new Promise((resolve) => ctx2.canvas.toBlob(resolve));
+  // const blob = await new Promise((resolve) => svgCtx.canvas.toBlob(resolve));
+  // const domUrl = window.URL || window.webkitURL || window;
+  // a.href = domUrl.createObjectURL(blob);
+  // a.download = 'svgimage.png';
+  // a.click();
+  // URL.revokeObjectURL(a.href);
+
+  // End debugging section
+
+  const distances = calcSDF(svgCtx, {
+    channel: 3,
+    cutoff,
+    radius: radius * size,
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  ctx.imageSmoothingEnabled = true;
+  const imageData = ctx.createImageData(size, size);
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      imageData.data[j*size*4 + i*4 + 0] = 0;
+      imageData.data[j*size*4 + i*4 + 1] = 0;
+      imageData.data[j*size*4 + i*4 + 2] = 0;
+      imageData.data[j*size*4 + i*4 + 3] = distances[j*size+i]*255;
+    }
+  }
+
+  // Scale image
+  const pixelRatio = window.devicePixelRatio;
+  const ratio = (isRetina() ? 36 : 21) / size;
+  const scaledSize = size * ratio;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.putImageData(imageData, 0, 0);
+  ctx.drawImage(ctx.canvas, 0, 0, size, size, 0, 0, scaledSize, scaledSize);
+  const scaledImageData = ctx.getImageData(0, 0, scaledSize, scaledSize);
+
+  // Debugging section (uncomment to download sdf image on canvas)
+  // TODO Remove this for production
+
+  // const a = document.createElement('a');
+  // const blob = await new Promise((resolve) => ctx.canvas.toBlob(resolve));
+  // const domUrl = window.URL || window.webkitURL || window;
+  // a.href = domUrl.createObjectURL(blob);
+  // a.download = 'sdfimage.png';
+  // a.click();
+  // URL.revokeObjectURL(a.href);
+
+  // End debugging section
+
+  // Debugging section (uncomment to download scaled SDF image)
+  // TODO Remove this for production
+
+  // const a = document.createElement('a');
+  // const canvas3 = document.createElement('canvas');
+  // canvas3.width = 45;
+  // canvas3.height = 45;
+  // const ctx3 = canvas3.getContext('2d');
+  // ctx3.putImageData(scaledImageData, 0, 0);
+  // const blob = await new Promise((resolve) => ctx3.canvas.toBlob(resolve));
   // const domUrl = window.URL || window.webkitURL || window;
   // a.href = domUrl.createObjectURL(blob);
   // a.download = 'blob.png';
@@ -130,7 +160,7 @@ export async function createSdfIcon(svgString) {
 
   // End debugging section
 
-  return scaledImageData;
+  return { imageData: scaledImageData, pixelRatio };
 }
 
 // Style descriptor stores symbolId, for example 'aircraft'

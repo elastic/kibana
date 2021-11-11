@@ -15,6 +15,8 @@ import { CUSTOM_ICON_PREFIX_SDF, createSdfIcon, getCustomIconId } from '../../sy
 
 export interface Props {
   svg?: string;
+  cutoff?: number;
+  radius?: number;
 }
 
 interface State {
@@ -39,7 +41,7 @@ export class IconPreview extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.svg !== prevProps.svg) {
+    if (this.props.svg !== prevProps.svg || this.props.cutoff !== prevProps.cutoff || this.props.radius !== prevProps.radius) {
       this._syncImageToMap();
     }
   }
@@ -68,14 +70,15 @@ export class IconPreview extends Component<Props, State> {
   async _syncImageToMap() {
     if (this._isMounted && this.state.map && this.props.svg) {
       const map = this.state.map;
-      const sdfImage = await createSdfIcon(this.props.svg);
+      const { imageData, pixelRatio } = await createSdfIcon(this.props.svg, this.props.cutoff, this.props.radius);
       if (map.hasImage(IconPreview.iconId)) {
         // @ts-expect-error
-        map.updateImage(IconPreview.iconId, sdfImage);
+        map.updateImage(IconPreview.iconId, imageData);
       } else {
-        map.addImage(IconPreview.iconId, sdfImage, { sdf: true });
+        map.addImage(IconPreview.iconId, imageData, { pixelRatio, sdf: true });
       }
       map.setLayoutProperty('icon-layer', 'icon-image', IconPreview.iconId);
+      map.setLayoutProperty('icon-layer', 'icon-size', 6);
       this._syncPaintPropertiesToMap();
     }
   }
@@ -158,7 +161,7 @@ export class IconPreview extends Component<Props, State> {
         </EuiFlexItem>
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiFormRow label="Icon color">
+          <EuiFormRow label="Preview color">
             <EuiColorPicker onChange={this._setIconColor} color={iconColor} />
           </EuiFormRow>
         </EuiFlexItem>

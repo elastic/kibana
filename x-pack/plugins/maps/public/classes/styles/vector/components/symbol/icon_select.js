@@ -21,6 +21,9 @@ import { getCustomIconId, SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
 
+const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
+const DEFAULT_CUSTOM_ICON_RADIUS = 0.5;
+
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
 }
@@ -31,7 +34,7 @@ export class IconSelect extends Component {
     isModalVisible: false,
   };
 
-  _handleSave = (name, image) => {
+  _handleSave = (name, image, cutoff, radius) => {
     const symbolId = getCustomIconId();
     const icons = [
       ...this.props.customIcons,
@@ -39,6 +42,8 @@ export class IconSelect extends Component {
         symbolId,
         svg: image,
         name,
+        cutoff,
+        radius,
       },
     ];
     this.props.onCustomIconsChange(icons);
@@ -90,8 +95,8 @@ export class IconSelect extends Component {
     });
 
     if (selectedOption) {
-      const { key, svg, label } = selectedOption;
-      this.props.onChange({ selectedIconId: key, svg, label });
+      const { key, svg, label, cutoff, radius } = selectedOption;
+      this.props.onChange({ selectedIconId: key, svg, label, cutoff, radius });
     }
     this._closePopover();
   };
@@ -149,11 +154,13 @@ export class IconSelect extends Component {
       }),
     ];
 
-    const customOptions = this.props.customIcons.map(({ symbolId, svg, name }) => {
+    const customOptions = this.props.customIcons.map(({ symbolId, svg, name, cutoff, radius }) => {
       return {
         key: symbolId,
         label: name,
         svg,
+        cutoff,
+        radius,
         prepend: (
           <SymbolIcon
             key={symbolId}
@@ -207,6 +214,8 @@ export class IconSelect extends Component {
         {this.state.isModalVisible ? (
           <CustomIconModal
             title="Custom Icon"
+            cutoff={DEFAULT_CUSTOM_ICON_CUTOFF}
+            radius={DEFAULT_CUSTOM_ICON_RADIUS}
             onSave={this._handleSave}
             onCancel={this._hideModal}
           />

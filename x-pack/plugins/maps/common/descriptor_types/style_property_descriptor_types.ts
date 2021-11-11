@@ -62,6 +62,8 @@ export type IconStop = {
   icon: string;
   svg?: string;
   label?: string;
+  cutoff?: number;
+  radius?: number;
 };
 
 export type ColorDynamicOptions = {
@@ -112,6 +114,8 @@ export type IconStaticOptions = {
   value: string; // icon id
   svg?: string;
   label?: string;
+  cutoff?: number;
+  radius?: number;
 };
 
 export type IconStylePropertyDescriptor =
@@ -186,6 +190,8 @@ export type CustomIcon = {
   symbolId: string;
   svg: string; //svg string
   name: string; // user given name
+  cutoff: number;
+  radius: number;
 };
 
 export type VectorStylePropertiesDescriptor = {
