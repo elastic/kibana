@@ -80,7 +80,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
         <BasicOptions {...props} legendPositions={legendPositions} />
         {showElasticChartsOptions && (
           <LongLegendOptions
-            data-test-subj="pieLongLegendsOptions"
+            data-test-subj="heatmapLongLegendsOptions"
             truncateLegend={stateParams.truncateLegend ?? true}
             maxLegendLines={stateParams.maxLegendLines ?? 1}
             setValue={setValue}
@@ -91,6 +91,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
           label={i18n.translate('visTypeHeatmap.editors.heatmap.highlightLabel', {
             defaultMessage: 'Highlight range',
           })}
+          data-test-subj="heatmapHighlightRange"
           paramName="enableHover"
           value={stateParams.enableHover}
           setValue={setValue}
@@ -140,6 +141,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
           value={valueAxis.scale.type}
           setValue={setValueAxisScale}
           disabled={showElasticChartsOptions}
+          data-test-subj="heatmapColorScale"
         />
 
         {!showElasticChartsOptions && (
@@ -150,6 +152,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
             paramName="defaultYExtents"
             value={valueAxis.scale.defaultYExtents}
             setValue={setValueAxisScale}
+            data-test-subj="heatmapScaleToDataBounds"
           />
         )}
 

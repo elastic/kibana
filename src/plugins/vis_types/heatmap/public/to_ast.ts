@@ -27,7 +27,7 @@ const prepareLegend = (params: HeatmapVisParams) => {
 
 const prepareGrid = (params: HeatmapVisParams) => {
   const gridConfig = buildExpressionFunction('heatmap_grid', {
-    isCellLabelVisible: params.valueAxes[0].labels.show,
+    isCellLabelVisible: params.valueAxes?.[0].labels.show ?? false,
     isXAxisLabelVisible: true,
   });
 
@@ -42,11 +42,6 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
     highlightInHover: vis.params.enableHover,
     useDistinctBands: vis.params.useDistinctBands ?? true,
     percentageMode: vis.params.percentageMode,
-    xAccessor: schemas.segment?.[0].accessor,
-    yAccessor: schemas.group?.[0].accessor,
-    valueAccessor: schemas.metric[0].accessor,
-    splitRowAccessor: schemas.split_row?.[0].accessor,
-    splitColumnAccessor: schemas.split_column?.[0].accessor,
     percentageFormatPattern:
       vis.params.percentageFormatPattern ?? `0,0.[${'0'.repeat(DEFAULT_PERCENT_DECIMALS)}]%`,
     legend: prepareLegend(vis.params),
@@ -54,6 +49,21 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
   };
 
   const visTypeHeatmap = buildExpressionFunction('heatmap', expressionArgs);
+  if (schemas.metric.length) {
+    visTypeHeatmap.addArgument('valueAccessor', schemas.metric?.[0]?.accessor);
+  }
+  if (schemas.segment && schemas.segment.length) {
+    visTypeHeatmap.addArgument('xAccessor', schemas.segment?.[0]?.accessor);
+  }
+  if (schemas.group && schemas.group.length) {
+    visTypeHeatmap.addArgument('yAccessor', schemas.group?.[0]?.accessor);
+  }
+  if (schemas.split_row && schemas.split_row.length) {
+    visTypeHeatmap.addArgument('splitRowAccessor', schemas.split_row?.[0]?.accessor);
+  }
+  if (schemas.split_column && schemas.split_column.length) {
+    visTypeHeatmap.addArgument('splitColumnAccessor', schemas.split_column?.[0]?.accessor);
+  }
   let palette;
   if (vis.params.setColorRange && vis.params.colorsRange && vis.params.colorsRange.length) {
     const stopsWithColors = getStopsWithColorsFromRanges(
@@ -61,6 +71,7 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
       vis.params.colorSchema,
       vis.params.invertColors
     );
+    // palette is type of number, if user gives specific ranges
     palette = buildExpressionFunction('palette', {
       ...stopsWithColors,
       range: 'number',
@@ -75,6 +86,7 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
           : undefined,
     });
   } else {
+    // palette is type of percent, if user wants dynamic calulated ranges
     const stopsWithColors = getStopsWithColorsFromColorsNumber(
       vis.params.colorsNumber,
       vis.params.colorSchema,

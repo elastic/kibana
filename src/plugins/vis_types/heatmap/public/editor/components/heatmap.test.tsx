@@ -9,19 +9,30 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
-import PieOptions, { PieOptionsProps } from './pie';
-import { chartPluginMock } from '../../../../../charts/public/mocks';
+import type { PersistedState } from '../../../../../visualizations/public';
+import HeatmapOptions, { HeatmapOptionsProps } from './heatmap';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 
 describe('PalettePicker', function () {
-  let props: PieOptionsProps;
-  let component: ReactWrapper<PieOptionsProps>;
+  let props: HeatmapOptionsProps;
+  let component: ReactWrapper<HeatmapOptionsProps>;
+  const mockState = new Map();
+  const uiState = {
+    get: jest
+      .fn()
+      .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
+    set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
+    emit: jest.fn(),
+    on: jest.fn(),
+    setSilent: jest.fn(),
+  } as unknown as PersistedState;
 
   beforeAll(() => {
     props = {
-      palettes: chartPluginMock.createSetupContract().palettes,
       showElasticChartsOptions: true,
+      uiState,
+      setValidity: jest.fn(),
       vis: {
         type: {
           editorConfig: {
@@ -49,90 +60,146 @@ describe('PalettePicker', function () {
         },
       },
       stateParams: {
-        isDonut: true,
-        legendPosition: 'left',
-        labels: {
-          show: true,
-        },
+        percentageMode: false,
+        addTooltip: true,
+        addLegend: true,
+        enableHover: false,
+        legendPosition: 'right',
+        colorsNumber: 8,
+        colorSchema: 'Blues',
+        setColorRange: false,
+        colorsRange: [],
+        invertColors: false,
+        truncateLegend: true,
+        maxLegendLines: 1,
+        valueAxes: [
+          {
+            id: 'ValueAxis-1',
+            name: 'LeftAxis-1',
+            type: 'value',
+            position: 'left',
+            show: true,
+            style: {},
+            scale: {
+              type: 'linear',
+              mode: 'normal',
+            },
+            labels: {
+              show: true,
+              rotate: 0,
+              filter: false,
+              truncate: 100,
+              overwriteColor: true,
+            },
+            title: {
+              text: 'Count',
+            },
+          },
+        ],
       },
       setValue: jest.fn(),
-    } as unknown as PieOptionsProps;
-  });
-
-  it('renders the nested legend switch for the elastic charts implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} />);
-    await act(async () => {
-      expect(findTestSubject(component, 'visTypePieNestedLegendSwitch').length).toBe(1);
-    });
-  });
-
-  it('not renders the nested legend switch for the vislib implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
-    await act(async () => {
-      expect(findTestSubject(component, 'visTypePieNestedLegendSwitch').length).toBe(0);
-    });
+    } as unknown as HeatmapOptionsProps;
   });
 
   it('renders the long legend options for the elastic charts implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} />);
+    component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'pieLongLegendsOptions').length).toBe(1);
+      expect(findTestSubject(component, 'heatmapLongLegendsOptions').length).toBe(1);
     });
   });
 
   it('not renders the long legend options for the vislib implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
+    component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
-      expect(findTestSubject(component, 'pieLongLegendsOptions').length).toBe(0);
+      expect(findTestSubject(component, 'heatmapLongLegendsOptions').length).toBe(0);
     });
   });
 
-  it('renders the label position dropdown for the elastic charts implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} />);
+  it('disables the highlight range switch for the elastic charts implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'visTypePieLabelPositionSelect').length).toBe(1);
+      expect(findTestSubject(component, 'heatmapHighlightRange').prop('disabled')).toBeTruthy();
     });
   });
 
-  it('not renders the label position dropdown for the vislib implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
+  it('enables the highlight range switch for the vislib implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
-      expect(findTestSubject(component, 'visTypePieLabelPositionSelect').length).toBe(0);
+      expect(findTestSubject(component, 'heatmapHighlightRange').prop('disabled')).toBeFalsy();
     });
   });
 
-  it('renders the top level switch for the elastic charts implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} />);
+  it('disables the color scale dropdown for the elastic charts implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'visTypePieTopLevelSwitch').length).toBe(1);
+      expect(findTestSubject(component, 'heatmapColorScale').prop('disabled')).toBeTruthy();
     });
   });
 
-  it('renders the top level switch for the vislib implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
+  it('enables the color scale dropdown for the vislib implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
-      expect(findTestSubject(component, 'visTypePieTopLevelSwitch').length).toBe(1);
+      expect(findTestSubject(component, 'heatmapColorScale').prop('disabled')).toBeFalsy();
     });
   });
 
-  it('renders the value format dropdown for the elastic charts implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} />);
+  it('not renders the scale to data bounds switch for the elastic charts implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'visTypePieValueFormatsSelect').length).toBe(1);
+      expect(findTestSubject(component, 'heatmapScaleToDataBounds').length).toBe(0);
     });
   });
 
-  it('not renders the value format dropdown for the vislib implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
+  it('renders the scale to data bounds for the vislib implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
-      expect(findTestSubject(component, 'visTypePieValueFormatsSelect').length).toBe(0);
+      expect(findTestSubject(component, 'heatmapScaleToDataBounds').length).toBe(1);
     });
   });
 
-  it('renders the percent slider for the elastic charts implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} />);
+  it('disables the labels rotate for the elastic charts implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'visTypePieValueDecimals').length).toBe(1);
+      expect(findTestSubject(component, 'heatmapLabelsRotate').prop('disabled')).toBeTruthy();
+    });
+  });
+
+  it('enables the labels rotate for the vislib implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'heatmapLabelsRotate').prop('disabled')).toBeFalsy();
+    });
+  });
+
+  it('disables the overwtite color switch for the elastic charts implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} />);
+    await act(async () => {
+      expect(
+        findTestSubject(component, 'heatmapLabelsOverwriteColor').prop('disabled')
+      ).toBeTruthy();
+    });
+  });
+
+  it('enables the overwtite color switch for the vislib implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
+    await act(async () => {
+      expect(
+        findTestSubject(component, 'heatmapLabelsOverwriteColor').prop('disabled')
+      ).toBeFalsy();
+    });
+  });
+
+  it('disables the color picker for the elastic charts implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'heatmapLabelsColor').prop('disabled')).toBeTruthy();
+    });
+  });
+
+  it('enables the color picker for the vislib implementation', async () => {
+    component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'heatmapLabelsColor').prop('disabled')).toBeFalsy();
     });
   });
 });

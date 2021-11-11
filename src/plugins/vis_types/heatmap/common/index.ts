@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const DEFAULT_PERCENT_DECIMALS = 2;
 export const LEGACY_HEATMAP_CHARTS_LIBRARY = 'visualization:visualize:legacyHeatmapChartsLibrary';

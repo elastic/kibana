@@ -6,21 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { metricVisFunction } from './metric_vis_function';
-import type { MetricArguments } from '../../common';
+import { heatmapFunction } from './heatmap_function';
+import type { HeatmapArguments } from '../../common';
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { EXPRESSION_HEATMAP_GRID_NAME, EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
 
-describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(metricVisFunction());
+describe('interpreter/functions#heatmap', () => {
+  const fn = functionWrapper(heatmapFunction());
   const context: Datatable = {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    columns: [
+      { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
+      { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+    ],
   };
-  const args: MetricArguments = {
+  const args: HeatmapArguments = {
     percentageMode: false,
-    colorMode: 'None',
+    shape: 'heatmap',
+    legend: {
+      isVisible: true,
+      position: 'top',
+      type: EXPRESSION_HEATMAP_LEGEND_NAME,
+    },
+    gridConfig: {
+      isCellLabelVisible: true,
+      isYAxisLabelVisible: true,
+      isXAxisLabelVisible: true,
+      type: EXPRESSION_HEATMAP_GRID_NAME,
+    },
     palette: {
       type: 'palette',
       name: '',
@@ -33,18 +48,10 @@ describe('interpreter/functions#metric', () => {
         range: 'number',
       },
     },
-    showLabels: true,
-    font: { spec: { fontSize: '60px' }, type: 'style', css: '' },
-    metric: [
-      {
-        type: 'vis_dimension',
-        accessor: 0,
-        format: {
-          id: 'number',
-          params: {},
-        },
-      },
-    ],
+    showTooltip: true,
+    highlightInHover: false,
+    xAccessor: 'col-1-2',
+    valueAccessor: 'col-0-1',
   };
 
   it('returns an object with the correct structure', () => {

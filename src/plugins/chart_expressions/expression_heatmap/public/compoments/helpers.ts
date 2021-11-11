@@ -220,11 +220,6 @@ export const findMinMaxByColumnId = (
   }
   return minMax;
 };
-
-// Checks if accessor is a string or number. Lens and legacy heatmap treat the accessors differently
-// For legacy, accessor indicates the column number while in Lens the column id
-export const accessorIsNotNumber = (value: string | undefined) => isNaN(value as unknown as number);
-
 interface SourceParams {
   order?: string;
   orderBy?: string;

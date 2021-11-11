@@ -25,12 +25,7 @@ import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
 import { LegendToggle } from '../../../../charts/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
-import {
-  applyPaletteParams,
-  findMinMaxByColumnId,
-  accessorIsNotNumber,
-  getSortPredicate,
-} from './helpers';
+import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import { getColorPicker } from '../utils/get_color_picker';
 import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
 import { EmptyPlaceholder } from './empty_placeholder';
@@ -163,9 +158,11 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     [args.legend.position, setColor, uiState]
   );
   const table = data;
-  const valueAccessor = accessorIsNotNumber(args.valueAccessor)
-    ? args.valueAccessor
-    : table.columns[Number(args.valueAccessor) ?? 0].id;
+  const valueAccessor =
+    typeof args.valueAccessor === 'string'
+      ? args.valueAccessor
+      : table.columns[args.valueAccessor ?? 0].id;
+
   const minMaxByColumnId = useMemo(
     () => findMinMaxByColumnId([valueAccessor!], table),
     [valueAccessor, table]
@@ -176,12 +173,10 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const paletteParams = args.palette?.params;
-  const xAccessor = accessorIsNotNumber(args.xAccessor)
-    ? args.xAccessor
-    : table.columns[Number(args.xAccessor) ?? 0].id;
-  const yAccessor = accessorIsNotNumber(args.yAccessor)
-    ? args.yAccessor
-    : table.columns[Number(args.yAccessor) ?? 0].id;
+  const xAccessor =
+    typeof args.xAccessor === 'string' ? args.xAccessor : table.columns[args.xAccessor ?? 0].id;
+  const yAccessor =
+    typeof args.yAccessor === 'string' ? args.yAccessor : table.columns[args.yAccessor ?? 0].id;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);

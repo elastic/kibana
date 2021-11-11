@@ -7,13 +7,7 @@
  */
 import { UiCounterMetricType } from '@kbn/analytics';
 import type { Position } from '@elastic/charts';
-import type {
-  PaletteOutput,
-  ChartsPluginSetup,
-  Style,
-  Labels,
-  ColorSchemas,
-} from '../../../charts/public';
+import type { ChartsPluginSetup, Style, Labels, ColorSchemas } from '../../../charts/public';
 import { Range } from '../../../expressions/public';
 
 export interface HeatmapTypeProps {
@@ -31,7 +25,6 @@ export interface HeatmapVisParams {
   maxLegendLines?: number;
   useDistinctBands: boolean;
   percentageMode: boolean;
-  palette: PaletteOutput;
   valueAxes: ValueAxis[];
   colorSchema: ColorSchemas;
   invertColors: boolean;

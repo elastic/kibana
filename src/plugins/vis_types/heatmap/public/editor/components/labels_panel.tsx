@@ -75,6 +75,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
         label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.rotateLabel', {
           defaultMessage: 'Rotate',
         })}
+        data-test-subj="heatmapLabelsRotate"
         paramName="rotate"
         value={rotateLabels}
         setValue={setRotateLabels}
@@ -95,6 +96,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
         paramName="overwriteColor"
         value={Boolean(valueAxis.labels.overwriteColor)}
         setValue={setValueAxisLabels}
+        data-test-subj="heatmapLabelsOverwriteColor"
         tooltip={i18n.translate('visTypeHeatmap.editors.heatmap.overwriteColorlNotAvailable', {
           defaultMessage:
             'Overwrite automatic color is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
@@ -111,6 +113,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
         <EuiColorPicker
           compressed
           fullWidth
+          data-test-subj="heatmapLabelsColor"
           disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor || isNewLibrary}
           color={valueAxis.labels.color}
           onChange={setColor}

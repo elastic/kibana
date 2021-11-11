@@ -365,14 +365,11 @@ describe('heatmap', () => {
         xAccessor: 'x-accessor',
         valueAccessor: 'value-accessor',
       };
-      const attributes = {
-        title: 'Test',
-      };
 
       expect(
         getHeatmapVisualization({
           paletteService,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
         chain: [
@@ -380,8 +377,6 @@ describe('heatmap', () => {
             type: 'function',
             function: FUNCTION_NAME,
             arguments: {
-              title: ['Test'],
-              description: [''],
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: ['value-accessor'],
@@ -498,8 +493,6 @@ describe('heatmap', () => {
             type: 'function',
             function: FUNCTION_NAME,
             arguments: {
-              title: [''],
-              description: [''],
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: [''],

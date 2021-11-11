@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../../visualizations/public';
+import { Vis } from 'src/plugins/visualizations/public';
+import { sampleAreaVis } from './sample_vis.test.mocks';
 import { buildExpression } from '../../../expressions/public';
 
-import { BasicVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
-import { sampleAreaVis } from '../../xy/public/sample_vis.test.mocks';
+import { HeatmapVisParams } from './types';
 
 jest.mock('../../../expressions/public', () => ({
   ...(jest.requireActual('../../../expressions/public') as any),
@@ -27,8 +27,8 @@ jest.mock('./to_ast_esaggs', () => ({
   getEsaggsFn: jest.fn(),
 }));
 
-describe('vislib vis toExpressionAst function', () => {
-  let vis: Vis<BasicVislibParams>;
+describe('heatmap vis toExpressionAst function', () => {
+  let vis: Vis<HeatmapVisParams>;
 
   const params = {
     timefilter: {},
@@ -42,7 +42,7 @@ describe('vislib vis toExpressionAst function', () => {
 
   it('should match basic snapshot', () => {
     toExpressionAst(vis, params);
-    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls[0][0];
+    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls.pop()[0];
 
     expect(builtExpression).toMatchSnapshot();
   });

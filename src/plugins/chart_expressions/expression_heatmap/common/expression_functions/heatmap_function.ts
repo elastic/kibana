@@ -17,8 +17,17 @@ import {
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
 
-const convertToVisDimension = (columns: DatatableColumn[], accessor: string | undefined) => {
-  const column = columns.find((c) => c.id === accessor);
+const convertToVisDimension = (
+  columns: DatatableColumn[],
+  accessor: string | number | undefined
+) => {
+  if (!accessor) return;
+  let column;
+  if (typeof accessor === 'string') {
+    column = columns.find((c) => c.id === accessor);
+  } else {
+    column = columns[accessor];
+  }
   if (!column) return;
   return {
     accessor: column.id,
@@ -52,7 +61,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
     shape: {
       types: ['string'],
-      help: 'TBD',
+      help: 'Defines the shape of the visualization',
     },
     palette: {
       types: ['palette'],
@@ -89,38 +98,42 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     useDistinctBands: {
       types: ['boolean'],
       help: i18n.translate('expressionHeatmap.function.args.useDistinctBandsHelpText', {
-        defaultMessage: 'TBD',
+        defaultMessage: 'If is set to false, the end value of the bands will be infinite',
       }),
       default: false,
     },
     xAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
       help: i18n.translate('expressionHeatmap.function.args.xAccessorHelpText', {
-        defaultMessage: 'Id of the x axis column or column index',
+        defaultMessage: 'The id of the x axis column as string or the number of the table index',
       }),
     },
     yAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
+
       help: i18n.translate('expressionHeatmap.function.args.yAccessorHelpText', {
-        defaultMessage: 'Id of the y axis column or column index',
+        defaultMessage: 'The id of the y axis column as string or the number of the table index',
       }),
     },
     valueAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
+
       help: i18n.translate('expressionHeatmap.function.args.valueAccessorHelpText', {
-        defaultMessage: 'Id of the value column or column index',
+        defaultMessage: 'The id of the value column as string or the number of the table index',
       }),
     },
     splitRowAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
+
       help: i18n.translate('expressionHeatmap.function.args.splitRowAccessorHelpText', {
-        defaultMessage: 'Id of the splitRow column or column index',
+        defaultMessage: 'The id of the split row as string or the number of the table index',
       }),
     },
     splitColumnAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
+
       help: i18n.translate('expressionHeatmap.function.args.splitColumnAccessorHelpText', {
-        defaultMessage: 'Id of the spliColumn column or column index',
+        defaultMessage: 'The id of the split column as string or the number of the table index',
       }),
     },
   },
