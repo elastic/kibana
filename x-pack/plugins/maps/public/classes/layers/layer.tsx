@@ -472,7 +472,7 @@ export class AbstractLayer implements ILayer {
     return null;
   }
 
-  isBasemap(): boolean {
+  isBasemap(order: number): boolean {
     return false;
   }
 }
