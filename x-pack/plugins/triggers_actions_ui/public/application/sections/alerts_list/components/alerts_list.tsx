@@ -438,6 +438,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 color="hollow"
                 iconType="tag"
                 iconSide="left"
+                tabIndex={-1}
                 onClick={() => setTagPopoverOpenIndex(item.index)}
                 onClickAriaLabel="Tags"
                 iconOnClick={() => setTagPopoverOpenIndex(item.index)}
@@ -571,47 +572,50 @@ export const AlertsList: React.FunctionComponent = () => {
       name: '',
       width: '10%',
       render(item: AlertTableItem) {
-        return item.isEditable && isRuleTypeEditableInContext(item.alertTypeId) ? (
+        return (
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
             <EuiFlexItem grow={false} className="alertSidebarItem">
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false} data-test-subj="alertSidebarEditAction">
-                  <EuiButtonIcon
-                    color={'primary'}
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip',
-                      { defaultMessage: 'Edit' }
-                    )}
-                    className="alertSidebarItem__action"
-                    data-test-subj="editActionHoverButton"
-                    onClick={() => onRuleEdit(item)}
-                    iconType={'pencil'}
-                    aria-label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
-                      { defaultMessage: 'Edit' }
-                    )}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} data-test-subj="alertSidebarDeleteAction">
-                  <EuiButtonIcon
-                    color={'danger'}
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip',
-                      { defaultMessage: 'Delete' }
-                    )}
-                    className="alertSidebarItem__action"
-                    data-test-subj="deleteActionHoverButton"
-                    onClick={() => setAlertsToDelete([item.id])}
-                    iconType={'trash'}
-                    aria-label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
-                      { defaultMessage: 'Delete' }
-                    )}
-                  />
-                </EuiFlexItem>
+                {item.isEditable && isRuleTypeEditableInContext(item.alertTypeId) ? (
+                  <EuiFlexItem grow={false} data-test-subj="alertSidebarEditAction">
+                    <EuiButtonIcon
+                      color={'primary'}
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip',
+                        { defaultMessage: 'Edit' }
+                      )}
+                      className="alertSidebarItem__action"
+                      data-test-subj="editActionHoverButton"
+                      onClick={() => onRuleEdit(item)}
+                      iconType={'pencil'}
+                      aria-label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
+                        { defaultMessage: 'Edit' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                ) : null}
+                {item.isEditable ? (
+                  <EuiFlexItem grow={false} data-test-subj="alertSidebarDeleteAction">
+                    <EuiButtonIcon
+                      color={'danger'}
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip',
+                        { defaultMessage: 'Delete' }
+                      )}
+                      className="alertSidebarItem__action"
+                      data-test-subj="deleteActionHoverButton"
+                      onClick={() => setAlertsToDelete([item.id])}
+                      iconType={'trash'}
+                      aria-label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
+                        { defaultMessage: 'Delete' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
               <CollapsedItemActions
                 key={item.id}
@@ -622,7 +626,7 @@ export const AlertsList: React.FunctionComponent = () => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        ) : null;
+        );
       },
     },
   ];
