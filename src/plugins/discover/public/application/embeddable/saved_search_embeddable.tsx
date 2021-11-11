@@ -47,7 +47,7 @@ import { getDefaultSort } from '../apps/main/components/doc_table';
 import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
 import { updateSearchSource } from './helpers/update_search_source';
 import { VIEW_MODE } from '../apps/main/components/view_mode_toggle';
-import { FieldStatsTableEmbeddable } from '../components/data_visualizer_grid/field_stats_table_embeddable';
+import { FieldStatsTableSavedSearchEmbeddable } from '../components/field_stats_table';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -391,7 +391,7 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <FieldStatsTableEmbeddable
+        <FieldStatsTableSavedSearchEmbeddable
           services={searchProps.services}
           indexPattern={searchProps.indexPattern}
           columns={searchProps.columns}
