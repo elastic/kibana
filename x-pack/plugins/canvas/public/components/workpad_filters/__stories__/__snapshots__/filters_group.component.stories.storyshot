@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/WorkpadFilters/FiltersGroup default 1`] = `
+exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] = `
 <div
   className="canvasLayout__sidebar"
 >
@@ -63,7 +63,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroup default 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/WorkpadFilters/FiltersGroup empty group 1`] = `
+exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 1`] = `
 <div
   className="canvasLayout__sidebar"
 >
