@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { registerTestBed } from './testbed';
-export type {
-  TestBed,
-  TestBedConfig,
-  AsyncTestBedConfig,
-  SetupFunc,
-  UnwrapPromise,
-  SyncSetupFunc,
-  AsyncSetupFunc,
-} from './types';
+import { LangModuleType } from '@kbn/monaco';
+import { languageConfiguration, lexerRules } from './language';
+import { LANG } from './constants';
+
+export const Lang: LangModuleType = { ID: LANG, languageConfiguration, lexerRules };

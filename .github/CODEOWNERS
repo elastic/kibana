@@ -94,6 +94,18 @@
 # Observability Shared
 /x-pack/plugins/observability/ @elastic/observability-ui
 
+# Unified Observability
+/x-pack/plugins/observability/public/pages/overview @elastic/unified-observability
+/x-pack/plugins/observability/public/pages/home @elastic/unified-observability
+/x-pack/plugins/observability/public/pages/landing @elastic/unified-observability
+/x-pack/plugins/observability/public/context @elastic/unified-observability
+
+# Actionable Observability
+/x-pack/plugins/observability/common/rules @elastic/actionable-observability
+/x-pack/plugins/observability/public/rules @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/alerts @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
+
 # Infra Monitoring
 /x-pack/plugins/infra/ @elastic/infra-monitoring-ui
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui

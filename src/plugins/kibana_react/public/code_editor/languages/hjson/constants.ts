@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { registerTestBed } from './testbed';
-export type {
-  TestBed,
-  TestBedConfig,
-  AsyncTestBedConfig,
-  SetupFunc,
-  UnwrapPromise,
-  SyncSetupFunc,
-  AsyncSetupFunc,
-} from './types';
+export const LANG = 'hjson';
