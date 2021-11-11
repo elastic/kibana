@@ -46,6 +46,10 @@ export const metricSet = {
       name: 'index_disk',
     },
     {
+      keys: ['index_segment_count_total', 'index_segment_count_primaries'],
+      name: 'index_segment_count',
+    },
+    {
       keys: ['index_index_latency', 'index_query_latency'],
       name: 'index_latency',
     },
@@ -61,5 +65,9 @@ export const metricSet = {
       name: 'index_size',
     },
     'index_document_count',
+    {
+      keys: ['index_segment_count_total', 'index_segment_count_primaries'],
+      name: 'index_segment_count',
+    },
   ],
 };
