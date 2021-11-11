@@ -50,7 +50,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns correct metadata for the dependency', async () => {
         await generateData({ synthtraceEsClient, start, end });
-
         const { status, body } = await callApi();
         const { span } = dataConfig;
 
