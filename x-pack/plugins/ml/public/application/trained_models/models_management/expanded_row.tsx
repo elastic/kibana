@@ -33,31 +33,22 @@ interface ExpandedRowProps {
   item: ModelItemFull;
 }
 
+const badgeFormatter = (items: string[]) => {
+  if (items.length === 0) return;
+  return (
+    <div>
+      {items.map((item) => (
+        <EuiBadge key={item} color="hollow">
+          {item}
+        </EuiBadge>
+      ))}
+    </div>
+  );
+};
+
 const formatterDictionary: Record<string, (value: any) => JSX.Element | string | undefined> = {
-  tags: (tags: string[]) => {
-    if (tags.length === 0) return;
-    return (
-      <div>
-        {tags.map((tag) => (
-          <EuiBadge key={tag} color="hollow">
-            {tag}
-          </EuiBadge>
-        ))}
-      </div>
-    );
-  },
-  roles: (tags: string[]) => {
-    if (tags.length === 0) return;
-    return (
-      <div>
-        {tags.map((tag) => (
-          <EuiBadge key={tag} color="hollow">
-            {tag}
-          </EuiBadge>
-        ))}
-      </div>
-    );
-  },
+  tags: badgeFormatter,
+  roles: badgeFormatter,
   create_time: timeFormatter,
   timestamp: timeFormatter,
 };
