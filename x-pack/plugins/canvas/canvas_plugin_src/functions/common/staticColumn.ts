@@ -45,23 +45,28 @@ export function staticColumn(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const rows = input.rows.map((row) => ({ ...row, [args.name]: args.value }));
+      const columnIndex = input.columns.findIndex((column) => column.name === args.name);
       const type = getType(args.value) as DatatableColumnType;
-      const columns = [...input.columns];
-      const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
-      const newColumn = { id: args.name, name: args.name, meta: { type } };
 
-      if (existingColumnIndex > -1) {
-        columns[existingColumnIndex] = newColumn;
-      } else {
-        columns.push(newColumn);
+      if (columnIndex === -1) {
+        const rows = input.rows.map((row) => ({ ...row, [args.name]: args.value }));
+        const newColumn = { id: args.name, name: args.name, meta: { type } };
+
+        return { type: 'datatable', columns: [...input.columns, newColumn], rows };
       }
 
-      return {
-        type: 'datatable',
-        columns,
-        rows,
+      const { id, meta } = input.columns[columnIndex];
+      const rows = input.rows.map((row) => ({ ...row, [id]: args.value }));
+      const newColumn = {
+        id,
+        name: args.name,
+        meta: { ...meta, params: { ...(meta.params ?? {}), id: type }, type },
       };
+
+      const columns = [...input.columns];
+      columns.splice(columnIndex, 1, newColumn);
+
+      return { type: 'datatable', columns, rows };
     },
   };
 }
