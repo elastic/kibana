@@ -9,6 +9,7 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import { PINGS_DATE_RANGE_START, PINGS_DATE_RANGE_END } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { API_URLS } from '../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,9 +23,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest
-        .get(
-          `/api/uptime/pings?sort=desc&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`
-        )
+        .get(API_URLS.PINGS)
+        .query({
+          sort: 'desc',
+          from: PINGS_DATE_RANGE_START,
+          to: PINGS_DATE_RANGE_END,
+        })
         .expect(200);
 
       expect(apiResponse.total).to.be(2);
@@ -34,7 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should sort pings according to timestamp', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/uptime/pings?sort=asc&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`)
+        .get(API_URLS.PINGS)
+        .query({
+          sort: 'asc',
+          from: PINGS_DATE_RANGE_START,
+          to: PINGS_DATE_RANGE_END,
+        })
         .expect(200);
 
       expect(apiResponse.total).to.be(2);
@@ -45,9 +54,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return results of n length', async () => {
       const { body: apiResponse } = await supertest
-        .get(
-          `/api/uptime/pings?sort=desc&size=1&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`
-        )
+        .get(API_URLS.PINGS)
+        .query({
+          sort: 'desc',
+          size: 1,
+          from: PINGS_DATE_RANGE_START,
+          to: PINGS_DATE_RANGE_END,
+        })
         .expect(200);
 
       expect(apiResponse.total).to.be(2);
@@ -59,7 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
       const from = moment('2002-01-01').valueOf();
       const to = moment('2002-01-02').valueOf();
       const { body: apiResponse } = await supertest
-        .get(`/api/uptime/pings?from=${from}&to=${to}`)
+        .get(API_URLS.PINGS)
+        .query({ from, to })
         .expect(200);
 
       expect(apiResponse.total).to.be(0);
