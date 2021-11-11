@@ -25,8 +25,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload '.es/**/*.hprof'
 
   if [[ "$CODE_COVERAGE" == "1" ]]; then
-    tar -czf kibana-coverage.tar.gz 'target/kibana-coverage/**/*'
-    buildkite-agent artifact upload 'kibana-coverage.tar.gz'
+    buildkite-agent artifact upload 'target/kibana-coverage/**/*'
   else
     buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
   fi
