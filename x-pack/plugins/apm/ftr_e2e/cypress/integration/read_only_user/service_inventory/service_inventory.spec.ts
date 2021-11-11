@@ -93,11 +93,14 @@ describe('When navigating to the service inventory', () => {
       cy.wait(aliasNames);
     });
 
-    // FAILING, @caue.marcondes will be fixing soon
-    it.skip('when selecting a different time range and clicking the refresh button', () => {
+    it.skip('when selecting a different time range and clicking the update button', () => {
       cy.wait(aliasNames);
 
-      cy.changeTimeRange('Last 30 days');
+      cy.selectAbsoluteTimeRange(
+        'Oct 10, 2021 @ 01:00:00.000',
+        'Oct 10, 2021 @ 01:30:00.000'
+      );
+      cy.contains('Update').click();
       cy.wait(aliasNames);
 
       cy.contains('Refresh').click();
