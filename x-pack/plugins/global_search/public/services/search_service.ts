@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, Observable, timer, throwError, EMPTY } from 'rxjs';
+import { merge, Observable, timer, throwError, of, EMPTY } from 'rxjs';
 import { map, takeUntil, catchError } from 'rxjs/operators';
 import { uniq } from 'lodash';
 import { duration } from 'moment';
@@ -93,6 +93,7 @@ interface SetupDeps {
 interface StartDeps {
   http: HttpStart;
   licenseChecker: ILicenseChecker;
+  isScreenshotMode: boolean;
 }
 
 const mapToUndefined = () => undefined;
@@ -104,6 +105,7 @@ export class SearchService {
   private http?: HttpStart;
   private maxProviderResults = defaultMaxProviderResults;
   private licenseChecker?: ILicenseChecker;
+  private isScreenshotMode = false;
   private serverTypes?: string[];
 
   setup({ config, maxProviderResults = defaultMaxProviderResults }: SetupDeps): SearchServiceSetup {
@@ -121,9 +123,10 @@ export class SearchService {
     };
   }
 
-  start({ http, licenseChecker }: StartDeps): SearchServiceStart {
+  start({ http, licenseChecker, isScreenshotMode }: StartDeps): SearchServiceStart {
     this.http = http;
     this.licenseChecker = licenseChecker;
+    this.isScreenshotMode = isScreenshotMode;
 
     return {
       find: (params, options) => this.performFind(params, options),
@@ -147,6 +150,10 @@ export class SearchService {
   }
 
   private performFind(params: GlobalSearchFindParams, options: GlobalSearchFindOptions) {
+    if (this.isScreenshotMode) {
+      return of({ results: [] });
+    }
+
     const licenseState = this.licenseChecker!.getState();
     if (!licenseState.valid) {
       return throwError(

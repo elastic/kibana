@@ -25,4 +25,8 @@ export interface GlobalSearchFindOptions {
    * If/when provided and emitting, the result observable will be completed and no further result emission will be performed.
    */
   aborted$?: Observable<void>;
+  /**
+   * When a screenshot capture service has opened Kibana, the page needs to avoid automatically calling APIs
+   */
+  isScreenshotMode?: boolean;
 }

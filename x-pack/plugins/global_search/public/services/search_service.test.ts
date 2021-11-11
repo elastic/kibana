@@ -39,9 +39,12 @@ describe('SearchService', () => {
     };
   };
 
+  let isScreenshotMode = false;
+
   const startDeps = () => ({
     http: httpStart,
     licenseChecker,
+    isScreenshotMode,
   });
 
   const createProvider = (
@@ -102,6 +105,8 @@ describe('SearchService', () => {
 
     getDefaultPreferenceMock.mockClear();
     getDefaultPreferenceMock.mockReturnValue('default_pref');
+
+    isScreenshotMode = false;
   });
 
   describe('#setup()', () => {
@@ -158,6 +163,19 @@ describe('SearchService', () => {
           { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
           expect.objectContaining({ preference: 'pref', aborted$: expect.any(Object) })
         );
+      });
+
+      it('has `fetchServerResults` avoid HTTP calls when isScreenshotMode = true', () => {
+        service.setup({ config: createConfig() });
+
+        isScreenshotMode = true;
+        const { find } = service.start(startDeps());
+        find(
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
+          { preference: 'pref' }
+        );
+
+        expect(fetchServerResultsMock).toHaveBeenCalledTimes(0);
       });
 
       it('calls `getDefaultPreference` when `preference` is not specified', () => {

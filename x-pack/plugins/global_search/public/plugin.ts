@@ -6,16 +6,18 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import type { ScreenshotModePluginStart } from '../../../../src/plugins/screenshot_mode/public';
 import { LicensingPluginStart } from '../../licensing/public';
-import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
-import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
+import { ILicenseChecker, LicenseChecker } from '../common/license_checker';
 import { GlobalSearchClientConfigType } from './config';
 import { SearchService } from './services';
+import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchPluginSetupDeps {}
 export interface GlobalSearchPluginStartDeps {
   licensing: LicensingPluginStart;
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 export class GlobalSearchPlugin
@@ -45,11 +47,12 @@ export class GlobalSearchPlugin
     };
   }
 
-  start({ http }: CoreStart, { licensing }: GlobalSearchPluginStartDeps) {
+  start({ http }: CoreStart, { licensing, screenshotMode }: GlobalSearchPluginStartDeps) {
     this.licenseChecker = new LicenseChecker(licensing.license$);
     const { find, getSearchableTypes } = this.searchService.start({
       http,
       licenseChecker: this.licenseChecker,
+      isScreenshotMode: screenshotMode.isScreenshotMode(),
     });
 
     return {
