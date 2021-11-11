@@ -12,7 +12,7 @@ import { staticColumn } from './staticColumn';
 describe('staticColumn', () => {
   const fn = functionWrapper(staticColumn);
 
-  it('adds a column to a datatable with a static value in every row', () => {
+  it("adds a column to a datatable with a static value in every row if column with such a name doesn't exist", () => {
     const result = fn(testTable, { name: 'foo', value: 'bar' });
 
     expect(result.type).toBe('datatable');
@@ -24,13 +24,26 @@ describe('staticColumn', () => {
     expect(result.rows.every((row) => row.foo === 'bar')).toBe(true);
   });
 
-  it('overwrites an existing column if provided an existing column name', () => {
-    const result = fn(testTable, { name: 'name', value: 'John' });
+  it('updates an existing column if provided an existing column name', () => {
+    const name = 'name';
+    const value = 500;
+    const result = fn(testTable, { name, value });
 
     expect(result.type).toBe('datatable');
-    expect(result.columns).toEqual(testTable.columns);
-    expect(result.rows.every((row) => typeof row.name === 'string')).toBe(true);
-    expect(result.rows.every((row) => row.name === 'John')).toBe(true);
+    const foundColumn = result.columns.find((column) => column.name === name);
+    const originalColumn = testTable.columns.find((column) => column.name === name);
+
+    expect(foundColumn).not.toBeUndefined();
+    expect(originalColumn).not.toBeUndefined();
+
+    expect(foundColumn.meta).toEqual({
+      ...originalColumn.meta,
+      type: 'number',
+      params: { ...originalColumn.meta.params, id: 'number' },
+    });
+
+    expect(result.rows.every((row) => typeof row.name === 'number')).toBe(true);
+    expect(result.rows.every((row) => row.name === value)).toBe(true);
   });
 
   it('adds a column with null values', () => {
