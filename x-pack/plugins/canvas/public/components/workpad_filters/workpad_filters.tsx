@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect } from 'react';
+import React, { FC, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { State, FilterField } from '../../../types';
 import { groupFiltersBy } from '../../lib/filter';
@@ -17,9 +17,9 @@ import { WorkpadFilters as Component } from './workpad_filters.component';
 const DEFAULT_GROUP_BY: FilterField = 'filterGroup';
 
 export const WorkpadFilters: FC = () => {
-  const groupFiltersByField: FilterField | undefined = useSelector((state: State) =>
-    getGroupFiltersByOption(state)
-  );
+  const groupFiltersByField: FilterField =
+    useSelector((state: State) => getGroupFiltersByOption(state)) ?? DEFAULT_GROUP_BY;
+
   const dispatch = useDispatch();
 
   const onGroupByChange = useCallback(
@@ -28,12 +28,6 @@ export const WorkpadFilters: FC = () => {
     },
     [dispatch]
   );
-
-  useEffect(() => {
-    if (!groupFiltersByField) {
-      onGroupByChange(DEFAULT_GROUP_BY);
-    }
-  }, [groupFiltersByField, onGroupByChange]);
 
   const canvasFilters = useCanvasFilters();
 
