@@ -11,8 +11,8 @@ import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/environments/get_environments';
 import { rangeRt } from './default_api_types';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 
 const environmentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/environments',

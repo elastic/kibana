@@ -1,0 +1,98 @@
+{
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "chunking_config" : {
+    "mode" : "off"
+  },
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "processor.event": "metric" } },
+        { "term": { "metricset.name": "transaction" } }
+      ]
+    }
+  },
+  "aggregations" : {
+    "buckets" : {
+      "composite" : {
+        "size" : 5000,
+        "sources" : [
+          {
+            "date" : {
+              "date_histogram" : {
+                "field" : "@timestamp",
+                "fixed_interval" : "90s"
+              }
+            }
+          },
+          {
+            "transaction.type" : {
+              "terms" : {
+                "field" : "transaction.type"
+              }
+            }
+          },
+          {
+            "service.name" : {
+              "terms" : {
+                "field" : "service.name"
+              }
+            }
+          }
+        ]
+      },
+      "aggs" : {
+        "@timestamp" : {
+          "max" : {
+            "field" : "@timestamp"
+          }
+        },
+        "transaction_throughput" : {
+          "rate" : {
+            "unit" : "minute"
+          }
+        },
+        "transaction_latency" : {
+          "avg" : {
+            "field" : "transaction.duration.histogram"
+          }
+        },
+        "error_count" : {
+          "filter" : {
+            "term" : {
+              "event.outcome" : "failure"
+            }
+          },
+          "aggs" : {
+            "actual_error_count" : {
+              "value_count" : {
+                "field" : "event.outcome"
+              }
+            }
+          }
+        },
+        "success_count" : {
+          "filter" : {
+            "term" : {
+              "event.outcome" : "success"
+            }
+          }
+        },
+        "failed_transaction_rate" : {
+          "bucket_script" : {
+            "buckets_path" : {
+              "failure_count" : "error_count>_count",
+              "success_count" : "success_count>_count"
+            },
+            "script" : "if ((params.failure_count + params.success_count)==0){return 0;}else{return 100 * (params.failure_count/(params.failure_count + params.success_count));}"
+          }
+        }
+      }
+    }
+  },
+  "indices_options": {
+    "ignore_unavailable": true
+  }
+}

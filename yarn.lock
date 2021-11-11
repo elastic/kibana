@@ -5905,11 +5905,6 @@
   resolved "https://registry.yarnpkg.com/@types/base64-js/-/base64-js-1.2.5.tgz#582b2476169a6cba460a214d476c744441d873d5"
   integrity sha1-WCskdhaabLpGCiFNR2x0REHYc9U=
 
-"@types/bluebird@^3.1.1":
-  version "3.5.30"
-  resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.30.tgz#ee034a0eeea8b84ed868b1aa60d690b08a6cfbc5"
-  integrity sha512-8LhzvcjIoqoi1TghEkRMkbbmM+jhHnBokPGkJWjclMK+Ks0MxEBow3/p2/iFTZ+OIbJHQDSfpgdZEb+af3gfVw==
-
 "@types/braces@*":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/braces/-/braces-3.0.0.tgz#7da1c0d44ff1c7eb660a36ec078ea61ba7eb42cb"
@@ -9421,11 +9416,6 @@ bluebird@3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
   integrity sha512-/qKPUQlaW1OyR51WeCPBvRnAlnZFUJkCSG5HzGnuIqhgyJtF+T94lFnn33eiazjRm2LAHVy2guNnaq48X9SJuw==
-
-bluebird@3.5.5:
-  version "3.5.5"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.5.tgz#a8d0afd73251effbbd5fe384a77d73003c17a71f"
-  integrity sha512-5am6HnnfN+urzt4yfg7IgTbotDjIT/u8AJpEt0sIU9FtXfVeezXAPKswrG+xKUCOYAINpSdgZVDU6QFh+cuH3w==
 
 bluebird@3.7.2, bluebird@^3.3.5, bluebird@^3.4.1, bluebird@^3.5.0, bluebird@^3.5.1, bluebird@^3.5.5, bluebird@^3.7.1, bluebird@^3.7.2:
   version "3.7.2"
@@ -13225,10 +13215,10 @@ ejs@^3.1.2, ejs@^3.1.6:
   dependencies:
     jake "^10.6.1"
 
-elastic-apm-http-client@^10.1.0:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-10.1.0.tgz#8fbfa3f026f40d82b22b77bf4ed539cc20623edb"
-  integrity sha512-G+UsOQS8+kTyjbZ9PBXgbN8RGgeTe3FfbVljiwuN+eIf0UwpSR8k5Oh+Z2BELTTVwTcit7NCH4+B4MPayYx1mw==
+elastic-apm-http-client@^10.3.0:
+  version "10.3.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-10.3.0.tgz#12b95dc190a755cd1a8ce2c296cd28ef50f16aa4"
+  integrity sha512-BAqB7k5JA/x09L8BVj04WRoknRptmW2rLAoHQVrPvPhUm/IgNz63wPfiBuhWVE//Hl7xEpURO5pMV6az0UArkA==
   dependencies:
     breadth-filter "^2.0.0"
     container-info "^1.0.1"
@@ -13239,10 +13229,10 @@ elastic-apm-http-client@^10.1.0:
     readable-stream "^3.4.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.23.0:
-  version "3.23.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.23.0.tgz#e842aa505d576003579803e45fe91f572db74a72"
-  integrity sha512-yzdO/MwAcjT+TbcBQBKWbDb4beDVmmrIaFCu9VA+z6Ow9GKlQv7QaD9/cQjuN8/KI6ASiJfQI8cPgqy1SgSUuA==
+elastic-apm-node@3.24.0:
+  version "3.24.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.24.0.tgz#d7acb3352f928a23c28ebabab2bd30098562814e"
+  integrity sha512-Fmj/W2chWQa2zb1FfMYK2ypLB4TcnKNX+1klaJFbytRYDLgeSfo0EC7egvI3a+bLPZSRL5053PXOp7slVTPO6Q==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -13251,7 +13241,7 @@ elastic-apm-node@^3.23.0:
     basic-auth "^2.0.1"
     cookie "^0.4.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "^10.1.0"
+    elastic-apm-http-client "^10.3.0"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"

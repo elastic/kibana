@@ -111,6 +111,8 @@ export const AlertsList: React.FunctionComponent = () => {
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const [noData, setNoData] = useState<boolean>(true);
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -220,7 +222,8 @@ export const AlertsList: React.FunctionComponent = () => {
   }, []);
 
   async function loadAlertsData() {
-    const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
+    const hasAnyAuthorizedAlertType =
+      alertTypesState.isInitialized && alertTypesState.data.size > 0;
     if (hasAnyAuthorizedAlertType) {
       setAlertsState({ ...alertsState, isLoading: true });
       try {
@@ -243,6 +246,15 @@ export const AlertsList: React.FunctionComponent = () => {
         if (!alertsResponse.data?.length && page.index > 0) {
           setPage({ ...page, index: 0 });
         }
+
+        const isFilterApplied = !(
+          isEmpty(searchText) &&
+          isEmpty(typesFilter) &&
+          isEmpty(actionTypesFilter) &&
+          isEmpty(alertStatusesFilter)
+        );
+
+        setNoData(alertsResponse.data.length === 0 && !isFilterApplied);
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
@@ -254,6 +266,7 @@ export const AlertsList: React.FunctionComponent = () => {
         });
         setAlertsState({ ...alertsState, isLoading: false });
       }
+      setInitialLoad(false);
     }
   }
 
@@ -946,18 +959,22 @@ export const AlertsList: React.FunctionComponent = () => {
     </>
   );
 
-  const loadedItems = convertAlertsToTableItems(
-    alertsState.data,
-    alertTypesState.data,
-    canExecuteActions
-  );
+  // if initial load, show spinner
+  const getRulesList = () => {
+    if (noData && !alertsState.isLoading && !alertTypesState.isLoading) {
+      return authorizedToCreateAnyAlerts ? (
+        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
+      ) : (
+        noPermissionPrompt
+      );
+    }
 
-  const isFilterApplied = !(
-    isEmpty(searchText) &&
-    isEmpty(typesFilter) &&
-    isEmpty(actionTypesFilter) &&
-    isEmpty(alertStatusesFilter)
-  );
+    if (initialLoad) {
+      return <CenterJustifiedSpinner />;
+    }
+
+    return table;
+  };
 
   return (
     <section data-test-subj="alertsList">
@@ -988,15 +1005,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       />
       <EuiSpacer size="xs" />
-      {loadedItems.length || isFilterApplied ? (
-        table
-      ) : alertTypesState.isLoading || alertsState.isLoading ? (
-        <CenterJustifiedSpinner />
-      ) : authorizedToCreateAnyAlerts ? (
-        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
-      ) : (
-        noPermissionPrompt
-      )}
+      {getRulesList()}
       {alertFlyoutVisible && (
         <AlertAdd
           consumer={ALERTS_FEATURE_ID}
