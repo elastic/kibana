@@ -12,9 +12,14 @@ import { EuiDescriptionList, EuiSpacer, EuiText } from '@elastic/eui';
 import type { Job } from '../../lib/job';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 
-const NA = 'n/a';
+const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
+  defaultMessage: 'N/A',
+});
 
-const UNKNOWN = 'unknown';
+const UNKNOWN = i18n.translate('xpack.reporting.listing.infoPanel.unknownLabel', {
+  defaultMessage: 'unknown',
+});
+
 const getDimensions = (info: Job): string => {
   const defaultDimensions = { width: null, height: null };
   const { width, height } = info.layout?.dimensions || defaultDimensions;
@@ -120,7 +125,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         : info.jobtype,
     },
 
-    // TODO when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
+    // TODO: when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
   ];
 
   const jobScreenshot = [

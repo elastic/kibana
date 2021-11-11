@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { Fragment, PureComponent } from 'react';
 import { Job } from '../../lib/job';
-import { ListingProps } from '..';
+import { ListingProps } from '../';
 
 type DeleteFn = () => Promise<void>;
 type Props = { jobsToDelete: Job[]; performDelete: DeleteFn } & ListingProps;
