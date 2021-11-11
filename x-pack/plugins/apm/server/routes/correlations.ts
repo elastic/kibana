@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 
 import { isActivePlatinumLicense } from '../../common/license_check';
 
@@ -24,8 +24,8 @@ import { fetchFieldsStats } from '../lib/correlations/queries/field_stats/get_fi
 
 import { withApmSpan } from '../utils/with_apm_span';
 
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {

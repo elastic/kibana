@@ -557,6 +557,7 @@ export interface DocLinksStart {
             readonly range: string;
             readonly significant_terms: string;
             readonly terms: string;
+            readonly terms_doc_count_error: string;
             readonly avg: string;
             readonly avg_bucket: string;
             readonly max_bucket: string;
@@ -711,6 +712,7 @@ export interface DocLinksStart {
             fleetServerAddFleetServer: string;
             settings: string;
             settingsFleetServerHostSettings: string;
+            settingsFleetServerProxySettings: string;
             troubleshooting: string;
             elasticAgent: string;
             datastreams: string;
@@ -720,6 +722,7 @@ export interface DocLinksStart {
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
             apiKeysLearnMore: string;
+            onPremRegistry: string;
         }>;
         readonly ecs: {
             readonly guide: string;
