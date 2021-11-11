@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...getSimpleRule('rule-1'),
           actions: [action1],
         };
-        const createdRule = await createRule(supertest, log, ruleWithConnector);
+        const createdRule = await createRule(supertest, ruleWithConnector);
         expect(createdRule.actions.length).to.eql(1);
 
         // update a simple rule's name and remove the actions
