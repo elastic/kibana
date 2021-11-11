@@ -335,29 +335,33 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    return {
-      fleetSetupCompleted: async () => {
-        try {
-          logger.info('Beginning fleet setup');
+    const fleetSetupPromise = async () => {
+      try {
+        logger.info('Beginning fleet setup');
 
-          const { nonFatalErrors } = await setupFleet(
-            new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-            core.elasticsearch.client.asInternalUser
+        const { nonFatalErrors } = await setupFleet(
+          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+          core.elasticsearch.client.asInternalUser
+        );
+
+        if (nonFatalErrors.length > 0) {
+          logger.info('Encountered non fatal errors during Fleet setup');
+          formatNonFatalErrors(nonFatalErrors).forEach((error) =>
+            logger.info(JSON.stringify(error))
           );
-
-          if (nonFatalErrors.length > 0) {
-            logger.info('Encountered non fatal errors during Fleet setup');
-            formatNonFatalErrors(nonFatalErrors).forEach((error) =>
-              logger.info(JSON.stringify(error))
-            );
-          }
-
-          logger.info('Fleet setup completed');
-        } catch (error) {
-          logger.warn('Fleet setup failed');
-          logger.warn(error);
         }
-      },
+
+        logger.info('Fleet setup completed');
+      } catch (error) {
+        logger.warn('Fleet setup failed');
+        logger.warn(error);
+      }
+    };
+
+    fleetSetupPromise();
+
+    return {
+      fleetSetupCompleted: fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstallation,
