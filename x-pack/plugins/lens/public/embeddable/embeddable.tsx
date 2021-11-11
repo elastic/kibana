@@ -514,9 +514,9 @@ export class Embeddable
       if (!this.savedVis) return;
 
       // have to dance since this.savedVis.state is readonly
-      const newVis = JSON.parse(JSON.stringify(this.savedVis));
+      const newVis = JSON.parse(JSON.stringify(this.savedVis)) as Document;
       newVis.state.visualization = this.onEditAction(newVis.state.visualization, event);
-      this.savedVis = newVis as Document;
+      this.savedVis = newVis;
 
       const { expression, errors } = await getExpressionFromDocument(
         this.savedVis,
