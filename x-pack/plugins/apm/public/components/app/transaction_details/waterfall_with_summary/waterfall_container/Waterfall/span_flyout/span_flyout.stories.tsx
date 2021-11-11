@@ -7,7 +7,6 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { MockApmAppContextProvider } from '../../../../../../../context/mock_apm_app/mock_apm_app_context';
 import { SpanFlyout } from './';
 

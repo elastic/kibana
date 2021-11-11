@@ -8,19 +8,11 @@
 import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import type { IKibanaSearchResponse } from 'src/plugins/data/public';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
-import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
 import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { LatencyCorrelations } from './latency_correlations';
 
-function Wrapper({
-  children,
-  dataSearchResponse,
-}: {
-  children?: ReactNode;
-  dataSearchResponse: IKibanaSearchResponse<LatencyCorrelationsResponse>;
-}) {
+function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <IntlProvider locale="en">
       <EuiThemeProvider>
@@ -40,15 +32,6 @@ describe('correlations', () => {
   describe('LatencyCorrelations', () => {
     it('shows loading indicator when the service is running and returned no results yet', async () => {
       render(<LatencyCorrelations onFilter={jest.fn()} />, {
-        initialProps: {
-          dataSearchResponse: {
-            isRunning: true,
-            rawResponse: {
-              ccsWarning: false,
-              latencyCorrelations: [],
-            },
-          },
-        },
         wrapper: Wrapper,
       });
 
@@ -60,15 +43,6 @@ describe('correlations', () => {
 
     it("doesn't show loading indicator when the service isn't running", async () => {
       render(<LatencyCorrelations onFilter={jest.fn()} />, {
-        initialProps: {
-          dataSearchResponse: {
-            isRunning: false,
-            rawResponse: {
-              ccsWarning: false,
-              latencyCorrelations: [],
-            },
-          },
-        },
         wrapper: Wrapper,
       });
 

@@ -18,7 +18,7 @@ function Wrapper({
   children?: ReactNode;
   error: boolean;
 }) {
-  const httpMethodMock = async (endpoint) => {
+  const httpMethodMock = async (endpoint: string) => {
     await delay(100);
     if (error) {
       throw new Error('Something went wrong');

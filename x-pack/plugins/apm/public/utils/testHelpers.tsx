@@ -14,12 +14,11 @@ import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { PromiseReturnType } from '../../../observability/typings/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
@@ -65,9 +64,9 @@ export function mockMoment() {
 }
 
 // Useful for getting the rendered href from any kind of link component
-export async function getRenderedHref(Component: React.FC, path: Location) {
+export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MockApmAppContextProvider value={{ path }}>
+    <MockApmAppContextProvider value={{ path: location.toString() }}>
       <UrlParamsProvider>
         <Component />
       </UrlParamsProvider>

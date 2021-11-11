@@ -8,7 +8,6 @@
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { AnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';

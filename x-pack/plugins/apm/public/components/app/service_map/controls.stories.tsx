@@ -7,14 +7,12 @@
 
 import { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
-import React, { ComponentProps } from 'react';
+import React from 'react';
 import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { Controls } from './Controls';
 import { CytoscapeContext } from './Cytoscape';
 
-type Args = ComponentProps<typeof Controls>;
-
-const stories: Meta<Args> = {
+const stories: Meta<{}> = {
   title: 'app/ServiceMap/Controls',
   component: Controls,
   decorators: [
@@ -39,7 +37,6 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = (args) => {
-  return <Controls {...args} />;
+export const Example: Story<{}> = () => {
+  return <Controls />;
 };
-Example.args = {};

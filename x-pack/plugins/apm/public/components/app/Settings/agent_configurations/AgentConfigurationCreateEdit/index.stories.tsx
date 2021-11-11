@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/core';
+import type { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
+import type { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { MockApmAppContextProvider } from '../../../../../context/mock_apm_app/mock_apm_app_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { AgentConfigurationCreateEdit } from './index';

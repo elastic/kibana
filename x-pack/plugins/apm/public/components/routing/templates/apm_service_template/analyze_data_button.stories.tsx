@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';

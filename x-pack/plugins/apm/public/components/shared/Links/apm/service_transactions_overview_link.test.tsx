@@ -7,7 +7,6 @@
 
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import { createMemoryHistory } from 'history';
 import React from 'react';
 import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
@@ -15,6 +14,7 @@ import {
   ServiceOrTransactionsOverviewLink,
   useServiceOrTransactionsOverviewHref,
 } from './service_transactions_overview_link';
+
 function getWrapper({
   queryParams,
 }: {
@@ -55,11 +55,13 @@ describe('Service or transactions overview link', () => {
       );
     });
   });
+
   describe('ServiceOrTransactionsOverviewLink', () => {
     function getHref(container: HTMLElement) {
       return ((container as HTMLDivElement).children[0] as HTMLAnchorElement)
         .href;
     }
+
     it('returns service link', () => {
       const Component = getWrapper({});
       const { container } = render(

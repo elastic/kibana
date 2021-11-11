@@ -32,10 +32,7 @@ import { APMServiceContext } from '../../../../context/apm_service/apm_service_c
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
-import {
-  APIReturnType,
-  createCallApmApi,
-} from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { LatencyChart } from './';
 
 interface Args {

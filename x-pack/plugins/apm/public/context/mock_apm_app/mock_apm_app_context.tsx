@@ -44,7 +44,7 @@ const mockCoreStart = {
   chrome: { docTitle: { change: () => {} } },
   docLinks: { links: { apm: {}, observability: {} } },
   http: {
-    basePath: { get: () => '', prepend: (str) => `/basepath${str}` },
+    basePath: { get: () => '', prepend: (str: string) => `/basepath${str}` },
     get: () => ({}),
   },
   notifications: { toasts: { add: () => {}, addDanger: () => {} } },
@@ -187,7 +187,7 @@ export function MockApmAppContextProvider({
       >
         <RouterProvider router={apmRouter as any} history={usedHistory}>
           <CurrentRouteContextProvider value={{}}>
-            {children}
+            <>{children}</>
           </CurrentRouteContextProvider>
         </RouterProvider>
       </ApmPluginContext.Provider>

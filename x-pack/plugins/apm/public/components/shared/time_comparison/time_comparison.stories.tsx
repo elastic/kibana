@@ -6,15 +6,15 @@
  */
 
 import { Meta, Story } from '@storybook/react';
-import React, { ComponentProps } from 'react';
-import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
-import { TimeComparison } from './';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import {
-  TimeRangeComparisonType,
-  TimeRangeComparisonEnum,
-} from '../../../../common/runtime_types/comparison_type_rt';
+import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import {
+  TimeRangeComparisonEnum,
+  TimeRangeComparisonType,
+} from '../../../../common/runtime_types/comparison_type_rt';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import { TimeComparison } from './';
 
 interface Args {
   exactStart: string;
@@ -55,8 +55,8 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = (args) => {
-  return <TimeComparison {...args} />;
+export const Example: Story<Args> = (_args) => {
+  return <TimeComparison />;
 };
 Example.args = {
   exactStart: '2021-06-04T16:17:02.335Z',
