@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-// compile typescript on the fly
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+const { unoptimizeTsConfig } = require('./optimize_tsconfig/unoptimize');
 
-require('./create-functional-tests-archive/index.ts');
+unoptimizeTsConfig().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

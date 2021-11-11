@@ -24,7 +24,7 @@ import {
   TRANSACTION_RESULT,
   PROCESSOR_EVENT,
 } from '../../common/elasticsearch_fieldnames';
-import { createOrUpdateIndex } from '../shared/create-or-update-index';
+import { createOrUpdateIndex } from '../shared/create_or_update_index';
 import { parseIndexUrl } from '../shared/parse_index_url';
 import { ESClient, getEsClient } from '../shared/get_es_client';
 
