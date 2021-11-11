@@ -658,4 +658,61 @@ describe('DatatableComponent', () => {
 
     expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').exists()).toBe(false);
   });
+
+  describe('pagination', () => {
+    it('enables pagination when pageSize provided', async () => {
+      const { data, args } = sampleArgs();
+
+      args.pageSize = 7;
+
+      const wrapper = shallow(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).toBeTruthy();
+      expect(paginationConfig?.pageIndex).toBe(0); // should start at 0
+      expect(paginationConfig?.pageSize).toBe(args.pageSize);
+
+      // trigger new page
+      const newIndex = 3;
+      paginationConfig?.onChangePage(newIndex);
+
+      const updatedConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(updatedConfig).toBeTruthy();
+      expect(updatedConfig?.pageIndex).toBe(newIndex);
+      expect(updatedConfig?.pageSize).toBe(args.pageSize);
+    });
+
+    it('disables pagination when pageSize NOT provided', async () => {
+      const { data, args } = sampleArgs();
+
+      delete args.pageSize;
+
+      const wrapper = shallow(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).not.toBeTruthy();
+    });
+  });
 });

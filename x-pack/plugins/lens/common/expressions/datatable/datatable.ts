@@ -22,6 +22,7 @@ export interface DatatableArgs {
   columns: ColumnConfigArg[];
   sortingColumnId: SortingState['columnId'];
   sortingDirection: SortingState['direction'];
+  pageSize?: number;
   fitRowToContent?: boolean;
 }
 

@@ -60,6 +60,44 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   });
   const [firstLocalTable, updateTable] = useState(firstTable);
 
+  // ** Pagination config
+  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number } | undefined>(
+    // TODO consider page size of zero
+    props.args.pageSize
+      ? {
+          pageIndex: 0,
+          pageSize: props.args.pageSize,
+        }
+      : undefined
+  );
+
+  const onChangeItemsPerPage = useCallback(
+    (pageSize) =>
+      setPagination((_pagination) => ({
+        ..._pagination,
+        pageSize,
+        pageIndex: 0,
+      })),
+    [setPagination]
+  );
+
+  const onChangePage = useCallback(
+    (pageIndex) => {
+      setPagination((_pagination) => {
+        if (_pagination) {
+          return { pageSize: _pagination?.pageSize, pageIndex };
+        }
+      });
+    },
+    [setPagination]
+  );
+
+  const paginationConfig = pagination && {
+    ...pagination,
+    onChangeItemsPerPage,
+    onChangePage,
+  };
+
   useDeepCompareEffect(() => {
     setColumnConfig({
       columns: props.args.columns,
@@ -372,6 +410,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
           sorting={sorting}
+          pagination={paginationConfig}
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}
