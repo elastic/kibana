@@ -207,7 +207,12 @@ export class EndpointMetadataService {
   private async enrichHostMetadata(
     esClient: ElasticsearchClient,
     endpointMetadata: HostMetadata,
-    /** If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata  */
+    /**
+     * If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata.
+     * If passing in an `Agent` record that was retrieved from the Endpoint Unified transform index,
+     * ensure that its `.status` property is properly set to the calculated value done by
+     * fleet `getAgentStatus()` method.
+     */
     _fleetAgent?: MaybeImmutable<Agent>,
     /** If undefined, it will be retrieved from Fleet using data from the endpointMetadata  */
     _fleetAgentPolicy?:
@@ -278,7 +283,7 @@ export class EndpointMetadataService {
 
     return {
       metadata: endpointMetadata,
-      host_status: getAgentStatus(fleetAgent)
+      host_status: fleetAgent
         ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
         : DEFAULT_ENDPOINT_HOST_STATUS,
@@ -444,9 +449,18 @@ export class EndpointMetadataService {
     const hosts: HostInfo[] = [];
 
     for (const doc of docs) {
-      const { endpoint: metadata, agent } = doc?._source?.united ?? {};
+      const { endpoint: metadata, agent: _agent } = doc?._source?.united ?? {};
 
-      if (metadata && agent) {
+      if (metadata && _agent) {
+        // `_agent: Agent` here is the record stored in the unified index, whose `status` **IS NOT** the
+        // calculated status returned by the normal fleet API/Service. So lets calculated it before
+        // passing this on to other methods that expect an `Agent` type
+        const agent: typeof _agent = {
+          ..._agent,
+          // Casting below necessary to remove `Immutable<>` from the type
+          status: getAgentStatus(_agent as Agent),
+        };
+
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const agentPolicy = agentPoliciesMap[agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

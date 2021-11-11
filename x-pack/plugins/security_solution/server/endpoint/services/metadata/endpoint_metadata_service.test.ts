@@ -183,7 +183,7 @@ describe('EndpointMetadataService', () => {
         data: [
           {
             metadata: endpointMetadataDoc,
-            host_status: 'unhealthy',
+            host_status: 'inactive',
             policy_info: {
               agent: {
                 applied: {
