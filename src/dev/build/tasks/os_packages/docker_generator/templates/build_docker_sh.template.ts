@@ -63,8 +63,7 @@ function generator({
 
   docker save ${dockerTargetName} | gzip -c > ${dockerTargetFilename}
 
-  echo "Pushing: ${dockerTargetName}"; \\
-  ${dockerPush} && docker image push ${dockerTargetName} || exit 1;
+  ${dockerPush} && docker image push ${dockerTargetName}
   exit 0
   `);
 }
