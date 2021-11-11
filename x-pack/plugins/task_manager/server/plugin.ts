@@ -159,7 +159,7 @@ export class TaskManagerPlugin
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
-      esClient: elasticsearch.createClient('taskManager').asInternalUser,
+      esClient: elasticsearch.client.asInternalUser,
       index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
