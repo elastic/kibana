@@ -11,6 +11,7 @@ import { shallow } from 'enzyme';
 import { IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
 import { Table, renderFieldName } from './table';
+import { overlayServiceMock } from 'src/core/public/mocks';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
@@ -81,7 +82,13 @@ const renderTable = (
   }
 ) =>
   shallow(
-    <Table indexPattern={indexPattern} items={items} editField={editField} deleteField={() => {}} />
+    <Table
+      indexPattern={indexPattern}
+      items={items}
+      editField={editField}
+      deleteField={() => {}}
+      openModal={overlayServiceMock.createStartContract().openModal}
+    />
   );
 
 describe('Table', () => {

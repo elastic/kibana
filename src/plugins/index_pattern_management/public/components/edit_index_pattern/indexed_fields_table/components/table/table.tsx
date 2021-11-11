@@ -265,7 +265,7 @@ const getConflictBtn = (
               <>
                 <EuiModalHeader>
                   <EuiModalHeaderTitle>
-                    <h1>{fieldName} field type conflict</h1>
+                    <h1>Field &#39;{fieldName}&#39; type conflict</h1>
                   </EuiModalHeaderTitle>
                 </EuiModalHeader>
                 <EuiModalBody>
