@@ -201,6 +201,8 @@ export class LensPlugin {
         plugins.fieldFormats.deserialize
       );
 
+      const visualizationMap = await this.editorFrameService!.loadVisualizations();
+
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
@@ -208,6 +210,7 @@ export class LensPlugin {
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
+        visualizationMap,
         indexPatternService: plugins.data.indexPatterns,
         uiActions: plugins.uiActions,
         usageCollection,
