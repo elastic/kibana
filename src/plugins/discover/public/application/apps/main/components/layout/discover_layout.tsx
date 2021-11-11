@@ -45,6 +45,7 @@ import {
 } from '../../../../../saved_searches';
 import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
 import { VIEW_MODE } from '../view_mode_toggle';
+import { DataViewType } from '../../../../../../../data_views/common';
 
 /**
  * Local storage key for sidebar persistence state
@@ -110,8 +111,12 @@ export function DiscoverLayout({
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
-  const timeField = useMemo(() => {
-    return indexPattern.type !== 'rollup' ? indexPattern.timeFieldName : undefined;
+  // We treat rollup v1 data views as non time based in Discover, since we query them
+  // in a non time based way using the regular _search API, since the internal
+  // representation of those documents does not have the time field that _field_caps
+  // reports us.
+  const isTimeBased = useMemo(() => {
+    return indexPattern.type !== DataViewType.ROLLUP && indexPattern.isTimeBased();
   }, [indexPattern]);
 
   const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
@@ -264,7 +269,7 @@ export function DiscoverLayout({
             >
               {resultState === 'none' && (
                 <DiscoverNoResults
-                  timeFieldName={timeField}
+                  isTimeBased={isTimeBased}
                   data={data}
                   error={dataState.error}
                   hasQuery={!!state.query?.query}
@@ -295,7 +300,7 @@ export function DiscoverLayout({
                       savedSearchDataTotalHits$={totalHits$}
                       services={services}
                       stateContainer={stateContainer}
-                      timefield={timeField}
+                      isTimeBased={isTimeBased}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                     />
