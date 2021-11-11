@@ -7,6 +7,7 @@
  */
 
 import React, { PureComponent } from 'react';
+import { OverlayModalStart } from 'src/core/public';
 
 import {
   EuiIcon,
@@ -15,9 +16,18 @@ import {
   EuiBasicTableColumn,
   EuiBadge,
   EuiToolTip,
+  EuiButtonIcon,
+  EuiModalHeader,
+  EuiModalFooter,
+  EuiModalBody,
+  EuiButton,
+  EuiModalHeaderTitle,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { toMountPoint } from '../../../../../../../kibana_react/public';
 
 import { IIndexPattern } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';
@@ -42,14 +52,6 @@ const multiTypeAriaLabel = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.table.multiTypeAria',
   {
     defaultMessage: 'Multiple type field',
-  }
-);
-
-const multiTypeTooltip = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.multiTypeTooltip',
-  {
-    defaultMessage:
-      'The type of this field changes across indices. It is unavailable for many analysis functions.',
   }
 );
 
@@ -172,7 +174,23 @@ interface IndexedFieldProps {
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string) => void;
+  openModal: OverlayModalStart['open'];
 }
+
+const TypeSummary = ({
+  conflictDescriptions,
+}: {
+  conflictDescriptions: IndexedFieldItem['conflictDescriptions'];
+}) => {
+  const conflicts = Object.keys(conflictDescriptions!).map((type) => {
+    return (
+      <p>
+        {type}: {conflictDescriptions![type].slice(0, 4).join(', ')}
+      </p>
+    );
+  });
+  return <>{conflicts}</>;
+};
 
 export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
   <span>
@@ -223,28 +241,65 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
   </span>
 );
 
+const getConflictBtn = (
+  fieldName: string,
+  conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
+  openModal: IndexedFieldProps['openModal']
+) => {
+  const content = (
+    <FormattedMessage
+      id="indexPatternManagement.editIndexPattern.fields.table.multiTypeTooltip"
+      defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+    />
+  );
+  return (
+    <span>
+      &nbsp;
+      <EuiButtonIcon
+        iconType="alert"
+        aria-label={multiTypeAriaLabel}
+        color="warning"
+        onClick={() => {
+          const overlayRef = openModal(
+            toMountPoint(
+              <>
+                <EuiModalHeader>
+                  <EuiModalHeaderTitle>
+                    <h1>{fieldName} field type conflict</h1>
+                  </EuiModalHeaderTitle>
+                </EuiModalHeader>
+                <EuiModalBody>
+                  <EuiText>
+                    <p>{content}</p>
+                    <TypeSummary conflictDescriptions={conflictDescriptions} />
+                  </EuiText>
+                </EuiModalBody>
+                <EuiModalFooter>
+                  <EuiButton onClick={() => overlayRef.close()} fill>
+                    Close
+                  </EuiButton>
+                </EuiModalFooter>
+              </>
+            )
+          );
+        }}
+      />
+    </span>
+  );
+};
+
 export class Table extends PureComponent<IndexedFieldProps> {
   renderBooleanTemplate(value: string, arialLabel: string) {
     return value ? <EuiIcon type="dot" color="secondary" aria-label={arialLabel} /> : <span />;
   }
 
-  renderFieldType(type: string, isConflict: boolean) {
+  renderFieldType(type: string, field: IndexedFieldItem) {
     return (
       <span>
         {type}
-        {isConflict ? (
-          <span>
-            &nbsp;
-            <EuiIconTip
-              type="alert"
-              color="warning"
-              aria-label={multiTypeAriaLabel}
-              content={multiTypeTooltip}
-            />
-          </span>
-        ) : (
-          ''
-        )}
+        {field.conflictDescriptions
+          ? getConflictBtn(field.name, field.conflictDescriptions, this.props.openModal)
+          : ''}
       </span>
     );
   }
@@ -275,7 +330,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
         dataType: 'string',
         sortable: true,
         render: (value: string, field: IndexedFieldItem) => {
-          return this.renderFieldType(value, field.kbnType === 'conflict');
+          return this.renderFieldType(value, field);
         },
         'data-test-subj': 'indexedFieldType',
       },

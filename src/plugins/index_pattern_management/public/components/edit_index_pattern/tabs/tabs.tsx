@@ -103,7 +103,7 @@ export function Tabs({
         }
       } else {
         if (field.esTypes) {
-          tempIndexedFieldTypes.push(field.esTypes?.join(', '));
+          tempIndexedFieldTypes.push(field.esTypes.length === 1 ? field.esTypes[0] : 'conflict');
         }
       }
     });
