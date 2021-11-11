@@ -12,7 +12,7 @@ import {
   luceneStringToDsl,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMlContext } from '../../../../../contexts/ml';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { getQueryFromSavedSearchObject } from '../../../../../util/index_utils';
@@ -33,7 +33,7 @@ export function useSavedSearch() {
   const [savedSearchQueryStr, setSavedSearchQueryStr] = useState<SavedSearchQueryStr>(undefined);
 
   const mlContext = useMlContext();
-  const { currentSavedSearch, currentIndexPattern, kibanaConfig } = mlContext;
+  const { currentSavedSearch, currentDataView, kibanaConfig } = mlContext;
 
   const getQueryData = () => {
     let qry: estypes.QueryDslQueryContainer = {};
@@ -46,7 +46,7 @@ export function useSavedSearch() {
 
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
         const ast = fromKueryExpression(qryString);
-        qry = toElasticsearchQuery(ast, currentIndexPattern);
+        qry = toElasticsearchQuery(ast, currentDataView);
       } else {
         qry = luceneStringToDsl(qryString);
         decorateQuery(qry, kibanaConfig.get('query:queryString:options'));

@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useGetSettings, useUrlModal, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
+import { useGetSettings, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
 
@@ -52,18 +52,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const [mode, setMode] = useState<FlyoutMode>(defaultMode);
 
-  const { modal } = useUrlModal();
-  const [lastModal, setLastModal] = useState(modal);
   const settings = useGetSettings();
   const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
-
-  // Refresh settings when there is a modal/flyout change
-  useEffect(() => {
-    if (modal !== lastModal) {
-      settings.resendRequest();
-      setLastModal(modal);
-    }
-  }, [modal, lastModal, settings]);
 
   const fleetStatus = useFleetStatus();
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);

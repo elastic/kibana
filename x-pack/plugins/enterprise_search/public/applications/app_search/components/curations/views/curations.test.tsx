@@ -14,6 +14,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { set } from 'lodash/fp';
+
 import { EuiTab } from '@elastic/eui';
 
 import { getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
@@ -51,8 +53,10 @@ describe('Curations', () => {
     curationsSettings: {
       enabled: true,
     },
-    // LicensingLogic
-    hasPlatinumLicense: true,
+    // EngineLogic
+    engine: {
+      adaptive_relevance_suggestions_active: true,
+    },
   };
 
   const actions = {
@@ -84,8 +88,8 @@ describe('Curations', () => {
     expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(3, 'settings');
   });
 
-  it('renders less tabs when less than platinum license', () => {
-    setMockValues({ ...values, hasPlatinumLicense: false });
+  it('renders less tabs when suggestions are not active', () => {
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, values));
     const wrapper = shallow(<Curations />);
 
     expect(getPageTitle(wrapper)).toEqual('Curated results');
@@ -94,8 +98,8 @@ describe('Curations', () => {
     expect(tabs.length).toBe(2);
   });
 
-  it('renders a New! badge when less than platinum license', () => {
-    setMockValues({ ...values, hasPlatinumLicense: false });
+  it('renders a New! badge  when suggestions are not active', () => {
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, values));
     const wrapper = shallow(<Curations />);
 
     expect(getPageTitle(wrapper)).toEqual('Curated results');
@@ -104,29 +108,8 @@ describe('Curations', () => {
     expect(tabs.at(1).prop('append')).not.toBeUndefined();
   });
 
-  it('renders a New! badge when suggestions are disabled', () => {
-    setMockValues({
-      ...values,
-      curationsSettings: {
-        enabled: false,
-      },
-    });
-    const wrapper = shallow(<Curations />);
-
-    expect(getPageTitle(wrapper)).toEqual('Curated results');
-
-    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
-    expect(tabs.at(2).prop('append')).not.toBeUndefined();
-  });
-
-  it('hides the badge when suggestions are enabled and the user has a platinum license', () => {
-    setMockValues({
-      ...values,
-      hasPlatinumLicense: true,
-      curationsSettings: {
-        enabled: true,
-      },
-    });
+  it('hides the badge when suggestions are active', () => {
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', true, values));
     const wrapper = shallow(<Curations />);
 
     expect(getPageTitle(wrapper)).toEqual('Curated results');

@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-utils';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from './../functional/ftr_provider_context';
 
 const baseSimulationPath = 'src/test/scala/org/kibanaLoadTest/simulation';
@@ -28,7 +28,11 @@ if (!Fs.existsSync(gatlingProjectRootPath)) {
   );
 }
 
-const dropEmptyLines = (s: string) => s.split(',').filter((i) => i.length > 0);
+const dropEmptyLines = (s: string) =>
+  s
+    .split(',')
+    .filter((i) => i.length > 0)
+    .map((i) => (i.includes('.') ? i : `branch.${i}`));
 const simulationClasses = dropEmptyLines(simulationEntry);
 const simulationsRootPath = resolve(gatlingProjectRootPath, baseSimulationPath);
 
@@ -78,7 +82,7 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
       });
       // wait a minute between simulations, skip for the last one
       if (i < simulationClasses.length - 1) {
-        await delay(60 * 1000);
+        await setTimeoutAsync(60 * 1000);
       }
     }
   });

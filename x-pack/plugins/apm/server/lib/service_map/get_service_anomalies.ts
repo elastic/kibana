@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
@@ -22,6 +22,8 @@ import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
 import { Setup } from '../helpers/setup_request';
+import { apmMlAnomalyQuery } from '../../../common/anomaly_detection/apm_ml_anomaly_query';
+import { ApmMlDetectorIndex } from '../../../common/anomaly_detection/apm_ml_detectors';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
@@ -56,7 +58,7 @@ export async function getServiceAnomalies({
         query: {
           bool: {
             filter: [
-              { terms: { result_type: ['model_plot', 'record'] } },
+              ...apmMlAnomalyQuery(ApmMlDetectorIndex.txLatency),
               ...rangeQuery(
                 Math.min(end - 30 * 60 * 1000, start),
                 end,

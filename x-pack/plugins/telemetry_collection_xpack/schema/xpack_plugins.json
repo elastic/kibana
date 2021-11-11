@@ -100,6 +100,49 @@
             }
           }
         },
+        "count_actions_executions_per_day": {
+          "type": "long"
+        },
+        "count_actions_executions_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
         "count_active_email_connectors_by_service_type": {
           "properties": {
             "DYNAMIC_KEY": {
@@ -127,6 +170,92 @@
         },
         "count_actions_namespaces": {
           "type": "long"
+        },
+        "count_actions_executions_failed_per_day": {
+          "type": "long"
+        },
+        "count_actions_executions_failed_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_execution_time_per_day": {
+          "type": "long"
+        },
+        "avg_execution_time_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
         }
       }
     },
@@ -144,6 +273,19 @@
         "throttle_time": {
           "properties": {
             "min": {
+              "type": "keyword"
+            },
+            "avg": {
+              "type": "keyword"
+            },
+            "max": {
+              "type": "keyword"
+            }
+          }
+        },
+        "throttle_time_number_s": {
+          "properties": {
+            "min": {
               "type": "long"
             },
             "avg": {
@@ -155,6 +297,19 @@
           }
         },
         "schedule_time": {
+          "properties": {
+            "min": {
+              "type": "keyword"
+            },
+            "avg": {
+              "type": "keyword"
+            },
+            "max": {
+              "type": "keyword"
+            }
+          }
+        },
+        "schedule_time_number_s": {
           "properties": {
             "min": {
               "type": "long"
@@ -352,6 +507,633 @@
         },
         "count_rules_namespaces": {
           "type": "long"
+        },
+        "count_rules_executions_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_executions_failured_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_failured_by_reason_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "read": {
+              "type": "long"
+            },
+            "decrypt": {
+              "type": "long"
+            },
+            "license": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_executions_failured_by_reason_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "read": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "decrypt": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "license": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "unknown": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "avg_execution_time_per_day": {
+          "type": "long"
+        },
+        "avg_execution_time_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
         }
       }
     },
@@ -6930,12 +7712,6 @@
             "description": "Indicates if audit logging is both enabled and supported by the current license."
           }
         },
-        "auditLoggingType": {
-          "type": "keyword",
-          "_meta": {
-            "description": "If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy)."
-          }
-        },
         "loginSelectorEnabled": {
           "type": "boolean",
           "_meta": {
@@ -7327,44 +8103,6 @@
                   }
                 }
               }
-            }
-          }
-        },
-        "ui_open": {
-          "properties": {
-            "elasticsearch": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
-              }
-            },
-            "overview": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the Overview page."
-              }
-            },
-            "kibana": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Kibana deprecations"
-              }
-            }
-          }
-        },
-        "ui_reindex": {
-          "properties": {
-            "close": {
-              "type": "long"
-            },
-            "open": {
-              "type": "long"
-            },
-            "start": {
-              "type": "long"
-            },
-            "stop": {
-              "type": "long"
             }
           }
         }

@@ -7,11 +7,7 @@
 
 export { TabAliases, TabMappings, TabSettings } from './details_panel';
 
-export {
-  StepAliasesContainer,
-  StepMappingsContainer,
-  StepSettingsContainer,
-  CommonWizardSteps,
-} from './wizard_steps';
+export type { CommonWizardSteps } from './wizard_steps';
+export { StepAliasesContainer, StepMappingsContainer, StepSettingsContainer } from './wizard_steps';
 
 export { TemplateContentIndicator } from './template_content_indicator';

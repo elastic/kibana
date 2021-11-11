@@ -13,6 +13,7 @@ import {
   AllSeries,
   allSeriesKey,
   convertAllShortSeries,
+  reportTypeKey,
   useSeriesStorage,
 } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
@@ -91,13 +92,14 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
   const theme = useTheme();
 
   return useMemo(() => {
-    if (isEmpty(indexPatterns) || isEmpty(allSeries) || !reportType) {
+    // we only use the data from url to apply, since that gets updated to apply changes
+    const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+    const reportTypeT: ReportViewType = storage.get(reportTypeKey) as ReportViewType;
+
+    if (isEmpty(indexPatterns) || isEmpty(allSeriesT) || !reportTypeT) {
       return null;
     }
-    // we only use the data from url to apply, since that get's updated to apply changes
-    const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
-
-    const layerConfigs = getLayerConfigs(allSeriesT, reportType, theme, indexPatterns);
+    const layerConfigs = getLayerConfigs(allSeriesT, reportTypeT, theme, indexPatterns);
 
     if (layerConfigs.length < 1) {
       return null;
@@ -106,5 +108,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     const lensAttributes = new LensAttributes(layerConfigs);
 
     return lensAttributes.getJSON(lastRefresh);
-  }, [indexPatterns, allSeries, reportType, storage, theme, lastRefresh]);
+    // we also want to check the state on allSeries changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPatterns, reportType, storage, theme, lastRefresh, allSeries]);
 };

@@ -15,12 +15,11 @@ import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
 import {
   createLoadingResourceState,
-  createUninitialisedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
 } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import {
   EndpointPrivileges,
   useEndpointPrivileges,
@@ -118,9 +117,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     act(() => {
       appTestContext.store.dispatch({
         type: 'policyArtifactsDeosAnyTrustedAppExists',
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
-        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+        payload: createLoadingResourceState(),
       });
     });
 
@@ -203,7 +200,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     });
 
     expect(appTestContext.coreStart.application.navigateToApp).toHaveBeenCalledWith(
-      APP_ID,
+      APP_UI_ID,
       expect.objectContaining({
         path: '/administration/trusted_apps?filter=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
       })

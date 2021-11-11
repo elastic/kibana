@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import type { KueryNode } from '@kbn/es-query';
@@ -16,7 +16,7 @@ import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
-import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
+import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
@@ -126,10 +126,12 @@ export async function getAgentsByKuery(
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
-    sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
     ignore_unavailable: true,
-    body,
+    body: {
+      ...body,
+      sort: [{ [sortField]: { order: sortOrder } }],
+    },
   });
 
   let agents = res.body.hits.hits.map(searchHitToAgent);
@@ -174,7 +176,7 @@ export async function countInactiveAgents(
   const filters = [INACTIVE_AGENT_CONDITION];
 
   if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+    filters.push(normalizeKuery(AGENTS_PREFIX, kuery));
   }
 
   const kueryNode = _joinFilters(filters);
@@ -219,6 +221,7 @@ export function isAgentDocument(
 }
 
 export type ESAgentDocumentResult = estypes.MgetHit<FleetServerAgent>;
+
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
   agentIds: string[]
@@ -315,10 +318,9 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
+    items: res.body.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
-      // @ts-expect-error ErrorCause is not assignable to Error
       error: item.update!.error as Error,
     })),
   };

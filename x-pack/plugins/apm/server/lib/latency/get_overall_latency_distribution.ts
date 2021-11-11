@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ProcessorEvent } from '../../../common/processor_event';
 
@@ -14,8 +14,8 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getHistogramIntervalRequest,
   getHistogramRangeSteps,
-} from '../search_strategies/queries/query_histogram_range_steps';
-import { getTransactionDurationRangesRequest } from '../search_strategies/queries/query_ranges';
+} from '../correlations/queries/query_histogram_range_steps';
+import { getTransactionDurationRangesRequest } from '../correlations/queries/query_ranges';
 
 import { getPercentileThresholdValue } from './get_percentile_threshold_value';
 import type {
@@ -27,9 +27,7 @@ export async function getOverallLatencyDistribution(
   options: OverallLatencyDistributionOptions
 ) {
   return withApmSpan('get_overall_latency_distribution', async () => {
-    const overallLatencyDistribution: OverallLatencyDistributionResponse = {
-      log: [],
-    };
+    const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
 
     const { setup, termFilters, ...rawParams } = options;
     const { apmEventClient } = setup;

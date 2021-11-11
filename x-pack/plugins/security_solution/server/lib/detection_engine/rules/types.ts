@@ -8,12 +8,7 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from 'kibana/server';
+import { SavedObject, SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -45,6 +40,7 @@ import type {
   ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
@@ -106,11 +102,9 @@ import {
 
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { SanitizedAlert } from '../../../../../alerting/common';
-import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
-import { ruleTypeMappings } from '../signals/utils';
 
 export type RuleAlertType = SanitizedAlert<RuleParams>;
 
@@ -208,10 +202,8 @@ export const isAlertType = (
     : partialAlert.alertTypeId === SIGNALS_ID;
 };
 
-export const isRuleStatusSavedObjectType = (
-  obj: unknown
-): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
-  return get('attributes', obj) != null;
+export const isRuleStatusSavedObjectAttributes = (obj: unknown): obj is IRuleStatusSOAttributes => {
+  return get('status', obj) != null;
 };
 
 export interface CreateRulesOptions {
@@ -275,8 +267,8 @@ export interface UpdateRulesOptions {
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
+  existingRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
-  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface PatchRulesOptions {
@@ -342,10 +334,9 @@ export interface ReadRuleOptions {
 }
 
 export interface DeleteRuleOptions {
+  ruleId: Id;
   rulesClient: RulesClient;
   ruleStatusClient: IRuleExecutionLogClient;
-  ruleStatuses: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>;
-  id: Id;
 }
 
 export interface FindRuleOptions {

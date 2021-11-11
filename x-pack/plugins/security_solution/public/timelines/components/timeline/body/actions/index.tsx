@@ -104,15 +104,15 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
   const eventType = getEventType(ecsData);
 
-  const isContextMenuDisabled = useMemo(
-    () =>
+  const isContextMenuDisabled = useMemo(() => {
+    return (
       eventType !== 'signal' &&
       !(
         (ecsData.event?.kind?.includes('event') || ecsData.event?.kind?.includes('alert')) &&
         ecsData.agent?.type?.includes('endpoint')
-      ),
-    [eventType, ecsData.event?.kind, ecsData.agent?.type]
-  );
+      )
+    );
+  }, [ecsData, eventType]);
 
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
   const { setGlobalFullScreen } = useGlobalFullScreen();
@@ -169,7 +169,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
             key="investigate-in-timeline"
             ecsRowData={ecsData}
-            nonEcsRowData={data}
           />
         )}
 

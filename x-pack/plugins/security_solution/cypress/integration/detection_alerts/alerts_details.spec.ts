@@ -9,6 +9,7 @@ import { ALERT_FLYOUT, CELL_TEXT, JSON_TEXT, TABLE_ROWS } from '../../screens/al
 
 import {
   expandFirstAlert,
+  refreshAlerts,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
@@ -32,6 +33,7 @@ describe('Alert details with unmapped fields', () => {
     createCustomRuleActivated(getUnmappedRule());
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
+    refreshAlerts();
     expandFirstAlert();
   });
 
@@ -46,9 +48,10 @@ describe('Alert details with unmapped fields', () => {
     });
   });
 
+  // This test needs to be updated to not look for the field in a specific row, as it prevents us from adding/removing fields
   it('Displays the unmapped field on the table', () => {
     const expectedUnmmappedField = {
-      row: 86,
+      row: 82,
       field: 'unmapped',
       text: 'This is the unmapped field',
     };

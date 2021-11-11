@@ -6,11 +6,6 @@
  */
 
 import { EuiSelectOption } from '@elastic/eui';
-import {
-  ENABLE_NEW_SN_ITSM_CONNECTOR,
-  ENABLE_NEW_SN_SIR_CONNECTOR,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../actions/server/constants/connectors';
 import { IErrorObject } from '../../../../../public/types';
 import { AppInfo, Choice, RESTApiError, ServiceNowActionConnector } from './types';
 
@@ -28,18 +23,21 @@ export const isFieldInvalid = (
 ): boolean => error !== undefined && error.length > 0 && field != null;
 
 // TODO: Remove when the applications are certified
-export const isLegacyConnector = (connector: ServiceNowActionConnector) => {
+export const isDeprecatedConnector = (connector?: ServiceNowActionConnector): boolean => {
   if (connector == null) {
-    return true;
+    return false;
   }
 
-  if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {
-    return true;
+  if (connector.actionTypeId === '.servicenow' || connector.actionTypeId === '.servicenow-sir') {
+    /**
+     * Connector's prior to the Elastic ServiceNow application
+     * use the Table API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_TableAPI)
+     * Connectors after the Elastic ServiceNow application use the
+     * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
+     * A ServiceNow connector is considered deprecated if it uses the Table API.
+     */
+    return !!connector.config.usesTableApi;
   }
 
-  if (!ENABLE_NEW_SN_SIR_CONNECTOR && connector.actionTypeId === '.servicenow-sir') {
-    return true;
-  }
-
-  return connector.config.isLegacy;
+  return false;
 };

@@ -10,6 +10,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
 import { AppDeepLink } from 'kibana/public';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -22,7 +23,7 @@ import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { PLUGIN_ID } from '../../../../../fleet/common';
-import { APP_ID, APP_PATH } from '../../../../common/constants';
+import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/mocks';
@@ -85,6 +86,14 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
   }
   return state;
 };
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // turns retries off
+      retry: false,
+    },
+  },
+});
 
 /**
  * Creates a mocked endpoint app context custom renderer that can be used to render
@@ -115,7 +124,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        {children}
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </AppRootProvider>
     </KibanaContextProvider>
   );
@@ -176,7 +185,7 @@ const createCoreStartMock = (
     switch (appId) {
       case PLUGIN_ID:
         return '/app/fleet';
-      case APP_ID:
+      case APP_UI_ID:
         return `${APP_PATH}${
           deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''
         }${path ?? ''}`;
@@ -186,7 +195,7 @@ const createCoreStartMock = (
   });
 
   coreStart.application.navigateToApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
-    if (appId === APP_ID) {
+    if (appId === APP_UI_ID) {
       history.push(
         `${deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''}${path ?? ''}`
       );

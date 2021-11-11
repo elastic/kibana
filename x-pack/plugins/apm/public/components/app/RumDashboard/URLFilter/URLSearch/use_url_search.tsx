@@ -9,7 +9,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { useState } from 'react';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 import { useUxQuery } from '../../hooks/useUxQuery';
-import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 
 interface Props {
   popoverIsOpen: boolean;
@@ -19,7 +19,7 @@ interface Props {
 export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
   const uxQuery = useUxQuery();
 
-  const { uxUiFilters } = useUrlParams();
+  const { uxUiFilters } = useLegacyUrlParams();
 
   const { transactionUrl, transactionUrlExcluded, ...restFilters } =
     uxUiFilters;
@@ -38,7 +38,7 @@ export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
     (callApmApi) => {
       if (uxQuery && popoverIsOpen) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/url-search',
+          endpoint: 'GET /internal/apm/ux/url-search',
           params: {
             query: {
               ...uxQuery,

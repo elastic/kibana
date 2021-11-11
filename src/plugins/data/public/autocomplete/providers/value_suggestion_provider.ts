@@ -56,7 +56,7 @@ export const setupValueSuggestionProvider = (
   }
 
   const requestSuggestions = memoize(
-    (
+    <T = unknown>(
       index: string,
       field: IFieldType,
       query: string,
@@ -68,7 +68,7 @@ export const setupValueSuggestionProvider = (
     ) => {
       usageCollector?.trackRequest();
       return core.http
-        .fetch(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
           method: 'POST',
           body: JSON.stringify({
             query,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isEmpty, unset, set } from 'lodash';
+import { pickBy, get, isEmpty, isString, unset, set, intersection } from 'lodash';
 import satisfies from 'semver/functions/satisfies';
 import {
   EuiFlexGroup,
@@ -15,7 +15,7 @@ import {
   EuiLink,
   EuiAccordion,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { produce } from 'immer';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -35,7 +35,105 @@ import {
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
-import { Form, useForm, Field, getUseField, FIELD_TYPES, fieldValidators } from '../shared_imports';
+import { ConfigUploader } from './config_uploader';
+import {
+  Form,
+  useForm,
+  useFormData,
+  Field,
+  getUseField,
+  FIELD_TYPES,
+  fieldValidators,
+  ValidationFunc,
+} from '../shared_imports';
+
+// https://github.com/elastic/beats/blob/master/x-pack/osquerybeat/internal/osqd/args.go#L57
+const RESTRICTED_CONFIG_OPTIONS = [
+  'force',
+  'disable_watchdog',
+  'utc',
+  'events_expiry',
+  'extensions_socket',
+  'extensions_interval',
+  'extensions_timeout',
+  'pidfile',
+  'database_path',
+  'extensions_autoload',
+  'flagfile',
+  'config_plugin',
+  'logger_plugin',
+  'pack_delimiter',
+  'config_refresh',
+];
+
+export const configProtectedKeysValidator = (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value }] = args;
+
+  let configJSON;
+  try {
+    configJSON = JSON.parse(value as string);
+  } catch (e) {
+    return;
+  }
+
+  const restrictedFlags = intersection(
+    Object.keys(configJSON?.options ?? {}),
+    RESTRICTED_CONFIG_OPTIONS
+  );
+
+  if (restrictedFlags.length) {
+    return {
+      code: 'ERR_RESTRICTED_OPTIONS',
+      message: i18n.translate(
+        'xpack.osquery.fleetIntegration.osqueryConfig.restrictedOptionsErrorMessage',
+        {
+          defaultMessage:
+            'The following osquery options are not supported and must be removed: {restrictedFlags}.',
+          values: {
+            restrictedFlags: restrictedFlags.join(', '),
+          },
+        }
+      ),
+    };
+  }
+
+  return;
+};
+
+export const packConfigFilesValidator = (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value }] = args;
+
+  let configJSON;
+  try {
+    configJSON = JSON.parse(value as string);
+  } catch (e) {
+    return;
+  }
+
+  const packsWithConfigPaths = Object.keys(pickBy(configJSON?.packs ?? {}, isString));
+
+  if (packsWithConfigPaths.length) {
+    return {
+      code: 'ERR_RESTRICTED_OPTIONS',
+      message: i18n.translate(
+        'xpack.osquery.fleetIntegration.osqueryConfig.packConfigFilesErrorMessage',
+        {
+          defaultMessage:
+            'Pack configuration files are not supported. These packs must be removed: {packNames}.',
+          values: {
+            packNames: packsWithConfigPaths.join(', '),
+          },
+        }
+      ),
+    };
+  }
+
+  return;
+};
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -82,35 +180,69 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               { allowEmptyString: true }
             ),
           },
+          { validator: packConfigFilesValidator },
+          {
+            validator: configProtectedKeysValidator,
+          },
         ],
       },
     },
   });
 
-  const { isValid, getFormData } = configForm;
+  const [{ config }] = useFormData({ form: configForm, watch: 'config' });
+  const { isValid, setFieldValue } = configForm;
 
   const agentsLinkHref = useMemo(() => {
     if (!policy?.policy_id) return '#';
 
     return getUrlForApp(PLUGIN_ID, {
-      path:
-        `#` +
-        pagePathGetters.policy_details({ policyId: policy?.policy_id })[1] +
-        '?openEnrollmentFlyout=true',
+      path: pagePathGetters.policy_details({ policyId: policy?.policy_id })[1],
     });
   }, [getUrlForApp, policy?.policy_id]);
+
+  const handleConfigUpload = useCallback(
+    (newConfig) => {
+      let currentPacks = {};
+      try {
+        currentPacks = JSON.parse(config)?.packs;
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
+
+      if (newConfig) {
+        setFieldValue(
+          'config',
+          JSON.stringify(
+            {
+              ...newConfig,
+              ...(currentPacks || newConfig.packs
+                ? { packs: { ...newConfig.packs, ...currentPacks } }
+                : {}),
+            },
+            null,
+            2
+          )
+        );
+      }
+    },
+    [config, setFieldValue]
+  );
 
   useDebounce(
     () => {
       // if undefined it means that config was not modified
       if (isValid === undefined) return;
-      const configData = getFormData().config;
 
       const updatedPolicy = produce(newPolicy, (draft) => {
-        if (isEmpty(configData)) {
+        let parsedConfig;
+        try {
+          parsedConfig = JSON.parse(config);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+
+        if (isEmpty(parsedConfig)) {
           unset(draft, 'inputs[0].config');
         } else {
-          set(draft, 'inputs[0].config.osquery.value', configData);
+          set(draft, 'inputs[0].config.osquery.value', parsedConfig);
         }
         return draft;
       });
@@ -118,18 +250,21 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       onChange({ isValid: !!isValid, updatedPolicy: isValid ? updatedPolicy : newPolicy });
     },
     500,
-    [isValid]
+    [isValid, config]
   );
 
   useEffect(() => {
     if (editMode && policyAgentsCount === null) {
       const fetchAgentsCount = async () => {
         try {
-          const response = await http.fetch(agentRouteService.getStatusPath(), {
-            query: {
-              policyId: policy?.policy_id,
-            },
-          });
+          const response = await http.fetch<{ results: { total: number } }>(
+            agentRouteService.getStatusPath(),
+            {
+              query: {
+                policyId: policy?.policy_id,
+              },
+            }
+          );
           if (response.results) {
             setPolicyAgentsCount(response.results.total);
           }
@@ -140,7 +275,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       const fetchAgentPolicyDetails = async () => {
         if (policy?.policy_id) {
           try {
-            const response = await http.fetch(
+            const response = await http.fetch<{ item: AgentPolicy }>(
               agentPolicyRouteService.getInfoPath(policy?.policy_id)
             );
             if (response.item) {
@@ -183,6 +318,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               streams: [],
               policy_template: 'osquery_manager',
             });
+          } else {
+            if (!draft.inputs[0].type) {
+              set(draft, 'inputs[0].type', 'osquery');
+            }
+            if (!draft.inputs[0].policy_template) {
+              set(draft, 'inputs[0].policy_template', 'osquery_manager');
+            }
+            if (!draft.inputs[0].enabled) {
+              set(draft, 'inputs[0].enabled', true);
+            }
           }
         });
         onChange({
@@ -220,11 +365,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         </>
       ) : null}
 
-      <NavigationButtons
-        isDisabled={!editMode}
-        integrationPolicyId={policy?.id}
-        agentPolicyId={policy?.policy_id}
-      />
+      <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
       <EuiSpacer size="xxl" />
       <StyledEuiAccordion
         id="advanced"
@@ -238,6 +379,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         <EuiSpacer size="xs" />
         <Form form={configForm}>
           <CommonUseField path="config" />
+          <ConfigUploader onChange={handleConfigUpload} />
         </Form>
       </StyledEuiAccordion>
     </>
