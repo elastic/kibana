@@ -26,7 +26,10 @@ import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { getGeoFields, getSourceFields, getTermsFields } from '../../../../index_pattern_util';
 import { getEmsFileLayers } from '../../../../util';
-import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../../kibana_services';
+import {
+  getIndexPatternSelectComponent,
+  getIndexPatternService,
+} from '../../../../kibana_services';
 import {
   createEmsChoroplethLayerDescriptor,
   createEsChoroplethLayerDescriptor,

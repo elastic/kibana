@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type { LayerWizard, LayerWizardWithMeta, RenderWizardArguments } from './layer_wizard_registry';
+export type {
+  LayerWizard,
+  LayerWizardWithMeta,
+  RenderWizardArguments,
+} from './layer_wizard_registry';
 export { getLayerWizards, registerLayerWizard } from './layer_wizard_registry';

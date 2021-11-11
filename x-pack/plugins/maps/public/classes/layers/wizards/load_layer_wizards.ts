@@ -11,7 +11,10 @@ import {
   esDocumentsLayerWizardConfig,
   esTopHitsLayerWizardConfig,
 } from '../../sources/es_search_source';
-import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from '../../sources/es_geo_grid_source';
+import {
+  clustersLayerWizardConfig,
+  heatmapLayerWizardConfig,
+} from '../../sources/es_geo_grid_source';
 import { geoLineLayerWizardConfig } from '../../sources/es_geo_line_source';
 // @ts-ignore
 import { point2PointLayerWizardConfig } from '../../sources/es_pew_pew_source';
