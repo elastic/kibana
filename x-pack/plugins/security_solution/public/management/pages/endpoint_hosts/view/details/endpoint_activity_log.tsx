@@ -148,7 +148,10 @@ export const EndpointActivityLog = memo(
               <EuiFlexItem grow={false}>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
                 {(!activityLogLoading || !isPagingDisabled) && !showCallout && (
-                  <LoadMoreTrigger ref={loadMoreTrigger} />
+                  <LoadMoreTrigger
+                    data-test-subj="activityLogLoadMoreTrigger"
+                    ref={loadMoreTrigger}
+                  />
                 )}
                 {isPagingDisabled && !activityLogLoading && (
                   <EuiText color="subdued" textAlign="center">
