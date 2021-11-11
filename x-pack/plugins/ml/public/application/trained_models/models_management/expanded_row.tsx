@@ -265,7 +265,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           },
         ]
       : []),
-    ...(isPopulatedObject(omit(stats, 'pipeline_count'))
+    ...(isPopulatedObject(omit(stats, ['pipeline_count', 'ingest']))
       ? [
           {
             id: 'stats',
