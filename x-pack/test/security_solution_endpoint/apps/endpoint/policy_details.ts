@@ -15,6 +15,7 @@ import { FullAgentPolicyInput } from '../../../../plugins/fleet/common';
 import { PolicyConfig } from '../../../../plugins/security_solution/common/endpoint/types';
 import { ManifestSchema } from '../../../../plugins/security_solution/common/endpoint/schema/manifest';
 import { policyFactory } from '../../../../plugins/security_solution/common/endpoint/models/policy_config';
+import { popupVersionsMap } from '../../../../plugins/security_solution/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -305,6 +306,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (policyInfo) {
           await policyInfo.cleanup();
         }
+      });
+
+      it('should show the supported Endpoint version', async () => {
+        expect(await testSubjects.getVisibleText('policySupportedVersions')).to.equal(
+          'Agent version ' + popupVersionsMap.get('malware')
+        );
       });
 
       it('should show the custom message text area when the Notify User checkbox is checked', async () => {

@@ -20,10 +20,12 @@ export function getInstallCommandForPlatform(
 
   if (isProductionDeployment && fleetServerHost) {
     commandArguments += `--url=${fleetServerHost} ${newLineSeparator}\n`;
+  } else {
+    commandArguments += `  ${newLineSeparator}\n`;
   }
 
-  commandArguments += ` -f ${newLineSeparator}\n --fleet-server-es=${esHost}`;
-  commandArguments += ` ${newLineSeparator}\n --fleet-server-service-token=${serviceToken}`;
+  commandArguments += `  --fleet-server-es=${esHost}`;
+  commandArguments += ` ${newLineSeparator}\n  --fleet-server-service-token=${serviceToken}`;
   if (policyId) {
     commandArguments += ` ${newLineSeparator}\n  --fleet-server-policy=${policyId}`;
   }

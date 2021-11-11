@@ -2337,10 +2337,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@38.1.3":
-  version "38.1.3"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-38.1.3.tgz#0bf27021c54176e87d38269613205f3d6219da96"
-  integrity sha512-p6bJQWmfJ5SLkcgAoAMB3eTah/2a3/r3uo3ZskEN/xdPiqU8P+GANF8+6F4dWNfejbrpSUyCUldl7S4nWFGg3Q==
+"@elastic/charts@39.0.0":
+  version "39.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-39.0.0.tgz#85e615f550d03d8fb880bf44e891452b4341706b"
+  integrity sha512-EnmOXFAN5u9rkcwM4L2AksxoWpOpZRXbjX2HYAxgj8WcBb14zYoYeyENMQyG/qu2Rm6PnUni0dgy+mPOTEnGmw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -13225,10 +13225,10 @@ ejs@^3.1.2, ejs@^3.1.6:
   dependencies:
     jake "^10.6.1"
 
-elastic-apm-http-client@^10.1.0:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-10.1.0.tgz#8fbfa3f026f40d82b22b77bf4ed539cc20623edb"
-  integrity sha512-G+UsOQS8+kTyjbZ9PBXgbN8RGgeTe3FfbVljiwuN+eIf0UwpSR8k5Oh+Z2BELTTVwTcit7NCH4+B4MPayYx1mw==
+elastic-apm-http-client@^10.3.0:
+  version "10.3.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-10.3.0.tgz#12b95dc190a755cd1a8ce2c296cd28ef50f16aa4"
+  integrity sha512-BAqB7k5JA/x09L8BVj04WRoknRptmW2rLAoHQVrPvPhUm/IgNz63wPfiBuhWVE//Hl7xEpURO5pMV6az0UArkA==
   dependencies:
     breadth-filter "^2.0.0"
     container-info "^1.0.1"
@@ -13239,10 +13239,10 @@ elastic-apm-http-client@^10.1.0:
     readable-stream "^3.4.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.23.0:
-  version "3.23.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.23.0.tgz#e842aa505d576003579803e45fe91f572db74a72"
-  integrity sha512-yzdO/MwAcjT+TbcBQBKWbDb4beDVmmrIaFCu9VA+z6Ow9GKlQv7QaD9/cQjuN8/KI6ASiJfQI8cPgqy1SgSUuA==
+elastic-apm-node@3.24.0:
+  version "3.24.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.24.0.tgz#d7acb3352f928a23c28ebabab2bd30098562814e"
+  integrity sha512-Fmj/W2chWQa2zb1FfMYK2ypLB4TcnKNX+1klaJFbytRYDLgeSfo0EC7egvI3a+bLPZSRL5053PXOp7slVTPO6Q==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -13251,7 +13251,7 @@ elastic-apm-node@^3.23.0:
     basic-auth "^2.0.1"
     cookie "^0.4.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "^10.1.0"
+    elastic-apm-http-client "^10.3.0"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
@@ -20624,10 +20624,10 @@ mochawesome@^6.2.1:
     strip-ansi "^6.0.0"
     uuid "^7.0.3"
 
-mock-fs@^5.1.1:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-5.1.1.tgz#d4c95e916abf400664197079d7e399d133bb6048"
-  integrity sha512-p/8oZ3qvfKGPw+4wdVCyjDxa6wn2tP0TCf3WXC1UyUBAevezPn1TtOoxtMYVbZu/S/iExg+Ghed1busItj2CEw==
+mock-fs@^5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-5.1.2.tgz#6fa486e06d00f8793a8d2228de980eff93ce6db7"
+  integrity sha512-YkjQkdLulFrz0vD4BfNQdQRVmgycXTV7ykuHMlyv+C8WCHazpkiQRDthwa02kSyo8wKnY9wRptHfQLgmf0eR+A==
 
 mock-http-server@1.3.0:
   version "1.3.0"
