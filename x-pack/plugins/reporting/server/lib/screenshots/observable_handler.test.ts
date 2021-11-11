@@ -95,7 +95,7 @@ describe('ScreenshotObservableHandler', () => {
 
       const testPipeline = () => test$.toPromise();
       await expect(testPipeline).rejects.toMatchInlineSnapshot(
-        `[Error: The "Test Config" phase took longer than 0.2 seconds. You may need to increase "test.config.value": TimeoutError: Timeout has occurred]`
+        `[Error: The "Test Config" phase took longer than 0.2 seconds. You may need to increase "test.config.value"]`
       );
     });
 

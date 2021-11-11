@@ -95,7 +95,7 @@ export const staticValueOperation: OperationDefinition<
         arguments: {
           id: [columnId],
           name: [label || defaultLabel],
-          expression: [isValidNumber(params.value) ? params.value! : String(defaultValue)],
+          expression: [String(isValidNumber(params.value) ? params.value! : defaultValue)],
         },
       },
     ];
@@ -118,7 +118,7 @@ export const staticValueOperation: OperationDefinition<
       operationType: 'static_value',
       isBucketed: false,
       scale: 'ratio',
-      params: { ...previousParams, value: previousParams.value ?? String(defaultValue) },
+      params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
       references: [],
     };
   },
@@ -137,13 +137,12 @@ export const staticValueOperation: OperationDefinition<
   },
 
   paramEditor: function StaticValueEditor({
-    layer,
     updateLayer,
     currentColumn,
     columnId,
     activeData,
     layerId,
-    indexPattern,
+    paramEditorCustomProps,
   }) {
     const onChange = useCallback(
       (newValue) => {
@@ -201,11 +200,7 @@ export const staticValueOperation: OperationDefinition<
 
     return (
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>
-          {i18n.translate('xpack.lens.indexPattern.staticValue.label', {
-            defaultMessage: 'Reference line value',
-          })}
-        </EuiFormLabel>
+        <EuiFormLabel>{paramEditorCustomProps?.label || defaultLabel}</EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiFieldNumber
           data-test-subj="lns-indexPattern-static_value-input"
