@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { ToolbarPopover } from '../../shared_components';
-import { VisualizationToolbarProps } from '../../types';
-import { DatatableVisualizationState } from '../visualization';
+import type { VisualizationToolbarProps } from '../../types';
+import type { DatatableVisualizationState } from '../visualization';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
+
+  const onChange = useCallback(() => {
+    const current = state.fitRowToContent ?? false;
+    setState({
+      ...state,
+      fitRowToContent: !current,
+    });
+  }, [setState, state])
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
@@ -37,13 +45,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             label=""
             showLabel={false}
             checked={Boolean(state.fitRowToContent)}
-            onChange={() => {
-              const current = state.fitRowToContent ?? false;
-              setState({
-                ...state,
-                fitRowToContent: !current,
-              });
-            }}
+            onChange={onChange}
           />
         </EuiFormRow>
       </ToolbarPopover>
