@@ -57,7 +57,6 @@ export const HostIsolationExceptionsList = () => {
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-
   const { isLoading, data, error, refetch } = useQuery<
     FoundExceptionListItemSchema,
     ServerApiError
@@ -72,8 +71,6 @@ export const HostIsolationExceptionsList = () => {
 
   const listItems = data?.data || [];
   const totalCountListItems = data?.total || 0;
-
-  const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
   const showFlyout = privileges.canIsolateHost && !!location.show;
   const hasDataToShow = !!location.filter || listItems.length > 0;
