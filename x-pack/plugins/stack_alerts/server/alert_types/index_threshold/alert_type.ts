@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
 import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
-import { ActionContext, BaseActionContext, addMessages } from './action_context';
+import {
+  ActionContext,
+  BaseActionContext,
+  addMessages,
+  addRecoveryMessages,
+} from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import {
   CoreQueryParamsSchemaProperties,
@@ -211,5 +216,19 @@ export function getAlertType(
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
+
+    options.services.getRecoveredAlertIds().forEach((recoveredAlertId: string) => {
+      const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
+      const humanFn = `${agg} is NOT ${getHumanReadableComparator(
+        params.thresholdComparator
+      )} ${params.threshold.join(' and ')}`;
+      const baseContext: BaseActionContext = {
+        date,
+        group: recoveredAlertId,
+        conditions: humanFn,
+      };
+      const recoveryContext = addRecoveryMessages(options, baseContext, params);
+      options.services.recoveredAlertFactory(recoveredAlertId).setContext(recoveryContext);
+    });
   }
 }

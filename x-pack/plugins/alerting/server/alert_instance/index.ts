@@ -7,4 +7,6 @@
 
 export type { PublicAlertInstance } from './alert_instance';
 export { AlertInstance } from './alert_instance';
+export { RecoveredAlert } from './recovered_alert';
 export { createAlertInstanceFactory } from './create_alert_instance_factory';
+export { createRecoveredAlertFactory } from './create_recovered_alert_factory';

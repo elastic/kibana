@@ -13,7 +13,12 @@ import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
-import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
+import {
+  AlertInstance,
+  createAlertInstanceFactory,
+  RecoveredAlert,
+  createRecoveredAlertFactory,
+} from '../alert_instance';
 import {
   validateAlertTypeParams,
   executionStatusFromState,
@@ -259,6 +264,11 @@ export class TaskRunner<
     const originalAlertInstances = cloneDeep(alertInstances);
     const originalAlertInstanceIds = new Set(Object.keys(originalAlertInstances));
 
+    const recoveredAlertsContext: Record<
+      string,
+      RecoveredAlert<InstanceState, InstanceContext>
+    > = {};
+
     const eventLogger = this.context.eventLogger;
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
 
@@ -283,6 +293,17 @@ export class TaskRunner<
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >(alertInstances),
+            recoveredAlertFactory: createRecoveredAlertFactory<InstanceState, InstanceContext>(
+              recoveredAlertsContext
+            ),
+            getRecoveredAlertIds: (): string[] => {
+              const recoveredAlertInstances = pickBy(
+                alertInstances,
+                (alertInstance: AlertInstance<InstanceState, InstanceContext>, id) =>
+                  !alertInstance.hasScheduledActions() && originalAlertInstanceIds.has(id)
+              );
+              return Object.keys(recoveredAlertInstances);
+            },
           },
           params,
           state: alertTypeState as State,
@@ -377,6 +398,8 @@ export class TaskRunner<
         mutedInstanceIdsSet,
         logger: this.logger,
         alertLabel,
+        recoveredAlertsContext,
+        alertRawInstances,
       });
 
       const instancesToExecute =
@@ -430,7 +453,10 @@ export class TaskRunner<
       alertInstances: mapValues<
         Record<string, AlertInstance<InstanceState, InstanceContext>>,
         RawAlertInstance
-      >(instancesWithScheduledActions, (alertInstance) => alertInstance.toRaw()),
+      >(instancesWithScheduledActions, (alertInstance) => ({
+        ...alertInstance.toRaw(),
+        ...alertInstance.getScheduledActionOptions(),
+      })),
     };
   }
 
@@ -857,6 +883,8 @@ interface ScheduleActionsForRecoveredInstancesParams<
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedInstanceIdsSet: Set<string>;
   alertLabel: string;
+  recoveredAlertsContext: Record<string, RecoveredAlert<InstanceState, InstanceContext>>;
+  alertRawInstances: Record<string, { context: InstanceContext }>;
 }
 
 function scheduleActionsForRecoveredInstances<
@@ -877,6 +905,8 @@ function scheduleActionsForRecoveredInstances<
     executionHandler,
     mutedInstanceIdsSet,
     alertLabel,
+    recoveredAlertsContext,
+    alertRawInstances,
   } = params;
   const recoveredIds = Object.keys(recoveredAlertInstances);
   for (const id of recoveredIds) {
@@ -888,9 +918,16 @@ function scheduleActionsForRecoveredInstances<
       const instance = recoveredAlertInstances[id];
       instance.updateLastScheduledActions(recoveryActionGroup.id);
       instance.unscheduleActions();
+
+      // try to get current context
+      const context = recoveredAlertsContext[id]
+        ? recoveredAlertsContext[id].getContext()
+        : alertRawInstances[id]
+        ? alertRawInstances[id].context
+        : {};
       executionHandler({
         actionGroup: recoveryActionGroup.id,
-        context: {},
+        context,
         state: {},
         alertInstanceId: id,
       });

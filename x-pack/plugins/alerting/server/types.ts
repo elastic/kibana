@@ -7,7 +7,7 @@
 
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicAlertInstance } from './alert_instance';
+import { PublicAlertInstance, RecoveredAlert } from './alert_instance';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -75,6 +75,8 @@ export interface AlertServices<
   alertInstanceFactory: (
     id: string
   ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  recoveredAlertFactory: (id: string) => RecoveredAlert<InstanceState, InstanceContext>;
+  getRecoveredAlertIds: () => string[];
 }
 
 export interface AlertExecutorOptions<
