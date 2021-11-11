@@ -160,7 +160,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   router.get(
     {
-      path: `${MAIN_ENTRY}/payload/{docId}`,
+      path: `${MAIN_ENTRY}/locatorParams/{docId}`,
       validate: {
         params: schema.object({
           docId: schema.string({ minLength: 2 }),
@@ -175,15 +175,26 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
       const { docId } = req.params;
 
-      const result = await jobsQuery.getReport(user, docId);
+      const locatorParams = await jobsQuery.getLocatorParams(user, docId);
 
-      const validationResult = await validateJobIsAvailable(result);
-      if (validationResult) {
-        return validationResult;
+      if (locatorParams) {
+        return res.notFound({
+          body: {
+            message: i18n.translate(
+              'xpack.reporting.jobsQuery.locatorParams.notFoundErrorMessage',
+              {
+                defaultMessage: `Locator params not found for {docId}`,
+                values: {
+                  docId,
+                },
+              }
+            ),
+          },
+        });
       }
 
       return res.ok({
-        body: result!.payload,
+        body: locatorParams,
         headers: {
           'content-type': 'application/json',
         },

@@ -6,9 +6,9 @@
  */
 
 import type { Size, LayoutParams } from './layout';
-import type { JobId, BaseParams, BasePayload } from './base';
+import type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 } from './base';
 
-export type { JobId, BaseParams, BasePayload };
+export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
 export type { Size, LayoutParams };
 export type {
   DownloadReportFn,
