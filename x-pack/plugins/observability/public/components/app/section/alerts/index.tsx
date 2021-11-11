@@ -24,6 +24,7 @@ import { EuiSelect } from '@elastic/eui';
 import { uniqBy } from 'lodash';
 import { Alert } from '../../../../../../alerting/common';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { paths } from '../../../../config';
 
 const ALL_TYPES = 'ALL_TYPES';
 const allTypes = {
@@ -41,8 +42,8 @@ export function AlertsSection({ alerts }: Props) {
   const { config, core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
   const manageLink = config.unsafe.alertingExperience.enabled
-    ? core.http.basePath.prepend(`/app/observability/alerts`)
-    : core.http.basePath.prepend(`/app/management/insightsAndAlerting/triggersActions/rules`);
+    ? core.http.basePath.prepend(paths.observability.alerts)
+    : core.http.basePath.prepend(paths.management.rules);
   const filterOptions = uniqBy(alerts, (alert) => alert.consumer).map(({ consumer }) => ({
     value: consumer,
     text: consumer,
@@ -89,9 +90,7 @@ export function AlertsSection({ alerts }: Props) {
               <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
                 <EuiFlexItem grow={false}>
                   <EuiLink
-                    href={core.http.basePath.prepend(
-                      `/app/management/insightsAndAlerting/triggersActions/alert/${alert.id}`
-                    )}
+                    href={core.http.basePath.prepend(paths.management.alertDetails(alert.id))}
                   >
                     <EuiText size="s">{alert.name}</EuiText>
                   </EuiLink>
