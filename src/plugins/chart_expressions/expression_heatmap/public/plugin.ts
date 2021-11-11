@@ -17,7 +17,7 @@ import {
   setDocLinks,
 } from './services';
 import { heatmapRenderer } from './expression_renderers';
-import { FieldFormatsStart } from '../../../field_formats/public';
+import type { FieldFormatsStart } from '../../../field_formats/public';
 
 /** @internal */
 export interface ExpressionHeatmapPluginSetup {

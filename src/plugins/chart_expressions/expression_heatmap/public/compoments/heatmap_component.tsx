@@ -18,8 +18,11 @@ import {
   Settings,
   TooltipType,
   TooltipProps,
+  ESFixedIntervalUnit,
+  ESCalendarIntervalUnit,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '../../../../charts/public';
+import { search } from '../../../../data/public';
 import { LegendToggle } from '../../../../charts/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
@@ -159,12 +162,18 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     () => getColorPicker(args.legend.position, setColor, uiState),
     [args.legend.position, setColor, uiState]
   );
+  const table = data;
+  const valueAccessor = accessorIsNotNumber(args.valueAccessor)
+    ? args.valueAccessor
+    : table.columns[Number(args.valueAccessor) ?? 0].id;
+  const minMaxByColumnId = useMemo(
+    () => findMinMaxByColumnId([valueAccessor!], table),
+    [valueAccessor, table]
+  );
 
   const tooltip: TooltipProps = {
     type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
   };
-
-  const table = data;
 
   const paletteParams = args.palette?.params;
   const xAccessor = accessorIsNotNumber(args.xAccessor)
@@ -173,9 +182,6 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const yAccessor = accessorIsNotNumber(args.yAccessor)
     ? args.yAccessor
     : table.columns[Number(args.yAccessor) ?? 0].id;
-  const valueAccessor = accessorIsNotNumber(args.valueAccessor)
-    ? args.valueAccessor
-    : table.columns[Number(args.valueAccessor) ?? 0].id;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
@@ -183,11 +189,6 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const xAxisColumn = table.columns[xAxisColumnIndex];
   const yAxisColumn = table.columns[yAxisColumnIndex];
   const valueColumn = table.columns.find((v) => v.id === valueAccessor);
-
-  const minMaxByColumnId = useMemo(
-    () => findMinMaxByColumnId([valueAccessor!], table),
-    [valueAccessor, table]
-  );
 
   if (!valueColumn) {
     // Chart is not ready
@@ -211,11 +212,33 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   const xAxisMeta = xAxisColumn?.meta;
   const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+  const dateHistogramMeta = search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn);
 
   // Fallback to the ordinal scale type when a single row of data is provided.
   // Related issue https://github.com/elastic/elastic-charts/issues/1184
-  const xScaleType =
-    isTimeBasedSwimLane && chartData.length > 1 ? ScaleType.Time : ScaleType.Ordinal;
+  let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
+  // console.dir(search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn));
+  if (isTimeBasedSwimLane && chartData.length > 1) {
+    const dateInterval = dateHistogramMeta?.interval;
+    const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
+    if (esInterval) {
+      xScale = {
+        type: ScaleType.Time,
+        interval:
+          esInterval.type === 'fixed'
+            ? {
+                type: 'fixed',
+                unit: esInterval.unit as ESFixedIntervalUnit,
+                value: esInterval.value,
+              }
+            : {
+                type: 'calendar',
+                unit: esInterval.unit as ESCalendarIntervalUnit,
+                value: esInterval.value,
+              },
+      };
+    }
+  }
 
   const xValuesFormatter = formatFactory(xAxisMeta?.params);
   const metricFormatter = args.percentageMode
@@ -429,6 +452,16 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
               },
             },
           }}
+          xDomain={{
+            min:
+              dateHistogramMeta && dateHistogramMeta.timeRange
+                ? new Date(dateHistogramMeta.timeRange.from).getTime()
+                : NaN,
+            max:
+              dateHistogramMeta && dateHistogramMeta.timeRange
+                ? new Date(dateHistogramMeta.timeRange.to).getTime()
+                : NaN,
+          }}
           onBrushEnd={onBrushEnd as BrushEndListener}
         />
         <Heatmap
@@ -443,7 +476,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
           yAccessor={yAccessor || 'unifiedY'}
           valueAccessor={valueAccessor}
           valueFormatter={valueFormatter}
-          xScaleType={xScaleType}
+          xScale={xScale}
           ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
           config={config}
           xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
