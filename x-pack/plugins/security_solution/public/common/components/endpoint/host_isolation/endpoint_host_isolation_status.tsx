@@ -28,7 +28,7 @@ export interface EndpointHostIsolationStatusProps {
 export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps>(
   ({ isIsolated, pendingIsolate = 0, pendingUnIsolate = 0, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const isPendingStatuseDisabled = useIsExperimentalFeatureEnabled(
+    const isPendingStatusDisabled = useIsExperimentalFeatureEnabled(
       'disableIsolationUIPendingStatuses'
     );
 
@@ -41,7 +41,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
     });
 
     return useMemo(() => {
-      if (isPendingStatuseDisabled) {
+      if (isPendingStatusDisabled) {
         // If nothing is pending and host is not currently isolated, then render nothing
         if (!isIsolated) {
           return null;
@@ -146,7 +146,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       dataTestSubj,
       getTestId,
       isIsolated,
-      isPendingStatuseDisabled,
+      isPendingStatusDisabled,
       pendingIsolate,
       pendingUnIsolate,
       wasIsolating,
