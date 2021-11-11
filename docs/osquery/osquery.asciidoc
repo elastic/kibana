@@ -16,9 +16,6 @@ With Osquery in {kib}, you can:
  * View a history of past queries and their results
  * Save queries and build a library of queries for specific use cases
 
-Osquery results are stored in {es}, so that you can 
-search, analyze, and visualize Osquery data in {kib}.
-
 Osquery is powered by the *Osquery Manager* integration.
 For information on how to set up *Osquery Manager*, refer to <<manage-osquery-integration>>.
 
@@ -58,15 +55,18 @@ image::images/enter-query.png[Select saved query dropdown name showing query nam
 . Review the results in a table, or navigate to *Discover* to dive deeper into the response,
 or to the drag-and-drop *Lens* editor to create visualizations.
 . To view more information about the request, such as failures, open the *Status* tab.
-. To optionally save the query for future use, click *Save for later* and define the ID,
+. To save the query for future use, click *Save for later* and define the ID,
 description, and other <<osquery-manage-query,details>>. 
 
-To view a history of the past queries you have run, open the *Live queries history*.
+[float]
+[[osquery-view-history]]
+===  View or rerun previous live queries
 
-* To replay a query, click image:images/play-icon.png[Right-pointing triangle].
+From the *Live queries history* section on the *Live queries* tab:
 
-* To view the query <<osquery-results,results>> and <<osquery-status,status>>,
-click image:images/table-icon.png[Table icon].
+* Click image:images/play-icon.png[Right-pointing triangle] to replay a query.
+
+* Click image:images/table-icon.png[Table icon] to view the query <<osquery-results,results>> and <<osquery-status,status>>.
 +
 [role="screenshot"]
 image::images/live-query-check-results.png[Results of OSquery]
@@ -154,7 +154,7 @@ Add or edit saved queries from the *Saved queries* tab.
 [[osquery-map-fields]]
 == Map result fields to ECS
 
-When you save queries or add queries to a pack, you can optionally map osquery results or static values to fields in
+When you save queries or add queries to a pack, you can optionally map Osquery results or static values to fields in
 the {ecs-ref}/ecs-reference.html[Elastic Common Schema] (ECS).
 This standardizes your Osquery data for use across detections, machine learning,
 and any other areas that rely on ECS-compliant data.
@@ -171,7 +171,7 @@ and the mapped ECS fields. For example, if you update a query to map `osquery.na
 
 . In the **Value** column, use the dropdown on the left to choose what type of value to map to the ECS field: 
 
-** **Osquery value**: Select an Osquery field. The fields available are based on the SQL query entered, and only include fields that the query returns. When the query runs, the ECS field is set dynamically to the value of the osquery field selected.
+** **Osquery value**: Select an Osquery field. The fields available are based on the SQL query entered, and only include fields that the query returns. When the query runs, the ECS field is set dynamically to the value of the Osquery field selected.
 
 ** **Static value**: Enter a static value. When the query runs, the ECS field is set to the value entered. For example, static fields can be used to apply `tags` or your preferred `event.category` to the query results. 
 
@@ -183,14 +183,17 @@ and the mapped ECS fields. For example, if you update a query to map `osquery.na
 
 . Save your changes.
 
-Note:
+[NOTE]
+=========================
 
-** Some ECS fields are restricted and cannot be mapped. These are not available in the ECS dropdown.
+* Some ECS fields are restricted and cannot be mapped. These are not available in the ECS dropdown.
 
-** Some ECS fields are restricted to a set of allowed values, like {ecs-ref}/ecs-event.html#field-event-category[event.category]. Use the {ecs-ref}/ecs-field-reference.html[ECS Field Reference] for help when mapping fields. 
+* Some ECS fields are restricted to a set of allowed values, like {ecs-ref}/ecs-event.html#field-event-category[event.category]. Use the {ecs-ref}/ecs-field-reference.html[ECS Field Reference] for help when mapping fields. 
 
-** Osquery date fields have a variety of data types (including integer, text, or bigint). When mapping an Osquery date field to an ECS date field, you might need to use SQL operators in the query to get an {es}-compatible 
+* Osquery date fields have a variety of data types (including integer, text, or bigint). When mapping an Osquery date field to an ECS date field, you might need to use SQL operators in the query to get an {es}-compatible 
 {ref}/date.html[date] type. 
+=========================
+
 
 [float]
 [[osquery-extended-tables]]
@@ -230,7 +233,8 @@ the results are still returned.
 [float]
 [[osquery-results]]
 == Osquery results
-
+When you run live or scheduled queries, the results are automatically 
+stored in an {es} index, so that you can search, analyze, and visualize this data in {kib}.
 For a list of the Osquery fields that can be returned in query results,
 refer to https://docs.elastic.co/en/integrations/osquery_manager#exported-fields[exported fields].
 Query results can also include ECS fields, if the query has a defined ECS mapping.
@@ -284,7 +288,7 @@ This is useful for teams who need in-depth and detailed control.
 
 [float]
 === Customize Osquery configuration
-By default, all Osquery Manager integrations share the same osquery configuration. However, you can customize how osquery is configured by editing the Osquery Manager integration for each agent policy
+By default, all Osquery Manager integrations share the same osquery configuration. However, you can customize how Osquery is configured by editing the Osquery Manager integration for each agent policy
 you want to adjust. The custom configuration is then applied to all agents in the policy. 
 This powerful feature allows you to configure
 https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring[File Integrity Monitoring], https://osquery.readthedocs.io/en/stable/deployment/process-auditing[Process auditing], 
@@ -308,7 +312,7 @@ IMPORTANT: Take caution when editing this configuration. The changes you make ar
 
 * Some fields are protected and cannot be set. A warning is displayed with details about which fields should be removed.
 
-* (Optional) To load a full configuration file, drag and drop an osquery `.conf` file into the area at the bottom of the page.
+* (Optional) To load a full configuration file, drag and drop an Osquery `.conf` file into the area at the bottom of the page.
 
 . Click *Save integration* to apply the custom configuration to all agents in the policy.
 
