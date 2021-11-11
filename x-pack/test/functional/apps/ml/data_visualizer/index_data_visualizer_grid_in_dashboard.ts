@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const startTime = 'Jan 1, 2016 @ 00:00:00.000';
     const endTime = 'Nov 1, 2020 @ 00:00:00.000';
 
-    describe.only(`with ${testData.suiteTitle}`, function () {
+    describe(`with ${testData.suiteTitle}`, function () {
       after(async function () {
         await ml.testResources.deleteSavedSearchByTitle(savedSearchTitle);
         await ml.testResources.deleteDashboardByTitle(dashboardTitle);
