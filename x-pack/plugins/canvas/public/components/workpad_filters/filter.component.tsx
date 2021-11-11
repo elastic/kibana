@@ -9,8 +9,6 @@ import React, { FC } from 'react';
 import { EuiDescriptionList, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedFilterViewInstance } from '../../../types';
 
-import './filter.scss';
-
 interface Props {
   filter: FormattedFilterViewInstance;
   updateFilter?: (value: any) => void;
@@ -52,10 +50,11 @@ export const Filter: FC<Props> = ({ filter, ...restProps }) => {
   });
 
   return (
-    <EuiPanel grow={false} hasShadow={false} paddingSize="s">
+    <EuiPanel grow={false} hasShadow={false} paddingSize="m">
       <EuiDescriptionList
         type="column"
         className="workpadFilter"
+        compressed
         listItems={filterView}
         titleProps={{ style: titleStyle, className: 'eui-textBreakWord' }}
         descriptionProps={{ style: descriptionStyle, className: 'eui-textBreakWord' }}
