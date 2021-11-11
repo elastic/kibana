@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
-        operation: 'sum',
+        operation: 'average',
         field: 'bytes',
         keepOpen: true,
       });
