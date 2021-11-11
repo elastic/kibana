@@ -61,7 +61,7 @@ export const HostIsolationExceptionsList = () => {
   const { isLoading, data, error, refetch } = useQuery<
     FoundExceptionListItemSchema,
     ServerApiError
-  >(['hostIsolationExceptions', omit(location, 'show')], () => {
+  >(['hostIsolationExceptions', location.filter, location.page_size, location.page_index], () => {
     return getHostIsolationExceptionItems({
       http,
       page: location.page_index + 1,

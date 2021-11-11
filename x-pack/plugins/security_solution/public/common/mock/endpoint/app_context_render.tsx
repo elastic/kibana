@@ -33,8 +33,10 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 // hide react-query output in console
 setLogger({
   error: () => {},
-  log: () => {},
-  warn: () => {},
+  // eslint-disable-next-line no-console
+  log: console.log,
+  // eslint-disable-next-line no-console
+  warn: console.warn,
 });
 
 /**
