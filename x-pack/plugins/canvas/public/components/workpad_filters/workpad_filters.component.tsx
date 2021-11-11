@@ -68,9 +68,9 @@ export const WorkpadFilters: FC<Props> = ({
       (groupedByFilterGroupField ? strings.getWithoutGroupLabel() : strings.getBlankValueLabel()),
   }));
 
-  const filtersGroupsComponents = preparedFilterGroups.map((filtersGroup, index) => (
-    <FiltersGroup key={`filter-group-${index}`} filtersGroup={filtersGroup} />
-  ));
+  const filtersGroupsComponents = preparedFilterGroups.map((filtersGroup, index) => {
+    return <FiltersGroup key={`filter-group-${index}`} id={index} filtersGroup={filtersGroup} />;
+  });
 
   return (
     <Fragment>

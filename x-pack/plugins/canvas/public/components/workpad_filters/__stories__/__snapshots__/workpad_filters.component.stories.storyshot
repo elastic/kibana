@@ -180,7 +180,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             className="euiAccordion__triggerWrapper"
           >
             <button
-              aria-controls="canvas-filter-group-Without group"
+              aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
@@ -198,7 +198,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               />
             </button>
             <button
-              aria-controls="canvas-filter-group-Without group"
+              aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               className="euiAccordion__button"
               id="generated-id"
@@ -215,7 +215,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           <div
             aria-labelledby="generated-id"
             className="euiAccordion__childWrapper"
-            id="canvas-filter-group-Without group"
+            id="canvas-filter-group-0"
             role="region"
             tabIndex={-1}
           />
@@ -321,7 +321,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             className="euiAccordion__triggerWrapper"
           >
             <button
-              aria-controls="canvas-filter-group-(Blank)"
+              aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
@@ -339,7 +339,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               />
             </button>
             <button
-              aria-controls="canvas-filter-group-(Blank)"
+              aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               className="euiAccordion__button"
               id="generated-id"
@@ -356,7 +356,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           <div
             aria-labelledby="generated-id"
             className="euiAccordion__childWrapper"
-            id="canvas-filter-group-(Blank)"
+            id="canvas-filter-group-0"
             role="region"
             tabIndex={-1}
           />
@@ -462,7 +462,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             className="euiAccordion__triggerWrapper"
           >
             <button
-              aria-controls="canvas-filter-group-(Blank)"
+              aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
@@ -480,7 +480,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               />
             </button>
             <button
-              aria-controls="canvas-filter-group-(Blank)"
+              aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               className="euiAccordion__button"
               id="generated-id"
@@ -497,7 +497,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           <div
             aria-labelledby="generated-id"
             className="euiAccordion__childWrapper"
-            id="canvas-filter-group-(Blank)"
+            id="canvas-filter-group-0"
             role="region"
             tabIndex={-1}
           />
@@ -603,7 +603,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
             className="euiAccordion__triggerWrapper"
           >
             <button
-              aria-controls="canvas-filter-group-Group 1"
+              aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
@@ -621,7 +621,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               />
             </button>
             <button
-              aria-controls="canvas-filter-group-Group 1"
+              aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               className="euiAccordion__button"
               id="generated-id"
@@ -638,7 +638,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
           <div
             aria-labelledby="generated-id"
             className="euiAccordion__childWrapper"
-            id="canvas-filter-group-Group 1"
+            id="canvas-filter-group-0"
             role="region"
             tabIndex={-1}
           />
@@ -659,7 +659,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
             className="euiAccordion__triggerWrapper"
           >
             <button
-              aria-controls="canvas-filter-group-Group 2"
+              aria-controls="canvas-filter-group-1"
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
@@ -677,7 +677,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               />
             </button>
             <button
-              aria-controls="canvas-filter-group-Group 2"
+              aria-controls="canvas-filter-group-1"
               aria-expanded={true}
               className="euiAccordion__button"
               id="generated-id"
@@ -694,7 +694,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
           <div
             aria-labelledby="generated-id"
             className="euiAccordion__childWrapper"
-            id="canvas-filter-group-Group 2"
+            id="canvas-filter-group-1"
             role="region"
             tabIndex={-1}
           />

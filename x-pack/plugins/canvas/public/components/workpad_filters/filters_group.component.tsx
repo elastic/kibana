@@ -14,13 +14,14 @@ import { FiltersGroup as FiltersGroupType } from './types';
 
 interface Props {
   filtersGroup: FiltersGroupType;
+  id: string | number;
 }
 
 const panelStyle = {
   paddingTop: '15px',
 };
 
-export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
+export const FiltersGroup: FC<Props> = ({ filtersGroup, id }) => {
   const { name, filters: groupFilters } = filtersGroup;
 
   const filledFilterViews = groupFilters.map((filter) => {
@@ -38,7 +39,7 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
   return (
     <div className="canvasSidebar__expandable">
       <EuiAccordion
-        id={`canvas-filter-group-${name}`}
+        id={`canvas-filter-group-${id}`}
         buttonContent={name}
         initialIsOpen={true}
         className="canvasSidebar__accordion filtersSidebar__accordion"
