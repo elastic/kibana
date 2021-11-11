@@ -34,7 +34,6 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
     });
 
     after(async () => {
-      objectRemover.removeAll();
       await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id');
     });
 
