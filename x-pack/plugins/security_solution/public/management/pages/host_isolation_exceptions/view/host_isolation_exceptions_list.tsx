@@ -15,6 +15,7 @@ import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
+import { omit } from 'lodash';
 import { ServerApiError } from '../../../../common/types';
 import { useHttp } from '../../../../common/lib/kibana';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
@@ -60,7 +61,7 @@ export const HostIsolationExceptionsList = () => {
   const { isLoading, data, error, refetch } = useQuery<
     FoundExceptionListItemSchema,
     ServerApiError
-  >(['hostIsolationExceptions', location], () => {
+  >(['hostIsolationExceptions', omit(location, 'show')], () => {
     return getHostIsolationExceptionItems({
       http,
       page: location.page_index + 1,

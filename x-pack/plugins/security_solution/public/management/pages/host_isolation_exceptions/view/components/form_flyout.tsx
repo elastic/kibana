@@ -26,6 +26,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Dispatch } from 'redux';
+import { useQueryClient } from 'react-query';
 import { Loader } from '../../../../../common/components/loader';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
@@ -62,6 +63,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const creationFailure = useHostIsolationExceptionsSelector(getFormStatusFailure);
   const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+  const queryClient = useQueryClient();
   const history = useHistory();
 
   const [formHasError, setFormHasError] = useState(true);
@@ -115,8 +117,17 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
       } else {
         toasts.addSuccess(getCreationSuccessMessage(exception.name));
       }
+      queryClient.invalidateQueries('hostIsolationExceptions');
     }
-  }, [creationSuccessful, dispatch, exception?.item_id, exception?.name, onCancel, toasts]);
+  }, [
+    creationSuccessful,
+    dispatch,
+    exception?.item_id,
+    exception?.name,
+    onCancel,
+    queryClient,
+    toasts,
+  ]);
 
   // handle load item to edit error
   useEffect(() => {
