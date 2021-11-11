@@ -43,7 +43,7 @@ const filtersGroup: FiltersGroupType = {
   ],
 };
 
-storiesOf('components/WorkpadFilters/FiltersGroup', module)
+storiesOf('components/WorkpadFilters/FiltersGroupComponent', module)
   .addDecorator(reduxDecorator({ elements }))
   .addDecorator((story) => <div className="canvasLayout__sidebar">{story()}</div>)
   .add('default', () => <FiltersGroup filtersGroup={filtersGroup} id="0" />)
