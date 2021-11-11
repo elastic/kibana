@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { composeStories } from '@storybook/testing-react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { shallow } from 'enzyme';
-import { ServiceNodeMetrics } from '.';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import * as stories from './service_node_metrics.stories';
+
+const { Example } = composeStories(stories);
 
 describe('ServiceNodeMetrics', () => {
-  it('renders', () => {
-    expect(() =>
-      render(
-        <MockApmPluginContextWrapper>
-          <ServiceNodeMetrics />
-        </MockApmPluginContextWrapper>
-      )
-    ).not.toThrowError();
+  it('renders', async () => {
+    render(<Example />);
+
+    expect(await screen.findByText('testServiceName')).toBeInTheDocument();
   });
 });

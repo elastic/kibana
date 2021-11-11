@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { RouterProvider } from '@kbn/typed-react-router-config';
+import {
+  CurrentRouteContextProvider,
+  RouterProvider,
+} from '@kbn/typed-react-router-config';
 import { createMemoryHistory, History } from 'history';
 import { merge } from 'lodash';
 import React, { createContext, ReactNode, useMemo } from 'react';
@@ -176,7 +179,9 @@ export function MockApmAppContextProvider({
         })}
       >
         <RouterProvider router={apmRouter as any} history={usedHistory}>
-          {children}
+          <CurrentRouteContextProvider value={{}}>
+            {children}
+          </CurrentRouteContextProvider>
         </RouterProvider>
       </ApmPluginContext.Provider>
     </KibanaContext.Provider>

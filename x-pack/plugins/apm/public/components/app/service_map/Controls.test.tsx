@@ -5,46 +5,19 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme } from '@kbn/ui-shared-deps-src/theme';
-import { render } from '@testing-library/react';
-import cytoscape from 'cytoscape';
-import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { ThemeContext } from 'styled-components';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { Controls } from './Controls';
-import { CytoscapeContext } from './Cytoscape';
+import { composeStories } from '@storybook/testing-react';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import * as stories from './controls.stories';
 
-const cy = cytoscape({
-  elements: [{ classes: 'primary', data: { id: 'test node' } }],
-});
-
-function Wrapper({ children }: { children?: ReactNode }) {
-  return (
-    <CytoscapeContext.Provider value={cy}>
-      <MemoryRouter
-        initialEntries={[
-          '/service-map?rangeFrom=now-15m&rangeTo=now&environment=ENVIRONMENT_ALL&kuery=',
-        ]}
-      >
-        <MockApmPluginContextWrapper>
-          <ThemeContext.Provider value={{ eui: lightTheme }}>
-            {children}
-          </ThemeContext.Provider>
-        </MockApmPluginContextWrapper>
-      </MemoryRouter>
-      s
-    </CytoscapeContext.Provider>
-  );
-}
+const { Example } = composeStories(stories);
 
 describe('Controls', () => {
   describe('with a primary node', () => {
     it('links to the full map', async () => {
-      const result = render(<Controls />, { wrapper: Wrapper });
-      const { findByTestId } = result;
+      render(<Example />);
 
-      const button = await findByTestId('viewFullMapButton');
+      const button = await screen.findByTestId('viewFullMapButton');
 
       expect(button.getAttribute('href')).toEqual(
         '/basepath/app/apm/service-map'
