@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../../state/selectors/workpad';
 import { State } from '../../../../types';
 import { SidebarContent as Component } from './sidebar_content.component';
@@ -16,12 +16,14 @@ interface SidebarContentProps {
 }
 
 export const SidebarContent: React.FC<SidebarContentProps> = ({ commit }) => {
-  const selectedToplevelNodes = useSelector<State, string[]>((state) =>
-    getSelectedToplevelNodes(state)
+  const selectedToplevelNodes = useSelector<State, string[]>(
+    (state) => getSelectedToplevelNodes(state),
+    shallowEqual
   );
 
-  const selectedElementId = useSelector<State, string | null>((state) =>
-    getSelectedElementId(state)
+  const selectedElementId = useSelector<State, string | null>(
+    (state) => getSelectedElementId(state),
+    shallowEqual
   );
 
   return (

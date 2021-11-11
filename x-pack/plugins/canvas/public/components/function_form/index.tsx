@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { Ast } from '@kbn/interpreter/common';
+import deepEqual from 'react-fast-compare';
 import {
   ExpressionAstExpression,
   ExpressionValue,
@@ -49,15 +50,21 @@ interface FunctionFormProps {
 export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) => {
   const { expressionIndex, argType, nextArgType } = props;
   const dispatch = useDispatch();
-  const context = useSelector<State, ExpressionContext>((state) =>
-    getContextForIndex(state, expressionIndex)
+  const context = useSelector<State, ExpressionContext>(
+    (state) => getContextForIndex(state, expressionIndex),
+    deepEqual
   );
-  const element = useSelector<State, CanvasElement | undefined>((state) =>
-    getSelectedElement(state)
+  const element = useSelector<State, CanvasElement | undefined>(
+    (state) => getSelectedElement(state),
+    deepEqual
   );
-  const pageId = useSelector<State, string>((state) => getSelectedPage(state));
-  const assets = useSelector<State, State['assets']>((state) => getAssets(state));
-  const filterGroups = useSelector<State, string[]>((state) => getGlobalFilterGroups(state));
+  const pageId = useSelector<State, string>((state) => getSelectedPage(state), shallowEqual);
+  const assets = useSelector<State, State['assets']>((state) => getAssets(state), shallowEqual);
+  const filterGroups = useSelector<State, string[]>(
+    (state) => getGlobalFilterGroups(state),
+    shallowEqual
+  );
+
   const addArgument = useCallback(
     (argName: string, argValue: string | Ast | null) => () => {
       dispatch(
@@ -131,7 +138,6 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
     },
     [assets, onAssetAddDispatch]
   );
-
   return (
     <Component
       {...props}
