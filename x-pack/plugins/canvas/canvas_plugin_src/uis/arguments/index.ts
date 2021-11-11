@@ -16,7 +16,7 @@ import { imageUpload } from './image_upload';
 // @ts-expect-error untyped local
 import { number } from './number';
 import { numberFormatInitializer } from './number_format';
-import { palette } from './palette';
+import { palette, stopsPalette } from './palette';
 // @ts-expect-error untyped local
 import { percentage } from './percentage';
 // @ts-expect-error untyped local
@@ -42,6 +42,7 @@ export const args = [
   imageUpload,
   number,
   palette,
+  stopsPalette,
   percentage,
   range,
   select,
