@@ -45,7 +45,6 @@ import {
 } from '../../../../../saved_searches';
 import { DataViewType } from '../../../../../../../data_views/common';
 
-
 /**
  * Local storage key for sidebar persistence state
  */
