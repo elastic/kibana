@@ -16,7 +16,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     markdownPlugins: true,
   },
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
+    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
