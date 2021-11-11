@@ -41,7 +41,7 @@ export function JSErrors() {
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/js-errors',
+          endpoint: 'GET /internal/apm/ux/js-errors',
           params: {
             query: {
               start,
