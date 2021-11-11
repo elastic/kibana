@@ -55,7 +55,11 @@ export interface CreateCaseFormFieldsProps {
   hideConnectorServiceNowSir: boolean;
   withSteps: boolean;
 }
-export interface CreateCaseFormProps extends Partial<CreateCaseFormFieldsProps> {
+export interface CreateCaseFormProps
+  extends Pick<
+    Partial<CreateCaseFormFieldsProps>,
+    'disableAlerts' | 'hideConnectorServiceNowSir' | 'withSteps'
+  > {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
@@ -144,9 +148,7 @@ CreateCaseFormFields.displayName = 'CreateCaseFormFields';
 
 export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
   ({
-    connectors = empty,
     disableAlerts = false,
-    isLoadingConnectors = false,
     hideConnectorServiceNowSir = false,
     withSteps = true,
     afterCaseCreated,
@@ -164,38 +166,36 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         // if we are disabling alerts, then we should not sync alerts
         syncAlertsDefaultValue={!disableAlerts}
       >
-        <>
-          <CreateCaseFormFields
-            connectors={connectors}
-            disableAlerts={disableAlerts}
-            isLoadingConnectors={isLoadingConnectors}
-            hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-            withSteps={withSteps}
-          />
-          <Container>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="xs"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="create-case-cancel"
-                  iconType="cross"
-                  onClick={onCancel}
-                  size="s"
-                >
-                  {i18n.CANCEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SubmitCaseButton />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </Container>
-          <InsertTimeline fieldName={descriptionFieldName} />
-        </>
+        <CreateCaseFormFields
+          connectors={empty}
+          disableAlerts={disableAlerts}
+          isLoadingConnectors={false}
+          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+          withSteps={withSteps}
+        />
+        <Container>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="create-case-cancel"
+                iconType="cross"
+                onClick={onCancel}
+                size="s"
+              >
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SubmitCaseButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Container>
+        <InsertTimeline fieldName={descriptionFieldName} />
       </FormContext>
     </CasesTimelineIntegrationProvider>
   )
