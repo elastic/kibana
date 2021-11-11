@@ -83,7 +83,7 @@ import { RouterWrappers } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
-import { setupFleet } from './services/setup';
+import { formatNonFatalErrors, setupFleet } from './services/setup';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -340,10 +340,17 @@ export class FleetPlugin
         try {
           logger.info('Beginning fleet setup');
 
-          await setupFleet(
+          const { nonFatalErrors } = await setupFleet(
             new SavedObjectsClient(core.savedObjects.createInternalRepository()),
             core.elasticsearch.client.asInternalUser
           );
+
+          if (nonFatalErrors.length > 0) {
+            logger.info('Encountered non fatal errors during Fleet setup');
+            formatNonFatalErrors(nonFatalErrors).forEach((error) =>
+              logger.info(JSON.stringify(error))
+            );
+          }
 
           logger.info('Fleet setup completed');
         } catch (error) {
