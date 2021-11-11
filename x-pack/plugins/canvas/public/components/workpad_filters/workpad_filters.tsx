@@ -14,11 +14,10 @@ import { getGroupFiltersByOption } from '../../state/selectors/sidebar';
 import { useCanvasFilters } from './hooks';
 import { WorkpadFilters as Component } from './workpad_filters.component';
 
-const DEFAULT_GROUP_BY: FilterField = 'filterGroup';
-
 export const WorkpadFilters: FC = () => {
-  const groupFiltersByField: FilterField =
-    useSelector((state: State) => getGroupFiltersByOption(state)) ?? DEFAULT_GROUP_BY;
+  const groupFiltersByField: FilterField = useSelector((state: State) =>
+    getGroupFiltersByOption(state)
+  );
 
   const dispatch = useDispatch();
 
