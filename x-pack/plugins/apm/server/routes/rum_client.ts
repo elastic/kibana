@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { Logger } from 'kibana/server';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt } from '@kbn/io-ts-utils/iso_to_epoch_rt';
 import { setupRequest, Setup } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
@@ -19,8 +19,8 @@ import { getUrlSearch } from '../lib/rum_client/get_url_search';
 import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { hasRumData } from '../lib/rum_client/has_rum_data';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { rangeRt } from './default_api_types';
 import { UxUIFilters } from '../../typings/ui_filters';
 import { APMRouteHandlerResources } from '../routes/typings';
