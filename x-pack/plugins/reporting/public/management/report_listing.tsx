@@ -424,6 +424,7 @@ class ReportListingUi extends Component<Props, State> {
             name: i18n.translate('xpack.reporting.listing.table.openInKibanaAppLabel', {
               defaultMessage: 'Open in Kibana App',
             }),
+            'data-test-subj': 'reportOpenInKibanaApp',
             description: i18n.translate(
               'xpack.reporting.listing.table.openInKibanaAppDescription',
               {
