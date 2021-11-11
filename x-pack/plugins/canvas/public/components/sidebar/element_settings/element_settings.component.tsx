@@ -61,7 +61,6 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
       ),
     },
   ];
-
   return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />;
 };
 

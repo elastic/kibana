@@ -16,8 +16,11 @@ const DATE_WITH_DATA = {
 };
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
-const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filter-for-value';
+const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
+const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
+const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
+
 const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
@@ -43,6 +46,15 @@ export function ObservabilityAlertsCommonProvider({
     );
   };
 
+  const navigateWithoutFilter = async () => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      '/alerts',
+      `?`,
+      { ensureCurrentUrl: false }
+    );
+  };
+
   const setKibanaTimeZoneToUTC = async () => {
     await kibanaServer.uiSettings.update({
       'dateFormat:tz': 'UTC',
@@ -59,6 +71,10 @@ export function ObservabilityAlertsCommonProvider({
   const getTableCells = async () => {
     // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
     return await testSubjects.findAll('dataGridRowCell');
+  };
+
+  const getExperimentalDisclaimer = async () => {
+    return testSubjects.existOrFail('o11yExperimentalDisclaimer');
   };
 
   const getTableCellsInRows = async () => {
@@ -137,6 +153,10 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.existOrFail('alertsFlyoutViewInAppButton');
   };
 
+  const getAlertsFlyoutViewRuleDetailsLinkOrFail = async () => {
+    return await testSubjects.existOrFail('viewRuleDetailsFlyout');
+  };
+
   const getAlertsFlyoutDescriptionListTitles = async (): Promise<WebElementWrapper[]> => {
     const flyout = await getAlertsFlyout();
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListTitle', flyout);
@@ -160,10 +180,17 @@ export function ObservabilityAlertsCommonProvider({
   const openActionsMenuForRow = async (rowIndex: number) => {
     const rows = await getTableCellsInRows();
     const actionsOverflowButton = await testSubjects.findDescendant(
-      'alerts-table-row-action-more',
+      'alertsTableRowActionMore',
       rows[rowIndex][ACTION_COLUMN_INDEX]
     );
     await actionsOverflowButton.click();
+  };
+
+  const viewRuleDetailsButtonClick = async () => {
+    return await (await testSubjects.find(VIEW_RULE_DETAILS_SELECTOR)).click();
+  };
+  const viewRuleDetailsLinkClick = async () => {
+    return await (await testSubjects.find(VIEW_RULE_DETAILS_FLYOUT_SELECTOR)).click();
   };
 
   // Workflow status
@@ -183,7 +210,7 @@ export function ObservabilityAlertsCommonProvider({
 
   const setWorkflowStatusFilter = async (workflowStatus: WorkflowStatus) => {
     const buttonGroupButton = await testSubjects.find(
-      `workflow-status-filter-${workflowStatus}-button`
+      `workflowStatusFilterButton-${workflowStatus}`
     );
     await buttonGroupButton.click();
   };
@@ -210,7 +237,7 @@ export function ObservabilityAlertsCommonProvider({
 
   const getActionsButtonByIndex = async (index: number) => {
     const actionsOverflowButtons = await find.allByCssSelector(
-      '[data-test-subj="alerts-table-row-action-more"]'
+      '[data-test-subj="alertsTableRowActionMore"]'
     );
     return actionsOverflowButtons[index] || null;
   };
@@ -243,6 +270,11 @@ export function ObservabilityAlertsCommonProvider({
     typeInQueryBar,
     openActionsMenuForRow,
     getTimeRange,
+    navigateWithoutFilter,
+    getExperimentalDisclaimer,
     getActionsButtonByIndex,
+    viewRuleDetailsButtonClick,
+    viewRuleDetailsLinkClick,
+    getAlertsFlyoutViewRuleDetailsLinkOrFail,
   };
 }

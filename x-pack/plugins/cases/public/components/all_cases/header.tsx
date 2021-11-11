@@ -17,7 +17,6 @@ import { NavButtons } from './nav_buttons';
 interface OwnProps {
   actionsErrors: ErrorMessage[];
   refresh: number;
-  showTitle?: boolean;
   userCanCrud: boolean;
 }
 
@@ -41,10 +40,9 @@ const FlexItemDivider = styled(EuiFlexItem)`
 export const CasesTableHeader: FunctionComponent<Props> = ({
   actionsErrors,
   refresh,
-  showTitle = true,
   userCanCrud,
 }) => (
-  <HeaderPage title={showTitle ? i18n.PAGE_TITLE : ''} border>
+  <HeaderPage title={i18n.PAGE_TITLE} border>
     <EuiFlexGroup alignItems="center" gutterSize="m" wrap={true} data-test-subj="all-cases-header">
       {userCanCrud ? (
         <>

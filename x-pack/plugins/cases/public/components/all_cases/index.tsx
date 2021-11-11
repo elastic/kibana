@@ -14,10 +14,9 @@ import { CasesTableHeader } from './header';
 
 export interface AllCasesProps {
   disableAlerts?: boolean;
-  showTitle?: boolean;
 }
 
-export const AllCases: React.FC<AllCasesProps> = ({ showTitle, disableAlerts }) => {
+export const AllCases: React.FC<AllCasesProps> = ({ disableAlerts }) => {
   const { userCanCrud } = useCasesContext();
   const [refresh, setRefresh] = useState<number>(0);
   const doRefresh = useCallback(() => {
@@ -29,12 +28,7 @@ export const AllCases: React.FC<AllCasesProps> = ({ showTitle, disableAlerts }) 
 
   return (
     <>
-      <CasesTableHeader
-        actionsErrors={actionsErrors}
-        refresh={refresh}
-        showTitle={showTitle}
-        userCanCrud={userCanCrud}
-      />
+      <CasesTableHeader actionsErrors={actionsErrors} refresh={refresh} userCanCrud={userCanCrud} />
       <AllCasesList disableAlerts={disableAlerts} doRefresh={doRefresh} />
     </>
   );

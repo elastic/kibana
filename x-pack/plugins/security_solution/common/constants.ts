@@ -69,6 +69,7 @@ export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
+export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.

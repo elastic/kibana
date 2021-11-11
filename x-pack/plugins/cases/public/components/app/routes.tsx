@@ -28,7 +28,6 @@ import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
-  showTitle,
   disableAlerts,
   onComponentInitialized,
   actionsNavigation,
@@ -53,7 +52,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   return (
     <Switch>
       <Route strict exact path={basePath}>
-        <AllCases disableAlerts={disableAlerts} showTitle={showTitle} />
+        <AllCases disableAlerts={disableAlerts} />
       </Route>
 
       <Route path={getCreateCasePath(basePath)}>

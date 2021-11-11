@@ -28,7 +28,6 @@ describe('useAddToCase', function () {
 
       return (
         <span>
-          <EuiButton onClick={result.goToCreateCase}>Add new case</EuiButton>
           <EuiButton onClick={() => result.onCaseClicked({ id: 'test' } as any)}>
             On case click
           </EuiButton>
@@ -44,18 +43,10 @@ describe('useAddToCase', function () {
     const { setData, core, findByText } = setupTestComponent();
 
     expect(setData).toHaveBeenLastCalledWith({
-      goToCreateCase: expect.any(Function),
       isCasesOpen: false,
       isSaving: false,
       onCaseClicked: expect.any(Function),
       setIsCasesOpen: expect.any(Function),
-    });
-
-    fireEvent.click(await findByText('Add new case'));
-
-    expect(core.application?.navigateToApp).toHaveBeenCalledTimes(1);
-    expect(core.application?.navigateToApp).toHaveBeenCalledWith('observability', {
-      deepLinkId: 'cases_create',
     });
 
     fireEvent.click(await findByText('On case click'));

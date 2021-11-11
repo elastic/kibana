@@ -34,7 +34,6 @@ jest.mock('../../containers/use_get_cases_status');
 
 const defaultAllCasesProps: AllCasesProps = {
   disableAlerts: false,
-  showTitle: true,
 };
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

@@ -12,7 +12,6 @@ import { CasesTimelineIntegration } from '../timeline_context';
 
 export interface CasesRoutesProps {
   disableAlerts?: boolean;
-  showTitle?: boolean;
   onComponentInitialized?: () => void;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;

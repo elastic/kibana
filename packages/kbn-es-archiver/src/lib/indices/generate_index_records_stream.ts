@@ -11,7 +11,15 @@ import { Transform } from 'stream';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
-export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
+export function createGenerateIndexRecordsStream({
+  client,
+  stats,
+  keepIndexNames,
+}: {
+  client: Client;
+  stats: Stats;
+  keepIndexNames?: boolean;
+}) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
@@ -59,9 +67,9 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
           this.push({
             type: 'index',
             value: {
-              // always rewrite the .kibana_* index to .kibana_1 so that
+              // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
               // when it is loaded it can skip migration, if possible
-              index: index.startsWith('.kibana') ? '.kibana_1' : index,
+              index: index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : index,
               settings,
               mappings,
               aliases,

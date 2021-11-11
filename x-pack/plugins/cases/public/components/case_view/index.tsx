@@ -26,7 +26,7 @@ import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { ContentWrapper, WhitePageWrapper, HeaderWrapper } from '../wrappers';
+import { ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { EditConnector } from '../edit_connector';
@@ -377,31 +377,30 @@ export const CaseComponent = React.memo<CaseComponentProps>(
 
     return (
       <>
-        <HeaderWrapper>
-          <HeaderPage
-            showBackButton={true}
-            data-test-subj="case-view-title"
-            titleNode={
-              <EditableTitle
-                userCanCrud={userCanCrud}
-                isLoading={isLoading && updateKey === 'title'}
-                title={caseData.title}
-                onSubmit={onSubmitTitle}
-              />
-            }
-            title={caseData.title}
-          >
-            <CaseActionBar
-              caseData={caseData}
-              currentExternalIncident={currentExternalIncident}
+        <HeaderPage
+          showBackButton={true}
+          data-test-subj="case-view-title"
+          titleNode={
+            <EditableTitle
               userCanCrud={userCanCrud}
-              disableAlerting={ruleDetailsNavigation == null || hideSyncAlerts}
-              isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
-              onRefresh={handleRefresh}
-              onUpdateField={onUpdateField}
+              isLoading={isLoading && updateKey === 'title'}
+              title={caseData.title}
+              onSubmit={onSubmitTitle}
             />
-          </HeaderPage>
-        </HeaderWrapper>
+          }
+          title={caseData.title}
+        >
+          <CaseActionBar
+            caseData={caseData}
+            currentExternalIncident={currentExternalIncident}
+            userCanCrud={userCanCrud}
+            disableAlerting={ruleDetailsNavigation == null || hideSyncAlerts}
+            isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
+            onRefresh={handleRefresh}
+            onUpdateField={onUpdateField}
+          />
+        </HeaderPage>
+
         <WhitePageWrapper>
           <ContentWrapper>
             <EuiFlexGroup>

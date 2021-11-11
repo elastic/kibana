@@ -10,3 +10,4 @@ export { LANG as CssLang } from './css/constants';
 export { LANG as MarkdownLang } from './markdown/constants';
 export { LANG as YamlLang } from './yaml/constants';
 export { LANG as HandlebarsLang } from './handlebars/constants';
+export { LANG as HJsonLang } from './hjson/constants';
