@@ -22,6 +22,9 @@ const StyledEuiPanel = styled(EuiPanel)`
   &.bottom-section {
     padding-top: 24px;
   }
+  &.artifact-entry-collapsible-card {
+    padding: 24px !important;
+  }
 `;
 
 export const CardSectionPanel = memo<CardSectionPanelProps>((props) => {
