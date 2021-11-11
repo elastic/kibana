@@ -362,11 +362,11 @@ export const ModelsList: FC = () => {
       },
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
-        defaultMessage: 'Start allocation',
+      name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
+        defaultMessage: 'Start deployment',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
-        defaultMessage: 'Start allocation',
+      description: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
+        defaultMessage: 'Start deployment',
       }),
       icon: 'play',
       type: 'icon',
@@ -406,11 +406,11 @@ export const ModelsList: FC = () => {
       },
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
-        defaultMessage: 'Stop allocation',
+      name: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
+        defaultMessage: 'Stop deployment',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
-        defaultMessage: 'Stop allocation',
+      description: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
+        defaultMessage: 'Stop deployment',
       }),
       icon: 'stop',
       type: 'icon',
