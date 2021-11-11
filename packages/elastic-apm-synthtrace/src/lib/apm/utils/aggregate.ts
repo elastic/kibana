@@ -8,15 +8,15 @@
 import moment from 'moment';
 import { pickBy } from 'lodash';
 import objectHash from 'object-hash';
-import { Fields } from '../entity';
+import { ApmFields } from '../apm_fields';
 import { createPicker } from './create_picker';
 
-export function aggregate(events: Fields[], fields: string[]) {
+export function aggregate(events: ApmFields[], fields: string[]) {
   const picker = createPicker(fields);
 
-  const metricsets = new Map<string, { key: Fields; events: Fields[] }>();
+  const metricsets = new Map<string, { key: ApmFields; events: ApmFields[] }>();
 
-  function getMetricsetKey(span: Fields) {
+  function getMetricsetKey(span: ApmFields) {
     const timestamp = moment(span['@timestamp']).valueOf();
     return {
       '@timestamp': timestamp - (timestamp % (60 * 1000)),

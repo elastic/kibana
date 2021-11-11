@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { set } from 'lodash';
 
-import { Fields } from '../entity';
-
-export function getObserverDefaults(): Fields {
-  return {
-    'observer.version': '7.16.0',
-    'observer.version_major': 7,
-  };
+export function dedot(source: Record<string, any>, target: Record<string, any>) {
+  // eslint-disable-next-line guard-for-in
+  for (const key in source) {
+    const val = source[key as keyof typeof source];
+    set(target, key, val);
+  }
 }

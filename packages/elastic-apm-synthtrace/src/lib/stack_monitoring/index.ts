@@ -5,11 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { cluster } from './cluster';
 
-export { apm } from './lib/apm';
-export { stackMonitoring } from './lib/stack_monitoring';
-
-export { timerange } from './lib/timerange';
-
-export { cleanWriteTargets } from './lib/utils/clean_write_targets';
-export { createLogger, LogLevel } from './lib/utils/create_logger';
+export const stackMonitoring = {
+  cluster,
+};

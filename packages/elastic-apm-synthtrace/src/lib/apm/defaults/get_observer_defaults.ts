@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { apm } from './lib/apm';
-export { stackMonitoring } from './lib/stack_monitoring';
+import { ApmFields } from '../apm_fields';
 
-export { timerange } from './lib/timerange';
-
-export { cleanWriteTargets } from './lib/utils/clean_write_targets';
-export { createLogger, LogLevel } from './lib/utils/create_logger';
+export function getObserverDefaults(): ApmFields {
+  return {
+    'observer.version': '7.16.0',
+    'observer.version_major': 7,
+  };
+}

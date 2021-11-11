@@ -7,7 +7,7 @@
  */
 import objectHash from 'object-hash';
 import { groupBy, pickBy } from 'lodash';
-import { Fields } from '../entity';
+import { ApmFields } from '../apm_fields';
 import { createPicker } from './create_picker';
 
 const instanceFields = [
@@ -29,7 +29,7 @@ const metricsetPicker = createPicker([
   'span.subtype',
 ]);
 
-export function getBreakdownMetrics(events: Fields[]) {
+export function getBreakdownMetrics(events: ApmFields[]) {
   const txWithSpans = groupBy(
     events.filter(
       (event) => event['processor.event'] === 'span' || event['processor.event'] === 'transaction'
@@ -37,13 +37,13 @@ export function getBreakdownMetrics(events: Fields[]) {
     (event) => event['transaction.id']
   );
 
-  const metricsets: Map<string, Fields> = new Map();
+  const metricsets: Map<string, ApmFields> = new Map();
 
   Object.keys(txWithSpans).forEach((transactionId) => {
     const txEvents = txWithSpans[transactionId];
     const transaction = txEvents.find((event) => event['processor.event'] === 'transaction')!;
 
-    const eventsById: Record<string, Fields> = {};
+    const eventsById: Record<string, ApmFields> = {};
     const activityByParentId: Record<string, Array<{ from: number; to: number }>> = {};
     for (const event of txEvents) {
       const id =

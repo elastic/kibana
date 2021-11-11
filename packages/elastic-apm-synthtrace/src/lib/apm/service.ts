@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Entity } from './entity';
+import { Entity } from '../entity';
+import { ApmFields } from './apm_fields';
 import { Instance } from './instance';
 
-export class Service extends Entity {
+export class Service extends Entity<ApmFields> {
   instance(instanceName: string) {
     return new Instance({
       ...this.fields,

@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { apm } from './lib/apm';
-export { stackMonitoring } from './lib/stack_monitoring';
+import { Serializable } from '../serializable';
+import { StackMonitoringFields } from './stack_monitoring_fields';
+import { KibanaStats } from './kibana_stats';
 
-export { timerange } from './lib/timerange';
-
-export { cleanWriteTargets } from './lib/utils/clean_write_targets';
-export { createLogger, LogLevel } from './lib/utils/create_logger';
+export class Kibana extends Serializable<StackMonitoringFields> {
+  stats() {
+    return new KibanaStats({
+      ...this.fields,
+    });
+  }
+}

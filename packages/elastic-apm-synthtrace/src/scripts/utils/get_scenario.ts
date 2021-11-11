@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 import Path from 'path';
-import { Fields } from '../../lib/entity';
 import { Logger } from '../../lib/utils/create_logger';
-
-export type Scenario = (options: { from: number; to: number }) => Fields[];
+import { Scenario } from '../scenario';
 
 export function getScenario({ file, logger }: { file: unknown; logger: Logger }) {
   const location = Path.join(process.cwd(), String(file));

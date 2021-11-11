@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { apm } from './lib/apm';
-export { stackMonitoring } from './lib/stack_monitoring';
+import { ElasticsearchOutput } from '../lib/utils/to_elasticsearch_output';
+import { RunOptions } from './utils/parse_run_cli_flags';
 
-export { timerange } from './lib/timerange';
-
-export { cleanWriteTargets } from './lib/utils/clean_write_targets';
-export { createLogger, LogLevel } from './lib/utils/create_logger';
+type Generate = (range: { from: number; to: number }) => ElasticsearchOutput[];
+export type Scenario = (options: RunOptions) => Promise<{ generate: Generate }>;

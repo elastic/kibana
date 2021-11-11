@@ -6,25 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { getScenario } from './get_scenario';
-import { getWriteTargets } from '../../lib/utils/get_write_targets';
+import { pick } from 'lodash';
+import { LogLevel } from '../../lib/utils/create_logger';
+import { RunCliFlags } from '../run';
 import { intervalToMs } from './interval_to_ms';
-import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 
-export async function getCommonResources({
-  file,
-  interval,
-  bucketSize,
-  target,
-  logLevel,
-}: {
-  file: string;
-  interval: string;
-  bucketSize: string;
-  target: string;
-  logLevel: string;
-}) {
+export function parseRunCliFlags(flags: RunCliFlags) {
+  const { file, _, logLevel, interval, bucketSize } = flags;
+
+  const parsedFile = String(file || _[0]);
+
   let parsedLogLevel = LogLevel.info;
   switch (logLevel) {
     case 'trace':
@@ -44,8 +35,6 @@ export async function getCommonResources({
       break;
   }
 
-  const logger = createLogger(parsedLogLevel);
-
   const intervalInMs = intervalToMs(interval);
   if (!intervalInMs) {
     throw new Error('Invalid interval');
@@ -57,22 +46,13 @@ export async function getCommonResources({
     throw new Error('Invalid bucket size');
   }
 
-  const client = new Client({
-    node: target,
-  });
-
-  const [scenario, writeTargets] = await Promise.all([
-    getScenario({ file, logger }),
-    getWriteTargets({ client }),
-  ]);
-
   return {
-    scenario,
-    writeTargets,
-    logger,
-    client,
+    ...pick(flags, 'target', 'workers', 'clientWorkers', 'batchSize', 'writeTarget'),
     intervalInMs,
     bucketSizeInMs,
     logLevel: parsedLogLevel,
+    file: parsedFile,
   };
 }
+
+export type RunOptions = ReturnType<typeof parseRunCliFlags>;

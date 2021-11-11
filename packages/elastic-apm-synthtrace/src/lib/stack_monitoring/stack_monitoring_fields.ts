@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { apm } from './lib/apm';
-export { stackMonitoring } from './lib/stack_monitoring';
+import { Fields } from '../entity';
 
-export { timerange } from './lib/timerange';
-
-export { cleanWriteTargets } from './lib/utils/clean_write_targets';
-export { createLogger, LogLevel } from './lib/utils/create_logger';
+export type StackMonitoringFields = Fields &
+  Partial<{
+    cluster_uuid: string;
+    type: string;
+    'kibana_stats.kibana.name': string;
+    'kibana_stats.kibana.index': string;
+    'kibana_stats.requests.disconnects': number;
+    'kibana_stats.requests.total': number;
+    'kibana_stats.timestamp': string;
+  }>;
