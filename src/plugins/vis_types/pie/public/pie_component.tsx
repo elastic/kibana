@@ -234,9 +234,21 @@ const PieComponent = (props: PieComponentProps) => {
       syncColors,
     ]
   );
+
+  const rescaleFactor = useMemo(() => {
+    const overallSum = visData.rows.reduce((sum, row) => sum + row[metricColumn.id], 0);
+    const slices = visData.rows.map((row) => row[metricColumn.id] / overallSum);
+    const smallSlices = slices.filter((value) => value < 0.02).length;
+    if (smallSlices) {
+      // shrink up to 20% to give some room for the linked values
+      return 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
+    }
+    return 1;
+  }, [visData.rows, metricColumn]);
+
   const config = useMemo(
-    () => getConfig(visParams, chartTheme, dimensions),
-    [chartTheme, visParams, dimensions]
+    () => getConfig(visParams, chartTheme, dimensions, rescaleFactor),
+    [chartTheme, visParams, dimensions, rescaleFactor]
   );
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
