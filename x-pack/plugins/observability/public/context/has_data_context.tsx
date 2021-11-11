@@ -9,7 +9,6 @@ import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
-import { Alert } from '../../../alerting/common';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { usePluginContext } from '../hooks/use_plugin_context';
@@ -148,9 +147,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some((app) => {
     const appHasData = hasDataMap[app]?.hasData;
-    return (
-      appHasData === true || (Array.isArray(appHasData) && (appHasData as Alert[])?.length > 0)
-    );
+    return appHasData === true;
   });
 
   return (
