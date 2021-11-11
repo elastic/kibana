@@ -36,7 +36,10 @@ export async function getSeriesData(
     fieldFormatService,
   } = services;
 
-  const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
+  const panelIndex = await cachedIndexPatternFetcher(
+    panel.index_pattern,
+    !panel.use_kibana_indexes
+  );
 
   const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
 
