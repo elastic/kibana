@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_FLYOUT, CELL_TEXT, JSON_TEXT, TABLE_ROWS } from '../../screens/alerts_details';
+import {
+  ALERT_FLYOUT,
+  CELL_TEXT,
+  JSON_TEXT,
+  TABLE_CONTAINER,
+  TABLE_ROWS,
+} from '../../screens/alerts_details';
 
 import {
   expandFirstAlert,
@@ -60,6 +66,22 @@ describe('Alert details with unmapped fields', () => {
       .within(() => {
         cy.get(CELL_TEXT).eq(2).should('have.text', expectedUnmmappedField.field);
         cy.get(CELL_TEXT).eq(4).should('have.text', expectedUnmmappedField.text);
+      });
+  });
+
+  // This test makes sure that the table does not overflow horizontally
+  it('Table does not scroll horizontally', () => {
+    openTable();
+
+    cy.get(ALERT_FLYOUT)
+      .find(TABLE_CONTAINER)
+      .within(($tableContainer) => {
+        expect($tableContainer[0].scrollLeft).to.equal(0);
+
+        // Try to scroll left and make sure that the table hasn't actually scrolled
+        $tableContainer[0].scroll({ left: 1000 });
+
+        expect($tableContainer[0].scrollLeft).to.equal(0);
       });
   });
 });
