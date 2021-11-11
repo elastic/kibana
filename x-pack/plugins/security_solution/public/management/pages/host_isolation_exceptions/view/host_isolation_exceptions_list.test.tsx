@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
@@ -89,9 +89,9 @@ describe('When on the host isolation exceptions page', () => {
         releaseApiResponse!(getFoundExceptionListItemSchemaMock());
 
         //  check the loader is gone
-        await waitFor(() => {
-          expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
-        });
+        await waitForElementToBeRemoved(
+          renderResult.getByTestId('hostIsolationExceptionsContent-loader')
+        );
       });
 
       it('should display the search bar and item count', async () => {
