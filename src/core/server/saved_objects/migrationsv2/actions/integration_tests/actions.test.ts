@@ -383,7 +383,7 @@ describe('migration actions', () => {
                       }
                   `);
     });
-    it('resolves left with a retryable_es_client_error if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
+    it.skip('resolves left with a retryable_es_client_error if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
       // Create a red index
       await client.indices
         .create({
