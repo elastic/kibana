@@ -333,7 +333,9 @@ export class Embeddable
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
     }
+  };
 
+  private onRender: ExpressionWrapperProps['onRender$'] = () => {
     this.renderComplete.dispatchComplete();
   };
 
@@ -378,6 +380,7 @@ export class Embeddable
         searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
+        onRender$={this.onRender}
         interactive={!input.disableTriggers}
         renderMode={input.renderMode}
         syncColors={input.syncColors}
