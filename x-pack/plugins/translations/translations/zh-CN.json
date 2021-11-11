@@ -7053,7 +7053,6 @@
     "xpack.observability.cases.createCase.fieldTagsHelpText": "为此案例键入一个或多个定制识别标签。在每个标签后按 Enter 键可开始新的标签。",
     "xpack.observability.cases.createCase.titleFieldRequiredError": "标题必填。",
     "xpack.observability.cases.dismissErrorsPushServiceCallOutTitle": "关闭",
-    "xpack.observability.cases.pageTitle": "案例",
     "xpack.observability.casesLinkTitle": "案例",
     "xpack.observability.emptySection.apps.alert.description": "503 错误是否越来越多？服务是否响应？CPU 和 RAM 利用率是否激增？实时查看警告，而不是事后再进行剖析。",
     "xpack.observability.emptySection.apps.alert.link": "创建规则",
