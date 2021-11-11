@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { EventOutcome } from '../../../common/event_outcome';
 import {
+  EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { Setup } from '../helpers/setup_request';
+import { Setup } from '../../lib/helpers/setup_request';
+import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { getBucketSize } from '../helpers/get_bucket_size';
 
-export async function getThroughputChartsForBackend({
+export async function getErrorRateChartsForBackend({
   backendName,
   setup,
   start,
@@ -41,13 +42,7 @@ export async function getThroughputChartsForBackend({
     offset,
   });
 
-  const { intervalString } = getBucketSize({
-    start: startWithOffset,
-    end: endWithOffset,
-    minBucketSize: 60,
-  });
-
-  const response = await apmEventClient.search('get_throughput_for_backend', {
+  const response = await apmEventClient.search('get_error_rate_for_backend', {
     apm: {
       events: [ProcessorEvent.metric],
     },
@@ -60,22 +55,27 @@ export async function getThroughputChartsForBackend({
             ...kqlQuery(kuery),
             ...rangeQuery(startWithOffset, endWithOffset),
             { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
+            {
+              terms: {
+                [EVENT_OUTCOME]: [EventOutcome.success, EventOutcome.failure],
+              },
+            },
           ],
         },
       },
       aggs: {
         timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
-          },
+          date_histogram: getMetricsDateHistogramParams({
+            start: startWithOffset,
+            end: endWithOffset,
+            metricsInterval: 60,
+          }),
           aggs: {
-            throughput: {
-              rate: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                unit: 'minute',
+            failures: {
+              filter: {
+                term: {
+                  [EVENT_OUTCOME]: EventOutcome.failure,
+                },
               },
             },
           },
@@ -86,9 +86,12 @@ export async function getThroughputChartsForBackend({
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {
+      const totalCount = bucket.doc_count;
+      const failureCount = bucket.failures.doc_count;
+
       return {
         x: bucket.key + offsetInMs,
-        y: bucket.throughput.value,
+        y: failureCount / totalCount,
       };
     }) ?? []
   );

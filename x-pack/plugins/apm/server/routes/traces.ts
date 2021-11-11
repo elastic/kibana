@@ -9,11 +9,11 @@ import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTraceItems } from '../lib/traces/get_trace_items';
 import { getTopTransactionGroupList } from '../lib/transaction_groups';
-import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { getTransaction } from '../lib/transactions/get_transaction';
 
 const tracesRoute = createApmServerRoute({

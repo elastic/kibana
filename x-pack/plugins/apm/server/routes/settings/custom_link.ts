@@ -21,8 +21,8 @@ import {
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
-import { createApmServerRoute } from '../create_apm_server_route';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 
 const customLinkTransactionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/custom_links/transaction',

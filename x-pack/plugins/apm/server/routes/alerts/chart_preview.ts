@@ -10,8 +10,8 @@ import { getTransactionDurationChartPreview } from '../../lib/alerts/chart_previ
 import { getTransactionErrorCountChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_count';
 import { getTransactionErrorRateChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_rate';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { createApmServerRoute } from '../create_apm_server_route';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, rangeRt } from '../default_api_types';
 
 const alertParamsRt = t.intersection([

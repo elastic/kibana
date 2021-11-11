@@ -15,8 +15,8 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapBackendNodeInfo } from '../lib/service_map/get_service_map_backend_node_info';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { environmentRt, rangeRt } from './default_api_types';
 
 const serviceMapRoute = createApmServerRoute({

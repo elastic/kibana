@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
-import { createApmServerRoute } from '../create_apm_server_route';
+import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   getApmIndices,
   getApmIndexSettings,

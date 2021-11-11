@@ -34,8 +34,8 @@ import { getServiceProfilingStatistics } from '../lib/services/profiling/get_ser
 import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
 import { getServiceInfrastructure } from '../lib/services/get_service_infrastructure';
 import { withApmSpan } from '../utils/with_apm_span';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import {
   comparisonRangeRt,
   environmentRt,
