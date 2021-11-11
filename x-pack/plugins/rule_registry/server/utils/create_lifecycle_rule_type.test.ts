@@ -14,7 +14,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging/mocks';
-import { castArray, omit, mapValues } from 'lodash';
+import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
