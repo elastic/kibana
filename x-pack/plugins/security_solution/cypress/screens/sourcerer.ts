@@ -6,6 +6,7 @@
  */
 
 export const SOURCERER = {
+  alertCheckbox: '[data-test-subj="sourcerer-alert-only-checkbox"]',
   advancedSettings: '[data-test-subj="sourcerer-advanced-options-toggle"]',
   comboBoxInput: '[data-test-subj="sourcerer-combo-box"] [data-test-subj="comboBoxInput"]',
   comboBoxOptions: '[data-test-subj="sourcerer-combo-option"]',

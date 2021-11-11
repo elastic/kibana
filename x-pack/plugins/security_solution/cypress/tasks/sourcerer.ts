@@ -6,9 +6,16 @@
  */
 
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
-import { TIMELINE_TITLE } from '../screens/timeline';
+import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
 import { HOSTS_URL } from '../urls/navigation';
 import { waitForPage } from './login';
+import { refreshPage } from './security_header';
+import { LOADING_INDICATOR } from '../screens/security_header';
+import { openTimelineUsingToggle } from './security_main';
+import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
+import { waitForAlertsIndexToBeCreated } from './alerts';
+import { createCustomRuleActivated } from './api_calls/rules';
+import { getNewRule } from '../objects/rule';
 
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {
@@ -17,17 +24,13 @@ export const openSourcerer = (sourcererScope?: string) => {
   cy.get(SOURCERER.trigger).should('be.enabled');
   cy.get(SOURCERER.trigger).should('be.visible');
   cy.get(SOURCERER.trigger).click();
+  cy.get(SOURCERER.wrapperTimeline).should('be.visible');
 };
 export const openTimelineSourcerer = () => {
   cy.get(SOURCERER.triggerTimeline).should('be.enabled');
   cy.get(SOURCERER.triggerTimeline).should('be.visible');
-  cy.get(SOURCERER.triggerTimeline).click();
-  cy.get(SOURCERER.advancedSettings).should(($div) => {
-    if ($div.text() === 'Show Advanced') {
-      $div.click();
-    }
-    expect(true).to.eq(true);
-  });
+  cy.get(SOURCERER.triggerTimeline).first().click();
+  cy.get(SOURCERER.wrapperTimeline).should('be.visible');
 };
 export const openAdvancedSettings = () => {
   cy.get(SOURCERER.advancedSettings).should('be.visible');
@@ -59,6 +62,12 @@ export const isHostsStatValue = (value: string) => {
 
 export const isNotSourcererSelection = (patternName: string) => {
   return cy.get(SOURCERER.comboBoxInput).find(`span[title="${patternName}"]`).should('not.exist');
+};
+export const isNotSourcererOption = (patternName: string) => {
+  return cy
+    .get(SOURCERER.comboBoxOptions)
+    .find(`button[title="${patternName}"]`)
+    .should('not.exist');
 };
 
 export const isSourcererOptions = (patternNames: string[]) => {
@@ -127,4 +136,48 @@ export const addIndexToDefault = (index: string) => {
       cy.get('.euiToast .euiButton--primary').click();
       waitForPage(HOSTS_URL);
     });
+};
+
+export const deleteAlertsIndex = () => {
+  const alertsIndexUrl = `${Cypress.env(
+    'ELASTICSEARCH_URL'
+  )}/.internal.alerts-security.alerts-default-000001`;
+
+  cy.request({
+    url: alertsIndexUrl,
+    method: 'GET',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  }).then((response) => {
+    if (response.status === 200) {
+      cy.request({
+        url: alertsIndexUrl,
+        method: 'DELETE',
+        headers: { 'kbn-xsrf': 'cypress-creds' },
+      });
+    }
+  });
+};
+
+export const refreshUntilAlertsIndexExists = async () => {
+  cy.waitUntil(
+    () => {
+      cy.reload();
+      openTimelineUsingToggle();
+      openSourcerer('timeline');
+      openAdvancedSettings();
+
+      return cy
+        .get(SOURCERER.comboBoxInput)
+        .invoke('text')
+        .then((txt) => txt.includes(`${DEFAULT_ALERTS_INDEX}-default`));
+    },
+    { interval: 500, timeout: 12000 }
+  );
+};
+
+export const waitForAlertsIndexToExist = () => {
+  waitForAlertsIndexToBeCreated();
+  createCustomRuleActivated(getNewRule(), '1', '100m', 100);
+  refreshUntilAlertsIndexExists();
 };
