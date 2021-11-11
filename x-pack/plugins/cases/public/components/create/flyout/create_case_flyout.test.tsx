@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { act } from '@testing-library/react';
 
 import { CreateCaseFlyout } from './create_case_flyout';
 import { TestProviders } from '../../../common/mock';
@@ -21,27 +22,31 @@ const defaultProps = {
 
 describe('CreateCaseFlyout', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
-  it('renders', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCaseFlyout {...defaultProps} />
-      </TestProviders>
-    );
+  it('renders', async () => {
+    await act(async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CreateCaseFlyout {...defaultProps} />
+        </TestProviders>
+      );
 
-    expect(wrapper.find(`[data-test-subj='create-case-flyout']`).exists()).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj='create-case-flyout']`).exists()).toBeTruthy();
+    });
   });
 
-  it('Closing modal calls onCloseCaseModal', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCaseFlyout {...defaultProps} />
-      </TestProviders>
-    );
+  it('Closing modal calls onCloseCaseModal', async () => {
+    await act(async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CreateCaseFlyout {...defaultProps} />
+        </TestProviders>
+      );
 
-    wrapper.find(`[data-test-subj='euiFlyoutCloseButton']`).first().simulate('click');
-    expect(onClose).toBeCalled();
+      wrapper.find(`[data-test-subj='euiFlyoutCloseButton']`).first().simulate('click');
+      expect(onClose).toBeCalled();
+    });
   });
 });

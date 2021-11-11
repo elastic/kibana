@@ -298,15 +298,15 @@ describe('useSecuritySolutionNavigation', () => {
         );
 
         const caseNavItem = (result.current?.items || [])[3].items?.find(
-          (item) => item['data-test-subj'] === 'navigation-case'
+          (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
           Object {
-            "data-href": "securitySolutionUI/case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-            "data-test-subj": "navigation-case",
+            "data-href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "data-test-subj": "navigation-cases",
             "disabled": false,
-            "href": "securitySolutionUI/case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-            "id": "case",
+            "href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "id": "cases",
             "isSelected": false,
             "name": "Cases",
             "onClick": [Function],
@@ -326,7 +326,7 @@ describe('useSecuritySolutionNavigation', () => {
         );
 
         const caseNavItem = (result.current?.items || [])[3].items?.find(
-          (item) => item['data-test-subj'] === 'navigation-case'
+          (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toBeFalsy();
       });

@@ -379,17 +379,18 @@ describe('Navigation Breadcrumbs', () => {
 
     test('should return Cases breadcrumbs when supplied case pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
-        getMockObject('case', '/', undefined),
+        getMockObject('cases', '/', undefined),
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
         { text: 'Security', href: 'securitySolutionUI/overview' },
         {
           text: 'Cases',
-          href: "securitySolutionUI/case?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+          href: "securitySolutionUI/cases?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
       ]);
     });
+
     test('should return Case details breadcrumbs when supplied case details pathname', () => {
       const sampleCase = {
         id: 'my-case-id',
@@ -397,7 +398,7 @@ describe('Navigation Breadcrumbs', () => {
       };
       const breadcrumbs = getBreadcrumbsForRoute(
         {
-          ...getMockObject('case', `/${sampleCase.id}`, sampleCase.id),
+          ...getMockObject('cases', `/${sampleCase.id}`, sampleCase.id),
           state: { caseTitle: sampleCase.name },
         },
         getUrlForAppMock
@@ -406,14 +407,15 @@ describe('Navigation Breadcrumbs', () => {
         { text: 'Security', href: 'securitySolutionUI/overview' },
         {
           text: 'Cases',
-          href: "securitySolutionUI/case?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+          href: "securitySolutionUI/cases?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: sampleCase.name,
-          href: `securitySolutionUI/case/${sampleCase.id}?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+          href: `securitySolutionUI/cases/${sampleCase.id}?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
         },
       ]);
     });
+
     test('should return Admin breadcrumbs when supplied endpoints pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('administration', '/endpoints', undefined),
