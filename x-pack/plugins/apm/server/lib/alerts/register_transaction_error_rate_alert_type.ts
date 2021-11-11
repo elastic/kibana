@@ -46,8 +46,9 @@ import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
-import { getDocumentTypeFilterForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getDocumentTypeFilterForTransactions } from '../helpers/transactions';
 import { asPercent } from '../../../../observability/common/utils/formatters';
+import { termQuery } from '../../../../observability/server';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
   ALERT_EVALUATION_THRESHOLD_NON_TYPED;
@@ -131,7 +132,7 @@ export function registerTransactionErrorRateAlertType({
                       },
                     },
                   },
-                  ...getDocumentTypeFilterForAggregatedTransactions(
+                  ...getDocumentTypeFilterForTransactions(
                     searchAggregatedTransactions
                   ),
                   {
@@ -142,18 +143,8 @@ export function registerTransactionErrorRateAlertType({
                       ],
                     },
                   },
-                  ...(alertParams.serviceName
-                    ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                    : []),
-                  ...(alertParams.transactionType
-                    ? [
-                        {
-                          term: {
-                            [TRANSACTION_TYPE]: alertParams.transactionType,
-                          },
-                        },
-                      ]
-                    : []),
+                  ...termQuery(SERVICE_NAME, alertParams.serviceName),
+                  ...termQuery(TRANSACTION_TYPE, alertParams.transactionType),
                   ...environmentQuery(alertParams.environment),
                 ],
               },

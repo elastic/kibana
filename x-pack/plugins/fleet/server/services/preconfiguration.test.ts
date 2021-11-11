@@ -9,7 +9,11 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
-import type { PreconfiguredAgentPolicy, PreconfiguredOutput } from '../../common/types';
+import type {
+  InstallResult,
+  PreconfiguredAgentPolicy,
+  PreconfiguredOutput,
+} from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
@@ -30,11 +34,13 @@ jest.mock('./output');
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 const mockInstalledPackages = new Map();
+const mockInstallPackageErrors = new Map<string, string>();
 const mockConfiguredPolicies = new Map();
 
 const mockDefaultOutput: Output = {
   id: 'test-id',
   is_default: true,
+  is_default_monitoring: false,
   name: 'default',
   // @ts-ignore
   type: 'elasticsearch',
@@ -99,8 +105,22 @@ function getPutPreconfiguredPackagesMock() {
 }
 
 jest.mock('./epm/packages/install', () => ({
-  installPackage({ pkgkey, force }: { pkgkey: string; force?: boolean }) {
+  async installPackage({
+    pkgkey,
+    force,
+  }: {
+    pkgkey: string;
+    force?: boolean;
+  }): Promise<InstallResult> {
     const [pkgName, pkgVersion] = pkgkey.split('-');
+    const installError = mockInstallPackageErrors.get(pkgName);
+    if (installError) {
+      return {
+        error: new Error(installError),
+        installType: 'install',
+      };
+    }
+
     const installedPackage = mockInstalledPackages.get(pkgName);
     if (installedPackage) {
       if (installedPackage.version === pkgVersion) return installedPackage;
@@ -109,7 +129,10 @@ jest.mock('./epm/packages/install', () => ({
     const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
     mockInstalledPackages.set(pkgName, packageInstallation);
 
-    return packageInstallation;
+    return {
+      status: 'installed',
+      installType: 'install',
+    };
   },
   ensurePackagesCompletedInstall() {
     return [];
@@ -132,6 +155,8 @@ jest.mock('./epm/packages/get', () => ({
     return mockInstalledPackages.get(pkgName) ?? false;
   },
 }));
+
+jest.mock('./epm/kibana/index_pattern/install');
 
 jest.mock('./package_policy', () => ({
   ...jest.requireActual('./package_policy'),
@@ -177,6 +202,7 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 describe('policy preconfiguration', () => {
   beforeEach(() => {
     mockInstalledPackages.clear();
+    mockInstallPackageErrors.clear();
     mockConfiguredPolicies.clear();
     spyAgentPolicyServiceUpdate.mockClear();
     spyAgentPolicyServicBumpAllAgentPoliciesForOutput.mockClear();
@@ -266,7 +292,38 @@ describe('policy preconfiguration', () => {
     );
   });
 
-  it('should not create a policy if we are not able to add packages ', async () => {
+  it('should not create a policy and throw an error if install fails for required package', async () => {
+    const soClient = getPutPreconfiguredPackagesMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const policies: PreconfiguredAgentPolicy[] = [
+      {
+        name: 'Test policy',
+        namespace: 'default',
+        id: 'test-id',
+        package_policies: [
+          {
+            package: { name: 'test_package' },
+            name: 'Test package',
+          },
+        ],
+      },
+    ];
+    mockInstallPackageErrors.set('test_package', 'REGISTRY ERROR');
+
+    await expect(
+      ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        policies,
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput
+      )
+    ).rejects.toThrow(
+      '[Test policy] could not be added. [test_package] could not be installed due to error: [Error: REGISTRY ERROR]'
+    );
+  });
+
+  it('should not create a policy and throw an error if package is not installed for an unknown reason', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const policies: PreconfiguredAgentPolicy[] = [
@@ -283,22 +340,16 @@ describe('policy preconfiguration', () => {
       },
     ];
 
-    let error;
-    try {
-      await ensurePreconfiguredPackagesAndPolicies(
+    await expect(
+      ensurePreconfiguredPackagesAndPolicies(
         soClient,
         esClient,
         policies,
         [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
         mockDefaultOutput
-      );
-    } catch (err) {
-      error = err;
-    }
-
-    expect(error).toBeDefined();
-    expect(error.message).toEqual(
-      'Test policy could not be added. test_package is not installed, add test_package to `xpack.fleet.packages` or remove it from Test package.'
+      )
+    ).rejects.toThrow(
+      '[Test policy] could not be added. [test_package] is not installed, add [test_package] to [xpack.fleet.packages] or remove it from [Test package].'
     );
   });
   it('should not attempt to recreate or modify an agent policy if its ID is unchanged', async () => {
@@ -504,13 +555,14 @@ describe('output preconfiguration', () => {
     mockedOutputService.create.mockReset();
     mockedOutputService.update.mockReset();
     mockedOutputService.delete.mockReset();
-    mockedOutputService.getDefaultOutputId.mockReset();
+    mockedOutputService.getDefaultDataOutputId.mockReset();
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
       return [
         {
           id: 'existing-output-1',
           is_default: false,
+          is_default_monitoring: false,
           name: 'Output 1',
           // @ts-ignore
           type: 'elasticsearch',
@@ -530,30 +582,11 @@ describe('output preconfiguration', () => {
         name: 'Output 1',
         type: 'elasticsearch',
         is_default: false,
+        is_default_monitoring: false,
         hosts: ['http://test.fr'],
       },
     ]);
 
-    expect(mockedOutputService.create).toBeCalled();
-    expect(mockedOutputService.update).not.toBeCalled();
-    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
-  });
-
-  it('should delete existing default output if a new preconfigured output is added', async () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockedOutputService.getDefaultOutputId.mockResolvedValue('default-output-123');
-    await ensurePreconfiguredOutputs(soClient, esClient, [
-      {
-        id: 'non-existing-default-output-1',
-        name: 'Output 1',
-        type: 'elasticsearch',
-        is_default: true,
-        hosts: ['http://test.fr'],
-      },
-    ]);
-
-    expect(mockedOutputService.delete).toBeCalled();
     expect(mockedOutputService.create).toBeCalled();
     expect(mockedOutputService.update).not.toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
@@ -568,6 +601,7 @@ describe('output preconfiguration', () => {
         name: 'Output 1',
         type: 'elasticsearch',
         is_default: false,
+        is_default_monitoring: false,
       },
     ]);
 
@@ -583,33 +617,13 @@ describe('output preconfiguration', () => {
       {
         id: 'existing-output-1',
         is_default: false,
+        is_default_monitoring: false,
         name: 'Output 1',
         type: 'elasticsearch',
         hosts: ['http://newhostichanged.co:9201'], // field that changed
       },
     ]);
 
-    expect(mockedOutputService.create).not.toBeCalled();
-    expect(mockedOutputService.update).toBeCalled();
-    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
-  });
-
-  it('should delete default output if preconfigured output exists and another default output exists', async () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
-    mockedOutputService.getDefaultOutputId.mockResolvedValue('default-123');
-    await ensurePreconfiguredOutputs(soClient, esClient, [
-      {
-        id: 'existing-output-1',
-        is_default: true,
-        name: 'Output 1',
-        type: 'elasticsearch',
-        hosts: ['http://newhostichanged.co:9201'], // field that changed
-      },
-    ]);
-
-    expect(mockedOutputService.delete).toBeCalled();
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
@@ -619,11 +633,12 @@ describe('output preconfiguration', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
-    mockedOutputService.getDefaultOutputId.mockResolvedValue('existing-output-1');
+    mockedOutputService.getDefaultDataOutputId.mockResolvedValue('existing-output-1');
     await ensurePreconfiguredOutputs(soClient, esClient, [
       {
         id: 'existing-output-1',
         is_default: true,
+        is_default_monitoring: false,
         name: 'Output 1',
         type: 'elasticsearch',
         hosts: ['http://newhostichanged.co:9201'], // field that changed
@@ -642,6 +657,7 @@ describe('output preconfiguration', () => {
       data: {
         id: 'existing-output-1',
         is_default: false,
+        is_default_monitoring: false,
         name: 'Output 1',
         type: 'elasticsearch',
         hosts: ['http://es.co:80'],
@@ -652,6 +668,7 @@ describe('output preconfiguration', () => {
       data: {
         id: 'existing-output-1',
         is_default: false,
+        is_default_monitoring: false,
         name: 'Output 1',
         type: 'elasticsearch',
         hosts: ['http://es.co'],
@@ -685,6 +702,7 @@ describe('output preconfiguration', () => {
       {
         id: 'output1',
         is_default: false,
+        is_default_monitoring: false,
         name: 'Output 1',
         type: 'elasticsearch',
         hosts: ['http://es.co:9201'],
@@ -692,6 +710,7 @@ describe('output preconfiguration', () => {
       {
         id: 'output2',
         is_default: false,
+        is_default_monitoring: false,
         name: 'Output 2',
         type: 'elasticsearch',
         hosts: ['http://es.co:9201'],
@@ -716,6 +735,7 @@ describe('output preconfiguration', () => {
       {
         id: 'output1',
         is_default: false,
+        is_default_monitoring: false,
         name: 'Output 1',
         type: 'elasticsearch',
         hosts: ['http://es.co:9201'],

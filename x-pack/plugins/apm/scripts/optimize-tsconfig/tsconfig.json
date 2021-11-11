@@ -13,6 +13,7 @@
     "**/node_modules/**"
   ],
   "compilerOptions": {
-    "noErrorTruncation": true
+    "noErrorTruncation": true,
+    "assumeChangesOnlyAffectDirectDependencies": true
   }
 }

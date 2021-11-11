@@ -48,13 +48,17 @@ export async function getFullAgentPolicy(
     return null;
   }
 
-  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
-  if (!defaultOutputId) {
+  const defaultDataOutputId = await outputService.getDefaultDataOutputId(soClient);
+
+  if (!defaultDataOutputId) {
     throw new Error('Default output is not setup');
   }
 
-  const dataOutputId = agentPolicy.data_output_id || defaultOutputId;
-  const monitoringOutputId = agentPolicy.monitoring_output_id || defaultOutputId;
+  const dataOutputId: string = agentPolicy.data_output_id || defaultDataOutputId;
+  const monitoringOutputId: string =
+    agentPolicy.monitoring_output_id ||
+    (await outputService.getDefaultMonitoringOutputId(soClient)) ||
+    dataOutputId;
 
   const outputs = await Promise.all(
     Array.from(new Set([dataOutputId, monitoringOutputId])).map((outputId) =>
@@ -70,12 +74,14 @@ export async function getFullAgentPolicy(
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
-
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(output);
+        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
+          output,
+          standalone
+        );
 
         return acc;
       }, {}),
@@ -179,8 +185,8 @@ function transformOutputToFullPolicyOutput(
 
   if (standalone) {
     delete newOutput.api_key;
-    newOutput.username = 'ES_USERNAME';
-    newOutput.password = 'ES_PASSWORD';
+    newOutput.username = '{ES_USERNAME}';
+    newOutput.password = '{ES_PASSWORD}';
   }
 
   return newOutput;

@@ -16,10 +16,25 @@ import useTimeoutFn from 'react-use/lib/useTimeoutFn';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from 'kibana/public';
 
+import type { StatusResponse } from '../../../core/types/status';
 import { useKibana } from './use_kibana';
 
 export interface ProgressIndicatorProps {
   onSuccess?(): void;
+}
+
+function isKibanaPastPreboot(response?: Response, body?: StatusResponse) {
+  if (!response?.headers.get('content-type')?.includes('application/json')) {
+    return false;
+  }
+
+  return (
+    // Status endpoint may require authentication after `preboot` stage.
+    response?.status === 401 ||
+    // We're only interested in the availability of the critical core services.
+    (body?.status?.core?.elasticsearch?.level === 'available' &&
+      body?.status?.core?.savedObjects?.level === 'available')
+  );
 }
 
 export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ onSuccess }) => {
@@ -28,19 +43,21 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
     let isAvailable: boolean | undefined = false;
     let isPastPreboot: boolean | undefined = false;
     try {
-      const { response } = await http.get('/api/status', { asResponse: true });
+      const { response, body } = await http.get<StatusResponse | undefined>('/api/status', {
+        asResponse: true,
+      });
       isAvailable = response ? response.status < 500 : undefined;
-      isPastPreboot = response?.headers.get('content-type')?.includes('application/json');
+      isPastPreboot = isKibanaPastPreboot(response, body);
     } catch (error) {
-      const { response } = error as IHttpFetchError;
+      const { response, body = {} } = error as IHttpFetchError;
       isAvailable = response ? response.status < 500 : undefined;
-      isPastPreboot = response?.headers.get('content-type')?.includes('application/json');
+      isPastPreboot = isKibanaPastPreboot(response, body as StatusResponse);
     }
-    return isAvailable === true && isPastPreboot === true
+    return isAvailable === true && isPastPreboot
       ? 'complete'
       : isAvailable === false
       ? 'unavailable'
-      : isAvailable === true && isPastPreboot === false
+      : isAvailable === true && !isPastPreboot
       ? 'preboot'
       : 'unknown';
   });

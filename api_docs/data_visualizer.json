@@ -574,7 +574,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
+              "\"number\" | \"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
@@ -956,6 +956,56 @@
       },
       {
         "parentPluginId": "dataVisualizer",
+        "id": "def-common.applicationPath",
+        "type": "string",
+        "tags": [],
+        "label": "applicationPath",
+        "description": [],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.featureId",
+        "type": "string",
+        "tags": [],
+        "label": "featureId",
+        "description": [],
+        "signature": [
+          "\"file_data_visualizer\""
+        ],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.featureTitle",
+        "type": "string",
+        "tags": [],
+        "label": "featureTitle",
+        "description": [],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-common.FILE_DATA_VIS_TAB_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FILE_DATA_VIS_TAB_ID",
+        "description": [],
+        "signature": [
+          "\"fileDataViz\""
+        ],
+        "path": "x-pack/plugins/data_visualizer/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
         "id": "def-common.FILE_SIZE_DISPLAY_FORMAT",
         "type": "string",
         "tags": [],
@@ -1004,7 +1054,7 @@
         "label": "JobFieldType",
         "description": [],
         "signature": [
-          "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
+          "\"number\" | \"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
         ],
         "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
         "deprecated": false,

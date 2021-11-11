@@ -7,17 +7,24 @@
 
 import { sum } from 'lodash';
 import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
-import { IEventLogService } from '../../../../../../event_log/server';
+import { IEventLogClient, IEventLogService } from '../../../../../../event_log/server';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { IRuleStatusSOAttributes } from '../../rules/types';
 import { SavedObjectsAdapter } from '../saved_objects_adapter/saved_objects_adapter';
 import {
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
+  GetCurrentStatusArgs,
+  GetCurrentStatusBulkArgs,
+  GetCurrentStatusBulkResult,
+  GetLastFailuresArgs,
   IRuleExecutionLogClient,
   LogExecutionMetricsArgs,
   LogStatusChangeArgs,
-  UpdateExecutionLogArgs,
 } from '../types';
 import { EventLogClient } from './event_log_client';
+
+const MAX_LAST_FAILURES = 5;
 
 export class EventLogAdapter implements IRuleExecutionLogClient {
   private eventLogClient: EventLogClient;
@@ -28,38 +35,46 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
    */
   private savedObjectsAdapter: IRuleExecutionLogClient;
 
-  constructor(eventLogService: IEventLogService, savedObjectsClient: SavedObjectsClientContract) {
-    this.eventLogClient = new EventLogClient(eventLogService);
+  constructor(
+    eventLogService: IEventLogService,
+    eventLogClient: IEventLogClient | undefined,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
+    this.eventLogClient = new EventLogClient(eventLogService, eventLogClient);
     this.savedObjectsAdapter = new SavedObjectsAdapter(savedObjectsClient);
   }
 
+  /** @deprecated */
   public async find(args: FindExecutionLogArgs) {
     return this.savedObjectsAdapter.find(args);
   }
 
+  /** @deprecated */
   public async findBulk(args: FindBulkExecutionLogArgs) {
     return this.savedObjectsAdapter.findBulk(args);
   }
 
-  public async update(args: UpdateExecutionLogArgs) {
-    const { attributes, spaceId, ruleName, ruleType } = args;
-
-    await this.savedObjectsAdapter.update(args);
-
-    // EventLog execution events are immutable, so we just log a status change istead of updating previous
-    if (attributes.status) {
-      this.eventLogClient.logStatusChange({
-        ruleName,
-        ruleType,
-        ruleId: attributes.alertId,
-        newStatus: attributes.status,
-        spaceId,
-      });
-    }
+  public getLastFailures(args: GetLastFailuresArgs): Promise<IRuleStatusSOAttributes[]> {
+    const { ruleId } = args;
+    return this.eventLogClient.getLastStatusChanges({
+      ruleId,
+      count: MAX_LAST_FAILURES,
+      includeStatuses: [RuleExecutionStatus.failed],
+    });
   }
 
-  public async delete(id: string) {
-    await this.savedObjectsAdapter.delete(id);
+  public getCurrentStatus(
+    args: GetCurrentStatusArgs
+  ): Promise<IRuleStatusSOAttributes | undefined> {
+    return this.savedObjectsAdapter.getCurrentStatus(args);
+  }
+
+  public getCurrentStatusBulk(args: GetCurrentStatusBulkArgs): Promise<GetCurrentStatusBulkResult> {
+    return this.savedObjectsAdapter.getCurrentStatusBulk(args);
+  }
+
+  public async deleteCurrentStatus(ruleId: string): Promise<void> {
+    await this.savedObjectsAdapter.deleteCurrentStatus(ruleId);
 
     // EventLog execution events are immutable, nothing to do here
   }
@@ -89,7 +104,7 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
     await this.savedObjectsAdapter.logStatusChange(args);
 
     if (args.metrics) {
-      this.logExecutionMetrics({
+      await this.logExecutionMetrics({
         ruleId: args.ruleId,
         ruleName: args.ruleName,
         ruleType: args.ruleType,

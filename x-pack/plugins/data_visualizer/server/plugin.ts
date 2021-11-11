@@ -7,13 +7,16 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { StartDeps, SetupDeps } from './types';
-import { dataVisualizerRoutes } from './routes';
+import { registerWithCustomIntegrations } from './register_custom_integration';
 
 export class DataVisualizerPlugin implements Plugin {
   constructor() {}
 
   setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
-    dataVisualizerRoutes(coreSetup);
+    // home-plugin required
+    if (plugins.home && plugins.customIntegrations) {
+      registerWithCustomIntegrations(plugins.customIntegrations);
+    }
   }
 
   start(core: CoreStart) {}

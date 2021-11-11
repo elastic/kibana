@@ -6,17 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { durationToNumber } from '../../../common/schema_utils';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { CaptureConfig } from '../../types';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
-type SelectorArgs = Record<string, string>;
+interface CompletedItemsCountParameters {
+  context: string;
+  count: number;
+  renderCompleteSelector: string;
+}
 
-const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
-  return document.querySelectorAll(renderCompleteSelector).length;
+const getCompletedItemsCount = ({
+  context,
+  count,
+  renderCompleteSelector,
+}: CompletedItemsCountParameters) => {
+  const { length } = document.querySelectorAll(renderCompleteSelector);
+
+  // eslint-disable-next-line no-console
+  console.debug(`evaluate ${context}: waitng for ${count} elements, got ${length}.`);
+
+  return length >= count;
 };
 
 /*
@@ -25,7 +36,7 @@ const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
  * 3. Wait for the render complete event to be fired once for each item
  */
 export const waitForVisualizations = async (
-  captureConfig: CaptureConfig,
+  timeout: number,
   browser: HeadlessChromiumDriver,
   toEqual: number,
   layout: LayoutInstance,
@@ -42,24 +53,19 @@ export const waitForVisualizations = async (
   );
 
   try {
-    const timeout = durationToNumber(captureConfig.timeouts.renderComplete);
-    await browser.waitFor(
-      { fn: getCompletedItemsCount, args: [{ renderCompleteSelector }], toEqual, timeout },
-      { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },
-      logger
-    );
+    await browser.waitFor({
+      fn: getCompletedItemsCount,
+      args: [{ renderCompleteSelector, context: CONTEXT_WAITFORELEMENTSTOBEINDOM, count: toEqual }],
+      timeout,
+    });
 
     logger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
     logger.error(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.couldntFinishRendering', {
-        defaultMessage: `An error occurred when trying to wait for {count} visualizations to finish rendering. You may need to increase '{configKey}'. {error}`,
-        values: {
-          count: toEqual,
-          configKey: 'xpack.reporting.capture.timeouts.renderComplete',
-          error: err,
-        },
+        defaultMessage: `An error occurred when trying to wait for {count} visualizations to finish rendering. {error}`,
+        values: { count: toEqual, error: err },
       })
     );
   }

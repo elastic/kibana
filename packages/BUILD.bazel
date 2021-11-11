@@ -3,7 +3,7 @@
 filegroup(
   name = "build",
   srcs = [
-      "//packages/elastic-apm-generator:build",
+      "//packages/elastic-apm-synthtrace:build",
       "//packages/elastic-datemath:build",
       "//packages/elastic-eslint-config-kibana:build",
       "//packages/elastic-safer-lodash-set:build",
@@ -36,6 +36,7 @@ filegroup(
       "//packages/kbn-optimizer:build",
       "//packages/kbn-plugin-generator:build",
       "//packages/kbn-plugin-helpers:build",
+      "//packages/kbn-react-field:build",
       "//packages/kbn-rule-data-utils:build",
       "//packages/kbn-securitysolution-autocomplete:build",
       "//packages/kbn-securitysolution-list-constants:build",
@@ -46,6 +47,7 @@ filegroup(
       "//packages/kbn-securitysolution-list-api:build",
       "//packages/kbn-securitysolution-list-hooks:build",
       "//packages/kbn-securitysolution-list-utils:build",
+      "//packages/kbn-securitysolution-rules:build",
       "//packages/kbn-securitysolution-utils:build",
       "//packages/kbn-securitysolution-es-utils:build",
       "//packages/kbn-securitysolution-t-grid:build",

@@ -812,7 +812,7 @@ describe('Lens App', () => {
 
       await runInspect(instance);
 
-      expect(services.inspector.open).toHaveBeenCalledTimes(1);
+      expect(services.inspector.inspect).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -16,7 +16,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { isValidIPv4OrCIDR } from '../../utils';
 import {
@@ -34,18 +37,19 @@ interface ExceptionIpEntry {
   field: 'destination.ip';
   operator: 'included';
   type: 'match';
-  value: '';
+  value: string;
 }
 
 export const HostIsolationExceptionsForm: React.FC<{
-  exception: CreateExceptionListItemSchema;
+  exception: CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
   onError: (error: boolean) => void;
-  onChange: (exception: CreateExceptionListItemSchema) => void;
+  onChange: (exception: CreateExceptionListItemSchema | UpdateExceptionListItemSchema) => void;
 }> = memo(({ exception, onError, onChange }) => {
+  const ipEntry = exception.entries[0] as ExceptionIpEntry;
   const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
   const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
-  const [hasNameError, setHasNameError] = useState(true);
-  const [hasIpError, setHasIpError] = useState(true);
+  const [hasNameError, setHasNameError] = useState(!exception.name);
+  const [hasIpError, setHasIpError] = useState(!ipEntry.value);
 
   useEffect(() => {
     onError(hasNameError || hasIpError);
@@ -175,7 +179,7 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.form.description"
-          defaultMessage="Add an IP to the Host Isolation Exceptions. Only accepts IPv4 with optional CIDR"
+          defaultMessage="Allows isolated hosts to connect to these IP addresses. Only accepts IPv4 with optional CIDR."
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -194,7 +198,7 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.form.conditions.subtitle"
-          defaultMessage="IP exceptions will apply to all OS Types"
+          defaultMessage="Host Isolation exceptions will apply to all operating systems."
         />
       </EuiText>
       <EuiSpacer size="m" />

@@ -63,6 +63,26 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.controlGroup",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroup",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainer.getPanelCount",
             "type": "Function",
             "tags": [],
@@ -155,6 +175,35 @@
                     "text": "ContainerOutput"
                   },
                   "> | undefined"
+                ],
+                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainer.Unnamed.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "controlGroup",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ControlGroupContainer",
+                    "text": "ControlGroupContainer"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ErrorEmbeddable",
+                    "text": "ErrorEmbeddable"
+                  },
+                  " | undefined"
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
@@ -472,7 +521,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>, embeddableId?: string | undefined) => Promise<void | E | ",
+              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>, embeddableId?: string | undefined) => Promise<void | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -480,7 +529,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | E>"
             ],
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
             "deprecated": false,
@@ -558,6 +607,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -1161,6 +1225,20 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.controlGroupInput",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "DashboardControlGroupInput",
+              " | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainerInput.refreshConfig",
             "type": "Object",
             "tags": [],
@@ -1560,7 +1638,7 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; history: Record<string, any>[]; setPreferredSearchStrategyId: (searchStrategyId: string) => void; setField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
+              "; history: Record<string, any>[]; setPreferredSearchStrategyId: (searchStrategyId: string) => void; setField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1576,7 +1654,7 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; removeField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              "; removeField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1608,7 +1686,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "; getField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
+              "; getField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1616,7 +1694,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getOwnField: <K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              "[K]; getOwnField: <K extends \"type\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1807,6 +1885,45 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardSavedObject.outcome",
+            "type": "string",
+            "tags": [],
+            "label": "outcome",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardSavedObject.aliasId",
+            "type": "string",
+            "tags": [],
+            "label": "aliasId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardSavedObject.controlGroupInput",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "{ controlStyle?: \"twoLine\" | \"oneLine\" | undefined; panelsJSON?: string | undefined; } | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2501,7 +2618,7 @@
             "section": "def-server.SavedObjectsRepository",
             "text": "SavedObjectsRepository"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
+          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "server",
@@ -2530,7 +2647,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">"
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">"
             ],
             "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
             "deprecated": false,
@@ -2817,6 +2934,20 @@
                 "text": "EmbeddableInput"
               },
               " & { [k: string]: unknown; }>; }"
+            ],
+            "path": "src/plugins/dashboard/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.DashboardContainerStateWithType.controlGroupInput",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "DashboardContainerControlGroupInput",
+              " | undefined"
             ],
             "path": "src/plugins/dashboard/common/types.ts",
             "deprecated": false

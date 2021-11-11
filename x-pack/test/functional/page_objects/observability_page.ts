@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ObservabilityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   return {
     async expectCreateCaseButtonEnabled() {
@@ -29,7 +28,11 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async expectNoReadOnlyCallout() {
-      await testSubjects.missingOrFail('case-callout-e41900b01c9ef0fa81dd6ff326083fb3');
+      await testSubjects.missingOrFail('caseCallout-e41900b01c9ef0fa81dd6ff326083fb3');
+    },
+
+    async expectNoDataPage() {
+      await testSubjects.existOrFail('noDataPage');
     },
 
     async expectCreateCase() {
@@ -47,7 +50,7 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async expectForbidden() {
-      const h2 = await find.byCssSelector('body', 20000);
+      const h2 = await testSubjects.find('noFeaturePermissions', 20000);
       const text = await h2.getVisibleText();
       expect(text).to.contain('Kibana feature privileges required');
     },

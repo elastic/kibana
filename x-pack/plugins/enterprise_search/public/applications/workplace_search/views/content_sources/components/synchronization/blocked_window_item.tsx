@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 import moment from 'moment';
 
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiDatePicker,
   EuiDatePickerRange,
   EuiFlexGroup,
@@ -179,9 +179,14 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => 
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill color="danger" onClick={() => removeBlockedWindow(index)}>
-            {REMOVE_BUTTON}
-          </EuiButton>
+          <EuiButtonIcon
+            display="base"
+            iconType="trash"
+            color="danger"
+            onClick={() => removeBlockedWindow(index)}
+            aria-label={REMOVE_BUTTON}
+            title={REMOVE_BUTTON}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

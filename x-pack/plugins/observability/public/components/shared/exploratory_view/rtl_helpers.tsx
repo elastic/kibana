@@ -243,6 +243,7 @@ export const mockAppIndexPattern = () => {
     hasAppData: { ux: true } as any,
     loadIndexPattern,
     indexPatterns: { ux: mockIndexPattern } as unknown as Record<AppDataType, IndexPattern>,
+    indexPatternErrors: {} as any,
   });
   return { spy, loadIndexPattern };
 };
@@ -307,10 +308,14 @@ export function mockUseSeriesFilter() {
   const removeFilter = jest.fn();
   const invertFilter = jest.fn();
   const setFilter = jest.fn();
+  const replaceFilter = jest.fn();
+  const setFiltersWildcard = jest.fn();
   const spy = jest.spyOn(useSeriesFilterHook, 'useSeriesFilters').mockReturnValue({
     removeFilter,
     invertFilter,
     setFilter,
+    replaceFilter,
+    setFiltersWildcard,
   });
 
   return {
@@ -318,6 +323,8 @@ export function mockUseSeriesFilter() {
     removeFilter,
     invertFilter,
     setFilter,
+    replaceFilter,
+    setFiltersWildcard,
   };
 }
 

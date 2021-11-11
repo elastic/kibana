@@ -9,11 +9,11 @@ import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const getPolicyExists = async (
   esClient: ElasticsearchClient,
-  policy: string
+  name: string
 ): Promise<boolean> => {
   try {
     await esClient.ilm.getLifecycle({
-      policy,
+      name,
     });
     // Return true that there exists a policy which is not 404 or some error
     // Since there is not a policy exists API, this is how we create one by calling

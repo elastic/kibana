@@ -493,7 +493,7 @@ describe('DocumentCreationLogic', () => {
           await nextTick();
 
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith(
-            "Cannot read property 'total' of undefined"
+            "Cannot read properties of undefined (reading 'total')"
           );
         });
 

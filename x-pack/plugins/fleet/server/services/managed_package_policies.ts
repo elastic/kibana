@@ -6,12 +6,23 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import semverGte from 'semver/functions/gte';
 
-import { AUTO_UPDATE_PACKAGES } from '../../common';
+import type {
+  Installation,
+  PackageInfo,
+  UpgradePackagePolicyDryRunResponseItem,
+} from '../../common';
 
 import { appContextService } from './app_context';
-import { getPackageInfo } from './epm/packages';
+import { getInstallation, getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';
+
+export interface UpgradeManagedPackagePoliciesResult {
+  packagePolicyId: string;
+  diff?: UpgradePackagePolicyDryRunResponseItem['diff'];
+  errors: any;
+}
 
 /**
  * Upgrade any package policies for packages installed through setup that are denoted as `AUTO_UPGRADE` packages
@@ -21,8 +32,8 @@ export const upgradeManagedPackagePolicies = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   packagePolicyIds: string[]
-) => {
-  const policyIdsToUpgrade: string[] = [];
+): Promise<UpgradeManagedPackagePoliciesResult[]> => {
+  const results: UpgradeManagedPackagePoliciesResult[] = [];
 
   for (const packagePolicyId of packagePolicyIds) {
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
@@ -37,22 +48,66 @@ export const upgradeManagedPackagePolicies = async (
       pkgVersion: packagePolicy.package.version,
     });
 
-    const shouldUpgradePolicies =
-      AUTO_UPDATE_PACKAGES.some((pkg) => pkg.name === packageInfo.name) ||
-      packageInfo.keepPoliciesUpToDate;
+    const installedPackage = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+    });
 
-    if (shouldUpgradePolicies) {
-      policyIdsToUpgrade.push(packagePolicy.id);
+    if (!installedPackage) {
+      results.push({
+        packagePolicyId,
+        errors: [`${packagePolicy.package.name} is not installed`],
+      });
+
+      continue;
+    }
+
+    if (shouldUpgradePolicies(packageInfo, installedPackage)) {
+      // Since upgrades don't report diffs/errors, we need to perform a dry run first in order
+      // to notify the user of any granular policy upgrade errors that occur during Fleet's
+      // preconfiguration check
+      const dryRunResults = await packagePolicyService.getUpgradeDryRunDiff(
+        soClient,
+        packagePolicyId
+      );
+
+      if (dryRunResults.hasErrors) {
+        const errors = dryRunResults.diff
+          ? dryRunResults.diff?.[1].errors
+          : dryRunResults.body?.message;
+
+        appContextService
+          .getLogger()
+          .error(
+            new Error(
+              `Error upgrading package policy ${packagePolicyId}: ${JSON.stringify(errors)}`
+            )
+          );
+
+        results.push({ packagePolicyId, diff: dryRunResults.diff, errors });
+        continue;
+      }
+
+      try {
+        await packagePolicyService.upgrade(soClient, esClient, [packagePolicyId]);
+        results.push({ packagePolicyId, diff: dryRunResults.diff, errors: [] });
+      } catch (error) {
+        results.push({ packagePolicyId, diff: dryRunResults.diff, errors: [error] });
+      }
     }
   }
 
-  if (policyIdsToUpgrade.length) {
-    appContextService
-      .getLogger()
-      .debug(
-        `Upgrading ${policyIdsToUpgrade.length} package policies: ${policyIdsToUpgrade.join(', ')}`
-      );
-
-    await packagePolicyService.upgrade(soClient, esClient, policyIdsToUpgrade);
-  }
+  return results;
 };
+
+export function shouldUpgradePolicies(
+  packageInfo: PackageInfo,
+  installedPackage: Installation
+): boolean {
+  const isPolicyVersionGteInstalledVersion = semverGte(
+    packageInfo.version,
+    installedPackage.version
+  );
+
+  return !isPolicyVersionGteInstalledVersion && !!packageInfo.keepPoliciesUpToDate;
+}

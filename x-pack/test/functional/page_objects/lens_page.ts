@@ -129,9 +129,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const operationSelector = opts.isPreviousIncompatible
           ? `lns-indexPatternDimension-${opts.operation} incompatible`
           : `lns-indexPatternDimension-${opts.operation}`;
-        await testSubjects.click(operationSelector);
+        await retry.try(async () => {
+          await testSubjects.exists(operationSelector);
+          await testSubjects.click(operationSelector);
+        });
       }
-
       if (opts.field) {
         const target = await testSubjects.find('indexPattern-dimension-field');
         await comboBox.openOptionsList(target);
@@ -244,6 +246,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async waitForField(field: string) {
       await retry.try(async () => {
         await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
+      });
+    },
+
+    async waitForMissingDataViewWarning() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`missing-refs-failure`);
+      });
+    },
+
+    async waitForMissingDataViewWarningDisappear() {
+      await retry.try(async () => {
+        await testSubjects.missingOrFail(`missing-refs-failure`);
+      });
+    },
+
+    async waitForEmptyWorkspace() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`empty-workspace`);
+      });
+    },
+
+    async waitForWorkspaceWithVisualization() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsVisualizationContainer`);
       });
     },
 
@@ -676,7 +702,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async switchFirstLayerIndexPattern(name: string) {
       await testSubjects.click('lns_layerIndexPatternLabel');
-      await find.clickByCssSelector(`[title="${name}"]`);
+      await find.clickByCssSelector(`.lnsChangeIndexPatternPopover [title="${name}"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -773,6 +799,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableHeader(index = 0) {
+      log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
@@ -873,12 +900,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async toggleColumnVisibility(dimension: string) {
+    async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
       const id = 'lns-table-column-hidden';
+      await PageObjects.common.sleep(500);
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status before the toggle = ${isChecked}`);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await PageObjects.common.sleep(500);
+      const isChecked2 = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status after the toggle = ${isChecked2}`);
       await this.closeDimensionEditor();
+      await PageObjects.common.sleep(500);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -1094,6 +1127,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async toggleFullscreen() {
       await testSubjects.click('lnsFormula-fullscreen');
+    },
+
+    async goToListingPageViaBreadcrumbs() {
+      await retry.try(async () => {
+        await testSubjects.click('breadcrumb first');
+        if (await testSubjects.exists('appLeaveConfirmModal')) {
+          await testSubjects.exists('confirmModalConfirmButton');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
+        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+      });
     },
 
     async typeFormula(formula: string) {

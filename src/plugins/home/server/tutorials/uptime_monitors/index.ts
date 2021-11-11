@@ -28,7 +28,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uptimeMonitors.shortDescription', {
-      defaultMessage: 'Monitor services for their availability',
+      defaultMessage: 'Monitor availability of the services with Heartbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.uptimeMonitors.longDescription', {
       defaultMessage:

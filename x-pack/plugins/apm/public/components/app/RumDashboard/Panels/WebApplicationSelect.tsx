@@ -9,18 +9,18 @@ import React from 'react';
 import { ServiceNameFilter } from '../URLFilter/ServiceNameFilter';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function WebApplicationSelect() {
   const {
     urlParams: { start, end },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/services',
+          endpoint: 'GET /internal/apm/ux/services',
           params: {
             query: {
               start,

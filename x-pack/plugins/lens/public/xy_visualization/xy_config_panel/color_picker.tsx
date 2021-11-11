@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './xy_config_panel.scss';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -16,7 +15,7 @@ import { State } from '../types';
 import { FormatFactory, layerTypes } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
 import {
-  defaultThresholdColor,
+  defaultReferenceLineColor,
   getAccessorColorConfig,
   getColorAssignments,
 } from '../color_assignment';
@@ -60,8 +59,8 @@ export const ColorPicker = ({
   const overwriteColor = getSeriesColor(layer, accessor);
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
-    if (layer.layerType === layerTypes.THRESHOLD) {
-      return defaultThresholdColor;
+    if (layer.layerType === layerTypes.REFERENCELINE) {
+      return defaultReferenceLineColor;
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];

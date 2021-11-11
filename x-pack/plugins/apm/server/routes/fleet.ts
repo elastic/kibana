@@ -24,8 +24,8 @@ import { getUnsupportedApmServerSchema } from '../lib/fleet/get_unsupported_apm_
 import { isSuperuser } from '../lib/fleet/is_superuser';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_data',
@@ -92,7 +92,7 @@ const fleetAgentsRoute = createApmServerRoute({
 });
 
 const saveApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/fleet/apm_server_schema',
+  endpoint: 'POST /api/apm/fleet/apm_server_schema',
   options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({
@@ -143,11 +143,13 @@ const getMigrationCheckRoute = createApmServerRoute({
           fleetPluginStart,
         })
       : undefined;
+    const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
     return {
       has_cloud_agent_policy: !!cloudAgentPolicy,
-      has_cloud_apm_package_policy: !!getApmPackagePolicy(cloudAgentPolicy),
+      has_cloud_apm_package_policy: !!apmPackagePolicy,
       cloud_apm_migration_enabled: cloudApmMigrationEnabled,
       has_required_role: hasRequiredRole,
+      cloud_apm_package_policy: apmPackagePolicy,
     };
   },
 });

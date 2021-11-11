@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
 import {
   LogMeta,
@@ -19,6 +20,7 @@ import {
 import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -51,7 +53,8 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAl
     SUPPORT_INCIDENTS_ACTION_TYPES.includes(action.actionTypeId)
   );
 
-export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
+// Deprecated in 8.0
+export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
 /**
@@ -95,19 +98,19 @@ export function getMigrations(
 
   const migrationSecurityRules713 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSiemSignalsRuleType(doc),
     pipeMigrations(removeNullsFromSecurityRules)
   );
 
   const migrationSecurityRules714 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSiemSignalsRuleType(doc),
     pipeMigrations(removeNullAuthorFromSecurityRules)
   );
 
   const migrationSecurityRules715 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSiemSignalsRuleType(doc),
     pipeMigrations(addExceptionListsToReferences)
   );
 
@@ -117,14 +120,15 @@ export function getMigrations(
     pipeMigrations(
       setLegacyId,
       getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured),
-      addRuleIdsToLegacyNotificationReferences
+      addRuleIdsToLegacyNotificationReferences,
+      extractRefsFromGeoContainmentAlert
     )
   );
 
   const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    (doc) => doc // no-op
+    pipeMigrations(addRACRuleTypes)
   );
 
   return {
@@ -643,6 +647,25 @@ function setLegacyId(
       legacyId: id,
     },
   };
+}
+
+function addRACRuleTypes(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const ruleType = doc.attributes.params.type;
+  return isSiemSignalsRuleType(doc) && isRuleType(ruleType)
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          alertTypeId: ruleTypeMappings[ruleType],
+          params: {
+            ...doc.attributes.params,
+            outputIndex: '',
+          },
+        },
+      }
+    : doc;
 }
 
 function getRemovePreconfiguredConnectorsFromReferencesFn(

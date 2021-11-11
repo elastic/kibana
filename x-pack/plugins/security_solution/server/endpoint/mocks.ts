@@ -18,10 +18,10 @@ import {
   createMockAgentService,
   createArtifactsClientMock,
 } from '../../../fleet/server/mocks';
-import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
+  EndpointAppContextServiceSetupContract,
   EndpointAppContextServiceStartContract,
 } from './endpoint_app_context_services';
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
@@ -37,6 +37,7 @@ import { parseExperimentalConfigValue } from '../../common/experimental_features
 // a restricted path.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createCasesClientMock } from '../../../cases/server/client/mocks';
+import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
 
 /**
@@ -70,12 +71,22 @@ export const createMockEndpointAppContextService = (
 };
 
 /**
+ * Creates a mocked input contract for the `EndpointAppContextService#setup()` method
+ */
+export const createMockEndpointAppContextServiceSetupContract =
+  (): jest.Mocked<EndpointAppContextServiceSetupContract> => {
+    return {
+      securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
+    };
+  };
+
+/**
  * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
 export const createMockEndpointAppContextServiceStartContract =
   (): jest.Mocked<EndpointAppContextServiceStartContract> => {
-    const factory = new AppClientFactory();
     const config = createMockConfig();
+
     const casesClientMock = createCasesClientMock();
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
     const agentService = createMockAgentService();
@@ -86,8 +97,6 @@ export const createMockEndpointAppContextServiceStartContract =
       agentPolicyService
     );
 
-    factory.setup({ getSpaceId: () => 'mockSpace', config });
-
     return {
       agentService,
       agentPolicyService,
@@ -95,7 +104,6 @@ export const createMockEndpointAppContextServiceStartContract =
       packageService: createMockPackageService(),
       logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
       manifestManager: getManifestManagerMock(),
-      appClientFactory: factory,
       security: securityMock.createStart(),
       alerting: alertsMock.createStart(),
       config,
@@ -119,6 +127,7 @@ export const createMockEndpointAppContextServiceStartContract =
 export const createMockPackageService = (): jest.Mocked<PackageService> => {
   return {
     getInstallation: jest.fn(),
+    ensureInstalledPackage: jest.fn(),
   };
 };
 

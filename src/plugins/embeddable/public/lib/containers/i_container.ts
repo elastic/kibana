@@ -15,7 +15,7 @@ import {
 } from '../embeddables';
 import { PanelState } from '../../../common/types';
 
-export { PanelState };
+export type { PanelState };
 
 export interface ContainerOutput extends EmbeddableOutput {
   embeddableLoaded: { [key: string]: boolean };

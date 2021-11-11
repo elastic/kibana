@@ -36,9 +36,11 @@ export function ExpViewActionMenuContent({
         responsive={false}
         style={{ paddingRight: 20 }}
       >
-        <EuiFlexItem grow={false}>
-          <AddToCaseAction lensAttributes={lensAttributes} timeRange={timeRange} />
-        </EuiFlexItem>
+        {timeRange && (
+          <EuiFlexItem grow={false}>
+            <AddToCaseAction lensAttributes={lensAttributes} timeRange={timeRange} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton
             iconType="lensApp"

@@ -65,6 +65,9 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   ml_module: i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
     defaultMessage: 'ML modules',
   }),
+  ml_model: i18n.translate('xpack.fleet.epm.assetTitles.mlModels', {
+    defaultMessage: 'ML models',
+  }),
   view: i18n.translate('xpack.fleet.epm.assetTitles.views', {
     defaultMessage: 'Views',
   }),

@@ -24,6 +24,7 @@ describe('config', () => {
       table: 'incident',
       useImportAPI: true,
       commentFieldKey: 'work_notes',
+      appId: '7148dbc91bf1f450ced060a7234bcb88',
     });
   });
 
@@ -34,6 +35,18 @@ describe('config', () => {
       appScope: 'x_elas2_sir_int',
       table: 'sn_si_incident',
       useImportAPI: true,
+      commentFieldKey: 'work_notes',
+      appId: '2f0746801baeb01019ae54e4604bcb0f',
+    });
+  });
+
+  test('ITOM: the config are correct', async () => {
+    const snConfig = snExternalServiceConfig['.servicenow-itom'];
+    expect(snConfig).toEqual({
+      importSetTable: 'x_elas2_inc_int_elastic_incident',
+      appScope: 'x_elas2_inc_int',
+      table: 'em_event',
+      useImportAPI: false,
       commentFieldKey: 'work_notes',
     });
   });

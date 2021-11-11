@@ -8,10 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/journey/{checkGroup}',
+  path: API_URLS.JOURNEY_CREATE,
   validate: {
     params: schema.object({
       checkGroup: schema.string(),
@@ -22,7 +23,6 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
       syntheticEventTypes: schema.maybe(
         schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
       ),
-      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
@@ -55,11 +55,10 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
 
 export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/journeys/failed_steps',
+  path: API_URLS.JOURNEY_FAILED_STEPS,
   validate: {
     query: schema.object({
       checkGroups: schema.arrayOf(schema.string()),
-      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {

@@ -10,10 +10,9 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 
-import { QueryBarTopRow } from './';
+import QueryBarTopRow from './query_bar_top_row';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
@@ -112,7 +111,7 @@ describe('QueryBarTopRowTopRow', () => {
     jest.clearAllMocks();
   });
 
-  it('Should render query and time picker', async () => {
+  it('Should render query and time picker', () => {
     const { getByText, getByTestId } = render(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
@@ -123,8 +122,8 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    await waitFor(() => getByText(kqlQuery.query));
-    await waitFor(() => getByTestId('superDatePickerShowDatesButton'));
+    expect(getByText(kqlQuery.query)).toBeInTheDocument();
+    expect(getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {

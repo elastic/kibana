@@ -343,7 +343,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             />
           </EuiPortal>
         )}
-        <AgentPolicyDetailsContent agentPolicy={agentPolicy} />;
+        <AgentPolicyDetailsContent agentPolicy={agentPolicy} />
       </>
     );
   }, [

@@ -7,15 +7,18 @@
 
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
-import { first, map, take } from 'rxjs/operators';
+import { filter, first, map, take } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import {
   BasePath,
   IClusterClient,
   KibanaRequest,
+  PackageInfo,
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  ServiceStatusLevels,
+  StatusServiceSetup,
   UiSettingsServiceStart,
 } from '../../../../src/core/server';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
@@ -43,6 +46,7 @@ export interface ReportingInternalSetup {
   taskManager: TaskManagerSetupContract;
   screenshotMode: ScreenshotModePluginSetup;
   logger: LevelLogger;
+  status: StatusServiceSetup;
 }
 
 export interface ReportingInternalStart {
@@ -57,7 +61,7 @@ export interface ReportingInternalStart {
 }
 
 export class ReportingCore {
-  private kibanaVersion: string;
+  private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
@@ -72,7 +76,7 @@ export class ReportingCore {
   public getContract: () => ReportingSetup;
 
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
-    this.kibanaVersion = context.env.packageInfo.version;
+    this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
@@ -85,8 +89,8 @@ export class ReportingCore {
     this.executing = new Set();
   }
 
-  public getKibanaVersion() {
-    return this.kibanaVersion;
+  public getKibanaPackageInfo() {
+    return this.packageInfo;
   }
 
   /*
@@ -110,10 +114,23 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
+    await this.assertKibanaIsAvailable();
+
     const { taskManager } = startDeps;
     const { executeTask, monitorTask } = this;
     // enable this instance to generate reports and to monitor for pending reports
     await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+  }
+
+  private async assertKibanaIsAvailable(): Promise<void> {
+    const { status } = this.getPluginSetupDeps();
+
+    await status.overall$
+      .pipe(
+        filter((current) => current.level === ServiceStatusLevels.available),
+        first()
+      )
+      .toPromise();
   }
 
   /*
@@ -304,6 +321,16 @@ export class ReportingCore {
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  }
+
+  public async getDataViewsService(request: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    const savedObjectsClient = savedObjects.getScopedClient(request);
+    const { indexPatterns } = await this.getDataService();
+    const { asCurrentUser: esClient } = (await this.getEsClient()).asScoped(request);
+    const dataViews = await indexPatterns.dataViewsServiceFactory(savedObjectsClient, esClient);
+
+    return dataViews;
   }
 
   public async getDataService() {

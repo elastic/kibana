@@ -14,6 +14,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { set } from 'lodash/fp';
+
 import { EuiTab } from '@elastic/eui';
 
 import { getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
@@ -25,6 +27,7 @@ import { CurationsSettings } from './curations_settings';
 
 describe('Curations', () => {
   const values = {
+    // CurationsLogic
     dataLoading: false,
     curations: [
       {
@@ -46,6 +49,14 @@ describe('Curations', () => {
       },
     },
     selectedPageTab: 'overview',
+    // CurationsSettingsLogic
+    curationsSettings: {
+      enabled: true,
+    },
+    // EngineLogic
+    engine: {
+      adaptive_relevance_suggestions_active: true,
+    },
   };
 
   const actions = {
@@ -75,6 +86,36 @@ describe('Curations', () => {
 
     tabs.at(2).simulate('click');
     expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(3, 'settings');
+  });
+
+  it('renders less tabs when suggestions are not active', () => {
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, values));
+    const wrapper = shallow(<Curations />);
+
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+    expect(tabs.length).toBe(2);
+  });
+
+  it('renders a New! badge  when suggestions are not active', () => {
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, values));
+    const wrapper = shallow(<Curations />);
+
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+    expect(tabs.at(1).prop('append')).not.toBeUndefined();
+  });
+
+  it('hides the badge when suggestions are active', () => {
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', true, values));
+    const wrapper = shallow(<Curations />);
+
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+    expect(tabs.at(2).prop('append')).toBeUndefined();
   });
 
   it('renders an overview view', () => {
@@ -108,18 +149,20 @@ describe('Curations', () => {
   });
 
   describe('loading state', () => {
-    it('renders a full-page loading state on initial page load', () => {
-      setMockValues({ ...values, dataLoading: true, curations: [] });
+    it('renders a full-page loading state and hides tabs on initial page load', () => {
+      setMockValues({ ...values, dataLoading: true });
       const wrapper = shallow(<Curations />);
 
       expect(wrapper.prop('isLoading')).toEqual(true);
+      expect(wrapper.prop('tabs')).toBeUndefined();
     });
 
-    it('does not re-render a full-page loading state after initial page load (uses component-level loading state instead)', () => {
-      setMockValues({ ...values, dataLoading: true, curations: [{}] });
+    it('does not re-render a full-page loading and shows tabs state when data is loaded', () => {
+      setMockValues({ ...values, dataLoading: false });
       const wrapper = shallow(<Curations />);
 
       expect(wrapper.prop('isLoading')).toEqual(false);
+      expect(typeof wrapper.prop('tabs')).not.toBeUndefined();
     });
   });
 

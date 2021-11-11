@@ -11,6 +11,8 @@ import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.basePath && !settings.server?.rewriteBasePath) {
     addDeprecation({
+      configPath: 'server.basePath',
+      title: 'Setting "server.rewriteBasePath" should be set when using "server.basePath"',
       message:
         'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana ' +
         'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
@@ -31,6 +33,8 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
   const corsSettings = settings.server?.cors;
   if (typeof corsSettings === 'boolean') {
     addDeprecation({
+      configPath: 'server.cors',
+      title: 'Setting "server.cors" is deprecated',
       message: '"server.cors" is deprecated and has been replaced by "server.cors.enabled"',
       level: 'warning',
       correctiveActions: {

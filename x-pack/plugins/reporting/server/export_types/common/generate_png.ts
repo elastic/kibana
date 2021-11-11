@@ -11,7 +11,7 @@ import { finalize, map, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger } from '../../lib';
-import { LayoutParams, PreserveLayout } from '../../lib/layouts';
+import { LayoutParams, LayoutSelectorDictionary, PreserveLayout } from '../../lib/layouts';
 import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
 
@@ -25,14 +25,15 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
-    layoutParams: LayoutParams
+    layoutParams: LayoutParams & { selectors?: Partial<LayoutSelectorDictionary> }
   ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
     const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
     const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
-    const layout = new PreserveLayout(layoutParams.dimensions);
+    const layout = new PreserveLayout(layoutParams.dimensions, layoutParams.selectors);
+
     if (apmLayout) apmLayout.end();
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');

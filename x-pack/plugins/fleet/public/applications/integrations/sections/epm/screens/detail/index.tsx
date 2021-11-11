@@ -250,7 +250,7 @@ export function Detail() {
 
       let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
         CreatePackagePolicyRouteState['onCancelNavigateTo'];
-
+      let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
       if (agentPolicyIdFromContext) {
         redirectToPath = [
           PLUGIN_ID,
@@ -260,24 +260,37 @@ export function Detail() {
             })[1],
           },
         ];
+
+        onSaveQueryParams = {
+          showAddAgentHelp: true,
+          openEnrollmentFlyout: true,
+        };
       } else {
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
             path: pagePathGetters.integration_details_policies({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ];
+
+        onSaveQueryParams = {
+          showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
+          openEnrollmentFlyout: { renameKey: 'addAgentToPolicyId', policyIdAsValue: true },
+        };
       }
 
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
         onSaveNavigateTo: redirectToPath,
+        onSaveQueryParams,
         onCancelNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,
           {
             path: pagePathGetters.integration_details_overview({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ],
@@ -357,12 +370,12 @@ export function Detail() {
                             content: missingSecurityConfiguration ? (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
-                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the minimum required privileges. Contact your administrator."
+                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the superuser role. Contact your administrator."
                               />
                             ) : (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                defaultMessage="To add Elastic Agent integrations, you must have the minimum required privileges. Contact your adminstrator."
+                                defaultMessage="To add Elastic Agent integrations, you must have the superuser role. Contact your adminstrator."
                               />
                             ),
                           }
@@ -441,7 +454,7 @@ export function Detail() {
         name: (
           <FormattedMessage
             id="xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText"
-            defaultMessage="Policies"
+            defaultMessage="Integration Policies"
           />
         ),
         isSelected: panel === 'policies',
