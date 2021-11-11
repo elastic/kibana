@@ -28,7 +28,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               if (ruleDataClient.isWriteEnabled() && numAlerts) {
                 const commonRuleFields = getCommonAlertFields(options);
 
-                const alertChunks = chunk(alerts, 1024);
+                // 65536 is the default max terms count for an Elasticsearch index, so we can put
+                // at least this many alert IDs into each query against alerts-as-data indices
+                const alertChunks = chunk(alerts, 65536);
                 const filteredAlerts: typeof alerts = [];
 
                 for (const alertChunk of alertChunks) {
