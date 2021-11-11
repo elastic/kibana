@@ -12,7 +12,7 @@ import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
-import { getCurrentLocation, getListPagination } from '../store/selector';
+import { getCurrentLocation } from '../store/selector';
 import {
   useFetchHostIsolationExceptionsList,
   useHostIsolationExceptionsNavigateCallback,
@@ -32,6 +32,10 @@ import {
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
+import {
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -43,12 +47,18 @@ export const HostIsolationExceptionsList = () => {
   const privileges = useEndpointPrivileges();
 
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
-  const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
   const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
+
+  const pagination = {
+    totalItemCount: data?.total ?? 0,
+    pageSize: data?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
+    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+    pageIndex: (data?.page ?? 1) - 1,
+  };
 
   const listItems = data?.data || [];
   const totalCountListItems = data?.total || 0;
