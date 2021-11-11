@@ -557,6 +557,7 @@ export interface DocLinksStart {
             readonly range: string;
             readonly significant_terms: string;
             readonly terms: string;
+            readonly terms_doc_count_error: string;
             readonly avg: string;
             readonly avg_bucket: string;
             readonly max_bucket: string;

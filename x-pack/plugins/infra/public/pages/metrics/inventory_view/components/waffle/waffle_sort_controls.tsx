@@ -39,6 +39,7 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
     <DropdownButton
       label={i18n.translate('xpack.infra.waffle.sortLabel', { defaultMessage: 'Sort by' })}
       onClick={showPopover}
+      data-test-subj={'waffleSortByDropdown'}
     >
       {label}
     </DropdownButton>
@@ -59,7 +60,8 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
       ...sort,
       direction: sort.direction === 'asc' ? 'desc' : 'asc',
     });
-  }, [sort, onChange]);
+    closePopover();
+  }, [closePopover, sort, onChange]);
 
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [
@@ -71,11 +73,13 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
             name: LABELS.name,
             icon: sort.by === 'name' ? 'check' : 'empty',
             onClick: selectName,
+            'data-test-subj': 'waffleSortByName',
           },
           {
             name: LABELS.value,
             icon: sort.by === 'value' ? 'check' : 'empty',
             onClick: selectValue,
+            'data-test-subj': 'waffleSortByValue',
           },
         ],
       },
@@ -101,6 +105,7 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
           })}
           checked={sort.direction === 'desc'}
           onChange={toggleSort}
+          data-test-subj={'waffleSortByDirection'}
         />
       </SwitchContainer>
     </EuiPopover>

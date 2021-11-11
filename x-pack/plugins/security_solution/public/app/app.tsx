@@ -11,6 +11,7 @@ import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
 
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -34,6 +35,8 @@ interface StartAppComponent {
   store: Store<State, Action>;
 }
 
+const queryClient = new QueryClient();
+
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
   history,
@@ -56,13 +59,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
               <MlCapabilitiesProvider>
                 <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                   <ManageUserInfo>
-                    <PageRouter
-                      history={history}
-                      onAppLeave={onAppLeave}
-                      setHeaderActionMenu={setHeaderActionMenu}
-                    >
-                      {children}
-                    </PageRouter>
+                    <QueryClientProvider client={queryClient}>
+                      <PageRouter
+                        history={history}
+                        onAppLeave={onAppLeave}
+                        setHeaderActionMenu={setHeaderActionMenu}
+                      >
+                        {children}
+                      </PageRouter>
+                    </QueryClientProvider>
                   </ManageUserInfo>
                 </UserPrivilegesProvider>
               </MlCapabilitiesProvider>
