@@ -8,7 +8,7 @@
 import minimist from 'minimist';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import bluebird from 'bluebird';
+import pMap from 'p-map';
 import { basename } from 'path';
 import { AxiosResponse } from 'axios';
 import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
@@ -113,7 +113,7 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
     return () => policyIds[randomN(policyIds.length)];
   })();
 
-  return bluebird.map(
+  return pMap(
     Array.from({ length: count }),
     async () => {
       const body = trustedAppGenerator.generateTrustedAppForCreate();
