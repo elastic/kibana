@@ -24,8 +24,10 @@ export default function (providerContext: FtrProviderContext) {
     describe('setup performs upgrades', async () => {
       const oldEndpointVersion = '0.13.0';
       beforeEach(async () => {
+        const url = '/api/fleet/epm/packages/endpoint';
+        await supertest.delete(url).set('kbn-xsrf', 'xxxx').send({ force: true }).expect(200);
         await supertest
-          .post(`/api/fleet/epm/packages/endpoint-${oldEndpointVersion}`)
+          .post(`${url}-${oldEndpointVersion}`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);

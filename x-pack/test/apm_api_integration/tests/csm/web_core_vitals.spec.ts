@@ -14,9 +14,12 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
   registry.when('CSM web core vitals without data', { config: 'trial', archives: [] }, () => {
     it('returns empty list', async () => {
-      const response = await supertest.get(
-        '/api/apm/rum-client/web-core-vitals?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-14T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22elastic-co-rum-test%22%5D%7D&percentile=50'
-      );
+      const response = await supertest.get('/internal/apm/ux/web-core-vitals').query({
+        start: '2020-09-07T20:35:54.654Z',
+        end: '2020-09-14T20:35:54.654Z',
+        uiFilters: '{"serviceName":["elastic-co-rum-test"]}',
+        percentile: 50,
+      });
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({
@@ -35,9 +38,12 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
     { config: 'trial', archives: ['8.0.0', 'rum_8.0.0'] },
     () => {
       it('returns web core vitals values', async () => {
-        const response = await supertest.get(
-          '/api/apm/rum-client/web-core-vitals?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22kibana-frontend-8_0_0%22%5D%7D&percentile=50'
-        );
+        const response = await supertest.get('/internal/apm/ux/web-core-vitals').query({
+          start: '2020-09-07T20:35:54.654Z',
+          end: '2020-09-16T20:35:54.654Z',
+          uiFilters: '{"serviceName":["kibana-frontend-8_0_0"]}',
+          percentile: 50,
+        });
 
         expect(response.status).to.be(200);
 
