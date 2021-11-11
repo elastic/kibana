@@ -405,6 +405,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.fleet?.agentService!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentPolicyService!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        plugins.fleet?.packagePolicyService!,
         logger
       ),
       security: plugins.security,
