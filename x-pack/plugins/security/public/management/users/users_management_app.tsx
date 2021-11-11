@@ -119,7 +119,6 @@ export const usersManagementApp = Object.freeze({
         );
 
         return () => {
-          coreStart.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

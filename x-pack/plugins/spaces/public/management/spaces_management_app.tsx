@@ -43,18 +43,16 @@ export const spacesManagementApp = Object.freeze({
         const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
           await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
-        const spacesBreadcrumbs = [
-          {
-            text: title,
-            href: `/`,
-          },
-        ];
+        const spacesFirstBreadcrumb = {
+          text: title,
+          href: `/`,
+        };
         const { notifications, i18n: i18nStart, application, chrome } = coreStart;
 
         chrome.docTitle.change(title);
 
         const SpacesGridPageWithBreadcrumbs = () => {
-          setBreadcrumbs(spacesBreadcrumbs);
+          setBreadcrumbs([{ ...spacesFirstBreadcrumb, href: undefined }]);
           return (
             <SpacesGridPage
               capabilities={application.capabilities}
@@ -69,12 +67,11 @@ export const spacesManagementApp = Object.freeze({
 
         const CreateSpacePageWithBreadcrumbs = () => {
           setBreadcrumbs([
-            ...spacesBreadcrumbs,
+            spacesFirstBreadcrumb,
             {
               text: i18n.translate('xpack.spaces.management.createSpaceBreadcrumb', {
                 defaultMessage: 'Create',
               }),
-              href: '/create',
             },
           ]);
 
@@ -94,10 +91,9 @@ export const spacesManagementApp = Object.freeze({
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
-              ...spacesBreadcrumbs,
+              spacesFirstBreadcrumb,
               {
                 text: space.name,
-                href: `/edit/${encodeURIComponent(space.id)}`,
               },
             ]);
           };
