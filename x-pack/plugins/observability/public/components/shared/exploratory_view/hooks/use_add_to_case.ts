@@ -51,6 +51,16 @@ export const useAddToCase = ({
     notifications: { toasts },
   } = useKibana().services;
 
+  const goToCreateCase = useCallback(
+    async (ev) => {
+      ev.preventDefault();
+      navigateToApp(observabilityFeatureId, {
+        deepLinkId: CasesDeepLinkId.casesCreate,
+      });
+    },
+    [navigateToApp]
+  );
+
   const onCaseClicked = useCallback(
     (theCase?: Case | SubCase) => {
       if (theCase && lensAttributes) {
@@ -98,6 +108,7 @@ export const useAddToCase = ({
 
   return {
     onCaseClicked,
+    goToCreateCase,
     isSaving,
     isCasesOpen,
     setIsCasesOpen,

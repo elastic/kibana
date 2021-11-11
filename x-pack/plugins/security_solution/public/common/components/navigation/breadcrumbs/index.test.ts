@@ -390,6 +390,7 @@ describe('Navigation Breadcrumbs', () => {
         },
       ]);
     });
+
     test('should return Case details breadcrumbs when supplied case details pathname', () => {
       const sampleCase = {
         id: 'my-case-id',
@@ -414,6 +415,7 @@ describe('Navigation Breadcrumbs', () => {
         },
       ]);
     });
+
     test('should return Admin breadcrumbs when supplied endpoints pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('administration', '/endpoints', undefined),

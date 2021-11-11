@@ -44,18 +44,18 @@ describe('useAddToCase', function () {
     const { setData, core, findByText } = setupTestComponent();
 
     expect(setData).toHaveBeenLastCalledWith({
-      createCaseUrl: '/app/observability/cases/create',
       goToCreateCase: expect.any(Function),
       isCasesOpen: false,
       isSaving: false,
       onCaseClicked: expect.any(Function),
       setIsCasesOpen: expect.any(Function),
     });
+
     fireEvent.click(await findByText('Add new case'));
 
     expect(core.application?.navigateToApp).toHaveBeenCalledTimes(1);
     expect(core.application?.navigateToApp).toHaveBeenCalledWith('observability', {
-      path: '/cases/create',
+      deepLinkId: 'cases_create',
     });
 
     fireEvent.click(await findByText('On case click'));
