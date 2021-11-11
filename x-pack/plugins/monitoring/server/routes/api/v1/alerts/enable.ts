@@ -11,7 +11,6 @@ import { AlertsFactory } from '../../../../alerts';
 import { LegacyServer, RouteDependencies } from '../../../../types';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { ActionResult } from '../../../../../../actions/common';
-import { AlertingSecurity } from '../../../../lib/elasticsearch/verify_alerting_security';
 import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
 import { AlertTypeParams, SanitizedAlert } from '../../../../../../alerting/common';
 
@@ -38,12 +37,14 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
 
         const alerts = AlertsFactory.getAll();
         if (alerts.length) {
-          const { isSufficientlySecure, hasPermanentEncryptionKey } =
-            await AlertingSecurity.getSecurityHealth(context, npRoute.encryptedSavedObjects);
+          const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting
+            ?.getSecurityHealth
+            ? await npRoute.alerting?.getSecurityHealth()
+            : { isSufficientlySecure: false, hasPermanentEncryptionKey: false };
 
           if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
             server.log.info(
-              `Skipping alert creation for "${context.infra.spaceId}" space; Stack monitoring alerts require Transport Layer Security between Kibana and Elasticsearch, and an encryption key in your kibana.yml file.`
+              `Skipping rule creation for "${context.infra.spaceId}" space; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
             );
             return response.ok({
               body: {

@@ -61,7 +61,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       },
     },
     disableAlerts: true,
-    showTitle: false,
+    showTitle: true,
     userCanCrud,
     owner: [CASES_OWNER],
   });
