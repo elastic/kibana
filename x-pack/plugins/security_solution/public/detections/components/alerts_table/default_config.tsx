@@ -7,7 +7,6 @@
 
 import {
   ALERT_DURATION,
-  ALERT_INSTANCE_ID,
   ALERT_RULE_PRODUCER,
   ALERT_START,
   ALERT_WORKFLOW_STATUS,
@@ -15,6 +14,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_SEVERITY,
 } from '@kbn/rule-data-utils';
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -272,10 +272,10 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.instance.id': ALERT_INSTANCE_ID,
   'event.kind': 'event.kind',
-  'alert.start': ALERT_START,
+  'rule.severity': ALERT_RULE_SEVERITY,
   'alert.uuid': ALERT_UUID,
+  'alert.start': ALERT_START,
   'event.action': 'event.action',
   'alert.workflow_status': ALERT_WORKFLOW_STATUS,
   'alert.duration.us': ALERT_DURATION,
