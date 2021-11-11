@@ -99,7 +99,6 @@ const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDeta
             <Display show={!globalFullScreen}>
               <HeaderPage
                 border
-                sourcererScope={SourcererScopeName.detections}
                 subtitle={
                   <LastEventTime
                     docValueFields={docValueFields}

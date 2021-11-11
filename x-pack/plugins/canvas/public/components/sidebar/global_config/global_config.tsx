@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment, FC } from 'react';
 import { EuiTabbedContent, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GeneralConfig } from './general_config';
@@ -26,7 +26,7 @@ const strings = {
     }),
 };
 
-export const GlobalConfig: FunctionComponent = () => {
+export const GlobalConfig: FC = () => {
   const tabs = [
     {
       id: 'general',
@@ -39,7 +39,7 @@ export const GlobalConfig: FunctionComponent = () => {
       ),
     },
     {
-      id: 'data',
+      id: 'filter',
       name: strings.getFilterLabel(),
       content: (
         <div className="canvasSidebar__pop">

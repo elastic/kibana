@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect } from 'react';
+import React, { FC, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { State, FilterField, PositionedElement } from '../../../types';
 import { extractGroupsFromElementsFilters, groupFiltersBy } from '../../lib/filter';
 import { setGroupFiltersByOption } from '../../state/actions/sidebar';
 import { getGroupFiltersByOption } from '../../state/selectors/sidebar';
-import { useCanvasFilters } from '../hooks/sidebar/use_canvas_filters';
+import { useCanvasFilters } from './hooks';
 import { WorkpadFilters as Component } from './workpad_filters.component';
-
-const DEFAULT_GROUP_BY: FilterField = 'filterGroup';
 
 interface Props {
   element?: PositionedElement | null;
 }
 
 export const WorkpadFilters: FC<Props> = ({ element }) => {
-  const groupFiltersByField: FilterField | undefined = useSelector((state: State) =>
+  const groupFiltersByField: FilterField = useSelector((state: State) =>
     getGroupFiltersByOption(state)
   );
+
   const dispatch = useDispatch();
 
   const onGroupByChange = useCallback(
@@ -32,12 +31,6 @@ export const WorkpadFilters: FC<Props> = ({ element }) => {
     },
     [dispatch]
   );
-
-  useEffect(() => {
-    if (!groupFiltersByField) {
-      onGroupByChange(DEFAULT_GROUP_BY);
-    }
-  }, [groupFiltersByField, onGroupByChange]);
 
   const groups = element ? extractGroupsFromElementsFilters(element.expression) : undefined;
 

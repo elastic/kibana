@@ -9,7 +9,7 @@ import { EuiAccordion } from '@elastic/eui';
 import React, { FC } from 'react';
 import { FormattedFilterViewInstance } from '../../../types';
 import { createFilledFilterView } from '../../lib/filter';
-import { Filter } from './filter';
+import { Filter } from './filter.component';
 import { filterViews } from './filter_views';
 import { FiltersGroup as FiltersGroupType } from './types';
 
@@ -36,7 +36,7 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
   return (
     <div className="canvasSidebar__expandable">
       <EuiAccordion
-        id="canvas-element-stats"
+        id={`canvas-filter-group-${name}`}
         buttonContent={name}
         initialIsOpen={true}
         className="canvasSidebar__accordion filtersSidebar__accordion"

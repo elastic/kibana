@@ -18,15 +18,15 @@ export interface TimeFilterValue {
 
 const strings = {
   getFromLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.timeFilter.from', {
+    i18n.translate('xpack.canvas.workpadFilters.timeFilter.from', {
       defaultMessage: 'From',
     }),
   getToLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.timeFilter.to', {
+    i18n.translate('xpack.canvas.workpadFilters.timeFilter.to', {
       defaultMessage: 'To',
     }),
   getInvalidDateLabel: (date: string) =>
-    i18n.translate('xpack.canvas.workpad_filters.timeFilter.invalidDate', {
+    i18n.translate('xpack.canvas.workpadFilters.timeFilter.invalidDate', {
       defaultMessage: 'Invalid date: {date}',
       values: {
         date,

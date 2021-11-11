@@ -11,19 +11,19 @@ import { formatByKey } from '../utils';
 
 const strings = {
   getTypeLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.defaultFilter.type', {
+    i18n.translate('xpack.canvas.workpadFilters.defaultFilter.type', {
       defaultMessage: 'Type',
     }),
   getColumnLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.defaultFilter.column', {
+    i18n.translate('xpack.canvas.workpadFilters.defaultFilter.column', {
       defaultMessage: 'Column',
     }),
   getFilterGroupLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.defaultFilter.filterGroup', {
+    i18n.translate('xpack.canvas.workpadFilters.defaultFilter.filterGroup', {
       defaultMessage: 'Filter group',
     }),
   getValueLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.defaultFilter.value', {
+    i18n.translate('xpack.canvas.workpadFilters.defaultFilter.value', {
       defaultMessage: 'Value',
     }),
 };
