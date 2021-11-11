@@ -63,6 +63,8 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                       absolute: true,
                     });
                   }}
+                  iconType={'documentEdit'}
+                  iconSide="left"
                 >
                   <FormattedMessage
                     id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
