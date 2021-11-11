@@ -337,10 +337,10 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    const fleetSetupPromise = new Promise<void>(async (resolve, reject) => {
+    const fleetSetupPromise = (async () => {
       try {
         if (this.fleetSetupStatus === 'pending' || this.fleetSetupStatus === 'complete') {
-          resolve();
+          return;
         }
 
         logger.info('Beginning fleet setup');
@@ -360,17 +360,13 @@ export class FleetPlugin
 
         logger.info('Fleet setup completed');
         this.fleetSetupStatus = 'complete';
-
-        resolve();
       } catch (error) {
         logger.warn('Fleet setup failed');
         logger.warn(error);
 
         this.fleetSetupStatus = 'initial';
-
-        reject(error);
       }
-    });
+    })();
 
     return {
       fleetSetupCompleted: () => fleetSetupPromise,
