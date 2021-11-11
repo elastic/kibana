@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
