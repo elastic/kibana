@@ -309,8 +309,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show the supported Endpoint version', async () => {
-        const supportedVersion = await testSubjects.find('policySupportedVersions');
-        expect(supportedVersion).to.be('Agent version ' + popupVersionsMap.get('malware'));
+        expect(await testSubjects.getVisibleText('policySupportedVersions')).to.equal(
+          'Agent version ' + popupVersionsMap.get('malware')
+        );
       });
 
       it('should show the custom message text area when the Notify User checkbox is checked', async () => {
