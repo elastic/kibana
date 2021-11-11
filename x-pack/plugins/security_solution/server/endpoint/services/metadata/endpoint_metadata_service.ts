@@ -55,6 +55,7 @@ import { createInternalReadonlySoClient } from '../../utils/create_internal_read
 import { GetHostMetadataListQuery } from '../../types';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
+import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -277,7 +278,7 @@ export class EndpointMetadataService {
 
     return {
       metadata: endpointMetadata,
-      host_status: fleetAgent
+      host_status: getAgentStatus(fleetAgent)
         ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
         : DEFAULT_ENDPOINT_HOST_STATUS,
