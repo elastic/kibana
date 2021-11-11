@@ -23,8 +23,6 @@ import {
 
 import { nextTick } from '@kbn/test/jest';
 
-import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
-
 import { GenericEndpointInlineEditableTableLogic } from './generic_endpoint_inline_editable_table_logic';
 
 describe('GenericEndpointInlineEditableTableLogic', () => {
