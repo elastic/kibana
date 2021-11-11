@@ -20,6 +20,8 @@ import { nextTick } from '@kbn/test/jest';
 import { JSON_HEADER as headers } from '../../../../../common/constants';
 import { DEFAULT_META } from '../../../shared/constants';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { GroupsLogic } from './groups_logic';
 
 // We need to mock out the debounced functionality
@@ -227,13 +229,8 @@ describe('GroupsLogic', () => {
         expect(onInitializeGroupsSpy).toHaveBeenCalledWith(groupsResponse);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         GroupsLogic.actions.initializeGroups();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -310,13 +307,8 @@ describe('GroupsLogic', () => {
         expect(setGroupUsersSpy).toHaveBeenCalledWith(users);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         GroupsLogic.actions.fetchGroupUsers('123');
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -336,13 +328,8 @@ describe('GroupsLogic', () => {
         expect(setNewGroupSpy).toHaveBeenCalledWith(groups[0]);
       });
 
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         GroupsLogic.actions.saveNewGroup();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
