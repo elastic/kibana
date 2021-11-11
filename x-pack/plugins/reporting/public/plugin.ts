@@ -35,13 +35,13 @@ import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_ha
 import { getGeneralErrorToast } from './notifier';
 import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
 import { getSharedComponents } from './shared';
-import {
+import type {
   SharePluginSetup,
   SharePluginStart,
   UiActionsSetup,
   UiActionsStart,
-  AppNavLinkStatus,
 } from './shared_imports';
+import { AppNavLinkStatus } from './shared_imports';
 import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 
