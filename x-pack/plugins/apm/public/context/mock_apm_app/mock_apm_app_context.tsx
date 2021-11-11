@@ -7,6 +7,7 @@
 
 import {
   CurrentRouteContextProvider,
+  RouteMatch,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
 import { createMemoryHistory, History } from 'history';
@@ -128,9 +129,9 @@ export interface MockApmAppContextValue {
   pluginsStart: ApmPluginStartDeps;
 
   /**
-   * The router path as a string
+   * The router path as a string or location
    */
-  path?: string;
+  path?: History.LocationDescriptor<any>;
 }
 
 export const mockApmAppContextValue = {
@@ -162,7 +163,9 @@ export function MockApmAppContextProvider({
     return (
       history ??
       createMemoryHistory({
-        initialEntries: [path ?? '/services/?rangeFrom=now-15m&rangeTo=now'],
+        initialEntries: [
+          (path as string) ?? '/services/?rangeFrom=now-15m&rangeTo=now',
+        ],
       })
     );
   }, [history, path]);
@@ -186,7 +189,10 @@ export function MockApmAppContextProvider({
         })}
       >
         <RouterProvider router={apmRouter as any} history={usedHistory}>
-          <CurrentRouteContextProvider value={{}}>
+          <CurrentRouteContextProvider
+            element={<div />}
+            match={{} as RouteMatch}
+          >
             <>{children}</>
           </CurrentRouteContextProvider>
         </RouterProvider>

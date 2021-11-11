@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
+import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 type Args = ComponentProps<typeof ExceptionStacktrace>;
 
-export default {
+const stories: Meta<Args> = {
   title: 'app/ErrorGroupDetails/DetailView/ExceptionStacktrace',
   component: ExceptionStacktrace,
 };
+export default stories;
 
 export const JavaWithLongLines: Story<Args> = (args) => (
   <ExceptionStacktrace {...args} />

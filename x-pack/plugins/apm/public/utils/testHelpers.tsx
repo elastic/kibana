@@ -66,7 +66,7 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MockApmAppContextProvider value={{ path: location.toString() }}>
+    <MockApmAppContextProvider value={{ path: location }}>
       <UrlParamsProvider>
         <Component />
       </UrlParamsProvider>
