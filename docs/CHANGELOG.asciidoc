@@ -86,12 +86,6 @@ To review the breaking changes in previous versions, refer to the following:
 {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
-[[enhancement-v7.15.2]]
-=== Enhancements
-Operations::
-* Adds ability to create multiple processes on production by splitting no_transpilation when setting up node env {kibana-pull}114940[#114940]
-
-[float]
 [[fixes-v7.15.2]]
 === Bug Fixes
 APM::
@@ -109,6 +103,8 @@ Metrics::
 * Adds track_total_hits to Metric Threshold query to support alerts with over 10K documents {kibana-pull}115465[#115465]
 Uptime::
 * TLS and TLS legacy alert translation mismatch {kibana-pull}116113[#116113]
+Operations::
+* Fixes the creation of multiple processes at start {kibana-pull}114940[#114940]
 Osquery Manager::
 * Fixes the bug that caused the live query search to return irrelevant results for agents {kibana-pull}116332[#116332]
 * Improves Osquery SQL query parser logic {kibana-pull}114932[#114932]
