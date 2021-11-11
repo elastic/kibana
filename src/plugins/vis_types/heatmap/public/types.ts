@@ -27,9 +27,10 @@ export interface HeatmapVisParams {
   addTooltip: boolean;
   enableHover: boolean;
   legendPosition: Position;
+  truncateLegend?: boolean;
+  maxLegendLines?: number;
   useDistinctBands: boolean;
   percentageMode: boolean;
-  isCellLabelVisible?: boolean;
   palette: PaletteOutput;
   valueAxes: ValueAxis[];
   colorSchema: ColorSchemas;

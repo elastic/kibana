@@ -57,7 +57,7 @@ export class VisTypeVislibPlugin
       visualizations.createBaseVisualization(pieVisTypeDefinition);
       expressions.registerFunction(createPieVisFn());
     }
-    if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY, false)) {
+    if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       // register vislib heatmap chart
       visualizations.createBaseVisualization(heatmapVisTypeDefinition);
       expressions.registerFunction(createVisTypeVislibVisFn());

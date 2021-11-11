@@ -22,10 +22,9 @@ interface LabelsPanelProps {
   valueAxis: ValueAxis;
   setValue: VisEditorOptionsProps<HeatmapVisParams>['setValue'];
   isNewLibrary?: boolean;
-  isCellLabelVisible?: boolean;
 }
 
-function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: LabelsPanelProps) {
+function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
   const rotateLabels = valueAxis.labels.rotate === VERTICAL_ROTATION;
 
   const setValueAxisLabels = useCallback(
@@ -62,27 +61,14 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary, isCellLabelVisible }: 
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {isNewLibrary && (
-        <SwitchOption
-          label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.showLabelsTitle', {
-            defaultMessage: 'Show labels',
-          })}
-          paramName="isCellLabelVisible"
-          value={Boolean(isCellLabelVisible)}
-          setValue={setValue}
-        />
-      )}
-
-      {!isNewLibrary && (
-        <SwitchOption
-          label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.showLabelsTitle', {
-            defaultMessage: 'Show labels',
-          })}
-          paramName="show"
-          value={Boolean(valueAxis.labels.show)}
-          setValue={setValueAxisLabels}
-        />
-      )}
+      <SwitchOption
+        label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.showLabelsTitle', {
+          defaultMessage: 'Show labels',
+        })}
+        paramName="show"
+        value={Boolean(valueAxis.labels.show)}
+        setValue={setValueAxisLabels}
+      />
 
       <SwitchOption
         disabled={!valueAxis.labels.show || isNewLibrary}

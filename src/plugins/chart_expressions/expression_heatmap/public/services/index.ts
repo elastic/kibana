@@ -14,4 +14,3 @@ export {
   getThemeService,
 } from './palette_service';
 export { getUISettings, setUISettings } from './ui_settings';
-export { getDocLinks, setDocLinks } from './doc_links_service';

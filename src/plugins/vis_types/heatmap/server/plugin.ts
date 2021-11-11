@@ -23,7 +23,7 @@ export const getUiSettingsConfig: () => Record<string, UiSettingsParams<boolean>
       }
     ),
     requiresPageReload: true,
-    value: false,
+    value: true,
     description: i18n.translate(
       'visTypeHeatmap.advancedSettings.visualization.legacyHeatmapChartsLibrary.description',
       {

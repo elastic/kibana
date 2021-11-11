@@ -33,7 +33,7 @@ export class VisTypePiePlugin {
     core: CoreSetup<VisTypeHeatmapPluginStartDependencies>,
     { visualizations, charts, usageCollection }: VisTypeHeatmapSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY, false)) {
+    if (!core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       const trackUiMetric = usageCollection?.reportUiCounter.bind(
         usageCollection,
         'vis_type_heatmap'

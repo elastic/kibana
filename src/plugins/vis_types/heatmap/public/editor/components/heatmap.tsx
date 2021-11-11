@@ -21,6 +21,7 @@ import {
   ColorSchemaOptions,
   NumberInputOption,
   PercentageModeOption,
+  LongLegendOptions,
 } from '../../../../../vis_default_editor/public';
 import { colorSchemas } from '../../../../../charts/public';
 import { VisEditorOptionsProps } from '../../../../../visualizations/public';
@@ -77,6 +78,14 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
         <EuiSpacer size="s" />
 
         <BasicOptions {...props} legendPositions={legendPositions} />
+        {showElasticChartsOptions && (
+          <LongLegendOptions
+            data-test-subj="pieLongLegendsOptions"
+            truncateLegend={stateParams.truncateLegend ?? true}
+            maxLegendLines={stateParams.maxLegendLines ?? 1}
+            setValue={setValue}
+          />
+        )}
 
         <SwitchOption
           label={i18n.translate('visTypeHeatmap.editors.heatmap.highlightLabel', {
@@ -194,7 +203,6 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
         valueAxis={valueAxis}
         setValue={setValue}
         isNewLibrary={showElasticChartsOptions}
-        isCellLabelVisible={stateParams.isCellLabelVisible}
       />
     </>
   );

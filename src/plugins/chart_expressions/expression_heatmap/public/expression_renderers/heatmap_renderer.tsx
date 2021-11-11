@@ -16,15 +16,8 @@ import {
   FilterEvent,
   BrushEvent,
 } from '../../common';
-import {
-  getFormatService,
-  getPaletteService,
-  getUISettings,
-  getThemeService,
-  getDocLinks,
-} from '../services';
+import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
-import { SplitChartWarning } from './split_chart_warning';
 
 import HeatmapComponent from '../compoments/heatmap_component';
 import './index.scss';
@@ -47,13 +40,9 @@ export const heatmapRenderer = (): ExpressionRenderDefinition<HeatmapExpressionP
       handlers.event({ name: 'brush', data });
     };
 
-    // split chart will not be supported in the first release of the new implementation
-    const isSplitChart = Boolean(config.args.splitRowAccessor || config.args.splitColumnAccessor);
-
     const timeZone = getTimeZone(getUISettings());
     render(
       <div className="heatmap-container" data-test-subj="heatmapContainer">
-        {isSplitChart && <SplitChartWarning docLinks={getDocLinks()} />}
         <MemoizedChart
           {...config}
           onClickValue={onClickValue}
