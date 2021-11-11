@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useRef, useEffect } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useTestIdGenerator } from '../../../../management/components/hooks/use_test_id_generator';
@@ -32,6 +32,14 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       'disableIsolationUIPendingStatuses'
     );
 
+    const wasReleasing = useRef<boolean>(false);
+    const wasIsolating = useRef<boolean>(false);
+
+    useEffect(() => {
+      wasReleasing.current = pendingIsolate === 0 && pendingUnIsolate > 0;
+      wasIsolating.current = pendingIsolate > 0 && pendingUnIsolate === 0;
+    });
+
     return useMemo(() => {
       if (isPendingStatuseDisabled) {
         // If nothing is pending and host is not currently isolated, then render nothing
@@ -49,21 +57,23 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
         );
       }
 
-      // If nothing is pending and host is not currently isolated, then render nothing
-      if (!isIsolated && !pendingIsolate && !pendingUnIsolate) {
-        return null;
-      }
-
-      // If nothing is pending, but host is isolated, then show isolation badge
-      if (!pendingIsolate && !pendingUnIsolate) {
-        return (
-          <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.hostIsolationStatus.isolated"
-              defaultMessage="Isolated"
-            />
-          </EuiBadge>
-        );
+      // If nothing is pending
+      if (!(pendingIsolate || pendingUnIsolate)) {
+        // and host is either releasing and or currently released, then render nothing
+        if ((!wasIsolating.current && wasReleasing.current) || !isIsolated) {
+          return null;
+        }
+        // else host was isolating or is isolated, then show isolation badge
+        else if ((wasIsolating.current && !wasReleasing.current) || isIsolated) {
+          return (
+            <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolationStatus.isolated"
+                defaultMessage="Isolated"
+              />
+            </EuiBadge>
+          );
+        }
       }
 
       // If there are multiple types of pending isolation actions, then show count of actions with tooltip that displays breakdown
@@ -139,6 +149,8 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       isPendingStatuseDisabled,
       pendingIsolate,
       pendingUnIsolate,
+      wasIsolating,
+      wasReleasing,
     ]);
   }
 );
