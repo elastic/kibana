@@ -118,7 +118,7 @@ export function useFleetServerHostsForm(
           i18n.translate('xpack.fleet.settings.fleetServerHostsFlyout.confirmModalTitle', {
             defaultMessage: 'Save and deploy changes?',
           }),
-          i18n.translate('xpack.fleet.settings.fleetServerHostsFlyout.confirmModalTitle', {
+          i18n.translate('xpack.fleet.settings.fleetServerHostsFlyout.confirmModalDescription', {
             defaultMessage:
               'This action will update all of your agent policies and all of your agents. Are you sure you wish to continue?',
           })
