@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
 import { FormattedFilterViewInstance, Filter as FilterType, State } from '../../../types';
 import { getGlobalFilterGroups } from '../../state/selectors/workpad';
-import { useCanvasFiltersActions } from '../hooks/sidebar';
+import { useCanvasFiltersActions } from './hooks';
 import { Filter as Component } from './filter.component';
 
 interface Props {

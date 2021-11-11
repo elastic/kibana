@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { State } from '../../../types';
+import { DEFAULT_GROUP_BY_FIELD } from '../../../common/lib';
+import { FilterField, State } from '../../../types';
 
-export const getGroupFiltersByOption = (state: State) => {
-  return state.persistent.workpad.sidebar?.groupFiltersByOption;
+export const getGroupFiltersByOption = (state: State): FilterField => {
+  return state.transient.sidebar.groupFiltersByOption ?? DEFAULT_GROUP_BY_FIELD;
 };

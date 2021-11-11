@@ -24,17 +24,11 @@ export function getRootReducer(initialState) {
   return combineReducers({
     assets: assetsReducer,
     app: appReducer,
-    transient: reduceReducers(transientReducer, resolvedArgsReducer),
+    transient: reduceReducers(transientReducer, resolvedArgsReducer, sidebarReducer),
     persistent: reduceReducers(
       historyReducer,
       combineReducers({
-        workpad: reduceReducers(
-          workpadReducer,
-          pagesReducer,
-          elementsReducer,
-          embeddableReducer,
-          sidebarReducer
-        ),
+        workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer, embeddableReducer),
         schemaVersion: (state = get(initialState, 'persistent.schemaVersion')) => state,
       })
     ),

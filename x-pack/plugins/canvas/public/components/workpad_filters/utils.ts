@@ -10,19 +10,19 @@ import { FilterField } from '../../../types';
 
 const strings = {
   getBlankLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.filter.blankTypeLabel', {
+    i18n.translate('xpack.canvas.workpadFilters.filter.blankTypeLabel', {
       defaultMessage: '(Blank)',
     }),
   getExactlyFilterTypeLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.defaultFilter.typeLabel', {
+    i18n.translate('xpack.canvas.workpadFilters.defaultFilter.typeLabel', {
       defaultMessage: 'Dropdown',
     }),
   getTimeFilterTypeLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.timeFilter.typeLabel', {
+    i18n.translate('xpack.canvas.workpadFilters.timeFilter.typeLabel', {
       defaultMessage: 'Time',
     }),
   getWithoutGroupLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.filters_group.withoutGroup', {
+    i18n.translate('xpack.canvas.workpadFilters.filters_group.withoutGroup', {
       defaultMessage: 'Without group',
     }),
 };

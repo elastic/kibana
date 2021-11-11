@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment, FC } from 'react';
 // @ts-expect-error unconverted component
 import { ElementConfig } from '../../element_config';
 // @ts-expect-error unconverted component
@@ -14,7 +14,7 @@ import { WorkpadConfig } from '../../workpad_config';
 // @ts-expect-error unconverted component
 import { SidebarSection } from '../sidebar_section';
 
-export const GeneralConfig: FunctionComponent = () => {
+export const GeneralConfig: FC = () => {
   return (
     <Fragment>
       <SidebarSection>

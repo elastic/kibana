@@ -64,7 +64,6 @@ export interface CanvasWorkpad {
   page: number;
   pages: CanvasPage[];
   width: number;
-  sidebar: Sidebar;
 }
 
 type CanvasTemplateElement = Omit<CanvasElement, 'filter' | 'type'>;
