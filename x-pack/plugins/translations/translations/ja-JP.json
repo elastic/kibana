@@ -6995,7 +6995,6 @@
     "xpack.observability.cases.createCase.fieldTagsHelpText": "このケースの1つ以上のカスタム識別タグを入力します。新しいタグを開始するには、各タグの後でEnterを押します。",
     "xpack.observability.cases.createCase.titleFieldRequiredError": "タイトルが必要です。",
     "xpack.observability.cases.dismissErrorsPushServiceCallOutTitle": "閉じる",
-    "xpack.observability.cases.pageTitle": "ケース",
     "xpack.observability.casesLinkTitle": "ケース",
     "xpack.observability.emptySection.apps.alert.description": "503 エラーが累積していますか?サービスは応答していますか?CPUとRAMの使用量が跳ね上がっていますか?このような警告を、事後にではなく、発生と同時に把握しましょう。",
     "xpack.observability.emptySection.apps.alert.link": "ルールを作成",

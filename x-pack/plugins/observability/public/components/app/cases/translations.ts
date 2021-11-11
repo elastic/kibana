@@ -92,10 +92,6 @@ export const OPTIONAL = i18n.translate('xpack.observability.cases.caseView.optio
   defaultMessage: 'Optional',
 });
 
-export const PAGE_TITLE = i18n.translate('xpack.observability.cases.pageTitle', {
-  defaultMessage: 'Cases',
-});
-
 export const CREATE_CASE = i18n.translate('xpack.observability.cases.caseView.createCase', {
   defaultMessage: 'Create case',
 });
