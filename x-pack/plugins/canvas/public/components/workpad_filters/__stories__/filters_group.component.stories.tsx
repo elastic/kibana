@@ -20,7 +20,7 @@ const filtersGroup: FiltersGroupType = {
   filters: [
     { id: '0', type: 'exactly', column: 'project', value: 'kibana', filterGroup: group1 },
     {
-      id: '0',
+      id: '1',
       type: 'time',
       column: '@timestamp',
       value: {
@@ -29,9 +29,9 @@ const filtersGroup: FiltersGroupType = {
       },
       filterGroup: group1,
     },
-    { id: '0', type: 'exactly', column: 'country', value: 'US', filterGroup: group1 },
+    { id: '2', type: 'exactly', column: 'country', value: 'US', filterGroup: group1 },
     {
-      id: '0',
+      id: '3',
       type: 'time',
       column: 'time',
       value: {
