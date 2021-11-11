@@ -322,52 +322,57 @@ export function constructMultiTermOtherFilter(
   };
 }
 
-export const otherBucketPostFlightRequest: IAggType['postFlightRequest'] = async (
-  resp,
-  aggConfigs,
-  aggConfig,
-  searchSource,
-  inspectorRequestAdapter,
-  abortSignal,
-  searchSessionId
+export const createOtherBucketPostFlightRequest = (
+  otherFilterBuilder: (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => Filter
 ) => {
-  if (!resp.aggregations) return resp;
-  const nestedSearchSource = searchSource.createChild();
-  if (aggConfig.params.otherBucket) {
-    const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
-    if (!filterAgg) return resp;
+  const postFlightRequest: IAggType['postFlightRequest'] = async (
+    resp,
+    aggConfigs,
+    aggConfig,
+    searchSource,
+    inspectorRequestAdapter,
+    abortSignal,
+    searchSessionId
+  ) => {
+    if (!resp.aggregations) return resp;
+    const nestedSearchSource = searchSource.createChild();
+    if (aggConfig.params.otherBucket) {
+      const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
+      if (!filterAgg) return resp;
 
-    nestedSearchSource.setField('aggs', filterAgg);
+      nestedSearchSource.setField('aggs', filterAgg);
 
-    const { rawResponse: response } = await nestedSearchSource
-      .fetch$({
-        abortSignal,
-        sessionId: searchSessionId,
-        inspector: {
-          adapter: inspectorRequestAdapter,
-          title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
-            defaultMessage: 'Other bucket',
-          }),
-          description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
-            defaultMessage:
-              'This request counts the number of documents that fall ' +
-              'outside the criterion of the data buckets.',
-          }),
-        },
-      })
-      .toPromise();
+      const { rawResponse: response } = await nestedSearchSource
+        .fetch$({
+          abortSignal,
+          sessionId: searchSessionId,
+          inspector: {
+            adapter: inspectorRequestAdapter,
+            title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
+              defaultMessage: 'Other bucket',
+            }),
+            description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
+              defaultMessage:
+                'This request counts the number of documents that fall ' +
+                'outside the criterion of the data buckets.',
+            }),
+          },
+        })
+        .toPromise();
 
-    resp = mergeOtherBucketAggResponse(
-      aggConfigs,
-      resp,
-      response,
-      aggConfig,
-      filterAgg(),
-      constructMultiTermOtherFilter
-    );
-  }
-  if (aggConfig.params.missingBucket) {
-    resp = updateMissingBucket(resp, aggConfigs, aggConfig);
-  }
-  return resp;
+      resp = mergeOtherBucketAggResponse(
+        aggConfigs,
+        resp,
+        response,
+        aggConfig,
+        filterAgg(),
+        otherFilterBuilder
+      );
+    }
+    if (aggConfig.params.missingBucket) {
+      resp = updateMissingBucket(resp, aggConfigs, aggConfig);
+    }
+    return resp;
+  };
+  return postFlightRequest;
 };

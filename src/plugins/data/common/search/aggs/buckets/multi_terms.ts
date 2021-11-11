@@ -15,8 +15,11 @@ import { createFilterMultiTerms } from './create_filter/multi_terms';
 import { aggTermsFnName } from './terms_fn';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
-import { otherBucketPostFlightRequest } from './_terms_other_bucket_helper';
 import { MultiFieldKey } from './multi_field_key';
+import {
+  createOtherBucketPostFlightRequest,
+  constructMultiTermOtherFilter,
+} from './_terms_other_bucket_helper';
 import { termsOrderAggParamDefinition } from './_terms_order_helper';
 
 const termsTitle = i18n.translate('data.search.aggs.buckets.multiTermsTitle', {
@@ -84,7 +87,7 @@ export const getMultiTermsBucketAgg = () => {
       };
     },
     createFilter: createFilterMultiTerms,
-    postFlightRequest: otherBucketPostFlightRequest,
+    postFlightRequest: createOtherBucketPostFlightRequest(constructMultiTermOtherFilter),
     params: [
       {
         name: 'fields',

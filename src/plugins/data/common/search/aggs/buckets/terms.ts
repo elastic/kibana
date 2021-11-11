@@ -21,7 +21,10 @@ import { AggConfigSerialized, BaseAggParams } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../../../common';
 
-import { otherBucketPostFlightRequest } from './_terms_other_bucket_helper';
+import {
+  createOtherBucketPostFlightRequest,
+  constructSingleTermOtherFilter,
+} from './_terms_other_bucket_helper';
 import { termsOrderAggParamDefinition } from './_terms_order_helper';
 
 export { termsAggFilter } from './_terms_order_helper';
@@ -69,7 +72,7 @@ export const getTermsBucketAgg = () =>
       };
     },
     createFilter: createFilterTerms,
-    postFlightRequest: otherBucketPostFlightRequest,
+    postFlightRequest: createOtherBucketPostFlightRequest(constructSingleTermOtherFilter),
     hasPrecisionError: (aggBucket) => Boolean(aggBucket?.doc_count_error_upper_bound),
     params: [
       {
