@@ -109,6 +109,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       });
       break;
     case SecurityPageName.case:
+    case 'case':
       application.navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         replace: true,
