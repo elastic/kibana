@@ -147,6 +147,14 @@ const breadcrumbGetters: {
       }),
     },
   ],
+  settings: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.settingsPageTitle', {
+        defaultMessage: 'Settings',
+      }),
+    },
+  ],
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {

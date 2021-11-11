@@ -12,6 +12,7 @@ import { RenderToDom } from '../components/render_to_dom';
 import { BaseForm, BaseFormProps } from './base_form';
 import { ExpressionFormHandlers } from '../../common/lib';
 import { ExpressionFunction } from '../../types';
+import { UpdatePropsRef } from '../../types/arguments';
 
 const defaultTemplate = () => (
   <div>
@@ -22,7 +23,8 @@ const defaultTemplate = () => (
 type TemplateFn = (
   domNode: HTMLElement,
   config: DatasourceRenderProps,
-  handlers: ExpressionFormHandlers
+  handlers: ExpressionFormHandlers,
+  onMount?: (ref: UpdatePropsRef<DatasourceRenderProps> | null) => void
 ) => void;
 
 export type DatasourceProps = {
@@ -49,6 +51,8 @@ interface DatasourceWrapperProps {
 
 const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (props) => {
   const domNodeRef = useRef<HTMLElement>();
+  const datasourceRef = useRef<UpdatePropsRef<DatasourceRenderProps>>();
+
   const { spec, datasourceProps, handlers } = props;
 
   const callRenderFn = useCallback(() => {
@@ -58,14 +62,23 @@ const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (prop
       return;
     }
 
-    template(domNodeRef.current, datasourceProps, handlers);
+    template(domNodeRef.current, datasourceProps, handlers, (ref) => {
+      datasourceRef.current = ref ?? undefined;
+    });
   }, [datasourceProps, handlers, spec]);
 
   useEffect(() => {
     callRenderFn();
-  }, [callRenderFn, props]);
+  }, [callRenderFn]);
+
+  useEffect(() => {
+    if (datasourceRef.current) {
+      datasourceRef.current.updateProps(datasourceProps);
+    }
+  }, [datasourceProps]);
 
   useEffectOnce(() => () => {
+    datasourceRef.current = undefined;
     handlers.destroy();
   });
 

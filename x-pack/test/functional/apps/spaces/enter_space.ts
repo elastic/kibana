@@ -14,7 +14,8 @@ export default function enterSpaceFunctonalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
-  describe('Enter Space', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/100570
+  describe.skip('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/spaces/enter_space');
@@ -49,15 +50,12 @@ export default function enterSpaceFunctonalTests({
       });
 
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
-
       await PageObjects.spaceSelector.expectRoute(spaceId, '/app/canvas');
-
       await PageObjects.spaceSelector.openSpacesNav();
 
       // change spaces
       const newSpaceId = 'default';
       await PageObjects.spaceSelector.clickSpaceAvatar(newSpaceId);
-
       await PageObjects.spaceSelector.expectHomePage(newSpaceId);
     });
   });

@@ -7,7 +7,6 @@
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
-import { map as mapAsync } from 'bluebird';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrService } from '../../ftr_provider_context';
 
@@ -271,11 +270,11 @@ export class TestSubjects extends FtrService {
 
   private async _mapAll<T>(
     selectorAll: string,
-    mapFn: (element: WebElementWrapper, index?: number, arrayLength?: number) => Promise<T>
+    mapFn: (element: WebElementWrapper, index: number, array: WebElementWrapper[]) => Promise<T>
   ): Promise<T[]> {
     return await this.retry.try(async () => {
       const elements = await this.findAll(selectorAll);
-      return await mapAsync(elements, mapFn);
+      return await Promise.all(elements.map(mapFn));
     });
   }
 

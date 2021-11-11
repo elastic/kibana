@@ -25,17 +25,31 @@ const dataStart = dataPluginMock.createStartContract();
 const { search, fieldFormats } = dataStart;
 
 export const spySearchQuery = jest.fn();
-export const spySearchQueryResponse = jest.fn();
+export const spySearchQueryResponse = jest.fn(() => Promise.resolve({}));
 export const spyIndexPatternGetAllFields = jest.fn().mockImplementation(() => []);
 
-spySearchQuery.mockImplementation((params) => {
+let searchResponseDelay = 0;
+
+// Add latency to the search request
+export const setSearchResponseLatency = (ms: number) => {
+  searchResponseDelay = ms;
+};
+
+spySearchQuery.mockImplementation(() => {
   return {
     toPromise: () => {
+      if (searchResponseDelay === 0) {
+        // no delay, it is synchronous
+        return spySearchQueryResponse();
+      }
+
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve(undefined);
-        }, 2000); // simulate 2s latency for the HTTP request
-      }).then(() => spySearchQueryResponse());
+        }, searchResponseDelay);
+      }).then(() => {
+        return spySearchQueryResponse();
+      });
     },
   };
 });
