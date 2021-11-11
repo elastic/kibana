@@ -238,17 +238,17 @@ export class ScalingForm extends Component<Props, State> {
         <EuiFormRow>
           <div>
             <EuiRadio
-              id={SCALING_TYPES.LIMIT}
-              label={this._getLimitOptionLabel()}
-              checked={this.props.scalingType === SCALING_TYPES.LIMIT}
-              onChange={() => this._onScalingTypeSelect(SCALING_TYPES.LIMIT)}
-            />
-            {this._renderClusteringRadio()}
-            <EuiRadio
               id={SCALING_TYPES.MVT}
               label={this._getMvtOptionLabel()}
               checked={this.props.scalingType === SCALING_TYPES.MVT}
               onChange={() => this._onScalingTypeSelect(SCALING_TYPES.MVT)}
+            />
+            {this._renderClusteringRadio()}
+            <EuiRadio
+              id={SCALING_TYPES.LIMIT}
+              label={this._getLimitOptionLabel()}
+              checked={this.props.scalingType === SCALING_TYPES.LIMIT}
+              onChange={() => this._onScalingTypeSelect(SCALING_TYPES.LIMIT)}
             />
           </div>
         </EuiFormRow>
