@@ -65,6 +65,7 @@ import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
+import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -99,6 +100,7 @@ export interface PluginSetupContract {
       RecoveryActionGroupId
     >
   ): void;
+  getSecurityHealth: () => Promise<SecurityHealth>;
 }
 
 export interface PluginStartContract {
@@ -314,6 +316,16 @@ export class AlertingPlugin {
         } else {
           ruleTypeRegistry.register(alertType);
         }
+      },
+      getSecurityHealth: async () => {
+        return await getSecurityHealth(
+          async () => (this.licenseState ? this.licenseState.getIsSecurityEnabled() : null),
+          async () => plugins.encryptedSavedObjects.canEncrypt,
+          async () => {
+            const [, { security }] = await core.getStartServices();
+            return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
+          }
+        );
       },
     };
   }
