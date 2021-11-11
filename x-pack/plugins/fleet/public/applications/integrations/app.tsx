@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -22,10 +22,8 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
-import { AgentPolicyContextProvider, useUrlModal } from './hooks';
+import { AgentPolicyContextProvider } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
-
-import { SettingFlyout } from './components';
 
 import type { UIExtensionsStorage } from './types';
 
@@ -93,18 +91,8 @@ export const IntegrationsAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
-  const { modal, setModal } = useUrlModal();
   return (
     <>
-      {modal === 'settings' && (
-        <EuiPortal>
-          <SettingFlyout
-            onClose={() => {
-              setModal(null);
-            }}
-          />
-        </EuiPortal>
-      )}
       <Switch>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />

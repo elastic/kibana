@@ -20,8 +20,9 @@ const TOTAL_ALERTS_CELL_COUNT = 198;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
 
-  describe('Observability alerts', function () {
+  describe('Observability alerts 1', function () {
     this.tags('includeFirefox');
 
     const testSubjects = getService('testSubjects');
@@ -178,6 +179,10 @@ export default ({ getService }: FtrProviderContext) => {
           it('Displays a View in App button', async () => {
             await observability.alerts.common.getAlertsFlyoutViewInAppButtonOrFail();
           });
+
+          it('Displays a View rule details link', async () => {
+            await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
+          });
         });
       });
 
@@ -211,6 +216,24 @@ export default ({ getService }: FtrProviderContext) => {
             const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
           });
+        });
+      });
+
+      describe('Actions Button', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await observability.alerts.common.navigateToTimeWithData();
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        });
+
+        it('Opens rule details page when click on "View Rule Details"', async () => {
+          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+          await actionsButton.click();
+          await observability.alerts.common.viewRuleDetailsButtonClick();
+          expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
         });
       });
     });

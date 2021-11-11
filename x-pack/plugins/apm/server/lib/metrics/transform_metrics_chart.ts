@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { getVizColorForIndex } from '../../../common/viz_colors';
 import { GenericMetricsRequest } from './fetch_and_transform_metrics';
@@ -26,26 +26,30 @@ export function transformDataToMetricsChart(
     title: chartBase.title,
     key: chartBase.key,
     yUnit: chartBase.yUnit,
-    series: Object.keys(chartBase.series).map((seriesKey, i) => {
-      const overallValue = aggregations?.[seriesKey]?.value;
+    series:
+      result.hits.total.value > 0
+        ? Object.keys(chartBase.series).map((seriesKey, i) => {
+            const overallValue = aggregations?.[seriesKey]?.value;
 
-      return {
-        title: chartBase.series[seriesKey].title,
-        key: seriesKey,
-        type: chartBase.type,
-        color:
-          chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
-        overallValue,
-        data:
-          timeseriesData?.buckets.map((bucket) => {
-            const { value } = bucket[seriesKey];
-            const y = value === null || isNaN(value) ? null : value;
             return {
-              x: bucket.key,
-              y,
+              title: chartBase.series[seriesKey].title,
+              key: seriesKey,
+              type: chartBase.type,
+              color:
+                chartBase.series[seriesKey].color ||
+                getVizColorForIndex(i, theme),
+              overallValue,
+              data:
+                timeseriesData?.buckets.map((bucket) => {
+                  const { value } = bucket[seriesKey];
+                  const y = value === null || isNaN(value) ? null : value;
+                  return {
+                    x: bucket.key,
+                    y,
+                  };
+                }) || [],
             };
-          }) || [],
-      };
-    }),
+          })
+        : [],
   };
 }
