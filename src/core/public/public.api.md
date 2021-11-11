@@ -713,6 +713,7 @@ export interface DocLinksStart {
             fleetServerAddFleetServer: string;
             settings: string;
             settingsFleetServerHostSettings: string;
+            settingsFleetServerProxySettings: string;
             troubleshooting: string;
             elasticAgent: string;
             datastreams: string;
@@ -722,6 +723,7 @@ export interface DocLinksStart {
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
             apiKeysLearnMore: string;
+            onPremRegistry: string;
         }>;
         readonly ecs: {
             readonly guide: string;
