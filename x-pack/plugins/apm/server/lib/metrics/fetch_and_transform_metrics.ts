@@ -112,7 +112,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   );
   const timeseriesData = aggregations?.timeseriesData;
 
-  const a = {
+  return {
     title: chartBase.title,
     key: chartBase.key,
     yUnit: chartBase.yUnit,
@@ -143,6 +143,4 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
             };
           }),
   };
-
-  return a;
 }

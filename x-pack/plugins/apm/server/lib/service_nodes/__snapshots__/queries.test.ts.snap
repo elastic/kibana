@@ -36,17 +36,17 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.node.name": "bar",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
                 "gte": 0,
                 "lte": 50000,
               },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.node.name": "bar",
             },
           },
         ],
@@ -93,6 +93,15 @@ Object {
             },
           },
           Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
             "bool": Object {
               "must_not": Array [
                 Object {
@@ -101,15 +110,6 @@ Object {
                   },
                 },
               ],
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 0,
-                "lte": 50000,
-              },
             },
           },
         ],
@@ -191,6 +191,7 @@ Object {
         ],
       },
     },
+    "size": 0,
   },
 }
 `;
