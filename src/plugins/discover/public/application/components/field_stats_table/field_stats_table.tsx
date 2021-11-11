@@ -7,9 +7,10 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../data/common';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -17,8 +18,10 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '../../../../../embeddable/public';
+import { FIELD_STATISTICS_LOADED } from './constants';
 import { SavedSearch } from '../../../saved_searches';
 import { GetStateReturn } from '../../apps/main/services/discover_state';
+import { DataRefetch$ } from '../../apps/main/services/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: IndexPattern;
@@ -36,7 +39,7 @@ export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
 }
 
-export interface DiscoverDataVisualizerGridProps {
+export interface FieldStatisticsTableProps {
   /**
    * Determines which columns are displayed
    */
@@ -69,14 +72,24 @@ export interface DiscoverDataVisualizerGridProps {
    * Filters query to update the table content
    */
   filters?: Filter[];
+  /**
+   * State container with persisted settings
+   */
   stateContainer?: GetStateReturn;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  savedSearchRefetch$?: DataRefetch$;
 }
 
-export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
+export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
     services,
     indexPattern,
@@ -86,9 +99,10 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
     filters,
     stateContainer,
     onAddFilter,
+    trackUiMetric,
+    savedSearchRefetch$,
   } = props;
   const { uiSettings } = services;
-
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
@@ -109,10 +123,16 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
       }
     });
 
+    const refetch = savedSearchRefetch$?.subscribe(() => {
+      if (embeddable && !isErrorEmbeddable(embeddable)) {
+        embeddable.updateInput({ lastReloadRequestTime: Date.now() });
+      }
+    });
     return () => {
       sub?.unsubscribe();
+      refetch?.unsubscribe();
     };
-  }, [embeddable, stateContainer]);
+  }, [embeddable, stateContainer, savedSearchRefetch$]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
@@ -135,16 +155,10 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
       embeddable.updateInput({
         showPreviewByDefault,
       });
+
       embeddable.reload();
     }
   }, [showPreviewByDefault, uiSettings, embeddable]);
-
-  useEffect(() => {
-    return () => {
-      // Clean up embeddable upon unmounting
-      embeddable?.destroy();
-    };
-  }, [embeddable]);
 
   useEffect(() => {
     let unmounted = false;
@@ -181,8 +195,15 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   useEffect(() => {
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
+
+      trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
     }
-  }, [embeddable, embeddableRoot, uiSettings]);
+
+    return () => {
+      // Clean up embeddable upon unmounting
+      embeddable?.destroy();
+    };
+  }, [embeddable, embeddableRoot, uiSettings, trackUiMetric]);
 
   return (
     <div
