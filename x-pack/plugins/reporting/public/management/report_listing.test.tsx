@@ -7,7 +7,6 @@
 
 import { registerTestBed } from '@kbn/test/jest';
 import type { SerializableRecord, UnwrapPromise } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { Observable } from 'rxjs';
@@ -443,7 +442,9 @@ describe('ReportListing', () => {
     it('informs users when migrations failed', async () => {
       const status: IlmPolicyMigrationStatus = 'indices-not-managed-by-policy';
       httpService.get.mockResolvedValueOnce({ status });
-      reportingAPIClient.migrateReportingIndicesIlmPolicy.mockRejectedValueOnce(new Error('oops!'));
+      (reportingAPIClient.migrateReportingIndicesIlmPolicy as jest.Mock).mockRejectedValueOnce(
+        new Error('oops!')
+      );
       await runSetup();
       const { actions } = testBed;
 
