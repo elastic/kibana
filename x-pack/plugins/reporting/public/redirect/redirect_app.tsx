@@ -45,12 +45,13 @@ export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
   useEffect(() => {
     (async () => {
       try {
-        let locatorParams: LocatorParams;
+        let locatorParams: undefined | LocatorParams;
 
         const { jobId } = parse(window.location.search);
 
         if (jobId) {
-          locatorParams = (await apiClient.getLocatorParams(jobId as string))[0];
+          const result = await apiClient.getInfo(jobId as string);
+          locatorParams = result?.locatorParams?.[0];
         } else {
           locatorParams = (window as unknown as Record<string, LocatorParams>)[
             REPORTING_REDIRECT_LOCATOR_STORE_KEY

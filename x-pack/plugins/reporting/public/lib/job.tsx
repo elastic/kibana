@@ -12,6 +12,7 @@ import moment from 'moment';
 import React from 'react';
 import { JOB_STATUSES } from '../../common/constants';
 import {
+  BaseParamsV2,
   JobId,
   ReportApiJSON,
   ReportOutput,
@@ -58,6 +59,8 @@ export class Job {
   public max_size_reached?: TaskRunResult['max_size_reached'];
   public warnings?: TaskRunResult['warnings'];
 
+  public locatorParams?: BaseParamsV2['locatorParams'];
+
   constructor(report: ReportApiJSON) {
     this.id = report.id;
     this.index = report.index;
@@ -87,6 +90,7 @@ export class Job {
     this.csv_contains_formulas = report.output?.csv_contains_formulas;
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;
+    this.locatorParams = (report.payload as BaseParamsV2).locatorParams;
   }
 
   getStatusMessage() {

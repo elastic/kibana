@@ -22,7 +22,6 @@ import {
 } from '../../../common/constants';
 import {
   BaseParams,
-  BasePayloadV2,
   DownloadReportFn,
   JobId,
   ManagementLinkFn,
@@ -60,8 +59,6 @@ interface IReportingAPI {
   getInfo(jobId: string): Promise<Job>;
   findForJobIds(jobIds: string[]): Promise<Job[]>;
 
-  getLocatorParams(jobId: string): Promise<BasePayloadV2['locatorParams']>;
-
   // Function props
   getManagementLink: ManagementLinkFn;
   getDownloadLink: DownloadReportFn;
@@ -78,19 +75,6 @@ export class ReportingAPIClient implements IReportingAPI {
     private kibanaVersion: string
   ) {}
 
-  public getReportURL(jobId: string) {
-    const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
-    const downloadLink = `${apiBaseUrl}/download/${jobId}`;
-
-    return downloadLink;
-  }
-
-  public downloadReport(jobId: string) {
-    const location = this.getReportURL(jobId);
-
-    window.open(location);
-  }
-
   public getKibanaAppHref(job: Job): string {
     const searchParams = stringify({ jobId: job.id });
 
@@ -102,6 +86,19 @@ export class ReportingAPIClient implements IReportingAPI {
 
     const href = `${path}?${searchParams}`;
     return href;
+  }
+
+  public getReportURL(jobId: string) {
+    const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
+    const downloadLink = `${apiBaseUrl}/download/${jobId}`;
+
+    return downloadLink;
+  }
+
+  public downloadReport(jobId: string) {
+    const location = this.getReportURL(jobId);
+
+    window.open(location);
   }
 
   public async deleteReport(jobId: string) {
@@ -150,16 +147,6 @@ export class ReportingAPIClient implements IReportingAPI {
       asSystemRequest: true,
     });
     return new Job(report);
-  }
-
-  public async getLocatorParams(jobId: string) {
-    const payload: BasePayloadV2['locatorParams'] = await this.http.get(
-      `${API_LIST_URL}/locatorParams/${jobId}`,
-      {
-        asSystemRequest: true,
-      }
-    );
-    return payload;
   }
 
   public async findForJobIds(jobIds: JobId[]) {

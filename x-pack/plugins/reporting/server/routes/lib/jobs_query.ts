@@ -19,7 +19,7 @@ import { ElasticsearchClient } from 'src/core/server';
 import { PromiseType } from 'utility-types';
 import { ReportingCore } from '../../';
 import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
-import { ReportApiJSON, ReportSource, BasePayloadV2 } from '../../../common/types';
+import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
@@ -51,11 +51,7 @@ interface JobsQueryFactory {
     jobIds: string[] | null
   ): Promise<ReportApiJSON[]>;
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
-  get(user: ReportingUser, id: string): Promise<ReportApiJSON | undefined>;
-  getLocatorParams(
-    user: ReportingUser,
-    id: string
-  ): Promise<BasePayloadV2['locatorParams'] | undefined>;
+  get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
   delete(deleteIndex: string, id: string): Promise<TransportResult<DeleteResponse>>;
 }
@@ -63,41 +59,6 @@ interface JobsQueryFactory {
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
   function getIndex() {
     return `${REPORTING_SYSTEM_INDEX}-*`;
-  }
-
-  async function getReport(user: ReportingUser, id: string) {
-    const { logger } = reportingCore.getPluginSetupDeps();
-    if (!id) {
-      logger.warning(`No ID provided for GET`);
-      return;
-    }
-
-    const username = getUsername(user);
-
-    const body = getSearchBody({
-      query: {
-        constant_score: {
-          filter: {
-            bool: {
-              must: [{ term: { _id: id } }, { term: { created_by: username } }],
-            },
-          },
-        },
-      },
-      size: 1,
-    });
-
-    const response = await execQuery((elasticsearchClient) =>
-      elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
-    );
-
-    const result = response?.body.hits?.hits?.[0];
-    if (!result?._source) {
-      logger.warning(`No hits resulted in search`);
-      return;
-    }
-
-    return new Report({ ...result, ...result._source });
   }
 
   async function execQuery<
@@ -116,7 +77,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     }
   }
 
-  const factory: JobsQueryFactory = {
+  return {
     async list(jobTypes, user, page = 0, size = defaultSize, jobIds) {
       const username = getUsername(user);
       const body = getSearchBody({
@@ -176,17 +137,39 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     },
 
     async get(user, id) {
-      const report = await getReport(user, id);
-      return report?.toApiJSON();
-    },
+      const { logger } = reportingCore.getPluginSetupDeps();
+      if (!id) {
+        logger.warning(`No ID provided for GET`);
+        return;
+      }
 
-    /**
-     * @note If this returns `undefined` it means that either the V2 report does not have locatorParams (big issue) or the
-     * report is not a V2 report.
-     */
-    async getLocatorParams(user, id) {
-      const report = await getReport(user, id);
-      return (report?.payload as unknown as BasePayloadV2)?.locatorParams;
+      const username = getUsername(user);
+
+      const body = getSearchBody({
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [{ term: { _id: id } }, { term: { created_by: username } }],
+              },
+            },
+          },
+        },
+        size: 1,
+      });
+
+      const response = await execQuery((elasticsearchClient) =>
+        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
+      );
+
+      const result = response?.body.hits?.hits?.[0];
+      if (!result?._source) {
+        logger.warning(`No hits resulted in search`);
+        return;
+      }
+
+      const report = new Report({ ...result, ...result._source });
+      return report.toApiJSON();
     },
 
     async getError(id) {
@@ -235,6 +218,4 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       }
     },
   };
-
-  return factory;
 }

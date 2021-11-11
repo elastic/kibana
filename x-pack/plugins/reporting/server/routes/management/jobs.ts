@@ -8,15 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../../';
-import {
-  IKibanaResponse,
-  kibanaResponseFactory,
-  ResponseError,
-} from '../../../../../../src/core/server';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../../security/server';
 import { API_BASE_URL } from '../../../common/constants';
-import { Report } from '../../lib/store';
-import type { ReportApiJSON } from '../../lib/store/report';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { deleteJobResponseHandler, downloadJobResponseHandler } from '../lib/job_response_handler';
@@ -92,38 +85,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
     })
   );
 
-  /**
-   * Returns appropriate {@link IKibanaResponse<ResponseError>} if the requested job is not valid either because:
-   * 1. It was not found
-   * 2. It is not permitted under the current licensing
-   */
-  const validateJobIsAvailable = async (
-    job?: Report | ReportApiJSON
-  ): Promise<undefined | IKibanaResponse<ResponseError>> => {
-    if (!job) {
-      // Bad result
-      return kibanaResponseFactory.notFound();
-    }
-
-    const { jobtype: jobType } = job;
-    const {
-      management: { jobTypes = [] },
-    } = await reporting.getLicenseInfo();
-
-    if (!jobTypes.includes(jobType)) {
-      // Bad result
-      return kibanaResponseFactory.forbidden({
-        body: i18n.translate('xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage', {
-          defaultMessage: 'Sorry, you are not authorized to view {jobType} info',
-          values: { jobType },
-        }),
-      });
-    }
-
-    // Good result
-    return;
-  };
-
   // return some info about the job
   router.get(
     {
@@ -141,60 +102,29 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       }
 
       const { docId } = req.params;
+      const {
+        management: { jobTypes = [] },
+      } = await reporting.getLicenseInfo();
 
       const result = await jobsQuery.get(user, docId);
 
-      const validationResult = await validateJobIsAvailable(result);
-      if (validationResult) {
-        return validationResult;
+      if (!result) {
+        return res.notFound();
       }
 
-      return res.ok({
-        body: result!,
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
-    })
-  );
+      const { jobtype: jobType } = result;
 
-  router.get(
-    {
-      path: `${MAIN_ENTRY}/locatorParams/{docId}`,
-      validate: {
-        params: schema.object({
-          docId: schema.string({ minLength: 2 }),
-        }),
-      },
-    },
-    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-      // ensure the async dependencies are loaded
-      if (!context.reporting) {
-        return res.custom({ statusCode: 503 });
-      }
-
-      const { docId } = req.params;
-
-      const locatorParams = await jobsQuery.getLocatorParams(user, docId);
-
-      if (!locatorParams || !locatorParams.length) {
-        return res.notFound({
-          body: {
-            message: i18n.translate(
-              'xpack.reporting.jobsQuery.locatorParams.notFoundErrorMessage',
-              {
-                defaultMessage: `Locator params not found for {docId}`,
-                values: {
-                  docId,
-                },
-              }
-            ),
-          },
+      if (!jobTypes.includes(jobType)) {
+        return res.forbidden({
+          body: i18n.translate('xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage', {
+            defaultMessage: 'Sorry, you are not authorized to view {jobType} info',
+            values: { jobType },
+          }),
         });
       }
 
       return res.ok({
-        body: locatorParams,
+        body: result,
         headers: {
           'content-type': 'application/json',
         },
