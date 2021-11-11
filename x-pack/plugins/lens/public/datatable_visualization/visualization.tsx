@@ -30,6 +30,7 @@ export interface DatatableVisualizationState {
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
+  pageSize?: number;
   fitRowToContent?: boolean;
 }
 
@@ -391,6 +392,7 @@ export const getDatatableVisualization = ({
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
             fitRowToContent: [state.fitRowToContent ?? false],
+            pageSize: state.pageSize ? [state.pageSize] : [],
           },
         },
       ],

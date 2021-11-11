@@ -23,6 +23,15 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
     });
   }, [setState, state]);
 
+  const onTogglePagination = useCallback(() => {
+    const defaultPageSize = 10;
+    const pageSize = state.pageSize ? undefined : defaultPageSize;
+    setState({
+      ...state,
+      pageSize,
+    });
+  }, [setState, state]);
+
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
@@ -46,6 +55,16 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             showLabel={false}
             checked={Boolean(state.fitRowToContent)}
             onChange={onChange}
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Paginate Table?" display="columnCompressedSwitch">
+          <EuiSwitch
+            compressed
+            data-test-subj="lens-table-pagination-switch"
+            label=""
+            showLabel={false}
+            checked={Boolean(state.pageSize)}
+            onChange={onTogglePagination}
           />
         </EuiFormRow>
       </ToolbarPopover>

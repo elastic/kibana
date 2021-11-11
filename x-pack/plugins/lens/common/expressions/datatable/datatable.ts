@@ -63,6 +63,10 @@ export const getDatatable = (
       types: ['boolean'],
       help: '',
     },
+    pageSize: {
+      types: ['number'],
+      help: '',
+    },
   },
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
