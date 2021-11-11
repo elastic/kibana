@@ -11,7 +11,6 @@ import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
@@ -43,6 +42,7 @@ describe('When on the host isolation exceptions page', () => {
       history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
     });
   });
+
   describe('When on the host isolation list page', () => {
     describe('And no data exists', () => {
       beforeEach(async () => {
@@ -66,6 +66,7 @@ describe('When on the host isolation exceptions page', () => {
         expect(renderResult.queryByTestId('searchExceptions')).toBeFalsy();
       });
     });
+
     describe('And data exists', () => {
       beforeEach(async () => {
         getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
