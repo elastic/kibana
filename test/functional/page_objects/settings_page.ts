@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { map as mapAsync } from 'bluebird';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -234,23 +233,29 @@ export class SettingsPageObject extends FtrService {
 
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getFieldTypes() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldType');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getScriptedFieldLangs() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > scriptedFieldLang');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async setFieldTypeFilter(type: string) {
@@ -327,9 +332,11 @@ export class SettingsPageObject extends FtrService {
 
   async getAllIndexPatternNames() {
     const indexPatterns = await this.getIndexPatternList();
-    return await mapAsync(indexPatterns, async (index) => {
-      return await index.getVisibleText();
-    });
+    return await Promise.all(
+      indexPatterns.map(async (index) => {
+        return await index.getVisibleText();
+      })
+    );
   }
 
   async isIndexPatternListEmpty() {
@@ -437,7 +444,8 @@ export class SettingsPageObject extends FtrService {
   async setIndexPatternField(indexPatternName = 'logstash-*') {
     this.log.debug(`setIndexPatternField(${indexPatternName})`);
     const field = await this.getIndexPatternField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
+
     if (
       indexPatternName.charAt(0) === '*' &&
       indexPatternName.charAt(indexPatternName.length - 1) === '*'
@@ -565,9 +573,11 @@ export class SettingsPageObject extends FtrService {
     const table = await this.find.byClassName('euiTable');
     await this.retry.waitFor('field filter to be added', async () => {
       const tableCells = await table.findAllByCssSelector('td');
-      const fieldNames = await mapAsync(tableCells, async (cell) => {
-        return (await cell.getVisibleText()).trim();
-      });
+      const fieldNames = await Promise.all(
+        tableCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
       return fieldNames.includes(name);
     });
   }
