@@ -73,22 +73,16 @@ export interface HeatmapArguments {
   highlightInHover?: boolean;
   palette?: PaletteOutput<CustomPaletteState>;
   shape: ChartShapes;
-  xAccessor?: string | number;
-  yAccessor?: string | number;
-  valueAccessor?: string | number;
-  splitRowAccessor?: string | number;
-  splitColumnAccessor?: string | number;
+  xAccessor?: string;
+  yAccessor?: string;
+  valueAccessor?: string;
+  splitRowAccessor?: string;
+  splitColumnAccessor?: string;
   legend: HeatmapLegendConfigResult;
   gridConfig: HeatmapGridConfigResult;
 }
 
 export type HeatmapInput = Datatable;
-
-// export interface MetricVisRenderConfig {
-//   visType: typeof visType;
-//   visData: Datatable;
-//   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
-// }
 
 export interface HeatmapExpressionProps {
   data: Datatable;

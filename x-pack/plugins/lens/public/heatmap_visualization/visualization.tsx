@@ -162,7 +162,7 @@ export const getHeatmapVisualization = ({
     const { displayStops, activePalette } = getSafePaletteParams(
       paletteService,
       frame.activeData?.[state.layerId],
-      String(state.valueAccessor),
+      state.valueAccessor,
       state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
     );
 
@@ -489,7 +489,7 @@ export const getHeatmapVisualization = ({
     const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
 
     const datasource = frame.datasourceLayers[state.layerId];
-    const operation = datasource.getOperationForColumnId(String(state.valueAccessor));
+    const operation = datasource.getOperationForColumnId(state.valueAccessor);
 
     return hasArrayValues
       ? [

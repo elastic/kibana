@@ -454,7 +454,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 };
 
 export interface AccessorConfig {
-  columnId: string | number;
+  columnId: string;
   triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;

@@ -24,6 +24,7 @@ import {
 import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
 import { LegendToggle } from '../../../../charts/public';
+import type { DatatableColumn } from '../../../../expressions/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import { getColorPicker } from '../utils/get_color_picker';
@@ -109,6 +110,10 @@ function computeColorRanges(
 
   return { colors, ranges };
 }
+const getAccessor = (value: string, columns: DatatableColumn[]) => {
+  const accessor = value as unknown as number;
+  return isNaN(accessor) ? value : columns[accessor ?? 0].id;
+};
 const HeatmapComponent: FC<HeatmapRenderProps> = ({
   data,
   args,
@@ -158,11 +163,9 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     [args.legend.position, setColor, uiState]
   );
   const table = data;
-  const valueAccessor =
-    typeof args.valueAccessor === 'string'
-      ? args.valueAccessor
-      : table.columns[args.valueAccessor ?? 0].id;
-
+  const valueAccessor = args.valueAccessor
+    ? getAccessor(args.valueAccessor, table.columns)
+    : undefined;
   const minMaxByColumnId = useMemo(
     () => findMinMaxByColumnId([valueAccessor!], table),
     [valueAccessor, table]
@@ -173,10 +176,8 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const paletteParams = args.palette?.params;
-  const xAccessor =
-    typeof args.xAccessor === 'string' ? args.xAccessor : table.columns[args.xAccessor ?? 0].id;
-  const yAccessor =
-    typeof args.yAccessor === 'string' ? args.yAccessor : table.columns[args.yAccessor ?? 0].id;
+  const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
+  const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
