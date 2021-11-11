@@ -29,6 +29,7 @@ describe('CategoryAxisPanel component', () => {
       axis,
       onPositionChanged,
       setCategoryAxis,
+      useMultiLayerAxis: false,
     };
   });
 

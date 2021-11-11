@@ -292,7 +292,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
 
   const isTimeViz = aggs.aggs.some(
     (agg) =>
-      agg.schema === 'segment' && agg.enabled && agg.type.name === BUCKET_TYPES.DATE_HISTOGRAM
+      agg.schema === 'segment' && agg.enabled && agg.type?.name === BUCKET_TYPES.DATE_HISTOGRAM
   );
   const xAxisIsHorizontal =
     stateParams.categoryAxes[0].position === Position.Bottom ||

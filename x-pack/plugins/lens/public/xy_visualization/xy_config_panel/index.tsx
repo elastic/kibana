@@ -177,7 +177,7 @@ function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, sta
 }
 
 export const XyToolbar = memo(function XyToolbar(
-  props: VisualizationToolbarProps<State> & { useLegacyTimeAxis: boolean }
+  props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
 ) {
   const { state, setState, frame, useLegacyTimeAxis } = props;
 

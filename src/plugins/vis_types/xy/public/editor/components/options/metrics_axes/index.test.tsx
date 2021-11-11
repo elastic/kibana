@@ -31,6 +31,11 @@ jest.mock('./category_axis_panel', () => ({
 jest.mock('./value_axes_panel', () => ({
   ValueAxesPanel: () => 'ValueAxesPanel',
 }));
+jest.mock('../../../../services', () => ({
+  getUISettings: jest.fn(() => ({
+    get: jest.fn((key: string, defaultOverride?: unknown) => defaultOverride),
+  })),
+}));
 
 const SERIES_PARAMS = 'seriesParams';
 const VALUE_AXES = 'valueAxes';

@@ -23,14 +23,14 @@ export interface LabelOptionsProps {
   axisLabels: Labels;
   axisFilterCheckboxName: string;
   setAxisLabel: SetAxisLabel;
-  enableSingleLayerAxisControls: boolean;
+  disableSingleLayerAxisControls?: boolean;
 }
 
 function LabelOptions({
   axisLabels,
   axisFilterCheckboxName,
   setAxisLabel,
-  enableSingleLayerAxisControls,
+  disableSingleLayerAxisControls,
 }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Labels['rotate']) => {
@@ -40,7 +40,7 @@ function LabelOptions({
   );
 
   const rotateOptions = useMemo(getRotateOptions, []);
-  const multilayerAxisTooltipText = !enableSingleLayerAxisControls
+  const multilayerAxisTooltipText = disableSingleLayerAxisControls
     ? i18n.translate(
         'visTypeXy.controls.pointSeries.categoryAxis.axisLabelsOptionsMultilayer.disabled',
         {
@@ -49,7 +49,7 @@ function LabelOptions({
         }
       )
     : undefined;
-  const axisLabelControlDisabled = !axisLabels.show || !enableSingleLayerAxisControls;
+  const axisLabelControlDisabled = !axisLabels.show || disableSingleLayerAxisControls;
 
   return (
     <>

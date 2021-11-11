@@ -101,7 +101,7 @@ function CategoryAxisPanel({
           axisLabels={axis.labels}
           axisFilterCheckboxName={`xAxisFilterLabelsCheckbox${axis.id}`}
           setAxisLabel={setAxisLabel}
-          enableSingleLayerAxisControls={!useMultiLayerAxis}
+          disableSingleLayerAxisControls={useMultiLayerAxis}
         />
       )}
     </EuiPanel>
