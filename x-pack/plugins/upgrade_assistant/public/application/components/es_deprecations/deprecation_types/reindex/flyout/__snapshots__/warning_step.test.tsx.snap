@@ -2,28 +2,7 @@
 
 exports[`WarningsFlyoutStep renders 1`] = `
 <Fragment>
-  <EuiFlyoutBody>
-    <EuiCallOut
-      color="danger"
-      iconType="alert"
-      title={
-        <FormattedMessage
-          defaultMessage="This index requires destructive changes that cannot be reversed"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
-          values={Object {}}
-        />
-      }
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
-          values={Object {}}
-        />
-      </p>
-    </EuiCallOut>
-    <EuiSpacer />
-  </EuiFlyoutBody>
+  <EuiFlyoutBody />
   <EuiFlyoutFooter>
     <EuiFlexGroup
       justifyContent="spaceBetween"
@@ -33,11 +12,11 @@ exports[`WarningsFlyoutStep renders 1`] = `
       >
         <EuiButtonEmpty
           flush="left"
-          iconType="cross"
+          iconType="arrowLeft"
           onClick={[MockFunction]}
         >
           <FormattedMessage
-            defaultMessage="Cancel"
+            defaultMessage="Back"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
             values={Object {}}
           />
@@ -47,13 +26,13 @@ exports[`WarningsFlyoutStep renders 1`] = `
         grow={false}
       >
         <EuiButton
-          color="danger"
+          color="primary"
           disabled={false}
           fill={true}
           onClick={[MockFunction]}
         >
           <FormattedMessage
-            defaultMessage="Continue with reindex"
+            defaultMessage="Continue reindexing"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
             values={Object {}}
           />

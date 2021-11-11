@@ -67,8 +67,8 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
-import type { PackagePolicyUpgradeUsage } from './upgrade_usage';
-import { sendTelemetryEvents } from './upgrade_usage';
+import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
+import { sendTelemetryEvents } from './upgrade_sender';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -423,12 +423,13 @@ class PackagePolicyService {
       });
 
       if (packagePolicy.package.version !== currentVersion) {
-        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
-          package_name: packagePolicy.package.name,
-          current_version: currentVersion || 'unknown',
-          new_version: packagePolicy.package.version,
+        const upgradeTelemetry: PackageUpdateEvent = {
+          packageName: packagePolicy.package.name,
+          currentVersion: currentVersion || 'unknown',
+          newVersion: packagePolicy.package.version,
           status: 'success',
           dryRun: false,
+          eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(
           appContextService.getLogger(),
@@ -668,13 +669,14 @@ class PackagePolicyService {
       const hasErrors = 'errors' in updatedPackagePolicy;
 
       if (packagePolicy.package.version !== packageInfo.version) {
-        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
-          package_name: packageInfo.name,
-          current_version: packagePolicy.package.version,
-          new_version: packageInfo.version,
+        const upgradeTelemetry: PackageUpdateEvent = {
+          packageName: packageInfo.name,
+          currentVersion: packagePolicy.package.version,
+          newVersion: packageInfo.version,
           status: hasErrors ? 'failure' : 'success',
           error: hasErrors ? updatedPackagePolicy.errors : undefined,
           dryRun: true,
+          eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(
           appContextService.getLogger(),
@@ -716,7 +718,7 @@ class PackagePolicyService {
           pkgName: pkgInstall.name,
           pkgVersion: pkgInstall.version,
         }),
-        outputService.getDefaultOutputId(soClient),
+        outputService.getDefaultDataOutputId(soClient),
       ]);
       if (packageInfo) {
         if (!defaultOutputId) {
