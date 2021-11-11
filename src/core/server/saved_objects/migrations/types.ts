@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc } from '../serialization';
-import { SavedObjectsMigrationLogger } from './core/migration_logger';
+import * as TaskEither from 'fp-ts/TaskEither';
+import type { SavedObjectUnsanitizedDoc } from '../serialization';
+import type { SavedObjectsMigrationLogger } from './core';
+import { SavedObjectsRawDoc } from '../serialization';
+import { DocumentsTransformFailed, DocumentsTransformSuccess } from './core';
 
 /**
  * A migration function for a {@link SavedObjectsType | saved object type}
@@ -90,4 +93,24 @@ export interface SavedObjectMigrationContext {
  */
 export interface SavedObjectMigrationMap {
   [version: string]: SavedObjectMigrationFn<any, any>;
+}
+
+/** @internal */
+export type TransformRawDocs = (
+  rawDocs: SavedObjectsRawDoc[]
+) => TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;
+
+/** @internal */
+export type MigrationLogLevel = 'error' | 'info' | 'warning';
+
+/** @internal */
+export interface MigrationLog {
+  level: MigrationLogLevel;
+  message: string;
+}
+
+/** @internal */
+export interface Progress {
+  processed: number | undefined;
+  total: number | undefined;
 }
