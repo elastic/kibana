@@ -179,7 +179,6 @@ export class FleetPlugin
   private securitySetup?: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
-  private fleetSetupStatus: 'initial' | 'pending' | 'complete';
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -189,7 +188,6 @@ export class FleetPlugin
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
-    this.fleetSetupStatus = 'initial';
   }
 
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
@@ -339,12 +337,7 @@ export class FleetPlugin
 
     const fleetSetupPromise = (async () => {
       try {
-        if (this.fleetSetupStatus === 'pending' || this.fleetSetupStatus === 'complete') {
-          return;
-        }
-
         logger.info('Beginning fleet setup');
-        this.fleetSetupStatus = 'pending';
 
         const { nonFatalErrors } = await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
@@ -359,12 +352,9 @@ export class FleetPlugin
         }
 
         logger.info('Fleet setup completed');
-        this.fleetSetupStatus = 'complete';
       } catch (error) {
         logger.warn('Fleet setup failed');
         logger.warn(error);
-
-        this.fleetSetupStatus = 'initial';
       }
     })();
 
