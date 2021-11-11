@@ -19,5 +19,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./ip_to_hostname'));
     loadTestFile(require.resolve('./http_source'));
     loadTestFile(require.resolve('./metric_threshold_alert'));
+    loadTestFile(require.resolve('./metrics_overview_top'));
   });
 }
