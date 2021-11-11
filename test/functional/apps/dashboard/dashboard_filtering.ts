@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await dashboardExpect.savedSearchRowsMissing();
       });
 
       it('timelion is filtered', async () => {
@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await dashboardExpect.savedSearchRowsMissing();
       });
 
       it('timelion is filtered', async () => {
@@ -235,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowCount(1);
+        await dashboardExpect.savedSearchRowsExist();
       });
 
       it('vega', async () => {

@@ -225,15 +225,23 @@ export class DashboardExpectService extends FtrService {
     await this.textWithinTestSubjectsExists(values, 'markdownBody');
   }
 
-  async savedSearchRowCount(expectedCount: number) {
-    this.log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
+  async savedSearchRowCount(expectedMinCount: number) {
+    this.log.debug(`DashboardExpect.savedSearchRowCount(${expectedMinCount})`);
     await this.retry.try(async () => {
       const savedSearchRows = await this.testSubjects.findAll(
         'docTableExpandToggleColumn',
         this.findTimeout
       );
-      expect(savedSearchRows.length).to.be(expectedCount);
+      expect(savedSearchRows.length).to.be.above(expectedMinCount);
     });
+  }
+
+  async savedSearchRowsExist() {
+    this.testSubjects.existOrFail('docTableExpandToggleColumn');
+  }
+
+  async savedSearchRowsMissing() {
+    this.testSubjects.missingOrFail('docTableExpandToggleColumn');
   }
 
   async dataTableRowCount(expectedCount: number) {
