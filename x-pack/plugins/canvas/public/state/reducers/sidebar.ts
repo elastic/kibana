@@ -9,17 +9,14 @@ import { handleActions } from 'redux-actions';
 import { State } from '../../../types';
 import { SetGroupFiltersByOptionType, SetGroupFiltersByOptionPayload } from '../actions/sidebar';
 
-export const sidebarReducer = handleActions<
-  State['persistent']['workpad'],
-  SetGroupFiltersByOptionPayload
->(
+export const sidebarReducer = handleActions<State['transient'], SetGroupFiltersByOptionPayload>(
   {
-    [SetGroupFiltersByOptionType]: (workpadState, { payload }) => {
+    [SetGroupFiltersByOptionType]: (transientState, { payload }) => {
       return {
-        ...workpadState,
-        sidebar: { ...(workpadState.sidebar ?? {}), groupFiltersByOption: payload },
+        ...transientState,
+        sidebar: { ...transientState.sidebar, groupFiltersByOption: payload },
       };
     },
   },
-  {} as State['persistent']['workpad']
+  {} as State['transient']
 );

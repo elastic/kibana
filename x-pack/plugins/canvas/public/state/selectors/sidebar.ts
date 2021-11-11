@@ -8,5 +8,5 @@
 import { State } from '../../../types';
 
 export const getGroupFiltersByOption = (state: State) => {
-  return state.persistent.workpad.sidebar?.groupFiltersByOption;
+  return state.transient.sidebar.groupFiltersByOption;
 };

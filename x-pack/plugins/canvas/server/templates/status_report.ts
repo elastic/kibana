@@ -886,6 +886,5 @@ export const status: CanvasTemplate = {
     },
     '@timestamp': '2019-04-10T18:07:50.022Z',
     '@created': '2019-04-10T13:07:03.261Z',
-    sidebar: {},
   },
 };

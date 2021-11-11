@@ -40,6 +40,7 @@ export const getInitialState = (path) => {
       // In there will live an object with a status (string), value (any), and error (Error) property.
       // If the state is 'error', the error property will be the error object, the value will not change
       // See the resolved_args reducer for more information.
+      sidebar: {},
     },
     persistent: {
       schemaVersion: 2,
