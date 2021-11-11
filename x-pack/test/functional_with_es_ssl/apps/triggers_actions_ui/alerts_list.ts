@@ -206,6 +206,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    it('should be able to mute the rule with non "alerts" consumer from a non editable context', async () => {
+      const createdAlert = await createAlert({ consumer: 'siem' });
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await testSubjects.click('muteButton');
+
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        const muteBadge = await testSubjects.find('mutedActionsBadge');
+        expect(await muteBadge.isDisplayed()).to.eql(true);
+      });
+    });
+
     it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
       await muteAlert(createdAlert.id);
@@ -463,6 +479,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
         expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
       });
+      await testSubjects.click('alertTypeFilterButton');
+
+      // de-select action type filter
+      await testSubjects.click('actionTypeFilterButton');
+      await testSubjects.click('actionType.slackFilterOption');
+
+      await testSubjects.missingOrFail('centerJustifiedSpinner');
     });
   });
 };
