@@ -15,7 +15,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   let version: string = '';
 
-  describe('feature controls saved objects management', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/118272
+  describe.skip('feature controls saved objects management', () => {
     before(async () => {
       version = await kibanaServer.version.get();
       await kibanaServer.importExport.load(
