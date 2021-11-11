@@ -149,8 +149,6 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       isPendingStatusDisabled,
       pendingIsolate,
       pendingUnIsolate,
-      wasIsolating,
-      wasReleasing,
     ]);
   }
 );
