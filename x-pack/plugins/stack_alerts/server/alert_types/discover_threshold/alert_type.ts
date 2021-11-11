@@ -121,7 +121,8 @@ export function getAlertType(
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
-        { name: 'searchSource', description: 'SearchSource' },
+        { name: 'searchSourceJSON', description: 'SearchSourceJSON' },
+        { name: 'searchSourceReferencesJSON', description: 'searchSourceReferencesJSON' },
         ...alertParamsVariables,
       ],
     },
