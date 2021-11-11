@@ -29,11 +29,13 @@ export function createCreateIndexStream({
   client,
   stats,
   skipExisting = false,
+  docsOnly = false,
   log,
 }: {
   client: KibanaClient;
   stats: Stats;
   skipExisting?: boolean;
+  docsOnly?: boolean;
   log: ToolingLog;
 }) {
   const skipDocsFromIndices = new Set();
@@ -42,6 +44,7 @@ export function createCreateIndexStream({
   // previous indices are removed so we're starting w/ a clean slate for
   // migrations. This only needs to be done once per archive load operation.
   let kibanaIndexAlreadyDeleted = false;
+  let kibanaTaskManagerIndexAlreadyDeleted = false;
 
   async function handleDoc(stream: Readable, record: DocRecord) {
     if (skipDocsFromIndices.has(record.value.index)) {
@@ -56,13 +59,17 @@ export function createCreateIndexStream({
 
     // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
     const isPre7Mapping = !!mappings && Object.keys(mappings).length > 0 && !mappings.properties;
-    const isKibana = index.startsWith('.kibana');
+    const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
+    const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
         if (isKibana && !kibanaIndexAlreadyDeleted) {
-          await deleteKibanaIndices({ client, stats, log });
-          kibanaIndexAlreadyDeleted = true;
+          await deleteKibanaIndices({ client, stats, log }); // delete all .kibana* indices
+          kibanaIndexAlreadyDeleted = kibanaTaskManagerIndexAlreadyDeleted = true;
+        } else if (isKibanaTaskManager && !kibanaTaskManagerIndexAlreadyDeleted) {
+          await deleteKibanaIndices({ client, stats, onlyTaskManager: true, log }); // delete only .kibana_task_manager* indices
+          kibanaTaskManagerIndexAlreadyDeleted = true;
         }
 
         await client.indices.create(
