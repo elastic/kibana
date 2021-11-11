@@ -48,7 +48,7 @@ const getMockObject = (
       href: '/app/security/cases',
       id: 'case',
       name: 'Cases',
-      urlKey: 'case',
+      urlKey: 'cases',
     },
     hosts: {
       disabled: false,
