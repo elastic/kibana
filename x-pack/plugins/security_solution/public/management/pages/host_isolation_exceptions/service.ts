@@ -81,7 +81,7 @@ export async function createHostIsolationExceptionItem({
   });
 }
 
-export async function deleteHostIsolationExceptionItems(http: HttpStart, id: string) {
+export async function deleteOneHostIsolationExceptionItem(http: HttpStart, id: string) {
   await ensureHostIsolationExceptionsListExists(http);
   return http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
     query: {
