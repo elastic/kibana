@@ -159,13 +159,13 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   },
   [DOC_TABLE_LEGACY]: {
     name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
-      defaultMessage: 'Disable Document Explorer',
+      defaultMessage: 'Document Explorer or classic view',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'The new Document Explorer in Discover offers better data sorting, resizeable columns, and a full screen view. ' +
-        'Turn on this option to use the classic Discover. Turn off to use the new Document Explorer. ',
+        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),

@@ -93,8 +93,8 @@ export function OptionsPopover(props: OptionsPopoverProps) {
               fullWidth
               href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
             >
-              {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
-                defaultMessage: 'Get started',
+              {i18n.translate('discover.openOptionsPopover.tryDocumentExplorer', {
+                defaultMessage: 'Try Document Explorer',
               })}
             </EuiButton>
           </>
@@ -107,7 +107,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
             href={addBasePath(`/app/management/kibana/settings?query=category:(discover)`)}
           >
             {i18n.translate('discover.openOptionsPopover.gotToSettings', {
-              defaultMessage: 'Go to Discover settings',
+              defaultMessage: 'View Discover settings',
             })}
           </EuiButtonEmpty>
         </EuiTextAlign>
