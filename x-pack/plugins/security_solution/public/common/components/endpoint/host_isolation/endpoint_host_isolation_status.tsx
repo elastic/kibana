@@ -64,7 +64,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
           return null;
         }
         // else host was isolating or is isolated, then show isolation badge
-        else if ((wasIsolating.current && !wasReleasing.current) || isIsolated) {
+        else if ((!isIsolated && wasIsolating.current && !wasReleasing.current) || isIsolated) {
           return (
             <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
               <FormattedMessage
