@@ -56,7 +56,7 @@ export const roleMappingsManagementApp = Object.freeze({
 
         const roleMappingsAPIClient = new RoleMappingsAPIClient(core.http);
 
-        const EditRoleMappingsPageWithBreadcrumbs = () => {
+        const EditRoleMappingsPageWithBreadcrumbs = ({ action }: { action: 'edit' | 'clone' }) => {
           const { name } = useParams<{ name?: string }>();
 
           // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
@@ -64,7 +64,7 @@ export const roleMappingsManagementApp = Object.freeze({
           const decodedName = name ? tryDecodeURIComponent(name) : undefined;
 
           const breadcrumbObj =
-            name && decodedName
+            action === 'edit' && name && decodedName
               ? { text: decodedName, href: `/edit/${encodeURIComponent(name)}` }
               : {
                   text: i18n.translate('xpack.security.roleMappings.createBreadcrumb', {
@@ -75,6 +75,7 @@ export const roleMappingsManagementApp = Object.freeze({
           return (
             <Breadcrumb text={breadcrumbObj.text} href={breadcrumbObj.href}>
               <EditRoleMappingPage
+                action={action}
                 name={decodedName}
                 roleMappingsAPI={roleMappingsAPIClient}
                 rolesAPIClient={new RolesAPIClient(core.http)}
@@ -105,7 +106,10 @@ export const roleMappingsManagementApp = Object.freeze({
                       />
                     </Route>
                     <Route path="/edit/:name?">
-                      <EditRoleMappingsPageWithBreadcrumbs />
+                      <EditRoleMappingsPageWithBreadcrumbs action="edit" />
+                    </Route>
+                    <Route path="/clone/:name">
+                      <EditRoleMappingsPageWithBreadcrumbs action="clone" />
                     </Route>
                   </Breadcrumb>
                 </BreadcrumbsProvider>

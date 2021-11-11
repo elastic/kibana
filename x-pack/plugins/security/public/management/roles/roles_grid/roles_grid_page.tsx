@@ -8,7 +8,7 @@
 import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -36,6 +37,7 @@ import {
   isRoleReserved,
 } from '../../../../common/model';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
+import { ActionsEuiTableFormatting } from '../../table_utils';
 import type { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
@@ -129,53 +131,55 @@ export class RolesGridPage extends Component<Props, State> {
           />
         ) : null}
 
-        <EuiInMemoryTable
-          itemId="name"
-          responsive={false}
-          columns={this.getColumnConfig()}
-          hasActions={true}
-          selection={{
-            selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
-            selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
-            onSelectionChange: (selection: Role[]) => this.setState({ selection }),
-          }}
-          pagination={{
-            initialPageSize: 20,
-            pageSizeOptions: [10, 20, 30, 50, 100],
-          }}
-          items={this.state.visibleRoles}
-          loading={roles.length === 0}
-          search={{
-            toolsLeft: this.renderToolsLeft(),
-            toolsRight: this.renderToolsRight(),
-            box: {
-              incremental: true,
-              'data-test-subj': 'searchRoles',
-            },
-            onChange: (query: Record<string, any>) => {
-              this.setState({
-                filter: query.queryText,
-                visibleRoles: this.getVisibleRoles(
-                  this.state.roles,
-                  query.queryText,
-                  this.state.includeReservedRoles
-                ),
-              });
-            },
-          }}
-          sorting={{
-            sort: {
-              field: 'name',
-              direction: 'asc',
-            },
-          }}
-          rowProps={() => {
-            return {
-              'data-test-subj': 'roleRow',
-            };
-          }}
-          isSelectable
-        />
+        <ActionsEuiTableFormatting>
+          <EuiInMemoryTable
+            itemId="name"
+            responsive={false}
+            columns={this.getColumnConfig()}
+            hasActions={true}
+            selection={{
+              selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
+              selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
+              onSelectionChange: (selection: Role[]) => this.setState({ selection }),
+            }}
+            pagination={{
+              initialPageSize: 20,
+              pageSizeOptions: [10, 20, 30, 50, 100],
+            }}
+            items={this.state.visibleRoles}
+            loading={roles.length === 0}
+            search={{
+              toolsLeft: this.renderToolsLeft(),
+              toolsRight: this.renderToolsRight(),
+              box: {
+                incremental: true,
+                'data-test-subj': 'searchRoles',
+              },
+              onChange: (query: Record<string, any>) => {
+                this.setState({
+                  filter: query.queryText,
+                  visibleRoles: this.getVisibleRoles(
+                    this.state.roles,
+                    query.queryText,
+                    this.state.includeReservedRoles
+                  ),
+                });
+              },
+            }}
+            sorting={{
+              sort: {
+                field: 'name',
+                direction: 'asc',
+              },
+            }}
+            rowProps={() => {
+              return {
+                'data-test-subj': 'roleRow',
+              };
+            }}
+            isSelectable
+          />
+        </ActionsEuiTableFormatting>
       </>
     );
   };
@@ -219,48 +223,98 @@ export class RolesGridPage extends Component<Props, State> {
         width: '150px',
         actions: [
           {
-            available: (role: Role) => !isRoleReadOnly(role),
-            render: (role: Role) => {
-              const title = i18n.translate('xpack.security.management.roles.editRoleActionName', {
-                defaultMessage: `Edit {roleName}`,
-                values: { roleName: role.name },
-              });
-
-              return (
-                <EuiButtonIcon
-                  aria-label={title}
-                  data-test-subj={`edit-role-action-${role.name}`}
-                  title={title}
-                  color={'primary'}
-                  iconType={'pencil'}
-                  {...reactRouterNavigate(
-                    this.props.history,
-                    getRoleManagementHref('edit', role.name)
-                  )}
-                />
-              );
-            },
-          },
-          {
             available: (role: Role) => !isRoleReserved(role),
+            isPrimary: true,
             render: (role: Role) => {
               const title = i18n.translate('xpack.security.management.roles.cloneRoleActionName', {
+                defaultMessage: `Clone`,
+              });
+
+              const label = i18n.translate('xpack.security.management.roles.cloneRoleActionLabel', {
                 defaultMessage: `Clone {roleName}`,
                 values: { roleName: role.name },
               });
 
               return (
-                <EuiButtonIcon
-                  aria-label={title}
-                  data-test-subj={`clone-role-action-${role.name}`}
-                  title={title}
-                  color={'primary'}
-                  iconType={'copy'}
-                  {...reactRouterNavigate(
-                    this.props.history,
-                    getRoleManagementHref('clone', role.name)
-                  )}
-                />
+                <EuiToolTip content={title}>
+                  <EuiButtonEmpty
+                    aria-label={label}
+                    color={'primary'}
+                    data-test-subj={`clone-role-action-${role.name}`}
+                    disabled={this.state.selection.length >= 1}
+                    iconType={'copy'}
+                    {...reactRouterNavigate(
+                      this.props.history,
+                      getRoleManagementHref('clone', role.name)
+                    )}
+                  >
+                    {title}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              );
+            },
+          },
+          {
+            available: (role: Role) => !role.metadata || !role.metadata._reserved,
+            render: (role: Role) => {
+              const title = i18n.translate('xpack.security.management.roles.deleteRoleActionName', {
+                defaultMessage: `Delete`,
+              });
+
+              const label = i18n.translate(
+                'xpack.security.management.roles.deleteRoleActionLabel',
+                {
+                  defaultMessage: `Delete {roleName}`,
+                  values: { roleName: role.name },
+                }
+              );
+
+              return (
+                <EuiToolTip content={title}>
+                  <EuiButtonEmpty
+                    aria-label={label}
+                    color={'danger'}
+                    data-test-subj={`delete-role-action-${role.name}`}
+                    disabled={this.state.selection.length >= 1}
+                    iconType={'trash'}
+                    onClick={() => this.deleteOneRole(role)}
+                  >
+                    {title}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              );
+            },
+          },
+          {
+            available: (role: Role) => !isRoleReadOnly(role),
+            enable: () => this.state.selection.length === 0,
+            isPrimary: true,
+            render: (role: Role) => {
+              const title = i18n.translate('xpack.security.management.roles.editRoleActionName', {
+                defaultMessage: `Clone`,
+              });
+
+              const label = i18n.translate('xpack.security.management.roles.editRoleActionLabel', {
+                defaultMessage: `Edit {roleName}`,
+                values: { roleName: role.name },
+              });
+
+              return (
+                <EuiToolTip content={title}>
+                  <EuiButtonEmpty
+                    aria-label={label}
+                    color={'primary'}
+                    data-test-subj={`edit-role-action-${role.name}`}
+                    disabled={this.state.selection.length >= 1}
+                    iconType={'pencil'}
+                    {...reactRouterNavigate(
+                      this.props.history,
+                      getRoleManagementHref('edit', role.name)
+                    )}
+                  >
+                    {title}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               );
             },
           },
@@ -337,6 +391,13 @@ export class RolesGridPage extends Component<Props, State> {
     this.loadRoles();
   };
 
+  private deleteOneRole = (roleToDelete: Role) => {
+    this.setState({
+      selection: [roleToDelete],
+      showDeleteConfirmation: true,
+    });
+  };
+
   private async loadRoles() {
     try {
       const roles = await this.props.rolesAPIClient.getRoles();
@@ -385,6 +446,7 @@ export class RolesGridPage extends Component<Props, State> {
       </EuiButton>
     );
   }
+
   private renderToolsRight() {
     return (
       <EuiSwitch
