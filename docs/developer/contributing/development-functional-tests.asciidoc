@@ -490,7 +490,7 @@ From the command line run:
 
 ["source","shell"]
 -----------
-node --debug-brk --inspect scripts/functional_test_runner
+node --inspect-brk scripts/functional_test_runner
 -----------
 
 This prints out a URL that you can visit in Chrome and debug your functional tests in the browser.

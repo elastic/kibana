@@ -28,6 +28,7 @@ import { uniqBy } from 'lodash';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getObservabilityAlerts } from '../../../../services/get_observability_alerts';
+import { paths } from '../../../../config';
 
 const ALL_TYPES = 'ALL_TYPES';
 const allTypes = {
@@ -41,8 +42,8 @@ export function AlertsSection() {
   const { config, core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
   const manageLink = config.unsafe.alertingExperience.enabled
-    ? core.http.basePath.prepend(`/app/observability/alerts`)
-    : core.http.basePath.prepend(`/app/management/insightsAndAlerting/triggersActions/rules`);
+    ? core.http.basePath.prepend(paths.observability.alerts)
+    : core.http.basePath.prepend(paths.management.rules);
 
   const { data, status } = useFetcher(() => {
     return getObservabilityAlerts({ core });
@@ -137,9 +138,7 @@ export function AlertsSection() {
               <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
                 <EuiFlexItem grow={false}>
                   <EuiLink
-                    href={core.http.basePath.prepend(
-                      `/app/management/insightsAndAlerting/triggersActions/alert/${alert.id}`
-                    )}
+                    href={core.http.basePath.prepend(paths.management.alertDetails(alert.id))}
                   >
                     <EuiText size="s">{alert.name}</EuiText>
                   </EuiLink>
