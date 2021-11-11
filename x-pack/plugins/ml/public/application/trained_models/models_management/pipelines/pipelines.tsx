@@ -12,7 +12,7 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiTitle,
-  EuiFlexGroup,
+  EuiPanel,
   EuiAccordion,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,16 +41,9 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
               key={pipelineName}
               id={pipelineName}
               buttonContent={
-                <EuiFlexGroup gutterSize={'s'}>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h5>{pipelineName}</h5>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  {pipelineDefinition.description ? (
-                    <EuiFlexItem grow={false}>({pipelineDefinition.description})</EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
+                <EuiTitle size="xs">
+                  <h5>{pipelineName}</h5>
+                </EuiTitle>
               }
               extraAction={
                 <EuiButtonEmpty
@@ -75,30 +68,43 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
               paddingSize="l"
             >
               <EuiFlexGrid columns={2}>
-                <EuiFlexItem>
-                  <EuiTitle size={'xxs'}>
-                    <h6>
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
-                        defaultMessage="Definition"
-                      />
-                    </h6>
-                  </EuiTitle>
-                  <EuiCodeBlock
-                    language="json"
-                    fontSize="m"
-                    paddingSize="m"
-                    overflowHeight={300}
-                    isCopyable
-                  >
-                    {JSON.stringify(pipelineDefinition, null, 2)}
-                  </EuiCodeBlock>
-                </EuiFlexItem>
+                {ingestStats?.pipelines ? (
+                  <EuiFlexItem>
+                    <EuiPanel>
+                      <EuiTitle size={'xxs'}>
+                        <h6>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.modelsList.expandedRow.ingestStatsTitle"
+                            defaultMessage="Ingest stats"
+                          />
+                        </h6>
+                      </EuiTitle>
+
+                      <ProcessorsStats stats={ingestStats!.pipelines[pipelineName].processors} />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                ) : null}
 
                 <EuiFlexItem>
-                  {ingestStats?.pipelines ? (
-                    <ProcessorsStats stats={ingestStats!.pipelines[pipelineName].processors} />
-                  ) : null}
+                  <EuiPanel>
+                    <EuiTitle size={'xxs'}>
+                      <h6>
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
+                          defaultMessage="Definition"
+                        />
+                      </h6>
+                    </EuiTitle>
+                    <EuiCodeBlock
+                      language="json"
+                      fontSize="m"
+                      paddingSize="m"
+                      overflowHeight={300}
+                      isCopyable
+                    >
+                      {JSON.stringify(pipelineDefinition, null, 2)}
+                    </EuiCodeBlock>
+                  </EuiPanel>
                 </EuiFlexItem>
               </EuiFlexGrid>
             </EuiAccordion>
