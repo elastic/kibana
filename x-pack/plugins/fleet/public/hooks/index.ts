@@ -19,7 +19,6 @@ export { usePagination, PAGE_SIZE_OPTIONS } from './use_pagination';
 export { useUrlPagination } from './use_url_pagination';
 export { useSorting } from './use_sorting';
 export { useDebounce } from './use_debounce';
-export { useUrlModal } from './use_url_modal';
 export * from './use_request';
 export * from './use_input';
 export * from './use_url_params';
