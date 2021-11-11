@@ -46,6 +46,18 @@ const formatterDictionary: Record<string, (value: any) => JSX.Element | string |
       </div>
     );
   },
+  roles: (tags: string[]) => {
+    if (tags.length === 0) return;
+    return (
+      <div>
+        {tags.map((tag) => (
+          <EuiBadge key={tag} color="hollow">
+            {tag}
+          </EuiBadge>
+        ))}
+      </div>
+    );
+  },
   create_time: timeFormatter,
   timestamp: timeFormatter,
 };
