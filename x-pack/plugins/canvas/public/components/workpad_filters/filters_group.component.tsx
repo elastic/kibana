@@ -36,7 +36,7 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
   return (
     <div className="canvasSidebar__expandable">
       <EuiAccordion
-        id="canvas-element-stats"
+        id={`canvas-filter-group-${name}`}
         buttonContent={name}
         initialIsOpen={true}
         className="canvasSidebar__accordion filtersSidebar__accordion"
