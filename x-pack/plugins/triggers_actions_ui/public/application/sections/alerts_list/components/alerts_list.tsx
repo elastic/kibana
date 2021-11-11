@@ -222,50 +222,48 @@ export const AlertsList: React.FunctionComponent = () => {
   }, []);
 
   async function loadAlertsData() {
-    if (alertTypesState.isInitialized) {
-      const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
-      if (hasAnyAuthorizedAlertType) {
-        setAlertsState({ ...alertsState, isLoading: true });
-        try {
-          const alertsResponse = await loadAlerts({
-            http,
-            page,
-            searchText,
-            typesFilter,
-            actionTypesFilter,
-            alertStatusesFilter,
-            sort,
-          });
-          await loadAlertAggs();
-          setAlertsState({
-            isLoading: false,
-            data: alertsResponse.data,
-            totalItemCount: alertsResponse.total,
-          });
+    const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
+    if (hasAnyAuthorizedAlertType) {
+      setAlertsState({ ...alertsState, isLoading: true });
+      try {
+        const alertsResponse = await loadAlerts({
+          http,
+          page,
+          searchText,
+          typesFilter,
+          actionTypesFilter,
+          alertStatusesFilter,
+          sort,
+        });
+        await loadAlertAggs();
+        setAlertsState({
+          isLoading: false,
+          data: alertsResponse.data,
+          totalItemCount: alertsResponse.total,
+        });
 
-          if (!alertsResponse.data?.length && page.index > 0) {
-            setPage({ ...page, index: 0 });
-          }
-
-          const isFilterApplied = !(
-            isEmpty(searchText) &&
-            isEmpty(typesFilter) &&
-            isEmpty(actionTypesFilter) &&
-            isEmpty(alertStatusesFilter)
-          );
-
-          setNoData(alertsResponse.data.length === 0 && !isFilterApplied);
-        } catch (e) {
-          toasts.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertsList.unableToLoadRulesMessage',
-              {
-                defaultMessage: 'Unable to load rules',
-              }
-            ),
-          });
-          setAlertsState({ ...alertsState, isLoading: false });
+        if (!alertsResponse.data?.length && page.index > 0) {
+          setPage({ ...page, index: 0 });
         }
+
+        const isFilterApplied = !(
+          isEmpty(searchText) &&
+          isEmpty(typesFilter) &&
+          isEmpty(actionTypesFilter) &&
+          isEmpty(alertStatusesFilter)
+        );
+
+        setNoData(alertsResponse.data.length === 0 && !isFilterApplied);
+      } catch (e) {
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadRulesMessage',
+            {
+              defaultMessage: 'Unable to load rules',
+            }
+          ),
+        });
+        setAlertsState({ ...alertsState, isLoading: false });
       }
       setInitialLoad(false);
     }
