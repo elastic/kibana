@@ -64,7 +64,7 @@ export interface CreateCaseFormProps extends Partial<CreateCaseFormFieldsProps> 
 }
 
 const empty: ActionConnector[] = [];
-const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
+export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ connectors, disableAlerts, isLoadingConnectors, hideConnectorServiceNowSir, withSteps }) => {
     const { isSubmitting } = useFormContext();
     const firstStep = useMemo(
