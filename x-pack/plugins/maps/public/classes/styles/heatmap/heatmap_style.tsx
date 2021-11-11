@@ -68,11 +68,13 @@ export class HeatmapStyle implements IStyle {
     mbMap,
     layerId,
     propertyName,
+    max,
     resolution,
   }: {
     mbMap: MbMap;
     layerId: string;
     propertyName: string;
+    max: number;
     resolution: GRID_RESOLUTION;
   }) {
     let radius;
@@ -83,18 +85,18 @@ export class HeatmapStyle implements IStyle {
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
       radius = 32;
     } else {
-      // SUPER_FINE or any other is not supported.
-      const errorMessage = i18n.translate('xpack.maps.style.heatmap.resolutionStyleErrorMessage', {
-        defaultMessage: `Resolution param not recognized: {resolution}`,
-        values: { resolution },
-      });
-      throw new Error(errorMessage);
+      radius = 16;
     }
     mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
-    mbMap.setPaintProperty(layerId, 'heatmap-weight', {
-      type: 'identity',
-      property: propertyName,
-    });
+    mbMap.setPaintProperty(layerId, 'heatmap-weight', [
+      'interpolate',
+      ['linear'],
+      ['get', propertyName],
+      0,
+      0,
+      max,
+      1
+    ]);
 
     const colorStops = getOrdinalMbColorRampStops(
       this._descriptor.colorRampName,

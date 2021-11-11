@@ -17,8 +17,6 @@ import { DataRequestContext } from '../../../actions';
 import { DataRequestAbortError } from '../../util/data_request';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 
-const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__'; // unique name to store scaled value for weighting
-
 export class HeatmapLayer extends AbstractLayer {
   private readonly _style: HeatmapStyle;
 
@@ -144,26 +142,22 @@ export class HeatmapLayer extends AbstractLayer {
     const propertyKey = this._getPropKeyOfSelectedMetric();
     const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
+      mbGeoJSONSource.setData(featureCollection);
+      
       let max = 1; // max will be at least one, since counts or sums will be at least one.
       for (let i = 0; i < featureCollection.features.length; i++) {
         max = Math.max(featureCollection.features[i].properties?.[propertyKey], max);
       }
-      for (let i = 0; i < featureCollection.features.length; i++) {
-        if (featureCollection.features[i].properties) {
-          featureCollection.features[i].properties![SCALED_PROPERTY_NAME] =
-            featureCollection.features[i].properties![propertyKey] / max;
-        }
-      }
-      mbGeoJSONSource.setData(featureCollection);
+      this.getCurrentStyle().setMBPaintProperties({
+        mbMap,
+        layerId: heatmapLayerId,
+        propertyName: propertyKey,
+        max,
+        resolution: this.getSource().getGridResolution(),
+      });
     }
 
     this.syncVisibilityWithMb(mbMap, heatmapLayerId);
-    this.getCurrentStyle().setMBPaintProperties({
-      mbMap,
-      layerId: heatmapLayerId,
-      propertyName: SCALED_PROPERTY_NAME,
-      resolution: this.getSource().getGridResolution(),
-    });
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
     mbMap.setLayerZoomRange(heatmapLayerId, this.getMinZoom(), this.getMaxZoom());
   }
