@@ -9,7 +9,7 @@ import { EuiAccordion } from '@elastic/eui';
 import React, { FC } from 'react';
 import { FormattedFilterViewInstance } from '../../../types';
 import { createFilledFilterView } from '../../lib/filter';
-import { Filter } from './filter';
+import { Filter } from './filter.component';
 import { filterViews } from './filter_views';
 import { FiltersGroup as FiltersGroupType } from './types';
 
