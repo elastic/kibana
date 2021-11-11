@@ -114,6 +114,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     };
     const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
       const newAdditionalProps: AdditionalPanelProps = {
+        className: 'eui-yScroll',
         style: {},
       };
 
@@ -122,7 +123,6 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
       }
 
       if (maxHeight) {
-        newAdditionalProps.style.overflowY = 'auto';
         newAdditionalProps.style.maxHeight = maxHeight;
       }
 
