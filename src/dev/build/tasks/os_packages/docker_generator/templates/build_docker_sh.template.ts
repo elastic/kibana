@@ -20,6 +20,9 @@ function generator({
   baseOSImage,
   architecture,
 }: TemplateContext) {
+  const dockerTargetName = `${imageTag}${imageFlavor}:${version}${
+    dockerTagQualifier ? '-' + dockerTagQualifier : ''
+  }`;
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -56,12 +59,12 @@ function generator({
   retry_docker_pull ${baseOSImage}
 
   echo "Building: kibana${imageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}:${version}${dockerTagQualifier} -f Dockerfile . || exit 1;
+  docker build -t ${dockerTargetName} -f Dockerfile . || exit 1;
 
-  docker save ${imageTag}${imageFlavor}:${version}${dockerTagQualifier} | gzip -c > ${dockerTargetFilename}
+  docker save ${dockerTargetName} | gzip -c > ${dockerTargetFilename}
 
-  echo "Pushing: ${imageTag}${imageFlavor}:${version}${dockerTagQualifier}"; \\
-  ${dockerPush} && docker image push ${imageTag}${imageFlavor}:${version}${dockerTagQualifier} || exit 1;
+  echo "Pushing: ${dockerTargetName}"; \\
+  ${dockerPush} && docker image push ${dockerTargetName} || exit 1;
   exit 0
   `);
 }
