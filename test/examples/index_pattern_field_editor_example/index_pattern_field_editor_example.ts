@@ -12,7 +12,7 @@ import { PluginFunctionalProviderContext } from 'test/plugin_functional/services
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
 
-  describe.only('', () => {
+  describe('', () => {
     it('finds an index pattern', async () => {
       await testSubjects.existOrFail('indexPatternTitle');
     });
