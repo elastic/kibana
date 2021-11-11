@@ -27,31 +27,23 @@ export interface Params {
   path?: t.HasProps;
 }
 
-interface Route {
-  handler: (params?: any) => JSX.Element;
-  params: Params;
-  exact?: boolean;
-}
-
-interface Routes {
-  [path: string]: Route;
-}
-
-export const routes: Routes = {
+export const routes = {
   '/': {
     handler: () => {
       return <HomePage />;
     },
     params: {},
+    exact: true,
   },
   '/landing': {
     handler: () => {
       return <LandingPage />;
     },
     params: {},
+    exact: true,
   },
   '/overview': {
-    handler: ({ query }) => {
+    handler: ({ query }: any) => {
       return <OverviewPage routeParams={{ query }} />;
     },
     params: {
@@ -62,13 +54,14 @@ export const routes: Routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    exact: true,
   },
   [casesPath]: {
     handler: () => {
       return <CasesPage />;
     },
-    exact: false,
     params: {},
+    exact: false,
   },
   '/alerts': {
     handler: () => {
@@ -77,6 +70,7 @@ export const routes: Routes = {
     params: {
       // Technically gets a '_a' param by using Kibana URL state sync helpers
     },
+    exact: true,
   },
   '/exploratory-view/': {
     handler: () => {
@@ -90,5 +84,6 @@ export const routes: Routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    exact: true,
   },
 };

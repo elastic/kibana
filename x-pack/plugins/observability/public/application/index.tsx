@@ -29,8 +29,9 @@ function App() {
   return (
     <>
       <Switch>
-        {Object.keys(routes).map((path) => {
-          const { handler, exact = true } = routes[path];
+        {Object.keys(routes).map((key) => {
+          const path = key as keyof typeof routes;
+          const { handler, exact } = routes[path];
           const Wrapper = () => {
             const params = useRouteParams(path);
             return handler(params);
