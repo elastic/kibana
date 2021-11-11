@@ -286,7 +286,7 @@ function ObservabilityActions({
                   iconType="boxesHorizontal"
                   aria-label={actionsToolTip}
                   onClick={() => toggleActionsPopover(eventId)}
-                  data-test-subj="alerts-table-row-action-more"
+                  data-test-subj="alertsTableRowActionMore"
                 />
               </EuiToolTip>
             }
@@ -385,6 +385,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       },
       renderCellValue: getRenderCellValue({ setFlyoutAlert }),
       rowRenderers: NO_ROW_RENDER,
+      // TODO: implement Kibana data view runtime fields in observability
+      runtimeMappings: {},
       start: rangeFrom,
       setRefetch,
       sort: [
