@@ -10,12 +10,12 @@ import { Redirect, Route, Router, Switch } from 'react-router-dom';
 import React from 'react';
 import { History } from 'history';
 import { KibanaContextProvider } from '../../../kibana_react/public';
-import { ContextAppRoute } from './apps/context';
-import { SingleDocRoute } from './apps/doc';
-import { DiscoverMainRoute } from './apps/main';
-import { NotFoundRoute } from './apps/not_found';
+import { ContextAppRoute } from './context';
+import { SingleDocRoute } from './doc';
+import { DiscoverMainRoute } from './main';
+import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
-import { DiscoverMainProps } from './apps/main/discover_main_route';
+import { DiscoverMainProps } from './main/discover_main_route';
 
 export const discoverRouter = (services: DiscoverServices, history: History) => {
   const mainRouteProps: DiscoverMainProps = {
