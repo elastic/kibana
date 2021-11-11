@@ -10,7 +10,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
 import { AppDeepLink } from 'kibana/public';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -29,6 +29,13 @@ import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/mocks';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+
+// hide react-query output in console
+setLogger({
+  error: () => {},
+  log: () => {},
+  warn: () => {},
+});
 
 /**
  * Mocked app root context renderer
@@ -86,14 +93,6 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
   }
   return state;
 };
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // turns retries off
-      retry: false,
-    },
-  },
-});
 
 /**
  * Creates a mocked endpoint app context custom renderer that can be used to render
@@ -120,6 +119,17 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     ...managementMiddlewareFactory(coreStart, depsStart),
     middlewareSpy.actionSpyMiddleware,
   ]);
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        // turns retries off
+        retry: false,
+        // prevent jest did not exit errors
+        cacheTime: Infinity,
+      },
+    },
+  });
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
