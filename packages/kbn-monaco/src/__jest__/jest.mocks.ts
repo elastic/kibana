@@ -33,8 +33,8 @@ const createMockModel = (ID: string) => {
   return model;
 };
 
-jest.mock('../src/monaco_imports', () => {
-  const original = jest.requireActual('../src/monaco_imports');
+jest.mock('../monaco_imports', () => {
+  const original = jest.requireActual('../monaco_imports');
   const originalMonaco = original.monaco;
   const originalEditor = original.monaco.editor;
 
