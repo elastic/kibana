@@ -27,7 +27,6 @@ import {
   JobId,
   ManagementLinkFn,
   ReportApiJSON,
-  ReportSource,
 } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
