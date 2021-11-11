@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENTS_PREFIX } from '../../constants';
 
 import { getAgentsByKuery } from './crud';
 import { unenrollAgent } from './unenroll';
@@ -21,7 +21,7 @@ export async function unenrollForAgentPolicyId(
   let page = 1;
   while (hasMore) {
     const { agents } = await getAgentsByKuery(esClient, {
-      kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${policyId}"`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}"`,
       page: page++,
       perPage: 1000,
       showInactive: false,

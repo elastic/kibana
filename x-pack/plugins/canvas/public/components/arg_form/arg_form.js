@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ErrorBoundary } from '../enhance/error_boundary';
 import { ArgSimpleForm } from './arg_simple_form';
@@ -39,11 +39,9 @@ export const ArgForm = (props) => {
     onValueRemove,
     workpad,
     assets,
-    renderError,
-    setRenderError,
     resolvedArgValue,
   } = props;
-
+  const [renderError, setRenderError] = useState(false);
   const isMounted = useRef();
 
   useEffect(() => {
@@ -62,21 +60,15 @@ export const ArgForm = (props) => {
       {({ error, resetErrorState }) => {
         const { template, simpleTemplate } = argTypeInstance.argType;
         const hasError = Boolean(error) || renderError;
-
         const argumentProps = {
           ...templateProps,
           resolvedArgValue,
           defaultValue: argTypeInstance.default,
 
           renderError: () => {
-            // TODO: don't do this
-            // It's an ugly hack to avoid React's render cycle and ensure the error happens on the next tick
-            // This is important; Otherwise we end up updating state in the middle of a render cycle
-            Promise.resolve().then(() => {
-              // Provide templates with a renderError method, and wrap the error in a known error type
-              // to stop Kibana's window.error from being called
-              isMounted.current && setRenderError(true);
-            });
+            // Provide templates with a renderError method, and wrap the error in a known error type
+            // to stop Kibana's window.error from being called
+            isMounted.current && setRenderError(true);
           },
           error: hasError,
           setLabel: (label) => isMounted.current && setLabel(label),
@@ -154,7 +146,5 @@ ArgForm.propTypes = {
   expand: PropTypes.bool,
   setExpand: PropTypes.func,
   onValueRemove: PropTypes.func,
-  renderError: PropTypes.bool.isRequired,
-  setRenderError: PropTypes.func.isRequired,
   resolvedArgValue: PropTypes.any,
 };
