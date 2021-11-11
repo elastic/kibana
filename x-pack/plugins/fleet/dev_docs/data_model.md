@@ -37,8 +37,6 @@ All of the code that interacts with this index is currently located in
 [`x-pack/plugins/fleet/server/services/agents/crud.ts`](../server/services/agents/crud.ts) and the schema of these
 documents is maintained by the `FleetServerAgent` TypeScript interface.
 
-Prior to Fleet Server, this data was stored in the `fleet-agents` Saved Object type which is now obsolete.
-
 ### `.fleet-actions` index
 
 Each document in this index represents an action that was initiated by a user and needs to be processed by Fleet Server
@@ -167,46 +165,3 @@ represents the relative file path of the file from the package contents
 
 Used as "tombstone record" to indicate that a package that was installed by default through preconfiguration was
 explicitly deleted by user. Used to avoid recreating a preconfiguration policy that a user explicitly does not want.
-
-### `fleet-agents` 
-
-**DEPRECATED in favor of `.fleet-agents` index.**
-
-- Constant in code: `AGENT_SAVED_OBJECT_TYPE`
-- Introduced in ?
-- [Code Link](../server/saved_objects/index.ts#76)
-- Migrations: 7.10.0, 7.12.0
-- References to other objects:
-  - `policy_id` - ID that points to the policy (`ingest-agent-policies`) this agent is assigned to.
-  - `access_api_key_id`
-  - `default_api_key_id`
-
-Tracks an individual Elastic Agent's enrollment in the Fleet, which policy it is current assigned to, its check in
-status, which packages are currently installed, and other metadata about the Agent.
-
-### `fleet-agent-actions`
-
-**DEPRECATED in favor of `.fleet-agent-actions` index.**
-
-- Constant in code: `AGENT_ACTION_SAVED_OBJECT_TYPE`
-- Introduced in ?
-- [Code Link](../server/saved_objects/index.ts#113)
-- Migrations: 7.10.0
-- References to other objects:
-  - `agent_id` - ID that points to the agent for this action (`fleet-agents`)
-  - `policy_id`- ID that points to the policy for this action (`ingest-agent-policies`)
-
-
-### `fleet-enrollment-api-keys`
-
-**DEPRECATED in favor of `.fleet-enrollment-api-keys` index.**
-
-- Constant in code: `ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE`
-- Introduced in ?
-- [Code Link](../server/saved_objects/index.ts#166)
-- Migrations: 7.10.0
-- References to other objects:
-  - `api_key_id`
-  - `policy_id` - ID that points to an agent policy (`ingest-agent-policies`)
-
-Contains an enrollment key that can be used to enroll a new agent in a specific agent policy.
