@@ -309,6 +309,7 @@ export class ResourceInstaller {
 
         template: {
           settings: {
+            hidden: true,
             'index.lifecycle': {
               name: ilmPolicyName,
               // TODO: fix the types in the ES package, they don't include rollover_alias???
