@@ -38,7 +38,7 @@ export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
     (callApmApi) => {
       if (uxQuery && popoverIsOpen) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/url-search',
+          endpoint: 'GET /internal/apm/ux/url-search',
           params: {
             query: {
               ...uxQuery,

@@ -13,10 +13,11 @@ import {
 } from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 export const createLastSuccessfulStepRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/synthetics/step/success/',
+  path: API_URLS.SYNTHETICS_SUCCESSFUL_STEP,
   validate: {
     query: schema.object({
       monitorId: schema.string(),

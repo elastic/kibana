@@ -16,10 +16,11 @@ import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
+import { API_URLS } from '../../common/constants';
 
 export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/dynamic_settings',
+  path: API_URLS.DYNAMIC_SETTINGS,
   validate: false,
   handler: async ({ savedObjectsClient }): Promise<any> => {
     return savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
@@ -47,7 +48,7 @@ export const validateCertsValues = (
 
 export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'POST',
-  path: '/api/uptime/dynamic_settings',
+  path: API_URLS.DYNAMIC_SETTINGS,
   validate: {
     body: schema.object({
       heartbeatIndices: schema.string(),

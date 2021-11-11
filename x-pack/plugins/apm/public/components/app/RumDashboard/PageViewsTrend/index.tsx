@@ -39,7 +39,7 @@ export function PageViewsTrend() {
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/page-view-trends',
+          endpoint: 'GET /internal/apm/ux/page-view-trends',
           params: {
             query: {
               start,
