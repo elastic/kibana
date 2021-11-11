@@ -23,6 +23,7 @@ export const createGridCell = (
 ) => {
   // Changing theme requires a full reload of the page, so we can cache here
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const tableCellClassName = fitRowToContent ? '' : 'lnsTableCell';
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, minMaxByColumnId, getColorForValue } = useContext(DataContext);
     const rowValue = table?.rows[rowIndex][columnId];
@@ -76,7 +77,7 @@ export const createGridCell = (
          */
         dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="lnsTableCellContent"
-        className={`${fitRowToContent ? '' : 'lnsTableCell'} ${alignmentClassName}`}
+        className={`${tableCellClassName} ${alignmentClassName}`}
       />
     );
   };

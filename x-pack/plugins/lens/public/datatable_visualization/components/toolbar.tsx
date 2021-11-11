@@ -36,7 +36,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             data-test-subj="lens-legend-auto-height-switch"
             label=""
             showLabel={false}
-            checked={!!state.fitRowToContent}
+            checked={Boolean(state.fitRowToContent)}
             onChange={() => {
               const current = state.fitRowToContent ?? false;
               setState({
