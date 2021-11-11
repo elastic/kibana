@@ -49,7 +49,7 @@ export function registerSearchRoute({
                   index: request.body.index,
                   body: request.body.body,
                   track_total_hits: true,
-                  ignore_throttled: !includeFrozen,
+                  ...(includeFrozen ? { ignore_throttled: false } : {}),
                 })
               ).body,
             },
