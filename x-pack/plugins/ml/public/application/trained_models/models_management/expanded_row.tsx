@@ -6,30 +6,28 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 import {
   EuiBadge,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiListGroup,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
-import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
-import { ModelItemFull } from './models_list';
-import { useMlLocator } from '../../contexts/kibana';
+import type { ModelItemFull } from './models_list';
 import { timeFormatter } from '../../../../common/util/date_utils';
 import { isDefined } from '../../../../common/types/guards';
 import { isPopulatedObject } from '../../../../common';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { ModelPipelines } from './pipelines';
+import { AllocatedModels } from '../nodes_overview/allocated_models';
+import type { AllocatedModel } from '../../../../common/types/trained_models';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -85,11 +83,7 @@ export function formatToListItems(
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
-  const mlLocator = useMlLocator();
-
-  const [deploymentStatsItems, setDeploymentStats] = useState<EuiDescriptionListProps['listItems']>(
-    []
-  );
+  const [modelItems, setModelItems] = useState<AllocatedModel[]>([]);
 
   const {
     inference_config: inferenceConfig,
@@ -122,36 +116,32 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   };
 
   useEffect(
-    function updateDeploymentState() {
+    function updateModelItems() {
       (async function () {
-        const { nodes, ...deploymentStats } = stats.deployment_stats ?? {};
+        const deploymentStats = stats.deployment_stats;
 
-        if (!isPopulatedObject(deploymentStats)) return;
+        if (!deploymentStats) return;
 
-        const result = formatToListItems(deploymentStats)!;
-
-        const items: EuiListGroupItemProps[] = await Promise.all(
-          nodes!.map(async (v) => {
-            const nodeObject = Object.values(v.node)[0];
-            const href = await mlLocator!.getUrl({
-              page: ML_PAGES.TRAINED_MODELS_NODES,
-              pageState: {
-                nodeId: nodeObject.name,
-              },
-            });
-            return {
-              label: nodeObject.name,
-              href,
-            };
-          })
-        );
-
-        result.push({
-          title: 'nodes',
-          description: <EuiListGroup size={'s'} gutterSize={'s'} listItems={items} />,
+        const items: AllocatedModel[] = deploymentStats.nodes.map((n) => {
+          const nodeName = Object.values(n.node)[0].name;
+          return {
+            ...deploymentStats,
+            node: {
+              ...pick(n, [
+                'average_inference_time_ms',
+                'inference_count',
+                'routing_state',
+                'last_access',
+                'number_of_pending_requests',
+                'start_time',
+              ]),
+              name: nodeName,
+            } as AllocatedModel['node'],
+            model_id: 'qq',
+          };
         });
 
-        setDeploymentStats(result);
+        setModelItems(items);
       })();
     },
     [stats.deployment_stats]
@@ -285,7 +275,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             content: (
               <>
                 <EuiSpacer size={'m'} />
-                {!!deploymentStatsItems?.length ? (
+                {!!modelItems?.length ? (
                   <>
                     <EuiPanel>
                       <EuiTitle size={'xs'}>
@@ -297,12 +287,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         </h5>
                       </EuiTitle>
                       <EuiSpacer size={'m'} />
-                      <EuiDescriptionList
-                        compressed={true}
-                        type="column"
-                        listItems={deploymentStatsItems}
-                      />
+                      <AllocatedModels models={modelItems} hideColumns={['model_id']} />
                     </EuiPanel>
+
                     <EuiSpacer size={'m'} />
                   </>
                 ) : null}
