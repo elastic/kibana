@@ -24,10 +24,10 @@ that {kib} (the client) makes to {es} (the server) is authenticated. Most
 requests made by end users through {kib} to {es} are authenticated by using the
 credentials of the logged-in user.
 
-If {kib} has `elasticsearch.username` and `elasticsearch.password` configured,
-it attempts to use these credentials to authenticate to {es} via the
-{ref}/native-realm.html[native realm]. However, {kib} also supports mutual TLS
-authentication with {es} via a
+To {ref}/configuring-stack-security.html#stack-start-with-security[enroll {kib} with an {es} cluster], you pass a generated enrollment token. This token 
+configures {kib} to authenticate with {es} using a
+{ref}/service-accounts.html#service-accounts-tokens[service account token].
+{kib} also supports mutual TLS authentication with {es} via a
 {ref}/pki-realm.html[Public Key Infrastructure (PKI) realm]. With this setup,
 {es} needs to verify the signature on the {kib} client certificate, and it also
 needs to map the client certificate's distinguished name (DN) to the appropriate
@@ -39,11 +39,8 @@ license levels, see https://www.elastic.co/subscriptions[the subscription page].
 [discrete]
 ==== Configure {kib} and {es} to use mutual TLS authentication
 
-When you {ref}/configuring-stack-security.html[start the {stack} with security enabled],
-password authentication for {kib} is configured and TLS encryption is enabled
-between {kib} and {es} automatically. For steps to manually set up TLS
-encryption, refer to
-{ref}/security-basic-setup-https.html#encrypt-kibana-elasticsearch[encrypting traffic between {kib} and {es}].
+If you haven't already, start {kib} and connect it to {es} using the
+{ref}/configuring-stack-security.html#stack-start-with-security[enrollment token].
 
 . Obtain a client certificate and private key for {kib}.
 +

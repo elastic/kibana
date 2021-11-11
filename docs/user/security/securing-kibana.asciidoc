@@ -13,20 +13,17 @@ process generates a password for the `elastic` user and an enrollment token for
 and then enroll {kib} as part of the configuration process.
 
 You can then log in to {kib} as the `elastic` user to create additional roles
-and users. You can also configure <<elasticsearch-mutual-tls,mutual TLS>>
-between {kib} and {es} where requests are authenticated by both applications.
+and users.
 
-NOTE: With {security-features} enabled, if you load a {kib} dashboard that
-accesses data in an index that you are not authorized to view, you get an error
-that indicates the index does not exist. The {security-features} do not
-currently provide a way to control which users can load which dashboards.
+NOTE: When a user is not authorized to view data in an index (such as an {es}
+index), the entire index will be inaccessible and not display in {kib}.
 
 [discrete]
 [[security-configure-settings]]
 === Configure security settings
 
-You can configure the following security settings to provide additional
-encryption.
+Set an encryption key so that sessions are not invalidated. You can optionally
+configure additional security settings and authentication.
 
 . Set the `xpack.security.encryptionKey` property in the `kibana.yml`
 configuration file. You can use any text string that is 32 characters or longer
