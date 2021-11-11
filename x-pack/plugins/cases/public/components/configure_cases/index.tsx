@@ -22,7 +22,7 @@ import { ClosureType } from '../../containers/configure/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../triggers_actions_ui/public/types';
 
-import { SectionWrapper, ContentWrapper, WhitePageWrapper, HeaderWrapper } from '../wrappers';
+import { SectionWrapper, ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
@@ -183,13 +183,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   return (
     <>
-      <HeaderWrapper>
-        <HeaderPage
-          showBackButton={true}
-          data-test-subj="case-configure-title"
-          title={i18n.CONFIGURE_CASES_PAGE_TITLE}
-        />
-      </HeaderWrapper>
+      <HeaderPage
+        showBackButton={true}
+        data-test-subj="case-configure-title"
+        title={i18n.CONFIGURE_CASES_PAGE_TITLE}
+      />
       <WhitePageWrapper>
         <ContentWrapper>
           <FormWrapper>
