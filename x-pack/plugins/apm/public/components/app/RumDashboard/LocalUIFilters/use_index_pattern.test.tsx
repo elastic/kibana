@@ -24,7 +24,7 @@ describe('useIndexPattern', () => {
   const title = 'apm-*';
   jest
     .spyOn(dynamicIndexPattern, 'useDynamicIndexPatternFetcher')
-    .mockReturnValue({ indexPattern: { title } });
+    .mockReturnValue({ indexPattern: { title } as any });
 
   it('returns result as expected', async () => {
     const { waitForNextUpdate } = renderHook(() => useIndexPattern(), {
