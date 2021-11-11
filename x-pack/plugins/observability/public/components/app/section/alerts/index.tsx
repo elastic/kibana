@@ -49,7 +49,7 @@ export function AlertsSection() {
     return getObservabilityAlerts({ core });
   }, [core]);
 
-  const alerts = useMemo(() => data || [], [data]);
+  const alerts = useMemo(() => data ?? [], [data]);
 
   const filterOptions = useMemo(() => {
     if (!alerts) {
