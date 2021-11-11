@@ -18,6 +18,9 @@ const DATE_WITH_DATA = {
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
+const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
+const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
+
 const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
@@ -150,6 +153,10 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.existOrFail('alertsFlyoutViewInAppButton');
   };
 
+  const getAlertsFlyoutViewRuleDetailsLinkOrFail = async () => {
+    return await testSubjects.existOrFail('viewRuleDetailsFlyout');
+  };
+
   const getAlertsFlyoutDescriptionListTitles = async (): Promise<WebElementWrapper[]> => {
     const flyout = await getAlertsFlyout();
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListTitle', flyout);
@@ -177,6 +184,13 @@ export function ObservabilityAlertsCommonProvider({
       rows[rowIndex][ACTION_COLUMN_INDEX]
     );
     await actionsOverflowButton.click();
+  };
+
+  const viewRuleDetailsButtonClick = async () => {
+    return await (await testSubjects.find(VIEW_RULE_DETAILS_SELECTOR)).click();
+  };
+  const viewRuleDetailsLinkClick = async () => {
+    return await (await testSubjects.find(VIEW_RULE_DETAILS_FLYOUT_SELECTOR)).click();
   };
 
   // Workflow status
@@ -259,5 +273,8 @@ export function ObservabilityAlertsCommonProvider({
     navigateWithoutFilter,
     getExperimentalDisclaimer,
     getActionsButtonByIndex,
+    viewRuleDetailsButtonClick,
+    viewRuleDetailsLinkClick,
+    getAlertsFlyoutViewRuleDetailsLinkOrFail,
   };
 }

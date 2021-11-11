@@ -7,14 +7,17 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
+import { UpdatePropsRef } from '../../../types/arguments';
 
 interface ArgTemplateFormProps {
   template?: (
     domNode: HTMLElement,
     config: ArgTemplateFormProps['argumentProps'],
-    handlers: ArgTemplateFormProps['handlers']
+    handlers: ArgTemplateFormProps['handlers'],
+    onMount?: (ref: UpdatePropsRef<ArgTemplateFormProps['argumentProps']> | null) => void
   ) => void;
   argumentProps: {
     valueMissing?: boolean;
@@ -42,11 +45,27 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
   errorTemplate,
 }) => {
   const [updatedHandlers, setHandlers] = useState(mergeWithFormHandlers(handlers));
-  const previousError = usePrevious(error);
+  const [mounted, setMounted] = useState(false);
+  const prevError = usePrevious(error);
+  const prevMounted = usePrevious(mounted);
+  const mountedArgumentRef = useRef<UpdatePropsRef<ArgTemplateFormProps['argumentProps']>>();
+
   const domNodeRef = useRef<HTMLElement>();
+
+  useEffectOnce(() => () => {
+    mountedArgumentRef.current = undefined;
+  });
+
   const renderTemplate = useCallback(
-    (domNode) => template && template(domNode, argumentProps, updatedHandlers),
-    [template, argumentProps, updatedHandlers]
+    (domNode) =>
+      template &&
+      template(domNode, argumentProps, updatedHandlers, (ref) => {
+        if (!mountedArgumentRef.current && ref) {
+          mountedArgumentRef.current = ref;
+          setMounted(true);
+        }
+      }),
+    [argumentProps, template, updatedHandlers]
   );
 
   const renderErrorTemplate = useCallback(
@@ -59,22 +78,30 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
   }, [handlers]);
 
   useEffect(() => {
-    if (previousError !== error) {
+    if (!prevError && error) {
       updatedHandlers.destroy();
     }
-  }, [previousError, error, updatedHandlers]);
+  }, [prevError, error, updatedHandlers]);
 
   useEffect(() => {
-    if (!error) {
+    if ((!error && prevError && mounted) || (mounted && !prevMounted && !error)) {
       renderTemplate(domNodeRef.current);
     }
-  }, [error, renderTemplate, domNodeRef]);
+  }, [error, mounted, prevError, prevMounted, renderTemplate]);
+
+  useEffect(() => {
+    if (mountedArgumentRef.current) {
+      mountedArgumentRef.current?.updateProps(argumentProps);
+    }
+  }, [argumentProps]);
 
   if (error) {
+    mountedArgumentRef.current = undefined;
     return renderErrorTemplate();
   }
 
   if (!template) {
+    mountedArgumentRef.current = undefined;
     return null;
   }
 
@@ -82,7 +109,7 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
     <RenderToDom
       render={(domNode) => {
         domNodeRef.current = domNode;
-        renderTemplate(domNode);
+        setMounted(true);
       }}
     />
   );
