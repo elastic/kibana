@@ -12,10 +12,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/117404
-  // FLAKY: https://github.com/elastic/kibana/issues/113043
-  describe.skip('lens heatmap', () => {
+  describe('lens heatmap', () => {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -73,9 +72,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should reflect stop colors change on the chart', async () => {
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
+      await retry.try(async () => {
+        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
+          clearWithKeyboard: true,
+          typeCharByChar: true,
+        });
       });
       await PageObjects.lens.waitForVisualization();
 
