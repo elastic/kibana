@@ -51,6 +51,7 @@
 /examples/demo_search/ @elastic/kibana-app-services
 /examples/developer_examples/ @elastic/kibana-app-services
 /examples/embeddable_examples/ @elastic/kibana-app-services
+/examples/embeddable_explorer/ @elastic/kibana-app-services
 /examples/state_containers_examples/ @elastic/kibana-app-services
 /examples/ui_action_examples/ @elastic/kibana-app-services
 /examples/ui_actions_explorer/ @elastic/kibana-app-services
