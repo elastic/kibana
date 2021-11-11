@@ -18,8 +18,10 @@ import type {
 } from 'src/core/public';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { ConfigSchema } from '..';
 import { RumHome } from '../components/app/RumDashboard/RumHome';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
+import { mockContextValue } from '../context/mock_apm_app/mock_apm_app_context';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { disableConsoleWarning } from '../utils/testHelpers';
@@ -33,6 +35,12 @@ jest.mock('../services/rest/data_view', () => ({
 jest.mock('../components/app/RumDashboard/RumHome', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
+
+const appMountParameters = {
+  element: document.createElement('div'),
+  history: createMemoryHistory(),
+  setHeaderActionMenu: () => {},
+} as unknown as AppMountParameters;
 
 describe('renderApp (APM)', () => {
   let mockConsole: jest.SpyInstance;
@@ -52,68 +60,7 @@ describe('renderApp (APM)', () => {
   });
 
   const getApmMountProps = () => {
-    const {
-      core: coreStart,
-      config,
-      observabilityRuleTypeRegistry,
-      corePlugins,
-    } = mockApmPluginContextValue;
-
-    const pluginsSetup = {
-      licensing: { license$: new Observable() },
-      triggersActionsUi: { actionTypeRegistry: {}, ruleTypeRegistry: {} },
-      data: {
-        query: {
-          timefilter: {
-            timefilter: { setTime: () => {}, getTime: () => ({}) },
-          },
-        },
-      },
-      observability: { navigation: { PageTemplate: () => null } },
-    } as unknown as ApmPluginSetupDeps;
-
-    const appMountParameters = {
-      element: document.createElement('div'),
-      history: createMemoryHistory(),
-      setHeaderActionMenu: () => {},
-    } as unknown as AppMountParameters;
-
-    const data = dataPluginMock.createStartContract();
-    const embeddable = embeddablePluginMock.createStartContract();
-
-    const pluginsStart = {
-      data,
-      embeddable,
-      observability: {
-        navigation: {
-          registerSections: () => jest.fn(),
-          PageTemplate: ({ children }: { children: React.ReactNode }) => (
-            <div>hello worlds {children}</div>
-          ),
-        },
-      },
-      triggersActionsUi: {
-        actionTypeRegistry: {},
-        ruleTypeRegistry: {},
-        getAddAlertFlyout: jest.fn(),
-        getEditAlertFlyout: jest.fn(),
-      },
-      usageCollection: { reportUiCounter: () => {} },
-      http: {
-        basePath: {
-          prepend: (path: string) => `/basepath${path}`,
-          get: () => `/basepath`,
-        },
-      } as HttpStart,
-      docLinks: {
-        DOC_LINK_VERSION: '0',
-        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-        links: {
-          apm: {},
-          observability: { guide: '' },
-        },
-      } as unknown as DocLinksStart,
-    } as unknown as ApmPluginStartDeps;
+    const { coreStart, pluginsSetup, pluginsStart } = mockContextValue;
 
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
     createCallApmApi(coreStart);
@@ -129,13 +76,11 @@ describe('renderApp (APM)', () => {
       });
 
     return {
+      appMountParameters,
+      config: {} as ConfigSchema,
       coreStart,
-      pluginsSetup: pluginsSetup as unknown as ApmPluginSetupDeps,
-      appMountParameters: appMountParameters as unknown as AppMountParameters,
+      pluginsSetup,
       pluginsStart,
-      config,
-      observabilityRuleTypeRegistry,
-      corePlugins,
     };
   };
 
@@ -156,9 +101,9 @@ describe('renderApp (APM)', () => {
 
 describe('renderUxApp', () => {
   it('has an error boundary for the UXAppRoot', async () => {
-    const uxMountProps = mockApmPluginContextValue;
+    const uxMountProps = { ...mockContextValue, appMountParameters };
 
-    const wrapper = mount(<UXAppRoot {...(uxMountProps as any)} />);
+    const wrapper = mount(<UXAppRoot {...uxMountProps} />);
 
     wrapper
       .find(RumHome)

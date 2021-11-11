@@ -13,24 +13,25 @@ import {
 import { createMemoryHistory, History } from 'history';
 import { merge } from 'lodash';
 import React, { createContext, ReactNode, useMemo } from 'react';
+import { Observable } from 'rxjs';
+import type { ConfigSchema } from '../..';
 import type { CoreStart } from '../../../../../../src/core/public';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import type { ConfigSchema } from '../..';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
-import { apmRouter } from '../../components/routing/apm_route_config';
 import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
-import type { RecursivePartial } from '../../../typings/common';
+import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
+import { MlLocatorDefinition } from '../../../../ml/public';
 import {
   createObservabilityRuleTypeRegistryMock,
   enableComparisonByDefault,
 } from '../../../../observability/public';
+import type { RecursivePartial } from '../../../typings/common';
+import { apmRouter } from '../../components/routing/apm_route_config';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
+import { createCallApmApi } from '../../services/rest/createCallApmApi';
 import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '../apm_plugin/apm_plugin_context';
-import { MlLocatorDefinition } from '../../../../ml/public';
-import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
-import { createCallApmApi } from '../../services/rest/createCallApmApi';
 
 // Kibana context
 
@@ -40,14 +41,20 @@ const mockCoreStart = {
       apm: { save: true },
       ml: {},
     },
+    currentAppId$: new Observable(),
     getUrlForApp: () => {},
   },
-  chrome: { docTitle: { change: () => {} } },
+  chrome: {
+    docTitle: { change: () => {} },
+    setBadge: () => {},
+    setHelpExtension: () => {},
+  },
   docLinks: { links: { apm: {}, observability: {} } },
   http: {
     basePath: { get: () => '', prepend: (str: string) => `/basepath${str}` },
     get: () => ({}),
   },
+  i18n: { Context: ({ children }: { children: ReactNode }) => <>{children}</> },
   notifications: { toasts: { add: () => {}, addDanger: () => {} } },
   uiSettings: {
     get: (key: string) => {
@@ -76,6 +83,7 @@ const mockCoreStart = {
       };
       return uiSettings[key];
     },
+    get$: () => new Observable(),
   },
 };
 
@@ -121,7 +129,7 @@ const mockApmPluginContextValue = {
 
 // Mock APM app context
 
-export interface MockApmAppContextValue {
+export interface MockContextValue {
   config: ConfigSchema;
   coreStart: CoreStart;
   history?: History;
@@ -134,13 +142,13 @@ export interface MockApmAppContextValue {
   path?: History.LocationDescriptor<any>;
 }
 
-export const mockApmAppContextValue = {
+export const mockContextValue = {
   coreStart: mockCoreStart,
-} as unknown as MockApmAppContextValue;
+  ...mockApmPluginContextValue,
+} as unknown as MockContextValue;
 
-export const MockApmAppContext = createContext<MockApmAppContextValue>(
-  mockApmAppContextValue
-);
+export const MockApmAppContext =
+  createContext<MockContextValue>(mockContextValue);
 
 /**
  * A mock provider for APM contexts which includes mocks for:
@@ -156,7 +164,7 @@ export function MockApmAppContextProvider({
   value = {},
 }: {
   children?: ReactNode;
-  value?: RecursivePartial<MockApmAppContextValue>;
+  value?: RecursivePartial<MockContextValue>;
 }) {
   const { history, path, pluginsSetup, pluginsStart } = value;
   const usedHistory = useMemo(() => {
