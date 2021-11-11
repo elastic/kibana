@@ -7,7 +7,7 @@
 
 import './table_basic.scss';
 
-import React, { useCallback, useMemo, useRef, useState, useContext } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
@@ -62,14 +62,20 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   // ** Pagination config
   const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number } | undefined>(
-    // TODO consider page size of zero
-    props.args.pageSize
-      ? {
-          pageIndex: 0,
-          pageSize: props.args.pageSize,
-        }
-      : undefined
+    undefined
   );
+
+  useEffect(() => {
+    // TODO consider page size of zero
+    setPagination(
+      props.args.pageSize
+        ? {
+            pageIndex: 0,
+            pageSize: props.args.pageSize,
+          }
+        : undefined
+    );
+  }, [props.args.pageSize]);
 
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
