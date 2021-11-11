@@ -6,23 +6,13 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import React from 'react';
 import { MetadataTable } from '.';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { expectTextsInDocument } from '../../../utils/testHelpers';
 import type { SectionDescriptor } from './types';
-
-function Wrapper({ children }: { children?: ReactNode }) {
-  return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-    </MemoryRouter>
-  );
-}
-
 const renderOptions = {
-  wrapper: Wrapper,
+  wrapper: MockApmAppContextProvider,
 };
 
 describe('MetadataTable', () => {

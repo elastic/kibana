@@ -12,7 +12,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import qs from 'query-string';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { DatePicker } from './';
 
 let history: MemoryHistory;
@@ -65,24 +65,22 @@ function mountDatePicker(initialParams: {
   mockHistoryReplace = jest.spyOn(history, 'replace');
 
   const wrapper = mount(
-    <MockApmPluginContextWrapper
-      value={
-        {
-          pluginsSetup: {
-            data: {
-              query: {
-                timefilter: {
-                  timefilter: { setTime: setTimeSpy, getTime: getTimeSpy },
-                },
+    <MockApmAppContextProvider
+      value={{
+        history,
+        pluginsSetup: {
+          data: {
+            query: {
+              timefilter: {
+                timefilter: { setTime: setTimeSpy, getTime: getTimeSpy },
               },
             },
           },
-        } as any
-      }
-      history={history}
+        },
+      }}
     >
       <DatePickerWrapper />
-    </MockApmPluginContextWrapper>
+    </MockApmAppContextProvider>
   );
 
   return { wrapper, setTimeSpy, getTimeSpy };

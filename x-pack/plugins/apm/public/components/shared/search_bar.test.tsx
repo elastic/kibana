@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { getByTestId, fireEvent, getByText } from '@testing-library/react';
+import { fireEvent, getByTestId, getByText } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../context/apm_service/apm_service_context';
-import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
-import type { ApmUrlParams } from '../../context/url_params_context/types';
-import * as useFetcherHook from '../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
+import { MockApmAppContextProvider } from '../../context/mock_apm_app/mock_apm_app_context';
+import type { ApmUrlParams } from '../../context/url_params_context/types';
+import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
+import * as useFetcherHook from '../../hooks/use_fetcher';
 import { renderWithTheme } from '../../utils/testHelpers';
 import { fromQuery } from './Links/url_helpers';
-import { CoreStart } from 'kibana/public';
 import { SearchBar } from './search_bar';
 
 function setup({
@@ -35,10 +32,6 @@ function setup({
     search: fromQuery(urlParams),
   });
 
-  const KibanaReactContext = createKibanaReactContext({
-    usageCollection: { reportUiCounter: () => {} },
-  } as Partial<CoreStart>);
-
   // mock transaction types
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
@@ -47,17 +40,13 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return renderWithTheme(
-    <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper>
-        <Router history={history}>
-          <UrlParamsProvider>
-            <ApmServiceContextProvider>
-              <SearchBar showTransactionTypeSelector />
-            </ApmServiceContextProvider>
-          </UrlParamsProvider>
-        </Router>
-      </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    <MockApmAppContextProvider value={{ history }}>
+      <UrlParamsProvider>
+        <ApmServiceContextProvider>
+          <SearchBar showTransactionTypeSelector />
+        </ApmServiceContextProvider>
+      </UrlParamsProvider>
+    </MockApmAppContextProvider>
   );
 }
 

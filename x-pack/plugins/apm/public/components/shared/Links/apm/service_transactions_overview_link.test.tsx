@@ -9,25 +9,23 @@ import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import {
   ServiceOrTransactionsOverviewLink,
   useServiceOrTransactionsOverviewHref,
 } from './service_transactions_overview_link';
-
-const history = createMemoryHistory();
-
-function wrapper({ queryParams }: { queryParams?: Record<string, unknown> }) {
+function getWrapper({
+  queryParams,
+}: {
+  queryParams?: Record<string, unknown>;
+}) {
   return ({ children }: { children: React.ReactElement }) => (
-    <MockApmPluginContextWrapper>
-      <Router history={history}>
-        <MockUrlParamsContextProvider params={queryParams}>
-          {children}
-        </MockUrlParamsContextProvider>
-      </Router>
-    </MockApmPluginContextWrapper>
+    <MockApmAppContextProvider>
+      <MockUrlParamsContextProvider params={queryParams}>
+        {children}
+      </MockUrlParamsContextProvider>
+    </MockApmAppContextProvider>
   );
 }
 
@@ -36,18 +34,24 @@ describe('Service or transactions overview link', () => {
     it('returns service link', () => {
       const { result } = renderHook(
         () => useServiceOrTransactionsOverviewHref({ serviceName: 'foo' }),
-        { wrapper: wrapper({}) }
+        { wrapper: getWrapper({}) }
       );
-      expect(result.current).toEqual('/basepath/app/apm/services/foo');
+      expect(result.current).toEqual(
+        '/basepath/app/apm/services/foo?rangeFrom=now-15m&rangeTo=now'
+      );
     });
 
     it('returns service link with persisted query items', () => {
       const { result } = renderHook(
         () => useServiceOrTransactionsOverviewHref({ serviceName: 'foo' }),
-        { wrapper: wrapper({ queryParams: { latencyAggregationType: 'avg' } }) }
+        {
+          wrapper: getWrapper({
+            queryParams: { latencyAggregationType: 'avg' },
+          }),
+        }
       );
       expect(result.current).toEqual(
-        '/basepath/app/apm/services/foo?latencyAggregationType=avg'
+        '/basepath/app/apm/services/foo?rangeFrom=now-15m&rangeTo=now&latencyAggregationType=avg'
       );
     });
   });
@@ -57,7 +61,7 @@ describe('Service or transactions overview link', () => {
         .href;
     }
     it('returns service link', () => {
-      const Component = wrapper({});
+      const Component = getWrapper({});
       const { container } = render(
         <Component>
           <ServiceOrTransactionsOverviewLink serviceName="foo">
@@ -66,12 +70,12 @@ describe('Service or transactions overview link', () => {
         </Component>
       );
       expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo'
+        'http://localhost/basepath/app/apm/services/foo?rangeFrom=now-15m&rangeTo=now'
       );
     });
 
     it('returns service link with persisted query items', () => {
-      const Component = wrapper({
+      const Component = getWrapper({
         queryParams: { latencyAggregationType: 'avg' },
       });
       const { container } = render(
@@ -82,7 +86,7 @@ describe('Service or transactions overview link', () => {
         </Component>
       );
       expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo?latencyAggregationType=avg'
+        'http://localhost/basepath/app/apm/services/foo?rangeFrom=now-15m&rangeTo=now&latencyAggregationType=avg'
       );
     });
   });

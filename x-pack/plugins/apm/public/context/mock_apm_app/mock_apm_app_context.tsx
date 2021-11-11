@@ -6,7 +6,7 @@
  */
 
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, History } from 'history';
 import { merge } from 'lodash';
 import React, { createContext, ReactNode, useMemo } from 'react';
 import type { CoreStart } from '../../../../../../src/core/public';
@@ -116,6 +116,7 @@ const mockApmPluginContextValue = {
 export interface MockApmAppContextValue {
   config: ConfigSchema;
   coreStart: CoreStart;
+  history?: History;
   pluginsSetup: ApmPluginSetupDeps;
   pluginsStart: ApmPluginStartDeps;
 
@@ -149,12 +150,15 @@ export function MockApmAppContextProvider({
   children?: ReactNode;
   value?: RecursivePartial<MockApmAppContextValue>;
 }) {
-  const { path, pluginsSetup, pluginsStart } = value;
-  const history = useMemo(() => {
-    return createMemoryHistory({
-      initialEntries: [path ?? '/services/?rangeFrom=now-15m&rangeTo=now'],
-    });
-  }, [path]);
+  const { history, path, pluginsSetup, pluginsStart } = value;
+  const usedHistory = useMemo(() => {
+    return (
+      history ??
+      createMemoryHistory({
+        initialEntries: [path ?? '/services/?rangeFrom=now-15m&rangeTo=now'],
+      })
+    );
+  }, [history, path]);
   const coreStart = merge(
     {},
     mockCoreStart,
@@ -171,7 +175,7 @@ export function MockApmAppContextProvider({
           pluginsStart,
         })}
       >
-        <RouterProvider router={apmRouter as any} history={history}>
+        <RouterProvider router={apmRouter as any} history={usedHistory}>
           {children}
         </RouterProvider>
       </ApmPluginContext.Provider>

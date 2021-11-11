@@ -7,14 +7,9 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { License } from '../../../../../licensing/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import {
-  mockApmPluginContextValue,
-  MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
 import * as apmApi from '../../../services/rest/createCallApmApi';
@@ -25,31 +20,11 @@ import {
 import { TransactionActionMenu } from './TransactionActionMenu';
 import * as Transactions from './__fixtures__/mockData';
 
-function getMockAPMContext({ canSave }: { canSave: boolean }) {
-  return {
-    ...mockApmPluginContextValue,
-    core: {
-      ...mockApmPluginContextValue.core,
-      application: { capabilities: { apm: { save: canSave }, ml: {} } },
-    },
-  } as unknown as ApmPluginContextValue;
-}
-
-function Wrapper({ children }: { children?: React.ReactNode }) {
-  return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper value={getMockAPMContext({ canSave: true })}>
-        {children}
-      </MockApmPluginContextWrapper>
-    </MemoryRouter>
-  );
-}
-
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
     <TransactionActionMenu transaction={transaction as Transaction} />,
     {
-      wrapper: Wrapper,
+      wrapper: MockApmAppContextProvider,
     }
   );
 
@@ -274,7 +249,7 @@ describe('TransactionActionMenu component', () => {
             transaction={Transactions.transactionWithMinimalData as Transaction}
           />
         </LicenseContext.Provider>,
-        { wrapper: Wrapper }
+        { wrapper: MockApmAppContextProvider }
       );
     }
     it('doesnt show custom links when license is not valid', () => {
@@ -311,7 +286,7 @@ describe('TransactionActionMenu component', () => {
             transaction={Transactions.transactionWithMinimalData as Transaction}
           />
         </LicenseContext.Provider>,
-        { wrapper: Wrapper }
+        { wrapper: MockApmAppContextProvider }
       );
       act(() => {
         fireEvent.click(component.getByText('Investigate'));

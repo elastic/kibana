@@ -5,30 +5,20 @@
  * 2.0.
  */
 
+import { act, renderHook } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
-import { merge } from 'lodash';
-import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
-
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import {
-  mockApmPluginContextValue,
-  MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmAppContextProvider } from '../../../context/mock_apm_app/mock_apm_app_context';
 import { delay } from '../../../utils/testHelpers';
-
-import { fromQuery } from '../../shared/Links/url_helpers';
-
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 
-function wrapper({
+function Wrapper({
   children,
   error = false,
 }: {
   children?: ReactNode;
   error: boolean;
 }) {
-  const httpMethodMock = jest.fn().mockImplementation(async (endpoint) => {
+  const httpMethodMock = async (endpoint) => {
     await delay(100);
     if (error) {
       throw new Error('Something went wrong');
@@ -74,29 +64,17 @@ function wrapper({
       default:
         return {};
     }
-  });
-
-  const history = createMemoryHistory();
-  jest.spyOn(history, 'push');
-  jest.spyOn(history, 'replace');
-
-  history.replace({
-    pathname: '/services/the-service-name/transactions/view',
-    search: fromQuery({
-      transactionName: 'the-transaction-name',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-    }),
-  });
-
-  const mockPluginContext = merge({}, mockApmPluginContextValue, {
-    core: { http: { get: httpMethodMock, post: httpMethodMock } },
-  }) as unknown as ApmPluginContextValue;
+  };
 
   return (
-    <MockApmPluginContextWrapper history={history} value={mockPluginContext}>
+    <MockApmAppContextProvider
+      value={{
+        coreStart: { http: { get: httpMethodMock, post: httpMethodMock } },
+        path: '/services/the-service-name/transactions/view?transactionName=the-transaction-name&rangeFrom=now-15m&rangeTo=now',
+      }}
+    >
       {children}
-    </MockApmPluginContextWrapper>
+    </MockApmAppContextProvider>
   );
 }
 
@@ -115,7 +93,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: Wrapper,
         }
       );
 
@@ -136,7 +114,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: Wrapper,
         }
       );
 
@@ -157,7 +135,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount, waitFor } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: Wrapper,
         }
       );
 
@@ -300,7 +278,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: Wrapper,
           initialProps: {
             error: true,
           },
@@ -321,7 +299,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: Wrapper,
           initialProps: {
             error: true,
           },
@@ -345,7 +323,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount, waitFor } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: Wrapper,
           initialProps: {
             error: true,
           },
@@ -374,7 +352,7 @@ describe('useFailedTransactionsCorrelations', () => {
       const { result, unmount, waitFor } = renderHook(
         () => useFailedTransactionsCorrelations(),
         {
-          wrapper,
+          wrapper: Wrapper,
         }
       );
 

@@ -5,21 +5,20 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { ServiceNodeMetrics } from '.';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 describe('ServiceNodeMetrics', () => {
-  describe('render', () => {
-    it('renders', () => {
-      expect(() =>
-        shallow(
-          <MockApmPluginContextWrapper>
-            <ServiceNodeMetrics />
-          </MockApmPluginContextWrapper>
-        )
-      ).not.toThrowError();
-    });
+  it('renders', () => {
+    expect(() =>
+      render(
+        <MockApmPluginContextWrapper>
+          <ServiceNodeMetrics />
+        </MockApmPluginContextWrapper>
+      )
+    ).not.toThrowError();
   });
 });

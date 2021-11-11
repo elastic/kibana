@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
-import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { Popover } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { CytoscapeContext } from '../Cytoscape';
@@ -40,7 +38,7 @@ const stories: Meta<Args> = {
             };
           },
         },
-      } as unknown as CoreStart;
+      };
 
       return (
         <MockApmAppContextProvider
@@ -50,11 +48,9 @@ const stories: Meta<Args> = {
           }}
         >
           <MockUrlParamsContextProvider>
-            <MockApmPluginContextWrapper>
-              <div style={{ height: 325 }}>
-                <StoryComponent />
-              </div>
-            </MockApmPluginContextWrapper>
+            <div style={{ height: 325 }}>
+              <StoryComponent />
+            </div>
           </MockUrlParamsContextProvider>
         </MockApmAppContextProvider>
       );

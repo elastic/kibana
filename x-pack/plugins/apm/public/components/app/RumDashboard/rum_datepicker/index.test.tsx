@@ -9,12 +9,12 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { createMemoryHistory, MemoryHistory } from 'history';
-import React, { ReactNode } from 'react';
 import qs from 'query-string';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import React, { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
+import { MockApmAppContextProvider } from '../../../../context/mock_apm_app/mock_apm_app_context';
 import { UrlParamsContext } from '../../../../context/url_params_context/url_params_context';
 import { RumDatePicker } from './';
-import { useLocation } from 'react-router-dom';
 
 let history: MemoryHistory;
 let mockHistoryPush: jest.SpyInstance;
@@ -63,26 +63,24 @@ function mountDatePicker(
   mockHistoryReplace = jest.spyOn(history, 'replace');
 
   const wrapper = mount(
-    <MockApmPluginContextWrapper
-      history={history}
-      value={
-        {
-          pluginsSetup: {
-            data: {
-              query: {
-                timefilter: {
-                  timefilter: { setTime: setTimeSpy, getTime: getTimeSpy },
-                },
+    <MockApmAppContextProvider
+      value={{
+        history,
+        pluginsSetup: {
+          data: {
+            query: {
+              timefilter: {
+                timefilter: { setTime: setTimeSpy, getTime: getTimeSpy },
               },
             },
           },
-        } as any
-      }
+        },
+      }}
     >
       <MockUrlParamsProvider>
         <RumDatePicker />
       </MockUrlParamsProvider>
-    </MockApmPluginContextWrapper>
+    </MockApmAppContextProvider>
   );
 
   return { wrapper, setTimeSpy, getTimeSpy };
