@@ -232,8 +232,7 @@ export async function cloneJob(jobId) {
           values: { jobId, dataViewTitle },
         }
       );
-      getToastNotifications().addDanger({
-        title: warningText,
+      getToastNotificationService().displayDangerToast(warningText, {
         'data-test-subj': 'mlCloneJobNoDataViewExistsWarningToast',
       });
       return;

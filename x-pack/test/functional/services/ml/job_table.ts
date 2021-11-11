@@ -380,10 +380,7 @@ export function MachineLearningJobTableProvider(
     }
 
     public async assertNoDataViewForCloneJobWarningToastExist() {
-      await retry.tryForTime(5000, async () => {
-        const toast = await testSubjects.find('mlCloneJobNoDataViewExistsWarningToast');
-        expect(toast).not.to.be(undefined);
-      });
+      await testSubjects.existOrFail('mlCloneJobNoDataViewExistsWarningToast', { timeout: 5000 });
     }
 
     public async clickEditJobAction(jobId: string) {
