@@ -212,7 +212,6 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   // Fallback to the ordinal scale type when a single row of data is provided.
   // Related issue https://github.com/elastic/elastic-charts/issues/1184
   let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
-  // console.dir(search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn));
   if (isTimeBasedSwimLane && chartData.length > 1) {
     const dateInterval = dateHistogramMeta?.interval;
     const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
