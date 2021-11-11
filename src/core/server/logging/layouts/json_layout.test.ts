@@ -58,6 +58,16 @@ const records: LogRecord[] = [
     timestamp,
     pid: 5355,
   },
+  {
+    context: 'context-7',
+    level: LogLevel.Trace,
+    message: 'message-6',
+    timestamp,
+    pid: 5355,
+    spanId: 'spanId-1',
+    traceId: 'traceId-1',
+    transactionId: 'transactionId-1',
+  },
 ];
 
 test('`createConfigSchema()` creates correct schema.', () => {
@@ -308,5 +318,42 @@ test('format() meta can not override timestamp', () => {
     process: {
       pid: 3,
     },
+  });
+});
+
+test('format() meta can not override tracing properties', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          span: 'span_override',
+          trace: 'trace_override',
+          transaction: 'transaction_override',
+        },
+        spanId: 'spanId-1',
+        traceId: 'traceId-1',
+        transactionId: 'transactionId-1',
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+    span: { id: 'spanId-1' },
+    trace: { id: 'traceId-1' },
+    transaction: { id: 'transactionId-1' },
   });
 });

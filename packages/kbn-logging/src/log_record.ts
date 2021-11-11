@@ -20,4 +20,7 @@ export interface LogRecord {
   error?: Error;
   meta?: { [name: string]: any };
   pid: number;
+  spanId?: string;
+  traceId?: string;
+  transactionId?: string;
 }

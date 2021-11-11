@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import apmAgent from 'elastic-apm-node';
+import { initApm } from '@kbn/apm-config-loader';
+import { REPO_ROOT } from '@kbn/utils';
 
-import './ensure_apm_started';
-import { FixturePlugin } from './plugin';
-
-export const plugin = () => new FixturePlugin();
+if (!apmAgent.isStarted()) {
+  initApm(process.argv, REPO_ROOT, false, 'test-plugin');
+}
