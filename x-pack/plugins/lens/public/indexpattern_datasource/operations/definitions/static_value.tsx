@@ -95,7 +95,7 @@ export const staticValueOperation: OperationDefinition<
         arguments: {
           id: [columnId],
           name: [label || defaultLabel],
-          expression: [isValidNumber(params.value) ? params.value! : String(defaultValue)],
+          expression: [String(isValidNumber(params.value) ? params.value! : defaultValue)],
         },
       },
     ];
@@ -118,7 +118,7 @@ export const staticValueOperation: OperationDefinition<
       operationType: 'static_value',
       isBucketed: false,
       scale: 'ratio',
-      params: { ...previousParams, value: previousParams.value ?? String(defaultValue) },
+      params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
       references: [],
     };
   },
