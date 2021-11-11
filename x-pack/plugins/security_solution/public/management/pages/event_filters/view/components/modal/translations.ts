@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const MODAL_TITLE = i18n.translate('xpack.securitySolution.eventFilter.modal.title', {
-  defaultMessage: 'Add Endpoint Event Filter',
+  defaultMessage: 'Add Endpoint event filter',
 });
 
 export const MODAL_SUBTITLE = i18n.translate('xpack.securitySolution.eventFilter.modal.subtitle', {
