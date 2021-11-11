@@ -14,6 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 import { usePreviewHistogram } from './use_preview_histogram';
 
 import { PreviewHistogram } from './preview_histogram';
+import { mockQueryBar } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 
 jest.mock('../../../../common/containers/use_global_time');
 jest.mock('./use_preview_histogram');
@@ -54,6 +55,7 @@ describe('PreviewHistogram', () => {
           previewId={'test-preview-id'}
           spaceId={'default'}
           ruleType={'query'}
+          query={mockQueryBar}
         />
       </TestProviders>
     );
@@ -88,6 +90,7 @@ describe('PreviewHistogram', () => {
           previewId={'test-preview-id'}
           spaceId={'default'}
           ruleType={'query'}
+          query={mockQueryBar}
         />
       </TestProviders>
     );

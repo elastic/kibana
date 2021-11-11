@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 import { RulePreview, RulePreviewProps } from './';
@@ -84,47 +84,43 @@ describe('PreviewQuery', () => {
   });
 
   test('it renders timeframe select and preview button on render', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="rule-preview"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="preview-time-frame"]').exists()).toBeTruthy();
+    expect(wrapper.findByTestId('rule-preview')).toBeTruthy();
+    expect(wrapper.findByTestId('preview-time-frame')).toBeTruthy();
   });
 
   test('it renders preview button disabled if "isDisabled" is true', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} isDisabled={true} />
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
-    ).toBeTruthy();
+    expect(wrapper.getByTestId('queryPreviewButton').closest('button')).toBeDisabled();
   });
 
   test('it renders preview button enabled if "isDisabled" is false', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
-    ).toBeFalsy();
+    expect(wrapper.getByTestId('queryPreviewButton').closest('button')).not.toBeDisabled();
   });
 
   test('does not render histogram when there is no previewId', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="preview-histogram-panel"]').exists()).toBeFalsy();
+    expect(wrapper.queryByTestId('[data-test-subj="preview-histogram-panel"]')).toBeNull();
   });
 });
