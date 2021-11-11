@@ -38,8 +38,8 @@ import {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
-import { registerRoutes } from './routes/register_routes';
-import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
+import { registerRoutes } from './routes/apm_routes/register_apm_server_routes';
+import { getGlobalApmServerRouteRepository } from './routes/apm_routes/get_global_apm_server_route_repository';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,

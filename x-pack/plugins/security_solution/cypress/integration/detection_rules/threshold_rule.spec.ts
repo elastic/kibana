@@ -99,7 +99,7 @@ describe('Detection rules, threshold', () => {
     waitForAlertsIndexToBeCreated();
   });
 
-  it.skip('Creates and activates a new threshold rule', () => {
+  it('Creates and activates a new threshold rule', () => {
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();
@@ -171,9 +171,7 @@ describe('Detection rules, threshold', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
-    cy.get(ALERT_GRID_CELL).eq(3).contains(rule.name);
-    cy.get(ALERT_GRID_CELL).eq(4).contains(rule.severity.toLowerCase());
-    cy.get(ALERT_GRID_CELL).eq(5).contains(rule.riskScore);
+    cy.get(ALERT_GRID_CELL).contains(rule.name);
   });
 
   it('Preview results of keyword using "host.name"', () => {
