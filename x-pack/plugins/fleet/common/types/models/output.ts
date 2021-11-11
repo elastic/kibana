@@ -12,6 +12,7 @@ export type OutputType = typeof outputType;
 
 export interface NewOutput {
   is_default: boolean;
+  is_default_monitoring: boolean;
   name: string;
   type: ValueOf<OutputType>;
   hosts?: string[];
