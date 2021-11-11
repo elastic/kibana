@@ -451,7 +451,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
-      onTGridStateChange
+      onTGridStateChange,
       query: {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
