@@ -13,8 +13,6 @@ import {
   FilterFieldProps,
 } from '../../../types';
 
-import './filter.scss';
-
 interface InteractiveFilterProps {
   filterView: FormattedFilterViewInstance;
   filter: FilterType;
@@ -63,10 +61,11 @@ export const Filter: FC<Props> = ({ filterView, ...restProps }) => {
   });
 
   return (
-    <EuiPanel grow={false} hasShadow={false} paddingSize="s">
+    <EuiPanel grow={false} hasShadow={false} paddingSize="m">
       <EuiDescriptionList
         type="column"
         className="workpadFilter"
+        compressed
         listItems={view}
         titleProps={{ style: titleStyle, className: 'eui-textBreakWord' }}
         descriptionProps={{ style: descriptionStyle, className: 'eui-textBreakWord' }}
