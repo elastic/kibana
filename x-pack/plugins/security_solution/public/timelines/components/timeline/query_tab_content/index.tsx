@@ -46,12 +46,11 @@ import {
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { PickEventType } from '../search_or_filter/pick_events';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
@@ -61,6 +60,7 @@ import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { defaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { Sourcerer } from '../../../../common/components/sourcerer';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -190,9 +190,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     docValueFields,
     loading: loadingSourcerer,
     indexPattern,
+    runtimeMappings,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.timeline);
-
+  } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
@@ -282,6 +282,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       language: kqlQuery.language,
       limit: itemsPerPage,
       filterQuery: combinedQueries?.filterQuery,
+      runtimeMappings,
       startDate: start,
       skip: !canQueryTimeline,
       sort: timelineQuerySortField,
@@ -357,10 +358,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <TimelineDatePickerLock />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <PickEventType
-                  eventType={eventType}
-                  onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
-                />
+                <Sourcerer scope={SourcererScopeName.timeline} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
@@ -429,6 +427,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}
                 timelineId={timelineId}
               />
@@ -502,13 +501,24 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+  updateEventTypeAndIndexesName: (
+    newEventType: TimelineEventsType,
+    newIndexNames: string[],
+    newDataViewId: string
+  ) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
     dispatch(
-      sourcererActions.setSelectedIndexPatterns({
+      timelineActions.updateDataView({
+        dataViewId: newDataViewId,
+        id: timelineId,
+        indexNames: newIndexNames,
+      })
+    );
+    dispatch(
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
         selectedPatterns: newIndexNames,
+        selectedDataViewId: newDataViewId,
       })
     );
   },

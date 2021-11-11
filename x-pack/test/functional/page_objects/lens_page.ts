@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -129,9 +129,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const operationSelector = opts.isPreviousIncompatible
           ? `lns-indexPatternDimension-${opts.operation} incompatible`
           : `lns-indexPatternDimension-${opts.operation}`;
-        await testSubjects.click(operationSelector);
+        await retry.try(async () => {
+          await testSubjects.exists(operationSelector);
+          await testSubjects.click(operationSelector);
+        });
       }
-
       if (opts.field) {
         const target = await testSubjects.find('indexPattern-dimension-field');
         await comboBox.openOptionsList(target);
@@ -1092,7 +1094,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         draggedOver,
         dropTarget
       );
-      await delay(150);
+      await setTimeoutAsync(150);
     },
 
     /**

@@ -75,29 +75,6 @@ To change the schedule for the invalidation task, use the kibana.yml configurati
 
 To change the default delay for the API key invalidation, use the kibana.yml configuration option `xpack.alerting.invalidateApiKeysTask.removalDelay`.
 
-## Plugin Status
-
-The plugin status of the Alerting Framework is customized by including information about checking for failures during framework decryption:
-
-```js
-core.status.set(
-        combineLatest([
-          core.status.derivedStatus$,
-          getHealthStatusStream(startPlugins.taskManager),
-        ]).pipe(
-          map(([derivedStatus, healthStatus]) => {
-            if (healthStatus.level > derivedStatus.level) {
-              return healthStatus as ServiceStatus;
-            } else {
-              return derivedStatus;
-            }
-          })
-        )
-      );
-```
-
-To check for framework decryption failures, we use the task `alerting_health_check`, which runs every 60 minutes by default. To change the default schedule, use the kibana.yml configuration option `xpack.alerting.healthCheck.interval`.
-
 ## Rule Types
 
 ### Methods
