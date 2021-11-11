@@ -6,3 +6,5 @@
  */
 
 export { PalettePicker } from './palette_picker';
+export { StopsPalettePicker } from './stops_palette_picker';
+export type { PalettePickerProps, CustomColorPalette, StopsPalettePickerProps } from './types';

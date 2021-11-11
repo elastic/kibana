@@ -40,8 +40,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
@@ -82,7 +80,6 @@ import {
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
 import { RouterWrappers } from './routes/security';
-import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -131,8 +128,6 @@ const allSavedObjectTypes = [
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 ];
 
@@ -335,15 +330,10 @@ export class FleetPlugin
     });
     licenseService.start(this.licensing$);
 
-    const fleetServerSetup = startFleetServerSetup();
-
     this.telemetryEventsSender.start(plugins.telemetry, core);
 
     return {
-      fleetSetupCompleted: () =>
-        new Promise<void>((resolve) => {
-          Promise.all([fleetServerSetup]).finally(() => resolve());
-        }),
+      fleetSetupCompleted: () => Promise.resolve(),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstallation,
