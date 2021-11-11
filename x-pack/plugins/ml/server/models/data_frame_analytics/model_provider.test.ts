@@ -222,9 +222,7 @@ describe('Model service', () => {
             'ml.max_jvm_size': '1073741824',
             'xpack.installed': 'true',
           },
-          host: '10.10.10.2',
           id: '3qIoLFnbSi-DwVrYioUCdw',
-          ip: '10.10.10.2:9353',
           memory_overview: {
             anomaly_detection: {
               total: 0,
@@ -259,7 +257,6 @@ describe('Model service', () => {
             },
           },
           roles: ['data', 'ingest', 'master', 'ml', 'transform'],
-          transport_address: '10.10.10.2:9353',
         },
         {
           name: 'node2',
@@ -342,9 +339,7 @@ describe('Model service', () => {
             'ml.max_jvm_size': '1073741824',
             'xpack.installed': 'true',
           },
-          host: '10.10.10.2',
           id: 'DpCy7SOBQla3pu0Dq-tnYw',
-          ip: '10.10.10.2:9352',
           memory_overview: {
             anomaly_detection: {
               total: 0,
@@ -379,7 +374,6 @@ describe('Model service', () => {
             },
           },
           roles: ['data', 'master', 'ml', 'transform'],
-          transport_address: '10.10.10.2:9352',
         },
         {
           allocated_models: [
@@ -465,9 +459,7 @@ describe('Model service', () => {
             'ml.max_jvm_size': '1073741824',
             'xpack.installed': 'true',
           },
-          host: '10.10.10.2',
           id: 'pt7s6lKHQJaP4QHKtU-Q0Q',
-          ip: '10.10.10.2:9351',
           memory_overview: {
             anomaly_detection: {
               total: 0,
@@ -503,7 +495,6 @@ describe('Model service', () => {
           },
           name: 'node1',
           roles: ['data', 'master', 'ml'],
-          transport_address: '10.10.10.2:9351',
         },
       ],
     });

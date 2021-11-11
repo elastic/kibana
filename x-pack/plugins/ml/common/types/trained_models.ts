@@ -190,7 +190,6 @@ export interface AllocatedModel {
 export interface NodeDeploymentStatsResponse {
   id: string;
   name: string;
-  transport_address: string;
   attributes: Record<string, string>;
   roles: string[];
   allocated_models: AllocatedModel[];

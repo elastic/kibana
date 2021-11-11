@@ -23,15 +23,7 @@ import { isDefined } from '../../../common/types/guards';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
-const NODE_FIELDS = [
-  'attributes',
-  'name',
-  'roles',
-  'ip',
-  'host',
-  'transport_address',
-  'version',
-] as const;
+const NODE_FIELDS = ['attributes', 'name', 'roles', 'version'] as const;
 
 export type RequiredNodeFields = Pick<NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
 
