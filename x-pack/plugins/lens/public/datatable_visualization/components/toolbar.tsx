@@ -21,7 +21,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
       ...state,
       fitRowToContent: !current,
     });
-  }, [setState, state])
+  }, [setState, state]);
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
