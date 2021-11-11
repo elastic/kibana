@@ -195,6 +195,14 @@ export const Layout = React.memo(
                               topMargin={topActionHeight}
                             />
                             {view === 'map' && (
+                              <Legend
+                                formatter={formatter}
+                                bounds={bounds}
+                                dataBounds={dataBounds}
+                                legend={options.legend}
+                              />
+                            )}
+                            {view === 'map' && (
                               <BottomDrawer
                                 measureRef={measureRef}
                                 interval={interval}
@@ -208,14 +216,6 @@ export const Layout = React.memo(
                     </>
                   )}
                 </AutoSizer>
-                {view === 'map' && (
-                  <Legend
-                    formatter={formatter}
-                    bounds={bounds}
-                    dataBounds={dataBounds}
-                    legend={options.legend}
-                  />
-                )}
               </MainContainer>
             )}
           </AutoSizer>
