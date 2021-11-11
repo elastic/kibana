@@ -12,7 +12,7 @@ import * as t from 'io-ts';
 import { CoreSetup, Logger } from 'src/core/server';
 import { APMConfig } from '../..';
 import { APMRouteCreateOptions, APMRouteHandlerResources } from '../typings';
-import { registerRoutes } from './index';
+import { registerRoutes } from './register_apm_server_routes';
 
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
 

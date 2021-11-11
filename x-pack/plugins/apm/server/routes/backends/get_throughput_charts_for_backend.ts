@@ -8,16 +8,15 @@
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { Setup } from '../helpers/setup_request';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
+import { Setup } from '../../lib/helpers/setup_request';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
-export async function getLatencyChartsForBackend({
+export async function getThroughputChartsForBackend({
   backendName,
   setup,
   start,
@@ -42,7 +41,13 @@ export async function getLatencyChartsForBackend({
     offset,
   });
 
-  const response = await apmEventClient.search('get_latency_for_backend', {
+  const { intervalString } = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
+    minBucketSize: 60,
+  });
+
+  const response = await apmEventClient.search('get_throughput_for_backend', {
     apm: {
       events: [ProcessorEvent.metric],
     },
@@ -60,20 +65,17 @@ export async function getLatencyChartsForBackend({
       },
       aggs: {
         timeseries: {
-          date_histogram: getMetricsDateHistogramParams({
-            start: startWithOffset,
-            end: endWithOffset,
-            metricsInterval: 60,
-          }),
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
+          },
           aggs: {
-            latency_sum: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-              },
-            },
-            latency_count: {
-              sum: {
+            throughput: {
+              rate: {
                 field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                unit: 'minute',
               },
             },
           },
@@ -86,7 +88,7 @@ export async function getLatencyChartsForBackend({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key + offsetInMs,
-        y: (bucket.latency_sum.value ?? 0) / (bucket.latency_count.value ?? 0),
+        y: bucket.throughput.value,
       };
     }) ?? []
   );
