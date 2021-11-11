@@ -29,6 +29,7 @@ describe('MetaRewritePolicy', () => {
       // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: 'before' });
       const policy = createPolicy('update', [{ path: 'a', value: 'after' }]);
+      // @ts-expect-error ECS custom meta
       expect(policy.rewrite(log).meta!.a).toBe('after');
     });
 
@@ -86,7 +87,9 @@ describe('MetaRewritePolicy', () => {
       // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: { b: 'existing meta' } });
       const { meta } = policy.rewrite(log);
+      // @ts-expect-error ECS custom meta
       expect(meta!.a.b).toBe('foo');
+      // @ts-expect-error ECS custom meta
       expect(meta!.a.c).toBeUndefined();
     });
 
@@ -113,6 +116,7 @@ describe('MetaRewritePolicy', () => {
       // @ts-expect-error ECS custom meta
       const log = createLogRecord({ a: 'goodbye' });
       const policy = createPolicy('remove', [{ path: 'a' }]);
+      // @ts-expect-error ECS custom meta
       expect(policy.rewrite(log).meta!.a).toBeUndefined();
     });
 
