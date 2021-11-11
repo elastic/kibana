@@ -202,6 +202,16 @@ export default ({ getService }: FtrProviderContext) => {
         moduleIds: ['nginx_data_stream'],
       },
     },
+    {
+      testTitleSuffix: 'for apm transaction dataset',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      indexPattern: 'ft_module_apm_transaction',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['apm_transaction'],
+      },
+    },
   ];
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {
