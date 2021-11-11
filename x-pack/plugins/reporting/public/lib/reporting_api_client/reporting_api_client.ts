@@ -22,6 +22,7 @@ import {
 } from '../../../common/constants';
 import {
   BaseParams,
+  BasePayloadV2,
   DownloadReportFn,
   JobId,
   ManagementLinkFn,
@@ -59,6 +60,8 @@ interface IReportingAPI {
   getError(jobId: string): Promise<string>;
   getInfo(jobId: string): Promise<Job>;
   findForJobIds(jobIds: string[]): Promise<Job[]>;
+
+  getLocatorParams(jobId: string): Promise<BasePayloadV2['locatorParams']>;
 
   // Function props
   getManagementLink: ManagementLinkFn;
@@ -150,9 +153,9 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(report);
   }
 
-  public async getPayload(jobId: string) {
-    const payload: ReportSource['payload'] = await this.http.get(
-      `${API_LIST_URL}/payload/${jobId}`,
+  public async getLocatorParams(jobId: string) {
+    const payload: BasePayloadV2['locatorParams'] = await this.http.get(
+      `${API_LIST_URL}/locatorParams/${jobId}`,
       {
         asSystemRequest: true,
       }

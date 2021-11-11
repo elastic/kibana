@@ -177,7 +177,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
       const locatorParams = await jobsQuery.getLocatorParams(user, docId);
 
-      if (locatorParams) {
+      if (!locatorParams || !locatorParams.length) {
         return res.notFound({
           body: {
             message: i18n.translate(

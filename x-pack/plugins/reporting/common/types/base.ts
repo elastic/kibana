@@ -23,7 +23,7 @@ export type BaseParams = Ensure<
 >;
 
 export type BaseParamsV2 = BaseParams & {
-  locatorParams: LocatorParams | LocatorParams[];
+  locatorParams: LocatorParams[];
 };
 
 // base params decorated with encrypted headers that come into runJob functions
