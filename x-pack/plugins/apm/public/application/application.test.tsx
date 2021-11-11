@@ -10,19 +10,10 @@ import { act } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
 import React from 'react';
-import { Observable } from 'rxjs';
-import type {
-  AppMountParameters,
-  DocLinksStart,
-  HttpStart,
-} from 'src/core/public';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import type { AppMountParameters } from 'src/core/public';
 import { ConfigSchema } from '..';
 import { RumHome } from '../components/app/RumDashboard/RumHome';
-import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { mockContextValue } from '../context/mock_apm_app/mock_apm_app_context';
-import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { renderApp as renderApmApp } from './';
