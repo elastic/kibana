@@ -34,6 +34,7 @@ export const SuggestedCurationsCallout: React.FC = () => {
 
   return (
     <SuggestionsCallout
+      style={{ marginBottom: '24px' }}
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.suggestedCurationsCallout.title',
         { defaultMessage: 'New suggested curations to review' }
