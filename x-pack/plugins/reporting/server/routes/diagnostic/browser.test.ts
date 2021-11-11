@@ -10,6 +10,7 @@ import { spawn } from 'child_process';
 import { createInterface } from 'readline';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
+import * as Rx from 'rxjs';
 import { ReportingCore } from '../..';
 import {
   createMockConfigSchema,
@@ -28,8 +29,10 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';
 
-// FLAKY: https://github.com/elastic/kibana/issues/89369
-describe.skip('POST /diagnose/browser', () => {
+const wait = (ms: number): Rx.Observable<0> =>
+  Rx.from(new Promise<0>((resolve) => setTimeout(() => resolve(0), ms)));
+
+describe('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   const mockLogger = createMockLevelLogger();
@@ -52,6 +55,9 @@ describe.skip('POST /diagnose/browser', () => {
       'reporting',
       () => ({ usesUiCapabilities: () => false })
     );
+
+    // Make all uses of 'Rx.timer' return an observable that completes in 50ms
+    jest.spyOn(Rx, 'timer').mockImplementation(() => wait(50));
 
     core = await createMockReportingCore(
       config,
@@ -79,6 +85,7 @@ describe.skip('POST /diagnose/browser', () => {
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
     await server.stop();
   });
 
