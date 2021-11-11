@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const testSubjects = getService('testSubjects');
 
-  describe('runtime fields', function () {
+  describe.only('runtime fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
