@@ -6,11 +6,9 @@
  */
 
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
-import { SERVER_SIDE_EVENT_COUNT, TIMELINE_TITLE } from '../screens/timeline';
+import { TIMELINE_TITLE } from '../screens/timeline';
 import { HOSTS_URL } from '../urls/navigation';
 import { waitForPage } from './login';
-import { refreshPage } from './security_header';
-import { LOADING_INDICATOR } from '../screens/security_header';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
 import { waitForAlertsIndexToBeCreated } from './alerts';
