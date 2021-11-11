@@ -179,6 +179,7 @@ export class FleetPlugin
   private securitySetup?: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+  private fleetSetupStatus: 'initial' | 'pending' | 'complete';
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -188,6 +189,7 @@ export class FleetPlugin
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
+    this.fleetSetupStatus = 'initial';
   }
 
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
@@ -335,9 +337,14 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    const fleetSetupPromise = async () => {
+    const fleetSetupPromise = new Promise<void>(async (resolve, reject) => {
       try {
+        if (this.fleetSetupStatus === 'pending' || this.fleetSetupStatus === 'complete') {
+          resolve();
+        }
+
         logger.info('Beginning fleet setup');
+        this.fleetSetupStatus = 'pending';
 
         const { nonFatalErrors } = await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
@@ -352,16 +359,21 @@ export class FleetPlugin
         }
 
         logger.info('Fleet setup completed');
+        this.fleetSetupStatus = 'complete';
+
+        resolve();
       } catch (error) {
         logger.warn('Fleet setup failed');
         logger.warn(error);
-      }
-    };
 
-    fleetSetupPromise();
+        this.fleetSetupStatus = 'initial';
+
+        reject(error);
+      }
+    });
 
     return {
-      fleetSetupCompleted: fleetSetupPromise,
+      fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstallation,
