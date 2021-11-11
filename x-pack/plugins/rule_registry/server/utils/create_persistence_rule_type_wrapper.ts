@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { chunk } from 'lodash';
-import { VERSION } from '@kbn/rule-data-utils';
+import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 
@@ -28,9 +28,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               if (ruleDataClient.isWriteEnabled() && numAlerts) {
                 const commonRuleFields = getCommonAlertFields(options);
 
-                // 65536 is the default max terms count for an Elasticsearch index, so we can put
-                // at least this many alert IDs into each query against alerts-as-data indices
-                const alertChunks = chunk(alerts, 65536);
+                const CHUNK_SIZE = 10000;
+                const alertChunks = chunk(alerts, CHUNK_SIZE);
                 const filteredAlerts: typeof alerts = [];
 
                 for (const alertChunk of alertChunks) {
@@ -41,15 +40,31 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                           values: alertChunk.map((alert) => alert._id),
                         },
                       },
+                      aggs: {
+                        uuids: {
+                          terms: {
+                            field: ALERT_UUID,
+                            size: CHUNK_SIZE,
+                          },
+                        },
+                      },
+                      size: 0,
                     },
                   };
                   const response = await ruleDataClient
                     .getReader({ namespace: options.spaceId })
                     .search(request);
-                  const newAlerts = alertChunk.filter((alert) =>
-                    response.hits.hits.every((hit) => hit._id !== alert._id)
-                  );
-                  filteredAlerts.concat(newAlerts);
+                  const uuidsMap: Record<string, boolean> = {};
+                  const aggs = response.aggregations as
+                    | Record<estypes.AggregateName, { buckets: Array<{ key: string }> }>
+                    | undefined;
+                  if (aggs != null) {
+                    aggs.uuids.buckets.forEach((bucket) => (uuidsMap[bucket.key] = true));
+                    const newAlerts = alertChunk.filter((alert) => !uuidsMap[alert._id]);
+                    filteredAlerts.push(...newAlerts);
+                  } else {
+                    filteredAlerts.push(...alertChunk);
+                  }
                 }
 
                 if (filteredAlerts.length === 0) {
