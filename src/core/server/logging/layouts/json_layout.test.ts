@@ -339,9 +339,9 @@ test('format() meta can not override tracing properties', () => {
         context: 'bar',
         pid: 3,
         meta: {
-          span: 'span_override',
-          trace: 'trace_override',
-          transaction: 'transaction_override',
+          span: { id: 'span_override' },
+          trace: { id: 'trace_override' },
+          transaction: { id: 'transaction_override' },
         },
         spanId: 'spanId-1',
         traceId: 'traceId-1',
