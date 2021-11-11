@@ -628,23 +628,9 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
-    const valueRow = await this.toggleRow('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(script);
-  }
-
-  async changeFieldScript(script: string) {
-    this.log.debug('set script = ' + script);
-    const valueRow = await this.testSubjects.find('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(this.browser.keys.DELETE.repeat(30));
-    this.browser.pressKeys(script);
+    await this.toggleRow('valueRow');
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
   async clickAddScriptedField() {
