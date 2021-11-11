@@ -33,6 +33,9 @@ const EndpointDetailsContentStyled = styled.div`
   dl dt {
     max-width: 220px;
   }
+  .policyLineText {
+    padding-right: 5px;
+  }
 `;
 
 const ColumnTitle = ({ children }: { children: React.ReactNode }) => {
@@ -106,7 +109,6 @@ export const EndpointDetailsContent = memo(
           ),
           description: (
             <EuiText size="xs">
-              {' '}
               <FormattedDate value={details['@timestamp']} fieldName="" />
             </EuiText>
           ),
@@ -125,7 +127,7 @@ export const EndpointDetailsContent = memo(
               <EndpointPolicyLink
                 policyId={details.Endpoint.policy.applied.id}
                 data-test-subj="policyDetailsValue"
-                style={{ paddingRight: '5px' }}
+                className={'policyLineText'}
               >
                 {details.Endpoint.policy.applied.name}
               </EndpointPolicyLink>
@@ -133,8 +135,7 @@ export const EndpointDetailsContent = memo(
                 <EuiText
                   color="subdued"
                   size="xs"
-                  className={'eui-displayInlineBlock'}
-                  style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}
+                  className={'eui-displayInlineBlock eui-textNoWrap policyLineText'}
                   data-test-subj="policyDetailsRevNo"
                 >
                   <FormattedMessage
