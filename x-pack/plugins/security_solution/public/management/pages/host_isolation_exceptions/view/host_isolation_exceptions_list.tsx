@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import {
-  ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
-import { useQuery } from 'react-query';
-import { ServerApiError } from '../../../../common/types';
-import { useHttp } from '../../../../common/lib/kibana';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import { getCurrentLocation, getListPagination } from '../store/selector';
 import {
+  useFetchHostIsolationExceptionsList,
   useHostIsolationExceptionsNavigateCallback,
   useHostIsolationExceptionsSelector,
 } from './hooks';
@@ -37,17 +32,13 @@ import {
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
-import { getHostIsolationExceptionItems } from '../service';
-import { parseQueryFilterToKQL } from '../../../common/utils';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
   typeof ExceptionItem
 >;
-const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
 
 export const HostIsolationExceptionsList = () => {
-  const http = useHttp();
   const history = useHistory();
   const privileges = useEndpointPrivileges();
 
@@ -57,17 +48,7 @@ export const HostIsolationExceptionsList = () => {
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-  const { isLoading, data, error, refetch } = useQuery<
-    FoundExceptionListItemSchema,
-    ServerApiError
-  >(['hostIsolationExceptions', location.filter, location.page_size, location.page_index], () => {
-    return getHostIsolationExceptionItems({
-      http,
-      page: location.page_index + 1,
-      perPage: location.page_size,
-      filter: parseQueryFilterToKQL(location.filter, SEARCHABLE_FIELDS) || undefined,
-    });
-  });
+  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
 
   const listItems = data?.data || [];
   const totalCountListItems = data?.total || 0;
