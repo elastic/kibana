@@ -15,6 +15,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_SEVERITY,
+  ALERT_RULE_RISK_SCORE,
 } from '@kbn/rule-data-utils';
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -274,6 +275,7 @@ export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
   'event.kind': 'event.kind',
   'rule.severity': ALERT_RULE_SEVERITY,
+  'rule.risk_score': ALERT_RULE_RISK_SCORE,
   'alert.uuid': ALERT_UUID,
   'alert.start': ALERT_START,
   'event.action': 'event.action',
