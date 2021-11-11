@@ -22,27 +22,27 @@ interface Props {
 
 const strings = {
   getGroupBySelectLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.groupBySelect', {
+    i18n.translate('xpack.canvas.workpadFilters.groupBySelect', {
       defaultMessage: 'Group by',
     }),
   getGroupByFilterGroupLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.groupByFilterGroup', {
+    i18n.translate('xpack.canvas.workpadFilters.groupByFilterGroup', {
       defaultMessage: 'Filter group',
     }),
   getGroupByFilterTypeLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.groupByFilterType', {
+    i18n.translate('xpack.canvas.workpadFilters.groupByFilterType', {
       defaultMessage: 'Filter type',
     }),
   getGroupByColumnLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.groupByColumn', {
+    i18n.translate('xpack.canvas.workpadFilters.groupByColumn', {
       defaultMessage: 'Column',
     }),
   getWithoutGroupLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.filters_group.withoutGroup', {
+    i18n.translate('xpack.canvas.workpadFilters.filters_group.withoutGroup', {
       defaultMessage: 'Without group',
     }),
   getBlankValueLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.filters_group.blankValue', {
+    i18n.translate('xpack.canvas.workpadFilters.filters_group.blankValue', {
       defaultMessage: '(Blank)',
     }),
 };
