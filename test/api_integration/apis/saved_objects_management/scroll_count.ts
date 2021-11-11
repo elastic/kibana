@@ -123,8 +123,6 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/api/saved_objects/_import`)
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(200);
-
-        return ids;
       };
 
       before(async () => {
