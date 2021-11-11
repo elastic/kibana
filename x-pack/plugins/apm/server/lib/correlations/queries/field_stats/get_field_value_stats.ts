@@ -14,7 +14,6 @@ import {
   Aggs,
   TopValueBucket,
 } from '../../../../../common/correlations/field_stats_types';
-import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 import { getQueryWithParams } from '../get_query_with_params';
 
 export const getFieldValueFieldStatsRequest = (
@@ -23,7 +22,7 @@ export const getFieldValueFieldStatsRequest = (
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({ params });
 
-  const { index, samplerShardSize } = params;
+  const { index } = params;
 
   const size = 0;
   const aggs: Aggs = {
@@ -38,14 +37,13 @@ export const getFieldValueFieldStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: {
-      sample: buildSamplerAggregation(aggs, samplerShardSize),
-    },
+    aggs,
   };
 
   return {
     index,
     size,
+    track_total_hits: false,
     body: searchBody,
   };
 };
@@ -59,22 +57,19 @@ export const fetchFieldValueFieldStats = async (
 
   const { body } = await esClient.search(request);
   const aggregations = body.aggregations as {
-    sample: {
-      doc_count: number;
-      filtered_count: estypes.AggregationsFiltersBucketItemKeys;
-    };
+    filtered_count: estypes.AggregationsFiltersBucketItemKeys;
   };
   const topValues: TopValueBucket[] = [
     {
       key: field.fieldValue,
-      doc_count: aggregations.sample.filtered_count.doc_count,
+      doc_count: aggregations.filtered_count.doc_count,
     },
   ];
 
   const stats = {
     fieldName: field.fieldName,
     topValues,
-    topValuesSampleSize: aggregations.sample.doc_count ?? 0,
+    topValuesSampleSize: aggregations.doc_count ?? 0,
   };
 
   return stats;

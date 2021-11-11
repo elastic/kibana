@@ -16,7 +16,6 @@ import {
 } from '../../../../../common/correlations/field_stats_types';
 import { FieldValuePair } from '../../../../../common/correlations/types';
 import { getQueryWithParams } from '../get_query_with_params';
-import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 
 export const getNumericFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
@@ -26,7 +25,7 @@ export const getNumericFieldStatsRequest = (
   const query = getQueryWithParams({ params, termFilters });
   const size = 0;
 
-  const { index, samplerShardSize } = params;
+  const { index } = params;
 
   const aggs: Aggs = {
     sampled_field_stats: {
@@ -50,14 +49,13 @@ export const getNumericFieldStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: {
-      sample: buildSamplerAggregation(aggs, samplerShardSize),
-    },
+    aggs,
   };
 
   return {
     index,
     size,
+    track_total_hits: false,
     body: searchBody,
   };
 };
@@ -76,19 +74,15 @@ export const fetchNumericFieldStats = async (
   const { body } = await esClient.search(request);
 
   const aggregations = body.aggregations as {
-    sample: {
-      sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
-      sampled_percentiles: estypes.AggregationsHdrPercentilesAggregate;
-      sampled_field_stats: {
-        doc_count: number;
-        actual_stats: estypes.AggregationsStatsAggregate;
-      };
+    sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
+    sampled_field_stats: {
+      doc_count: number;
+      actual_stats: estypes.AggregationsStatsAggregate;
     };
   };
-  const docCount = aggregations?.sample.sampled_field_stats?.doc_count ?? 0;
-  const fieldStatsResp =
-    aggregations?.sample.sampled_field_stats?.actual_stats ?? {};
-  const topValues = aggregations?.sample.sampled_top?.buckets ?? [];
+  const docCount = aggregations?.sampled_field_stats?.doc_count ?? 0;
+  const fieldStatsResp = aggregations?.sampled_field_stats?.actual_stats ?? {};
+  const topValues = aggregations?.sampled_top?.buckets ?? [];
 
   const stats: NumericFieldStats = {
     fieldName: field.fieldName,
@@ -99,7 +93,7 @@ export const fetchNumericFieldStats = async (
     topValues,
     topValuesSampleSize: topValues.reduce(
       (acc: number, curr: TopValueBucket) => acc + curr.doc_count,
-      aggregations.sample.sampled_top?.sum_other_doc_count ?? 0
+      aggregations.sampled_top?.sum_other_doc_count ?? 0
     ),
   };
 

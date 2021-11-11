@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import numeral from '@elastic/numeral';
 import {
   FieldStats,
   TopValueBucket,
@@ -228,7 +229,7 @@ export function TopValues({
           const barColor = isHighlighted ? 'accent' : 'primary';
           const valueText =
             progressBarMax !== undefined
-              ? asPercent(value.doc_count, progressBarMax)
+              ? numeral(value.doc_count / progressBarMax).format('0.0%') // asPercent(value.doc_count, progressBarMax)
               : undefined;
 
           return (
