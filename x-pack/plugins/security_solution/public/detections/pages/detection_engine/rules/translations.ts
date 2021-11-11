@@ -551,7 +551,8 @@ export const IMPORT_RULE_BTN_TITLE = i18n.translate(
 export const SELECT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
   {
-    defaultMessage: 'Select Security rules (as exported from the Detection Rules page) to import',
+    defaultMessage:
+      'Select rules and actions (as exported from the Security > Rules page) to import',
   }
 );
 
