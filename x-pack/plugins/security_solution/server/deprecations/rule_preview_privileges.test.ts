@@ -14,7 +14,7 @@ import { RegisterDeprecationsConfig } from 'src/core/server';
 import { Role } from '../../../security/common/model';
 import {
   registerRulePreviewPrivilegeDeprecations,
-  roleHasSignalsReadAccess,
+  roleHasReadAccess,
 } from './rule_preview_privileges';
 
 const emptyRole: Role = {
@@ -101,28 +101,52 @@ describe('rule preview privileges deprecation', () => {
       ]);
     });
 
-    it('returns an appropriate deprecation if no roles are found', async () => {
+    it('returns no deprecation if no roles are found', async () => {
       mockDependencies.getKibanaRoles.mockResolvedValue({
         roles: [],
       });
       const result = await deprecationHandler.getDeprecations(mockContext);
-      expect(result).toEqual([
-        {
-          correctiveActions: {
-            manualSteps: [
-              'Update your roles to include read privileges for the detection alerts preview indices appropriate for that role and space(s).',
-              'In 8.0, users will be unable to view preview results until those permissions are added.',
+      expect(result).toEqual([]);
+    });
+
+    it('returns no deprecation when a role also has read access to the previews index', async () => {
+      mockDependencies.getKibanaRoles.mockResolvedValue({
+        roles: [
+          getRoleMock(
+            [
+              {
+                names: ['other-index', '.siem-signals-*', '.preview.alerts-security.alerts-*'],
+                privileges: ['all'],
+              },
             ],
-          },
-          deprecationType: 'feature',
-          documentationUrl:
-            'https://www.elastic.co/guide/en/security/some-branch/rules-ui-create.html#preview-rules',
-          level: 'warning',
-          message:
-            'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices (.alerts-security.preview.alert-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
-          title: 'The Detections Rule Preview feature is changing',
+            'roleWithCorrectAccess'
+          ),
+        ],
+      });
+      const result = await deprecationHandler.getDeprecations(mockContext);
+      expect(result).toEqual([]);
+    });
+
+    it('returns no deprecation if all roles found are internal', async () => {
+      const internalRoleMock = {
+        ...getRoleMock(
+          [
+            {
+              names: ['other-index', '.siem-signals-*'],
+              privileges: ['all'],
+            },
+          ],
+          'internalRole'
+        ),
+        metadata: {
+          _reserved: true,
         },
-      ]);
+      };
+      mockDependencies.getKibanaRoles.mockResolvedValue({
+        roles: [internalRoleMock],
+      });
+      const result = await deprecationHandler.getDeprecations(mockContext);
+      expect(result).toEqual([]);
     });
 
     it('returns an appropriate deprecation if roles are found', async () => {
@@ -136,6 +160,15 @@ describe('rule preview privileges deprecation', () => {
               },
             ],
             'irrelevantRole'
+          ),
+          getRoleMock(
+            [
+              {
+                names: ['other-index', '.siem-signals-*', '.preview.alerts-security.alerts-*'],
+                privileges: ['all'],
+              },
+            ],
+            'roleWithCorrectAccess'
           ),
           getRoleMock(
             [
@@ -163,7 +196,7 @@ describe('rule preview privileges deprecation', () => {
             'https://www.elastic.co/guide/en/security/some-branch/rules-ui-create.html#preview-rules',
           level: 'warning',
           message:
-            'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices (.alerts-security.preview.alert-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
+            'In order to enable a more robust preview in 8.0+, users will need read privileges to new detection alerts preview indices (.preview.alerts-security.alerts-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
           title: 'The Detections Rule Preview feature is changing',
         },
       ]);
@@ -171,7 +204,7 @@ describe('rule preview privileges deprecation', () => {
   });
 
   describe('utilities', () => {
-    describe('roleHasSignalsReadAccess', () => {
+    describe('roleHasReadAccess', () => {
       it('returns true if the role has read privilege to all signals indexes', () => {
         const role = getRoleMock([
           {
@@ -179,7 +212,7 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['read'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(true);
+        expect(roleHasReadAccess(role)).toEqual(true);
       });
 
       it('returns true if the role has read privilege to a single signals index', () => {
@@ -189,7 +222,7 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['read'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(true);
+        expect(roleHasReadAccess(role)).toEqual(true);
       });
 
       it('returns true if the role has all privilege to a single signals index', () => {
@@ -199,7 +232,7 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['all'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(true);
+        expect(roleHasReadAccess(role)).toEqual(true);
       });
 
       it('returns false if the role has read privilege to other indices', () => {
@@ -209,7 +242,7 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['read'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(false);
+        expect(roleHasReadAccess(role)).toEqual(false);
       });
 
       it('returns false if the role has all privilege to other indices', () => {
@@ -219,12 +252,12 @@ describe('rule preview privileges deprecation', () => {
             privileges: ['all'],
           },
         ]);
-        expect(roleHasSignalsReadAccess(role)).toEqual(false);
+        expect(roleHasReadAccess(role)).toEqual(false);
       });
 
       it('returns false if the role has no specific privileges', () => {
         const role = getRoleMock();
-        expect(roleHasSignalsReadAccess(role)).toEqual(false);
+        expect(roleHasReadAccess(role)).toEqual(false);
       });
     });
   });
