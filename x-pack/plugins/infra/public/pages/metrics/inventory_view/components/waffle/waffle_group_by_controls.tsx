@@ -134,6 +134,7 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
       <DropdownButton
         label={i18n.translate('xpack.infra.waffle.groupByLabel', { defaultMessage: 'Group by' })}
         onClick={this.handleToggle}
+        data-test-subj={'waffleGroupByDropdown'}
       >
         {buttonBody}
       </DropdownButton>
@@ -147,7 +148,11 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
         panelPaddingSize="none"
         closePopover={this.handleClose}
       >
-        <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
+        <StyledContextMenu
+          initialPanelId="firstPanel"
+          panels={panels}
+          data-test-subj="groupByContextMenu"
+        />
       </EuiPopover>
     );
   }
