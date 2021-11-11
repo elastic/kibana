@@ -174,7 +174,7 @@ export const getBreadcrumbsForRoute = (
   }
 
   if (isCaseRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'case', isDetailPage: false };
+    const tempNav: SearchNavTab = { urlKey: 'cases', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
