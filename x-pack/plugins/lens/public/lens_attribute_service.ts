@@ -14,7 +14,8 @@ import type {
   LensByReferenceInput,
 } from './embeddable/embeddable';
 import { SavedObjectIndexStore } from './persistence';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { checkForDuplicateTitle } from './saved_visualize_helpers';
+import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { DOC_TYPE } from '../common/constants';
 
 export type LensAttributeService = AttributeService<
