@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const security = getService('security');
 
-  describe('timefield is a date in a nested field', function () {
+  // Disabled due to unterlying issues with the querying infrastructure in Discover
+  describe.skip('timefield is a date in a nested field', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nested');
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nested']);
