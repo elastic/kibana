@@ -55,10 +55,7 @@ import {
   ALERT_ORIGINAL_EVENT_CATEGORY,
   ALERT_GROUP_ID,
 } from '../../../../plugins/security_solution/common/field_maps/field_names';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DETECTION_ENGINE_RULES_URL,
-} from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
