@@ -16,7 +16,7 @@ export interface RouteValidatorConfig<P, Q, B>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-core-server.routevalidatorconfig.body.md) | <code>RouteValidationSpec&lt;B&gt;</code> | Validation logic for the body payload |
-|  [params](./kibana-plugin-core-server.routevalidatorconfig.params.md) | <code>RouteValidationSpec&lt;P&gt;</code> | Validation logic for the URL params |
-|  [query](./kibana-plugin-core-server.routevalidatorconfig.query.md) | <code>RouteValidationSpec&lt;Q&gt;</code> | Validation logic for the Query params |
+|  [body?](./kibana-plugin-core-server.routevalidatorconfig.body.md) | RouteValidationSpec&lt;B&gt; | <i>(Optional)</i> Validation logic for the body payload |
+|  [params?](./kibana-plugin-core-server.routevalidatorconfig.params.md) | RouteValidationSpec&lt;P&gt; | <i>(Optional)</i> Validation logic for the URL params |
+|  [query?](./kibana-plugin-core-server.routevalidatorconfig.query.md) | RouteValidationSpec&lt;Q&gt; | <i>(Optional)</i> Validation logic for the Query params |
 
