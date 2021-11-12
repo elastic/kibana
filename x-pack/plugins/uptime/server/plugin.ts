@@ -29,6 +29,7 @@ import { syncSyntheticsConfig } from './lib/synthetics_service/config';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from './config';
+import { UptimeRouter } from './types';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -36,6 +37,7 @@ export class Plugin implements PluginType {
   private savedObjectsClient?: ISavedObjectsRepository;
   private initContext: PluginInitializerContext;
   private logger?: Logger;
+  private router?: UptimeRouter;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.initContext = _initializerContext;
@@ -47,6 +49,7 @@ export class Plugin implements PluginType {
     savedObjectsAdapter.config = config;
 
     this.logger = this.initContext.logger.get();
+    this.router = core.http.createRouter();
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ruleDataClient = ruleDataService.initializeIndex({
