@@ -42,7 +42,7 @@ export class EventLoopDelaysMonitor {
    * the histogram calculations start from the last time `reset` was called or this
    * EventLoopDelaysMonitor instance was created.
    *
-   * Node's native monitorEventLoopDelay returns the data in nanoseconds and we convert to ms.
+   * Returns metrics in milliseconds.
 
    * @returns {IntervalHistogram}
    */
