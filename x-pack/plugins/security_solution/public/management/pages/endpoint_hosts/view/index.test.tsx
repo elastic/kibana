@@ -1048,6 +1048,15 @@ describe('when on the endpoint list page', () => {
 
         const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
         expect(activityLogCallout).not.toBeNull();
+        // scroll to the bottom by pressing down arrow key
+        // and keep it pressed
+        userEvent.keyboard('ArrowDown>');
+        // lift key up after half a second
+        // should give enough delay to move the callout
+        // past the date range filters and expose the bottom content
+        setTimeout(() => {
+          userEvent.keyboard('/ArrowDown');
+        }, 500);
         expect(await renderResult.queryByTestId('activityLogLoadMoreTrigger')).toBeNull();
       });
 
