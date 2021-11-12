@@ -20,10 +20,10 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [get](./kibana-plugin-core-server.basepath.get.md) |  | <code>(request: KibanaRequest) =&gt; string</code> | returns <code>basePath</code> value, specific for an incoming request. |
-|  [prepend](./kibana-plugin-core-server.basepath.prepend.md) |  | <code>(path: string) =&gt; string</code> | Prepends <code>path</code> with the basePath. |
-|  [publicBaseUrl](./kibana-plugin-core-server.basepath.publicbaseurl.md) |  | <code>string</code> | The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the [BasePath.serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md)<!-- -->. |
-|  [remove](./kibana-plugin-core-server.basepath.remove.md) |  | <code>(path: string) =&gt; string</code> | Removes the prepended basePath from the <code>path</code>. |
-|  [serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md) |  | <code>string</code> | returns the server's basePath<!-- -->See [BasePath.get](./kibana-plugin-core-server.basepath.get.md) for getting the basePath value for a specific request |
-|  [set](./kibana-plugin-core-server.basepath.set.md) |  | <code>(request: KibanaRequest, requestSpecificBasePath: string) =&gt; void</code> | sets <code>basePath</code> value, specific for an incoming request. |
+|  [get](./kibana-plugin-core-server.basepath.get.md) |  | (request: KibanaRequest) =&gt; string | returns <code>basePath</code> value, specific for an incoming request. |
+|  [prepend](./kibana-plugin-core-server.basepath.prepend.md) |  | (path: string) =&gt; string | Prepends <code>path</code> with the basePath. |
+|  [publicBaseUrl?](./kibana-plugin-core-server.basepath.publicbaseurl.md) |  | string | <i>(Optional)</i> The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the [BasePath.serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md)<!-- -->. |
+|  [remove](./kibana-plugin-core-server.basepath.remove.md) |  | (path: string) =&gt; string | Removes the prepended basePath from the <code>path</code>. |
+|  [serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md) |  | string | returns the server's basePath<!-- -->See [BasePath.get](./kibana-plugin-core-server.basepath.get.md) for getting the basePath value for a specific request |
+|  [set](./kibana-plugin-core-server.basepath.set.md) |  | (request: KibanaRequest, requestSpecificBasePath: string) =&gt; void | sets <code>basePath</code> value, specific for an incoming request. |
 

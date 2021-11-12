@@ -15,6 +15,6 @@ export interface SavedObjectsFindOptionsReference
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectsfindoptionsreference.id.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectsfindoptionsreference.type.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-core-server.savedobjectsfindoptionsreference.id.md) | string |  |
+|  [type](./kibana-plugin-core-server.savedobjectsfindoptionsreference.type.md) | string |  |
 

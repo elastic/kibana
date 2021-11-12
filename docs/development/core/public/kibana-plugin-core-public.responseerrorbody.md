@@ -15,7 +15,7 @@ export interface ResponseErrorBody
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [attributes](./kibana-plugin-core-public.responseerrorbody.attributes.md) | <code>Record&lt;string, unknown&gt;</code> |  |
-|  [message](./kibana-plugin-core-public.responseerrorbody.message.md) | <code>string</code> |  |
-|  [statusCode](./kibana-plugin-core-public.responseerrorbody.statuscode.md) | <code>number</code> |  |
+|  [attributes?](./kibana-plugin-core-public.responseerrorbody.attributes.md) | Record&lt;string, unknown&gt; | <i>(Optional)</i> |
+|  [message](./kibana-plugin-core-public.responseerrorbody.message.md) | string |  |
+|  [statusCode](./kibana-plugin-core-public.responseerrorbody.statuscode.md) | number |  |
 

@@ -15,5 +15,5 @@ export interface ElasticsearchErrorDetails
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-core-server.elasticsearcherrordetails.error.md) | <code>{</code><br/><code>        type: string;</code><br/><code>        reason?: string;</code><br/><code>    }</code> |  |
+|  [error?](./kibana-plugin-core-server.elasticsearcherrordetails.error.md) | { type: string; reason?: string; } | <i>(Optional)</i> |
 

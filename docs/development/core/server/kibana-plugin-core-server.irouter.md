@@ -16,11 +16,11 @@ export interface IRouter<Context extends RequestHandlerContext = RequestHandlerC
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [delete](./kibana-plugin-core-server.irouter.delete.md) | <code>RouteRegistrar&lt;'delete', Context&gt;</code> | Register a route handler for <code>DELETE</code> request. |
-|  [get](./kibana-plugin-core-server.irouter.get.md) | <code>RouteRegistrar&lt;'get', Context&gt;</code> | Register a route handler for <code>GET</code> request. |
-|  [handleLegacyErrors](./kibana-plugin-core-server.irouter.handlelegacyerrors.md) | <code>RequestHandlerWrapper</code> | Wrap a router handler to catch and converts legacy boom errors to proper custom errors. |
-|  [patch](./kibana-plugin-core-server.irouter.patch.md) | <code>RouteRegistrar&lt;'patch', Context&gt;</code> | Register a route handler for <code>PATCH</code> request. |
-|  [post](./kibana-plugin-core-server.irouter.post.md) | <code>RouteRegistrar&lt;'post', Context&gt;</code> | Register a route handler for <code>POST</code> request. |
-|  [put](./kibana-plugin-core-server.irouter.put.md) | <code>RouteRegistrar&lt;'put', Context&gt;</code> | Register a route handler for <code>PUT</code> request. |
-|  [routerPath](./kibana-plugin-core-server.irouter.routerpath.md) | <code>string</code> | Resulted path |
+|  [delete](./kibana-plugin-core-server.irouter.delete.md) | RouteRegistrar&lt;'delete', Context&gt; | Register a route handler for <code>DELETE</code> request. |
+|  [get](./kibana-plugin-core-server.irouter.get.md) | RouteRegistrar&lt;'get', Context&gt; | Register a route handler for <code>GET</code> request. |
+|  [handleLegacyErrors](./kibana-plugin-core-server.irouter.handlelegacyerrors.md) | RequestHandlerWrapper | Wrap a router handler to catch and converts legacy boom errors to proper custom errors. |
+|  [patch](./kibana-plugin-core-server.irouter.patch.md) | RouteRegistrar&lt;'patch', Context&gt; | Register a route handler for <code>PATCH</code> request. |
+|  [post](./kibana-plugin-core-server.irouter.post.md) | RouteRegistrar&lt;'post', Context&gt; | Register a route handler for <code>POST</code> request. |
+|  [put](./kibana-plugin-core-server.irouter.put.md) | RouteRegistrar&lt;'put', Context&gt; | Register a route handler for <code>PUT</code> request. |
+|  [routerPath](./kibana-plugin-core-server.irouter.routerpath.md) | string | Resulted path |
 

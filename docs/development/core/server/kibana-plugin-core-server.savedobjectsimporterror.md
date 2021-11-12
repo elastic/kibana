@@ -10,13 +10,14 @@
 ```typescript
 export declare class SavedObjectsImportError extends Error 
 ```
+<b>Extends:</b> Error
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [attributes](./kibana-plugin-core-server.savedobjectsimporterror.attributes.md) |  | <code>Record&lt;string, any&gt; &#124; undefined</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectsimporterror.type.md) |  | <code>string</code> |  |
+|  [attributes?](./kibana-plugin-core-server.savedobjectsimporterror.attributes.md) |  | Record&lt;string, any&gt; \| undefined | <i>(Optional)</i> |
+|  [type](./kibana-plugin-core-server.savedobjectsimporterror.type.md) |  | string |  |
 
 ## Methods
 

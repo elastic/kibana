@@ -15,12 +15,12 @@ export interface DeleteDocumentResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [\_id](./kibana-plugin-core-server.deletedocumentresponse._id.md) | <code>string</code> |  |
-|  [\_index](./kibana-plugin-core-server.deletedocumentresponse._index.md) | <code>string</code> |  |
-|  [\_shards](./kibana-plugin-core-server.deletedocumentresponse._shards.md) | <code>ShardsResponse</code> |  |
-|  [\_type](./kibana-plugin-core-server.deletedocumentresponse._type.md) | <code>string</code> |  |
-|  [\_version](./kibana-plugin-core-server.deletedocumentresponse._version.md) | <code>number</code> |  |
-|  [error](./kibana-plugin-core-server.deletedocumentresponse.error.md) | <code>{</code><br/><code>        type: string;</code><br/><code>    }</code> |  |
-|  [found](./kibana-plugin-core-server.deletedocumentresponse.found.md) | <code>boolean</code> |  |
-|  [result](./kibana-plugin-core-server.deletedocumentresponse.result.md) | <code>string</code> |  |
+|  [\_id](./kibana-plugin-core-server.deletedocumentresponse._id.md) | string |  |
+|  [\_index](./kibana-plugin-core-server.deletedocumentresponse._index.md) | string |  |
+|  [\_shards](./kibana-plugin-core-server.deletedocumentresponse._shards.md) | ShardsResponse |  |
+|  [\_type](./kibana-plugin-core-server.deletedocumentresponse._type.md) | string |  |
+|  [\_version](./kibana-plugin-core-server.deletedocumentresponse._version.md) | number |  |
+|  [error?](./kibana-plugin-core-server.deletedocumentresponse.error.md) | { type: string; } | <i>(Optional)</i> |
+|  [found](./kibana-plugin-core-server.deletedocumentresponse.found.md) | boolean |  |
+|  [result](./kibana-plugin-core-server.deletedocumentresponse.result.md) | string |  |
 

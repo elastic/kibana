@@ -16,5 +16,5 @@ export interface IExternalUrlConfig
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [policy](./kibana-plugin-core-server.iexternalurlconfig.policy.md) | <code>IExternalUrlPolicy[]</code> | A set of policies describing which external urls are allowed. |
+|  [policy](./kibana-plugin-core-server.iexternalurlconfig.policy.md) | IExternalUrlPolicy\[\] | A set of policies describing which external urls are allowed. |
 

@@ -16,11 +16,11 @@ setHeaderBanner(headerBanner?: ChromeUserBanner): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  headerBanner | <code>ChromeUserBanner</code> |  |
+|  headerBanner | ChromeUserBanner |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Remarks
 

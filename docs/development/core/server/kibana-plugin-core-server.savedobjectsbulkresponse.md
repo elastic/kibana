@@ -15,5 +15,5 @@ export interface SavedObjectsBulkResponse<T = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [saved\_objects](./kibana-plugin-core-server.savedobjectsbulkresponse.saved_objects.md) | <code>Array&lt;SavedObject&lt;T&gt;&gt;</code> |  |
+|  [saved\_objects](./kibana-plugin-core-server.savedobjectsbulkresponse.saved_objects.md) | Array&lt;SavedObject&lt;T&gt;&gt; |  |
 

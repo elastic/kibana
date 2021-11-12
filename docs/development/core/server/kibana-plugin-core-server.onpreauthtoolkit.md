@@ -16,5 +16,5 @@ export interface OnPreAuthToolkit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [next](./kibana-plugin-core-server.onpreauthtoolkit.next.md) | <code>() =&gt; OnPreAuthResult</code> | To pass request to the next handler |
+|  [next](./kibana-plugin-core-server.onpreauthtoolkit.next.md) | () =&gt; OnPreAuthResult | To pass request to the next handler |
 

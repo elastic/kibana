@@ -16,6 +16,6 @@ export interface ElasticsearchConfigPreboot
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [credentialsSpecified](./kibana-plugin-core-server.elasticsearchconfigpreboot.credentialsspecified.md) | <code>boolean</code> | Indicates whether Elasticsearch configuration includes credentials (<code>username</code>, <code>password</code> or <code>serviceAccountToken</code>). |
-|  [hosts](./kibana-plugin-core-server.elasticsearchconfigpreboot.hosts.md) | <code>string[]</code> | Hosts that the client will connect to. If sniffing is enabled, this list will be used as seeds to discover the rest of your cluster. |
+|  [credentialsSpecified](./kibana-plugin-core-server.elasticsearchconfigpreboot.credentialsspecified.md) | boolean | Indicates whether Elasticsearch configuration includes credentials (<code>username</code>, <code>password</code> or <code>serviceAccountToken</code>). |
+|  [hosts](./kibana-plugin-core-server.elasticsearchconfigpreboot.hosts.md) | string\[\] | Hosts that the client will connect to. If sniffing is enabled, this list will be used as seeds to discover the rest of your cluster. |
 

@@ -17,6 +17,5 @@ readonly client: IClusterClient;
 
 ```js
 const client = core.elasticsearch.client;
-
 ```
 

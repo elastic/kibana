@@ -13,5 +13,5 @@ getAll(): Array<Readonly<ChromeNavLink>>;
 ```
 <b>Returns:</b>
 
-`Array<Readonly<ChromeNavLink>>`
+Array&lt;Readonly&lt;ChromeNavLink&gt;&gt;
 

@@ -18,10 +18,10 @@ closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Pro
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>string</code> |  |
-|  options | <code>SavedObjectsClosePointInTimeOptions</code> |  |
+|  id | string |  |
+|  options | SavedObjectsClosePointInTimeOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsClosePointInTimeResponse>`
+Promise&lt;SavedObjectsClosePointInTimeResponse&gt;
 

@@ -11,10 +11,11 @@ See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)
 ```typescript
 export interface ICustomClusterClient extends IClusterClient 
 ```
+<b>Extends:</b> IClusterClient
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [close](./kibana-plugin-core-server.icustomclusterclient.close.md) | <code>() =&gt; Promise&lt;void&gt;</code> | Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API. |
+|  [close](./kibana-plugin-core-server.icustomclusterclient.close.md) | () =&gt; Promise&lt;void&gt; | Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API. |
 

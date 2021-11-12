@@ -15,8 +15,8 @@ export interface OverlayStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [banners](./kibana-plugin-core-public.overlaystart.banners.md) | <code>OverlayBannersStart</code> | [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |
-|  [openConfirm](./kibana-plugin-core-public.overlaystart.openconfirm.md) | <code>OverlayModalStart['openConfirm']</code> |  |
-|  [openFlyout](./kibana-plugin-core-public.overlaystart.openflyout.md) | <code>OverlayFlyoutStart['open']</code> |  |
-|  [openModal](./kibana-plugin-core-public.overlaystart.openmodal.md) | <code>OverlayModalStart['open']</code> |  |
+|  [banners](./kibana-plugin-core-public.overlaystart.banners.md) | OverlayBannersStart | [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |
+|  [openConfirm](./kibana-plugin-core-public.overlaystart.openconfirm.md) | OverlayModalStart\['openConfirm'\] |  |
+|  [openFlyout](./kibana-plugin-core-public.overlaystart.openflyout.md) | OverlayFlyoutStart\['open'\] |  |
+|  [openModal](./kibana-plugin-core-public.overlaystart.openmodal.md) | OverlayModalStart\['open'\] |  |
 
