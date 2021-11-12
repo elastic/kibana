@@ -62,6 +62,7 @@ export function alterColumn(): ExpressionFunctionDefinition<
 
       const name = args.name ?? column.name;
       const id = column.id ?? name;
+      const prevColumnId = column.id ?? column.name;
       const type = args.type || column.meta.type;
       const meta = { ...column.meta, params: { ...(column.meta.params ?? {}), id: type }, type };
 
@@ -97,8 +98,8 @@ export function alterColumn(): ExpressionFunctionDefinition<
       }
 
       const rows = input.rows.map((row) => ({
-        ...omit(row, column.id ?? column.name),
-        [id]: handler(row[column.id ?? column.name]),
+        ...omit(row, prevColumnId),
+        [id]: handler(row[prevColumnId]),
       }));
 
       return {
