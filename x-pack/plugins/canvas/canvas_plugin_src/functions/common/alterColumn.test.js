@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { emptyTable, testTable } from './__fixtures__/test_tables';
@@ -17,6 +18,7 @@ describe('alterColumn', () => {
 
   const nameColumnIndex = testTable.columns.findIndex(({ name }) => name === 'name');
   const timeColumnIndex = testTable.columns.findIndex(({ name }) => name === 'time');
+  const titleColumnIndex = testTable.columns.findIndex(({ id }) => id === 'title_id');
   const priceColumnIndex = testTable.columns.findIndex(({ name }) => name === 'price');
   const inStockColumnIndex = testTable.columns.findIndex(({ name }) => name === 'in_stock');
 
@@ -41,10 +43,22 @@ describe('alterColumn', () => {
 
         expect(newColumn.name).not.toBe(originalColumn.name);
         expect(newColumn.meta.type).not.toBe(originalColumn.meta.type);
-        expect(typeof dateToString.rows[arbitraryRowIndex].timeISO).toBe('string');
-        expect(new Date(dateToString.rows[arbitraryRowIndex].timeISO)).toEqual(
+        expect(typeof dateToString.rows[arbitraryRowIndex].time).toBe('string');
+        expect(new Date(dateToString.rows[arbitraryRowIndex].time)).toEqual(
           new Date(testTable.rows[arbitraryRowIndex].time)
         );
+      });
+
+      it('can alter the column by id', () => {
+        const newTitle = 'title12';
+        const titleToNumber = fn(testTable, { column: 'title_id', type: 'null', name: newTitle });
+        const originalColumn = testTable.columns[titleColumnIndex];
+        const newColumn = titleToNumber.columns[titleColumnIndex];
+        const arbitraryRowIndex = 7;
+
+        expect(newColumn.name).toBe(newTitle);
+        expect(newColumn.meta.type).not.toBe(originalColumn.meta.type);
+        expect(titleToNumber.rows[arbitraryRowIndex].title_id).toBeNull();
       });
 
       it('returns original context if column is not specified', () => {
@@ -63,8 +77,10 @@ describe('alterColumn', () => {
         const dateToString = fn(testTable, { column: 'time', type: 'string', name: 'timeISO' });
 
         expect(typeof dateToString.columns[timeColumnIndex].meta.type).toBe('string');
-        expect(typeof dateToString.rows[timeColumnIndex].timeISO).toBe('string');
-        expect(new Date(dateToString.rows[timeColumnIndex].timeISO)).toEqual(
+        expect(dateToString.columns[timeColumnIndex].name).toBe('timeISO');
+        expect(typeof dateToString.rows[timeColumnIndex].time).toBe('string');
+
+        expect(new Date(dateToString.rows[timeColumnIndex].time)).toEqual(
           new Date(testTable.rows[timeColumnIndex].time)
         );
       });
@@ -75,7 +91,8 @@ describe('alterColumn', () => {
         const arbitraryRowIndex = 2;
 
         expect(unconvertedColumn.columns[priceColumnIndex].meta.type).toBe(originalType);
-        expect(typeof unconvertedColumn.rows[arbitraryRowIndex].foo).toBe(originalType);
+        expect(unconvertedColumn.columns[priceColumnIndex].name).toBe('foo');
+        expect(typeof unconvertedColumn.rows[arbitraryRowIndex].price).toBe(originalType);
       });
 
       it('throws when converting to an invalid type', () => {
@@ -91,7 +108,7 @@ describe('alterColumn', () => {
         const arbitraryRowIndex = 8;
 
         expect(dateToString.columns[timeColumnIndex].name).toBe('timeISO');
-        expect(dateToString.rows[arbitraryRowIndex]).toHaveProperty('timeISO');
+        expect(dateToString.rows[arbitraryRowIndex]).toHaveProperty('time');
       });
 
       it('overwrites existing column if provided an existing column name', () => {
@@ -101,9 +118,10 @@ describe('alterColumn', () => {
         const arbitraryRowIndex = 5;
 
         expect(newColumn.name).not.toBe(originalColumn.name);
+        expect(newColumn.name).toBe('name');
         expect(newColumn.meta.type).not.toBe(originalColumn.meta.type);
-        expect(typeof overwriteName.rows[arbitraryRowIndex].name).toBe('string');
-        expect(new Date(overwriteName.rows[arbitraryRowIndex].name)).toEqual(
+        expect(typeof overwriteName.rows[arbitraryRowIndex].time).toBe('string');
+        expect(new Date(overwriteName.rows[arbitraryRowIndex].time)).toEqual(
           new Date(testTable.rows[arbitraryRowIndex].time)
         );
       });
@@ -113,6 +131,27 @@ describe('alterColumn', () => {
 
         expect(unchangedName.columns[priceColumnIndex].name).toBe(
           testTable.columns[priceColumnIndex].name
+        );
+      });
+
+      it('rewrites original column name if name is passed as an argument and id is not provided at the datatable', () => {
+        const newName = 'some name';
+        const arbitraryRowIndex = 4;
+
+        const testTableWithoutIds = {
+          ...testTable,
+          columns: testTable.columns.map((column) => omit(column, 'id')),
+        };
+
+        const changedNameResult = fn(testTableWithoutIds, {
+          column: 'price',
+          type: 'string',
+          name: newName,
+        });
+
+        expect(changedNameResult.columns[priceColumnIndex].name).toBe(newName);
+        expect(changedNameResult.rows[arbitraryRowIndex][newName]).toBe(
+          testTable.rows[arbitraryRowIndex].price.toString()
         );
       });
     });
