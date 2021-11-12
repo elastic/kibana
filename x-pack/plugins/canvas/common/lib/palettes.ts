@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { difference, isEqual } from 'lodash';
 import { LibStrings } from '../../i18n';
 
 const { Palettes: strings } = LibStrings;
@@ -19,11 +19,14 @@ export type PaletteID = typeof palettes[number]['id'];
  * An interface representing a color palette in Canvas, with a textual label and a set of
  * hex values.
  */
-export interface ColorPalette {
-  id: PaletteID;
+export interface ColorPalette<AdditionalPaletteID extends string = PaletteID> {
+  id: PaletteID | AdditionalPaletteID;
   label: string;
   colors: string[];
   gradient: boolean;
+  stops?: number[];
+  range?: 'number' | 'percent';
+  continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
 // This function allows one to create a strongly-typed palette for inclusion in
@@ -49,6 +52,15 @@ export const identifyPalette = (
   return palettes.find((palette) => {
     const { colors, gradient } = palette;
     return gradient === input.gradient && isEqual(colors, input.colors);
+  });
+};
+
+export const identifyPartialPalette = (
+  input: Pick<ColorPalette, 'colors' | 'gradient'>
+): ColorPalette | undefined => {
+  return palettes.find((palette) => {
+    const { colors, gradient } = palette;
+    return gradient === input.gradient && difference(input.colors, colors).length === 0;
   });
 };
 

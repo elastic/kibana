@@ -18,11 +18,11 @@ registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  appUpdater$ | <code>Observable&lt;AppUpdater&gt;</code> |  |
+|  appUpdater$ | Observable&lt;AppUpdater&gt; |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Example
 
@@ -42,6 +42,5 @@ export class MyPlugin implements Plugin {
      );
     }
 }
-
 ```
 

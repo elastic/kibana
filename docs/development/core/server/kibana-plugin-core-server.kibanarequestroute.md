@@ -16,7 +16,7 @@ export interface KibanaRequestRoute<Method extends RouteMethod>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [method](./kibana-plugin-core-server.kibanarequestroute.method.md) | <code>Method</code> |  |
-|  [options](./kibana-plugin-core-server.kibanarequestroute.options.md) | <code>KibanaRequestRouteOptions&lt;Method&gt;</code> |  |
-|  [path](./kibana-plugin-core-server.kibanarequestroute.path.md) | <code>string</code> |  |
+|  [method](./kibana-plugin-core-server.kibanarequestroute.method.md) | Method |  |
+|  [options](./kibana-plugin-core-server.kibanarequestroute.options.md) | KibanaRequestRouteOptions&lt;Method&gt; |  |
+|  [path](./kibana-plugin-core-server.kibanarequestroute.path.md) | string |  |
 

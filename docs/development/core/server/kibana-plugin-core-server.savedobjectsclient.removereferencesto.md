@@ -16,11 +16,11 @@ removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferen
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  options | <code>SavedObjectsRemoveReferencesToOptions</code> |  |
+|  type | string |  |
+|  id | string |  |
+|  options | SavedObjectsRemoveReferencesToOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsRemoveReferencesToResponse>`
+Promise&lt;SavedObjectsRemoveReferencesToResponse&gt;
 

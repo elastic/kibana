@@ -42,7 +42,7 @@ import {
   ContextMenuActions,
 } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENT_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -207,7 +207,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       if (kueryBuilder) {
         kueryBuilder = `(${kueryBuilder}) and`;
       }
-      kueryBuilder = `${kueryBuilder} ${AGENT_SAVED_OBJECT_TYPE}.policy_id : (${selectedAgentPolicies
+      kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
         .map((agentPolicy) => `"${agentPolicy}"`)
         .join(' or ')})`;
     }

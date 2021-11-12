@@ -15,5 +15,5 @@ export interface IRenderOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [includeUserSettings](./kibana-plugin-core-server.irenderoptions.includeusersettings.md) | <code>boolean</code> | Set whether to output user settings in the page metadata. <code>true</code> by default. |
+|  [includeUserSettings?](./kibana-plugin-core-server.irenderoptions.includeusersettings.md) | boolean | <i>(Optional)</i> Set whether to output user settings in the page metadata. <code>true</code> by default. |
 
