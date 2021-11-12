@@ -16,8 +16,6 @@ export function replaceTemplateStrings(
 ) {
   Mustache.parse(text, TEMPLATE_TAGS);
   return Mustache.render(text, {
-    curlyOpen: '{',
-    curlyClose: '}',
     config: {
       docs: {
         base_url: docLinks?.ELASTIC_WEBSITE_URL,
