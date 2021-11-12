@@ -54,7 +54,7 @@ export function staticColumn(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      if (args.id === null && args.name === null) {
+      if ((args.id === null || args.id === '') && (args.name === null || args.name === '')) {
         throw errors.invalidIdAndNameArguments();
       }
 
