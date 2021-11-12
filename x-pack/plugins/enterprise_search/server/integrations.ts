@@ -305,7 +305,7 @@ export const registerEnterpriseSearchIntegrations = (
   customIntegrations.registerCustomIntegration({
     id: 'app_search_web_crawler',
     title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.webCrawlerName', {
-      defaultMessage: 'Web Site Crawler',
+      defaultMessage: 'Web site crawler',
     }),
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.integrations.webCrawlerDescription',
