@@ -15,5 +15,5 @@ export interface SavedObjectsBulkCreateOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [overwrite](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.overwrite.md) | <code>boolean</code> | If a document with the given <code>id</code> already exists, overwrite it's contents (default=false). |
+|  [overwrite?](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.overwrite.md) | boolean | <i>(Optional)</i> If a document with the given <code>id</code> already exists, overwrite it's contents (default=false). |
 

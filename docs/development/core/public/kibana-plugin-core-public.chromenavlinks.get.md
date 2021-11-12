@@ -16,9 +16,9 @@ get(id: string): ChromeNavLink | undefined;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>string</code> |  |
+|  id | string |  |
 
 <b>Returns:</b>
 
-`ChromeNavLink | undefined`
+ChromeNavLink \| undefined
 

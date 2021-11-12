@@ -16,6 +16,6 @@ export interface CoreStatus
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [elasticsearch](./kibana-plugin-core-server.corestatus.elasticsearch.md) | <code>ServiceStatus</code> |  |
-|  [savedObjects](./kibana-plugin-core-server.corestatus.savedobjects.md) | <code>ServiceStatus</code> |  |
+|  [elasticsearch](./kibana-plugin-core-server.corestatus.elasticsearch.md) | ServiceStatus |  |
+|  [savedObjects](./kibana-plugin-core-server.corestatus.savedobjects.md) | ServiceStatus |  |
 
