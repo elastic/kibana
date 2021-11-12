@@ -10,7 +10,6 @@ import numeral from '@elastic/numeral';
 
 export function getUnits(series) {
   let units = get(series, '[0].metric.units');
-  console.log('the units in monitoring:', units);
 
   // For Bytes, find the largest unit from any data set's _last_ item
   if (units === 'B') {
