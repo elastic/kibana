@@ -103,11 +103,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const onEditAction = useCallback(
     (data: LensSortAction['data'] | LensResizeAction['data'] | LensToggleAction['data']) => {
-      if (renderMode === 'edit') {
-        dispatchEvent({ name: 'edit', data });
-      }
+      dispatchEvent({ name: 'edit', data });
     },
-    [dispatchEvent, renderMode]
+    [dispatchEvent]
   );
   const onRowContextMenuClick = useCallback(
     (data: LensTableRowContextMenuEvent['data']) => {

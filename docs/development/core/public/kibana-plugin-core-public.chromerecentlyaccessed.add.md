@@ -16,19 +16,18 @@ add(link: string, label: string, id: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  link | <code>string</code> |  |
-|  label | <code>string</code> |  |
-|  id | <code>string</code> |  |
+|  link | string | a relative URL to the resource (not including the ) |
+|  label | string | the label to display in the UI |
+|  id | string | a unique string used to de-duplicate the recently accessed list. |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Example
 
 
 ```js
 chrome.recentlyAccessed.add('/app/map/1234', 'Map 1234', '1234');
-
 ```
 

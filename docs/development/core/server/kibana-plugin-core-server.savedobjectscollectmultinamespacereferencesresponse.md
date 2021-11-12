@@ -16,5 +16,5 @@ export interface SavedObjectsCollectMultiNamespaceReferencesResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [objects](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesresponse.objects.md) | <code>SavedObjectReferenceWithContext[]</code> |  |
+|  [objects](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesresponse.objects.md) | SavedObjectReferenceWithContext\[\] |  |
 

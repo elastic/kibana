@@ -16,9 +16,9 @@ registerType(type: SavedObjectsType): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>SavedObjectsType</code> |  |
+|  type | SavedObjectsType |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

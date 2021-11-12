@@ -14,9 +14,9 @@ static isSavedObjectsClientError(error: any): error is DecoratedError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  error | <code>any</code> |  |
+|  error | any |  |
 
 <b>Returns:</b>
 
-`error is DecoratedError`
+error is DecoratedError
 

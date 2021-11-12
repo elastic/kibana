@@ -36,6 +36,5 @@ const page2 = await savedObjectsClient.find({
   searchAfter: lastHit.sort,
 });
 await savedObjectsClient.closePointInTime(page2.pit_id);
-
 ```
 
