@@ -27,6 +27,5 @@ export class MyPlugin implements Plugin  {
     // `mySubLogger` context: `plugins.myPlugin.sub`
   }
 }
-
 ```
 

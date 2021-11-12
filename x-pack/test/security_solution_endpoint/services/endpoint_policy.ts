@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   CreateAgentPolicyRequest,
@@ -161,7 +162,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-          name: 'East Coast',
+          name: `East Coast ${uuid.v4()}`,
           description: 'East Coast call center',
           namespace: 'default',
         };
@@ -182,7 +183,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-          name: 'Protect East Coast',
+          name: `Protect East Coast ${uuid.v4()}`,
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,

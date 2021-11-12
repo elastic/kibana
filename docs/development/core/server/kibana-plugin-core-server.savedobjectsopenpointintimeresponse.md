@@ -15,5 +15,5 @@ export interface SavedObjectsOpenPointInTimeResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectsopenpointintimeresponse.id.md) | <code>string</code> | PIT ID returned from ES. |
+|  [id](./kibana-plugin-core-server.savedobjectsopenpointintimeresponse.id.md) | string | PIT ID returned from ES. |
 

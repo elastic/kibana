@@ -16,5 +16,5 @@ export interface SavedObjectsRawDocParseOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [namespaceTreatment](./kibana-plugin-core-server.savedobjectsrawdocparseoptions.namespacetreatment.md) | <code>'strict' &#124; 'lax'</code> | Optional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously single-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade migrations.<!-- -->If not specified, the default treatment is <code>strict</code>. |
+|  [namespaceTreatment?](./kibana-plugin-core-server.savedobjectsrawdocparseoptions.namespacetreatment.md) | 'strict' \| 'lax' | <i>(Optional)</i> Optional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously single-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade migrations.<!-- -->If not specified, the default treatment is <code>strict</code>. |
 
