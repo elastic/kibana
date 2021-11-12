@@ -604,7 +604,7 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalledWith({
         closedAt: null,

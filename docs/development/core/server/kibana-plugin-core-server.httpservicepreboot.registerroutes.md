@@ -16,12 +16,12 @@ registerRoutes(path: string, callback: (router: IRouter) => void): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  path | <code>string</code> |  |
-|  callback | <code>(router: IRouter) =&gt; void</code> |  |
+|  path | string |  |
+|  callback | (router: IRouter) =&gt; void |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Remarks
 
@@ -35,6 +35,5 @@ registerRoutes('my-plugin', (router) => {
   // handler is called when '/my-plugin/path' resource is requested with `GET` method
   router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
 });
-
 ```
 

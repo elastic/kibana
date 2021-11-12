@@ -16,6 +16,6 @@ export interface SavedObjectsRepositoryFactory
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [createInternalRepository](./kibana-plugin-core-server.savedobjectsrepositoryfactory.createinternalrepository.md) | <code>(includedHiddenTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsrepository.md) that uses the internal Kibana user for authenticating with Elasticsearch. |
-|  [createScopedRepository](./kibana-plugin-core-server.savedobjectsrepositoryfactory.createscopedrepository.md) | <code>(req: KibanaRequest, includedHiddenTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsrepository.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. |
+|  [createInternalRepository](./kibana-plugin-core-server.savedobjectsrepositoryfactory.createinternalrepository.md) | (includedHiddenTypes?: string\[\]) =&gt; ISavedObjectsRepository | Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsrepository.md) that uses the internal Kibana user for authenticating with Elasticsearch. |
+|  [createScopedRepository](./kibana-plugin-core-server.savedobjectsrepositoryfactory.createscopedrepository.md) | (req: KibanaRequest, includedHiddenTypes?: string\[\]) =&gt; ISavedObjectsRepository | Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsrepository.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. |
 

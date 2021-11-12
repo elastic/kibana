@@ -13,5 +13,5 @@ getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
 ```
 <b>Returns:</b>
 
-`Observable<Partial<ChromeNavLink> | undefined>`
+Observable&lt;Partial&lt;ChromeNavLink&gt; \| undefined&gt;
 
