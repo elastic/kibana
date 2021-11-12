@@ -16,6 +16,7 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { UMServerLibs, UptimeESClient } from '../lib/lib';
+import { UptimeCorePluginsStart } from '../lib/adapters';
 import type { UptimeRequestHandlerContext } from '../types';
 
 /**
@@ -69,10 +70,12 @@ export type UMRouteHandler = ({
   request,
   response,
   savedObjectsClient,
+  plugins,
 }: {
   uptimeEsClient: UptimeESClient;
   context: UptimeRequestHandlerContext;
   request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>;
   response: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
+  plugins: UptimeCorePluginsStart;
 }) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

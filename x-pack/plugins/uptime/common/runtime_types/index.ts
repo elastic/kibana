@@ -13,3 +13,4 @@ export * from './monitor';
 export * from './ping';
 export * from './snapshot';
 export * from './network_events';
+export * from './synthetics_service_api_key';

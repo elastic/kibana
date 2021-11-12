@@ -9,7 +9,8 @@
     "data",
     "home",
     "ml",
-    "fleet"
+    "fleet",
+    "security"
   ],
   "requiredPlugins": [
     "alerting",
@@ -20,7 +21,8 @@
     "triggersActionsUi",
     "usageCollection",
     "ruleRegistry",
-    "observability"
+    "observability",
+    "taskManager"
   ],
   "server": true,
   "ui": true,

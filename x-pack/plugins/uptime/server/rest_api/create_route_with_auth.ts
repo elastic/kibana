@@ -10,7 +10,8 @@ import { UptimeRoute, UMRestApiRouteFactory, UMRouteHandler } from './types';
 
 export const createRouteWithAuth = (
   libs: UMServerLibs,
-  routeCreator: UMRestApiRouteFactory
+  routeCreator: UMRestApiRouteFactory,
+  plugins: any
 ): UptimeRoute => {
   const restRoute = routeCreator(libs);
   const { handler, method, path, options, ...rest } = restRoute;
@@ -22,6 +23,7 @@ export const createRouteWithAuth = (
     savedObjectsClient,
   }) => {
     const { statusCode, message } = libs.license(context.licensing.license);
+
     if (statusCode === 200) {
       return handler({
         uptimeEsClient,
@@ -29,6 +31,7 @@ export const createRouteWithAuth = (
         request,
         response,
         savedObjectsClient,
+        plugins,
       });
     }
     switch (statusCode) {

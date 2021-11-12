@@ -16,6 +16,11 @@ import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../../../../security/server';
+import {
+  TaskManagerStartContract,
+  TaskManagerSetupContract,
+} from '../../../../../task_manager/server';
 import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
 
@@ -35,7 +40,7 @@ export interface UptimeCoreSetup {
   router: UptimeRouter;
 }
 
-export interface UptimeCorePlugins {
+export interface UptimeCorePluginsSetup {
   features: PluginSetupContract;
   alerting: any;
   elasticsearch: any;
@@ -43,6 +48,13 @@ export interface UptimeCorePlugins {
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  security: SecurityPluginSetup;
+  taskManager: TaskManagerSetupContract;
+}
+
+export interface UptimeCorePluginsStart {
+  security: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface UMBackendFrameworkAdapter {

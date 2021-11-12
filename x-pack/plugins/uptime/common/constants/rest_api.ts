@@ -35,4 +35,7 @@ export enum API_URLS {
   DELETE_RULE = '/api/alerting/rule/',
   RULES_FIND = '/api/alerting/rules/_find',
   CONNECTOR_TYPES = '/api/actions/connector_types',
+
+  API_KEYS = '/api/uptime/service/key',
+  SYNC_CONFIG = '/api/uptime/service/config',
 }

@@ -10,8 +10,12 @@ import { Logger } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
-import { initUptimeServer } from './uptime_server';
-import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
+import { initUptimeServer, initSyntheticsServiceServer } from './uptime_server';
+import {
+  UptimeCorePluginsSetup,
+  UptimeCorePluginsStart,
+  UptimeCoreSetup,
+} from './lib/adapters/framework';
 import { umDynamicSettings } from './lib/saved_objects';
 import { UptimeRuleRegistry } from './plugin';
 
@@ -29,11 +33,11 @@ export interface KibanaServer extends Server {
 
 export const initServerWithKibana = (
   server: UptimeCoreSetup,
-  plugins: UptimeCorePlugins,
+  plugins: UptimeCorePluginsSetup,
   ruleRegistry: UptimeRuleRegistry,
   logger: Logger
 ) => {
-  const { features } = plugins;
+  const { features, security } = plugins;
   const libs = compose(server);
 
   features.registerKibanaFeature({
@@ -119,4 +123,13 @@ export const initServerWithKibana = (
   });
 
   initUptimeServer(server, libs, plugins, ruleRegistry, logger);
+};
+
+export const initSyntheticsServiceServerWithKibana = (
+  server: UptimeCoreSetup,
+  plugins: UptimeCorePluginsStart,
+  logger: Logger
+) => {
+  const libs = compose(server);
+  initSyntheticsServiceServer(server, libs, plugins, logger);
 };

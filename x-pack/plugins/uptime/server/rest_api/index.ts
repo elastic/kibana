@@ -28,6 +28,9 @@ import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
 import { createLastSuccessfulStepRoute } from './synthetics/last_successful_step';
 
+import { createGetAPIKeysRoute } from './synthetics_service/generate_service_api_key';
+import { createSyncSyntheticsConfig } from './synthetics_service/sync_synthetics_config';
+
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
@@ -51,4 +54,9 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createJourneyFailedStepsRoute,
   createLastSuccessfulStepRoute,
   createJourneyScreenshotBlocksRoute,
+];
+
+export const syntheticsServiceRestApiRoutes: UMRestApiRouteFactory[] = [
+  createGetAPIKeysRoute,
+  createSyncSyntheticsConfig,
 ];
