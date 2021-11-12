@@ -194,7 +194,8 @@ export function WaterfallItem({
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
   const itemBarStyle = getItemBarStyle(item, color, width, left);
-
+  const isServerlessColdstart = item.docType === 'transaction' && item.doc.faas?.coldstart;
+  
   return (
     <Container
       type={item.docType}
@@ -222,6 +223,13 @@ export function WaterfallItem({
         <Duration item={item} />
         <RelatedErrors item={item} errorCount={errorCount} />
         {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
+        {isServerlessColdstart && (
+          <EuiBadge color='warning'>
+            {i18n.translate('xpack.apm.transactionDetails.coldstartBadge', {
+              defaultMessage: 'cold start',
+            })}
+          </EuiBadge>
+        )}
       </ItemText>
     </Container>
   );

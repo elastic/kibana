@@ -92,7 +92,7 @@ export function CloudDetails({ cloud }: Props) {
     });
   }
 
-  if (cloud.machineTypes) {
+  if (!!cloud.machineTypes?.length) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.cloud.machineTypesLabel',
