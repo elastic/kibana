@@ -55,7 +55,7 @@ export class AlertNavigationRegistry {
       throw new Error(
         i18n.translate('xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError', {
           defaultMessage:
-            'Navigation for Alert type "{ruleTypeId}" within "{consumer}" is already registered.',
+            'Navigation for Rule type "{ruleTypeId}" within "{consumer}" is already registered.',
           values: {
             ruleTypeId: ruleType.id,
             consumer,
@@ -79,7 +79,7 @@ export class AlertNavigationRegistry {
     throw new Error(
       i18n.translate('xpack.alerting.alertNavigationRegistry.get.missingNavigationError', {
         defaultMessage:
-          'Navigation for Alert type "{ruleTypeId}" within "{consumer}" is not registered.',
+          'Navigation for Rule type "{ruleTypeId}" within "{consumer}" is not registered.',
         values: {
           ruleTypeId: ruleType.id,
           consumer,
