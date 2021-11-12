@@ -30,16 +30,10 @@ export const CONFIGURE_CASES_PAGE_NAME = i18n.translate('xpack.cases.configureCa
   defaultMessage: 'Configure Cases',
 });
 
-export const READ_ONLY_BADGE_TEXT = i18n.translate(
-  'xpack.securitySolution.cases.badge.readOnly.text',
-  {
-    defaultMessage: 'Read only',
-  }
-);
+export const READ_ONLY_BADGE_TEXT = i18n.translate('xpack.cases.badge.readOnly.text', {
+  defaultMessage: 'Read only',
+});
 
-export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.cases.badge.readOnly.tooltip',
-  {
-    defaultMessage: 'Unable to create or edit cases',
-  }
-);
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate('xpack.cases.badge.readOnly.tooltip', {
+  defaultMessage: 'Unable to create or edit cases',
+});
