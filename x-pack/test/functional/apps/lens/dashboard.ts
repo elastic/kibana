@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.getActions().move({ x, y, origin: el._webElement }).click().perform();
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/117770
-  describe.skip('lens dashboard tests', () => {
+  describe('lens dashboard tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await security.testUser.setRoles(
@@ -70,7 +69,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+      await retry.try(async () => {
+        await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await testSubjects.existOrFail('applyFiltersPopoverButton');
+      });
 
       await retry.try(async () => {
         await testSubjects.click('applyFiltersPopoverButton');
