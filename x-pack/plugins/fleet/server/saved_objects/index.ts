@@ -14,29 +14,19 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_ACTION_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
-  migrateAgentActionToV7100,
   migrateAgentPolicyToV7100,
-  migrateAgentToV7100,
-  migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
 } from './migrations/to_v7_10_0';
 
 import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
 
-import {
-  migrateAgentPolicyToV7120,
-  migrateAgentToV7120,
-  migratePackagePolicyToV7120,
-} from './migrations/to_v7_12_0';
+import { migrateAgentPolicyToV7120, migratePackagePolicyToV7120 } from './migrations/to_v7_12_0';
 import {
   migratePackagePolicyToV7130,
   migrateSettingsToV7130,
@@ -75,66 +65,6 @@ const getSavedObjectTypes = (
       '7.13.0': migrateSettingsToV7130,
     },
   },
-  [AGENT_SAVED_OBJECT_TYPE]: {
-    name: AGENT_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        type: { type: 'keyword' },
-        active: { type: 'boolean' },
-        enrolled_at: { type: 'date' },
-        unenrolled_at: { type: 'date' },
-        unenrollment_started_at: { type: 'date' },
-        upgraded_at: { type: 'date' },
-        upgrade_started_at: { type: 'date' },
-        access_api_key_id: { type: 'keyword' },
-        version: { type: 'keyword' },
-        user_provided_metadata: { type: 'flattened' },
-        local_metadata: { type: 'flattened' },
-        policy_id: { type: 'keyword' },
-        policy_revision: { type: 'integer' },
-        last_updated: { type: 'date' },
-        last_checkin: { type: 'date' },
-        last_checkin_status: { type: 'keyword' },
-        default_api_key_id: { type: 'keyword' },
-        default_api_key: { type: 'binary' },
-        updated_at: { type: 'date' },
-        current_error_events: { type: 'text', index: false },
-        packages: { type: 'keyword' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateAgentToV7100,
-      '7.12.0': migrateAgentToV7120,
-    },
-  },
-  [AGENT_ACTION_SAVED_OBJECT_TYPE]: {
-    name: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        agent_id: { type: 'keyword' },
-        policy_id: { type: 'keyword' },
-        policy_revision: { type: 'integer' },
-        type: { type: 'keyword' },
-        data: { type: 'binary' },
-        ack_data: { type: 'text' },
-        sent_at: { type: 'date' },
-        created_at: { type: 'date' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
-    },
-  },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
     name: AGENT_POLICY_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -165,30 +95,6 @@ const getSavedObjectTypes = (
     migrations: {
       '7.10.0': migrateAgentPolicyToV7100,
       '7.12.0': migrateAgentPolicyToV7120,
-    },
-  },
-  [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
-    name: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        name: { type: 'keyword' },
-        type: { type: 'keyword' },
-        api_key: { type: 'binary' },
-        api_key_id: { type: 'keyword' },
-        policy_id: { type: 'keyword' },
-        created_at: { type: 'date' },
-        updated_at: { type: 'date' },
-        expire_at: { type: 'date' },
-        active: { type: 'boolean' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateEnrollmentApiKeysToV7100,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -399,48 +305,4 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   // Encrypted saved objects
-  encryptedSavedObjects.registerType({
-    type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['api_key']),
-    attributesToExcludeFromAAD: new Set([
-      'name',
-      'type',
-      'api_key_id',
-      'policy_id',
-      'created_at',
-      'updated_at',
-      'expire_at',
-      'active',
-    ]),
-  });
-  encryptedSavedObjects.registerType({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['default_api_key']),
-    attributesToExcludeFromAAD: new Set([
-      'type',
-      'active',
-      'enrolled_at',
-      'access_api_key_id',
-      'version',
-      'user_provided_metadata',
-      'local_metadata',
-      'policy_id',
-      'policy_revision',
-      'last_updated',
-      'last_checkin',
-      'last_checkin_status',
-      'updated_at',
-      'current_error_events',
-      'unenrolled_at',
-      'unenrollment_started_at',
-      'packages',
-      'upgraded_at',
-      'upgrade_started_at',
-    ]),
-  });
-  encryptedSavedObjects.registerType({
-    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['data']),
-    attributesToExcludeFromAAD: new Set(['agent_id', 'type', 'sent_at', 'created_at']),
-  });
 }

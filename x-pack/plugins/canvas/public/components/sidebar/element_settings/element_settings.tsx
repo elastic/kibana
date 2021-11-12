@@ -6,31 +6,24 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
+import deepEqual from 'react-fast-compare';
+import { useSelector } from 'react-redux';
 import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
 import { ElementSettings as Component } from './element_settings.component';
-import { State, PositionedElement } from '../../../../types';
+import { State } from '../../../../types';
 
 interface Props {
   selectedElementId: string | null;
 }
 
-const mapStateToProps = (state: State, { selectedElementId }: Props): StateProps => ({
-  element: getElementById(state, selectedElementId, getSelectedPage(state)),
-});
+export const ElementSettings: React.FC<Props> = ({ selectedElementId }) => {
+  const element = useSelector((state: State) => {
+    return getElementById(state, selectedElementId, getSelectedPage(state));
+  }, deepEqual);
 
-interface StateProps {
-  element: PositionedElement | undefined;
-}
-
-const renderIfElement: React.FunctionComponent<StateProps> = (props) => {
-  if (props.element) {
-    return <Component element={props.element} />;
+  if (element) {
+    return <Component element={element} />;
   }
 
   return null;
 };
-
-export const ElementSettings = connect<StateProps, {}, Props, State>(mapStateToProps)(
-  renderIfElement
-);

@@ -16,5 +16,5 @@ export interface HttpResources
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [register](./kibana-plugin-core-server.httpresources.register.md) | <code>&lt;P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext&gt;(route: RouteConfig&lt;P, Q, B, 'get'&gt;, handler: HttpResourcesRequestHandler&lt;P, Q, B, Context&gt;) =&gt; void</code> | To register a route handler executing passed function to form response. |
+|  [register](./kibana-plugin-core-server.httpresources.register.md) | &lt;P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext&gt;(route: RouteConfig&lt;P, Q, B, 'get'&gt;, handler: HttpResourcesRequestHandler&lt;P, Q, B, Context&gt;) =&gt; void | To register a route handler executing passed function to form response. |
 
