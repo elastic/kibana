@@ -968,7 +968,12 @@ describe('when on the endpoint list page', () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
-            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
           );
         });
         const changedUrlAction = await userChangedUrlChecker;
@@ -987,7 +992,12 @@ describe('when on the endpoint list page', () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
-            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
           );
         });
         const changedUrlAction = await userChangedUrlChecker;
@@ -1013,7 +1023,12 @@ describe('when on the endpoint list page', () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
-            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
           );
         });
         const changedUrlAction = await userChangedUrlChecker;
@@ -1040,7 +1055,12 @@ describe('when on the endpoint list page', () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
-            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
           );
         });
         const changedUrlAction = await userChangedUrlChecker;
