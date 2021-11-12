@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
 import { EventsTdContent } from '../../styles';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import { Pin } from '../../pin';
 import { TimelineType } from '../../../../../../common/types/timeline';
@@ -41,7 +41,7 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
 
   return (
     <div key="timeline-action-pin-tool-tip">
-      <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+      <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
         <EuiToolTip data-test-subj="timeline-action-pin-tool-tip" content={tooltipContent}>
           <Pin
             ariaLabel={ariaLabel}
