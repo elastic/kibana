@@ -19,6 +19,7 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/Links/url_helpers';
 import { TransactionDetailsTabs } from './transaction_details_tabs';
+import { isServerlessAgent } from '../../../../common/agent_name';
 
 export function TransactionDetails() {
   const { path, query } = useApmParams(
@@ -32,7 +33,7 @@ export function TransactionDetails() {
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, runtimeName } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -54,6 +55,8 @@ export function TransactionDetails() {
     kuery,
   });
 
+  const isServerless = isServerlessAgent(runtimeName);
+
   return (
     <>
       {fallbackToTransactions && <AggregatedTransactionsBadge />}
@@ -72,6 +75,7 @@ export function TransactionDetails() {
           start={start}
           end={end}
           transactionName={transactionName}
+          isServerlessContext={isServerless}
         />
       </ChartPointerEventContextProvider>
 

@@ -20,6 +20,7 @@ import { getTransactionTraceSamples } from '../lib/transactions/trace_samples';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
 import { getLatencyPeriods } from '../lib/transactions/get_latency_charts';
 import { getErrorRatePeriods } from '../lib/transaction_groups/get_error_rate';
+import { getColdstartRatePeriods } from '../lib/transaction_groups/get_coldstart_rate';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import {
@@ -375,10 +376,64 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
   },
 });
 
+const transactionChartsColdstartRateRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({ transactionType: t.string }),
+      t.partial({ transactionName: t.string }),
+      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const {
+      environment,
+      kuery,
+      transactionType,
+      transactionName,
+      comparisonStart,
+      comparisonEnd,
+      start,
+      end,
+    } = params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+      start,
+      end,
+    });
+
+    return getColdstartRatePeriods({
+      environment,
+      kuery,
+      serviceName,
+      transactionType,
+      transactionName,
+      setup,
+      searchAggregatedTransactions,
+      comparisonStart,
+      comparisonEnd,
+      start,
+      end,
+    });
+  },
+});
+
 export const transactionRouteRepository = createApmServerRouteRepository()
   .add(transactionGroupsMainStatisticsRoute)
   .add(transactionGroupsDetailedStatisticsRoute)
   .add(transactionLatencyChartsRoute)
   .add(transactionTraceSamplesRoute)
   .add(transactionChartsBreakdownRoute)
-  .add(transactionChartsErrorRateRoute);
+  .add(transactionChartsErrorRateRoute)
+  .add(transactionChartsColdstartRateRoute);

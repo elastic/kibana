@@ -16,6 +16,7 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/Links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
+import { isServerlessAgent } from '../../../../common/agent_name';
 
 export function TransactionOverview() {
   const {
@@ -33,7 +34,7 @@ export function TransactionOverview() {
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { transactionType, serviceName, runtimeName } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -47,6 +48,8 @@ export function TransactionOverview() {
   if (!serviceName) {
     return null;
   }
+
+  const isServerless = isServerlessAgent(runtimeName);
 
   return (
     <>
@@ -65,6 +68,7 @@ export function TransactionOverview() {
         environment={environment}
         start={start}
         end={end}
+        isServerlessContext={isServerless}
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
