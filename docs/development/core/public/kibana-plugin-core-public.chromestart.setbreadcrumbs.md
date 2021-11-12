@@ -16,9 +16,9 @@ setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  newBreadcrumbs | <code>ChromeBreadcrumb[]</code> |  |
+|  newBreadcrumbs | ChromeBreadcrumb\[\] |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

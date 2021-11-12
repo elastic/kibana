@@ -15,5 +15,5 @@ getVisibleTypes(): SavedObjectsType<any>[];
 ```
 <b>Returns:</b>
 
-`SavedObjectsType<any>[]`
+SavedObjectsType&lt;any&gt;\[\]
 
