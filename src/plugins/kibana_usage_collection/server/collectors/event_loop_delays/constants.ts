@@ -45,8 +45,3 @@ export const MONITOR_EVENT_LOOP_THRESHOLD_START = 1 * 60 * 1000;
  * Check the event loop utilization every 30 seconds
  */
 export const MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL = 30 * 1000;
-
-/**
- * Nanosecond to milisecond conversion unit
- */
-export const ONE_MILLISECOND_AS_NANOSECONDS = 1000000;

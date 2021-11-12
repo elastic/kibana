@@ -9,13 +9,11 @@
 import { takeUntil, finalize } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import type { Logger } from 'kibana/server';
-import moment from 'moment';
 import type { UsageCounter } from '../../../../usage_collection/server';
 import {
   MONITOR_EVENT_LOOP_THRESHOLD_START,
   MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   MONITOR_EVENT_LOOP_WARN_THRESHOLD,
-  ONE_MILLISECOND_AS_NANOSECONDS,
 } from './constants';
 import type { EventLoopDelaysMonitor } from '../../../../../core/server';
 
