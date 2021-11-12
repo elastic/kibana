@@ -28,6 +28,7 @@ export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunct
 export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
 
 export NODE_OPTIONS="--max-old-space-size=4096"
+export CI_LOG_PATH="/var/log"
 
 export FORCE_COLOR=1
 export TEST_BROWSER_HEADLESS=1

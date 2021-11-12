@@ -42,7 +42,18 @@ export async function runKibanaServer({
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: filterCliArgs(collectCliArgs(config, options)),
+    args: [
+      ...filterCliArgs(collectCliArgs(config, options)),
+      ...(!!process.env.CI_LOG_PATH
+        ? [
+            '--logging.appenders.file.type=file',
+            `--logging.appenders.file.fileName=${process.env.CI_LOG_PATH || '/var/log'}/kibana.log`,
+            '--logging.appenders.file.layout.type=json',
+            '--logging.root.appenders[0]=file',
+            '--logging.root.appenders[1]=console',
+          ]
+        : []),
+    ],
     env: {
       FORCE_COLOR: 1,
       ...process.env,

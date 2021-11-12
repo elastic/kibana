@@ -38,7 +38,10 @@ export async function runElasticsearch({
     basePath: resolve(KIBANA_ROOT, '.es'),
     esFrom: esFrom || config.get('esTestCluster.from'),
     dataArchive: config.get('esTestCluster.dataArchive'),
-    esArgs,
+    esArgs: [
+      ...esArgs,
+      ...(!!process.env.CI_LOG_PATH ? [`path.logs=${process.env.CI_LOG_PATH || '/var/log'}`] : []),
+    ],
     esJavaOpts,
     ssl,
   });
