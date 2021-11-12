@@ -16,9 +16,9 @@ import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../helpers/setup_request';
 import {
@@ -70,7 +70,7 @@ export async function getColdstartRate({
     },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...getDocumentTypeFilterForAggregatedTransactions(
+    ...getDocumentTypeFilterForTransactions(
       searchAggregatedTransactions
     ),
     ...rangeQuery(start, end),
@@ -83,7 +83,7 @@ export async function getColdstartRate({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
+        getProcessorEventForTransactions(
           searchAggregatedTransactions
         ),
       ],
