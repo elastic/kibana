@@ -106,7 +106,7 @@ export class Plugin implements PluginType {
             // Perform the work of the task. The return value should fit the TaskResult interface, documented
             // below. Invalid return values will result in a logged warning.
             async run() {
-              await syncSyntheticsConfig();
+              await syncSyntheticsConfig({ core });
             },
 
             // Optional, will be called if a running instance of this task times out, allowing the task

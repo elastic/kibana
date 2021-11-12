@@ -15,18 +15,18 @@ export const createSyncSyntheticsConfig: UMRestApiRouteFactory = () => ({
   path: API_URLS.SYNC_CONFIG,
   validate: {},
   handler: async ({ savedObjectsClient }): Promise<any> => {
-    let apiKey: SyntheticsServiceApiKey;
-    try {
-      // get api key
-      apiKey = await savedObjectsAdapter.getSyntheticsServiceApiKey(savedObjectsClient!);
-      // if no api key, set api key
-      if (!apiKey) {
-        // error
-        return;
-      }
-    } catch (e) {
-      throw e;
-    }
+    // let apiKey: SyntheticsServiceApiKey;
+    // try {
+    //   // get api key
+    //   apiKey = await savedObjectsAdapter.getSyntheticsServiceApiKey(savedObjectsClient!);
+    //   // if no api key, set api key
+    //   if (!apiKey) {
+    //     // error
+    //     return;
+    //   }
+    // } catch (e) {
+    //   throw e;
+    // }
 
     try {
       // service doesn't currently take api key, but will need to be passed
