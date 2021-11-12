@@ -65,6 +65,14 @@ export function columns(): ExpressionFunctionDefinition<
       const { columns: contextColumns, rows: contextRows, ...rest } = input;
       let result = { ...input };
 
+      if (exclude) {
+        const fields = prepareFields(exclude);
+        const { matched: excluded, other } = splitColumnsByFields(result.columns, fields, true);
+        const fieldsIds = getFieldsIds(excluded);
+        const rows = excluded.length ? result.rows.map((row) => omit(row, fieldsIds)) : result.rows;
+        result = { rows, columns: other, ...rest };
+      }
+
       if (include) {
         const fields = prepareFields(include);
         const { matched: included } = splitColumnsByFields(result.columns, fields);
@@ -80,13 +88,6 @@ export function columns(): ExpressionFunctionDefinition<
         result = { rows, columns: cols, ...rest };
       }
 
-      if (exclude) {
-        const fields = prepareFields(exclude);
-        const { matched: excluded, other } = splitColumnsByFields(result.columns, fields, true);
-        const fieldsIds = getFieldsIds(excluded);
-        const rows = excluded.length ? result.rows.map((row) => omit(row, fieldsIds)) : result.rows;
-        result = { rows, columns: other, ...rest };
-      }
       return result;
     },
   };
