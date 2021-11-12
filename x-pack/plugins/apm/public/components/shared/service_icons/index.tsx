@@ -13,6 +13,7 @@ import { ContainerType } from '../../../../common/service_metadata';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getAgentIcon } from '../agent_icon/get_agent_icon';
 import { CloudDetails } from './cloud_details';
+import { ServerlessDetails } from './serverless_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
@@ -47,7 +48,7 @@ export function getContainerIcon(container?: ContainerType) {
   }
 }
 
-type Icons = 'service' | 'container' | 'cloud' | 'alerts';
+type Icons = 'service' | 'container' | 'serverless' | 'cloud' | 'alerts';
 
 export interface PopoverItem {
   key: Icons;
@@ -129,6 +130,17 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
         defaultMessage: 'Container',
       }),
       component: <ContainerDetails container={details?.container} />,
+    },
+    {
+      key: 'serverless',
+      icon: {
+        type: getAgentIcon(icons?.serverlessType, theme.darkMode) || 'node',
+      },
+      isVisible: !!icons?.serverlessType,
+      title: i18n.translate('xpack.apm.serviceIcons.serverless', {
+        defaultMessage: 'Serverless',
+      }),
+      component: <ServerlessDetails serverless={details?.serverless} />,
     },
     {
       key: 'cloud',

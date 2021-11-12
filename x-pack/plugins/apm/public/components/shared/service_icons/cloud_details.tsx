@@ -36,6 +36,18 @@ export function CloudDetails({ cloud }: Props) {
     });
   }
 
+  if (cloud.serviceName) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.cloud.serviceNameLabel',
+        {
+          defaultMessage: 'Cloud service',
+        }
+      ),
+      description: cloud.serviceName,
+    });
+  }
+
   if (!!cloud.availabilityZones?.length) {
     listItems.push({
       title: i18n.translate(
@@ -51,6 +63,28 @@ export function CloudDetails({ cloud }: Props) {
           {cloud.availabilityZones.map((zone, index) => (
             <li key={index}>
               <EuiBadge color="hollow">{zone}</EuiBadge>
+            </li>
+          ))}
+        </ul>
+      ),
+    });
+  }
+
+  if (!!cloud.regions?.length) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.cloud.regionLabel',
+        {
+          defaultMessage:
+            '{regions, plural, =0 {Region} one {Region} other {Regions}} ',
+          values: { regions: cloud.regions.length },
+        }
+      ),
+      description: (
+        <ul>
+          {cloud.regions.map((region, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{region}</EuiBadge>
             </li>
           ))}
         </ul>
