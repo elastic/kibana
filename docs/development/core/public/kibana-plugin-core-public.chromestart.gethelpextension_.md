@@ -13,5 +13,5 @@ getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 ```
 <b>Returns:</b>
 
-`Observable<ChromeHelpExtension | undefined>`
+Observable&lt;ChromeHelpExtension \| undefined&gt;
 

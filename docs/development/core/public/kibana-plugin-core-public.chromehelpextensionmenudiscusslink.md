@@ -10,11 +10,12 @@
 ```typescript
 export interface ChromeHelpExtensionMenuDiscussLink extends ChromeHelpExtensionLinkBase 
 ```
+<b>Extends:</b> ChromeHelpExtensionLinkBase
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [href](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.href.md) | <code>string</code> | URL to discuss page. i.e. <code>https://discuss.elastic.co/c/${appName}</code> |
-|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.linktype.md) | <code>'discuss'</code> | Creates a generic give feedback link with comment icon |
+|  [href](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.href.md) | string | URL to discuss page. i.e. <code>https://discuss.elastic.co/c/${appName}</code> |
+|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.linktype.md) | 'discuss' | Creates a generic give feedback link with comment icon |
 

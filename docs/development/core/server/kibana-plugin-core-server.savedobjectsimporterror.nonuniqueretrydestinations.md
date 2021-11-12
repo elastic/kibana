@@ -14,9 +14,9 @@ static nonUniqueRetryDestinations(nonUniqueRetryDestinations: string[]): SavedOb
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  nonUniqueRetryDestinations | <code>string[]</code> |  |
+|  nonUniqueRetryDestinations | string\[\] |  |
 
 <b>Returns:</b>
 
-`SavedObjectsImportError`
+SavedObjectsImportError
 

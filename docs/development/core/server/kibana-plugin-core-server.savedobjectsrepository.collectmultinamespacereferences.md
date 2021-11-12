@@ -16,10 +16,10 @@ collectMultiNamespaceReferences(objects: SavedObjectsCollectMultiNamespaceRefere
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObjectsCollectMultiNamespaceReferencesObject[]</code> |  |
-|  options | <code>SavedObjectsCollectMultiNamespaceReferencesOptions</code> |  |
+|  objects | SavedObjectsCollectMultiNamespaceReferencesObject\[\] | The objects to get the references for. |
+|  options | SavedObjectsCollectMultiNamespaceReferencesOptions |  |
 
 <b>Returns:</b>
 
-`Promise<import("./collect_multi_namespace_references").SavedObjectsCollectMultiNamespaceReferencesResponse>`
+Promise&lt;import("./collect\_multi\_namespace\_references").SavedObjectsCollectMultiNamespaceReferencesResponse&gt;
 
