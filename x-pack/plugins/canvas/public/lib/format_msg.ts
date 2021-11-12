@@ -51,14 +51,14 @@ export function formatMsg(err: Record<string, any> | string, source: string = ''
     // is an Angular $http "error object"
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
-      message += i18n.translate('canvas.formatMsg.toaster.unavailableServerErrorMessage', {
+      message += i18n.translate('xpack.canvas.formatMsg.toaster.unavailableServerErrorMessage', {
         defaultMessage:
           'An HTTP request has failed to connect. ' +
           'Please check if the Kibana server is running and that your browser has a working connection, ' +
           'or contact your system administrator.',
       });
     } else {
-      message += i18n.translate('canvas.formatMsg.toaster.errorStatusMessage', {
+      message += i18n.translate('xpack.canvas.formatMsg.toaster.errorStatusMessage', {
         defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',
         values: {
           errStatus: err.status,
