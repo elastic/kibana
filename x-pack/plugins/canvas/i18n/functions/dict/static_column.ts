@@ -20,6 +20,12 @@ export const help: FunctionHelp<FunctionFactory<typeof staticColumn>> = {
     },
   }),
   args: {
+    id: i18n.translate('xpack.canvas.functions.staticColumn.args.idHelpText', {
+      defaultMessage:
+        'An optional id of the resulting column. When no id is provided, the id will be looked up from' +
+        'the existing column by the provided name argument. If no column with this name exists yet,' +
+        'a new column with this name and an identical id will be added to the table.',
+    }),
     name: i18n.translate('xpack.canvas.functions.staticColumn.args.nameHelpText', {
       defaultMessage: 'The name of the new column.',
     }),
@@ -29,4 +35,13 @@ export const help: FunctionHelp<FunctionFactory<typeof staticColumn>> = {
         'other columns into a static value.',
     }),
   },
+};
+
+export const errors = {
+  invalidIdAndNameArguments: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.timefilter.invalidIdAndNameArgumentsErrorMessage', {
+        defaultMessage: 'id or name have to be provided',
+      })
+    ),
 };

@@ -11,10 +11,11 @@ import {
   Datatable,
   DatatableColumnType,
 } from 'src/plugins/expressions/common';
-import { getFunctionHelp } from '../../../i18n';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
-  name: string;
+  id: string | null;
+  name: string | null;
   value: string | number | boolean | null;
 }
 
@@ -25,6 +26,7 @@ export function staticColumn(): ExpressionFunctionDefinition<
   Datatable
 > {
   const { help, args: argHelp } = getFunctionHelp().staticColumn;
+  const errors = getFunctionErrors().staticColumn;
 
   return {
     name: 'staticColumn',
@@ -32,11 +34,18 @@ export function staticColumn(): ExpressionFunctionDefinition<
     inputTypes: ['datatable'],
     help,
     args: {
+      id: {
+        types: ['string', 'null'],
+        help: argHelp.id,
+        required: false,
+        default: null,
+      },
       name: {
-        types: ['string'],
+        types: ['string', 'null'],
         aliases: ['_', 'column'],
         help: argHelp.name,
-        required: true,
+        required: false,
+        default: null,
       },
       value: {
         types: ['string', 'number', 'boolean', 'null'],
@@ -45,21 +54,30 @@ export function staticColumn(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const columnIndex = input.columns.findIndex((column) => column.name === args.name);
+      if (args.id === null && args.name === null) {
+        throw errors.invalidIdAndNameArguments();
+      }
+
+      const columnIndex = input.columns.findIndex(({ id, name }) =>
+        args.id ? id === args.id : name === args.name
+      );
+
       const type = getType(args.value) as DatatableColumnType;
 
       if (columnIndex === -1) {
-        const rows = input.rows.map((row) => ({ ...row, [args.name]: args.value }));
-        const newColumn = { id: args.name, name: args.name, meta: { type } };
+        const id = (args.id ?? args.name) as string;
+        const rows = input.rows.map((row) => ({ ...row, [id]: args.value }));
+        const newColumn = { id, name: args.name ?? id, meta: { type } };
 
         return { type: 'datatable', columns: [...input.columns, newColumn], rows };
       }
 
-      const { id, meta } = input.columns[columnIndex];
-      const rows = input.rows.map((row) => ({ ...row, [id]: args.value }));
+      const { id, name, meta } = input.columns[columnIndex];
+      const columnId = id ?? args.name ?? name;
+      const rows = input.rows.map((row) => ({ ...row, [columnId]: args.value }));
       const newColumn = {
-        id,
-        name: args.name,
+        id: columnId,
+        name: args.name ?? name,
         meta: { ...meta, params: { ...(meta.params ?? {}), id: type }, type },
       };
 

@@ -17,6 +17,7 @@ import { errors as getCell } from './dict/get_cell';
 import { errors as joinRows } from './dict/join_rows';
 import { errors as ply } from './dict/ply';
 import { errors as pointseries } from './dict/pointseries';
+import { errors as staticColumn } from './dict/static_column';
 import { errors as timefilter } from './dict/timefilter';
 import { errors as to } from './dict/to';
 
@@ -33,6 +34,7 @@ export const getFunctionErrors = () => ({
   joinRows,
   ply,
   pointseries,
+  staticColumn,
   timefilter,
   to,
 });
