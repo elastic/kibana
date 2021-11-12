@@ -540,7 +540,10 @@ export class SecurityPageObject extends FtrService {
     return confirmText;
   }
 
-  async addRole(roleName: string, roleObj: Role) {
+  async addRole(
+    roleName: string,
+    roleObj: { elasticsearch: Pick<Role['elasticsearch'], 'indices'> }
+  ) {
     const self = this;
 
     await this.clickCreateNewRole();
