@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
-import { SeriesConfig, SeriesUrl } from '../types';
+import { SeriesConfig, SeriesUrl, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter } from '../configurations/utils';
 import { getFiltersFromDefs } from './use_lens_attributes';
@@ -36,13 +36,14 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
       const definitions = series.reportDefinitions ?? {};
       const filters = [...(seriesConfig?.baseFilters ?? [])];
 
-      const definitionFilters = getFiltersFromDefs(definitions);
+      const seriesFilters = (series.filters ?? []).concat(getFiltersFromDefs(definitions));
 
-      definitionFilters.forEach(({ field, values = [] }) => {
-        if (values.length > 1) {
+      seriesFilters.forEach(({ field, values = [], notValues = [] }) => {
+        if (values.length > 0) {
           filters.push(buildPhrasesFilter(field, values, indexPattern)[0]);
-        } else if (values?.length > 0) {
-          filters.push(buildPhraseFilter(field, values[0], indexPattern)[0]);
+        }
+        if (notValues.length > 0) {
+          filters.push(buildPhrasesFilter(field, values, indexPattern)[0]);
         }
       });
 

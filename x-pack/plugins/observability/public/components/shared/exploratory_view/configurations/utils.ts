@@ -59,7 +59,18 @@ export function createExploratoryViewUrl(
 export function buildPhraseFilter(field: string, value: string, indexPattern: IndexPattern) {
   const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
-    return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
+    return [esFilters.buildQueryFilter(fieldMeta, value, indexPattern)];
+  }
+  return [];
+}
+
+export function buildQueryFilter(field: string, value: string[], indexPattern: IndexPattern) {
+  const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    if (value.length === 1) {
+      return [esFilters.buildPhraseFilter(fieldMeta, value[0], indexPattern)];
+    }
+    return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
   }
   return [];
 }
@@ -67,6 +78,9 @@ export function buildPhraseFilter(field: string, value: string, indexPattern: In
 export function buildPhrasesFilter(field: string, value: string[], indexPattern: IndexPattern) {
   const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
+    if (value.length === 1) {
+      return [esFilters.buildPhraseFilter(fieldMeta, value[0], indexPattern)];
+    }
     return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
   }
   return [];
@@ -93,13 +107,13 @@ export function urlFilterToPersistedFilter({
 }) {
   const parsedFilters: FiltersType = initFilters ? [...initFilters] : [];
 
-  urlFilters.forEach(({ field, values = [], notValues = [] }) => {
-    if (values?.length > 0) {
+  urlFilters.forEach(({ field, values = [], notValues = [], wildcards, notWildcards = [] }) => {
+    if (values.length > 0) {
       const filter = buildPhrasesFilter(field, values, indexPattern);
       parsedFilters.push(...filter);
     }
 
-    if (notValues?.length > 0) {
+    if (notValues.length > 0) {
       const filter = buildPhrasesFilter(field, notValues, indexPattern)[0];
       filter.meta.negate = true;
       parsedFilters.push(filter);
