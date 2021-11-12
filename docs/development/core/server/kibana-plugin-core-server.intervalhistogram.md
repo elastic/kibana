@@ -16,12 +16,12 @@ export interface IntervalHistogram
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [exceeds](./kibana-plugin-core-server.intervalhistogram.exceeds.md) | <code>number</code> |  |
-|  [fromTimestamp](./kibana-plugin-core-server.intervalhistogram.fromtimestamp.md) | <code>string</code> |  |
-|  [lastUpdatedAt](./kibana-plugin-core-server.intervalhistogram.lastupdatedat.md) | <code>string</code> |  |
-|  [max](./kibana-plugin-core-server.intervalhistogram.max.md) | <code>number</code> |  |
-|  [mean](./kibana-plugin-core-server.intervalhistogram.mean.md) | <code>number</code> |  |
-|  [min](./kibana-plugin-core-server.intervalhistogram.min.md) | <code>number</code> |  |
-|  [percentiles](./kibana-plugin-core-server.intervalhistogram.percentiles.md) | <code>{</code><br/><code>        50: number;</code><br/><code>        75: number;</code><br/><code>        95: number;</code><br/><code>        99: number;</code><br/><code>    }</code> |  |
-|  [stddev](./kibana-plugin-core-server.intervalhistogram.stddev.md) | <code>number</code> |  |
+|  [exceeds](./kibana-plugin-core-server.intervalhistogram.exceeds.md) | number |  |
+|  [fromTimestamp](./kibana-plugin-core-server.intervalhistogram.fromtimestamp.md) | string |  |
+|  [lastUpdatedAt](./kibana-plugin-core-server.intervalhistogram.lastupdatedat.md) | string |  |
+|  [max](./kibana-plugin-core-server.intervalhistogram.max.md) | number |  |
+|  [mean](./kibana-plugin-core-server.intervalhistogram.mean.md) | number |  |
+|  [min](./kibana-plugin-core-server.intervalhistogram.min.md) | number |  |
+|  [percentiles](./kibana-plugin-core-server.intervalhistogram.percentiles.md) | { 50: number; 75: number; 95: number; 99: number; } |  |
+|  [stddev](./kibana-plugin-core-server.intervalhistogram.stddev.md) | number |  |
 

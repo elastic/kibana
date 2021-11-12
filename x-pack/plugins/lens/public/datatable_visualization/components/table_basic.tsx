@@ -103,11 +103,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const onEditAction = useCallback(
     (data: LensSortAction['data'] | LensResizeAction['data'] | LensToggleAction['data']) => {
-      if (renderMode === 'edit') {
-        dispatchEvent({ name: 'edit', data });
-      }
+      dispatchEvent({ name: 'edit', data });
     },
-    [dispatchEvent, renderMode]
+    [dispatchEvent]
   );
   const onRowContextMenuClick = useCallback(
     (data: LensTableRowContextMenuEvent['data']) => {
@@ -264,8 +262,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
 
   const renderCellValue = useMemo(
-    () => createGridCell(formatters, columnConfig, DataContext, props.uiSettings),
-    [formatters, columnConfig, props.uiSettings]
+    () =>
+      createGridCell(
+        formatters,
+        columnConfig,
+        DataContext,
+        props.uiSettings,
+        props.args.fitRowToContent
+      ),
+    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
   );
 
   const columnVisibility = useMemo(
@@ -351,6 +356,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
+          rowHeightsOptions={
+            props.args.fitRowToContent
+              ? {
+                  defaultHeight: 'auto',
+                }
+              : undefined
+          }
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}
