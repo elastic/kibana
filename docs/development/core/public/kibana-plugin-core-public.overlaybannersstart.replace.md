@@ -16,13 +16,13 @@ replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>string &#124; undefined</code> |  |
-|  mount | <code>MountPoint</code> |  |
-|  priority | <code>number</code> |  |
+|  id | string \| undefined | the unique identifier for the banner returned by [OverlayBannersStart.add()](./kibana-plugin-core-public.overlaybannersstart.add.md) |
+|  mount | MountPoint | [MountPoint](./kibana-plugin-core-public.mountpoint.md) |
+|  priority | number | optional priority order to display this banner. Higher priority values are shown first. |
 
 <b>Returns:</b>
 
-`string`
+string
 
 a new identifier for the given banner to be used with [OverlayBannersStart.remove()](./kibana-plugin-core-public.overlaybannersstart.remove.md) and [OverlayBannersStart.replace()](./kibana-plugin-core-public.overlaybannersstart.replace.md)
 

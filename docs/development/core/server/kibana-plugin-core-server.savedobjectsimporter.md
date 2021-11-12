@@ -17,12 +17,6 @@ export declare class SavedObjectsImporter
 |  --- | --- | --- |
 |  [(constructor)({ savedObjectsClient, typeRegistry, importSizeLimit, })](./kibana-plugin-core-server.savedobjectsimporter._constructor_.md) |  | Constructs a new instance of the <code>SavedObjectsImporter</code> class |
 
-## Properties
-
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  ["\#private"](./kibana-plugin-core-server.savedobjectsimporter.__private_.md) |  | <code></code> |  |
-
 ## Methods
 
 |  Method | Modifiers | Description |

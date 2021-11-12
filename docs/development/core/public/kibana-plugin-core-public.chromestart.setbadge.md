@@ -16,9 +16,9 @@ setBadge(badge?: ChromeBadge): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  badge | <code>ChromeBadge</code> |  |
+|  badge | ChromeBadge |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

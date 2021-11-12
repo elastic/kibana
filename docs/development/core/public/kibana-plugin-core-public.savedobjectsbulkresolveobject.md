@@ -15,6 +15,6 @@ export interface SavedObjectsBulkResolveObject
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-public.savedobjectsbulkresolveobject.id.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-core-public.savedobjectsbulkresolveobject.type.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-core-public.savedobjectsbulkresolveobject.id.md) | string |  |
+|  [type](./kibana-plugin-core-public.savedobjectsbulkresolveobject.type.md) | string |  |
 

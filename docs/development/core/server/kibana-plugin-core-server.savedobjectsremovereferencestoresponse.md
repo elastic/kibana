@@ -10,10 +10,11 @@
 ```typescript
 export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions 
 ```
+<b>Extends:</b> SavedObjectsBaseOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [updated](./kibana-plugin-core-server.savedobjectsremovereferencestoresponse.updated.md) | <code>number</code> | The number of objects that have been updated by this operation |
+|  [updated](./kibana-plugin-core-server.savedobjectsremovereferencestoresponse.updated.md) | number | The number of objects that have been updated by this operation |
 

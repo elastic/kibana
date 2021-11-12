@@ -11,15 +11,16 @@ All options that may be used with a [HttpHandler](./kibana-plugin-core-public.ht
 ```typescript
 export interface HttpFetchOptions extends HttpRequestInit 
 ```
+<b>Extends:</b> HttpRequestInit
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [asResponse](./kibana-plugin-core-public.httpfetchoptions.asresponse.md) | <code>boolean</code> | When <code>true</code> the return type of [HttpHandler](./kibana-plugin-core-public.httphandler.md) will be an [HttpResponse](./kibana-plugin-core-public.httpresponse.md) with detailed request and response information. When <code>false</code>, the return type will just be the parsed response body. Defaults to <code>false</code>. |
-|  [asSystemRequest](./kibana-plugin-core-public.httpfetchoptions.assystemrequest.md) | <code>boolean</code> | Whether or not the request should include the "system request" header to differentiate an end user request from Kibana internal request. Can be read on the server-side using KibanaRequest\#isSystemRequest. Defaults to <code>false</code>. |
-|  [context](./kibana-plugin-core-public.httpfetchoptions.context.md) | <code>KibanaExecutionContext</code> |  |
-|  [headers](./kibana-plugin-core-public.httpfetchoptions.headers.md) | <code>HttpHeadersInit</code> | Headers to send with the request. See [HttpHeadersInit](./kibana-plugin-core-public.httpheadersinit.md)<!-- -->. |
-|  [prependBasePath](./kibana-plugin-core-public.httpfetchoptions.prependbasepath.md) | <code>boolean</code> | Whether or not the request should automatically prepend the basePath. Defaults to <code>true</code>. |
-|  [query](./kibana-plugin-core-public.httpfetchoptions.query.md) | <code>HttpFetchQuery</code> | The query string for an HTTP request. See [HttpFetchQuery](./kibana-plugin-core-public.httpfetchquery.md)<!-- -->. |
+|  [asResponse?](./kibana-plugin-core-public.httpfetchoptions.asresponse.md) | boolean | <i>(Optional)</i> When <code>true</code> the return type of [HttpHandler](./kibana-plugin-core-public.httphandler.md) will be an [HttpResponse](./kibana-plugin-core-public.httpresponse.md) with detailed request and response information. When <code>false</code>, the return type will just be the parsed response body. Defaults to <code>false</code>. |
+|  [asSystemRequest?](./kibana-plugin-core-public.httpfetchoptions.assystemrequest.md) | boolean | <i>(Optional)</i> Whether or not the request should include the "system request" header to differentiate an end user request from Kibana internal request. Can be read on the server-side using KibanaRequest\#isSystemRequest. Defaults to <code>false</code>. |
+|  [context?](./kibana-plugin-core-public.httpfetchoptions.context.md) | KibanaExecutionContext | <i>(Optional)</i> |
+|  [headers?](./kibana-plugin-core-public.httpfetchoptions.headers.md) | HttpHeadersInit | <i>(Optional)</i> Headers to send with the request. See [HttpHeadersInit](./kibana-plugin-core-public.httpheadersinit.md)<!-- -->. |
+|  [prependBasePath?](./kibana-plugin-core-public.httpfetchoptions.prependbasepath.md) | boolean | <i>(Optional)</i> Whether or not the request should automatically prepend the basePath. Defaults to <code>true</code>. |
+|  [query?](./kibana-plugin-core-public.httpfetchoptions.query.md) | HttpFetchQuery | <i>(Optional)</i> The query string for an HTTP request. See [HttpFetchQuery](./kibana-plugin-core-public.httpfetchquery.md)<!-- -->. |
 

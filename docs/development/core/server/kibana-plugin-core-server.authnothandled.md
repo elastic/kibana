@@ -15,5 +15,5 @@ export interface AuthNotHandled
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [type](./kibana-plugin-core-server.authnothandled.type.md) | <code>AuthResultType.notHandled</code> |  |
+|  [type](./kibana-plugin-core-server.authnothandled.type.md) | AuthResultType.notHandled |  |
 
