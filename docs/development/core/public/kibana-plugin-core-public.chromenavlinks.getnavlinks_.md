@@ -13,5 +13,5 @@ getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 ```
 <b>Returns:</b>
 
-`Observable<Array<Readonly<ChromeNavLink>>>`
+Observable&lt;Array&lt;Readonly&lt;ChromeNavLink&gt;&gt;&gt;
 

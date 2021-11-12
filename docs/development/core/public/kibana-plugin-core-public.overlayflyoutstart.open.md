@@ -16,10 +16,10 @@ open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  mount | <code>MountPoint</code> |  |
-|  options | <code>OverlayFlyoutOpenOptions</code> |  |
+|  mount | MountPoint | [MountPoint](./kibana-plugin-core-public.mountpoint.md) - Mounts the children inside a flyout panel |
+|  options | OverlayFlyoutOpenOptions | [OverlayFlyoutOpenOptions](./kibana-plugin-core-public.overlayflyoutopenoptions.md) - options for the flyout  [OverlayRef](./kibana-plugin-core-public.overlayref.md) A reference to the opened flyout panel. |
 
 <b>Returns:</b>
 
-`OverlayRef`
+OverlayRef
 

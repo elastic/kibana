@@ -15,6 +15,6 @@ export interface SavedObjectsPitParams
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-server.savedobjectspitparams.id.md) | <code>string</code> |  |
-|  [keepAlive](./kibana-plugin-core-server.savedobjectspitparams.keepalive.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-core-server.savedobjectspitparams.id.md) | string |  |
+|  [keepAlive?](./kibana-plugin-core-server.savedobjectspitparams.keepalive.md) | string | <i>(Optional)</i> |
 

@@ -17,6 +17,8 @@ import { nextTick } from '@kbn/test/jest';
 
 import { InternalSchemaType } from '../../../shared/schema/types';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { DocumentDetailLogic } from './document_detail_logic';
 
 describe('DocumentDetailLogic', () => {
@@ -117,14 +119,9 @@ describe('DocumentDetailLogic', () => {
         await nextTick();
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         mount();
-        http.delete.mockReturnValue(Promise.reject('An error occured'));
-
         DocumentDetailLogic.actions.deleteDocument('1');
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
   });

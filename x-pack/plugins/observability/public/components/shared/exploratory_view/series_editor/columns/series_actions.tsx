@@ -30,7 +30,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
     if (allSeries.find(({ name }) => name === copySeriesId)) {
       copySeriesId = copySeriesId + allSeries.length;
     }
-    setSeries(allSeries.length, { ...series, name: copySeriesId });
+    setSeries(allSeries.length, { ...series, name: copySeriesId, breakdown: undefined });
   };
 
   const toggleSeries = () => {

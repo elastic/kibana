@@ -16,6 +16,6 @@ export interface OnPreRoutingToolkit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [next](./kibana-plugin-core-server.onpreroutingtoolkit.next.md) | <code>() =&gt; OnPreRoutingResult</code> | To pass request to the next handler |
-|  [rewriteUrl](./kibana-plugin-core-server.onpreroutingtoolkit.rewriteurl.md) | <code>(url: string) =&gt; OnPreRoutingResult</code> | Rewrite requested resources url before is was authenticated and routed to a handler |
+|  [next](./kibana-plugin-core-server.onpreroutingtoolkit.next.md) | () =&gt; OnPreRoutingResult | To pass request to the next handler |
+|  [rewriteUrl](./kibana-plugin-core-server.onpreroutingtoolkit.rewriteurl.md) | (url: string) =&gt; OnPreRoutingResult | Rewrite requested resources url before is was authenticated and routed to a handler |
 

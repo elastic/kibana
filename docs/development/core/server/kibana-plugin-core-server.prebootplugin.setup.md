@@ -14,10 +14,10 @@ setup(core: CorePreboot, plugins: TPluginsSetup): TSetup;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  core | <code>CorePreboot</code> |  |
-|  plugins | <code>TPluginsSetup</code> |  |
+|  core | CorePreboot |  |
+|  plugins | TPluginsSetup |  |
 
 <b>Returns:</b>
 
-`TSetup`
+TSetup
 

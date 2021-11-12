@@ -15,6 +15,6 @@ export interface GetDeprecationsContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [esClient](./kibana-plugin-core-server.getdeprecationscontext.esclient.md) | <code>IScopedClusterClient</code> |  |
-|  [savedObjectsClient](./kibana-plugin-core-server.getdeprecationscontext.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> |  |
+|  [esClient](./kibana-plugin-core-server.getdeprecationscontext.esclient.md) | IScopedClusterClient |  |
+|  [savedObjectsClient](./kibana-plugin-core-server.getdeprecationscontext.savedobjectsclient.md) | SavedObjectsClientContract |  |
 
