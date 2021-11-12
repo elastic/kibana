@@ -20633,7 +20633,6 @@
     "xpack.security.management.users.changePasswordFlyout.confirmButton": "{isSubmitting, select, true{正在更改密码……} other{更改密码}}",
     "xpack.security.management.users.changePasswordFlyout.confirmPasswordInvalidError": "密码不匹配。",
     "xpack.security.management.users.changePasswordFlyout.confirmPasswordLabel": "确认密码",
-    "xpack.security.management.users.changePasswordFlyout.confirmPasswordRequiredError": "密码不匹配。",
     "xpack.security.management.users.changePasswordFlyout.confirmSystemPasswordButton": "{isSubmitting, select, true{正在更改密码……} other{更改密码}}",
     "xpack.security.management.users.changePasswordFlyout.currentPasswordInvalidError": "密码无效。",
     "xpack.security.management.users.changePasswordFlyout.currentPasswordLabel": "当前密码",
