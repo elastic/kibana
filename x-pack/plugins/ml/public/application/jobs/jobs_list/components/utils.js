@@ -220,9 +220,21 @@ export async function cloneJob(jobId) {
     ]);
 
     const dataViewNames = await getDataViewNames();
-    const jobIndicesAvailable = dataViewNames.includes(datafeed.indices.join(','));
+    const dataViewTitle = datafeed.indices.join(',');
+    const jobIndicesAvailable = dataViewNames.includes(dataViewTitle);
 
     if (jobIndicesAvailable === false) {
+      const warningText = i18n.translate(
+        'xpack.ml.jobsList.managementActions.noSourceDataViewForClone',
+        {
+          defaultMessage:
+            'Unable to clone the anomaly detection job {jobId}. No data view exists for index {dataViewTitle}.',
+          values: { jobId, dataViewTitle },
+        }
+      );
+      getToastNotificationService().displayDangerToast(warningText, {
+        'data-test-subj': 'mlCloneJobNoDataViewExistsWarningToast',
+      });
       return;
     }
 

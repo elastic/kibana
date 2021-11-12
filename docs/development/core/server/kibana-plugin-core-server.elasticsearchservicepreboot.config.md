@@ -17,6 +17,5 @@ readonly config: Readonly<ElasticsearchConfigPreboot>;
 
 ```js
 const { hosts, credentialsSpecified } = core.elasticsearch.config;
-
 ```
 
