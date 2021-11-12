@@ -15,9 +15,9 @@ export declare class SavedObjectsUtils
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [createEmptyFindResponse](./kibana-plugin-core-server.savedobjectsutils.createemptyfindresponse.md) | <code>static</code> | <code>&lt;T, A&gt;({ page, perPage, }: SavedObjectsFindOptions) =&gt; SavedObjectsFindResponse&lt;T, A&gt;</code> | Creates an empty response for a find operation. This is only intended to be used by saved objects client wrappers. |
-|  [namespaceIdToString](./kibana-plugin-core-server.savedobjectsutils.namespaceidtostring.md) | <code>static</code> | <code>(namespace?: string &#124; undefined) =&gt; string</code> | Converts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with the exception of the <code>undefined</code> namespace ID (which has a namespace string of <code>'default'</code>). |
-|  [namespaceStringToId](./kibana-plugin-core-server.savedobjectsutils.namespacestringtoid.md) | <code>static</code> | <code>(namespace: string) =&gt; string &#124; undefined</code> | Converts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with the exception of the <code>'default'</code> namespace string (which has a namespace ID of <code>undefined</code>). |
+|  [createEmptyFindResponse](./kibana-plugin-core-server.savedobjectsutils.createemptyfindresponse.md) | <code>static</code> | &lt;T, A&gt;({ page, perPage, }: SavedObjectsFindOptions) =&gt; SavedObjectsFindResponse&lt;T, A&gt; | Creates an empty response for a find operation. This is only intended to be used by saved objects client wrappers. |
+|  [namespaceIdToString](./kibana-plugin-core-server.savedobjectsutils.namespaceidtostring.md) | <code>static</code> | (namespace?: string \| undefined) =&gt; string | Converts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with the exception of the <code>undefined</code> namespace ID (which has a namespace string of <code>'default'</code>). |
+|  [namespaceStringToId](./kibana-plugin-core-server.savedobjectsutils.namespacestringtoid.md) | <code>static</code> | (namespace: string) =&gt; string \| undefined | Converts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with the exception of the <code>'default'</code> namespace string (which has a namespace ID of <code>undefined</code>). |
 
 ## Methods
 

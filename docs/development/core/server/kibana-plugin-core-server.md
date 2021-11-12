@@ -8,7 +8,7 @@ The Kibana Core APIs for server-side plugins.
 
 A plugin requires a `kibana.json` file at it's root directory that follows [the manfiest schema](./kibana-plugin-core-server.pluginmanifest.md) to define static plugin information required to load the plugin.
 
-A plugin's `server/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-server.plugininitializer.md) which returns an object that implements [Plugin](./kibana-plugin-core-server.plugin.md)<!-- -->.
+A plugin's `server/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-server.plugininitializer.md) which returns an object that implements .
 
 The plugin integrates with the core system via lifecycle events: `setup`<!-- -->, `start`<!-- -->, and `stop`<!-- -->. In each lifecycle method, the plugin will receive the corresponding core services available (either [CoreSetup](./kibana-plugin-core-server.coresetup.md) or [CoreStart](./kibana-plugin-core-server.corestart.md)<!-- -->) and any interfaces returned by dependency plugins' lifecycle method. Anything returned by the plugin's lifecycle method will be exposed to downstream dependencies when their corresponding lifecycle methods are invoked.
 
@@ -123,7 +123,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OpsOsMetrics](./kibana-plugin-core-server.opsosmetrics.md) | OS related metrics |
 |  [OpsProcessMetrics](./kibana-plugin-core-server.opsprocessmetrics.md) | Process related metrics |
 |  [OpsServerMetrics](./kibana-plugin-core-server.opsservermetrics.md) | server related metrics |
-|  [Plugin](./kibana-plugin-core-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code> for a <code>standard</code> plugin. |
+|  [Plugin\_2](./kibana-plugin-core-server.plugin_2.md) | The interface that should be returned by a <code>PluginInitializer</code> for a <code>standard</code> plugin. |
 |  [PluginConfigDescriptor](./kibana-plugin-core-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
 |  [PluginInitializerContext](./kibana-plugin-core-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginManifest](./kibana-plugin-core-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
@@ -258,7 +258,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-core-server.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-core-server.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md)<!-- -->. |
-|  [Headers](./kibana-plugin-core-server.headers.md) | Http request headers to read. |
+|  [Headers\_2](./kibana-plugin-core-server.headers_2.md) | Http request headers to read. |
 |  [HttpResourcesRequestHandler](./kibana-plugin-core-server.httpresourcesrequesthandler.md) | Extended version of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) having access to [HttpResourcesServiceToolkit](./kibana-plugin-core-server.httpresourcesservicetoolkit.md) to respond with HTML or JS resources. |
 |  [HttpResourcesResponseOptions](./kibana-plugin-core-server.httpresourcesresponseoptions.md) | HTTP Resources response parameters |
 |  [HttpResponsePayload](./kibana-plugin-core-server.httpresponsepayload.md) | Data send to the client as a response payload. |

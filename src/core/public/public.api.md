@@ -4,25 +4,28 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { Action } from 'history';
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import type { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { History } from 'history';
+import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { Location } from 'history';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
@@ -32,21 +35,21 @@ import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
-import React from 'react';
+import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Request } from '@hapi/hapi';
+import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
-import { URL } from 'url';
+import { URL as URL_2 } from 'url';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
@@ -252,7 +255,7 @@ export type ChromeHelpExtensionLinkBase = Pick<EuiButtonEmptyProps, 'iconType' |
 
 // @public (undocumented)
 export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase {
-    content: React.ReactNode;
+    content: React_2.ReactNode;
     href: string;
     linkType: 'custom';
 }
@@ -453,7 +456,7 @@ export class CoreSystem {
     } | undefined>;
     // (undocumented)
     stop(): void;
-    }
+}
 
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
@@ -914,7 +917,7 @@ export type HttpStart = HttpSetup;
 // @public
 export interface I18nStart {
     Context: ({ children }: {
-        children: React.ReactNode;
+        children: React_2.ReactNode;
     }) => JSX.Element;
 }
 
@@ -1136,7 +1139,7 @@ export interface OverlayStart {
 export { PackageInfo }
 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
+interface Plugin_2<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
     setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
     // (undocumented)
@@ -1144,9 +1147,10 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
     // (undocumented)
     stop?(): void;
 }
+export { Plugin_2 as Plugin }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema extends object = object> {
@@ -1597,10 +1601,10 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 }
 
 // @public
-export class ScopedHistory<HistoryLocationState = unknown> implements History<HistoryLocationState> {
-    constructor(parentHistory: History, basePath: string);
+export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
+    constructor(parentHistory: History_2, basePath: string);
     get action(): Action;
-    block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    block: (prompt?: string | boolean | History_2.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
@@ -1609,11 +1613,11 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     goBack: () => void;
     goForward: () => void;
     get length(): number;
-    listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
-    get location(): Location<HistoryLocationState>;
+    listen: (listener: (location: Location_2<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
+    get location(): Location_2<HistoryLocationState>;
     push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
     replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
-    }
+}
 
 // @public
 export class SimpleSavedObject<T = unknown> {
@@ -1689,7 +1693,7 @@ export class ToastsApi implements IToasts {
         overlays: OverlayStart;
         i18n: I18nStart;
     }): void;
-    }
+}
 
 // @public (undocumented)
 export type ToastsSetup = IToasts;
@@ -1743,7 +1747,6 @@ export interface UserProvidedValues<T = any> {
     // (undocumented)
     userValue?: T;
 }
-
 
 // Warnings were encountered during analysis:
 //
