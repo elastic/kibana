@@ -16,6 +16,6 @@ export interface SavedObjectsImportSimpleWarning
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [message](./kibana-plugin-core-public.savedobjectsimportsimplewarning.message.md) | <code>string</code> | The translated message to display to the user |
-|  [type](./kibana-plugin-core-public.savedobjectsimportsimplewarning.type.md) | <code>'simple'</code> |  |
+|  [message](./kibana-plugin-core-public.savedobjectsimportsimplewarning.message.md) | string | The translated message to display to the user |
+|  [type](./kibana-plugin-core-public.savedobjectsimportsimplewarning.type.md) | 'simple' |  |
 
