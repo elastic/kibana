@@ -101,6 +101,17 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? JSON.stringify(error) : JSON.stringify(response);
+
+    server.respondWith('PUT', `${API_BASE_PATH}/settings/:name`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      body,
+    ]);
+  };
+
   const setSimulateTemplateResponse = (response?: HttpResponse, error?: any) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
@@ -134,6 +145,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadTemplateResponse,
     setCreateTemplateResponse,
     setUpdateTemplateResponse,
+    setUpdateIndexSettingsResponse,
     setSimulateTemplateResponse,
     setLoadComponentTemplatesResponse,
   };

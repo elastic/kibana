@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { keys } from '@elastic/eui/lib/services';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
@@ -210,6 +211,50 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       // The unfreeze action should not be present anymore
       expect(exists('unfreezeIndexMenuButton')).toBe(false);
+    });
+  });
+
+  describe.only('Edit index settings', () => {
+    const indexName = 'testIndex';
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
+
+      testBed = await setup();
+      const { find, component } = testBed;
+      component.update();
+
+      find('indexTableIndexNameLink').at(0).simulate('click');
+    });
+
+    test('shows error callout when request fails', async () => {
+      const { actions, find, component, exists } = testBed;
+
+      const error = {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'invalid tier names found',
+      };
+      httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
+
+      await actions.selectIndexDetailsTab('edit_settings');
+
+      find('.ace_text-input').simulate('change', {
+        target: {
+          value: `{
+          "index.routing.allocation.include._tier_preference": "non_existent_tier"
+        }`,
+        },
+      });
+
+      await act(async () => {
+        find('updateEditIndexSettingsButton').simulate('click');
+      });
+
+      component.update();
+
+      expect(exists('updateIndexSettingsErrorCallout')).toBe(true);
     });
   });
 });
