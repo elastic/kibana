@@ -436,10 +436,10 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
 
 exports[`Storyshots components/WorkpadFilters/FilterComponent/filter_views default 1`] = `
 <div
-  className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
 >
   <dl
-    className="euiDescriptionList euiDescriptionList--column workpadFilter"
+    className="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed workpadFilter"
   >
     <dt
       className="euiDescriptionList__title eui-textBreakWord"
@@ -611,10 +611,10 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent/filter_views defau
 
 exports[`Storyshots components/WorkpadFilters/FilterComponent/filter_views time 1`] = `
 <div
-  className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
 >
   <dl
-    className="euiDescriptionList euiDescriptionList--column workpadFilter"
+    className="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed workpadFilter"
   >
     <dt
       className="euiDescriptionList__title eui-textBreakWord"
