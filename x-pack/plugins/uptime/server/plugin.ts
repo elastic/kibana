@@ -23,6 +23,7 @@ import {
 import {
   savedObjectsAdapter,
   umDynamicSettings,
+  uptimeMonitor,
   syntheticsServiceApiKey,
 } from './lib/saved_objects';
 import { syncSyntheticsConfig } from './lib/synthetics_service/config';
@@ -70,6 +71,7 @@ export class Plugin implements PluginType {
       initSyntheticsServiceServerWithKibana({ router: this.router }, corePlugins, this.logger);
     });
     core.savedObjects.registerType(umDynamicSettings);
+    core.savedObjects.registerType(uptimeMonitor);
     core.savedObjects.registerType(syntheticsServiceApiKey);
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,

@@ -21,6 +21,7 @@ export interface UMSavedObjectsAdapter {
 }
 
 export const settingsObjectType = 'uptime-dynamic-settings';
+export const uptimeMonitorType = 'uptime-monitor';
 export const settingsObjectId = 'uptime-dynamic-settings-singleton';
 export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
 
@@ -90,6 +91,37 @@ export const syntheticsServiceApiKey: SavedObjectsType = {
     getTitle: () =>
       i18n.translate('xpack.uptime.uptimeSettings.index', {
         defaultMessage: 'Synthetics service api key',
+      }),
+  },
+};
+
+export const uptimeMonitor: SavedObjectsType = {
+  name: uptimeMonitorType,
+  hidden: false,
+  namespaceType: 'single',
+  mappings: {
+    dynamic: false,
+    properties: {
+      name: {
+        type: 'keyword',
+      },
+      id: {
+        type: 'keyword',
+      },
+      type: {
+        type: 'keyword',
+      },
+      schedule: {
+        type: 'keyword',
+      },
+    },
+  },
+  management: {
+    importableAndExportable: true,
+    icon: 'uptimeApp',
+    getTitle: () =>
+      i18n.translate('xpack.uptime.uptimeSettings.index', {
+        defaultMessage: 'Uptime - Monitor',
       }),
   },
 };

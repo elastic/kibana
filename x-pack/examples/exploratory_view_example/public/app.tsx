@@ -40,7 +40,7 @@ export const App = (props: {
       reportDefinitions: {
         'monitor.id': ['ALL_VALUES'],
       },
-      breakdown: 'observer.geo.name',
+      breakdown: 'monitor.type',
       operationType: 'average',
       dataType: 'synthetics',
       seriesType: 'line',

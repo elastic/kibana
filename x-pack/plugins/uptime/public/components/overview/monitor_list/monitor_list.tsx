@@ -36,6 +36,7 @@ import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
+import { AddMonitor } from './actions/add_monitor';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -177,6 +178,15 @@ export const MonitorListComponent: ({
             monitorId={item.monitor_id}
             selectedMonitor={item.state.summaryPings[0]}
           />
+        ),
+      },
+      {
+        align: 'center' as const,
+        field: '',
+        name: '',
+        width: '50px',
+        render: (item: MonitorSummary) => (
+          <AddMonitor monitorId={item.monitor_id} selectedMonitor={item.state.summaryPings[0]} />
         ),
       },
     ],
