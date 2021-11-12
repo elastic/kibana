@@ -332,13 +332,13 @@ test('format() meta can not override tracing properties', () => {
         context: 'bar',
         pid: 3,
         meta: {
-          span: 'span_override',
-          trace: 'trace_override',
-          transaction: 'transaction_override',
+          span: { id: 'span_override' },
+          trace: { id: 'trace_override' },
+          transaction: { id: 'transaction_override' },
         },
-        spanId: 'spanId-1',
-        traceId: 'traceId-1',
-        transactionId: 'transactionId-1',
+        spanId: 'spanId',
+        traceId: 'traceId',
+        transactionId: 'transactionId',
       })
     )
   ).toStrictEqual({
@@ -352,8 +352,8 @@ test('format() meta can not override tracing properties', () => {
     process: {
       pid: 3,
     },
-    span: { id: 'spanId-1' },
-    trace: { id: 'traceId-1' },
-    transaction: { id: 'transactionId-1' },
+    span: { id: 'span_override' },
+    trace: { id: 'trace_override' },
+    transaction: { id: 'transaction_override' },
   });
 });

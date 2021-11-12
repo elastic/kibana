@@ -16,6 +16,7 @@ import {
   getServerOptions,
   getRequestId,
 } from '@kbn/server-http-tools';
+import agent from 'elastic-apm-node';
 
 import type { Duration } from 'moment';
 import { Observable } from 'rxjs';
@@ -345,6 +346,7 @@ export class HttpServer {
         ...(request.app ?? {}),
         requestId,
         requestUuid: uuid.v4(),
+        traceId: agent.currentTraceIds['trace.id'],
       } as KibanaRequestState;
       return responseToolkit.continue;
     });
