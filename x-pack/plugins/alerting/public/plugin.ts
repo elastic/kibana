@@ -8,8 +8,8 @@
 import { CoreSetup, Plugin, CoreStart } from 'src/core/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
-import { loadAlert, loadAlertType } from './alert_api';
-import { Alert, AlertNavigation } from '../common';
+import { loadRule, loadRuleTypes } from './alert_api';
+import { Alert, AlertNavigation, AlertType } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -51,6 +51,8 @@ export interface PluginStartContract {
 
 export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
   private alertNavigationRegistry?: AlertNavigationRegistry;
+  private ruleTypes?: AlertType[];
+
   public setup(core: CoreSetup) {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
 
@@ -59,7 +61,28 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       ruleTypeId: string,
       handler: AlertNavigationHandler
     ) => {
-      this.alertNavigationRegistry!.register(applicationId, ruleTypeId, handler);
+      // if the ruleTypes not fetched yet than to the API call and cache the results
+      if (!!this.ruleTypes) {
+        this.ruleTypes = await loadRuleTypes({ http: core.http });
+        if (!this.ruleTypes) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Unable to register navigation for rule type "${ruleTypeId}", because not able to fetch rule types list from the server side.`
+          );
+          return;
+        }
+      }
+
+      // use cache to get ruleType
+      const ruleType = this.ruleTypes!.find((type) => type.id === ruleTypeId);
+      if (!!ruleType) {
+        this.alertNavigationRegistry!.register(applicationId, ruleType, handler);
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(
+          `Unable to register navigation for rule type "${ruleTypeId}" because it is not registered on the server side.`
+        );
+      }
     };
 
     const registerDefaultNavigation = async (
@@ -75,21 +98,21 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
 
   public start(core: CoreStart) {
     return {
-      getNavigation: async (alertId: Alert['id']) => {
-        const alert = await loadAlert({ http: core.http, alertId });
-        const alertType = await loadAlertType({ http: core.http, id: alert.alertTypeId });
+      getNavigation: async (ruleId: Alert['id']) => {
+        const rule = await loadRule({ http: core.http, ruleId });
+        const ruleType = this.ruleTypes!.find((type) => type.id === rule.alertTypeId);
 
-        if (!alertType) {
+        if (!ruleType) {
           // eslint-disable-next-line no-console
           console.log(
-            `Unable to get navigation for alert type "${alert.alertTypeId}" because it is not registered on the server side.`
+            `Unable to get navigation for rule type "${rule.alertTypeId}" because it is not registered on the server side.`
           );
           return;
         }
 
-        if (this.alertNavigationRegistry!.has(alert.consumer, alertType)) {
-          const navigationHandler = this.alertNavigationRegistry!.get(alert.consumer, alertType);
-          const state = navigationHandler(alert);
+        if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
+          const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
+          const state = navigationHandler(rule);
           return typeof state === 'string' ? { path: state } : { state };
         }
       },
