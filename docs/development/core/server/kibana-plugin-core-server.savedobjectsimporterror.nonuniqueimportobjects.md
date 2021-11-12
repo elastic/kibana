@@ -14,9 +14,9 @@ static nonUniqueImportObjects(nonUniqueEntries: string[]): SavedObjectsImportErr
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  nonUniqueEntries | <code>string[]</code> |  |
+|  nonUniqueEntries | string\[\] |  |
 
 <b>Returns:</b>
 
-`SavedObjectsImportError`
+SavedObjectsImportError
 

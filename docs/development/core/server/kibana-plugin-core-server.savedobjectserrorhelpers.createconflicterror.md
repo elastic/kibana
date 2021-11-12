@@ -14,11 +14,11 @@ static createConflictError(type: string, id: string, reason?: string): Decorated
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  reason | <code>string</code> |  |
+|  type | string |  |
+|  id | string |  |
+|  reason | string |  |
 
 <b>Returns:</b>
 
-`DecoratedError`
+DecoratedError
 
