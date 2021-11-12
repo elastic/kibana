@@ -16,5 +16,5 @@ export interface SavedObjectsImportUnsupportedTypeError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [type](./kibana-plugin-core-server.savedobjectsimportunsupportedtypeerror.type.md) | <code>'unsupported_type'</code> |  |
+|  [type](./kibana-plugin-core-server.savedobjectsimportunsupportedtypeerror.type.md) | 'unsupported\_type' |  |
 

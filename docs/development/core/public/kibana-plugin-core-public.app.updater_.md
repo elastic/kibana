@@ -39,6 +39,5 @@ export class MyPlugin implements Plugin {
        navLinkStatus: AppNavLinkStatus.disabled,
      })
   }
-
 ```
 

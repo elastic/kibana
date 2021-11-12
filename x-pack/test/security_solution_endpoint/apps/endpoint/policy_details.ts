@@ -309,8 +309,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show the supported Endpoint version', async () => {
-        const supportedVersion = await testSubjects.find('policySupportedVersions');
-        expect(supportedVersion).to.be('Agent version ' + popupVersionsMap.get('malware'));
+        expect(await testSubjects.getVisibleText('policySupportedVersions')).to.equal(
+          'Agent version ' + popupVersionsMap.get('malware')
+        );
       });
 
       it('should show the custom message text area when the Notify User checkbox is checked', async () => {
@@ -401,6 +402,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -447,6 +449,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -485,6 +488,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicyUpdated.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             revision: 3,
             meta: {
               package: {
