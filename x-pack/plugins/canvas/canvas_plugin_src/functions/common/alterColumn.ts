@@ -52,23 +52,24 @@ export function alterColumn(): ExpressionFunctionDefinition<
         return input;
       }
 
-      const column = input.columns.find((col) => col.name === args.column);
+      const column = input.columns.find(
+        (col) => col.id === args.column || col.name === args.column
+      );
+
       if (!column) {
         throw errors.columnNotFound(args.column);
       }
 
-      const name = args.name || column.name;
+      const name = args.name ?? column.name;
+      const id = column.id ?? column.name;
       const type = args.type || column.meta.type;
+      const meta = { ...column.meta, params: { ...(column.meta.params ?? {}), id: type }, type };
 
       const columns = input.columns.reduce((all: DatatableColumn[], col) => {
-        if (col.name !== args.name) {
-          if (col.name !== column.name) {
-            all.push(col);
-          } else {
-            all.push({ id: name, name, meta: { type } });
-          }
+        if (col.name !== args.name && (col.id === column.id || col.name === column.name)) {
+          return [...all, { ...col, name, id, meta }];
         }
-        return all;
+        return [...all, col];
       }, []);
 
       let handler = (val: any) => val;
@@ -96,8 +97,8 @@ export function alterColumn(): ExpressionFunctionDefinition<
       }
 
       const rows = input.rows.map((row) => ({
-        ...omit(row, column.name),
-        [name]: handler(row[column.name]),
+        ...omit(row, id),
+        [name]: handler(row[id]),
       }));
 
       return {
