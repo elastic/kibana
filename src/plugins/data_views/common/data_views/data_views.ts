@@ -35,7 +35,7 @@ import { META_FIELDS, SavedObject } from '../../common';
 import { SavedObjectNotFound } from '../../../kibana_utils/common';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
-import { DuplicateDataViewError } from '../errors';
+import { DuplicateDataViewError, SaveDataViewFailedLacksPermissionsError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
@@ -67,6 +67,7 @@ interface IndexPatternsServiceDeps {
   onNotification: OnNotification;
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
+  canSave: boolean;
 }
 
 export class DataViewsService {
@@ -78,6 +79,7 @@ export class DataViewsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
+  canSave = false;
 
   /**
    * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
@@ -93,6 +95,7 @@ export class DataViewsService {
     onNotification,
     onError,
     onRedirectNoIndexPattern = () => {},
+    canSave = false,
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -101,6 +104,7 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.ensureDefaultDataView = createEnsureDefaultDataView(uiSettings, onRedirectNoIndexPattern);
+    this.canSave = canSave;
 
     this.dataViewCache = createDataViewCache();
   }
@@ -557,6 +561,10 @@ export class DataViewsService {
    */
 
   async createSavedObject(indexPattern: DataView, override = false) {
+    if (!this.canSave) {
+      // todo different error
+      throw new SaveDataViewFailedLacksPermissionsError('hi');
+    }
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe) {
       if (override) {
@@ -595,6 +603,10 @@ export class DataViewsService {
     ignoreErrors: boolean = false
   ): Promise<void | Error> {
     if (!indexPattern.id) return;
+    if (!this.canSave) {
+      // todo log index pattern id and name
+      throw new SaveDataViewFailedLacksPermissionsError('name');
+    }
 
     // get the list of attributes
     const body = indexPattern.getAsSavedObjectBody();
@@ -678,6 +690,10 @@ export class DataViewsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
+    if (!this.canSave) {
+      // todo different error
+      throw new SaveDataViewFailedLacksPermissionsError('err');
+    }
     this.dataViewCache.clear(indexPatternId);
     return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
   }

@@ -61,6 +61,7 @@ export class DataViewsPublicPlugin
         application.navigateToApp,
         overlays
       ),
+      canSave: application.capabilities.indexPatterns.save === true,
     });
   }
 
