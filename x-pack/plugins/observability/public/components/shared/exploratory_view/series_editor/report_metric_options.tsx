@@ -127,7 +127,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         </EuiPopover>
       )}
       {series.selectedMetricField &&
-        (indexPattern && !loading ? (
+        (indexPattern ? (
           <EuiBadge
             iconType="cross"
             iconSide="right"

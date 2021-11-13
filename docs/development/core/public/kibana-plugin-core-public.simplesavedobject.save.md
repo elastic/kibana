@@ -11,5 +11,5 @@ save(): Promise<SimpleSavedObject<T>>;
 ```
 <b>Returns:</b>
 
-`Promise<SimpleSavedObject<T>>`
+Promise&lt;SimpleSavedObject&lt;T&gt;&gt;
 

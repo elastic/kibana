@@ -16,5 +16,5 @@ export interface SavedObjectsExportTransformContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [request](./kibana-plugin-core-server.savedobjectsexporttransformcontext.request.md) | <code>KibanaRequest</code> | The request that initiated the export request. Can be used to create scoped services or client inside the [transformation](./kibana-plugin-core-server.savedobjectsexporttransform.md) |
+|  [request](./kibana-plugin-core-server.savedobjectsexporttransformcontext.request.md) | KibanaRequest | The request that initiated the export request. Can be used to create scoped services or client inside the [transformation](./kibana-plugin-core-server.savedobjectsexporttransform.md) |
 

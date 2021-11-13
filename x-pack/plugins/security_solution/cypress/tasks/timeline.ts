@@ -17,7 +17,6 @@ import {
   ATTACH_TIMELINE_TO_CASE_BUTTON,
   ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
   ATTACH_TIMELINE_TO_NEW_CASE_ICON,
-  CASE,
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
   COMBO_BOX_INPUT,
@@ -35,6 +34,7 @@ import {
   RESET_FIELDS,
   SAVE_FILTER_BTN,
   SEARCH_OR_FILTER_CONTAINER,
+  SELECT_CASE,
   SERVER_SIDE_EVENT_COUNT,
   STAR_ICON,
   TIMELINE_CHANGES_IN_PROGRESS,
@@ -346,7 +346,7 @@ export const resetFields = () => {
 };
 
 export const selectCase = (caseId: string) => {
-  cy.get(CASE(caseId)).click();
+  cy.get(SELECT_CASE(caseId)).click();
 };
 
 export const waitForTimelineChanges = () => {
