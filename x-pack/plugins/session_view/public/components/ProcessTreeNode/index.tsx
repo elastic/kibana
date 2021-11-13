@@ -11,7 +11,7 @@
  *2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, MouseEvent } from 'react';
+import React, { useRef, useLayoutEffect, useState, useEffect, MouseEvent } from 'react';
 import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Process } from '../../hooks/use_process_tree';
@@ -20,6 +20,7 @@ import { useStyles } from './styles';
 interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
+  isOrphan?: boolean;
   depth?: number;
   onProcessSelected(process: Process): void;
 }
@@ -31,18 +32,34 @@ interface ProcessDeps {
 export function ProcessTreeNode({
   process,
   isSessionLeader = false,
+  isOrphan,
   depth = 0,
   onProcessSelected,
 }: ProcessDeps) {
   const styles = useStyles({ depth });
+  const textRef = useRef<HTMLSpanElement>(null);
 
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
+  const { searchMatched } = process;
 
   useEffect(() => {
     setChildrenExpanded(isSessionLeader || process.autoExpand);
   }, [isSessionLeader, process.autoExpand]);
 
-  const event = process.getLatest();
+  useLayoutEffect(() => {
+    if (searchMatched !== null && textRef && textRef.current) {
+      const regex = new RegExp(searchMatched);
+
+      const text = textRef.current.innerText;
+      const html = text.replace(regex, (match) => {
+        return `<span style="${styles.searchHighlight}">${match}</span>`;
+      });
+
+      textRef.current.innerHTML = html;
+    }
+  }, [searchMatched]);
+
+  const event = process.getDetails();
 
   if (!event) {
     return null;
@@ -64,7 +81,7 @@ export function ProcessTreeNode({
         {children.map((child: Process) => {
           return (
             <ProcessTreeNode
-              key={child.getEntityID()}
+              key={child.id}
               process={child}
               depth={newDepth}
               onProcessSelected={onProcessSelected}
@@ -93,12 +110,12 @@ export function ProcessTreeNode({
   };
 
   const renderSessionLeader = () => {
-    const { name, user } = process.getLatest().process;
+    const { name, executable, user } = process.getDetails().process;
     const sessionIcon = interactive ? 'consoleApp' : 'compute';
 
     return (
       <>
-        <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name}</b>
+        <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name || executable}</b>
         &nbsp;
         <FormattedMessage id="kbn.sessionView.startedBy" defaultMessage="started by" />
         &nbsp;
@@ -111,44 +128,34 @@ export function ProcessTreeNode({
   const template = () => {
     const {
       args,
+      executable,
       working_directory: workingDirectory,
       exit_code: exitCode,
-    } = process.getLatest().process;
-    const { searchMatched } = process;
-
-    if (searchMatched !== null) {
-      const regex = new RegExp(searchMatched);
-
-      // TODO: should we allow some form of customization via settings?
-      let text = `${workingDirectory} ${args.join(' ')}`;
-
-      text = text.replace(regex, (match) => {
-        return `<span style="${styles.searchHighlight}">${match}</span>`;
-      });
-
+    } = process.getDetails().process;
+    if (process.hasExec()) {
       return (
-        <>
-          {/* eslint-disable-next-line react/no-danger */}
-          <span dangerouslySetInnerHTML={{ __html: text }} />
-        </>
+        <span ref={textRef}>
+          <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
+          <span css={styles.darkText}>{args[0]}</span>&nbsp;
+          {args.slice(1).join(' ')}
+          {exitCode && <small> [exit_code: {exitCode}]</small>}
+        </span>
+      );
+    } else {
+      return (
+        <span ref={textRef}>
+          <span css={styles.darkText}>{executable}</span>&nbsp;
+        </span>
       );
     }
-
-    return (
-      <span>
-        <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
-        <span css={styles.darkText}>{args[0]}</span>&nbsp;
-        {args.slice(1).join(' ')}
-        {exitCode && <small> [exit_code: {exitCode}]</small>}
-      </span>
-    );
   };
 
   const renderProcess = () => {
     return (
       <span>
         {process.isUserEntered() && <EuiIcon css={styles.userEnteredIcon} type="user" />}
-        <EuiIcon type="console" /> {template()}
+        <EuiIcon type={process.hasExec() ? 'console' : 'branch'} /> {template()}
+        {isOrphan ? '(orphaned)' : ''}
       </span>
     );
   };
@@ -166,14 +173,11 @@ export function ProcessTreeNode({
     onProcessSelected(process);
   };
 
-  const id = process.getEntityID();
-
-  // eslint-disable-next-line
-  console.log(styles); 
+  const id = process.id;
 
   return (
     <>
-      <div data-id={id} key={id} css={styles.processNode}>
+      <div data-id={id} key={id + searchMatched} css={styles.processNode}>
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div css={styles.wrapper} onClick={onProcessClicked}>
           {isSessionLeader ? renderSessionLeader() : renderProcess()}

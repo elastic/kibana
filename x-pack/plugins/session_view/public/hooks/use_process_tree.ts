@@ -4,19 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import _ from 'lodash';
 import { useState, useEffect } from 'react';
 
 interface UseProcessTreeDeps {
-  sessionId: string;
+  sessionEntityId: string;
   forward: ProcessEvent[];
   backward?: ProcessEvent[];
   searchQuery?: string;
 }
 
-export enum Action {
+export enum EventKind {
+  event = 'event',
+  signal = 'signal',
+}
+
+export enum EventAction {
   fork = 'fork',
   exec = 'exec',
-  end = 'end',
+  exit = 'exit',
   output = 'output',
 }
 
@@ -51,9 +57,9 @@ interface ProcessSelf extends ProcessFields {
 export interface ProcessEvent {
   '@timestamp': string;
   event: {
-    kind: string;
+    kind: EventKind;
     category: string;
-    action: Action;
+    action: EventAction;
   };
   host?: {
     // optional for now (raw agent output doesn't have server identity)
@@ -79,62 +85,63 @@ export interface ProcessEvent {
 }
 
 export interface Process {
+  id: string; // the process entity_id
   events: ProcessEvent[];
   children: Process[];
   parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null; // either false, or set to searchQuery
-  getEntityID(): string;
   hasOutput(): boolean;
   hasAlerts(): boolean;
+  hasExec(): boolean;
   getOutput(): string;
-  getLatest(): ProcessEvent;
+  getDetails(): ProcessEvent;
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
 }
 
 class ProcessImpl implements Process {
+  id: string;
   events: ProcessEvent[];
   children: Process[];
   parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null;
 
-  constructor() {
+  constructor(id: string) {
+    this.id = id;
     this.events = [];
     this.children = [];
     this.autoExpand = false;
     this.searchMatched = null;
   }
 
-  getEntityID() {
-    return this.getLatest().process.entity_id;
-  }
-
   hasOutput() {
     // TODO: schema undecided
-    return !!this.events.find(({ event }) => event.action === Action.output);
+    return !!this.events.find(({ event }) => event.action === EventAction.output);
   }
 
   hasAlerts() {
-    // TODO: endpoint alerts schema uncertain (kind = alert comes from ECS)
-    // endpoint-dev code sets event.action to rule_detection and rule_prevention.
-    // alerts mechanics at elastic needs a research spike.
-    return !!this.events.find(({ event }) => event.kind === 'alert');
+    return !!this.events.find(({ event }) => event.kind === EventKind.signal);
   }
 
-  getLatest() {
-    const forksExecsOnly = this.events.filter((event) => {
-      return [Action.fork, Action.exec, Action.end].includes(event.event.action);
-    });
+  hasExec() {
+    return !!this.events.find(({ event }) => event.action === EventAction.exec);
+  }
 
-    // returns the most recent fork, exec, or exit
-    return forksExecsOnly[forksExecsOnly.length - 1];
+  hasExited() {
+    return !!this.events.find(({ event }) => event.action === EventAction.exit);
+  }
+
+  getDetails() {
+    const execsForks = this.events.filter(({ event }) => [EventAction.exec, EventAction.fork].includes(event.action));
+
+    return execsForks[execsForks.length - 1];
   }
 
   getOutput() {
     return this.events.reduce((output, event) => {
-      if (event.event.action === Action.output) {
+      if (event.event.action === EventAction.output) {
         output += ''; // TODO: schema unknown
       }
 
@@ -143,7 +150,7 @@ class ProcessImpl implements Process {
   }
 
   isUserEntered() {
-    const event = this.getLatest();
+    const event = this.getDetails();
     const { interactive, pgid, parent } = event.process;
 
     return interactive && pgid !== parent.pgid;
@@ -160,14 +167,14 @@ type ProcessMap = {
 };
 
 export const useProcessTree = ({
-  sessionId,
+  sessionEntityId,
   forward,
   backward,
   searchQuery,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   const initializedProcessMap: ProcessMap = {
-    [sessionId]: new ProcessImpl(),
+    [sessionEntityId]: new ProcessImpl(sessionEntityId),
   };
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
@@ -178,15 +185,23 @@ export const useProcessTree = ({
 
   const updateProcessMap = (events: ProcessEvent[]) => {
     events.forEach((event) => {
-      let process = processMap[event.process.entity_id];
+      const { entity_id: id } = event.process;
+      let process = processMap[id];
 
       if (!process) {
-        process = new ProcessImpl();
-        processMap[event.process.entity_id] = process;
+        process = new ProcessImpl(id);
+        processMap[id] = process;
       }
 
       process.events.push(event);
     });
+
+    if (processMap[sessionEntityId].events.length === 0) {
+      processMap[sessionEntityId].events.push({
+        ...events[0],
+        ...events[0].process.entry
+      })
+    }
   };
 
   const buildProcessTree = (events: ProcessEvent[], backwardDirection: boolean = false) => {
@@ -204,7 +219,7 @@ export const useProcessTree = ({
             parentProcess.children.push(process);
           }
         }
-      } else if (!orphans.includes(process)) {
+      } else if (process.id !== sessionEntityId && !orphans.includes(process)) {
         // if no parent process, process is probably orphaned
         orphans.push(process);
       }
@@ -217,7 +232,7 @@ export const useProcessTree = ({
     if (searchQuery) {
       for (const processId of Object.keys(processMap)) {
         const process = processMap[processId];
-        const event = process.getLatest();
+        const event = process.getDetails();
         const { working_directory: workingDirectory, args } = event.process;
 
         // TODO: the text we search is the same as what we render.
@@ -289,5 +304,5 @@ export const useProcessTree = ({
   }, [searchQuery]);
 
   // return the root session leader process, and a list of orphans
-  return { sessionLeader: processMap[sessionId], orphans, searchResults };
+  return { sessionLeader: processMap[sessionEntityId], orphans, searchResults };
 };
