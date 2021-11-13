@@ -44,6 +44,7 @@ const items: IndexedFieldItem[] = [
   {
     name: 'conflictingField',
     displayName: 'conflictingField',
+    conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
     type: 'text, long',
     kbnType: 'conflict',
     info: [],
@@ -123,7 +124,12 @@ describe('Table', () => {
 
   test('should render conflicting type', () => {
     const tableCell = shallow(
-      renderTable().prop('columns')[1].render('conflict', { kbnType: 'conflict' })
+      renderTable()
+        .prop('columns')[1]
+        .render('conflict', {
+          kbnType: 'conflict',
+          conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
+        })
     );
     expect(tableCell).toMatchSnapshot();
   });

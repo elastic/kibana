@@ -183,9 +183,10 @@ const TypeSummary = ({
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'];
 }) => {
   const conflicts = Object.keys(conflictDescriptions!).map((type) => {
+    // only show first 100 indices just incase the list is CRAZY long
     return (
       <p>
-        {type}: {conflictDescriptions![type].slice(0, 4).join(', ')}
+        {type}: {conflictDescriptions![type].slice(0, 99).join(', ')}
       </p>
     );
   });
@@ -246,12 +247,6 @@ const getConflictBtn = (
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
   openModal: IndexedFieldProps['openModal']
 ) => {
-  const content = (
-    <FormattedMessage
-      id="indexPatternManagement.editIndexPattern.fields.table.multiTypeTooltip"
-      defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
-    />
-  );
   return (
     <span>
       &nbsp;
@@ -266,17 +261,32 @@ const getConflictBtn = (
                 <EuiModalHeader>
                   <EuiModalHeaderTitle>
                     <h1>Field &#39;{fieldName}&#39; type conflict</h1>
+                    <h1>
+                      <FormattedMessage
+                        id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+                        defaultMessage="Field &#39;${fieldName}&#39; type conflict"
+                        values={{ fieldName }}
+                      />
+                    </h1>
                   </EuiModalHeaderTitle>
                 </EuiModalHeader>
                 <EuiModalBody>
                   <EuiText>
-                    <p>{content}</p>
+                    <p>
+                      <FormattedMessage
+                        id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
+                        defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+                      />
+                    </p>
                     <TypeSummary conflictDescriptions={conflictDescriptions} />
                   </EuiText>
                 </EuiModalBody>
                 <EuiModalFooter>
                   <EuiButton onClick={() => overlayRef.close()} fill>
-                    Close
+                    <FormattedMessage
+                      id="indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn"
+                      defaultMessage="Close"
+                    />
                   </EuiButton>
                 </EuiModalFooter>
               </>
