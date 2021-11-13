@@ -5,7 +5,7 @@
   "ui": true,
   "requiredPlugins": ["data", "visualizations", "mapsEms", "expressions", "inspector"],
   "optionalPlugins": ["home","usageCollection"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor", "esUiShared"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

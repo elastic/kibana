@@ -16,9 +16,9 @@ setIsVisible(isVisible: boolean): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  isVisible | <code>boolean</code> |  |
+|  isVisible | boolean |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

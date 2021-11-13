@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`throws error when more than one scoped saved objects client factory is set 1`] = `"custom client factory is already set, unable to replace the current one"`;
