@@ -12,6 +12,9 @@ import type { CustomPaletteParams, LayerType } from '../../common';
 export type HeatmapLayerState = HeatmapArguments & {
   layerId: string;
   layerType: LayerType;
+  valueAccessor?: string;
+  xAccessor?: string;
+  yAccessor?: string;
 };
 
 export type HeatmapVisualizationState = HeatmapLayerState & {

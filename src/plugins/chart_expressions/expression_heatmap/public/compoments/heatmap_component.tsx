@@ -110,9 +110,8 @@ function computeColorRanges(
 
   return { colors, ranges };
 }
-const getAccessor = (value: string, columns: DatatableColumn[]) => {
-  const accessor = value as unknown as number;
-  return isNaN(accessor) ? value : columns[accessor ?? 0].id;
+const getAccessor = (value: string | number, columns: DatatableColumn[]) => {
+  return typeof value === 'string' ? value : columns[value ?? 0].id;
 };
 const HeatmapComponent: FC<HeatmapRenderProps> = ({
   data,

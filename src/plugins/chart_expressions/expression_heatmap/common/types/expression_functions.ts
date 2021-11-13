@@ -73,11 +73,11 @@ export interface HeatmapArguments {
   highlightInHover?: boolean;
   palette?: PaletteOutput<CustomPaletteState>;
   shape: ChartShapes;
-  xAccessor?: string;
-  yAccessor?: string;
-  valueAccessor?: string;
-  splitRowAccessor?: string;
-  splitColumnAccessor?: string;
+  xAccessor?: string | number;
+  yAccessor?: string | number;
+  valueAccessor?: string | number;
+  splitRowAccessor?: string | number;
+  splitColumnAccessor?: string | number;
   legend: HeatmapLegendConfigResult;
   gridConfig: HeatmapGridConfigResult;
 }

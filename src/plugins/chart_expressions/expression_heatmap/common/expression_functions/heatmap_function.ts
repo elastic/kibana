@@ -17,10 +17,13 @@ import {
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
 
-const convertToVisDimension = (columns: DatatableColumn[], accessor: string | undefined) => {
+const convertToVisDimension = (
+  columns: DatatableColumn[],
+  accessor: string | number | undefined
+) => {
   if (!accessor) return;
   let column;
-  if (isNaN(accessor as unknown as number)) {
+  if (typeof accessor === 'string') {
     column = columns.find((c) => c.id === accessor);
   } else {
     column = columns[accessor as unknown as number];
@@ -100,34 +103,34 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       default: false,
     },
     xAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
       help: i18n.translate('expressionHeatmap.function.args.xAccessorHelpText', {
         defaultMessage: 'The id of the x axis column as string or the number of the table index',
       }),
     },
     yAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
 
       help: i18n.translate('expressionHeatmap.function.args.yAccessorHelpText', {
         defaultMessage: 'The id of the y axis column as string or the number of the table index',
       }),
     },
     valueAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
 
       help: i18n.translate('expressionHeatmap.function.args.valueAccessorHelpText', {
         defaultMessage: 'The id of the value column as string or the number of the table index',
       }),
     },
     splitRowAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
 
       help: i18n.translate('expressionHeatmap.function.args.splitRowAccessorHelpText', {
         defaultMessage: 'The id of the split row as string or the number of the table index',
       }),
     },
     splitColumnAccessor: {
-      types: ['string'],
+      types: ['string', 'number'],
 
       help: i18n.translate('expressionHeatmap.function.args.splitColumnAccessorHelpText', {
         defaultMessage: 'The id of the split column as string or the number of the table index',
