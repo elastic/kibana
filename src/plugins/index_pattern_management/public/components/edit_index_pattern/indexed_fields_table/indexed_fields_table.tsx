@@ -37,12 +37,10 @@ interface IndexedFieldsTableState {
 
 const withHooks = (Comp: typeof Component) => {
   return (props: any) => {
-    const { application, overlays } = useKibana<IndexPatternManagmentContext>().services;
+    const { application } = useKibana<IndexPatternManagmentContext>().services;
     const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
 
-    return (
-      <Comp userEditPermission={userEditPermission} openModal={overlays.openModal} {...props} />
-    );
+    return <Comp userEditPermission={userEditPermission} {...props} />;
   };
 };
 

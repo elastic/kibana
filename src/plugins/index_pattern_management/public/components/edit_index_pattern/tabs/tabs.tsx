@@ -80,7 +80,7 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { application, uiSettings, docLinks, indexPatternFieldEditor } =
+  const { application, uiSettings, docLinks, indexPatternFieldEditor, overlays } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -237,6 +237,7 @@ export function Tabs({
                       deleteField,
                       getFieldInfo,
                     }}
+                    openModal={overlays.openModal}
                   />
                 )}
               </DeleteRuntimeFieldProvider>
@@ -295,6 +296,7 @@ export function Tabs({
       openFieldEditor,
       DeleteRuntimeFieldProvider,
       refreshFields,
+      overlays,
     ]
   );
 
