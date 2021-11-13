@@ -93,6 +93,13 @@ export function Tabs({
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
 
+  const conflict = i18n.translate(
+    'indexPatternManagement.editIndexPattern.fieldTypes.conflictType',
+    {
+      defaultMessage: 'conflict',
+    }
+  );
+
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
@@ -103,7 +110,7 @@ export function Tabs({
         }
       } else {
         if (field.esTypes) {
-          tempIndexedFieldTypes.push(field.esTypes.length === 1 ? field.esTypes[0] : 'conflict');
+          tempIndexedFieldTypes.push(field.esTypes.length === 1 ? field.esTypes[0] : conflict);
         }
       }
     });
@@ -112,7 +119,7 @@ export function Tabs({
     setScriptedFieldLanguages(
       convertToEuiSelectOption(tempScriptedFieldLanguages, 'scriptedFieldLanguages')
     );
-  }, [indexPattern]);
+  }, [indexPattern, conflict]);
 
   const closeFieldEditor = useCallback(() => {
     if (closeEditorHandler.current) {

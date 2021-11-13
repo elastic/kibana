@@ -260,11 +260,10 @@ const getConflictBtn = (
               <>
                 <EuiModalHeader>
                   <EuiModalHeaderTitle>
-                    <h1>Field &#39;{fieldName}&#39; type conflict</h1>
                     <h1>
                       <FormattedMessage
                         id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-                        defaultMessage="Field &#39;${fieldName}&#39; type conflict"
+                        defaultMessage="Field &#39;{fieldName}&#39; type conflict"
                         values={{ fieldName }}
                       />
                     </h1>

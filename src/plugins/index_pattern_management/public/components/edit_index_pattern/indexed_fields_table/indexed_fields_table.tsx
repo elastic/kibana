@@ -7,6 +7,7 @@
  */
 
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import { createSelector } from 'reselect';
 import { OverlayStart } from 'src/core/public';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
@@ -75,8 +76,9 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
         return '';
       }
       if (length > 1) {
-        // todo localize
-        return 'conflict';
+        return i18n.translate('indexPatternManagement.editIndexPattern.fields.conflictType', {
+          defaultMessage: 'conflict',
+        });
       }
       return arr[0];
     };
