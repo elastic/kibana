@@ -6,23 +6,61 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from 'src/core/server';
-import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { Logger, SavedObjectReference } from 'src/core/server';
+import { AlertType, AlertExecutorOptions } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
-import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import {
-  CoreQueryParamsSchemaProperties,
-  TimeSeriesQuery,
-} from '../../../../triggers_actions_ui/server';
+import { ActionContext } from './action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
+import {
+  getTime,
+  parseSearchSourceJSON,
+  SearchSourceFields,
+} from '../../../../../../src/plugins/data/common';
 
 export const ID = '.discover-threshold';
 export const ActionGroupId = 'threshold met';
 
+/**
+ * node stolen from the data plugin, needs to moved to `common there`
+ */
+export const injectSearchSourceReferences = (
+  searchSourceFields: SearchSourceFields & { indexRefName: string },
+  references: SavedObjectReference[]
+) => {
+  const searchSourceReturnFields: SearchSourceFields = { ...searchSourceFields };
+  // Inject index id if a reference is saved
+  if (searchSourceFields.indexRefName) {
+    const reference = references.find((ref) => ref.name === searchSourceFields.indexRefName);
+    if (!reference) {
+      throw new Error(`Could not find reference for ${searchSourceFields.indexRefName}`);
+    }
+    // @ts-ignore
+    searchSourceReturnFields.index = reference.id;
+    // @ts-ignore
+    delete searchSourceReturnFields.indexRefName;
+  }
+
+  if (searchSourceReturnFields.filter && Array.isArray(searchSourceReturnFields.filter)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    searchSourceReturnFields.filter.forEach((filterRow: any) => {
+      if (!filterRow.meta || !filterRow.meta.indexRefName) {
+        return;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const reference = references.find((ref: any) => ref.name === filterRow.meta.indexRefName);
+      if (!reference) {
+        throw new Error(`Could not find reference for ${filterRow.meta.indexRefName}`);
+      }
+      filterRow.meta.index = reference.id;
+      delete filterRow.meta.indexRefName;
+    });
+  }
+
+  return searchSourceReturnFields;
+};
+
 export function getAlertType(
-  logger: Logger,
-  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
+  logger: Logger
 ): AlertType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Discover threshold',
@@ -92,15 +130,6 @@ export function getAlertType(
     }
   );
 
-  const alertParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
-    (propKey: string) => {
-      return {
-        name: propKey,
-        description: propKey,
-      };
-    }
-  );
-
   return {
     id: ID,
     name: alertTypeName,
@@ -123,19 +152,22 @@ export function getAlertType(
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
         { name: 'searchSourceJSON', description: 'SearchSourceJSON' },
         { name: 'searchSourceReferencesJSON', description: 'searchSourceReferencesJSON' },
-        ...alertParamsVariables,
+        { name: 'timeWindowSize', description: 'Time window size' },
+        { name: 'timeWindowUnit', description: 'Time window unit' },
       ],
     },
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor,
-    producer: STACK_ALERTS_FEATURE_ID,
+    producer: 'discover',
   };
 
   async function executor(
     options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
-    const { alertId, name, services, params } = options;
+    const { name, services, params } = options;
+
+    const parsedSearchSourceJSON = parseSearchSourceJSON(params.searchSourceJSON);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -149,69 +181,44 @@ export function getAlertType(
       );
     }
 
-    const esClient = services.scopedClusterClient.asCurrentUser;
-    const date = new Date().toISOString();
-    // the undefined values below are for config-schema optional types
-    const queryParams: TimeSeriesQuery = {
-      index: params.index,
-      timeField: params.timeField,
-      aggType: params.aggType,
-      aggField: params.aggField,
-      groupBy: params.groupBy,
-      termField: params.termField,
-      termSize: params.termSize,
-      dateStart: date,
-      dateEnd: date,
-      timeWindowSize: params.timeWindowSize,
-      timeWindowUnit: params.timeWindowUnit,
-      interval: undefined,
-    };
-    // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    const result = await (
-      await data
-    ).timeSeriesQuery({
-      logger,
-      esClient,
-      query: queryParams,
-    });
-    logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
+    try {
+      const searchSourceValues = injectSearchSourceReferences(
+        parsedSearchSourceJSON as Parameters<typeof injectSearchSourceReferences>[0],
+        JSON.parse(params.searchSourceReferencesJSON)
+      );
+      const searchSourceClient = await services.searchSourceClient;
+      const loadedSearchSource = await searchSourceClient.create(searchSourceValues);
+      loadedSearchSource.setField('size', 0);
+      const filter = getTime(loadedSearchSource.getField('index'), {
+        from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
+        to: 'now',
+      });
+      const searchSourceChild = loadedSearchSource.createChild();
+      searchSourceChild.setField('filter', filter);
+      const docs = await searchSourceChild.fetch();
+      const nrOfDocs = Number(docs.hits.total);
+      const met = compareFn(nrOfDocs, params.threshold);
 
-    const groupResults = result.results || [];
-    // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
-    for (const groupResult of groupResults) {
-      const instanceId = groupResult.group;
-      const metric =
-        groupResult.metrics && groupResult.metrics.length > 0 ? groupResult.metrics[0] : null;
-      const value = metric && metric.length === 2 ? metric[1] : null;
+      if (met) {
+        const conditions = `${nrOfDocs} is ${getHumanReadableComparator(
+          params.thresholdComparator
+        )} ${params.threshold}`;
+        const instanceId = 'test';
+        const date = new Date().toISOString();
+        const baseContext: ActionContext = {
+          title: name,
+          message: `${nrOfDocs} documents found (${conditions})`,
+          date,
+          group: instanceId,
+          value: Number(nrOfDocs),
+          conditions,
+        };
 
-      if (value === null || value === undefined) {
-        logger.debug(
-          `alert ${ID}:${alertId} "${name}": no metrics found for group ${instanceId}} from groupResult ${JSON.stringify(
-            groupResult
-          )}`
-        );
-        continue;
+        const alertInstance = options.services.alertInstanceFactory(instanceId);
+        alertInstance.scheduleActions(ActionGroupId, baseContext);
       }
-
-      const met = compareFn(value, params.threshold);
-
-      if (!met) continue;
-
-      const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
-      const humanFn = `${agg} is ${getHumanReadableComparator(
-        params.thresholdComparator
-      )} ${params.threshold.join(' and ')}`;
-
-      const baseContext: BaseActionContext = {
-        date,
-        group: instanceId,
-        value,
-        conditions: humanFn,
-      };
-      const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = options.services.alertInstanceFactory(instanceId);
-      alertInstance.scheduleActions(ActionGroupId, actionContext);
-      logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+    } catch (e) {
+      logger.error(e);
     }
   }
 }

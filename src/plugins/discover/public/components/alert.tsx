@@ -40,7 +40,6 @@ export const DiscoverAlertButton = ({
       sort: [],
       useNewFieldsApi: true,
     });
-    nextSearchSource.removeField('filter');
     const serializedSearchSource = nextSearchSource.serialize();
 
     return {

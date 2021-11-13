@@ -8,10 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ComparatorFnNames } from '../lib';
-import {
-  CoreQueryParamsSchemaProperties,
-  validateCoreQueryBody,
-} from '../../../../triggers_actions_ui/server';
+import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
 
 // alert type parameters
 
@@ -19,7 +16,9 @@ export type Params = TypeOf<typeof ParamsSchema>;
 
 export const ParamsSchema = schema.object(
   {
-    ...CoreQueryParamsSchemaProperties,
+    timeWindowSize: schema.number({ min: 1 }),
+    // units of time window for date range aggregations
+    timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
     // the comparison function to use to determine if the threshold as been met
     thresholdComparator: schema.string({ validate: validateComparator }),
     // the values to use as the threshold; `between` and `notBetween` require
@@ -37,10 +36,6 @@ const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
-  // validate core query parts, return if it fails validation (returning string)
-  const coreQueryValidated = validateCoreQueryBody(anyParams);
-  if (coreQueryValidated) return coreQueryValidated;
-
   const { thresholdComparator, threshold }: Params = anyParams as Params;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {

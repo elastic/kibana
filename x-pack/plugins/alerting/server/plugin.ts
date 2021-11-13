@@ -65,6 +65,7 @@ import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -133,6 +134,7 @@ export interface AlertingPluginsStart {
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
+  data: DataPluginStart;
 }
 
 export class AlertingPlugin {
@@ -388,7 +390,7 @@ export class AlertingPlugin {
 
     taskRunnerFactory.initialize({
       logger,
-      getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
+      getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch, plugins.data),
       getRulesClientWithRequest,
       spaceIdToNamespace,
       actionsPlugin: plugins.actions,
@@ -448,11 +450,13 @@ export class AlertingPlugin {
 
   private getServicesFactory(
     savedObjects: SavedObjectsServiceStart,
-    elasticsearch: ElasticsearchServiceStart
+    elasticsearch: ElasticsearchServiceStart,
+    data: DataPluginStart
   ): (request: KibanaRequest) => Services {
     return (request) => ({
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
       scopedClusterClient: elasticsearch.client.asScoped(request),
+      searchSourceClient: data.search.searchSource.asScoped(request),
     });
   }
 

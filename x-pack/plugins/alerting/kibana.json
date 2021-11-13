@@ -11,6 +11,7 @@
   "configPath": ["xpack", "alerting"],
   "requiredPlugins": [
     "actions",
+    "data",
     "encryptedSavedObjects",
     "eventLog",
     "features",

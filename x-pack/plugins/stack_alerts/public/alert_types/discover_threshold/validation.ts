@@ -7,83 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { IndexThresholdAlertParams } from './types';
-import {
-  ValidationResult,
-  builtInGroupByTypes,
-  builtInAggregationTypes,
-  builtInComparators,
-} from '../../../../triggers_actions_ui/public';
+import { ValidationResult, builtInComparators } from '../../../../triggers_actions_ui/public';
 
 export const validateExpression = (alertParams: IndexThresholdAlertParams): ValidationResult => {
-  const {
-    index,
-    timeField,
-    aggType,
-    aggField,
-    groupBy,
-    termSize,
-    termField,
-    threshold,
-    timeWindowSize,
-    thresholdComparator,
-  } = alertParams;
+  const { threshold, timeWindowSize, thresholdComparator } = alertParams;
   const validationResult = { errors: {} };
   const errors = {
-    aggField: new Array<string>(),
-    termSize: new Array<string>(),
-    termField: new Array<string>(),
     timeWindowSize: new Array<string>(),
     threshold0: new Array<string>(),
     threshold1: new Array<string>(),
-    index: new Array<string>(),
-    timeField: new Array<string>(),
   };
   validationResult.errors = errors;
-  if (!index || index.length === 0) {
-    errors.index.push(
-      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredIndexText', {
-        defaultMessage: 'Index is required.',
-      })
-    );
-  }
-  if (!timeField) {
-    errors.timeField.push(
-      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredTimeFieldText', {
-        defaultMessage: 'Time field is required.',
-      })
-    );
-  }
-  if (aggType && builtInAggregationTypes[aggType].fieldRequired && !aggField) {
-    errors.aggField.push(
-      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredAggFieldText', {
-        defaultMessage: 'Aggregation field is required.',
-      })
-    );
-  }
-  if (
-    groupBy &&
-    builtInGroupByTypes[groupBy] &&
-    builtInGroupByTypes[groupBy].sizeRequired &&
-    !termSize
-  ) {
-    errors.termSize.push(
-      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredTermSizedText', {
-        defaultMessage: 'Term size is required.',
-      })
-    );
-  }
-  if (
-    groupBy &&
-    builtInGroupByTypes[groupBy].validNormalizedTypes &&
-    builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
-    !termField
-  ) {
-    errors.termField.push(
-      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredTermFieldText', {
-        defaultMessage: 'Term field is required.',
-      })
-    );
-  }
+
   if (!timeWindowSize) {
     errors.timeWindowSize.push(
       i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredTimeWindowSizeText', {

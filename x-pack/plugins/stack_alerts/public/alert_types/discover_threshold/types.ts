@@ -28,13 +28,6 @@ export interface GroupByType {
 }
 
 export interface IndexThresholdAlertParams extends AlertTypeParams {
-  index: string | string[];
-  timeField?: string;
-  aggType: string;
-  aggField?: string;
-  groupBy?: string;
-  termSize?: number;
-  termField?: string;
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;

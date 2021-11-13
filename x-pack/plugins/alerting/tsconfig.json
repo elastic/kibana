@@ -24,6 +24,7 @@
     { "path": "../encrypted_saved_objects/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" }
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" }
   ]
 }
