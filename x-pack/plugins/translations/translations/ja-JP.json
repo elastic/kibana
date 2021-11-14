@@ -5925,7 +5925,7 @@
     "xpack.actions.serverSideErrors.unavailableLicenseErrorMessage": "現時点でライセンス情報を入手できないため、アクションタイプ {actionTypeId} は無効です。",
     "xpack.actions.serverSideErrors.unavailableLicenseInformationErrorMessage": "グラフを利用できません。現在ライセンス情報が利用できません。",
     "xpack.actions.urlAllowedHostsConfigurationError": "ターゲット{field}「{value}」はKibana構成xpack.actions.allowedHostsに追加されていません",
-    "xpack.alerting.alertNavigationRegistry.get.missingNavigationError": "「{consumer}」内のアラートタイプ「{alertType}」のナビゲーションは登録されていません。",
+    "xpack.alerting.alertNavigationRegistry.get.missingNavigationError": "「{consumer}」内のアラートタイプ「{ruleTypeId}」のナビゲーションは登録されていません。",
     "xpack.alerting.alertNavigationRegistry.register.duplicateDefaultError": "「{consumer}」内のデフォルトナビゲーションはすでに登録されています。",
     "xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError": "「{consumer}」内のアラートタイプ「{alertType}」のナビゲーションは既に登録されています。",
     "xpack.alerting.api.error.disabledApiKeys": "アラートは API キーに依存しますがキーが無効になっているようです",

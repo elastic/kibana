@@ -62,7 +62,7 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       handler: AlertNavigationHandler
     ) => {
       // if the ruleTypes not fetched yet than to the API call and cache the results
-      if (!!this.ruleTypes) {
+      if (!this.ruleTypes) {
         this.ruleTypes = await loadRuleTypes({ http: core.http });
         if (!this.ruleTypes) {
           // eslint-disable-next-line no-console
@@ -74,7 +74,7 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       }
 
       // use cache to get ruleType
-      const ruleType = this.ruleTypes!.find((type) => type.id === ruleTypeId);
+      const ruleType = this.ruleTypes.find((type) => type.id === ruleTypeId);
       if (!!ruleType) {
         this.alertNavigationRegistry!.register(applicationId, ruleType, handler);
       } else {

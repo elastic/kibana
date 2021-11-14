@@ -5971,7 +5971,7 @@
     "xpack.actions.serverSideErrors.unavailableLicenseErrorMessage": "操作类型 {actionTypeId} 已禁用，因为许可证信息当前不可用。",
     "xpack.actions.serverSideErrors.unavailableLicenseInformationErrorMessage": "操作不可用 - 许可信息当前不可用。",
     "xpack.actions.urlAllowedHostsConfigurationError": "目标 {field} 的“{value}”未添加到 Kibana 配置 xpack.actions.allowedHosts",
-    "xpack.alerting.alertNavigationRegistry.get.missingNavigationError": "在“{consumer}”内针对告警类型“{alertType}”的导航未注册。",
+    "xpack.alerting.alertNavigationRegistry.get.missingNavigationError": "在“{consumer}”内针对告警类型“{ruleTypeId}”的导航未注册。",
     "xpack.alerting.alertNavigationRegistry.register.duplicateDefaultError": "“{consumer}”内的默认导航已注册。",
     "xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError": "在“{consumer}”内针对告警类型“{alertType}”的导航已注册。",
     "xpack.alerting.api.error.disabledApiKeys": "Alerting 依赖的 API 密钥似乎已禁用",
