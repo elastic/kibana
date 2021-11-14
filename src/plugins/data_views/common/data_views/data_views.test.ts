@@ -99,6 +99,7 @@ describe('IndexPatterns', () => {
       onNotification: () => {},
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
+      getCanSave: () => Promise.resolve(true),
     });
   });
 

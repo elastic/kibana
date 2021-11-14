@@ -67,7 +67,7 @@ interface IndexPatternsServiceDeps {
   onNotification: OnNotification;
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
-  canSave: boolean;
+  getCanSave: () => Promise<boolean>;
 }
 
 export class DataViewsService {
@@ -79,7 +79,7 @@ export class DataViewsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
-  canSave = false;
+  private getCanSave: () => Promise<boolean>;
 
   /**
    * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
@@ -95,7 +95,7 @@ export class DataViewsService {
     onNotification,
     onError,
     onRedirectNoIndexPattern = () => {},
-    canSave = false,
+    getCanSave = () => Promise.resolve(false),
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -104,7 +104,7 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.ensureDefaultDataView = createEnsureDefaultDataView(uiSettings, onRedirectNoIndexPattern);
-    this.canSave = canSave;
+    this.getCanSave = getCanSave;
 
     this.dataViewCache = createDataViewCache();
   }
@@ -561,7 +561,7 @@ export class DataViewsService {
    */
 
   async createSavedObject(indexPattern: DataView, override = false) {
-    if (!this.canSave) {
+    if (!(await this.getCanSave())) {
       // todo different error
       throw new SaveDataViewFailedLacksPermissionsError('hi');
     }
@@ -603,7 +603,7 @@ export class DataViewsService {
     ignoreErrors: boolean = false
   ): Promise<void | Error> {
     if (!indexPattern.id) return;
-    if (!this.canSave) {
+    if (!(await this.getCanSave())) {
       // todo log index pattern id and name
       throw new SaveDataViewFailedLacksPermissionsError('name');
     }
@@ -690,7 +690,7 @@ export class DataViewsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
-    if (!this.canSave) {
+    if (!(await this.getCanSave())) {
       // todo different error
       throw new SaveDataViewFailedLacksPermissionsError('err');
     }

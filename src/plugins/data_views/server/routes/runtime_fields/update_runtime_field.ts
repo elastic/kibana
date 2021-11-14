@@ -55,7 +55,8 @@ export const registerUpdateRuntimeFieldRoute = (
       const [, , { indexPatternsServiceFactory }] = await getStartServices();
       const indexPatternsService = await indexPatternsServiceFactory(
         savedObjectsClient,
-        elasticsearchClient
+        elasticsearchClient,
+        req
       );
       const id = req.params.id;
       const name = req.params.name;
