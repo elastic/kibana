@@ -53,14 +53,17 @@ export class AlertNavigationRegistry {
   public register(consumer: string, ruleType: RuleType, handler: AlertNavigationHandler) {
     if (this.hasTypedHandler(consumer, ruleType)) {
       throw new Error(
-        i18n.translate('xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError', {
-          defaultMessage:
-            'Navigation for Rule type "{ruleTypeId}" within "{consumer}" is already registered.',
-          values: {
-            ruleTypeId: ruleType.id,
-            consumer,
-          },
-        })
+        i18n.translate(
+          'xpack.alerting.alertNavigationRegistry.register.duplicateRuleTypeNavigationError',
+          {
+            defaultMessage:
+              'Navigation for Rule type "{ruleTypeId}" within "{consumer}" is already registered.',
+            values: {
+              ruleTypeId: ruleType.id,
+              consumer,
+            },
+          }
+        )
       );
     }
 

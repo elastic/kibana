@@ -5927,7 +5927,6 @@
     "xpack.actions.urlAllowedHostsConfigurationError": "ターゲット{field}「{value}」はKibana構成xpack.actions.allowedHostsに追加されていません",
     "xpack.alerting.alertNavigationRegistry.get.missingNavigationError": "「{consumer}」内のアラートタイプ「{ruleTypeId}」のナビゲーションは登録されていません。",
     "xpack.alerting.alertNavigationRegistry.register.duplicateDefaultError": "「{consumer}」内のデフォルトナビゲーションはすでに登録されています。",
-    "xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError": "「{consumer}」内のアラートタイプ「{alertType}」のナビゲーションは既に登録されています。",
     "xpack.alerting.api.error.disabledApiKeys": "アラートは API キーに依存しますがキーが無効になっているようです",
     "xpack.alerting.appName": "アラート",
     "xpack.alerting.builtinActionGroups.recovered": "回復済み",
