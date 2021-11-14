@@ -1,5 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Table render conflict summary modal  1`] = `
+<React.Fragment>
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Field '{fieldName}' type conflict"
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+          values={
+            Object {
+              "fieldName": "message",
+            }
+          }
+        />
+      </h1>
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText>
+      <p>
+        <FormattedMessage
+          defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
+          values={Object {}}
+        />
+      </p>
+      <TypeSummary
+        conflictDescriptions={
+          Object {
+            "keyword": Array [
+              "index_a",
+            ],
+            "long": Array [
+              "index_b",
+            ],
+          }
+        }
+      />
+    </EuiText>
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButton
+      fill={true}
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Close"
+        id="indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</React.Fragment>
+`;
+
 exports[`Table render name 1`] = `
 <span>
   customer

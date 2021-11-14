@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
-import { Table, renderFieldName } from './table';
+import { Table, renderFieldName, getConflictModalContent } from './table';
 import { overlayServiceMock } from 'src/core/public/mocks';
 
 const indexPattern = {
@@ -175,5 +175,15 @@ describe('Table', () => {
     };
 
     expect(renderFieldName(runtimeField)).toMatchSnapshot();
+  });
+
+  test('render conflict summary modal ', () => {
+    expect(
+      getConflictModalContent({
+        closeFn: () => {},
+        fieldName: 'message',
+        conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
+      })
+    ).toMatchSnapshot();
   });
 });

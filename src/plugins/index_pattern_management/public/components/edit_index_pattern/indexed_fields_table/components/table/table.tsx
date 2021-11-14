@@ -242,6 +242,49 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
   </span>
 );
 
+export const getConflictModalContent = ({
+  closeFn,
+  fieldName,
+  conflictDescriptions,
+}: {
+  closeFn: () => void;
+  fieldName: string;
+  conflictDescriptions: IndexedFieldItem['conflictDescriptions'];
+}) => (
+  <>
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        <h1>
+          <FormattedMessage
+            id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+            defaultMessage="Field &#39;{fieldName}&#39; type conflict"
+            values={{ fieldName }}
+          />
+        </h1>
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
+            defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+          />
+        </p>
+        <TypeSummary conflictDescriptions={conflictDescriptions} />
+      </EuiText>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButton onClick={closeFn} fill>
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn"
+          defaultMessage="Close"
+        />
+      </EuiButton>
+    </EuiModalFooter>
+  </>
+);
+
 const getConflictBtn = (
   fieldName: string,
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
@@ -257,38 +300,13 @@ const getConflictBtn = (
         onClick={() => {
           const overlayRef = openModal(
             toMountPoint(
-              <>
-                <EuiModalHeader>
-                  <EuiModalHeaderTitle>
-                    <h1>
-                      <FormattedMessage
-                        id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-                        defaultMessage="Field &#39;{fieldName}&#39; type conflict"
-                        values={{ fieldName }}
-                      />
-                    </h1>
-                  </EuiModalHeaderTitle>
-                </EuiModalHeader>
-                <EuiModalBody>
-                  <EuiText>
-                    <p>
-                      <FormattedMessage
-                        id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
-                        defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
-                      />
-                    </p>
-                    <TypeSummary conflictDescriptions={conflictDescriptions} />
-                  </EuiText>
-                </EuiModalBody>
-                <EuiModalFooter>
-                  <EuiButton onClick={() => overlayRef.close()} fill>
-                    <FormattedMessage
-                      id="indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn"
-                      defaultMessage="Close"
-                    />
-                  </EuiButton>
-                </EuiModalFooter>
-              </>
+              getConflictModalContent({
+                closeFn: () => {
+                  overlayRef.close();
+                },
+                fieldName,
+                conflictDescriptions,
+              })
             )
           );
         }}
