@@ -226,6 +226,11 @@ class OutputService {
         `Preconfigured output ${id} cannot be deleted outside of kibana config file.`
       );
     }
+
+    if (originalOutput.is_default && !fromPreconfiguration) {
+      throw new Error(`Default output ${id} cannot be deleted.`);
+    }
+
     return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
