@@ -182,10 +182,6 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     [valueAccessor, table]
   );
 
-  const tooltip: TooltipProps = {
-    type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
-  };
-
   const paletteParams = args.palette?.params;
   const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
   const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
@@ -216,7 +212,13 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
       };
     });
   }
+  const { min, max } = minMaxByColumnId[valueAccessor!];
+  // formatters
   const xAxisMeta = xAxisColumn?.meta;
+  const xValuesFormatter = formatFactory(xAxisMeta?.params);
+  const metricFormatter = formatFactory(
+    typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
+  );
   const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
   const dateHistogramMeta = xAxisColumn
     ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
@@ -247,12 +249,10 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     }
   }
 
-  const xValuesFormatter = formatFactory(xAxisMeta?.params);
-  const metricFormatter = formatFactory(
-    typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
-  );
+  const tooltip: TooltipProps = {
+    type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
+  };
 
-  const { min, max } = minMaxByColumnId[valueAccessor!];
   const valueFormatter = (d: number) => {
     let value = d;
 
