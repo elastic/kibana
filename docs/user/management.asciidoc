@@ -4,7 +4,7 @@
 [partintro]
 --
 *Stack Management* is home to UIs for managing all things Elastic Stack&mdash;
-indices, clusters, licenses, UI settings, index patterns, spaces, and more.
+indices, clusters, licenses, UI settings, data views, spaces, and more.
 
 
 Access to individual features is governed by {es} and {kib} privileges.
@@ -128,12 +128,12 @@ Kerberos, PKI, OIDC, and SAML.
 [cols="50, 50"]
 |===
 
-a| <<managing-index-patterns, Manage index pattern data fields>>
-|Manage the data fields in the index patterns that retrieve your data from {es}.
+a| <<data-views, Data Views>>
+|Manage the fields in the data views that retrieve your data from {es}.
 
 | <<managing-saved-objects, Saved Objects>>
 | Copy, edit, delete, import, and export your saved objects.
-These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
+These include dashboards, visualizations, maps, data views, Canvas workpads, and more.
 
 | <<managing-tags, Tags>>
 |Create, manage, and assign tags to your saved objects.
@@ -183,7 +183,7 @@ include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
-include::{kib-repo-dir}/management/manage-index-patterns.asciidoc[]
+include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
 
 include::{kib-repo-dir}/management/numeral.asciidoc[]
 
