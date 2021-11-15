@@ -44,6 +44,7 @@ export function DevToolsSettingsModal(props: Props) {
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
   const [polling, setPolling] = useState(props.settings.polling);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
+  const [historyDisabled] = useState(props.settings.historyDisabled);
 
   const autoCompleteCheckboxes = [
     {
@@ -93,6 +94,7 @@ export function DevToolsSettingsModal(props: Props) {
       },
       polling,
       tripleQuotes,
+      historyDisabled,
     });
   }
 
