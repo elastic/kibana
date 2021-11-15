@@ -8,7 +8,6 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
-import { BehaviorSubject } from 'rxjs';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -94,7 +93,7 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private cancelled$: BehaviorSubject<boolean>;
+  private cancelled: boolean;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -115,7 +114,7 @@ export class TaskRunner<
     this.ruleName = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
-    this.cancelled$ = new BehaviorSubject<boolean>(false);
+    this.cancelled = false;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -231,7 +230,7 @@ export class TaskRunner<
 
   private shouldLogAndScheduleActionsForAlerts() {
     // if execution hasn't been cancelled, return true
-    if (!this.cancelled$.getValue()) {
+    if (!this.cancelled) {
       return true;
     }
 
@@ -645,7 +644,7 @@ export class TaskRunner<
 
     eventLogger.logEvent(event);
 
-    if (!this.cancelled$.getValue()) {
+    if (!this.cancelled) {
       this.logger.debug(
         `Updating rule task for ${this.alertType.id} rule with id ${alertId} - ${JSON.stringify(
           executionStatus
@@ -689,11 +688,11 @@ export class TaskRunner<
   }
 
   async cancel(): Promise<void> {
-    if (this.cancelled$.getValue()) {
+    if (this.cancelled) {
       return;
     }
 
-    this.cancelled$.next(true);
+    this.cancelled = true;
 
     // Write event log entry
     const {
