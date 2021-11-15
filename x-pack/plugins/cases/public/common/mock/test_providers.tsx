@@ -36,7 +36,7 @@ const TestProvidersComponent: React.FC<Props> = ({
   children,
   appId = 'testAppId',
   userCanCrud = true,
-  rootBreadcrumbs,
+  rootBreadcrumbs = [{ text: 'Root', href: '/root' }],
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>

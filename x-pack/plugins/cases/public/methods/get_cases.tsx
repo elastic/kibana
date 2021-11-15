@@ -27,7 +27,6 @@ export const getCasesLazy = ({
   useFetchAlertData,
   refreshRef,
   hideSyncAlerts,
-  onCaseDataSuccess,
   timelineIntegration,
 }: GetCasesProps) => (
   <CasesProvider value={{ owner, appId, userCanCrud, basePath, rootBreadcrumbs }}>
@@ -41,7 +40,6 @@ export const getCasesLazy = ({
         useFetchAlertData={useFetchAlertData}
         refreshRef={refreshRef}
         hideSyncAlerts={hideSyncAlerts}
-        onCaseDataSuccess={onCaseDataSuccess}
         timelineIntegration={timelineIntegration}
       />
     </Suspense>

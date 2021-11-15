@@ -6,7 +6,7 @@
  */
 
 import { MutableRefObject } from 'react';
-import { Ecs, Case, CaseViewRefreshPropInterface } from '../../../common';
+import { Ecs, CaseViewRefreshPropInterface } from '../../../common';
 import { CasesNavigation } from '../links';
 import { CasesTimelineIntegration } from '../timeline_context';
 
@@ -23,6 +23,5 @@ export interface CasesRoutesProps {
    */
   refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
   hideSyncAlerts?: boolean;
-  onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
 }

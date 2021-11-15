@@ -65,7 +65,6 @@ export interface CaseViewComponentProps {
 }
 
 export interface CaseViewProps extends Omit<CaseViewComponentProps, 'caseId' | 'subCaseId'> {
-  onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
 }
 
@@ -84,7 +83,6 @@ export interface CaseComponentProps extends CaseViewComponentProps {
   fetchCase: UseGetCase['fetchCase'];
   caseData: Case;
   updateCase: (newCase: Case) => void;
-  onCaseDataSuccess?: (newCase: Case) => void;
 }
 
 export const CaseComponent = React.memo<CaseComponentProps>(
@@ -92,7 +90,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     caseData,
     caseId,
     fetchCase,
-    onCaseDataSuccess,
     onComponentInitialized,
     actionsNavigation,
     ruleDetailsNavigation,
@@ -321,13 +318,8 @@ export const CaseComponent = React.memo<CaseComponentProps>(
         onUpdateField({
           key: 'title',
           value: newTitle,
-          onSuccess: () => {
-            if (onCaseDataSuccess) {
-              onCaseDataSuccess({ ...caseData, title: newTitle });
-            }
-          },
         }),
-      [caseData, onUpdateField, onCaseDataSuccess]
+      [onUpdateField]
     );
 
     const changeStatus = useCallback(
@@ -507,7 +499,6 @@ export const CaseViewLoading = () => (
 
 export const CaseView = React.memo(
   ({
-    onCaseDataSuccess,
     onComponentInitialized,
     actionsNavigation,
     ruleDetailsNavigation,
@@ -522,12 +513,6 @@ export const CaseView = React.memo(
     const { basePath } = useCasesContext();
     const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
       useGetCase(caseId, subCaseId);
-
-    useEffect(() => {
-      if (onCaseDataSuccess && data) {
-        onCaseDataSuccess(data);
-      }
-    }, [data, onCaseDataSuccess]);
 
     useEffect(() => {
       if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
@@ -572,7 +557,6 @@ export const CaseView = React.memo(
             caseData={data}
             caseId={caseId}
             fetchCase={fetchCase}
-            onCaseDataSuccess={onCaseDataSuccess}
             onComponentInitialized={onComponentInitialized}
             actionsNavigation={actionsNavigation}
             ruleDetailsNavigation={ruleDetailsNavigation}

@@ -377,21 +377,15 @@ describe('Navigation Breadcrumbs', () => {
       ]);
     });
 
-    test('should return Cases breadcrumbs when supplied case pathname', () => {
+    test('should return null breadcrumbs when supplied Cases pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('cases', '/', undefined),
         getUrlForAppMock
       );
-      expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
-        {
-          text: 'Cases',
-          href: "securitySolutionUI/cases?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
-        },
-      ]);
+      expect(breadcrumbs).toEqual(null);
     });
 
-    test('should return Case details breadcrumbs when supplied case details pathname', () => {
+    test('should return null breadcrumbs when supplied Cases details pathname', () => {
       const sampleCase = {
         id: 'my-case-id',
         name: 'Case name',
@@ -403,17 +397,7 @@ describe('Navigation Breadcrumbs', () => {
         },
         getUrlForAppMock
       );
-      expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
-        {
-          text: 'Cases',
-          href: "securitySolutionUI/cases?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
-        },
-        {
-          text: sampleCase.name,
-          href: `securitySolutionUI/cases/${sampleCase.id}?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
-        },
-      ]);
+      expect(breadcrumbs).toEqual(null);
     });
 
     test('should return Admin breadcrumbs when supplied endpoints pathname', () => {

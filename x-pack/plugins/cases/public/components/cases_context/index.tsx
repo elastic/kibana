@@ -14,7 +14,7 @@ export interface CasesContextValue {
   appId: string;
   userCanCrud: boolean;
   basePath: string;
-  rootBreadcrumbs?: ChromeBreadcrumb[];
+  rootBreadcrumbs: ChromeBreadcrumb[];
 }
 export interface CasesContextProps extends Omit<CasesContextValue, 'basePath'> {
   basePath?: string;

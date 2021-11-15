@@ -44,7 +44,6 @@ const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const onCaseDataSuccessMock = jest.fn();
 
 const spacesUiApiMock = {
   redirectLegacyUrl: jest.fn().mockResolvedValue(undefined),
@@ -111,7 +110,6 @@ export const caseProps: CaseComponentProps = {
   },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
-  onCaseDataSuccess: onCaseDataSuccessMock,
 };
 
 export const caseClosedProps: CaseComponentProps = {
@@ -334,37 +332,6 @@ describe('CaseView ', () => {
       ).toBeTruthy();
 
       expect(wrapper.find('button[data-test-subj="tag-list-edit"]').first().exists()).toBeFalsy();
-    });
-  });
-
-  it('should update title', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-    const newTitle = 'The new title';
-    wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
-    wrapper
-      .find(`[data-test-subj="editable-title-input-field"]`)
-      .last()
-      .simulate('change', { target: { value: newTitle } });
-
-    wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
-
-    const updateObject = updateCaseProperty.mock.calls[0][0];
-    await waitFor(() => {
-      expect(updateObject.updateKey).toEqual('title');
-      expect(updateObject.updateValue).toEqual(newTitle);
-      expect(updateObject.onSuccess).toBeDefined();
-    });
-
-    updateObject.onSuccess(); // simulate the request has succeed
-    await waitFor(() => {
-      expect(onCaseDataSuccessMock).toHaveBeenCalledWith({
-        ...caseProps.caseData,
-        title: newTitle,
-      });
     });
   });
 
