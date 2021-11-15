@@ -208,6 +208,22 @@ If you do not want to grant users privileges to machine learning features, updat
 ====
 
 [float]
+[[management-breaking-changes-8.0.0-beta1]]
+==== Management
+
+[discrete]
+[[breaking-113555]]
+.Removes console settings
+[%collapsible]
+====
+*Details* +
+The `console.proxyFilter` and `console.proxyConfig` settings have been removed. For more information, refer to {kibana-pull}113555[#113555].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `console.proxyFilter` and `console.proxyConfig` from kibana.yml, then use the <<settings,`server.ssl*`>> and <<elasticsearch-ssl-keyPassphrase,`elasticsearch.ssl.keyPassphrase`>> instead.
+====
+
+[float]
 [[maps-breaking-changes-8.0.0-beta1]]
 ==== Maps
 
