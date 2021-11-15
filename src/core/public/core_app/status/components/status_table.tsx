@@ -6,52 +6,93 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiInMemoryTable, EuiIcon, EuiBasicTableColumn } from '@elastic/eui';
+import React, { FunctionComponent, ReactElement, useState } from 'react';
+import {
+  EuiInMemoryTable,
+  EuiIcon,
+  EuiButtonIcon,
+  EuiBasicTableColumn,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormattedStatus } from '../lib';
+import { StatusExpandedRow } from './status_expanded_row';
 
 interface StatusTableProps {
   statuses?: FormattedStatus[];
 }
 
-const tableColumns: Array<EuiBasicTableColumn<FormattedStatus>> = [
-  {
-    field: 'state',
-    name: i18n.translate('core.statusPage.statusTable.columns.statusHeader', {
-      defaultMessage: 'Status',
-    }),
-    render: (state: FormattedStatus['state']) => (
-      <EuiIcon type="dot" aria-hidden color={state.uiColor} title={state.title} />
-    ),
-    width: '70px',
-    align: 'center' as const,
-    sortable: (row: FormattedStatus) => row.state.title,
-  },
-  {
-    field: 'id',
-    name: i18n.translate('core.statusPage.statusTable.columns.idHeader', {
-      defaultMessage: 'ID',
-    }),
-    sortable: true,
-  },
-  {
-    field: 'state',
-    name: i18n.translate('core.statusPage.statusTable.columns.statusHeader', {
-      defaultMessage: 'Status',
-    }),
-    render: (state: FormattedStatus['state']) => <span>{state.message}</span>,
-  },
-];
-
 export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) => {
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, ReactElement>
+  >({});
   if (!statuses) {
     return null;
   }
+
+  const toggleDetails = (item: FormattedStatus) => {
+    const newRowMap = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMap[item.id]) {
+      delete newRowMap[item.id];
+    } else {
+      newRowMap[item.id] = <StatusExpandedRow status={item} />;
+    }
+    setItemIdToExpandedRowMap(newRowMap);
+  };
+
+  const tableColumns: Array<EuiBasicTableColumn<FormattedStatus>> = [
+    {
+      field: 'state',
+      name: i18n.translate('core.statusPage.statusTable.columns.statusHeader', {
+        defaultMessage: 'Status',
+      }),
+      render: (state: FormattedStatus['state']) => (
+        <EuiIcon type="dot" aria-hidden color={state.uiColor} title={state.title} />
+      ),
+      width: '70px',
+      align: 'center' as const,
+      sortable: (row: FormattedStatus) => row.state.title,
+    },
+    {
+      field: 'id',
+      name: i18n.translate('core.statusPage.statusTable.columns.idHeader', {
+        defaultMessage: 'ID',
+      }),
+      sortable: true,
+    },
+    {
+      field: 'state',
+      name: i18n.translate('core.statusPage.statusTable.columns.statusHeader', {
+        defaultMessage: 'Status',
+      }),
+      render: (state: FormattedStatus['state']) => <span>{state.message}</span>,
+    },
+    {
+      name: (
+        <EuiScreenReaderOnly>
+          <span>Expand row</span>
+        </EuiScreenReaderOnly>
+      ),
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      render: (item: FormattedStatus) => (
+        <EuiButtonIcon
+          onClick={() => toggleDetails(item)}
+          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+        />
+      ),
+    },
+  ];
+
   return (
     <EuiInMemoryTable<FormattedStatus>
       columns={tableColumns}
+      itemId={(item) => item.id}
       items={statuses}
+      isExpandable={true}
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       rowProps={({ state }) => ({
         className: `status-table-row-${state.uiColor}`,
       })}

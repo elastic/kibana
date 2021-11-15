@@ -22,6 +22,7 @@ export interface Metric {
 export interface FormattedStatus {
   id: string;
   state: StatusState;
+  original: ServiceStatus;
 }
 
 export interface StatusState {
@@ -98,6 +99,7 @@ function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
 
   return {
     id,
+    original: status,
     state: {
       id: status.level,
       message: status.summary,
