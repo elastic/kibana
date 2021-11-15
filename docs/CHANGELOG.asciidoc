@@ -72,6 +72,38 @@ Review important information about the {kib} 7.x releases.
 Review the following information about the 7.15.2 release.
 
 [float]
+[[security-updates-v7.15.2]]
+=== Security updates
+
+Review the security updates that were found in previous versions of {kib}.
+
+[discrete]
+[[path-traversal-issue]]
+.Path traversal issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.9.0 to 7.15.1, {kib} is unable to validate .pbf file paths on Microsoft Windows operating systems, which allows malicious users to arbitrarily traverse the {kib} host to load internal .pbf files. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37938[CVE-2021-37938]
+
+Thank you Dominic Couture for finding this issue.
+
+*Solution* +
+Upgrade to {kib} 7.15.2.
+====
+
+[discrete]
+[[information-disclosure-issue]]
+.Information disclosure issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.8.0 to 7.15.1, the {kib} JIRA and IBM Resilient connectors could be used to return HTTP response data on internal hosts, which can be hidden from public view. Malicious users with privileges to create connectors can use the JIRA and IBM Resilient connectors to view limited HTTP response data on hosts accessible to the cluster. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37939[CVE-2021-37939]
+
+*Solution* +
+Upgrade to {kib} 7.15.2.
+====
+
+[float]
 [[breaking-changes-v7.15.2]]
 === Breaking changes
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.15.2, review the <<breaking-changes-7.15.0,7.15.0 breaking changes>>.
