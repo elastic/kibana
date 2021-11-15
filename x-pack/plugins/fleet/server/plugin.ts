@@ -20,7 +20,7 @@ import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -83,6 +83,7 @@ import { RouterWrappers } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
+import { setupFleet } from './services/setup';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -332,8 +333,22 @@ export class FleetPlugin
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
 
+    const logger = appContextService.getLogger();
+
+    const fleetSetupPromise = (async () => {
+      try {
+        await setupFleet(
+          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+          core.elasticsearch.client.asInternalUser
+        );
+      } catch (error) {
+        logger.warn('Fleet setup failed');
+        logger.warn(error);
+      }
+    })();
+
     return {
-      fleetSetupCompleted: () => Promise.resolve(),
+      fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstallation,
