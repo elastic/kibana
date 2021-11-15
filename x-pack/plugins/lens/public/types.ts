@@ -338,7 +338,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   invalid?: boolean;
   invalidMessage?: string;
 };
-
+export type ParamEditorCustomProps = Record<string, unknown> & { label?: string };
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
@@ -356,6 +356,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   isFullscreen: boolean;
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
+  paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
 };
 
@@ -485,6 +486,9 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   invalidMessage?: string;
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
+  supportStaticValue?: boolean;
+  paramEditorCustomProps?: ParamEditorCustomProps;
+  supportFieldFormat?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -673,8 +677,6 @@ export interface Visualization<T = unknown> {
    */
   getConfiguration: (props: VisualizationConfigProps<T>) => {
     groups: VisualizationDimensionGroupConfig[];
-    supportStaticValue?: boolean;
-    supportFieldFormat?: boolean;
   };
 
   /**
