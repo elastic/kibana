@@ -17,11 +17,13 @@ import {
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
+import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 
 interface Props {
   children: React.ReactNode;
   appId?: string;
   userCanCrud?: boolean;
+  rootBreadcrumbs?: ChromeBreadcrumb[];
 }
 
 export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
@@ -34,11 +36,14 @@ const TestProvidersComponent: React.FC<Props> = ({
   children,
   appId = 'testAppId',
   userCanCrud = true,
+  rootBreadcrumbs,
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <CasesProvider value={{ owner: [SECURITY_SOLUTION_OWNER], appId, userCanCrud }}>
+        <CasesProvider
+          value={{ owner: [SECURITY_SOLUTION_OWNER], appId, userCanCrud, rootBreadcrumbs }}
+        >
           {children}
         </CasesProvider>
       </ThemeProvider>

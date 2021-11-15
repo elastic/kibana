@@ -46,6 +46,7 @@ import {
   useCaseViewNavigation,
   useCaseViewParams,
 } from '../../common/navigation';
+import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 
 export interface CaseViewComponentProps {
   caseId: string;
@@ -104,6 +105,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
   }) => {
     const { userCanCrud } = useCasesContext();
     const { getCaseViewUrl } = useCaseViewNavigation();
+    useCasesTitleBreadcrumbs(caseData.title);
 
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);

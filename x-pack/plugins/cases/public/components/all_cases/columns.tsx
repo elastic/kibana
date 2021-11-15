@@ -10,6 +10,7 @@ import {
   EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
+  EuiButton,
   EuiLink,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -24,6 +25,8 @@ import styled from 'styled-components';
 import {
   CaseStatuses,
   CaseType,
+  CommentType,
+  CommentRequestAlertType,
   DeleteCase,
   Case,
   SubCase,
@@ -43,6 +46,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
+import { PostComment } from '../../containers/use_post_comment';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -74,6 +78,10 @@ export interface GetCasesColumn {
   isSelectorView: boolean;
   userCanCrud: boolean;
   connectors?: ActionConnector[];
+  onRowClick?: (theCase: Case) => void;
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
+  postComment?: (args: PostComment) => Promise<void>;
+  updateCase?: (newCase: Case) => void;
 }
 export const useCasesColumns = ({
   disableAlerts = false,
@@ -85,6 +93,10 @@ export const useCasesColumns = ({
   isSelectorView,
   userCanCrud,
   connectors = [],
+  onRowClick,
+  alertData,
+  postComment,
+  updateCase,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -128,6 +140,25 @@ export const useCasesColumns = ({
         deleteCaseOnClick: toggleDeleteModal,
       }),
     [toggleDeleteModal]
+  );
+
+  const assignCaseAction = useCallback(
+    async (theCase: Case) => {
+      if (alertData != null) {
+        await postComment?.({
+          caseId: theCase.id,
+          data: {
+            type: CommentType.alert,
+            ...alertData,
+          },
+          updateCase,
+        });
+      }
+      if (onRowClick) {
+        onRowClick(theCase);
+      }
+    },
+    [alertData, onRowClick, postComment, updateCase]
   );
 
   useEffect(() => {
@@ -277,6 +308,30 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
+    ...(isSelectorView
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            render: (theCase: Case) => {
+              if (theCase.id != null) {
+                return (
+                  <EuiButton
+                    data-test-subj={`cases-table-row-select-${theCase.id}`}
+                    onClick={() => {
+                      assignCaseAction(theCase);
+                    }}
+                    size="s"
+                    fill={true}
+                  >
+                    {i18n.SELECT}
+                  </EuiButton>
+                );
+              }
+              return getEmptyTagValue();
+            },
+          },
+        ]
+      : []),
     ...(!isSelectorView
       ? [
           {

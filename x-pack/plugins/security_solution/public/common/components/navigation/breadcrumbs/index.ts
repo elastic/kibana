@@ -13,7 +13,6 @@ import { APP_NAME, APP_UI_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
-import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
 import { getBreadcrumbs as getUebaBreadcrumbs } from '../../../../ueba/pages/details/utils';
@@ -30,9 +29,23 @@ import {
 import { getAppOverviewUrl } from '../../link_to';
 import { timelineActions } from '../../../../../public/timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
+import { useKibana } from '../../../lib/kibana';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
 import { GetUrlForApp, NavigateToUrl, SearchNavTab } from '../types';
+
+const getRootBreadcrumb = (getUrlForApp: GetUrlForApp): ChromeBreadcrumb => {
+  const overviewPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.overview });
+  return {
+    text: APP_NAME,
+    href: getAppOverviewUrl(overviewPath),
+  };
+};
+
+export const useRootBreadcrumb = () => {
+  const { getUrlForApp } = useKibana().services.application;
+  return getRootBreadcrumb(getUrlForApp);
+};
 
 export const useSetBreadcrumbs = () => {
   const dispatch = useDispatch();
@@ -92,11 +105,8 @@ export const getBreadcrumbsForRoute = (
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.overview });
-  const siemRootBreadcrumb: ChromeBreadcrumb = {
-    text: APP_NAME,
-    href: getAppOverviewUrl(overviewPath),
-  };
+  const siemRootBreadcrumb = getRootBreadcrumb(getUrlForApp);
+
   if (isHostsRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
@@ -174,24 +184,9 @@ export const getBreadcrumbsForRoute = (
   }
 
   if (isCaseRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'cases', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
-
-    return [
-      siemRootBreadcrumb,
-      ...getCaseDetailsBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
+    return null; // controlled by Cases routes
   }
+
   if (isTimelinesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'timeline', isDetailPage: false };
     const urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];

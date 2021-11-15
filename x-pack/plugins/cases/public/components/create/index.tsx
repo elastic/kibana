@@ -11,6 +11,8 @@ import { Field, getUseField } from '../../common/shared_imports';
 import * as i18n from './translations';
 import { CreateCaseForm, CreateCaseFormProps } from './form';
 import { HeaderPage } from '../header_page';
+import { useCasesBreadcrumbs } from '../use_breadcrumbs';
+import { CasesDeepLinkId } from '../../common/navigation';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -24,25 +26,29 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
     onSuccess,
     timelineIntegration,
     withSteps,
-  }) => (
-    <>
-      <HeaderPage
-        showBackButton={true}
-        data-test-subj="case-create-title"
-        title={i18n.CREATE_PAGE_TITLE}
-      />
-      <CreateCaseForm
-        afterCaseCreated={afterCaseCreated}
-        caseType={caseType}
-        hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-        disableAlerts={disableAlerts}
-        onCancel={onCancel}
-        onSuccess={onSuccess}
-        timelineIntegration={timelineIntegration}
-        withSteps={withSteps}
-      />
-    </>
-  )
+  }) => {
+    useCasesBreadcrumbs(CasesDeepLinkId.casesCreate);
+
+    return (
+      <>
+        <HeaderPage
+          showBackButton={true}
+          data-test-subj="case-create-title"
+          title={i18n.CREATE_PAGE_TITLE}
+        />
+        <CreateCaseForm
+          afterCaseCreated={afterCaseCreated}
+          caseType={caseType}
+          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+          disableAlerts={disableAlerts}
+          onCancel={onCancel}
+          onSuccess={onSuccess}
+          timelineIntegration={timelineIntegration}
+          withSteps={withSteps}
+        />
+      </>
+    );
+  }
 );
 
 CreateCase.displayName = 'CreateCase';

@@ -30,6 +30,8 @@ import * as i18n from './translations';
 import { getConnectorById } from '../utils';
 import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesBreadcrumbs } from '../use_breadcrumbs';
+import { CasesDeepLinkId } from '../../common/navigation';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -52,6 +54,7 @@ const FormWrapper = styled.div`
 export const ConfigureCases: React.FC = React.memo(() => {
   const { userCanCrud } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
+  useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);

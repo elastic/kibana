@@ -27,6 +27,7 @@ import * as timelineMarkdownPlugin from '../../common/components/markdown_editor
 import { DetailsPanel } from '../../timelines/components/side_panel';
 import { InvestigateInTimelineAction } from '../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { useFetchAlertData } from './use_fetch_alert_data';
+import { useRootBreadcrumb } from '../../common/components/navigation/breadcrumbs';
 
 const TimelineDetailsPanel = () => {
   const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
@@ -60,6 +61,7 @@ const CaseContainerComponent: React.FC = () => {
   const { getAppUrl, navigateTo } = useNavigation();
   const userPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
+  const rootBreadcrumb = useRootBreadcrumb();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
   );
@@ -174,6 +176,7 @@ const CaseContainerComponent: React.FC = () => {
           },
           useFetchAlertData,
           userCanCrud: userPermissions?.crud ?? false,
+          rootBreadcrumbs: [rootBreadcrumb],
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute state={spyState} pageName={SecurityPageName.case} />

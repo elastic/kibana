@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ChromeBreadcrumb } from 'kibana/public';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 
 export interface CasesContextValue {
@@ -13,6 +14,7 @@ export interface CasesContextValue {
   appId: string;
   userCanCrud: boolean;
   basePath: string;
+  rootBreadcrumbs?: ChromeBreadcrumb[];
 }
 export interface CasesContextProps extends Omit<CasesContextValue, 'basePath'> {
   basePath?: string;
@@ -22,9 +24,15 @@ export const CasesContext = React.createContext<CasesContextValue | undefined>(u
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { owner, appId, userCanCrud, basePath = DEFAULT_BASE_PATH },
+  value: { owner, appId, userCanCrud, basePath = DEFAULT_BASE_PATH, rootBreadcrumbs },
 }) => {
-  const [value, setValue] = useState<CasesContextValue>({ owner, appId, userCanCrud, basePath });
+  const [value, setValue] = useState<CasesContextValue>({
+    owner,
+    appId,
+    userCanCrud,
+    basePath,
+    rootBreadcrumbs,
+  });
 
   /**
    * `userCanCrud` prop may change by the parent plugin.

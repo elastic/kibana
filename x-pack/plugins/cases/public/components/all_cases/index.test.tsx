@@ -18,7 +18,6 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { CaseStatuses } from '../../../common';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
@@ -41,20 +40,6 @@ const useConnectorsMock = useConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
-
-const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
-
-jest.mock('../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: () => ({
-      services: {
-        triggersActionsUi: mockTriggersActionsUiService,
-      },
-    }),
-  };
-});
 
 describe('AllCases', () => {
   const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
@@ -90,10 +75,6 @@ describe('AllCases', () => {
 
   beforeAll(() => {
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
-  });
-
-  beforeEach(() => {
-    jest.resetAllMocks();
     (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
@@ -110,6 +91,10 @@ describe('AllCases', () => {
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should render the stats', async () => {

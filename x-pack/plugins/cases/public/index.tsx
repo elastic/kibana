@@ -20,4 +20,11 @@ export type { GetAllCasesSelectorModalProps } from './methods/get_all_cases_sele
 export type { GetRecentCasesProps } from './methods/get_recent_cases';
 
 export type { ICasesDeepLinkId } from './common/navigation';
-export { getCasesDeepLinks, CasesDeepLinkId, generateCaseViewPath } from './common/navigation';
+export {
+  getCasesDeepLinks,
+  CasesDeepLinkId,
+  generateCaseViewPath,
+  getCreateCasePath,
+  getCaseViewPath,
+  getCasesConfigurePath,
+} from './common/navigation';
