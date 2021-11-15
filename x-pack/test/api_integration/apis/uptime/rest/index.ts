@@ -40,13 +40,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('with generated data', () => {
       beforeEach('load heartbeat data', async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/uptime/blank');
-        await esArchiver.loadIfNeeded(
-          'x-pack/test/functional/es_archives/uptime/blank_data_stream'
-        );
       });
       after('unload', async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
-        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank_data_stream');
       });
 
       loadTestFile(require.resolve('./certs'));
