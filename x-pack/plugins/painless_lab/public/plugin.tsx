@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
 import { first } from 'rxjs/operators';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
@@ -46,29 +44,10 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
     const devTool = devTools.register({
       id: 'painless_lab',
       order: 7,
-      rawTitle: i18n.translate('xpack.painlessLab.displayName', {
+      isBeta: true,
+      title: i18n.translate('xpack.painlessLab.displayName', {
         defaultMessage: 'Painless Lab',
       }),
-      title: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.painlessLab.displayName', {
-              defaultMessage: 'Painless Lab',
-            })}
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false} className="painlessLab__betaLabelContainer">
-            <EuiBetaBadge
-              label={i18n.translate('xpack.painlessLab.displayNameBetaLabel', {
-                defaultMessage: 'Beta',
-              })}
-              tooltipContent={i18n.translate('xpack.painlessLab.displayNameBetaTooltipText', {
-                defaultMessage: 'This feature might change drastically in future releases',
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) as any,
       enableRouting: false,
       disabled: false,
       mount: async ({ element }) => {

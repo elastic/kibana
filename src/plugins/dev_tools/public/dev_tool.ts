@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ReactNode } from 'react';
 import { AppMount } from 'src/core/public';
 
 /**
@@ -27,17 +26,15 @@ export class DevToolApp {
   /**
    * The human readable name of the dev tool. Should be internationalized.
    * This will be used as a label in the tab above the actual tool.
-   * May also be a ReactNode, but then rawTitle needs to be defined to ensure
-   * that the breadcrumbs and doc title just strings.
+   * May also be a ReactNode.
    */
-  public readonly title: ReactNode;
+  public readonly title: string;
   public readonly mount: AppMount;
 
   /**
-   * If present, this will be used as doc title and as breadcrumb. Otherwise
-   * the `title` prop will be used.
+   * Mark the navigation tab as beta.
    */
-  public readonly rawTitle?: string;
+  public readonly isBeta?: boolean;
 
   /**
    * Flag indicating to disable the tab of this dev tool. Navigating to a
@@ -64,13 +61,13 @@ export class DevToolApp {
 
   constructor(
     id: string,
-    title: ReactNode,
+    title: string,
     mount: AppMount,
     enableRouting: boolean,
     order: number,
     toolTipContent = '',
     disabled = false,
-    rawTitle?: string
+    isBeta?: boolean
   ) {
     this.id = id;
     this.title = title;
@@ -79,7 +76,7 @@ export class DevToolApp {
     this.order = order;
     this.tooltipContent = toolTipContent;
     this.disabled = disabled;
-    this.rawTitle = rawTitle;
+    this.isBeta = isBeta;
   }
 
   public enable() {
@@ -103,6 +100,6 @@ export const createDevToolApp = ({
   order,
   tooltipContent,
   disabled,
-  rawTitle,
+  isBeta,
 }: CreateDevToolArgs) =>
-  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled, rawTitle);
+  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled, isBeta);

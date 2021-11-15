@@ -9,7 +9,7 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
@@ -44,10 +44,8 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
   );
 
   useEffect(() => {
-    const title = activeDevTool.rawTitle ?? (activeDevTool.title as string);
-
-    docTitleService.setTitle(title);
-    breadcrumbService.setBreadcrumbs(title);
+    docTitleService.setTitle(activeDevTool.title);
+    breadcrumbService.setBreadcrumbs(activeDevTool.title);
   }, [activeDevTool]);
 
   return (
@@ -65,7 +63,25 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
             }}
           >
             <EuiToolTip content={currentDevTool.tooltipContent}>
-              <span>{currentDevTool.title}</span>
+              <span>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>{currentDevTool.title}</EuiFlexItem>
+
+                  {currentDevTool.isBeta && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge
+                        label={i18n.translate('devTools.devToolBetaLabel', {
+                          defaultMessage: 'Beta',
+                        })}
+                        tooltipContent={i18n.translate('xpack.devToolBetaTooltipText', {
+                          defaultMessage:
+                            'This feature might change drastically in future releases',
+                        })}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </span>
             </EuiToolTip>
           </EuiTab>
         ))}
