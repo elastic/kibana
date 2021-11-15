@@ -17,7 +17,7 @@ import { findExactConfiguration } from '../../lib/settings/agent_configuration/f
 import { listConfigurations } from '../../lib/settings/agent_configuration/list_configurations';
 import { getEnvironments } from '../../lib/settings/agent_configuration/get_environments';
 import { deleteConfiguration } from '../../lib/settings/agent_configuration/delete_configuration';
-import { createApmServerRoute } from '../create_apm_server_route';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getAgentNameByService } from '../../lib/settings/agent_configuration/get_agent_name_by_service';
 import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_applied_by_agent';
 import {
@@ -25,7 +25,7 @@ import {
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { syncAgentConfigsToApmPackagePolicies } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations

@@ -20,8 +20,8 @@ export const ATTACH_TIMELINE_TO_EXISTING_CASE_ICON =
 
 export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
-export const CASE = (id: string) => {
-  return `[data-test-subj="cases-table-row-${id}"]`;
+export const SELECT_CASE = (id: string) => {
+  return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
 export const CELL = '[data-test-subj="statefulCell"]';
@@ -148,6 +148,8 @@ export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerAct
 export const TIMELINE_ADD_FIELD_BUTTON = '[data-test-subj="addField"]';
 
 export const TIMELINE_DATA_PROVIDER_FIELD = '[data-test-subj="field"]';
+
+export const TIMELINE_DATA_PROVIDER_FIELD_INPUT = '[data-test-subj="comboBoxSearchInput"]';
 
 export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
 
