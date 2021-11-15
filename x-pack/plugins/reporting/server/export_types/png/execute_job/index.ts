@@ -32,8 +32,10 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
 
       const generatePngObservable = await generatePngObservableFactory(reporting);
       const jobLogger = parentLogger.clone([PNG_JOB_TYPE, 'execute', jobId]);
-      const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-        mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
+
+      const process$: Rx.Observable<TaskRunResult> = Rx.defer(() =>
+        decryptJobHeaders(encryptionKey, job.headers, jobLogger)
+      ).pipe(
         map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
         map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
         mergeMap((conditionalHeaders) => {
