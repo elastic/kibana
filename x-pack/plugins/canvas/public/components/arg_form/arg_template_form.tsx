@@ -18,7 +18,7 @@ interface ArgTemplateFormProps {
     config: ArgTemplateFormProps['argumentProps'],
     handlers: ArgTemplateFormProps['handlers'],
     onMount?: (ref: UpdatePropsRef<ArgTemplateFormProps['argumentProps']> | null) => void
-  ) => ReactPortal;
+  ) => ReactPortal | undefined;
   argumentProps: {
     valueMissing?: boolean;
     label?: string;

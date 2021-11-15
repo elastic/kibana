@@ -28,7 +28,7 @@ type TemplateFn = (
   config: DatasourceRenderProps,
   handlers: ExpressionFormHandlers,
   onMount?: (ref: UpdatePropsRef<DatasourceRenderProps> | null) => void
-) => ReactPortal;
+) => ReactPortal | undefined;
 
 export type DatasourceProps = {
   template?: TemplateFn;
@@ -106,7 +106,7 @@ export const DatasourceWrapper = memo(DatasourceWrapperComponent, (prevProps, ne
 );
 
 export class Datasource extends BaseForm {
-  template: TemplateFn;
+  template?: TemplateFn;
   image?: string;
   requiresContext?: boolean;
 
