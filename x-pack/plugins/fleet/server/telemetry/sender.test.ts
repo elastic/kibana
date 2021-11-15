@@ -15,6 +15,8 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
+import { UpdateEventType } from '../services/upgrade_sender';
+
 import { TelemetryEventsSender } from './sender';
 
 jest.mock('axios', () => {
@@ -38,7 +40,13 @@ describe('TelemetryEventsSender', () => {
   describe('queueTelemetryEvents', () => {
     it('queues two events', () => {
       sender.queueTelemetryEvents('fleet-upgrades', [
-        { package_name: 'system', current_version: '0.3', new_version: '1.0', status: 'success' },
+        {
+          packageName: 'system',
+          currentVersion: '0.3',
+          newVersion: '1.0',
+          status: 'success',
+          eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
+        },
       ]);
       expect(sender['queuesPerChannel']['fleet-upgrades']).toBeDefined();
     });
@@ -54,7 +62,13 @@ describe('TelemetryEventsSender', () => {
       };
 
       sender.queueTelemetryEvents('fleet-upgrades', [
-        { package_name: 'apache', current_version: '0.3', new_version: '1.0', status: 'success' },
+        {
+          packageName: 'apache',
+          currentVersion: '0.3',
+          newVersion: '1.0',
+          status: 'success',
+          eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
+        },
       ]);
       sender['sendEvents'] = jest.fn();
 
@@ -74,7 +88,13 @@ describe('TelemetryEventsSender', () => {
       sender['telemetryStart'] = telemetryStart;
 
       sender.queueTelemetryEvents('fleet-upgrades', [
-        { package_name: 'system', current_version: '0.3', new_version: '1.0', status: 'success' },
+        {
+          packageName: 'system',
+          currentVersion: '0.3',
+          newVersion: '1.0',
+          status: 'success',
+          eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
+        },
       ]);
       sender['sendEvents'] = jest.fn();
 

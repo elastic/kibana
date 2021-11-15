@@ -23,7 +23,7 @@ export function VisitorBreakdown() {
 
       if (start && end && serviceName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/visitor-breakdown',
+          endpoint: 'GET /internal/apm/ux/visitor-breakdown',
           params: {
             query: {
               start,
