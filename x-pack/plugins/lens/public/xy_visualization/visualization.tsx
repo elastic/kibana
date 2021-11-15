@@ -692,8 +692,7 @@ export const getXyVisualization = ({
       <FormattedMessage
         key={label}
         id="xpack.lens.xyVisualization.arrayValues"
-        defaultMessage="{label} contains array values. Your visualization may not render as
-        expected."
+        defaultMessage="{label} contains array values. Your visualization may not render as expected."
         values={{
           label: <strong>{label}</strong>,
         }}
