@@ -40,8 +40,8 @@ export const IndexPatternSelector: React.FC<{
         : [
             {
               key: indexPatternId,
-              label: i18n.translate('xpack.infra.logSourceConfiguration.missingIndexPatternLabel', {
-                defaultMessage: `Missing index pattern {indexPatternId}`,
+              label: i18n.translate('xpack.infra.logSourceConfiguration.missingDataViewsLabel', {
+                defaultMessage: `Missing data view {indexPatternId}`,
                 values: {
                   indexPatternId,
                 },
@@ -83,6 +83,6 @@ export const IndexPatternSelector: React.FC<{
 };
 
 const indexPatternSelectorPlaceholder = i18n.translate(
-  'xpack.infra.logSourceConfiguration.indexPatternSelectorPlaceholder',
-  { defaultMessage: 'Choose an index pattern' }
+  'xpack.infra.logSourceConfiguration.dataViewSelectorPlaceholder',
+  { defaultMessage: 'Choose a data view' }
 );
