@@ -87,8 +87,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription="Fancy chart description"
-          reportTitle="My fanci metric chart"
         >
           <AutoScale
             key="3"
@@ -134,8 +132,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription="Fancy chart description"
-          reportTitle="My fanci metric chart"
         >
           <AutoScale
             key="last"
@@ -180,8 +176,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
           <AutoScale
             key="3"
@@ -226,8 +220,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
           <AutoScale
             key="3"
@@ -262,8 +254,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
           <EmptyPlaceholder
             icon={[Function]}
@@ -288,8 +278,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
           <EmptyPlaceholder
             icon={[Function]}
@@ -314,8 +302,6 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
-          reportDescription=""
-          reportTitle=""
         >
           <AutoScale
             key="0"
