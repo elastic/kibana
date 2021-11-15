@@ -159,7 +159,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   columns,
   end,
   eqlOptions,
-  eventType,
   expandedDetail,
   timelineId,
   isLive,
@@ -171,7 +170,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   start,
   timerangeKind,
-  updateEventTypeAndIndexesName,
 }) => {
   const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
@@ -293,7 +291,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 <TimelineDatePickerLock />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <Sourcerer scope={SourcererScopeName.timeline} />
+                {activeTab === TimelineTabs.eql && (
+                  <Sourcerer scope={SourcererScopeName.timeline} />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
@@ -405,27 +405,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (
-    newEventType: TimelineEventsType,
-    newIndexNames: string[],
-    newDataViewId: string
-  ) => {
-    dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(
-      timelineActions.updateDataView({
-        dataViewId: newDataViewId,
-        id: timelineId,
-        indexNames: newIndexNames,
-      })
-    );
-    dispatch(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.timeline,
-        selectedDataViewId: newDataViewId,
-        selectedPatterns: newIndexNames,
-      })
-    );
-  },
   onEventClosed: (args: ToggleDetailPanel) => {
     dispatch(timelineActions.toggleDetailPanel(args));
   },
@@ -442,13 +421,11 @@ const EqlTabContent = connector(
       prevProps.activeTab === nextProps.activeTab &&
       isTimerangeSame(prevProps, nextProps) &&
       deepEqual(prevProps.eqlOptions, nextProps.eqlOptions) &&
-      prevProps.eventType === nextProps.eventType &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
-      prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions)
   )
