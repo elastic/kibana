@@ -55,7 +55,12 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             onChange={onToggleFitRow}
           />
         </EuiFormRow>
-        <EuiFormRow label="Paginate Table?" display="columnCompressedSwitch">
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
+            defaultMessage: 'Paginate table',
+          })}
+          display="columnCompressedSwitch"
+        >
           <EuiSwitch
             compressed
             data-test-subj="lens-table-pagination-switch"
