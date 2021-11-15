@@ -15,7 +15,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FormattedStatus } from '../lib';
+import { FormattedStatus, getLevelSortValue } from '../lib';
 import { StatusExpandedRow } from './status_expanded_row';
 
 interface StatusTableProps {
@@ -49,9 +49,9 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
       render: (state: FormattedStatus['state']) => (
         <EuiIcon type="dot" aria-hidden color={state.uiColor} title={state.title} />
       ),
-      width: '70px',
+      width: '100px',
       align: 'center' as const,
-      sortable: (row: FormattedStatus) => row.state.title,
+      sortable: (row: FormattedStatus) => getLevelSortValue(row),
     },
     {
       field: 'id',
@@ -99,7 +99,7 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
       sorting={{
         sort: {
           direction: 'asc',
-          field: 'state.message',
+          field: 'state',
         },
       }}
       data-test-subj="statusBreakdown"

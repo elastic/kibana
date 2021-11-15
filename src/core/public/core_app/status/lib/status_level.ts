@@ -38,3 +38,7 @@ export const getHighestStatus = (statuses: FormattedStatus[]): Omit<StatusState,
     uiColor: STATUS_LEVEL_UI_ATTRS.available.uiColor,
   };
 };
+
+export const getLevelSortValue = (status: FormattedStatus) => {
+  return orderedLevels.indexOf(status.state.id);
+};
