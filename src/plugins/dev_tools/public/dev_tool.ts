@@ -27,10 +27,17 @@ export class DevToolApp {
   /**
    * The human readable name of the dev tool. Should be internationalized.
    * This will be used as a label in the tab above the actual tool.
-   * May also be a ReactNode.
+   * May also be a ReactNode, but then rawTitle needs to be defined to ensure
+   * that the breadcrumbs and doc title just strings.
    */
   public readonly title: ReactNode;
   public readonly mount: AppMount;
+
+  /**
+   * If present, this will be used as doc title and as breadcrumb. Otherwise
+   * the `title` prop will be used.
+   */
+  public readonly rawTitle?: string;
 
   /**
    * Flag indicating to disable the tab of this dev tool. Navigating to a
@@ -62,7 +69,8 @@ export class DevToolApp {
     enableRouting: boolean,
     order: number,
     toolTipContent = '',
-    disabled = false
+    disabled = false,
+    rawTitle?: string
   ) {
     this.id = id;
     this.title = title;
@@ -71,6 +79,7 @@ export class DevToolApp {
     this.order = order;
     this.tooltipContent = toolTipContent;
     this.disabled = disabled;
+    this.rawTitle = rawTitle;
   }
 
   public enable() {
@@ -94,5 +103,6 @@ export const createDevToolApp = ({
   order,
   tooltipContent,
   disabled,
+  rawTitle,
 }: CreateDevToolArgs) =>
-  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled);
+  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled, rawTitle);

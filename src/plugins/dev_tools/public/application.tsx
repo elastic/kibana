@@ -16,7 +16,6 @@ import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 import { ApplicationStart, ChromeStart, ScopedHistory } from 'src/core/public';
 import { docTitleService, breadcrumbService } from './services';
-import type { BreadcrumbType } from './types';
 
 import { DevToolApp } from './dev_tool';
 
@@ -45,8 +44,10 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
   );
 
   useEffect(() => {
-    docTitleService.setTitle(activeDevTool.id as BreadcrumbType);
-    breadcrumbService.setBreadcrumbs(activeDevTool.id as BreadcrumbType);
+    const title = activeDevTool.rawTitle ?? (activeDevTool.title as string);
+
+    docTitleService.setTitle(title);
+    breadcrumbService.setBreadcrumbs(title);
   }, [activeDevTool]);
 
   return (

@@ -7,7 +7,6 @@
  */
 
 import { i18Texts } from '../constants/texts';
-import type { BreadcrumbType } from '../types';
 
 type ChangeDocTitleHandler = (newTitle: string | string[]) => void;
 
@@ -18,11 +17,15 @@ class DocTitleService {
     this.changeDocTitleHandler = _changeDocTitleHandler;
   }
 
-  public setTitle(page?: BreadcrumbType): void {
+  public setTitle(page: string): void {
+    if (!this.changeDocTitleHandler) {
+      throw new Error('DocTitle service has not been initialized');
+    }
+
     if (!page || page === 'home') {
-      this.changeDocTitleHandler(`${i18Texts.breadcrumbs.home}`);
-    } else if (i18Texts.breadcrumbs[page]) {
-      this.changeDocTitleHandler(`${i18Texts.breadcrumbs[page]} - ${i18Texts.breadcrumbs.home}`);
+      this.changeDocTitleHandler(i18Texts.breadcrumbs.home);
+    } else {
+      this.changeDocTitleHandler(`${page} - ${i18Texts.breadcrumbs.home}`);
     }
   }
 }

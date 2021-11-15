@@ -7,5 +7,4 @@
  */
 
 export { docTitleService } from './doc_title';
-
 export { breadcrumbService } from './breadcrumb';
