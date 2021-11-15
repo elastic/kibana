@@ -36,15 +36,7 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
   state = initialHostIsolationExceptionsPageState(),
   action
 ) => {
-  switch (action.type) {
-    case 'userChangedUrl':
-      return userChangedUrl(state, action);
-  }
-  return state;
-};
-
-const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
-  if (isHostIsolationExceptionsPageLocation(action.payload)) {
+  if (action.type === 'userChangedUrl' && isHostIsolationExceptionsPageLocation(action.payload)) {
     const location = extractHostIsolationExceptionsPageLocation(
       parse(action.payload.search.slice(1))
     );
@@ -55,3 +47,5 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   }
   return state;
 };
+
+const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {};
