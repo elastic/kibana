@@ -1793,7 +1793,7 @@
                 "section": "def-server.RulesClient",
                 "text": "RulesClient"
               },
-              ", \"create\" | \"delete\" | \"find\" | \"get\" | \"resolve\" | \"update\" | \"aggregate\" | \"enable\" | \"disable\" | \"muteAll\" | \"getAlertState\" | \"getAlertInstanceSummary\" | \"updateApiKey\" | \"unmuteAll\" | \"muteInstance\" | \"unmuteInstance\" | \"listAlertTypes\" | \"getSpaceId\">"
+              ", \"create\" | \"delete\" | \"find\" | \"get\" | \"resolve\" | \"update\" | \"aggregate\" | \"enable\" | \"disable\" | \"muteAll\" | \"getAlertState\" | \"getAlertSummary\" | \"updateApiKey\" | \"unmuteAll\" | \"muteInstance\" | \"unmuteInstance\" | \"listAlertTypes\" | \"getSpaceId\">"
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
@@ -2223,15 +2223,15 @@
           "AggregateOptions",
           " | undefined; }) => Promise<",
           "AggregateResult",
-          ">; enable: ({ id }: { id: string; }) => Promise<void>; disable: ({ id }: { id: string; }) => Promise<void>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertInstanceSummary: ({ id, dateStart, }: ",
-          "GetAlertInstanceSummaryParams",
+          ">; enable: ({ id }: { id: string; }) => Promise<void>; disable: ({ id }: { id: string; }) => Promise<void>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: ({ id, dateStart }: ",
+          "GetAlertSummaryParams",
           ") => Promise<",
           {
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertInstanceSummary",
-            "text": "AlertInstanceSummary"
+            "section": "def-common.AlertSummary",
+            "text": "AlertSummary"
           },
           ">; updateApiKey: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
@@ -3157,273 +3157,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.AlertInstanceStatus",
-        "type": "Interface",
-        "tags": [],
-        "label": "AlertInstanceStatus",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceStatus.status",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [],
-            "signature": [
-              "\"OK\" | \"Active\""
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceStatus.muted",
-            "type": "boolean",
-            "tags": [],
-            "label": "muted",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceStatus.actionGroupId",
-            "type": "string",
-            "tags": [],
-            "label": "actionGroupId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceStatus.actionSubgroup",
-            "type": "string",
-            "tags": [],
-            "label": "actionSubgroup",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceStatus.activeStartDate",
-            "type": "string",
-            "tags": [],
-            "label": "activeStartDate",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.AlertInstanceSummary",
-        "type": "Interface",
-        "tags": [],
-        "label": "AlertInstanceSummary",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.tags",
-            "type": "Array",
-            "tags": [],
-            "label": "tags",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.alertTypeId",
-            "type": "string",
-            "tags": [],
-            "label": "alertTypeId",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.consumer",
-            "type": "string",
-            "tags": [],
-            "label": "consumer",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.muteAll",
-            "type": "boolean",
-            "tags": [],
-            "label": "muteAll",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.throttle",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "throttle",
-            "description": [],
-            "signature": [
-              "string | null"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.enabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabled",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.statusStartDate",
-            "type": "string",
-            "tags": [],
-            "label": "statusStartDate",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.statusEndDate",
-            "type": "string",
-            "tags": [],
-            "label": "statusEndDate",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.status",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [],
-            "signature": [
-              "\"OK\" | \"Active\" | \"Error\""
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.lastRun",
-            "type": "string",
-            "tags": [],
-            "label": "lastRun",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.errorMessages",
-            "type": "Array",
-            "tags": [],
-            "label": "errorMessages",
-            "description": [],
-            "signature": [
-              "{ date: string; message: string; }[]"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.instances",
-            "type": "Object",
-            "tags": [],
-            "label": "instances",
-            "description": [],
-            "signature": [
-              "{ [x: string]: ",
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertInstanceStatus",
-                "text": "AlertInstanceStatus"
-              },
-              "; }"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.AlertInstanceSummary.executionDuration",
-            "type": "Object",
-            "tags": [],
-            "label": "executionDuration",
-            "description": [],
-            "signature": [
-              "{ average: number; values: number[]; }"
-            ],
-            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.AlertsHealth",
         "type": "Interface",
         "tags": [],
@@ -3525,6 +3258,273 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.AlertStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertStatus",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertStatus.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"OK\" | \"Active\""
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertStatus.muted",
+            "type": "boolean",
+            "tags": [],
+            "label": "muted",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertStatus.actionGroupId",
+            "type": "string",
+            "tags": [],
+            "label": "actionGroupId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertStatus.actionSubgroup",
+            "type": "string",
+            "tags": [],
+            "label": "actionSubgroup",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertStatus.activeStartDate",
+            "type": "string",
+            "tags": [],
+            "label": "activeStartDate",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.AlertSummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertSummary",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.ruleTypeId",
+            "type": "string",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.consumer",
+            "type": "string",
+            "tags": [],
+            "label": "consumer",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.muteAll",
+            "type": "boolean",
+            "tags": [],
+            "label": "muteAll",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.throttle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "throttle",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.statusStartDate",
+            "type": "string",
+            "tags": [],
+            "label": "statusStartDate",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.statusEndDate",
+            "type": "string",
+            "tags": [],
+            "label": "statusEndDate",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"OK\" | \"Active\" | \"Error\""
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.lastRun",
+            "type": "string",
+            "tags": [],
+            "label": "lastRun",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.errorMessages",
+            "type": "Array",
+            "tags": [],
+            "label": "errorMessages",
+            "description": [],
+            "signature": [
+              "{ date: string; message: string; }[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.alerts",
+            "type": "Object",
+            "tags": [],
+            "label": "alerts",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.AlertStatus",
+                "text": "AlertStatus"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertSummary.executionDuration",
+            "type": "Object",
+            "tags": [],
+            "label": "executionDuration",
+            "description": [],
+            "signature": [
+              "{ average: number; values: number[]; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false
           }
         ],
@@ -3914,20 +3914,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.AlertInstanceStatusValues",
-        "type": "Type",
-        "tags": [],
-        "label": "AlertInstanceStatusValues",
-        "description": [],
-        "signature": [
-          "\"OK\" | \"Active\""
-        ],
-        "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.AlertNavigation",
         "type": "Type",
         "tags": [],
@@ -3990,9 +3976,9 @@
         "label": "AlertStatusValues",
         "description": [],
         "signature": [
-          "\"OK\" | \"Active\" | \"Error\""
+          "\"OK\" | \"Active\""
         ],
-        "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
+        "path": "x-pack/plugins/alerting/common/alert_summary.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4177,6 +4163,20 @@
           "<unknown>, \"outcome\" | \"alias_target_id\">"
         ],
         "path": "x-pack/plugins/alerting/common/alert.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleStatusValues",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleStatusValues",
+        "description": [],
+        "signature": [
+          "\"OK\" | \"Active\" | \"Error\""
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_summary.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

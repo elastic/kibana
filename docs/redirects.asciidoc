@@ -371,3 +371,8 @@ This content has moved. Refer to <<xpack-profiler>>.
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views>>.
+
+[role="exclude",id="managing-index-patterns"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<managing-data-views>>.
