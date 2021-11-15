@@ -512,7 +512,8 @@ class SavedObjectFinderUi extends React.Component<
               }}
               onChangeItemsPerPage={(perPage) => {
                 this.setState({
-                  perPage,
+                  page: 0,
+                  perPage: perPage,
                 });
               }}
               itemsPerPage={this.state.perPage}
