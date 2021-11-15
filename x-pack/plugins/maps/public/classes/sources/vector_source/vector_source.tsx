@@ -20,7 +20,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 
-export interface SourceTooltipConfig {
+export interface SourceStatus {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;
   isDeprecated?: boolean;
@@ -74,7 +74,7 @@ export interface IVectorSource extends ISource {
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   getDefaultFields(): Promise<Record<string, Record<string, string>>>;
@@ -171,7 +171,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 

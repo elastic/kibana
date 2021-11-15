@@ -95,11 +95,11 @@ describe('visiblity', () => {
   });
 });
 
-describe('getCustomIconAndTooltipContent', () => {
+describe('getLayerIcon', () => {
   it('Layers with non-elasticsearch sources should display icon', async () => {
     const layer: MvtVectorLayer = createLayer({}, {});
 
-    const iconAndTooltipContent = layer.getCustomIconAndTooltipContent();
+    const iconAndTooltipContent = layer.getLayerIcon(false);
     const component = shallow(iconAndTooltipContent.icon);
     expect(component).toMatchSnapshot();
   });

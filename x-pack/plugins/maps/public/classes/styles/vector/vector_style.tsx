@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
@@ -91,9 +91,10 @@ export interface IVectorStyle extends IStyle {
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   isTimeAware(): boolean;
-  getIcon(): ReactElement<any>;
+  getPrimaryColor(): string;
+  getIcon(showIncompleteIndicator: boolean): ReactElement;
   hasLegendDetails: () => Promise<boolean>;
-  renderLegendDetails: () => ReactElement<any>;
+  renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
   setFeatureStateAndStyleProps: (
     featureCollection: FeatureCollection,
@@ -700,7 +701,17 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  _getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
+  getPrimaryColor() {
+    const primaryColorKey = this._getIsLinesOnly()
+      ? VECTOR_STYLES.LINE_COLOR
+      : VECTOR_STYLES.FILL_COLOR;
+    return extractColorFromStyleProperty(this._descriptor.properties[primaryColorKey], 'grey');
+  }
+
+  getIcon(showIncompleteIndicator: boolean) {
+    const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this._getIsPointsOnly();
+
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -720,8 +731,17 @@ export class VectorStyle implements IVectorStyle {
           'grey'
         );
 
+    const borderStyle: CSSProperties = showIncompleteIndicator
+      ? {
+          borderColor: this.getPrimaryColor(),
+          borderStyle: 'dashed',
+          borderWidth: '1px',
+        }
+      : {};
+
     return (
       <VectorIcon
+        borderStyle={borderStyle}
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         symbolId={this._getSymbolId()}
@@ -729,12 +749,6 @@ export class VectorStyle implements IVectorStyle {
         fillColor={fillColor}
       />
     );
-  }
-
-  getIcon() {
-    const isLinesOnly = this._getIsLinesOnly();
-    const isPointsOnly = this._getIsPointsOnly();
-    return this._getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
   }
 
   _getLegendDetailStyleProperties = () => {

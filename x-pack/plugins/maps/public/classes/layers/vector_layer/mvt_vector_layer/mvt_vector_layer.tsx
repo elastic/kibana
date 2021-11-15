@@ -15,7 +15,6 @@ import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../../common/constants';
 import {
@@ -35,7 +34,7 @@ import {
 import { MVTSingleLayerVectorSourceConfig } from '../../../sources/mvt_single_layer_vector_source/types';
 import { ESSearchSource } from '../../../sources/es_search_source';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import { CustomIconAndTooltipContent } from '../../layer';
+import { LayerIcon } from '../../layer';
 
 const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
@@ -79,12 +78,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this._descriptor.__metaFromTiles || [];
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    const icon = this.getCurrentStyle().getIcon();
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
     if (!this.getSource().isESSource()) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
       return {
-        icon,
+        icon: this.getCurrentStyle().getIcon(false),
         tooltipContent: null,
         areResultsTrimmed: false,
       };
@@ -102,7 +100,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     if (this.getSource().getType() !== SOURCE_TYPES.ES_SEARCH) {
       // aggregation ES sources are never trimmed
       return {
-        icon,
+        icon: this.getCurrentStyle().getIcon(false),
         tooltipContent: null,
         areResultsTrimmed: false,
       };
@@ -111,7 +109,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const maxResultWindow = this._getMaxResultWindow();
     if (maxResultWindow === undefined) {
       return {
-        icon,
+        icon: this.getCurrentStyle().getIcon(false),
         tooltipContent: null,
         areResultsTrimmed: false,
       };
@@ -127,7 +125,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const isIncomplete: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
+    const areResultsTrimmed: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
       if (tileMeta?.properties?.[ES_MVT_HITS_TOTAL_RELATION] === 'gte') {
         return tileMeta?.properties?.[ES_MVT_HITS_TOTAL_VALUE] >= maxResultWindow + 1;
       } else {
@@ -136,8 +134,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     });
 
     return {
-      icon,
-      tooltipContent: isIncomplete
+      icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
+      tooltipContent: areResultsTrimmed
         ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
             defaultMessage: `Results limited to {count} documents.`,
             values: {
@@ -150,7 +148,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
               count: totalFeaturesCount.toLocaleString(),
             },
           }),
-      areResultsTrimmed: isIncomplete,
+      areResultsTrimmed,
     };
   }
 
@@ -347,7 +345,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
         ['==', ['get', ES_MVT_HITS_TOTAL_RELATION], 'gte'],
         ['>=', ['get', ES_MVT_HITS_TOTAL_VALUE], maxResultWindow + 1],
       ]);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', euiThemeVars.euiColorWarning);
+      mbMap.setPaintProperty(
+        tooManyFeaturesLayerId,
+        'line-color',
+        this.getCurrentStyle().getPrimaryColor()
+      );
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 3);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());
@@ -487,12 +489,6 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
-    const style = this.getCurrentStyle();
-    if (!style) {
-      return null;
-    }
-
-    const metaFromTiles = this._getMetaFromTiles();
-    return await style.pluckStyleMetaFromTileMeta(metaFromTiles);
+    return await this.getCurrentStyle().pluckStyleMetaFromTileMeta(this._getMetaFromTiles());
   }
 }

@@ -28,7 +28,7 @@ import { DataRequestContext } from '../../../../actions';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { AbstractLayer, CustomIconAndTooltipContent } from '../../layer';
+import { AbstractLayer, LayerIcon } from '../../layer';
 import { InnerJoin } from '../../../joins/inner_join';
 import {
   AbstractVectorLayer,
@@ -78,7 +78,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       : super.getBounds(syncContext);
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
     const featureCollection = this._getSourceFeatureCollection();
 
     if (!featureCollection || featureCollection.features.length === 0) {
@@ -101,12 +101,12 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
 
     const sourceDataRequest = this.getSourceDataRequest();
     const { tooltipContent, areResultsTrimmed, isDeprecated } =
-      this.getSource().getSourceTooltipContent(sourceDataRequest);
+      this.getSource().getSourceStatus(sourceDataRequest);
     return {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />
       ) : (
-        this.getCurrentStyle().getIcon()
+        this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed)
       ),
       tooltipContent,
       areResultsTrimmed,
