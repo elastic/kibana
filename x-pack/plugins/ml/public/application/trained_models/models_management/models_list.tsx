@@ -53,7 +53,6 @@ import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
-import { getUserConfirmationProvider } from './force_stop_dialog';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -81,7 +80,6 @@ export const ModelsList: FC = () => {
   const {
     services: {
       application: { navigateToUrl, capabilities },
-      overlays,
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
@@ -111,8 +109,6 @@ export const ModelsList: FC = () => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-
-  const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays), []);
 
   const navigateToPath = useNavigateToPath();
 
@@ -422,21 +418,13 @@ export const ModelsList: FC = () => {
       available: (item) => item.model_type === 'pytorch',
       enabled: (item) =>
         !isLoading &&
+        !isPopulatedObject(item.pipelines) &&
         isPopulatedObject(item.stats?.deployment_stats) &&
         item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
       onClick: async (item) => {
-        const requireForceStop = isPopulatedObject(item.pipelines);
-
-        if (requireForceStop) {
-          const hasUserApproved = await getUserConfirmation(item);
-          if (!hasUserApproved) return;
-        }
-
         try {
           setIsLoading(true);
-          await trainedModelsApiService.stopModelAllocation(item.model_id, {
-            force: requireForceStop,
-          });
+          await trainedModelsApiService.stopModelAllocation(item.model_id);
           displaySuccessToast(
             i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
               defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',

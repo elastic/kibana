@@ -16,7 +16,6 @@ import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { memoryOverviewServiceProvider } from '../models/memory_overview';
 import { mlLog } from '../lib/log';
-import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -263,7 +262,6 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/{modelId}/deployment/_stop',
       validate: {
         params: modelIdSchema,
-        query: forceQuerySchema,
       },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
@@ -274,7 +272,6 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const { modelId } = request.params;
         const { body } = await mlClient.stopTrainedModelDeployment({
           model_id: modelId,
-          force: request.query.force ?? false,
         });
         return response.ok({
           body,
