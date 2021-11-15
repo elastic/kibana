@@ -1,41 +1,42 @@
 [[connect-to-elasticsearch]]
-== Add your data
-++++
-<titleabbrev>Add an integration</titleabbrev>
-++++
+== Add an integration
 
-The best way to add data is to use one of our many integrations.
+The best way to add data to the Elastic Stack is to use one of our many integrations.
 Alternatively, you can add a sample data set or upload a file.
 
-
 [float]
-[[add-data-tutorial-kibana]]
-=== Add an integration
+[[add-an-integration]]
+=== Integrations
 
-Elastic integrations are a streamlined way to connect your data to the Elastic Stack.
-Integrations are available for popular services and platforms, like Nginx, AWS, and MongoDB,
-as well as many generic input types like log files.
-Each integration comes pre-packaged with assets that support your needs:
-
-* Data ingestion, storage, and transformation rules
-* Configuration options
-* Pre-built, custom dashboards and visualizations
-* Documentation
-
-To view the full list of available integrations, open the main
-menu and click *Add integrations*.
-{kib} automatically guides you to the *Integrations* view when no data is detected.
+Integrations are a way to stream in logs, metrics, traces,
+content, and more from your apps, endpoints, infrastructure, cloud, network,
+workplace tools, and other common sources in your ecosystem. All
+integrations are available in a single view, and
+{kib} guides you there from the Welcome screen and home page. Start
+with one of our promoted integrations, or browse or search for a specific integration.
 
 [role="screenshot"]
 image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]
 
-Use the controls on the bottom left of the **Integrations** view to determine whether to show
-Elastic Agent integrations, Beats integrations, or both.
-Elastic Agent is a single, unified agent
-to collect data and send it to the Elastic Stack.
-Beats are lightweight data shippers that send data to the Elastic Stack.
-For more information,
-refer to https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html[Beats and Elastic Agent capabilities].
+The *Integrations* view shows Elastic Agent integrations when the integration is generally available (GA).
+If it is not GA,
+the view defaults to Beats integrations. To use a specific
+Beats integration, use the control on the bottom left to filter for it.
+
+Some common integrations follow:
+
+* *Enterprise Search integrations.*. Integrations for App Search enable you to search your application with APIs, search your JSON data,
+and add search to your website.
+For Workplace Search, you can search your files and folders, email, project workflow, organizational content,
+and more.
+For a custom search, click *View deployment details* and fill in the required information.
+
+* *Observability integrations.* Integrations are available for popular services and platforms, like Nginx, AWS, and MongoDB,
+as well as many generic input types like log files.
+
+* *Security integrations.*  Integrations help you protect agains security threats.  For example, the osquery host management integration enables you to use osquery results
+to address cyber threats without the complexity or cost of a separate management layer.
+
 
 [float]
 === Add sample data
