@@ -309,6 +309,7 @@ export class ResourceInstaller {
 
         template: {
           settings: {
+            hidden: true,
             'index.lifecycle': {
               name: ilmPolicyName,
               rollover_alias: primaryNamespacedAlias,

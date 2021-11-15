@@ -69,6 +69,7 @@ import {
   TIMELINE_TAB_CONTENT_EQL,
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
   PINNED_TAB_BUTTON,
+  TIMELINE_DATA_PROVIDER_FIELD_INPUT,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -175,8 +176,10 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
-  cy.get(TIMELINE_DATA_PROVIDER_VALUE).should('have.focus'); // make sure the focus is ready before start typing
-
+  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get(TIMELINE_DATA_PROVIDER_FIELD)
+    .find(TIMELINE_DATA_PROVIDER_FIELD_INPUT)
+    .should('have.focus'); // make sure the focus is ready before start typing
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.field}{downarrow}{enter}`);

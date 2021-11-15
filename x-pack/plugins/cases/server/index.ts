@@ -17,7 +17,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   },
   deprecations: ({ deprecate, renameFromRoot }) => [
     deprecate('enabled', '8.0.0'),
-    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
+    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
