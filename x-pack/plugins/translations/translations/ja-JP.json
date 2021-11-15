@@ -14819,7 +14819,6 @@
     "xpack.maps.source.esSearch.joinsDisabledReasonMvt": "mvtベクトルタイルでスケーリングするときに、結合はサポートされていません",
     "xpack.maps.source.esSearch.limitScalingLabel": "結果を{maxResultWindow}に限定",
     "xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg": "ドキュメントが見つかりません。_id：{docId}",
-    "xpack.maps.source.esSearch.mvtDescription": "大きいデータセットを高速表示するために、ベクトルタイルを使用します。",
     "xpack.maps.source.esSearch.selectLabel": "ジオフィールドを選択",
     "xpack.maps.source.esSearch.sortFieldLabel": "フィールド",
     "xpack.maps.source.esSearch.sortFieldSelectPlaceholder": "ソートフィールドを選択",

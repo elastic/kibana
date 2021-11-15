@@ -15012,7 +15012,6 @@
     "xpack.maps.source.esSearch.joinsDisabledReasonMvt": "按 mvt 矢量磁贴缩放时不支持联接",
     "xpack.maps.source.esSearch.limitScalingLabel": "将结果数限制到 {maxResultWindow}",
     "xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg": "找不到文档，_id：{docId}",
-    "xpack.maps.source.esSearch.mvtDescription": "使用矢量磁贴可更快速地显示大型数据集。",
     "xpack.maps.source.esSearch.selectLabel": "选择地理字段",
     "xpack.maps.source.esSearch.sortFieldLabel": "字段",
     "xpack.maps.source.esSearch.sortFieldSelectPlaceholder": "选择排序字段",
