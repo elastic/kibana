@@ -6,14 +6,19 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { CoreStart } from 'kibana/public';
-import { createCallApmApi } from '../../../../../../services/rest/createCallApmApi';
 import { LinkPreview } from './link_preview';
 
 export default {
   title:
     'app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/LinkPreview',
   component: LinkPreview,
+  args: {
+    coreStart: {
+      http: {
+        get: () => ({ transaction: { id: '0' } }),
+      },
+    },
+  },
 };
 
 export function Example({
@@ -21,15 +26,6 @@ export function Example({
   label,
   url,
 }: ComponentProps<typeof LinkPreview>) {
-  const coreMock = {
-    http: {
-      get: async () => ({ transaction: { id: '0' } }),
-    },
-    uiSettings: { get: () => false },
-  } as unknown as CoreStart;
-
-  createCallApmApi(coreMock);
-
   return <LinkPreview filters={filters} label={label} url={url} />;
 }
 Example.args = {
