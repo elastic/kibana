@@ -17,6 +17,7 @@ import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
 import type { TopNavMenuData } from '../../../../../../navigation/public';
+import { openAlertsPopover } from './open_alerts_popover';
 
 /**
  * Helper function to build the top nav links
@@ -54,6 +55,24 @@ export const getTopNavLinks = ({
         anchorElement,
       }),
     testId: 'discoverOptionsButton',
+  };
+
+  const alerts = {
+    id: 'alerts',
+    label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
+      defaultMessage: 'Alerts',
+    }),
+    description: i18n.translate('discover.localMenu.optionsDescription', {
+      defaultMessage: 'Alerts',
+    }),
+    run: (anchorElement: HTMLElement) =>
+      openAlertsPopover({
+        I18nContext: services.core.i18n.Context,
+        anchorElement,
+        searchSource: savedSearch.searchSource,
+        services,
+      }),
+    testId: 'discoverAlertsButton',
   };
 
   const newSearch = {
@@ -157,6 +176,7 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
+    alerts,
     shareSearch,
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),

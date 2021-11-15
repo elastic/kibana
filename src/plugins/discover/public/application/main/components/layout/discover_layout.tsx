@@ -49,8 +49,6 @@ import {
   DOCUMENTS_VIEW_CLICK,
   FIELD_STATISTICS_VIEW_CLICK,
 } from '../../../components/field_stats_table/constants';
-import { DiscoverAlertButton } from '../../../../components/alert';
-import { DiscoverQueryAlertButton } from '../../../../components/alert_query';
 /**
  * Local storage key for sidebar persistence state
  */
@@ -275,20 +273,6 @@ export function DiscoverLayout({
                 'dscPageContent--emptyPrompt': resultState === 'none',
               })}
             >
-              {indexPattern.timeFieldName && (
-                <>
-                  <DiscoverAlertButton
-                    index={indexPattern.title}
-                    timeField={indexPattern.timeFieldName}
-                    searchSource={searchSource}
-                  />
-                  <DiscoverQueryAlertButton
-                    index={indexPattern.title}
-                    timeField={indexPattern.timeFieldName}
-                    searchSource={searchSource}
-                  />
-                </>
-              )}
               {resultState === 'none' && (
                 <DiscoverNoResults
                   timeFieldName={timeField}
