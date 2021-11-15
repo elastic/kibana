@@ -57,6 +57,7 @@ import type {
   AlertWorkflowStatus,
   ColumnHeaderOptions,
   RowRenderer,
+  TimelineItem,
 } from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
@@ -180,6 +181,7 @@ function ObservabilityActions({
   );
 
   const alert = parseObservabilityAlert(dataFieldEs);
+
   const { prepend } = core.http.basePath;
 
   const afterCaseSelection = useCallback(() => {
@@ -345,9 +347,13 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [totalItems, setTotalItems] = useState<number>(0);
-  const [expanded, setExpanded] = useState<any | undefined>();
   const [selectedAlertIndex, setSelectedAlertIndex] = useState<number>(-1);
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
+  const parseObservabilityAlert = useMemo(
+    () => parseAlert(observabilityRuleTypeRegistry),
+    [observabilityRuleTypeRegistry]
+  );
   const casePermissions = useGetUserCasesPermissions();
 
   const hasAlertsCrudPermissions = useCallback(
@@ -358,6 +364,15 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       return getAlertsPermissions(capabilities, ruleConsumer).crud;
     },
     [capabilities]
+  );
+
+  const parseAlertFn = useCallback(
+    (item: TimelineItem) => {
+      const dataFieldEs = item?.data?.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
+      const alert = dataFieldEs && parseObservabilityAlert(dataFieldEs);
+      return alert;
+    },
+    [parseObservabilityAlert]
   );
 
   const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
@@ -408,7 +423,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       deletedEventIds,
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
-      expanded,
+      expanded: flyoutAlert,
       filters: [],
       hasAlertsCrudPermissions,
       indexNames,
@@ -416,6 +431,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
       onTotalItemsChange: setTotalItems,
+      parseAlert: parseAlertFn,
       query: {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
@@ -425,7 +441,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       // TODO: implement Kibana data view runtime fields in observability
       runtimeMappings: {},
       selectedAlertIndex,
-      setExpanded,
+      setExpanded: setFlyoutAlert,
       setSelectedAlertIndex,
       start: rangeFrom,
       setRefetch,
@@ -444,15 +460,16 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   }, [
     casePermissions,
     addToQuery,
-    expanded,
+    flyoutAlert,
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
     workflowStatus,
     kuery,
+    parseAlertFn,
     rangeFrom,
     selectedAlertIndex,
-    setExpanded,
+    setFlyoutAlert,
     setRefetch,
     setSelectedAlertIndex,
     leadingControlColumns,
@@ -463,8 +480,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     setFlyoutAlert(undefined);
     setSelectedAlertIndex?.(-1);
   }, [setFlyoutAlert, setSelectedAlertIndex]);
-
-  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   return (
     <>

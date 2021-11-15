@@ -14,6 +14,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineItem } from '../../../../common/search_strategy';
 
 import type {
   CellValueElementProps,
@@ -110,6 +111,7 @@ export interface TGridStandaloneProps {
   query: Query;
   onTotalItemsChange?: (totalItems: number) => void;
   onRuleChange?: () => void;
+  parseAlert?: (item: TimelineItem) => any;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
@@ -148,6 +150,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   onRuleChange,
   onTotalItemsChange,
   query,
+  parseAlert,
   renderCellValue,
   rowRenderers,
   runtimeMappings,
@@ -357,6 +360,15 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       isFirstUpdate.current = false;
     }
   }, [loading]);
+
+  useEffect(() => {
+    if (selectedAlertIndex != null) {
+      const item = nonDeletedEvents[selectedAlertIndex];
+      const alert = parseAlert?.(item);
+      alert && setExpanded?.(alert);
+    }
+  }, [parseAlert, selectedAlertIndex]);
+
   const timelineContext = {
     timelineId: STANDALONE_ID,
     expanded,
