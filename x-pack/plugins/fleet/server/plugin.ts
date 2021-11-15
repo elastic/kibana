@@ -337,21 +337,10 @@ export class FleetPlugin
 
     const fleetSetupPromise = (async () => {
       try {
-        logger.info('Beginning fleet setup');
-
-        const { nonFatalErrors } = await setupFleet(
+        await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
           core.elasticsearch.client.asInternalUser
         );
-
-        if (nonFatalErrors.length > 0) {
-          logger.info('Encountered non fatal errors during Fleet setup');
-          formatNonFatalErrors(nonFatalErrors).forEach((error) =>
-            logger.info(JSON.stringify(error))
-          );
-        }
-
-        logger.info('Fleet setup completed');
       } catch (error) {
         logger.warn('Fleet setup failed');
         logger.warn(error);

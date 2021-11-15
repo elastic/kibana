@@ -52,6 +52,7 @@ async function createSetupSideEffects(
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
+  logger.info('Beginning fleet setup');
 
   const {
     agentPolicies: policiesOrUndefined,
@@ -113,6 +114,13 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up Fleet Server agent policies');
   await ensureFleetServerAgentPoliciesExists(soClient, esClient);
+
+  if (nonFatalErrors.length > 0) {
+    logger.info('Encountered non fatal errors during Fleet setup');
+    formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));
+  }
+
+  logger.info('Fleet setup completed');
 
   return {
     isInitialized: true,
