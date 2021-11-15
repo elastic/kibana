@@ -166,6 +166,7 @@ describe('TabbedAggResponseWriter class', () => {
           field: 'geo.src',
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             enabled: true,
             id: '1',
             indexPatternId: '1234',
@@ -193,6 +194,7 @@ describe('TabbedAggResponseWriter class', () => {
           },
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             appliedTimeRange: undefined,
             enabled: true,
             id: '2',
@@ -227,6 +229,7 @@ describe('TabbedAggResponseWriter class', () => {
           field: 'geo.src',
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             enabled: true,
             id: '1',
             indexPatternId: '1234',
@@ -254,6 +257,7 @@ describe('TabbedAggResponseWriter class', () => {
           },
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             appliedTimeRange: undefined,
             enabled: true,
             id: '2',
