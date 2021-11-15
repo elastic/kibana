@@ -16,7 +16,6 @@ function generator(options: TemplateContext) {
   const dir = options.ironbank ? 'ironbank' : 'base';
   const template = readFileSync(resolve(__dirname, dir, './Dockerfile'));
   return Mustache.render(template.toString(), {
-    packageManager: options.ubi ? 'microdnf' : 'yum',
     ...options,
   });
 }

@@ -11,9 +11,7 @@
 ################################################################################
 FROM {{{baseOSImage}}} AS builder
 
-{{#ubi}}
-RUN {{packageManager}} install -y findutils tar gzip
-{{/ubi}}
+RUN microdnf install -y findutils tar gzip
 
 {{#usePublicArtifact}}
 RUN cd /opt && \
@@ -54,16 +52,11 @@ RUN mkdir -p /opt/filebeat /opt/metricbeat && \
 FROM {{{baseOSImage}}}
 EXPOSE 5601
 
-{{#ubi}}
-  # https://github.com/rpm-software-management/microdnf/issues/50
-  RUN mkdir -p /run/user/$(id -u)
-{{/ubi}}
-
 RUN for iter in {1..10}; do \
-      {{packageManager}} update --setopt=tsflags=nodocs -y && \
-      {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss {{#ubi}}findutils{{/ubi}} && \
-      {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
+      microdnf update --setopt=tsflags=nodocs -y && \
+      microdnf install --setopt=tsflags=nodocs -y \
+        fontconfig freetype shadow-utils nss findutils && \
+      microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
       sleep 10; \
     done; \
     (exit $exit_code)

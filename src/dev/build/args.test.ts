@@ -28,7 +28,7 @@ it('build default and oss dist for current platform, without packages, by defaul
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": false,
+        "createDockerAlmaLinux": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
@@ -56,7 +56,7 @@ it('builds packages if --all-platforms is passed', () => {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": true,
+        "createDockerAlmaLinux": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
@@ -84,7 +84,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": false,
+        "createDockerAlmaLinux": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
@@ -112,7 +112,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": false,
+        "createDockerAlmaLinux": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
@@ -141,7 +141,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": true,
+        "createDockerAlmaLinux": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
@@ -177,7 +177,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": true,
+        "createDockerAlmaLinux": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": false,
@@ -199,14 +199,14 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
   `);
 });
 
-it('limits packages if --all-platforms passed with --skip-docker-centos', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-centos']))
+it('limits packages if --all-platforms passed with --skip-docker-almalinux', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-almalinux']))
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": false,
+        "createDockerAlmaLinux": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,

@@ -30,14 +30,17 @@ export async function runDockerGenerator(
     architecture?: string;
     context: boolean;
     image: boolean;
+    almalinux?: boolean;
     ubi?: boolean;
     ironbank?: boolean;
     cloud?: boolean;
     dockerBuildDate?: string;
   }
 ) {
-  // UBI var config
-  const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
+  let baseOSImage = '';
+  if (flags.almalinux || flags.cloud) baseOSImage = 'almalinux:8.4-minimal';
+  if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
+
   const ubiVersionTag = 'ubi8';
 
   let imageFlavor = '';
@@ -84,6 +87,7 @@ export async function runDockerGenerator(
     dockerTargetFilename,
     baseOSImage,
     dockerBuildDate,
+    almalinux: flags.almalinux,
     ubi: flags.ubi,
     cloud: flags.cloud,
     metricbeatTarball,

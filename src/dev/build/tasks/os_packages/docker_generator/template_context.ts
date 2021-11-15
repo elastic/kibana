@@ -20,6 +20,7 @@ export interface TemplateContext {
   baseOSImage: string;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
+  almalinux?: boolean;
   ubi?: boolean;
   cloud?: boolean;
   metricbeatTarball?: string;
