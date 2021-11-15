@@ -49,7 +49,7 @@ export const ForceStopModelConfirmDialog: FC<ForceStopModelConfirmDialogProps> =
       buttonColor="danger"
     >
       <FormattedMessage
-        id="xpack.ml.trainedModels.modelsList.forceStopDialog.confirmText"
+        id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
         defaultMessage="Selected model has associated pipelines: "
       />
       <ul>

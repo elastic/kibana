@@ -51,7 +51,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(32);
+      expect(count).toBe(31);
     });
   });
 
@@ -101,7 +101,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateMlAlerts).toBe(false);
-      expect(capabilities.canViewMlNodes).toBe(false);
     });
 
     test('full capabilities', async () => {
@@ -147,7 +146,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(true);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(true);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(true);
-      expect(capabilities.canViewMlNodes).toBe(true);
     });
 
     test('upgrade in progress with full capabilities', async () => {
