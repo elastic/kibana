@@ -7,7 +7,7 @@
 
 import type { Map as MbMap, Layer as MbLayer, Style as MbStyle } from '@kbn/mapbox-gl';
 import _ from 'lodash';
-import { AbstractLayer } from '../layer';
+import { RasterTileLayer } from '../raster_tile_layer/raster_tile_layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
@@ -46,7 +46,8 @@ interface SourceRequestData {
   };
 }
 
-export class EmsVectorTileLayer extends AbstractLayer {
+// TODO extend from AbstractLayer instead of RasterTileLayer
+export class EmsVectorTileLayer extends RasterTileLayer {
   static createDescriptor(options: Partial<LayerDescriptor>) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
