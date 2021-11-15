@@ -94,8 +94,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await filterBar.removeFilter('bytes');
     });
-    
-    it("exits full screen mode when back button pressed", async() => {
+
+    it('exits full screen mode when back button pressed', async () => {
       await PageObjects.dashboard.clickFullScreenMode();
       await browser.goBack();
       await retry.try(async () => {
