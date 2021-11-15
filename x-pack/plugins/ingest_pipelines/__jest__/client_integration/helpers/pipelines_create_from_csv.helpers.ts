@@ -7,12 +7,12 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 import { PipelinesCreateFromCsv } from '../../../public/application/sections/pipelines_create_from_csv';
 import { WithAppDependencies } from './setup_environment';
 import { getCreateFromCsvPath, ROUTES } from '../../../public/application/services/navigation';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [getCreateFromCsvPath()],
     componentRoutePath: ROUTES.createFromCsv,
