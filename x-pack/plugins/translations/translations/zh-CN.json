@@ -19140,8 +19140,6 @@
     "xpack.painlessLab.contextScoreLabel": "分数",
     "xpack.painlessLab.contextTabLabel": "上下文",
     "xpack.painlessLab.displayName": "Painless 实验室",
-    "xpack.painlessLab.displayNameBetaLabel": "公测版",
-    "xpack.painlessLab.displayNameBetaTooltipText": "此功能在未来的版本中可能会变化很大",
     "xpack.painlessLab.documentFieldLabel": "样例文档 (JSON)",
     "xpack.painlessLab.documentFieldTooltipText": "您的脚本可以访问此文档的字段",
     "xpack.painlessLab.flyoutDocLink": "API 文档",

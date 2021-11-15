@@ -70,10 +70,10 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
                   {currentDevTool.isBeta && (
                     <EuiFlexItem grow={false}>
                       <EuiBetaBadge
-                        label={i18n.translate('devTools.devToolBetaLabel', {
+                        label={i18n.translate('devTools.badge.betaLabel', {
                           defaultMessage: 'Beta',
                         })}
-                        tooltipContent={i18n.translate('xpack.devToolBetaTooltipText', {
+                        tooltipContent={i18n.translate('devTools.badge.betaTooltipText', {
                           defaultMessage:
                             'This feature might change drastically in future releases',
                         })}
