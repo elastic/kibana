@@ -44,8 +44,7 @@ function LabelOptions({
     ? i18n.translate(
         'visTypeXy.controls.pointSeries.categoryAxis.axisLabelsOptionsMultilayer.disabled',
         {
-          defaultMessage:
-            'This option is only available for categorical axes or the legacy time axis (see Advanced Settings -> visualization:useLegacyTimeAxis)',
+          defaultMessage: 'This option can be configured only with non-time-based axes',
         }
       )
     : undefined;

@@ -322,8 +322,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       <EuiSpacer size="s" />
       <TooltipWrapper
         tooltipContent={i18n.translate('xpack.lens.xyChart.axisOrientationMultilayer.disabled', {
-          defaultMessage:
-            'This option is only available for categorical axes or the legacy time axis (see Advanced Settings -> visualization:useLegacyTimeAxis)',
+          defaultMessage: 'These options can be configured only with non-time-based axes',
         })}
         condition={Boolean(useMultilayerTimeAxis)}
         display="block"
