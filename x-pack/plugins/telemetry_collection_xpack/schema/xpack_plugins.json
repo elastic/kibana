@@ -273,6 +273,32 @@
         "throttle_time": {
           "properties": {
             "min": {
+              "type": "keyword"
+            },
+            "avg": {
+              "type": "keyword"
+            },
+            "max": {
+              "type": "keyword"
+            }
+          }
+        },
+        "schedule_time": {
+          "properties": {
+            "min": {
+              "type": "keyword"
+            },
+            "avg": {
+              "type": "keyword"
+            },
+            "max": {
+              "type": "keyword"
+            }
+          }
+        },
+        "throttle_time_number_s": {
+          "properties": {
+            "min": {
               "type": "long"
             },
             "avg": {
@@ -283,7 +309,7 @@
             }
           }
         },
-        "schedule_time": {
+        "schedule_time_number_s": {
           "properties": {
             "min": {
               "type": "long"
@@ -8077,44 +8103,6 @@
                   }
                 }
               }
-            }
-          }
-        },
-        "ui_open": {
-          "properties": {
-            "elasticsearch": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
-              }
-            },
-            "overview": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the Overview page."
-              }
-            },
-            "kibana": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Kibana deprecations"
-              }
-            }
-          }
-        },
-        "ui_reindex": {
-          "properties": {
-            "close": {
-              "type": "long"
-            },
-            "open": {
-              "type": "long"
-            },
-            "start": {
-              "type": "long"
-            },
-            "stop": {
-              "type": "long"
             }
           }
         }

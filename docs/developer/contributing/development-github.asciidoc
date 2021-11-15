@@ -53,7 +53,7 @@ In order to assist with developer tooling we ask that all Elastic engineers use 
 +
 ["source","shell"]
 -----------
-git config --local user.email YOUR_ELASTIC_EMAIL@elastic.co
+git config user.email YOUR_ELASTIC_EMAIL@elastic.co
 -----------
  4. Create a commit using the new email address
 +

@@ -23,7 +23,9 @@ export type {
   FormHook,
   ValidationFunc,
   FieldConfig,
+  ValidationCancelablePromise,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
+
 export {
   useForm,
   useFormData,
@@ -31,6 +33,7 @@ export {
   useFormIsModified,
   Form,
   UseField,
+  useBehaviorSubject,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';
