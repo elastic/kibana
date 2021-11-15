@@ -144,16 +144,12 @@ export function AlertsFlyout({
           compressed={true}
           type="responsiveColumn"
           listItems={overviewListItems}
-          titleProps={
-            {
-              'data-test-subj': 'alertsFlyoutDescriptionListTitle',
-            } as any // NOTE / TODO: This "any" is a temporary workaround: https://github.com/elastic/eui/issues/5148
-          }
-          descriptionProps={
-            {
-              'data-test-subj': 'alertsFlyoutDescriptionListDescription',
-            } as any // NOTE / TODO: This "any" is a temporary workaround: https://github.com/elastic/eui/issues/5148
-          }
+          titleProps={{
+            'data-test-subj': 'alertsFlyoutDescriptionListTitle',
+          }}
+          descriptionProps={{
+            'data-test-subj': 'alertsFlyoutDescriptionListDescription',
+          }}
         />
       </EuiFlyoutBody>
       {alertData.link && !isInApp && (
