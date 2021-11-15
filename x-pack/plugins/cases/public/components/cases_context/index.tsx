@@ -16,15 +16,16 @@ export interface CasesContextValue {
   basePath: string;
   rootBreadcrumbs: ChromeBreadcrumb[];
 }
-export interface CasesContextProps extends Omit<CasesContextValue, 'basePath'> {
+export interface CasesContextProps extends Omit<CasesContextValue, 'basePath' | 'rootBreadcrumbs'> {
   basePath?: string;
+  rootBreadcrumbs?: ChromeBreadcrumb[];
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { owner, appId, userCanCrud, basePath = DEFAULT_BASE_PATH, rootBreadcrumbs },
+  value: { owner, appId, userCanCrud, basePath = DEFAULT_BASE_PATH, rootBreadcrumbs = [] },
 }) => {
   const [value, setValue] = useState<CasesContextValue>({
     owner,
