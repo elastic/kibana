@@ -162,9 +162,8 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     [args.legend.position, setColor, uiState]
   );
   const table = data;
-  const valueAccessor = args.valueAccessor
-    ? getAccessor(args.valueAccessor, table.columns)
-    : undefined;
+  const valueAccessor =
+    args.valueAccessor !== undefined ? getAccessor(args.valueAccessor, table.columns) : undefined;
   const minMaxByColumnId = useMemo(
     () => findMinMaxByColumnId([valueAccessor!], table),
     [valueAccessor, table]
@@ -175,8 +174,10 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const paletteParams = args.palette?.params;
-  const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
-  const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
+  const xAccessor =
+    args.xAccessor !== undefined ? getAccessor(args.xAccessor, table.columns) : undefined;
+  const yAccessor =
+    args.yAccessor !== undefined ? getAccessor(args.yAccessor, table.columns) : undefined;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
@@ -204,10 +205,11 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
       };
     });
   }
-
   const xAxisMeta = xAxisColumn?.meta;
   const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
-  const dateHistogramMeta = search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn);
+  const dateHistogramMeta = xAxisColumn
+    ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
+    : undefined;
 
   // Fallback to the ordinal scale type when a single row of data is provided.
   // Related issue https://github.com/elastic/elastic-charts/issues/1184

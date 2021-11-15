@@ -8,6 +8,7 @@
 import type { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type { HeatmapArguments } from '../../../../../src/plugins/chart_expressions/expression_heatmap/common';
 import type { CustomPaletteParams, LayerType } from '../../common';
+export type ChartShapes = 'heatmap';
 
 export type HeatmapLayerState = HeatmapArguments & {
   layerId: string;
@@ -15,6 +16,7 @@ export type HeatmapLayerState = HeatmapArguments & {
   valueAccessor?: string;
   xAccessor?: string;
   yAccessor?: string;
+  shape: ChartShapes;
 };
 
 export type HeatmapVisualizationState = HeatmapLayerState & {

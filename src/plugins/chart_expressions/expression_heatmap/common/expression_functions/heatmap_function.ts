@@ -59,10 +59,6 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
         defaultMessage: 'Pattern of the percentage format.',
       }),
     },
-    shape: {
-      types: ['string'],
-      help: 'Defines the shape of the visualization',
-    },
     palette: {
       types: ['palette'],
       help: i18n.translate('expressionHeatmap.function.palette.help', {

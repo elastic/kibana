@@ -11,6 +11,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '../../../../expressions';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
 // import { VisParams, visType } from './expression_renderers';
 import {
@@ -19,8 +20,6 @@ import {
   EXPRESSION_HEATMAP_GRID_NAME,
   HEATMAP_FUNCTION_RENDERER_NAME,
 } from '../constants';
-
-export type ChartShapes = 'heatmap';
 
 export interface HeatmapLegendConfig {
   /**
@@ -72,7 +71,6 @@ export interface HeatmapArguments {
   showTooltip?: boolean;
   highlightInHover?: boolean;
   palette?: PaletteOutput<CustomPaletteState>;
-  shape: ChartShapes;
   xAccessor?: string | number;
   yAccessor?: string | number;
   valueAccessor?: string | number;
