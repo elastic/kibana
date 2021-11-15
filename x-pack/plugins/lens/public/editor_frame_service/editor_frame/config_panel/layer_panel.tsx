@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiText,
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -412,11 +413,11 @@ export function LayerPanel(
                 }
                 labelAppend={
                   isOptional ? (
-                    <span className="lnsLayerPanel__rowOptional">
+                    <EuiText color="subdued" size="xs">
                       {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
                         defaultMessage: 'Optional',
                       })}
-                    </span>
+                    </EuiText>
                   ) : null
                 }
                 labelType="legend"
