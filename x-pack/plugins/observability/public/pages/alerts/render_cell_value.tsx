@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useContext, useCallback, useEffect } from 'react';
 /**
  * We need to produce types and code transpilation at different folders during the build of the package.
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
@@ -26,7 +26,12 @@ import {
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  euiLightVars as themeLight,
+  euiDarkVars as themeDark,
+} from '@kbn/ui-shared-deps-src/theme';
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
+import { TimelineContext } from '../../../../timelines/public';
 import { AlertStatusIndicator } from '../../components/shared/alert_status_indicator';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../common/utils/formatters';
@@ -65,12 +70,33 @@ export const getRenderCellValue = ({
 }: {
   setFlyoutAlert: (data: TopAlert) => void;
 }) => {
-  return ({ columnId, data }: CellValueElementProps) => {
+  return ({ columnId, data, setCellProps }: CellValueElementProps) => {
+    const { expanded, setExpanded } = useContext(TimelineContext);
     const { observabilityRuleTypeRegistry } = usePluginContext();
     const value = getMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]);
+
+    const onExpandFn = useCallback(
+      (alert: TopAlert) => {
+        setFlyoutAlert?.(alert);
+        setExpanded?.(data);
+      },
+      [setFlyoutAlert, setExpanded, data]
+    );
+
+    useEffect(() => {
+      if (expanded === data) {
+        setCellProps({
+          style: {
+            backgroundColor: themeLight.euiColorHighlight,
+          },
+        });
+      } else {
+        setCellProps({ style: undefined });
+      }
+    }, [expanded, data, setCellProps]);
 
     switch (columnId) {
       case ALERT_STATUS:
@@ -99,7 +125,7 @@ export const getRenderCellValue = ({
           // `EuiLink` to render the link as an (inline) <a>, which enables
           // text truncation, but requires overriding the linter warning below:
           // eslint-disable-next-line @elastic/eui/href-or-on-click
-          <EuiLink href="" onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>
+          <EuiLink href="" onClick={() => onExpandFn(alert)}>
             {alert.reason}
           </EuiLink>
         );

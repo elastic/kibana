@@ -79,6 +79,7 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 export interface TGridStandaloneProps {
+  activeAlertIndex?: number;
   appId: string;
   casesOwner: string;
   casePermissions: {
@@ -91,6 +92,7 @@ export interface TGridStandaloneProps {
   deletedEventIds: Readonly<string[]>;
   end: string;
   entityType?: EntityType;
+  expanded?: any;
   loadingText: React.ReactNode;
   filters: Filter[];
   footerText: React.ReactNode;
@@ -111,6 +113,7 @@ export interface TGridStandaloneProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
+  setExpanded?: (expanded: any) => void;
   setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
@@ -132,6 +135,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   deletedEventIds,
   end,
   entityType = 'alerts',
+  expanded,
   loadingText,
   filters,
   footerText,
@@ -145,6 +149,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   renderCellValue,
   rowRenderers,
   runtimeMappings,
+  setExpanded,
   setRefetch,
   start,
   sort,
@@ -348,7 +353,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       isFirstUpdate.current = false;
     }
   }, [loading]);
-  const timelineContext = { timelineId: STANDALONE_ID };
+  const timelineContext = { timelineId: STANDALONE_ID, expanded, setExpanded };
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {

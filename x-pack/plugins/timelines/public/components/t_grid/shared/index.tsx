@@ -24,7 +24,13 @@ const heights = {
   short: 250,
 };
 
-export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
+export const TimelineContext = createContext<{
+  timelineId: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  expanded?: any | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setExpanded?: (expanded: any | undefined) => void;
+}>({ timelineId: null });
 
 export const TGridLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
   return (

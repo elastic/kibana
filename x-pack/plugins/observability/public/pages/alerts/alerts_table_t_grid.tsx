@@ -41,7 +41,7 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
+import React, { Suspense, useMemo, useState, useContext, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { get } from 'lodash';
 import {
@@ -68,6 +68,7 @@ import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 import { translations, paths } from '../../config';
+import { TimelineContext } from '../../../../timelines/public';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
@@ -162,6 +163,7 @@ function ObservabilityActions({
     timelines,
     application: { capabilities },
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
+  const { setExpanded } = useContext(TimelineContext);
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -190,6 +192,11 @@ function ObservabilityActions({
   const toggleActionsPopover = useCallback((id) => {
     setActionsPopover((current) => (current ? null : id));
   }, []);
+
+  const onExpandFn = useCallback(() => {
+    setFlyoutAlert(alert);
+    setExpanded?.(data);
+  }, [setFlyoutAlert, setExpanded, alert, data]);
 
   const casePermissions = useGetUserCasesPermissions();
   const event = useMemo(() => {
@@ -282,7 +289,7 @@ function ObservabilityActions({
               size="s"
               iconType="expand"
               color="text"
-              onClick={() => setFlyoutAlert(alert)}
+              onClick={onExpandFn}
               data-test-subj="openFlyoutButton"
               aria-label={translations.alertsTable.viewDetailsTextLabel}
             />
@@ -338,6 +345,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [activeAlertIndex, setActiveAlertIndex] = useState<number>(0);
+  const [expanded, setExpanded] = useState<any | undefined>();
 
   const casePermissions = useGetUserCasesPermissions();
 
@@ -391,6 +399,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
+      activeAlertIndex,
       appId: observabilityFeatureId,
       casesOwner: observabilityFeatureId,
       casePermissions,
@@ -399,6 +408,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       deletedEventIds,
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
+      expanded,
       filters: [],
       hasAlertsCrudPermissions,
       indexNames,
@@ -414,6 +424,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       rowRenderers: NO_ROW_RENDER,
       // TODO: implement Kibana data view runtime fields in observability
       runtimeMappings: {},
+      setExpanded,
       start: rangeFrom,
       setRefetch,
       sort: [
@@ -431,18 +442,24 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   }, [
     casePermissions,
     addToQuery,
+    expanded,
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
     workflowStatus,
     kuery,
     rangeFrom,
+    setExpanded,
     setRefetch,
     leadingControlColumns,
     deletedEventIds,
   ]);
 
-  const handleFlyoutClose = () => setFlyoutAlert(undefined);
+  const onCollapseFn = useCallback(() => {
+    setFlyoutAlert(undefined);
+    setExpanded?.(undefined);
+  }, [setFlyoutAlert, setExpanded]);
+
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
   return (
@@ -452,7 +469,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           <LazyAlertsFlyout
             alert={flyoutAlert}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={handleFlyoutClose}
+            onClose={onCollapseFn}
             onSelectedAlertIndexChange={setActiveAlertIndex}
             selectedAlertIndex={activeAlertIndex}
             showPagination={true}

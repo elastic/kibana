@@ -56,7 +56,7 @@ type AlertsFlyoutProps = {
   alerts?: Array<Record<string, unknown>>;
   isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  onSelectedAlertIndexChange?: (number) => void;
+  onSelectedAlertIndexChange?: (selectedAlertIndex: number) => void;
   selectedAlertId?: string;
   selectedAlertIndex?: number;
   showPagination?: boolean;
