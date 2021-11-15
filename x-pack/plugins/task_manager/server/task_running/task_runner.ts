@@ -69,10 +69,11 @@ export interface TaskRunner {
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
-  taskUuid: string;
+  taskExecutionId: string;
   stage: string;
   isEphemeral?: boolean;
   toString: () => string;
+  isSameTask: (executionId: string) => boolean;
 }
 
 export enum TaskRunningStage {
@@ -187,10 +188,18 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   /**
-   * Gets the unique uuid of this task instance.
+   * Gets the execution id of this task instance.
    */
-  public get taskUuid() {
-    return `${this.id}-${this.uuid}`;
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**
