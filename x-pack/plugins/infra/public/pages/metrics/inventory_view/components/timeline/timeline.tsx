@@ -210,7 +210,9 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   }
 
   return (
-    <TimelineContainer>
+    <TimelineContainer
+      data-test-subj={isVisible ? 'timelineContainerOpen' : 'timelineContainerClosed'}
+    >
       <TimelineHeader>
         <EuiFlexItem grow={true}>
           <EuiText>
