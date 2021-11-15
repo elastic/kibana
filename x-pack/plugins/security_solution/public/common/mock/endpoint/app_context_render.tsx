@@ -10,6 +10,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
 import { AppDeepLink } from 'kibana/public';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -85,6 +86,14 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
   }
   return state;
 };
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // turns retries off
+      retry: false,
+    },
+  },
+});
 
 /**
  * Creates a mocked endpoint app context custom renderer that can be used to render
@@ -115,7 +124,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        {children}
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </AppRootProvider>
     </KibanaContextProvider>
   );
