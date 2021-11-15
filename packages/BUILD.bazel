@@ -36,6 +36,7 @@ filegroup(
       "//packages/kbn-optimizer:build",
       "//packages/kbn-plugin-generator:build",
       "//packages/kbn-plugin-helpers:build",
+      "//packages/kbn-react-field:build",
       "//packages/kbn-rule-data-utils:build",
       "//packages/kbn-securitysolution-autocomplete:build",
       "//packages/kbn-securitysolution-list-constants:build",

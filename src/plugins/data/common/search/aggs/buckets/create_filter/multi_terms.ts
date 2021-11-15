@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { MultiFieldKey } from '../multi_field_key';
 
 export const createFilterMultiTerms = (
   aggConfig: IBucketAggConfig,
-  key: MultiFieldKey | string,
+  key: MultiFieldKey,
   params: { terms: MultiFieldKey[] }
 ): Filter => {
   const fields = aggConfig.params.fields;
@@ -31,6 +32,14 @@ export const createFilterMultiTerms = (
     return {
       meta: {
         negate: true,
+        alias: multiTerms
+          .map((multiTerm) => multiTerm.keys.join(', '))
+          .join(
+            ` ${i18n.translate('data.search.aggs.buckets.multiTerms.otherFilterJoinName', {
+              defaultMessage: 'or',
+            })} `
+          ),
+        index: indexPattern.id,
       },
       query: {
         bool: {
@@ -48,7 +57,10 @@ export const createFilterMultiTerms = (
     buildPhraseFilter(indexPattern.getFieldByName(fields[i])!, partialKey, indexPattern)
   );
   return {
-    meta: {},
+    meta: {
+      alias: key.keys.join(', '),
+      index: indexPattern.id,
+    },
     query: {
       bool: {
         must: partials.map((partialFilter) => partialFilter.query),

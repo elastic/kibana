@@ -52,6 +52,7 @@ import {
   DimensionEditorTabs,
   CalloutWarning,
   LabelInput,
+  DimensionEditorTab,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
@@ -82,6 +83,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     supportStaticValue,
     supportFieldFormat = true,
     layerType,
+    paramEditorCustomProps,
   } = props;
   const services = {
     data: props.data,
@@ -478,6 +480,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   isFullscreen={isFullscreen}
                   toggleFullscreen={toggleFullscreen}
                   setIsCloseable={setIsCloseable}
+                  paramEditorCustomProps={paramEditorCustomProps}
                   {...services}
                 />
               );
@@ -590,6 +593,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             toggleFullscreen={toggleFullscreen}
             isFullscreen={isFullscreen}
             setIsCloseable={setIsCloseable}
+            paramEditorCustomProps={paramEditorCustomProps}
             {...services}
           />
         )}
@@ -705,6 +709,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         toggleFullscreen={toggleFullscreen}
         isFullscreen={isFullscreen}
         setIsCloseable={setIsCloseable}
+        paramEditorCustomProps={paramEditorCustomProps}
         {...services}
       />
     </>
@@ -731,57 +736,64 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const hasTabs = !isFullscreen && (hasFormula || supportStaticValue);
 
+  const tabs: DimensionEditorTab[] = [
+    {
+      id: staticValueOperationName,
+      enabled: Boolean(supportStaticValue),
+      state: showStaticValueFunction,
+      onClick: () => {
+        if (selectedColumn?.operationType === formulaOperationName) {
+          return setTemporaryState(staticValueOperationName);
+        }
+        setTemporaryState('none');
+        setStateWrapper(addStaticValueColumn());
+        return;
+      },
+      label: i18n.translate('xpack.lens.indexPattern.staticValueLabel', {
+        defaultMessage: 'Static value',
+      }),
+    },
+    {
+      id: quickFunctionsName,
+      enabled: true,
+      state: showQuickFunctions,
+      onClick: () => {
+        if (selectedColumn && !isQuickFunction(selectedColumn.operationType)) {
+          setTemporaryState(quickFunctionsName);
+          return;
+        }
+      },
+      label: i18n.translate('xpack.lens.indexPattern.quickFunctionsLabel', {
+        defaultMessage: 'Quick functions',
+      }),
+    },
+    {
+      id: formulaOperationName,
+      enabled: hasFormula,
+      state: temporaryState === 'none' && selectedColumn?.operationType === formulaOperationName,
+      onClick: () => {
+        setTemporaryState('none');
+        if (selectedColumn?.operationType !== formulaOperationName) {
+          const newLayer = insertOrReplaceColumn({
+            layer: props.state.layers[props.layerId],
+            indexPattern: currentIndexPattern,
+            columnId,
+            op: formulaOperationName,
+            visualizationGroups: dimensionGroups,
+          });
+          setStateWrapper(newLayer);
+          trackUiEvent(`indexpattern_dimension_operation_formula`);
+        }
+      },
+      label: i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+        defaultMessage: 'Formula',
+      }),
+    },
+  ];
+
   return (
     <div id={columnId}>
-      {hasTabs ? (
-        <DimensionEditorTabs
-          tabsEnabled={{
-            static_value: supportStaticValue,
-            formula: hasFormula,
-            quickFunctions: true,
-          }}
-          tabsState={{
-            static_value: showStaticValueFunction,
-            quickFunctions: showQuickFunctions,
-            formula:
-              temporaryState === 'none' && selectedColumn?.operationType === formulaOperationName,
-          }}
-          onClick={(tabClicked) => {
-            if (tabClicked === 'quickFunctions') {
-              if (selectedColumn && !isQuickFunction(selectedColumn.operationType)) {
-                setTemporaryState(quickFunctionsName);
-                return;
-              }
-            }
-
-            if (tabClicked === 'static_value') {
-              // when coming from a formula, set a temporary state
-              if (selectedColumn?.operationType === formulaOperationName) {
-                return setTemporaryState(staticValueOperationName);
-              }
-              setTemporaryState('none');
-              setStateWrapper(addStaticValueColumn());
-              return;
-            }
-
-            if (tabClicked === 'formula') {
-              setTemporaryState('none');
-              if (selectedColumn?.operationType !== formulaOperationName) {
-                const newLayer = insertOrReplaceColumn({
-                  layer: props.state.layers[props.layerId],
-                  indexPattern: currentIndexPattern,
-                  columnId,
-                  op: formulaOperationName,
-                  visualizationGroups: dimensionGroups,
-                });
-                setStateWrapper(newLayer);
-                trackUiEvent(`indexpattern_dimension_operation_formula`);
-              }
-            }
-          }}
-        />
-      ) : null}
-
+      {hasTabs ? <DimensionEditorTabs tabs={tabs} /> : null}
       <CalloutWarning
         currentOperationType={selectedColumn?.operationType}
         temporaryStateType={temporaryState}

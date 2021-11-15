@@ -17,7 +17,7 @@ export const SupportedVersionNotice = ({ optionName }: { optionName: string }) =
   }
 
   return (
-    <EuiText color="subdued" size="xs">
+    <EuiText color="subdued" size="xs" data-test-subj="policySupportedVersions">
       <i>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policyDetails.supportedVersion"

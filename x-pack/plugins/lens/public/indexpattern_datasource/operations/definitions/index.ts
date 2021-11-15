@@ -51,7 +51,7 @@ import {
 } from './formula';
 import { staticValueOperation, StaticValueIndexPatternColumn } from './static_value';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
+import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
 import type {
   BaseIndexPatternColumn,
   IncompleteColumn,
@@ -201,6 +201,7 @@ export interface ParamEditorProps<C> {
   data: DataPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  paramEditorCustomProps?: ParamEditorCustomProps;
 }
 
 export interface FieldInputProps<C> {

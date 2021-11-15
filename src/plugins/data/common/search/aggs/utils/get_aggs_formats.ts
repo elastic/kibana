@@ -135,7 +135,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
       convert = (val: unknown, type: FieldFormatsContentType) => {
         const params = this._params;
-        const formats = params.paramsPerField.map((fieldParams) =>
+        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) =>
           getFieldFormat({ id: fieldParams.id, params: fieldParams })
         );
 

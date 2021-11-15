@@ -7,6 +7,7 @@
  */
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildExistsFilter,
@@ -16,7 +17,8 @@ import {
 } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
-import { IBucketAggConfig } from './bucket_agg_type';
+import { IAggType } from '../agg_type';
+import { IAggConfig } from '../agg_config';
 
 export const OTHER_BUCKET_SEPARATOR = '╰┄►';
 
@@ -49,7 +51,7 @@ const getNestedAggDSL = (aggNestedDsl: Record<string, any>, startFromAggId: stri
 const getAggResultBuckets = (
   aggConfigs: IAggConfigs,
   response: estypes.SearchResponse<any>['aggregations'],
-  aggWithOtherBucket: IBucketAggConfig,
+  aggWithOtherBucket: IAggConfig,
   key: string
 ) => {
   const keyParts = key.split(OTHER_BUCKET_SEPARATOR);
@@ -116,11 +118,7 @@ const getAggConfigResultMissingBuckets = (responseAggs: any, aggId: string) => {
  * @param key: the key for this specific other bucket
  * @param otherAgg: AggConfig of the aggregation with other bucket
  */
-const getOtherAggTerms = (
-  requestAgg: Record<string, any>,
-  key: string,
-  otherAgg: IBucketAggConfig
-) => {
+const getOtherAggTerms = (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => {
   return requestAgg['other-filter'].filters.filters[key].bool.must_not
     .filter(
       (filter: Record<string, any>) =>
@@ -131,7 +129,7 @@ const getOtherAggTerms = (
 
 export const buildOtherBucketAgg = (
   aggConfigs: IAggConfigs,
-  aggWithOtherBucket: IBucketAggConfig,
+  aggWithOtherBucket: IAggConfig,
   response: any
 ) => {
   const bucketAggs = aggConfigs.aggs.filter(
@@ -253,13 +251,9 @@ export const mergeOtherBucketAggResponse = (
   aggsConfig: IAggConfigs,
   response: estypes.SearchResponse<any>,
   otherResponse: any,
-  otherAgg: IBucketAggConfig,
+  otherAgg: IAggConfig,
   requestAgg: Record<string, any>,
-  otherFilterBuilder: (
-    requestAgg: Record<string, any>,
-    key: string,
-    otherAgg: IBucketAggConfig
-  ) => Filter
+  otherFilterBuilder: (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => Filter
 ): estypes.SearchResponse<any> => {
   const updatedResponse = cloneDeep(response);
   each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
@@ -292,7 +286,7 @@ export const mergeOtherBucketAggResponse = (
 export const updateMissingBucket = (
   response: estypes.SearchResponse<any>,
   aggConfigs: IAggConfigs,
-  agg: IBucketAggConfig
+  agg: IAggConfig
 ) => {
   const updatedResponse = cloneDeep(response);
   const aggResultBuckets = getAggConfigResultMissingBuckets(updatedResponse.aggregations, agg.id);
@@ -305,7 +299,7 @@ export const updateMissingBucket = (
 export function constructSingleTermOtherFilter(
   requestAgg: Record<string, any>,
   key: string,
-  otherAgg: IBucketAggConfig
+  otherAgg: IAggConfig
 ) {
   const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
 
@@ -320,13 +314,65 @@ export function constructSingleTermOtherFilter(
 
 export function constructMultiTermOtherFilter(
   requestAgg: Record<string, any>,
-  key: string,
-  otherAgg: IBucketAggConfig
+  key: string
 ): Filter {
   return {
     query: requestAgg['other-filter'].filters.filters[key],
-    meta: {
-      negate: true,
-    },
+    meta: {},
   };
 }
+
+export const createOtherBucketPostFlightRequest = (
+  otherFilterBuilder: (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => Filter
+) => {
+  const postFlightRequest: IAggType['postFlightRequest'] = async (
+    resp,
+    aggConfigs,
+    aggConfig,
+    searchSource,
+    inspectorRequestAdapter,
+    abortSignal,
+    searchSessionId
+  ) => {
+    if (!resp.aggregations) return resp;
+    const nestedSearchSource = searchSource.createChild();
+    if (aggConfig.params.otherBucket) {
+      const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
+      if (!filterAgg) return resp;
+
+      nestedSearchSource.setField('aggs', filterAgg);
+
+      const { rawResponse: response } = await nestedSearchSource
+        .fetch$({
+          abortSignal,
+          sessionId: searchSessionId,
+          inspector: {
+            adapter: inspectorRequestAdapter,
+            title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
+              defaultMessage: 'Other bucket',
+            }),
+            description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
+              defaultMessage:
+                'This request counts the number of documents that fall ' +
+                'outside the criterion of the data buckets.',
+            }),
+          },
+        })
+        .toPromise();
+
+      resp = mergeOtherBucketAggResponse(
+        aggConfigs,
+        resp,
+        response,
+        aggConfig,
+        filterAgg(),
+        otherFilterBuilder
+      );
+    }
+    if (aggConfig.params.missingBucket) {
+      resp = updateMissingBucket(resp, aggConfigs, aggConfig);
+    }
+    return resp;
+  };
+  return postFlightRequest;
+};

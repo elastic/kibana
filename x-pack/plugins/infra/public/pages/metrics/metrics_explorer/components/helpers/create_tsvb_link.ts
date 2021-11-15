@@ -8,6 +8,7 @@
 import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
+import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
 import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
@@ -169,7 +170,7 @@ export const createTSVBLink = (
         series: options.metrics.map(mapMetricToSeries(chartOptions)),
         show_grid: 1,
         show_legend: 1,
-        time_field: (source && source.fields.timestamp) || '@timestamp',
+        time_field: TIMESTAMP_FIELD,
         type: 'timeseries',
         filter: createFilterFromOptions(options, series),
       },

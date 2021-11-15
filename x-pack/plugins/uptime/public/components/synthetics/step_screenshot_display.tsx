@@ -123,7 +123,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     }
   }, [hasIntersected, isIntersecting, setHasIntersected]);
 
-  const imgSrc = basePath + `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
+  const imgSrc = basePath + `/internal/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
 
   // When loading a legacy screenshot, set `url` to full-size screenshot path.
   // Otherwise, we first need to composite the image.

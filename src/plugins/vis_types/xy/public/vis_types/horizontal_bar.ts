@@ -56,7 +56,7 @@ export const horizontalBarVisTypeDefinition = {
           labels: {
             show: true,
             rotate: LabelRotation.Horizontal,
-            filter: false,
+            filter: true,
             truncate: 200,
           },
           title: {},
@@ -157,7 +157,7 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -167,7 +167,7 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -177,7 +177,7 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
     ],
   },

@@ -7,13 +7,13 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, ResponseHeaders } from 'src/core/server';
-import bluebird from 'bluebird';
+import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENTS_PREFIX } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -57,14 +57,14 @@ export const getAgentPoliciesHandler: RequestHandler<
       perPage,
     };
 
-    await bluebird.map(
+    await pMap(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
         getAgentsByKuery(esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
-          kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${agentPolicy.id}`,
+          kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
         }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
       { concurrency: 10 }
     );

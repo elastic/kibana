@@ -15,3 +15,5 @@ export * from './heatmap_chart';
 export * from './metric_chart';
 export * from './pie_chart';
 export * from './xy_chart';
+
+export * from './expression_types';

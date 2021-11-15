@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
 import { getErrorDistribution } from '../lib/errors/distribution/get_distribution';
 import { getErrorGroupSample } from '../lib/errors/get_error_group_sample';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
@@ -17,7 +17,7 @@ import {
   rangeRt,
   comparisonRangeRt,
 } from './default_api_types';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 
 const errorsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/errors',
