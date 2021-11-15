@@ -70,8 +70,8 @@ export const getRenderCellValue = ({
 }: {
   setFlyoutAlert: (data: TopAlert) => void;
 }) => {
-  return ({ columnId, data, setCellProps }: CellValueElementProps) => {
-    const { expanded, setExpanded } = useContext(TimelineContext);
+  return ({ columnId, data, rowIndex, setCellProps }: CellValueElementProps) => {
+    const { selectedAlertIndex, setSelectedAlertIndex } = useContext(TimelineContext);
     const { observabilityRuleTypeRegistry } = usePluginContext();
     const value = getMappedNonEcsValue({
       data,
@@ -81,13 +81,13 @@ export const getRenderCellValue = ({
     const onExpandFn = useCallback(
       (alert: TopAlert) => {
         setFlyoutAlert?.(alert);
-        setExpanded?.(data);
+        setSelectedAlertIndex?.(rowIndex);
       },
-      [setFlyoutAlert, setExpanded, data]
+      [setFlyoutAlert, setSelectedAlertIndex, data, rowIndex]
     );
 
     useEffect(() => {
-      if (expanded === data) {
+      if (rowIndex === selectedAlertIndex) {
         setCellProps({
           style: {
             backgroundColor: themeLight.euiColorHighlight,
@@ -96,7 +96,7 @@ export const getRenderCellValue = ({
       } else {
         setCellProps({ style: undefined });
       }
-    }, [expanded, data, setCellProps]);
+    }, [data, rowIndex, selectedAlertIndex, setCellProps]);
 
     switch (columnId) {
       case ALERT_STATUS:

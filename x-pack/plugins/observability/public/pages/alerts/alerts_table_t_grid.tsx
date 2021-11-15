@@ -152,6 +152,7 @@ function ObservabilityActions({
   ecsData,
   currentStatus,
   refetch,
+  rowIndex,
   setFlyoutAlert,
   setEventsLoading,
   setEventsDeleted,
@@ -163,7 +164,7 @@ function ObservabilityActions({
     timelines,
     application: { capabilities },
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
-  const { setExpanded } = useContext(TimelineContext);
+  const { setSelectedAlertIndex } = useContext(TimelineContext);
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -195,8 +196,8 @@ function ObservabilityActions({
 
   const onExpandFn = useCallback(() => {
     setFlyoutAlert(alert);
-    setExpanded?.(data);
-  }, [setFlyoutAlert, setExpanded, alert, data]);
+    setSelectedAlertIndex?.(rowIndex);
+  }, [setFlyoutAlert, setSelectedAlertIndex, alert, rowIndex]);
 
   const casePermissions = useGetUserCasesPermissions();
   const event = useMemo(() => {
@@ -344,8 +345,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [totalItems, setTotalItems] = useState<number>(0);
-  const [activeAlertIndex, setActiveAlertIndex] = useState<number>(0);
   const [expanded, setExpanded] = useState<any | undefined>();
+  const [selectedAlertIndex, setSelectedAlertIndex] = useState<number>(-1);
 
   const casePermissions = useGetUserCasesPermissions();
 
@@ -399,7 +400,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      activeAlertIndex,
       appId: observabilityFeatureId,
       casesOwner: observabilityFeatureId,
       casePermissions,
@@ -424,7 +424,9 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       rowRenderers: NO_ROW_RENDER,
       // TODO: implement Kibana data view runtime fields in observability
       runtimeMappings: {},
+      selectedAlertIndex,
       setExpanded,
+      setSelectedAlertIndex,
       start: rangeFrom,
       setRefetch,
       sort: [
@@ -449,16 +451,18 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     workflowStatus,
     kuery,
     rangeFrom,
+    selectedAlertIndex,
     setExpanded,
     setRefetch,
+    setSelectedAlertIndex,
     leadingControlColumns,
     deletedEventIds,
   ]);
 
   const onCollapseFn = useCallback(() => {
     setFlyoutAlert(undefined);
-    setExpanded?.(undefined);
-  }, [setFlyoutAlert, setExpanded]);
+    setSelectedAlertIndex?.(-1);
+  }, [setFlyoutAlert, setSelectedAlertIndex]);
 
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
@@ -470,8 +474,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             alert={flyoutAlert}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
             onClose={onCollapseFn}
-            onSelectedAlertIndexChange={setActiveAlertIndex}
-            selectedAlertIndex={activeAlertIndex}
+            onSelectedAlertIndexChange={setSelectedAlertIndex}
+            selectedAlertIndex={selectedAlertIndex}
             showPagination={true}
             totalAlerts={totalItems}
           />

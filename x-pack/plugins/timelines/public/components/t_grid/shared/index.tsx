@@ -28,8 +28,10 @@ export const TimelineContext = createContext<{
   timelineId: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   expanded?: any | undefined;
+  selectedAlertIndex?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setExpanded?: (expanded: any | undefined) => void;
+  setSelectedAlertIndex?: (selectedAlertIndex: number) => void;
 }>({ timelineId: null });
 
 export const TGridLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {

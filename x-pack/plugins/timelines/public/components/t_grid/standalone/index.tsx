@@ -114,7 +114,9 @@ export interface TGridStandaloneProps {
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
   setExpanded?: (expanded: any) => void;
+  selectedAlertIndex?: number;
   setRefetch: (ref: () => void) => void;
+  setSelectedAlertIndex?: (selectedAlertIndex: number) => void;
   start: string;
   sort: SortColumnTimeline[];
   graphEventId?: string;
@@ -156,6 +158,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
+  selectedAlertIndex,
+  setSelectedAlertIndex,
   data,
   unit,
 }) => {
@@ -353,7 +357,13 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       isFirstUpdate.current = false;
     }
   }, [loading]);
-  const timelineContext = { timelineId: STANDALONE_ID, expanded, setExpanded };
+  const timelineContext = {
+    timelineId: STANDALONE_ID,
+    expanded,
+    selectedAlertIndex,
+    setExpanded,
+    setSelectedAlertIndex,
+  };
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
