@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutProps,
   EuiLink,
+  EuiPagination,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -56,6 +57,9 @@ type AlertsFlyoutProps = {
   isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   selectedAlertId?: string;
+  alertCount?: number;
+  selectedAlertIndex?: number;
+  showPagination?: boolean;
 } & EuiFlyoutProps;
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
@@ -74,6 +78,9 @@ export function AlertsFlyout({
   observabilityRuleTypeRegistry,
   onClose,
   selectedAlertId,
+  selectedAlertIndex = 0,
+  alertCount = -1,
+  showPagination = false,
 }: AlertsFlyoutProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
   const { services } = useKibana();
@@ -130,13 +137,28 @@ export function AlertsFlyout({
   ];
 
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
+    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout" style={{ zIndex: 9999 }}>
       <EuiFlyoutHeader hasBorder>
         <ExperimentalBadge />
         <EuiSpacer size="s" />
-        <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
-          <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
+              <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {showPagination && (
+              <EuiPagination
+                aria-label="Yadda yadda"
+                pageCount={alertCount}
+                activePage={selectedAlertIndex}
+                onPageClick={(activePage) => console.log(activePage)}
+                compressed
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiTitle size="xs">

@@ -450,6 +450,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             alert={flyoutAlert}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
             onClose={handleFlyoutClose}
+            showPagination={true}
           />
         </Suspense>
       )}
