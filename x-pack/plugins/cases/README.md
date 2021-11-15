@@ -1,9 +1,11 @@
-# Case management in Kibana
+# Case
+
+This plugin provides cases management in Kibana
 
 [![Issues][issues-shield]][issues-url]
 [![Pull Requests][pr-shield]][pr-url]
 
-# Docs
+## Docs
 
 ![Cases Logo][cases-logo]
 
