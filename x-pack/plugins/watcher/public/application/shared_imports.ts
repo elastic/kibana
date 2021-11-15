@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-export {
+export type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
+} from '../../../../../src/plugins/es_ui_shared/public';
+export {
   sendRequest,
   useRequest,
   XJson,

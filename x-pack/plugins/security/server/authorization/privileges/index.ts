@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { privilegesFactory, PrivilegesService } from './privileges';
+export type { PrivilegesService } from './privileges';
+export { privilegesFactory } from './privileges';

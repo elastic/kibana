@@ -34,6 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('deleting signals migrations', () => {
     let outdatedSignalsIndexName: string;
@@ -45,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
 
       ({
         body: {
@@ -57,24 +58,28 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ index: [outdatedSignalsIndexName] })
         .expect(200));
 
-      await waitFor(async () => {
-        ({
-          body: {
-            migrations: [finalizedMigration],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200));
+      await waitFor(
+        async () => {
+          ({
+            body: {
+              migrations: [finalizedMigration],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200));
 
-        return finalizedMigration.completed ?? false;
-      }, `polling finalize_migration until all complete`);
+          return finalizedMigration.completed ?? false;
+        },
+        `polling finalize_migration until all complete`,
+        log
+      );
     });
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('returns the deleted migration SavedObjects', async () => {

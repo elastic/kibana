@@ -8,7 +8,7 @@
 import { CaseResponse } from '../../../common';
 import { format } from './sir_format';
 
-describe('ITSM formatter', () => {
+describe('SIR formatter', () => {
   const theCase = {
     id: 'case-id',
     connector: {

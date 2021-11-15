@@ -72,6 +72,7 @@ export const FieldValueCell = React.memo(
                     isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={(getLinkValue && getLinkValue(data.field)) ?? linkValue}
+                    truncate={false}
                   />
                 )}
               </EuiFlexItem>

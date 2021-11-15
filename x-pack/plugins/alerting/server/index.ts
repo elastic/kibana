@@ -30,9 +30,9 @@ export type {
   RuleParamsAndRefs,
 } from './types';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
-export { PluginSetupContract, PluginStartContract } from './plugin';
-export { FindResult } from './rules_client';
-export { PublicAlertInstance as AlertInstance } from './alert_instance';
+export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { FindResult } from './rules_client';
+export type { PublicAlertInstance as AlertInstance } from './alert_instance';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
 export {

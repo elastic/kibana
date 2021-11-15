@@ -29,7 +29,7 @@ import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_ann
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
@@ -48,7 +48,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { core } = useApmPluginContext();
   const theme = useTheme();
 
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { comparisonEnabled } = urlParams;
 
   const timeseries = [
@@ -56,7 +56,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
       data: distribution.currentPeriod,
       color: theme.eui.euiColorVis1,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
-        defaultMessage: 'Occurences',
+        defaultMessage: 'Occurrences',
       }),
     },
     ...(comparisonEnabled

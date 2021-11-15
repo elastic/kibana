@@ -39,7 +39,7 @@ import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
 import type { DashboardControlGroupInput } from './application/lib/dashboard_control_group';
 
-export { SavedDashboardPanel };
+export type { SavedDashboardPanel };
 
 export type NavAction = (anchorElement?: any) => void;
 export interface SavedDashboardPanelMap {

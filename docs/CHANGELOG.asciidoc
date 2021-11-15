@@ -18,8 +18,6 @@ Review important information about the {kib} 8.0.0 releases.
 [[release-notes-8.0.0-beta1]]
 == {kib} 8.0.0-beta1
 
-coming::[8.0.0-beta1]
-
 Review the {kib} 8.0.0-beta1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
@@ -846,7 +844,7 @@ The default values for the session timeout `xpack.security.session.{lifespan|idl
 *Impact* +
 Use the following default values:
 
-* `xpack.security.session.idleTimeout: 1h`
+* `xpack.security.session.idleTimeout: 8h`
 * `xpack.security.session.lifespan: 30d`
 ====
 

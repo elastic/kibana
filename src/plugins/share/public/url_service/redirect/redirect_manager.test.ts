@@ -57,9 +57,12 @@ describe('on page mount', () => {
         })
       )}`
     );
-    expect(spy).toHaveBeenCalledWith({
-      foo: 'bar',
-    });
+    expect(spy).toHaveBeenCalledWith(
+      {
+        foo: 'bar',
+      },
+      { replace: true }
+    );
   });
 
   test('migrates parameters on-the-fly to the latest version', async () => {
@@ -73,9 +76,12 @@ describe('on page mount', () => {
         })
       )}`
     );
-    expect(spy).toHaveBeenCalledWith({
-      num: 2,
-    });
+    expect(spy).toHaveBeenCalledWith(
+      {
+        num: 2,
+      },
+      { replace: true }
+    );
   });
 
   test('throws if locator does not exist', async () => {

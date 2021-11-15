@@ -17,7 +17,7 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
-export { rangeQuery, kqlQuery } from './utils/queries';
+export { rangeQuery, kqlQuery, termQuery } from './utils/queries';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
@@ -43,11 +43,5 @@ export type ObservabilityConfig = TypeOf<typeof config.schema>;
 export const plugin = (initContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initContext);
 
-export {
-  createOrUpdateIndex,
-  Mappings,
-  ObservabilityPluginSetup,
-  ScopedAnnotationsClient,
-  unwrapEsResponse,
-  WrappedElasticsearchClientError,
-};
+export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
+export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };

@@ -134,6 +134,12 @@ jest.mock('./epm/packages/cleanup', () => {
   };
 });
 
+jest.mock('./upgrade_sender', () => {
+  return {
+    sendTelemetryEvents: jest.fn(),
+  };
+});
+
 const mockedFetchInfo = fetchInfo as jest.Mock<ReturnType<typeof fetchInfo>>;
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
