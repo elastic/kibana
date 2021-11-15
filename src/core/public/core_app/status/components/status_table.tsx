@@ -62,8 +62,8 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
     },
     {
       field: 'state',
-      name: i18n.translate('core.statusPage.statusTable.columns.statusHeader', {
-        defaultMessage: 'Status',
+      name: i18n.translate('core.statusPage.statusTable.columns.statusSummaryHeader', {
+        defaultMessage: 'Status summary',
       }),
       render: (state: FormattedStatus['state']) => <span>{state.message}</span>,
     },
