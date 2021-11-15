@@ -413,6 +413,10 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
   padding-top: 24px;
 }
 
+.c4.artifact-entry-collapsible-card {
+  padding: 24px !important;
+}
+
 .c0 .trusted-app + .trusted-app {
   margin-top: 24px;
 }
@@ -4529,6 +4533,10 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
   padding-top: 24px;
 }
 
+.c4.artifact-entry-collapsible-card {
+  padding: 24px !important;
+}
+
 .c0 .trusted-app + .trusted-app {
   margin-top: 24px;
 }
@@ -8606,6 +8614,10 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
 
 .c4.bottom-section {
   padding-top: 24px;
+}
+
+.c4.artifact-entry-collapsible-card {
+  padding: 24px !important;
 }
 
 .c0 .trusted-app + .trusted-app {
