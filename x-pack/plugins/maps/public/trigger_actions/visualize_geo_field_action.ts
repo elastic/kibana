@@ -61,7 +61,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     {
       id: uuid(),
       visible: true,
-      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR,
+      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.GEOJSON_VECTOR,
       sourceDescriptor: {
         id: uuid(),
         type: SOURCE_TYPES.ES_SEARCH,

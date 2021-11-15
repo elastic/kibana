@@ -52,7 +52,7 @@ describe('visualize url generator', () => {
       {
         id: LAYER_ID,
         visible: true,
-        type: LAYER_TYPE.VECTOR,
+        type: LAYER_TYPE.GEOJSON_VECTOR,
         sourceDescriptor: {
           id: LAYER_ID,
           type: SOURCE_TYPES.ES_SEARCH,

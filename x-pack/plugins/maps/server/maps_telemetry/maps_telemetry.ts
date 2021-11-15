@@ -147,7 +147,7 @@ async function isGeoShapeAggLayer(layer: LayerDescriptor): Promise<boolean> {
   }
 
   if (
-    layer.type !== LAYER_TYPE.VECTOR &&
+    layer.type !== LAYER_TYPE.GEOJSON_VECTOR &&
     layer.type !== LAYER_TYPE.BLENDED_VECTOR &&
     layer.type !== LAYER_TYPE.HEATMAP
   ) {

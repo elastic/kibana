@@ -126,7 +126,7 @@ export class MbMap extends Component<Props, State> {
 
   // This keeps track of the latest update calls, per layerId
   _queryForMeta = (layer: ILayer) => {
-    if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
+    if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.MVT_VECTOR) {
       const mbFeatures = (layer as MvtVectorLayer).queryTileMetaFeatures(this.state.mbMap);
       if (mbFeatures !== null) {
         this.props.updateMetaFromTiles(layer.getId(), mbFeatures);

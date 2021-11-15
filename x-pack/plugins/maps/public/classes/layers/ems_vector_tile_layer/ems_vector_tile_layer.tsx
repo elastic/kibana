@@ -7,7 +7,7 @@
 
 import type { Map as MbMap, Layer as MbLayer, Style as MbStyle } from '@kbn/mapbox-gl';
 import _ from 'lodash';
-import { TileLayer } from '../tile_layer/tile_layer';
+import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
@@ -46,16 +46,23 @@ interface SourceRequestData {
   };
 }
 
-// TODO - rename to EmsVectorTileLayer
-export class VectorTileLayer extends TileLayer {
-  static type = LAYER_TYPE.VECTOR_TILE;
-
+export class EmsVectorTileLayer extends AbstractLayer {
   static createDescriptor(options: Partial<LayerDescriptor>) {
     const tileLayerDescriptor = super.createDescriptor(options);
-    tileLayerDescriptor.type = VectorTileLayer.type;
+    tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
+  }
+
+  constructor({
+    source,
+    layerDescriptor,
+  }: {
+    source: EMSTMSSource;
+    layerDescriptor: LayerDescriptor;
+  }) {
+    super({ source, layerDescriptor });
   }
 
   getSource(): EMSTMSSource {

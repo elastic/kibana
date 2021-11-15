@@ -65,7 +65,7 @@ describe('migrateJoinAggKey', () => {
   test('Should migrate vector styles from legacy join agg key to new join agg key', () => {
     const layerListJSON = JSON.stringify([
       {
-        type: LAYER_TYPE.VECTOR,
+        type: LAYER_TYPE.GEOJSON_VECTOR,
         joins,
         style: {
           properties: {

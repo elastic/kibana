@@ -47,7 +47,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(descriptor, mapColors);
-    layerDescriptor.type = LAYER_TYPE.TILED_VECTOR;
+    layerDescriptor.type = LAYER_TYPE.MVT_VECTOR;
 
     if (!layerDescriptor.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
