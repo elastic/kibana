@@ -11,7 +11,11 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EuiDataGrid } from '@elastic/eui';
 import { IAggType } from 'src/plugins/data/public';
-import { IFieldFormat } from 'src/plugins/field_formats/common';
+import {
+  FieldFormatParams,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from 'src/plugins/field_formats/common';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
@@ -661,10 +665,10 @@ describe('DatatableComponent', () => {
   });
 
   describe('pagination', () => {
-    it('enables pagination when pageSize provided', async () => {
+    it('enables pagination', async () => {
       const { data, args } = sampleArgs();
 
-      args.pageSize = 7;
+      args.enablePagination = true;
 
       const wrapper = mount(
         <DatatableComponent
@@ -679,10 +683,12 @@ describe('DatatableComponent', () => {
         />
       );
 
+      const DEFAULT_PAGE_SIZE = 10;
+
       const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
       expect(paginationConfig).toBeTruthy();
       expect(paginationConfig?.pageIndex).toBe(0); // should start at 0
-      expect(paginationConfig?.pageSize).toBe(args.pageSize);
+      expect(paginationConfig?.pageSize).toBe(DEFAULT_PAGE_SIZE);
 
       // trigger new page
       const newIndex = 3;
@@ -692,13 +698,13 @@ describe('DatatableComponent', () => {
       const updatedConfig = wrapper.find(EuiDataGrid).prop('pagination');
       expect(updatedConfig).toBeTruthy();
       expect(updatedConfig?.pageIndex).toBe(newIndex);
-      expect(updatedConfig?.pageSize).toBe(args.pageSize);
+      expect(updatedConfig?.pageSize).toBe(DEFAULT_PAGE_SIZE);
     });
 
-    it('disables pagination when pageSize NOT provided', async () => {
+    it('disables pagination by default', async () => {
       const { data, args } = sampleArgs();
 
-      delete args.pageSize;
+      delete args.enablePagination;
 
       const wrapper = mount(
         <DatatableComponent
@@ -721,14 +727,14 @@ describe('DatatableComponent', () => {
       const { data, args } = sampleArgs();
 
       const argsWithPagination = copyData(args);
-      argsWithPagination.pageSize = 20;
+      argsWithPagination.enablePagination = true;
 
       const argsWithoutPagination = copyData(args);
-      delete argsWithoutPagination.pageSize;
+      argsWithoutPagination.enablePagination = false;
 
       const defaultProps = {
         data,
-        formatFactory: (x) => x as IFieldFormat,
+        formatFactory: (x?: SerializedFieldFormat<FieldFormatParams>) => x as IFieldFormat,
         dispatchEvent: onDispatchEvent,
         getType: jest.fn(),
         paletteService: chartPluginMock.createPaletteRegistry(),

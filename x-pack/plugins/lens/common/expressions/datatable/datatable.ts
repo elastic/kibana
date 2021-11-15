@@ -22,7 +22,7 @@ export interface DatatableArgs {
   columns: ColumnConfigArg[];
   sortingColumnId: SortingState['columnId'];
   sortingDirection: SortingState['direction'];
-  pageSize?: number;
+  enablePagination?: boolean;
   fitRowToContent?: boolean;
 }
 
@@ -63,8 +63,8 @@ export const getDatatable = (
       types: ['boolean'],
       help: '',
     },
-    pageSize: {
-      types: ['number'],
+    enablePagination: {
+      types: ['boolean'],
       help: '',
     },
   },

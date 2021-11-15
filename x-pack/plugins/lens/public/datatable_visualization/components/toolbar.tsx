@@ -15,7 +15,7 @@ import type { DatatableVisualizationState } from '../visualization';
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
 
-  const onChange = useCallback(() => {
+  const onToggleFitRow = useCallback(() => {
     const current = state.fitRowToContent ?? false;
     setState({
       ...state,
@@ -24,11 +24,9 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   }, [setState, state]);
 
   const onTogglePagination = useCallback(() => {
-    const defaultPageSize = 10;
-    const pageSize = state.pageSize ? undefined : defaultPageSize;
     setState({
       ...state,
-      pageSize,
+      enablePagination: !state.enablePagination,
     });
   }, [setState, state]);
 
@@ -54,7 +52,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             label=""
             showLabel={false}
             checked={Boolean(state.fitRowToContent)}
-            onChange={onChange}
+            onChange={onToggleFitRow}
           />
         </EuiFormRow>
         <EuiFormRow label="Paginate Table?" display="columnCompressedSwitch">
@@ -63,7 +61,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             data-test-subj="lens-table-pagination-switch"
             label=""
             showLabel={false}
-            checked={Boolean(state.pageSize)}
+            checked={Boolean(state.enablePagination)}
             onChange={onTogglePagination}
           />
         </EuiFormRow>

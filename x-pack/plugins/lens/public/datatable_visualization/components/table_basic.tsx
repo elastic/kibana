@@ -50,6 +50,9 @@ const gridStyle: EuiDataGridStyle = {
   header: 'underline',
 };
 
+const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 50, 100];
+
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const [firstTable] = Object.values(props.data.tables);
 
@@ -66,16 +69,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   useEffect(() => {
-    // TODO consider page size of zero
     setPagination(
-      props.args.pageSize
+      props.args.enablePagination
         ? {
             pageIndex: 0,
-            pageSize: props.args.pageSize,
+            pageSize: DEFAULT_PAGE_SIZE,
           }
         : undefined
     );
-  }, [props.args.pageSize]);
+  }, [props.args.enablePagination]);
 
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -100,6 +102,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const paginationConfig = pagination && {
     ...pagination,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
     onChangeItemsPerPage,
     onChangePage,
   };
