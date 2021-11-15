@@ -34,10 +34,12 @@ import {
   EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -65,7 +67,7 @@ import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
-import { translations } from './translations';
+import { translations, paths } from '../../config';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
@@ -115,25 +117,25 @@ export const columns: Array<
 > = [
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: translations.statusColumnDescription,
+    displayAsText: translations.alertsTable.statusColumnDescription,
     id: ALERT_STATUS,
     initialWidth: 110,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: translations.lastUpdatedColumnDescription,
+    displayAsText: translations.alertsTable.lastUpdatedColumnDescription,
     id: TIMESTAMP,
     initialWidth: 230,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: translations.durationColumnDescription,
+    displayAsText: translations.alertsTable.durationColumnDescription,
     id: ALERT_DURATION,
     initialWidth: 116,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: translations.reasonColumnDescription,
+    displayAsText: translations.alertsTable.reasonColumnDescription,
     id: ALERT_REASON,
     linkField: '*',
   },
@@ -188,6 +190,7 @@ function ObservabilityActions({
   const toggleActionsPopover = useCallback((id) => {
     setActionsPopover((current) => (current ? null : id));
   }, []);
+
   const casePermissions = useGetUserCasesPermissions();
   const event = useMemo(() => {
     return {
@@ -219,6 +222,9 @@ function ObservabilityActions({
     onUpdateFailure: onAlertStatusUpdated,
   });
 
+  const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
+  const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
+
   const actionsMenuItems = useMemo(() => {
     return [
       ...(casePermissions?.crud
@@ -240,37 +246,56 @@ function ObservabilityActions({
           ]
         : []),
       ...(alertPermissions.crud ? statusActionItems : []),
+      ...(!!linkToRule
+        ? [
+            <EuiContextMenuItem
+              key="viewRuleDetails"
+              data-test-subj="viewRuleDetails"
+              href={linkToRule}
+            >
+              {translations.alertsTable.viewRuleDetailsButtonText}
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ];
-  }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
+  }, [
+    afterCaseSelection,
+    casePermissions,
+    timelines,
+    event,
+    statusActionItems,
+    alertPermissions,
+    linkToRule,
+  ]);
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
-      ? translations.notEnoughPermissions
-      : translations.moreActionsTextLabel;
+      ? translations.alertsTable.notEnoughPermissions
+      : translations.alertsTable.moreActionsTextLabel;
 
   return (
     <>
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
-          <EuiToolTip content={translations.viewDetailsTextLabel}>
+          <EuiToolTip content={translations.alertsTable.viewDetailsTextLabel}>
             <EuiButtonIcon
               size="s"
               iconType="expand"
               color="text"
               onClick={() => setFlyoutAlert(alert)}
               data-test-subj="openFlyoutButton"
-              aria-label={translations.viewDetailsTextLabel}
+              aria-label={translations.alertsTable.viewDetailsTextLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiToolTip content={translations.viewInAppTextLabel}>
+          <EuiToolTip content={translations.alertsTable.viewInAppTextLabel}>
             <EuiButtonIcon
               size="s"
               href={prepend(alert.link ?? '')}
               iconType="eye"
               color="text"
-              aria-label={translations.viewInAppTextLabel}
+              aria-label={translations.alertsTable.viewInAppTextLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -280,13 +305,12 @@ function ObservabilityActions({
               <EuiToolTip content={actionsToolTip}>
                 <EuiButtonIcon
                   display="empty"
-                  disabled={actionsMenuItems.length <= 0}
                   size="s"
                   color="text"
                   iconType="boxesHorizontal"
                   aria-label={actionsToolTip}
                   onClick={() => toggleActionsPopover(eventId)}
-                  data-test-subj="alerts-table-row-action-more"
+                  data-test-subj="alertsTableRowActionMore"
                 />
               </EuiToolTip>
             }
@@ -345,7 +369,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         id: 'expand',
         width: 120,
         headerCellRender: () => {
-          return <EventsThContent>{translations.actionsTextLabel}</EventsThContent>;
+          return <EventsThContent>{translations.alertsTable.actionsTextLabel}</EventsThContent>;
         },
         rowCellRender: (actionProps: ActionProps) => {
           return (
@@ -377,8 +401,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       hasAlertsCrudPermissions,
       indexNames,
       itemsPerPageOptions: [10, 25, 50],
-      loadingText: translations.loadingTextLabel,
-      footerText: translations.footerTextLabel,
+      loadingText: translations.alertsTable.loadingTextLabel,
+      footerText: translations.alertsTable.footerTextLabel,
       query: {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
@@ -399,7 +423,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filterStatus: workflowStatus as AlertWorkflowStatus,
       leadingControlColumns,
       trailingControlColumns,
-      unit: (totalAlerts: number) => translations.showingAlertsTitle(totalAlerts),
+      unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),
     };
   }, [
     casePermissions,

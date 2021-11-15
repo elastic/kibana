@@ -6,7 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { jsonRt, isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { isoToEpochRt } from '@kbn/io-ts-utils/iso_to_epoch_rt';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
@@ -32,8 +34,8 @@ import { getServiceProfilingStatistics } from '../lib/services/profiling/get_ser
 import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
 import { getServiceInfrastructure } from '../lib/services/get_service_infrastructure';
 import { withApmSpan } from '../utils/with_apm_span';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import {
   comparisonRangeRt,
   environmentRt,

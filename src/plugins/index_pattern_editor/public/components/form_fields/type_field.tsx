@@ -8,8 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { euiColorAccent } from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -54,7 +53,7 @@ const rollupSelectItem = (
         defaultMessage="Rollup data view"
       />
       &nbsp;
-      <EuiBadge color={euiColorAccent}>
+      <EuiBadge color={euiLightVars.euiColorAccent}>
         <FormattedMessage id="indexPatternEditor.typeSelect.betaLabel" defaultMessage="Beta" />
       </EuiBadge>
     </EuiDescriptionListTitle>

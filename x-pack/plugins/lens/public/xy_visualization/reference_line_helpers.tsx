@@ -104,14 +104,14 @@ export function getStaticValue(
   ) {
     return fallbackValue;
   }
-  return (
-    computeStaticValueForGroup(
-      filteredLayers,
-      accessors,
-      activeData,
-      groupId !== 'x' // histogram axis should compute the min based on the current data
-    ) || fallbackValue
+  const computedValue = computeStaticValueForGroup(
+    filteredLayers,
+    accessors,
+    activeData,
+    groupId !== 'x', // histogram axis should compute the min based on the current data
+    groupId !== 'x'
   );
+  return computedValue ?? fallbackValue;
 }
 
 function getAccessorCriteriaForGroup(
@@ -152,13 +152,15 @@ function getAccessorCriteriaForGroup(
 export function computeOverallDataDomain(
   dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
   accessorIds: string[],
-  activeData: NonNullable<FramePublicAPI['activeData']>
+  activeData: NonNullable<FramePublicAPI['activeData']>,
+  allowStacking: boolean = true
 ) {
   const accessorMap = new Set(accessorIds);
   let min: number | undefined;
   let max: number | undefined;
-  const [stacked, unstacked] = partition(dataLayers, ({ seriesType }) =>
-    isStackedChart(seriesType)
+  const [stacked, unstacked] = partition(
+    dataLayers,
+    ({ seriesType }) => isStackedChart(seriesType) && allowStacking
   );
   for (const { layerId, accessors } of unstacked) {
     const table = activeData[layerId];
@@ -215,7 +217,8 @@ function computeStaticValueForGroup(
   dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
-  minZeroOrNegativeBase: boolean = true
+  minZeroOrNegativeBase: boolean = true,
+  allowStacking: boolean = true
 ) {
   const defaultReferenceLineFactor = 3 / 4;
 
@@ -224,7 +227,12 @@ function computeStaticValueForGroup(
       return defaultReferenceLineFactor;
     }
 
-    const { min, max } = computeOverallDataDomain(dataLayers, accessorIds, activeData);
+    const { min, max } = computeOverallDataDomain(
+      dataLayers,
+      accessorIds,
+      activeData,
+      allowStacking
+    );
 
     if (min != null && max != null && isFinite(min) && isFinite(max)) {
       // Custom axis bounds can go below 0, so consider also lower values than 0

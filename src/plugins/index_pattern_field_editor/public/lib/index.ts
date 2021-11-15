@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { deserializeField } from './serialization';
+export { deserializeField, painlessErrorToMonacoMarker } from './serialization';
 
 export { getLinks } from './documentation';
 
-export type { RuntimeFieldPainlessError } from './runtime_field_validation';
-export { getRuntimeFieldValidator, parseEsError } from './runtime_field_validation';
+export { parseEsError } from './runtime_field_validation';
 
 export type { ApiService } from './api';
+
 export { initApi } from './api';
