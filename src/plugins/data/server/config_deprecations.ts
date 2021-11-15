@@ -14,9 +14,9 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
   renameFromRoot(
     'kibana.autocompleteTerminateAfter',
     'data.autocomplete.valueSuggestions.terminateAfter',
-    { level: 'critical' }
+    { level: 'warning' }
   ),
   renameFromRoot('kibana.autocompleteTimeout', 'data.autocomplete.valueSuggestions.timeout', {
-    level: 'critical',
+    level: 'warning',
   }),
 ];
