@@ -7,7 +7,9 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { EsqlLang } from '@kbn/monaco';
 import { EuiFormRow, EuiTextArea, EuiLink, EuiText } from '@elastic/eui';
+import { CodeEditorField } from '../../../../../../src/plugins/kibana_react/public';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { DataSourceStrings, SQL_URL } from '../../../i18n';
@@ -15,6 +17,11 @@ import { DataSourceStrings, SQL_URL } from '../../../i18n';
 const { Essql: strings } = DataSourceStrings;
 
 class EssqlDatasource extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.editor = null;
+  }
+
   componentDidMount() {
     const query = this.getQuery();
     if (typeof query !== 'string') {
@@ -56,9 +63,19 @@ class EssqlDatasource extends PureComponent {
     this.setArg(this.getArgName(), value);
   };
 
+  editorDidMount = (editor) => {
+    // Updating tab size for the editor
+    const model = editor.getModel();
+    if (model) {
+      model.updateOptions({ tabSize: 2 });
+    }
+
+    this.editor = editor;
+  };
+
   render() {
     const { isInvalid } = this.props;
-
+    console.log(EsqlLang);
     return (
       <EuiFormRow
         isInvalid={isInvalid}
@@ -71,14 +88,31 @@ class EssqlDatasource extends PureComponent {
           </EuiText>
         }
       >
-        <EuiTextArea
+        <CodeEditorField
+          languageId={EsqlLang.ID}
+          value={this.getQuery()}
+          onChange={this.onChange}
+          className="canvasTextArea__code"
+          placeholder={this.defaultQuery}
+          options={{
+            fontSize: 12,
+            scrollBeyondLastLine: false,
+            quickSuggestions: true,
+            minimap: { enabled: false },
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+          }}
+          height="150px"
+          editorDidMount={this.editorDidMount}
+        />
+        {/* <EuiTextArea
           placeholder={this.defaultQuery}
           isInvalid={isInvalid}
           className="canvasTextArea__code"
           value={this.getQuery()}
           onChange={this.onChange}
           rows={15}
-        />
+        /> */}
       </EuiFormRow>
     );
   }
