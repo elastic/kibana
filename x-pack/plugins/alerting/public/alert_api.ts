@@ -6,11 +6,11 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { BASE_ALERTING_API_PATH } from '../common';
+import { LEGACY_BASE_ALERT_API_PATH } from '../common';
 import type { Alert, AlertType } from '../common';
 
 export async function loadRuleTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
-  return await http.get(`${BASE_ALERTING_API_PATH}/rule_types`);
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`);
 }
 
 export async function loadRule({
@@ -20,5 +20,5 @@ export async function loadRule({
   http: HttpSetup;
   ruleId: string;
 }): Promise<Alert> {
-  return await http.get(`${BASE_ALERTING_API_PATH}/rule/${ruleId}`);
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${ruleId}`);
 }
