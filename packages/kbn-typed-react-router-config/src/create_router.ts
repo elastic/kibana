@@ -15,15 +15,9 @@ import {
 } from 'react-router-config';
 import qs from 'query-string';
 import { findLastIndex, merge, compact } from 'lodash';
-import type { deepExactRt as deepExactRtTyped, mergeRt as mergeRtTyped } from '@kbn/io-ts-utils';
-// @ts-expect-error
-import { deepExactRt as deepExactRtNonTyped } from '@kbn/io-ts-utils/target_node/deep_exact_rt';
-// @ts-expect-error
-import { mergeRt as mergeRtNonTyped } from '@kbn/io-ts-utils/target_node/merge_rt';
+import { mergeRt } from '@kbn/io-ts-utils/merge_rt';
+import { deepExactRt } from '@kbn/io-ts-utils/deep_exact_rt';
 import { FlattenRoutesOf, Route, Router } from './types';
-
-const deepExactRt: typeof deepExactRtTyped = deepExactRtNonTyped;
-const mergeRt: typeof mergeRtTyped = mergeRtNonTyped;
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');

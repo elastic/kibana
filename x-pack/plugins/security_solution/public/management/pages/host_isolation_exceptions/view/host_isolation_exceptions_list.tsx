@@ -7,15 +7,14 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, useCallback, useEffect } from 'react';
+import React, { Dispatch, useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import {
   getCurrentLocation,
-  getItemToDelete,
   getListFetchError,
   getListIsLoading,
   getListItems,
@@ -32,7 +31,6 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { HostIsolationExceptionsEmptyState } from './components/empty';
-import { HostIsolationExceptionsPageAction } from '../store/action';
 import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
 import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 import {
@@ -41,6 +39,7 @@ import {
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
+import { HostIsolationExceptionsPageAction } from '../store/action';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -55,12 +54,14 @@ export const HostIsolationExceptionsList = () => {
   const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
-  const itemToDelete = useHostIsolationExceptionsSelector(getItemToDelete);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+
+  const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
+
   const history = useHistory();
   const privileges = useEndpointPrivileges();
   const showFlyout = privileges.canIsolateHost && !!location.show;
-  const hasDataToShow = !isLoading && (!!location.filter || listItems.length > 0);
+  const hasDataToShow = !!location.filter || listItems.length > 0;
 
   useEffect(() => {
     if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
@@ -90,10 +91,7 @@ export const HostIsolationExceptionsList = () => {
     const deleteAction = {
       icon: 'trash',
       onClick: () => {
-        dispatch({
-          type: 'hostIsolationExceptionsMarkToDelete',
-          payload: element,
-        });
+        setItemToDelete(element);
       },
       'data-test-subj': 'deleteHostIsolationException',
       children: DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
@@ -124,6 +122,15 @@ export const HostIsolationExceptionsList = () => {
       }),
     [navigateCallback]
   );
+
+  const handleCloseDeleteDialog = (forceRefresh: boolean = false) => {
+    if (forceRefresh) {
+      dispatch({
+        type: 'hostIsolationExceptionsRefreshList',
+      });
+    }
+    setItemToDelete(null);
+  };
 
   return (
     <AdministrationListPage
@@ -161,7 +168,9 @@ export const HostIsolationExceptionsList = () => {
     >
       {showFlyout && <HostIsolationExceptionsFormFlyout />}
 
-      {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
+      {itemToDelete ? (
+        <HostIsolationExceptionDeleteModal item={itemToDelete} onCancel={handleCloseDeleteDialog} />
+      ) : null}
 
       {hasDataToShow ? (
         <>

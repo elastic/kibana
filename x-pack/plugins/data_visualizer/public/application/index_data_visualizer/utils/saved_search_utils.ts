@@ -15,6 +15,7 @@ import {
   Query,
   Filter,
 } from '@kbn/es-query';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
 import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
@@ -43,7 +44,7 @@ export function getDefaultQuery() {
 export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject | SavedSearch) {
   const search = isSavedSearchSavedObject(savedSearch)
     ? savedSearch?.attributes?.kibanaSavedObjectMeta
-    : // @ts-expect-error kibanaSavedObjectMeta does exist
+    : // @ts-ignore
       savedSearch?.kibanaSavedObjectMeta;
 
   const parsed =
@@ -76,7 +77,7 @@ export function createMergedEsQuery(
   indexPattern?: IndexPattern,
   uiSettings?: IUiSettingsClient
 ) {
-  let combinedQuery: any = getDefaultQuery();
+  let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
 
   if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
@@ -86,12 +87,12 @@ export function createMergedEsQuery(
     if (combinedQuery.bool !== undefined) {
       const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
-      if (Array.isArray(combinedQuery.bool.filter) === false) {
+      if (!Array.isArray(combinedQuery.bool.filter)) {
         combinedQuery.bool.filter =
           combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
       }
 
-      if (Array.isArray(combinedQuery.bool.must_not) === false) {
+      if (!Array.isArray(combinedQuery.bool.must_not)) {
         combinedQuery.bool.must_not =
           combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
       }
@@ -145,8 +146,20 @@ export function getEsQueryFromSavedSearch({
     savedSearch.searchSource.getParent() !== undefined &&
     userQuery
   ) {
+    // Flattened query from search source may contain a clause that narrows the time range
+    // which might interfere with global time pickers so we need to remove
+    const savedQuery =
+      cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultQuery();
+    const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
+
+    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
+      savedQuery.bool.filter = savedQuery.bool.filter.filter(
+        (c: QueryDslQueryContainer) =>
+          !(c.hasOwnProperty('range') && c.range?.hasOwnProperty(timeField))
+      );
+    }
     return {
-      searchQuery: savedSearch.searchSource.getSearchRequestBody()?.query ?? getDefaultQuery(),
+      searchQuery: savedQuery,
       searchString: userQuery.query,
       queryLanguage: userQuery.language as SearchQueryLanguage,
     };

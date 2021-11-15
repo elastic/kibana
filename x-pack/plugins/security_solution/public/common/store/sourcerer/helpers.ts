@@ -37,15 +37,7 @@ export const getScopePatternListSelection = (
       // set to signalIndexName whether or not it exists yet in the patternList
       return (signalIndexName != null ? [signalIndexName] : []).sort();
     case SourcererScopeName.timeline:
-      return (
-        signalIndexName != null
-          ? [
-              // remove signalIndexName in case its already in there and add it whether or not it exists yet in the patternList
-              ...patternList.filter((index) => index !== signalIndexName),
-              signalIndexName,
-            ]
-          : patternList
-      ).sort();
+      return patternList.sort();
   }
 };
 
@@ -96,16 +88,14 @@ export const validateSelectedPatterns = (
       selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
       ...(isEmpty(selectedPatterns)
-        ? id === SourcererScopeName.timeline
-          ? defaultDataViewByEventType({ state, eventType })
-          : {
-              selectedPatterns: getScopePatternListSelection(
-                dataView ?? state.defaultDataView,
-                id,
-                state.signalIndexName,
-                (dataView ?? state.defaultDataView).id === state.defaultDataView.id
-              ),
-            }
+        ? {
+            selectedPatterns: getScopePatternListSelection(
+              dataView ?? state.defaultDataView,
+              id,
+              state.signalIndexName,
+              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
+            ),
+          }
         : {}),
       loading: false,
     },

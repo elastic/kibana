@@ -12,7 +12,6 @@ export { CustomLabelField } from './custom_label_field';
 
 export { PopularityField } from './popularity_field';
 
-export type { ScriptSyntaxError } from './script_field';
 export { ScriptField } from './script_field';
 
 export { FormatField } from './format_field';
