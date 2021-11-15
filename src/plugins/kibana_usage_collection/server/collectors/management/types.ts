@@ -28,6 +28,7 @@ export interface UsageStats {
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
+  'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
