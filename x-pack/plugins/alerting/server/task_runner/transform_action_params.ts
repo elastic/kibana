@@ -13,6 +13,15 @@ import {
 } from '../types';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 
+export interface AlertMetadata {
+  start?: number;
+  duration?: number;
+  end?: number;
+  value?: number;
+  threshold?: number;
+  reason?: string;
+}
+
 interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
@@ -20,6 +29,12 @@ interface TransformActionParamsOptions {
   actionId: string;
   actionTypeId: string;
   alertName: string;
+  alertStart?: number;
+  alertDuration?: number;
+  alertEnd?: number;
+  alertValue?: number;
+  alertThreshold?: number;
+  alertReason?: string;
   spaceId: string;
   tags?: string[];
   alertInstanceId: string;
@@ -31,6 +46,7 @@ interface TransformActionParamsOptions {
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
+  alertMetadata: AlertMetadata;
 }
 
 export function transformActionParams({
@@ -51,6 +67,7 @@ export function transformActionParams({
   state,
   kibanaBaseUrl,
   alertParams,
+  alertMetadata,
 }: TransformActionParamsOptions): AlertActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -81,6 +98,12 @@ export function transformActionParams({
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
       actionSubgroup: alertActionSubgroup,
+      ...(alertMetadata.start ? { start: alertMetadata.start } : {}),
+      ...(alertMetadata.duration ? { duration: alertMetadata.duration } : {}),
+      ...(alertMetadata.end ? { end: alertMetadata.end } : {}),
+      ...(alertMetadata.threshold ? { threshold: alertMetadata.threshold } : {}),
+      ...(alertMetadata.value ? { value: alertMetadata.value } : {}),
+      ...(alertMetadata.reason ? { reason: alertMetadata.reason } : {}),
     },
   };
   return actionsPlugin.renderActionParameterTemplates(

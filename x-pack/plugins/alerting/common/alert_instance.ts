@@ -32,3 +32,13 @@ export const rawAlertInstance = t.partial({
   meta: metaSchema,
 });
 export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;
+
+export const rawAlertStaticContext = t.partial({
+  duration: t.number,
+  start: t.number,
+  end: t.number,
+  threshold: t.number,
+  value: t.number,
+  reason: t.string,
+});
+export type RawAlertStaticContext = t.TypeOf<typeof rawAlertStaticContext>;

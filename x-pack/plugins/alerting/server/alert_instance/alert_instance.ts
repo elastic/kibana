@@ -12,6 +12,7 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
+  RawAlertStaticContext,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -25,6 +26,7 @@ interface ScheduledExecutionOptions<
   subgroup?: string;
   context: Context;
   state: State;
+  staticContext: RawAlertStaticContext;
 }
 
 export type PublicAlertInstance<
@@ -134,11 +136,16 @@ export class AlertInstance<
     return this.state;
   }
 
-  scheduleActions(actionGroup: ActionGroupIds, context: Context = {} as Context) {
+  scheduleActions(
+    actionGroup: ActionGroupIds,
+    context: Context = {} as Context,
+    staticContext: RawAlertStaticContext = {}
+  ) {
     this.ensureHasNoScheduledActions();
     this.scheduledExecutionOptions = {
       actionGroup,
       context,
+      staticContext,
       state: this.state,
     };
     return this;
@@ -147,13 +154,15 @@ export class AlertInstance<
   scheduleActionsWithSubGroup(
     actionGroup: ActionGroupIds,
     subgroup: string,
-    context: Context = {} as Context
+    context: Context = {} as Context,
+    staticContext: RawAlertStaticContext = {}
   ) {
     this.ensureHasNoScheduledActions();
     this.scheduledExecutionOptions = {
       actionGroup,
       subgroup,
       context,
+      staticContext,
       state: this.state,
     };
     return this;

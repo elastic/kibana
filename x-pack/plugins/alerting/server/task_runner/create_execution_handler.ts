@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
-import { transformActionParams } from './transform_action_params';
+import { transformActionParams, AlertMetadata } from './transform_action_params';
 import {
   asSavedObjectExecutionSource,
   PluginStartContract as ActionsPluginStartContract,
@@ -24,7 +24,6 @@ import {
 import { NormalizedAlertType, UntypedNormalizedAlertType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-
 export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,
   ExtractedParams extends AlertTypeParams,
@@ -65,6 +64,7 @@ interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   alertInstanceId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
+  alertMetadata: AlertMetadata;
 }
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
@@ -113,6 +113,7 @@ export function createExecutionHandler<
     context,
     state,
     alertInstanceId,
+    alertMetadata,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
@@ -141,6 +142,7 @@ export function createExecutionHandler<
             state,
             kibanaBaseUrl,
             alertParams,
+            alertMetadata,
           }),
         };
       })

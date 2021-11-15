@@ -32,6 +32,12 @@ export enum AlertProvidedActionVariables {
   alertActionGroup = 'alert.actionGroup',
   alertActionGroupName = 'alert.actionGroupName',
   alertActionSubgroup = 'alert.actionSubgroup',
+  alertStart = 'alert.start',
+  alertDuration = 'alert.duration',
+  alertEnd = 'alert.end',
+  alertValue = 'alert.value',
+  alertThreshold = 'alert.threshold',
+  alertReason = 'alert.reason',
 }
 
 export enum LegacyAlertProvidedActionVariables {
@@ -131,6 +137,48 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
           'The human readable name of the action group of the alert that scheduled actions for the rule.',
       }
     ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertStart,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertStartNameLabel', {
+      defaultMessage: 'The date the alert became active, if available.',
+    }),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertDuration,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertDurationNameLabel', {
+      defaultMessage: 'The duration of the alert, if available.',
+    }),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertEnd,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertEndNameLabel', {
+      defaultMessage: 'The date the alert recovered, if available.',
+    }),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertValue,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertValueNameLabel', {
+      defaultMessage: 'The value used to evaluate whether the alert is active.',
+    }),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertThreshold,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertThresholdNameLabel', {
+      defaultMessage: 'The threshold used to evaluate whether the alert is active.',
+    }),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertReason,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertReasonLabel', {
+      defaultMessage: 'The reason the alert was triggered.',
+    }),
   });
 
   result.push({

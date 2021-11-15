@@ -16,6 +16,7 @@ import {
   TimeSeriesQuery,
 } from '../../../../triggers_actions_ui/server';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
+import { RawAlertStaticContext } from '../../../../alerting/common';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
@@ -208,7 +209,13 @@ export function getAlertType(
       };
       const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);
-      alertInstance.scheduleActions(ActionGroupId, actionContext);
+      const staticContext: RawAlertStaticContext = {
+        value,
+        threshold: params.threshold[0],
+        reason: humanFn,
+      };
+
+      alertInstance.scheduleActions(ActionGroupId, actionContext, staticContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
   }

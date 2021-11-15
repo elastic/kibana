@@ -214,7 +214,14 @@ export class TaskRunner<
     } = alertInstance.getScheduledActionOptions()!;
     alertInstance.updateLastScheduledActions(actionGroup, actionSubgroup);
     alertInstance.unscheduleActions();
-    return executionHandler({ actionGroup, actionSubgroup, context, state, alertInstanceId });
+    return executionHandler({
+      actionGroup,
+      actionSubgroup,
+      context,
+      state,
+      alertInstanceId,
+      alertMetadata: {},
+    });
   }
 
   async executeAlertInstances(
@@ -244,7 +251,12 @@ export class TaskRunner<
     } = alert;
     const {
       params: { alertId },
-      state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
+      state: {
+        alertInstances: alertRawInstances = {},
+        alertTypeState = {},
+        alertStaticContext = {},
+        previousStartedAt,
+      },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const alertType = this.ruleTypeRegistry.get(alertTypeId);
@@ -331,35 +343,46 @@ export class TaskRunner<
     };
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
-    const instancesWithScheduledActions = pickBy(
+    const activeAlerts = pickBy(
       alertInstances,
       (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
         alertInstance.hasScheduledActions()
     );
-    const recoveredAlertInstances = pickBy(
+    const recoveredAlerts = pickBy(
       alertInstances,
       (alertInstance: AlertInstance<InstanceState, InstanceContext>, id) =>
         !alertInstance.hasScheduledActions() && originalAlertInstanceIds.has(id)
     );
 
+    // TODO
+    // Loop through active alerts and get context from alertInstance.getScheduledActionOptions()?.staticContext
+    // Loop through recovered alerts and get context from alertStaticContext
+    const alertContexts = mapValues(
+      alertInstances,
+      (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
+        alertInstance.getScheduledActionOptions()?.staticContext ?? {}
+    );
+
     logActiveAndRecoveredInstances({
       logger: this.logger,
-      activeAlertInstances: instancesWithScheduledActions,
-      recoveredAlertInstances,
+      activeAlertInstances: activeAlerts,
+      recoveredAlertInstances: recoveredAlerts,
       alertLabel,
     });
 
+    // TODO
+    // Move from state to static context
     trackAlertDurations({
       originalAlerts: originalAlertInstances,
-      currentAlerts: instancesWithScheduledActions,
-      recoveredAlerts: recoveredAlertInstances,
+      currentAlerts: activeAlerts,
+      recoveredAlerts,
     });
 
     generateNewAndRecoveredInstanceEvents({
       eventLogger,
       originalAlertInstances,
-      currentAlertInstances: instancesWithScheduledActions,
-      recoveredAlertInstances,
+      currentAlertInstances: activeAlerts,
+      recoveredAlertInstances: recoveredAlerts,
       alertId,
       alertLabel,
       namespace,
@@ -372,7 +395,7 @@ export class TaskRunner<
 
       scheduleActionsForRecoveredInstances<InstanceState, InstanceContext, RecoveryActionGroupId>({
         recoveryActionGroup: this.alertType.recoveryActionGroup,
-        recoveredAlertInstances,
+        recoveredAlertInstances: recoveredAlerts,
         executionHandler,
         mutedInstanceIdsSet,
         logger: this.logger,
@@ -381,7 +404,7 @@ export class TaskRunner<
 
       const instancesToExecute =
         notifyWhen === 'onActionGroupChange'
-          ? Object.entries(instancesWithScheduledActions).filter(
+          ? Object.entries(activeAlerts).filter(
               ([alertInstanceName, alertInstance]: [
                 string,
                 AlertInstance<InstanceState, InstanceContext>
@@ -396,7 +419,7 @@ export class TaskRunner<
                 return shouldExecuteAction;
               }
             )
-          : Object.entries(instancesWithScheduledActions).filter(
+          : Object.entries(activeAlerts).filter(
               ([alertInstanceName, alertInstance]: [
                 string,
                 AlertInstance<InstanceState, InstanceContext>
@@ -427,10 +450,11 @@ export class TaskRunner<
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
+      alertStaticContext: {},
       alertInstances: mapValues<
         Record<string, AlertInstance<InstanceState, InstanceContext>>,
         RawAlertInstance
-      >(instancesWithScheduledActions, (alertInstance) => alertInstance.toRaw()),
+      >(activeAlerts, (alertInstance) => alertInstance.toRaw()),
     };
   }
 
@@ -893,6 +917,7 @@ function scheduleActionsForRecoveredInstances<
         context: {},
         state: {},
         alertInstanceId: id,
+        alertMetadata: {},
       });
       instance.scheduleActions(recoveryActionGroup.id);
     }

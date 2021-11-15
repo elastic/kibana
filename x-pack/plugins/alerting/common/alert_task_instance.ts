@@ -6,11 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { rawAlertInstance } from './alert_instance';
+import { rawAlertInstance, rawAlertStaticContext } from './alert_instance';
 import { DateFromString } from './date_from_string';
 
 export const alertStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
+  alertStaticContext: t.record(t.string, rawAlertStaticContext),
   alertInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
 });
