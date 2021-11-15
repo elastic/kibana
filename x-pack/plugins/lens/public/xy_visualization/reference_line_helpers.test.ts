@@ -120,6 +120,32 @@ describe('reference_line helpers', () => {
       ).toBe(100);
     });
 
+    it('should return 0 as result of calculation', () => {
+      expect(
+        getStaticValue(
+          [
+            {
+              layerId: 'id-a',
+              seriesType: 'area',
+              layerType: 'data',
+              accessors: ['a'],
+              yConfig: [{ forAccessor: 'a', axisMode: 'right' }],
+            } as XYLayerConfig,
+          ],
+          'yRight',
+          {
+            activeData: getActiveData([
+              {
+                id: 'id-a',
+                rows: [{ a: -30 }, { a: 10 }],
+              },
+            ]),
+          },
+          hasAllNumberHistogram
+        )
+      ).toBe(0);
+    });
+
     it('should work for no yConfig defined and fallback to left axis', () => {
       expect(
         getStaticValue(

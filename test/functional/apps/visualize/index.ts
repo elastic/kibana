@@ -74,8 +74,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_metric_chart'));
     });
 
-    describe('visualize ciGroup4', function () {
-      this.tags('ciGroup4');
+    describe('visualize ciGroup1', function () {
+      this.tags('ciGroup1');
 
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_shared_item'));
