@@ -19,7 +19,7 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
-import { defaultControlColumn } from './control_columns';
+import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
@@ -118,6 +118,8 @@ describe('Body', () => {
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
 
+  const ACTION_BUTTON_COUNT = 4;
+
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
@@ -139,7 +141,7 @@ describe('Body', () => {
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
-    leadingControlColumns: [defaultControlColumn],
+    leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
     trailingControlColumns: [],
   };
 

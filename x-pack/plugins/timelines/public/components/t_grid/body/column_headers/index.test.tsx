@@ -8,7 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
+import { getActionsColumnWidth } from './helpers';
+
 import { defaultHeaders } from './default_headers';
 import { Sort } from '../sort';
 
@@ -51,6 +52,8 @@ const timelineId = 'test';
 
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();
+  const ACTION_BUTTON_COUNT = 4;
+  const actionsColumnWidth = getActionsColumnWidth(ACTION_BUTTON_COUNT);
 
   describe('rendering', () => {
     const sort: Sort[] = [
@@ -65,7 +68,7 @@ describe('ColumnHeaders', () => {
       const wrapper = shallow(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -88,7 +91,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -111,7 +114,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -172,7 +175,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -216,7 +219,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -255,7 +258,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -293,7 +296,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}

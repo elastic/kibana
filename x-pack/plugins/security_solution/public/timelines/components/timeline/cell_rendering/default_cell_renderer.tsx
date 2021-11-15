@@ -18,7 +18,7 @@ import {
   StyledContent,
 } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 
-const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
+const FIELDS_WITHOUT_CELL_ACTIONS = ['signal.rule.risk_score', 'signal.reason'];
 const hasCellActions = (columnId?: string) => {
   return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 };
