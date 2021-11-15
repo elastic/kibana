@@ -22,7 +22,7 @@ import { DiscoverChart } from './discover_chart';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(timefield?: string) {
+function getProps(isTimeBased: boolean = false) {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -84,6 +84,7 @@ function getProps(timefield?: string) {
   }) as DataCharts$;
 
   return {
+    isTimeBased,
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchDataChart$: charts$,
@@ -93,7 +94,6 @@ function getProps(timefield?: string) {
     services,
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
-    timefield,
   };
 }
 
@@ -103,7 +103,7 @@ describe('Discover chart', () => {
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
   test('render with filefield', () => {
-    const component = mountWithIntl(<DiscoverChart {...getProps('timefield')} />);
+    const component = mountWithIntl(<DiscoverChart {...getProps(true)} />);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 });
