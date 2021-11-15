@@ -24,6 +24,7 @@ import {
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { ServerApiError } from '../../../../../common/types';
+import { useQueryClient } from 'react-query';
 import { Loader } from '../../../../../common/components/loader';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import {
