@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import type { StatusState } from '../lib';
 
-type StatusWithoutMessage = Omit<StatusState, 'message'>;
+export type StatusWithoutMessage = Omit<StatusState, 'message'>;
 
 interface StatusBadgeProps {
   status: StatusWithoutMessage;

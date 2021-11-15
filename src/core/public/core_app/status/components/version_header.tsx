@@ -9,7 +9,7 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ServerVersion } from '../../../../types/status';
+import type { ServerVersion } from '../../../../types/status';
 
 interface VersionHeaderProps {
   version: ServerVersion;
