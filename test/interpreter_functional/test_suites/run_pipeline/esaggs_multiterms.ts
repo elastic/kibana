@@ -159,7 +159,7 @@ export default function ({
       const expression = `
           kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
-          aggs={aggDateHistogram id="0" enabled=true schema="bucket" field="@timestamp" interval="1h"}
+          aggs={aggDateHistogram id="0" enabled=true schema="bucket" field="@timestamp" interval="6h"}
           aggs={aggMultiTerms id="1" enabled=true schema="bucket" fields="extension.raw" fields="geo.dest" size=3 orderAgg={aggAvg id="order" field="bytes" enabled=true schema="metric"} otherBucket=true}
           aggs={aggSum id="2" field="bytes" enabled=true schema="metric"}
         `;

@@ -135,7 +135,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
       convert = (val: unknown, type: FieldFormatsContentType) => {
         const params = this._params;
-        const formats = params.paramsPerField.map((fieldParams) =>
+        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) =>
           getFieldFormat({ id: fieldParams.id, params: fieldParams })
         );
 
@@ -145,7 +145,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         return (val as MultiFieldKey).keys
           .map((valPart, i) => formats[i].convert(valPart, type))
-          .join(' - ');
+          .join(' › ');
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
     },

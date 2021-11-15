@@ -175,7 +175,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       maxBars: params.maxBars === AUTO_BARS ? maxBarsDefaultValue : params.maxBars,
       interval: 'auto',
       has_extended_bounds: false,
-      min_doc_count: 1,
+      min_doc_count: false,
       extended_bounds: extendedBoundsToAst({}),
     }).toAst();
   },
