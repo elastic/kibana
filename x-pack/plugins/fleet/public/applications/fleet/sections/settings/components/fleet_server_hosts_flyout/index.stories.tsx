@@ -31,7 +31,10 @@ const args: Args = {
 export const FleetServerHostsFlyout = ({ width }: Args) => {
   return (
     <div style={{ width }}>
-      <Component onClose={() => {}} />
+      <Component
+        onClose={() => {}}
+        fleetServerHosts={['https://host1.fr:8220', 'https://host2-with-a-longer-name.fr:8220']}
+      />
     </div>
   );
 };

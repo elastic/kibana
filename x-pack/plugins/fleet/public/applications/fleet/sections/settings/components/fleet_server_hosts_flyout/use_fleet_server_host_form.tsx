@@ -15,22 +15,6 @@ import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 
-// function normalizeHosts(hostsInput: string[]) {
-//   return hostsInput.map((host) => {
-//     try {
-//       return normalizeHostsForAgents(host);
-//     } catch (err) {
-//       return host;
-//     }
-//   });
-// }
-
-// function isSameArrayValueWithNormalizedHosts(arrayA: string[] = [], arrayB: string[] = []) {
-//   const hostsA = normalizeHosts(arrayA);
-//   const hostsB = normalizeHosts(arrayB);
-//   return hostsA.length === hostsB.length && hostsA.every((val, index) => val === hostsB[index]);
-// }
-
 function validateFleetServerHosts(value: string[]) {
   if (value.length === 0) {
     return [

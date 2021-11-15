@@ -23,12 +23,11 @@ const ModalContext = React.createContext<null | {
 export function useConfirmModal() {
   const context = useContext(ModalContext);
 
-  if (context === null) {
-    throw new Error('Context need to be provided to use useConfirmModal');
-  }
-
   const confirm = useCallback(
     async (title: React.ReactNode, description: React.ReactNode) => {
+      if (context === null) {
+        throw new Error('Context need to be provided to use useConfirmModal');
+      }
       return new Promise<boolean>((resolve) => {
         context.showModal({
           title,
