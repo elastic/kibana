@@ -43,7 +43,7 @@ import { injectReferences, extractReferences } from './saved_visualization_refer
  * An error message to be used when the user rejects a confirm overwrite.
  * @type {string}
  */
-export const OVERWRITE_REJECTED = i18n.translate('savedObjects.overwriteRejectedDescription', {
+export const OVERWRITE_REJECTED = i18n.translate('visualizations.overwriteRejectedDescription', {
   defaultMessage: 'Overwrite confirmation was rejected',
 });
 /**
@@ -51,7 +51,7 @@ export const OVERWRITE_REJECTED = i18n.translate('savedObjects.overwriteRejected
  * @type {string}
  */
 export const SAVE_DUPLICATE_REJECTED = i18n.translate(
-  'savedObjects.saveDuplicateRejectedDescription',
+  'visualizations.saveDuplicateRejectedDescription',
   {
     defaultMessage: 'Save with duplicate title confirmation was rejected',
   }
