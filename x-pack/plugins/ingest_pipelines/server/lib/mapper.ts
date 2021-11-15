@@ -78,7 +78,7 @@ function parseAndValidate(file: string) {
 
   if (missingHeaders.length === 1) {
     throw new Error(
-      i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders', {
+      i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingSingleHeader', {
         defaultMessage: 'Missing required headers: Include {missing} header in the CSV file.',
         values: { missing: missingHeaders[0] },
       })
