@@ -27,11 +27,3 @@ export const getEngineBreadcrumbs = (breadcrumbs: BreadcrumbTrail = []) => {
   const { engineName } = EngineLogic.values;
   return [ENGINES_TITLE, engineName, ...breadcrumbs];
 };
-
-/**
- * Generate an API endpoint
- */
-export const getEngineApiEndpoint = (endpoint: string): string => {
-  const { engineName } = EngineLogic.values;
-  return `/api/app_search/engines/${engineName}/${endpoint}`;
-};
