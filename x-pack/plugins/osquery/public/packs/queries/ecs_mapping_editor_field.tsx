@@ -628,13 +628,13 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
       }),
     });
 
-    const { submit, reset, validate, __validateFields } = form;
+    const { submit, reset, validate, validateFields } = form;
 
     const [formData] = useFormData({ form });
 
     const handleSubmit = useCallback(async () => {
       validate();
-      __validateFields(['result.value']);
+      validateFields(['result.value']);
       const { data, isValid } = await submit();
 
       if (isValid) {
@@ -652,7 +652,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
         }
         reset();
       }
-    }, [validate, __validateFields, submit, onAdd, onChange, reset]);
+    }, [validate, validateFields, submit, onAdd, onChange, reset]);
 
     const handleDeleteClick = useCallback(() => {
       if (defaultValue?.key && onDelete) {
@@ -701,7 +701,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
             return { data: {}, isValid: true };
           }
 
-          __validateFields(['result.value']);
+          validateFields(['result.value']);
           const isValid = await validate();
 
           return {
@@ -716,7 +716,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
           };
         },
       }),
-      [__validateFields, editForm, formData, validate]
+      [validateFields, editForm, formData, validate]
     );
 
     useEffect(() => {
