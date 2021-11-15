@@ -7,36 +7,33 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { keyframes, css } from '@emotion/react';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const defaultSelectionColor = euiTheme.colors.accent;
+    const padding = euiTheme.size.s;
 
-    const scroller = `
+    const outerPanel = `
       font-family: ${euiTheme.font.familyCode};
-      overflow: auto;
-      height: 100%;
-      background-color: ${euiTheme.colors.lightestShade};
-      display: flex;
-      flex-direction: column;
+      position: relative;
     `;
 
-    const selectionArea = `
-      position: absolute;
-      display: none;
-      margin-left: -50%;
-      width: 150%;
-      height: 100%;
-      background-color: ${defaultSelectionColor};
-      pointer-events:none;
-      opacity: .1;
+    const treePanel = `
+      padding: ${padding} 0 0 ${padding};
+    `;
+
+    const detailPanel = `
+      max-width: 424px;
+      height: 300px;
+      overflow-y: auto;
     `;
 
     return {
-      scroller,
-      selectionArea,
+      outerPanel,
+      treePanel,
+      detailPanel,
     };
   }, [euiTheme]);
 

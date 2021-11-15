@@ -8,21 +8,25 @@ import React, { useState, useEffect } from 'react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { useQuery, useMutation } from 'react-query';
-import { 
-  EuiSearchBar, 
-  EuiSearchBarOnChangeArgs, 
-  EuiButton, 
-  EuiPage, 
+import {
+  EuiSearchBar,
+  EuiSearchBarOnChangeArgs,
+  EuiButton,
+  EuiDescriptionList,
+  EuiPage,
   EuiPageContent,
   EuiPageHeader,
   EuiSpacer,
+  EuiSplitPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt
+  EuiEmptyPrompt,
+  EuiTitle,
 } from '@elastic/eui';
 import { ProcessTree } from '../ProcessTree';
 import { getStart, getEnd, getEvent } from '../../../common/test/mock_data';
-import { Process } from '../../hooks/use_process_tree';
+import { Process, ProcessEvent } from '../../hooks/use_process_tree';
+import { useStyles } from './styles';
 
 import {
   INTERNAL_TEST_ROUTE,
@@ -50,7 +54,9 @@ interface MockESReturnData {
 export const SessionView = ({ sessionId }: SessionViewDeps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [data, setData] = useState<any[]>([]);
+  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
+  const styles = useStyles();
 
   const { http } = useKibana<CoreStart>().services;
 
@@ -115,6 +121,7 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
     deleteMutate(undefined, {
       onSuccess: () => {
         setData([]);
+        setSelectedProcess(null);
       }
     })
   }
@@ -145,7 +152,12 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
         }
       />
     )
-  }
+  };
+
+  const toggleDetailPanel = () => {
+    console.log('jack', data)
+    setIsDetailOpen(!isDetailOpen);
+  };
 
   const renderInsertButtons = () => {
     return (
@@ -190,16 +202,71 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
         {renderNoData()}
         {!!data.length &&
           <>
-            <EuiSearchBar query={searchQuery} onChange={onSearch} />
-            <div css={processTreeCSS}>
-              <ProcessTree
-                sessionId={sessionId}
-                forward={data}
-                searchQuery={searchQuery}
-                selectedProcess={selectedProcess}
-                onProcessSelected={onProcessSelected}
-              />
-            </div>  
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiSearchBar query={searchQuery} onChange={onSearch} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={toggleDetailPanel} iconType="list" fill>
+                  Detail Panel
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSplitPanel.Outer direction="row" color="transparent" borderRadius="none" css={styles.outerPanel}>
+              <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
+              <div css={processTreeCSS}>
+                <ProcessTree
+                  sessionId={sessionId}
+                  forward={data}
+                  searchQuery={searchQuery}
+                  selectedProcess={selectedProcess}
+                  onProcessSelected={onProcessSelected}
+                />
+              </div>
+              </EuiSplitPanel.Inner>
+              {isDetailOpen && (
+                <EuiSplitPanel.Inner paddingSize="s" css={styles.detailPanel}>
+                  {selectedProcess && (
+                    <>
+                      <EuiTitle size="xs"><span>Command Detail</span></EuiTitle>
+                      <EuiSpacer />
+                      {selectedProcess.events.map((event) => {
+                        return (<EuiDescriptionList
+                          type="column"
+                          compressed
+                          listItems={Object.keys(event).map((title) => ({
+                            title,
+                            description: JSON.stringify(event[title as keyof ProcessEvent], null, 4),
+                          }))}
+                        />)
+                      })}
+                      <EuiSpacer size="xxl"/>
+                    </>
+                  )}
+
+                  <EuiTitle size="xs"><span>Session Detail</span></EuiTitle>
+                  <EuiSpacer />
+                  <EuiDescriptionList
+                    type="column"
+                    compressed
+                    listItems={Object.keys(data?.[0].process.session).map((title) => ({
+                      title,
+                      description: JSON.stringify(data?.[0].process.session[title], null, 4),
+                    }))}
+                  />
+
+                  <EuiSpacer size="xxl"/>
+
+                  <EuiTitle size="xs"><span>Server Detail</span></EuiTitle>
+                  {/* Add server detail */}
+
+                  <EuiSpacer size="xxl"/>
+                  
+                  <EuiTitle size="xs"><span>Alert Detail</span></EuiTitle>
+                  {/* Add alert detail conditionally */}
+                </EuiSplitPanel.Inner>
+              )}
+            </EuiSplitPanel.Outer>
           </>
         }
         <EuiSpacer />
