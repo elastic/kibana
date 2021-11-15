@@ -98,6 +98,7 @@ test('`format()` correctly formats record with meta-data', () => {
         timestamp,
         pid: 5355,
         meta: {
+          // @ts-expect-error ECS custom meta
           version: {
             from: 'v7',
             to: 'v8',
@@ -140,6 +141,7 @@ test('`format()` correctly formats error record with meta-data', () => {
         timestamp,
         pid: 5355,
         meta: {
+          // @ts-expect-error ECS custom meta
           version: {
             from: 'v7',
             to: 'v8',
@@ -182,6 +184,7 @@ test('format() meta can merge override logs', () => {
         pid: 3,
         meta: {
           log: {
+            // @ts-expect-error ECS custom meta
             kbn_custom_field: 'hello',
           },
         },
@@ -213,6 +216,7 @@ test('format() meta can not override message', () => {
         context: 'bar',
         pid: 3,
         meta: {
+          // @ts-expect-error cannot override message
           message: 'baz',
         },
       })
@@ -242,7 +246,8 @@ test('format() meta can not override ecs version', () => {
         context: 'bar',
         pid: 3,
         meta: {
-          message: 'baz',
+          // @ts-expect-error cannot override ecs version
+          ecs: 1,
         },
       })
     )
@@ -272,6 +277,7 @@ test('format() meta can not override logger or level', () => {
         pid: 3,
         meta: {
           log: {
+            // @ts-expect-error cannot override log.level
             level: 'IGNORE',
             logger: 'me',
           },
@@ -303,6 +309,7 @@ test('format() meta can not override timestamp', () => {
         context: 'bar',
         pid: 3,
         meta: {
+          // @ts-expect-error cannot override @timestamp
           '@timestamp': '2099-02-01T09:30:22.011-05:00',
         },
       })
@@ -332,9 +339,9 @@ test('format() meta can not override tracing properties', () => {
         context: 'bar',
         pid: 3,
         meta: {
-          span: 'span_override',
-          trace: 'trace_override',
-          transaction: 'transaction_override',
+          span: { id: 'span_override' },
+          trace: { id: 'trace_override' },
+          transaction: { id: 'transaction_override' },
         },
         spanId: 'spanId-1',
         traceId: 'traceId-1',
