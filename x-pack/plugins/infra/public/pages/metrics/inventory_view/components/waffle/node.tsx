@@ -78,8 +78,12 @@ export class Node extends React.PureComponent<Props, State> {
             <SquareInner color={color}>
               {valueMode ? (
                 <ValueInner aria-label={nodeAriaLabel}>
-                  <Label color={color}>{node.name}</Label>
-                  <Value color={color}>{value}</Value>
+                  <Label data-test-subj="nodeName" color={color}>
+                    {node.name}
+                  </Label>
+                  <Value data-test-subj="nodeValue" color={color}>
+                    {value}
+                  </Value>
                 </ValueInner>
               ) : (
                 ellipsisMode && (
