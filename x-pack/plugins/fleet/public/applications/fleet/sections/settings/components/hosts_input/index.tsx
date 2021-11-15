@@ -29,12 +29,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { EuiTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
-interface Props {
+export interface HostInputProps {
   id: string;
   value: string[];
   onChange: (newValue: string[]) => void;
-  label: string;
-  helpText: ReactNode;
+  label?: string;
+  helpText?: ReactNode;
   errors?: Array<{ message: string; index?: number }>;
   isInvalid?: boolean;
 }
@@ -105,11 +105,13 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
             <EuiFlexItem>
               <EuiFieldText
                 fullWidth
-                compressed
                 value={value}
                 onChange={onChange}
                 autoFocus={autoFocus}
                 isInvalid={isInvalid}
+                placeholder={i18n.translate('xpack.fleet.hostsInput.placeholder', {
+                  defaultMessage: 'Specify host URL',
+                })}
               />
               {displayErrors(errors)}
             </EuiFlexItem>
@@ -130,7 +132,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
   }
 );
 
-export const HostsInput: FunctionComponent<Props> = ({
+export const HostsInput: FunctionComponent<HostInputProps> = ({
   id,
   value: valueFromProps,
   onChange,
@@ -231,10 +233,12 @@ export const HostsInput: FunctionComponent<Props> = ({
                   <>
                     <EuiFieldText
                       fullWidth
-                      compressed
                       value={row.value}
                       onChange={row.onChange}
                       isInvalid={!!indexedErrors[idx]}
+                      placeholder={i18n.translate('xpack.fleet.hostsInput.placeholder', {
+                        defaultMessage: 'Specify host URL',
+                      })}
                     />
                     {displayErrors(indexedErrors[idx])}
                   </>
