@@ -21,7 +21,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ReportingAPIClient, DiagnoseResponse } from '../lib/reporting_api_client';
+import { ReportingAPIClient, DiagnoseResponse } from '../../lib/reporting_api_client';
 
 interface Props {
   apiClient: ReportingAPIClient;
