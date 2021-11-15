@@ -35,7 +35,7 @@ describe('loadRuleTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/rule_types",
+        "/api/alerts/list_alert_types",
       ]
     `);
   });
@@ -62,6 +62,6 @@ describe('loadRule', () => {
     http.get.mockResolvedValueOnce(resolvedValue);
 
     expect(await loadRule({ http, ruleId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alerting/rule/${ruleId}`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${ruleId}`);
   });
 });
