@@ -43,6 +43,7 @@ const ruleType: jest.Mocked<UntypedNormalizedAlertType> = {
   executor: jest.fn(),
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
+  ruleTaskTimeout: '5m',
 };
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -239,7 +240,7 @@ describe('Task Runner Cancel', () => {
           },
         ],
       },
-      message: 'rule execution cancelled due to timeout: "test1"',
+      message: `rule: test:1: '' execution cancelled due to timeout - exceeded rule type timeout of 5m`,
       rule: {
         category: 'test',
         id: '1',
@@ -293,7 +294,7 @@ describe('Task Runner Cancel', () => {
       {
         executionStatus: {
           error: {
-            message: `rule execution cancelled due to timeout: "test1"`,
+            message: `test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m`,
             reason: 'timeout',
           },
           lastDuration: 0,
@@ -397,7 +398,10 @@ describe('Task Runner Cancel', () => {
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(6);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
-    expect(logger.debug).nthCalledWith(2, `Cancelling rule type test with id 1`);
+    expect(logger.debug).nthCalledWith(
+      2,
+      `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`
+    );
     expect(logger.debug).nthCalledWith(
       3,
       `Updating rule task for test rule with id 1 - execution error due to timeout`
@@ -465,7 +469,7 @@ describe('Task Runner Cancel', () => {
           },
         ],
       },
-      message: `rule execution cancelled due to timeout: \"test1\"`,
+      message: `rule: test:1: '' execution cancelled due to timeout - exceeded rule type timeout of 5m`,
       rule: {
         category: 'test',
         id: '1',
@@ -514,7 +518,10 @@ describe('Task Runner Cancel', () => {
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
-    expect(logger.debug).nthCalledWith(2, `Cancelling rule type test with id 1`);
+    expect(logger.debug).nthCalledWith(
+      2,
+      `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`
+    );
     expect(logger.debug).nthCalledWith(
       3,
       `Updating rule task for test rule with id 1 - execution error due to timeout`
@@ -578,7 +585,7 @@ describe('Task Runner Cancel', () => {
           },
         ],
       },
-      message: `rule execution cancelled due to timeout: \"test1\"`,
+      message: `rule: test:1: '' execution cancelled due to timeout - exceeded rule type timeout of 5m`,
       rule: {
         category: 'test',
         id: '1',

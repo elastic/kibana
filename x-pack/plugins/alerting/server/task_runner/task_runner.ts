@@ -83,6 +83,7 @@ export class TaskRunner<
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
+  private ruleName: string | null;
   private alertType: NormalizedAlertType<
     Params,
     ExtractedParams,
@@ -111,6 +112,7 @@ export class TaskRunner<
     this.context = context;
     this.logger = context.logger;
     this.alertType = alertType;
+    this.ruleName = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.cancelled$ = new BehaviorSubject<boolean>(false);
@@ -532,6 +534,8 @@ export class TaskRunner<
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
+    this.ruleName = alert.name;
+
     try {
       this.ruleTypeRegistry.ensureRuleTypeEnabled(alert.alertTypeId);
     } catch (err) {
@@ -693,7 +697,9 @@ export class TaskRunner<
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    this.logger.debug(`Cancelling rule type ${this.alertType.id} with id ${alertId}`);
+    this.logger.debug(
+      `Cancelling rule type ${this.alertType.id} with id ${alertId} - execution exceeded rule type timeout of ${this.alertType.ruleTaskTimeout}`
+    );
 
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {
@@ -703,7 +709,11 @@ export class TaskRunner<
         kind: 'alert',
         category: [this.alertType.producer],
       },
-      message: `rule execution cancelled due to timeout: "${this.alertType.id}${alertId}"`,
+      message: `rule: ${this.alertType.id}:${alertId}: '${
+        this.ruleName ?? ''
+      }' execution cancelled due to timeout - exceeded rule type timeout of ${
+        this.alertType.ruleTaskTimeout
+      }`,
       kibana: {
         saved_objects: [
           {
@@ -720,6 +730,7 @@ export class TaskRunner<
         license: this.alertType.minimumLicenseRequired,
         category: this.alertType.id,
         ruleset: this.alertType.producer,
+        ...(this.ruleName ? { name: this.ruleName } : {}),
       },
     };
     eventLogger.logEvent(event);
@@ -730,7 +741,7 @@ export class TaskRunner<
       status: 'error',
       error: {
         reason: AlertExecutionStatusErrorReasons.Timeout,
-        message: `rule execution cancelled due to timeout: "${this.alertType.id}${alertId}"`,
+        message: `${this.alertType.id}:${alertId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.alertType.ruleTaskTimeout}`,
       },
     };
     this.logger.debug(
