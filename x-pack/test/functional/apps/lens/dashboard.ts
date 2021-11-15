@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await retry.try(async () => {
         await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
-        await testSubjects.existOrFail('applyFiltersPopoverButton');
+        await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
       });
 
       await retry.try(async () => {
