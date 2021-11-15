@@ -83,7 +83,7 @@ import { RouterWrappers } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
-import { formatNonFatalErrors, setupFleet } from './services/setup';
+import { setupFleet } from './services/setup';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
