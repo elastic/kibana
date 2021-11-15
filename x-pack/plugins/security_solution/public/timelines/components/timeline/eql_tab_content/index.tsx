@@ -182,12 +182,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     docValueFields,
     loading: loadingSourcerer,
     selectedPatterns,
-<<<<<<< HEAD
   } = useSourcererScope(SourcererScopeName.timeline);
-=======
-  } = useSourcererDataView(SourcererScopeName.timeline);
   const ACTION_BUTTON_COUNT = 5;
->>>>>>> e4814b91cac ([Security Solution] Adjusts the width of the `Actions` column and action icon buttons (#118454))
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
