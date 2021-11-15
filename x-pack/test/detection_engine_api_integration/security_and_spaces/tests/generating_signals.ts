@@ -54,6 +54,7 @@ import {
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_EVENT_CATEGORY,
   ALERT_GROUP_ID,
+  ALERT_THRESHOLD_RESULT,
 } from '../../../../plugins/security_solution/common/field_maps/field_names';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 
@@ -729,7 +730,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
             [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
             [ALERT_DEPTH]: 1,
-            threshold_result: {
+            [ALERT_THRESHOLD_RESULT]: {
               terms: [
                 {
                   field: 'host.id',
@@ -850,7 +851,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
             [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
             [ALERT_DEPTH]: 1,
-            threshold_result: {
+            [ALERT_THRESHOLD_RESULT]: {
               terms: [
                 {
                   field: 'host.id',
@@ -917,7 +918,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
             [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
             [ALERT_DEPTH]: 1,
-            threshold_result: {
+            [ALERT_THRESHOLD_RESULT]: {
               terms: [
                 {
                   field: 'event.module',
