@@ -38,7 +38,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
     useEffect(() => {
       wasReleasing.current = pendingIsolate === 0 && pendingUnIsolate > 0;
       wasIsolating.current = pendingIsolate > 0 && pendingUnIsolate === 0;
-    });
+    }, [pendingIsolate, pendingUnIsolate]);
 
     return useMemo(() => {
       if (isPendingStatusDisabled) {
