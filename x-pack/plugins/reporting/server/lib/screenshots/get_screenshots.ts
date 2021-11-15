@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ElementsPositionAndAttribute, Screenshot } from './';
@@ -15,11 +14,7 @@ export const getScreenshots = async (
   elementsPositionAndAttributes: ElementsPositionAndAttribute[],
   logger: LevelLogger
 ): Promise<Screenshot[]> => {
-  logger.info(
-    i18n.translate('xpack.reporting.screencapture.takingScreenshots', {
-      defaultMessage: `taking screenshots`,
-    })
-  );
+  logger.info(`taking screenshots`);
 
   const screenshots: Screenshot[] = [];
 
@@ -42,14 +37,7 @@ export const getScreenshots = async (
     endTrace();
   }
 
-  logger.info(
-    i18n.translate('xpack.reporting.screencapture.screenshotsTaken', {
-      defaultMessage: `screenshots taken: {numScreenhots}`,
-      values: {
-        numScreenhots: screenshots.length,
-      },
-    })
-  );
+  logger.info(`screenshots taken: ${screenshots.length}`);
 
   return screenshots;
 };
