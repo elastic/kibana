@@ -11,7 +11,7 @@ import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
 import { NotificationsSetup } from 'src/core/public';
 
-import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
+import { useIlmPolicyStatus } from '../../../lib/ilm_policy_status_context';
 
 import { IlmPolicyMigrationNeededCallOut } from './ilm_policy_migration_needed_callout';
 
