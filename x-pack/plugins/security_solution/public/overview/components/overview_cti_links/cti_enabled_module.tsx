@@ -20,7 +20,7 @@ export type CtiEnabledModuleProps = Omit<
 
 export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props) => {
   const { eventCountsByDataset, totalCount } = useCtiEventCounts(props);
-  const { to, from, isSomeIntegrationsDisabled, installedIntegrationIds } = props;
+  const { to, from, isSomeIntegrationsDisabled, installedIntegrations } = props;
 
   switch (totalCount) {
     case -1:
@@ -32,7 +32,7 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
             to={to}
             from={from}
             isSomeIntegrationsDisabled={isSomeIntegrationsDisabled}
-            installedIntegrationIds={installedIntegrationIds}
+            installedIntegrations={installedIntegrations}
           />
         </div>
       );
@@ -45,7 +45,7 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
             to={to}
             from={from}
             isSomeIntegrationsDisabled={isSomeIntegrationsDisabled}
-            installedIntegrationIds={installedIntegrationIds}
+            installedIntegrations={installedIntegrations}
           />
         </div>
       );

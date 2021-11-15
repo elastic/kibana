@@ -7,27 +7,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  TAG_REQUEST_BODY,
-  createLinkFromDashboardSO,
-  getCtiListItemsWithoutLinks,
-  isOverviewItem,
-  getEmptyList,
-} from './helpers';
-import { LinkPanelListItem, isLinkPanelListItem } from '../../components/link_panel';
+import { TAG_REQUEST_BODY, getCtiListItems, getEmptyList } from './helpers';
+import { LinkPanelListItem } from '../../components/link_panel';
+
+interface Integration {
+  id: string;
+  dashboardIds: string[];
+}
 
 export const useCtiDashboardLinks = (
   eventCountsByDataset: { [key: string]: number },
   to: string,
   from: string,
-  installedIntegrationIds: string[] = []
+  installedIntegrations: Integration[] = []
 ) => {
   const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
   const savedObjectsClient = useKibana().services.savedObjects.client;
 
-  const [buttonHref, setButtonHref] = useState<string | undefined>();
   const [listItems, setListItems] = useState<LinkPanelListItem[]>(
-    getEmptyList(installedIntegrationIds)
+    getEmptyList(installedIntegrations)
   );
 
   const [isPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
@@ -35,12 +33,12 @@ export const useCtiDashboardLinks = (
     if (!isPluginDisabled) {
       setIsDashboardPluginDisabled(true);
     }
-    setListItems(getCtiListItemsWithoutLinks(eventCountsByDataset, installedIntegrationIds));
+    setListItems(getCtiListItems(eventCountsByDataset, installedIntegrations));
   }, [
     setIsDashboardPluginDisabled,
     setListItems,
     eventCountsByDataset,
-    installedIntegrationIds,
+    installedIntegrations,
     isPluginDisabled,
   ]);
 
@@ -80,25 +78,35 @@ export const useCtiDashboardLinks = (
                       to,
                       from,
                     },
-                  })
+                  }).then((url) => ({
+                    url,
+                    id: SO.id,
+                  }))
                 )
               );
-              const items = DashboardsSO.savedObjects
-                ?.reduce((acc: LinkPanelListItem[], dashboardSO, i) => {
-                  const item = createLinkFromDashboardSO(
-                    dashboardSO,
-                    eventCountsByDataset,
-                    dashboardUrls[i]
+
+              const integrationsWithPath = installedIntegrations.map((integration) => {
+                const integrationDashboards = integration.dashboardIds?.map((dashboardId) => {
+                  const dashboardFromSavedObjects = DashboardsSO.savedObjects?.find(
+                    (SO) => dashboardId === SO.id
                   );
-                  if (isOverviewItem(item)) {
-                    setButtonHref(item.path);
-                  } else if (isLinkPanelListItem(item)) {
-                    acc.push(item);
-                  }
-                  return acc;
-                }, [])
-                .sort((a, b) => (a.title > b.title ? 1 : -1));
-              setListItems(items);
+                  return dashboardFromSavedObjects;
+                });
+                let overviewDashboard = integrationDashboards.find((dashboard) =>
+                  (dashboard?.attributes?.title ?? '').toString().includes('Overview')
+                );
+                if (!overviewDashboard) {
+                  overviewDashboard = integrationDashboards[0];
+                }
+                const overviewDashboardUrl = dashboardUrls.find(
+                  (dashboardUrl) => dashboardUrl?.id === overviewDashboard?.id
+                )?.url;
+                return {
+                  ...integration,
+                  path: overviewDashboardUrl,
+                };
+              });
+              setListItems(getCtiListItems(eventCountsByDataset, integrationsWithPath));
             } else {
               handleDisabledPlugin();
             }
@@ -114,10 +122,10 @@ export const useCtiDashboardLinks = (
     isPluginDisabled,
     savedObjectsClient,
     to,
+    installedIntegrations,
   ]);
 
   return {
-    buttonHref,
     isPluginDisabled,
     listItems,
   };
