@@ -7,9 +7,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
-import { SeriesConfig, SeriesUrl, UrlFilter } from '../types';
+import { SeriesConfig, SeriesUrl } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter } from '../configurations/utils';
+import { buildExistsFilter, urlFilterToPersistedFilter } from '../configurations/utils';
 import { getFiltersFromDefs } from './use_lens_attributes';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
 
@@ -34,17 +34,13 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
 
     if (indexPattern) {
       const definitions = series.reportDefinitions ?? {};
-      const filters = [...(seriesConfig?.baseFilters ?? [])];
 
-      const seriesFilters = (series.filters ?? []).concat(getFiltersFromDefs(definitions));
+      const urlFilters = (series.filters ?? []).concat(getFiltersFromDefs(definitions));
 
-      seriesFilters.forEach(({ field, values = [], notValues = [] }) => {
-        if (values.length > 0) {
-          filters.push(buildPhrasesFilter(field, values, indexPattern)[0]);
-        }
-        if (notValues.length > 0) {
-          filters.push(buildPhrasesFilter(field, values, indexPattern)[0]);
-        }
+      const filters = urlFilterToPersistedFilter({
+        indexPattern,
+        urlFilters,
+        initFilters: seriesConfig?.baseFilters,
       });
 
       const selectedMetricField = series.selectedMetricField;
@@ -71,6 +67,7 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
   }, [
     indexPatterns,
     series.dataType,
+    series.filters,
     series.reportDefinitions,
     series.selectedMetricField,
     seriesConfig?.baseFilters,
