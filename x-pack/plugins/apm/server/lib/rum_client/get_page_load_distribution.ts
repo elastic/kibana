@@ -92,6 +92,7 @@ export async function getPageLoadDistribution({
   });
 
   const params = mergeProjection(projection, {
+    request_cache: true,
     body: {
       size: 0,
       aggs: {
@@ -205,6 +206,7 @@ const getPercentilesDistribution = async ({
   });
 
   const params = mergeProjection(projection, {
+    request_cache: true,
     body: {
       size: 0,
       aggs: {

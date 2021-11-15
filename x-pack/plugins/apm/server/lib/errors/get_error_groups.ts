@@ -57,6 +57,7 @@ export async function getErrorGroups({
     : { _count: sortDirection };
 
   const params = mergeProjection(projection, {
+    request_cache: true,
     body: {
       size: 0,
       aggs: {

@@ -113,7 +113,6 @@ export async function getServiceInstancesTransactionStatistics<
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
-        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
         ...(isComparisonSearch && serviceNodeIds
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),
@@ -153,6 +152,7 @@ export async function getServiceInstancesTransactionStatistics<
           getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
+      request_cache: !kuery,
       body: { size: 0, query, aggs },
     }
   );

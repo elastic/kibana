@@ -71,6 +71,7 @@ export const getPageLoadDistBreakdown = async ({
     apm: {
       events: [ProcessorEvent.transaction],
     },
+    request_cache: true,
     body: {
       size: 0,
       aggs: {

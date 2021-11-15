@@ -49,6 +49,7 @@ export async function getServiceErrorGroupDetailedStatistics({
       apm: {
         events: [ProcessorEvent.error],
       },
+      request_cache: !kuery,
       body: {
         size: 0,
         query: {

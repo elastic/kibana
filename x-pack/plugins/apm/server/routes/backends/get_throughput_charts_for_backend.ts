@@ -51,6 +51,7 @@ export async function getThroughputChartsForBackend({
     apm: {
       events: [ProcessorEvent.metric],
     },
+    request_cache: !kuery,
     body: {
       size: 0,
       query: {

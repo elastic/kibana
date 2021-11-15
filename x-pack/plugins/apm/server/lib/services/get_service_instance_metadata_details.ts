@@ -46,6 +46,8 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [ProcessorEvent.metric],
         },
+        // don't cache as we set size > 0
+        request_cache: false,
         body: {
           terminate_after: 1,
           size: 1,
@@ -68,6 +70,8 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [ProcessorEvent.transaction],
         },
+        // don't cache as we set size > 0
+        request_cache: false,
         body: {
           terminate_after: 1,
           size: 1,
@@ -86,6 +90,8 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [getProcessorEventForTransactions(true)],
         },
+        // don't cache as we set size > 0
+        request_cache: false,
         body: {
           terminate_after: 1,
           size: 1,

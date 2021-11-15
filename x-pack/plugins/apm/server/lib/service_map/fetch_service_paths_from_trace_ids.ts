@@ -32,6 +32,7 @@ export async function fetchServicePathsFromTraceIds(
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
+    request_cache: true,
     body: {
       size: 0,
       query: {

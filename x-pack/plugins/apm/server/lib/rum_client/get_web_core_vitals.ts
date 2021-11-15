@@ -37,6 +37,7 @@ export async function getWebCoreVitals({
   });
 
   const params = mergeProjection(projection, {
+    request_cache: true,
     body: {
       size: 0,
       query: {

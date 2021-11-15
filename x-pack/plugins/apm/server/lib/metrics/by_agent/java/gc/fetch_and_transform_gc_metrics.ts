@@ -64,6 +64,7 @@ export async function fetchAndTransformGcMetrics({
   // the delta in an es query. In the future agent might start
   // reporting deltas.
   const params = mergeProjection(projection, {
+    request_cache: !kuery,
     body: {
       size: 0,
       query: {

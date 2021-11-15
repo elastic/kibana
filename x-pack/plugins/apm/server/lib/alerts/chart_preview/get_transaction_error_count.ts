@@ -47,6 +47,8 @@ export async function getTransactionErrorCountChartPreview({
 
   const params = {
     apm: { events: [ProcessorEvent.error] },
+    // don't cache, just a preview
+    request_cache: false,
     body: { size: 0, query, aggs },
   };
 

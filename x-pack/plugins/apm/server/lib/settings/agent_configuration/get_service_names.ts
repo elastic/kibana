@@ -35,6 +35,7 @@ export async function getServiceNames({
         ProcessorEvent.metric,
       ],
     },
+    request_cache: true,
     body: {
       timeout: '1ms',
       size: 0,

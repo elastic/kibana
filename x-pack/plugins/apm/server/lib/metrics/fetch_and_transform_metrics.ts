@@ -27,7 +27,9 @@ type MetricAggs = Record<string, MetricsAggregationMap>;
 export type GenericMetricsRequest = Overwrite<
   APMEventESSearchRequest,
   {
+    request_cache: boolean;
     body: {
+      size: number;
       aggs: {
         timeseriesData: {
           date_histogram: AggregationOptionsByType['date_histogram'];
@@ -87,6 +89,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   });
 
   const params: GenericMetricsRequest = mergeProjection(projection, {
+    request_cache: !kuery,
     body: {
       size: 0,
       query: {

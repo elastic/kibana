@@ -29,6 +29,7 @@ export async function hasRumData({
       apm: {
         events: [ProcessorEvent.transaction],
       },
+      request_cache: true,
       body: {
         size: 0,
         query: {

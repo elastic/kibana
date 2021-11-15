@@ -21,6 +21,7 @@ export async function hasHistoricalAgentData(setup: Setup) {
         ProcessorEvent.transaction,
       ],
     },
+    request_cache: true,
     body: {
       size: 0,
     },

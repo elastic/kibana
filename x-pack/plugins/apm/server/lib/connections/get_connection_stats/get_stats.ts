@@ -58,6 +58,7 @@ export const getStats = async ({
     apm: {
       events: [ProcessorEvent.metric],
     },
+    request_cache: true,
     body: {
       track_total_hits: true,
       size: 0,

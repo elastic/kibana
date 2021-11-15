@@ -42,6 +42,7 @@ export async function getServiceNodeMetadata({
       end,
     }),
     {
+      request_cache: !kuery,
       body: {
         size: 0,
         aggs: {

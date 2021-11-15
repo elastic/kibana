@@ -76,6 +76,8 @@ export async function getTraceSamples({
         apm: {
           events: [ProcessorEvent.transaction],
         },
+        // don't cache because we set size > 0
+        request_cache: false,
         body: {
           query: {
             bool: {

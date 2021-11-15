@@ -132,6 +132,7 @@ async function getTransactionStats({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
+    request_cache: true,
     body: {
       size: 0,
       query: {
@@ -189,6 +190,7 @@ async function getCpuStats({
       apm: {
         events: [ProcessorEvent.metric],
       },
+      request_cache: true,
       body: {
         size: 0,
         query: {
@@ -229,6 +231,7 @@ function getMemoryStats({
           apm: {
             events: [ProcessorEvent.metric],
           },
+          request_cache: true,
           body: {
             size: 0,
             query: {

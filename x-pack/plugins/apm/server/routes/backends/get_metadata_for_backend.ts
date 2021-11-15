@@ -28,6 +28,8 @@ export async function getMetadataForBackend({
     apm: {
       events: [ProcessorEvent.span],
     },
+    // don't cache because we set size > 0
+    request_cache: false,
     body: {
       size: 1,
       query: {

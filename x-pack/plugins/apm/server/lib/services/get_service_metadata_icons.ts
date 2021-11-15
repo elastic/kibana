@@ -68,6 +68,8 @@ export async function getServiceMetadataIcons({
         ProcessorEvent.metric,
       ],
     },
+    // don't cache as we set size > 0
+    request_cache: false,
     body: {
       size: 1,
       _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME],

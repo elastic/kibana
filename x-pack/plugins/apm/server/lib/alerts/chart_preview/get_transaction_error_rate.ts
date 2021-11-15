@@ -47,6 +47,8 @@ export async function getTransactionErrorRateChartPreview({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
+    // don't cache, just a preview
+    request_cache: false,
     body: {
       size: 0,
       query: {

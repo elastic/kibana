@@ -61,6 +61,10 @@ describe('createApmEventClient', () => {
           apm: {
             events: [],
           },
+          request_cache: true,
+          body: {
+            size: 10,
+          },
         });
 
         return res.ok({ body: 'ok' });

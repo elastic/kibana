@@ -58,7 +58,11 @@ export async function getOverallLatencyDistribution(
       {
         // TODO: add support for metrics
         apm: { events: [ProcessorEvent.transaction] },
-        body: histogramIntervalRequestBody,
+        request_cache: true,
+        body: {
+          size: 0,
+          ...histogramIntervalRequestBody,
+        },
       }
     )) as {
       aggregations?: {
@@ -95,7 +99,11 @@ export async function getOverallLatencyDistribution(
       {
         // TODO: add support for metrics
         apm: { events: [ProcessorEvent.transaction] },
-        body: transactionDurationRangesRequestBody,
+        request_cache: true,
+        body: {
+          size: 0,
+          ...transactionDurationRangesRequestBody,
+        },
       }
     )) as {
       aggregations?: {

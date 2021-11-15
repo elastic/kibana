@@ -43,6 +43,8 @@ export async function getBuckets({
     apm: {
       events: [ProcessorEvent.error],
     },
+    // only cache the overview, not when a group id or kuery is set
+    request_cache: !groupId && !kuery,
     body: {
       size: 0,
       query: {

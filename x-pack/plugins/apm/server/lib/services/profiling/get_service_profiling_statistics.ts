@@ -51,6 +51,7 @@ async function getProfilingStats({
     apm: {
       events: [ProcessorEvent.profile],
     },
+    request_cache: true,
     body: {
       size: 0,
       query: {
@@ -104,6 +105,7 @@ function getProfilesWithStacks({
         apm: {
           events: [ProcessorEvent.profile],
         },
+        request_cache: true,
         body: {
           size: 0,
           query: {
@@ -140,7 +142,9 @@ function getProfilesWithStacks({
             apm: {
               events: [ProcessorEvent.profile],
             },
+            request_cache: true,
             body: {
+              size: 0,
               query: {
                 bool: {
                   filter,

@@ -28,6 +28,7 @@ export async function getAgentNameByService({
         ProcessorEvent.metric,
       ],
     },
+    request_cache: true,
     body: {
       size: 0,
       query: {

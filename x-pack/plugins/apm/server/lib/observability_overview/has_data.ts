@@ -20,6 +20,7 @@ export async function getHasData({ setup }: { setup: Setup }) {
         ],
       },
       terminate_after: 1,
+      request_cache: true,
       body: {
         size: 0,
       },

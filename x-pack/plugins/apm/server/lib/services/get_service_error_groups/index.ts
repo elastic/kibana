@@ -65,6 +65,7 @@ export async function getServiceErrorGroups({
         apm: {
           events: [ProcessorEvent.error],
         },
+        request_cache: !kuery,
         body: {
           size: 0,
           query: {
@@ -144,6 +145,7 @@ export async function getServiceErrorGroups({
         apm: {
           events: [ProcessorEvent.error],
         },
+        request_cache: !kuery,
         body: {
           size: 0,
           query: {

@@ -31,6 +31,8 @@ export async function getTraceItems(
     apm: {
       events: [ProcessorEvent.error],
     },
+    // don't cache as we set size > 0
+    request_cache: false,
     body: {
       size: maxTraceItems,
       query: {
@@ -49,6 +51,8 @@ export async function getTraceItems(
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
+    // don't cache as we set size > 0
+    request_cache: false,
     body: {
       size: maxTraceItems,
       query: {

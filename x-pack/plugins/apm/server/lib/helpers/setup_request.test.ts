@@ -111,8 +111,9 @@ describe('setupRequest', () => {
       const mockResources = getMockResources();
       const { apmEventClient } = await setupRequest(mockResources);
       await apmEventClient.search('foo', {
+        request_cache: true,
         apm: { events: [ProcessorEvent.transaction] },
-        body: { foo: 'bar' },
+        body: { size: 10 },
       });
 
       expect(
@@ -172,7 +173,9 @@ describe('setupRequest', () => {
         apm: {
           events: [ProcessorEvent.transaction],
         },
+        request_cache: true,
         body: {
+          size: 10,
           query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
         },
       });
@@ -200,7 +203,9 @@ describe('setupRequest', () => {
           events: [ProcessorEvent.error],
           includeLegacyData: true,
         },
+        request_cache: true,
         body: {
+          size: 10,
           query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
         },
       });
@@ -233,6 +238,10 @@ describe('without a bool filter', () => {
       apm: {
         events: [ProcessorEvent.error],
       },
+      request_cache: true,
+      body: {
+        size: 0,
+      },
     });
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
@@ -263,6 +272,10 @@ describe('with includeFrozen=false', () => {
       apm: {
         events: [],
       },
+      request_cache: true,
+      body: {
+        size: 10,
+      },
     });
 
     const params =
@@ -283,6 +296,10 @@ describe('with includeFrozen=true', () => {
 
     await apmEventClient.search('foo', {
       apm: { events: [] },
+      request_cache: true,
+      body: {
+        size: 10,
+      },
     });
 
     const params =

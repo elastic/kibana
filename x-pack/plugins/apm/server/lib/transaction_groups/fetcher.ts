@@ -77,6 +77,7 @@ function getRequest(topTraceOptions: TopTraceOptions) {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
+    request_cache: !kuery,
     body: {
       size: 0,
       query: {

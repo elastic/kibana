@@ -51,6 +51,8 @@ export async function getEventMetadata({
     apm: {
       events: [processorEvent],
     },
+    // don't cache as we set size > 0
+    request_cache: false,
     body: {
       query: {
         bool: { filter },

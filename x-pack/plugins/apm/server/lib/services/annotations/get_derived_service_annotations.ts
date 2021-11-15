@@ -51,6 +51,7 @@ export async function getDerivedServiceAnnotations({
             getProcessorEventForTransactions(searchAggregatedTransactions),
           ],
         },
+        request_cache: true,
         body: {
           size: 0,
           query: {
@@ -82,6 +83,7 @@ export async function getDerivedServiceAnnotations({
               getProcessorEventForTransactions(searchAggregatedTransactions),
             ],
           },
+          request_cache: true,
           body: {
             size: 1,
             query: {

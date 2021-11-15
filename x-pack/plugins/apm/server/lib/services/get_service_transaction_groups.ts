@@ -71,6 +71,7 @@ export async function getServiceTransactionGroups({
           getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
+      request_cache: !kuery,
       body: {
         size: 0,
         query: {

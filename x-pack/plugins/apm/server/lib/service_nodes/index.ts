@@ -44,7 +44,9 @@ const getServiceNodes = async ({
   });
 
   const params = mergeProjection(projection, {
+    request_cache: !kuery,
     body: {
+      size: 0,
       aggs: {
         nodes: {
           terms: {

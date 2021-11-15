@@ -46,6 +46,7 @@ export async function getAllEnvironments({
         ProcessorEvent.metric,
       ],
     },
+    request_cache: true,
     body: {
       // use timeout + min_doc_count to return as early as possible
       // if filter is not defined to prevent timeouts

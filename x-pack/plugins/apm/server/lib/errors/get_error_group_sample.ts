@@ -40,6 +40,8 @@ export async function getErrorGroupSample({
     apm: {
       events: [ProcessorEvent.error as const],
     },
+    // don't cache, as we set size > 0
+    request_cache: false,
     body: {
       size: 1,
       query: {

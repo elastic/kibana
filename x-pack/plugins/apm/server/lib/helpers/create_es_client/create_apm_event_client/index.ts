@@ -41,6 +41,10 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
     events: ProcessorEvent[];
     includeLegacyData?: boolean;
   };
+  request_cache: boolean;
+  body: {
+    size: number;
+  };
 };
 
 export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {

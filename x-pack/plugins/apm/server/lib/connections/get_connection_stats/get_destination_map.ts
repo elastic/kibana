@@ -73,6 +73,7 @@ export const getDestinationMap = ({
       apm: {
         events: [ProcessorEvent.span],
       },
+      request_cache: true,
       body: {
         size: 0,
         query: {
@@ -143,6 +144,8 @@ export const getDestinationMap = ({
         apm: {
           events: [ProcessorEvent.transaction],
         },
+        // don't cache, as we set size>0
+        request_cache: false,
         body: {
           query: {
             bool: {

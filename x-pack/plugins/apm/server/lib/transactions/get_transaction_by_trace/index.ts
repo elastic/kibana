@@ -22,6 +22,8 @@ export async function getRootTransactionByTraceId(
     apm: {
       events: [ProcessorEvent.transaction as const],
     },
+    // don't cache as we set size > 0
+    request_cache: false,
     body: {
       size: 1,
       query: {

@@ -47,6 +47,8 @@ export async function getServiceAgent({
         ProcessorEvent.metric,
       ],
     },
+    // don't cache as we set size > 0
+    request_cache: false,
     body: {
       size: 1,
       _source: [AGENT_NAME, SERVICE_RUNTIME_NAME],

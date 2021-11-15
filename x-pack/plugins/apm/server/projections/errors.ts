@@ -30,6 +30,7 @@ export function getErrorGroupsProjection({
     apm: {
       events: [ProcessorEvent.error as const],
     },
+    request_cache: !kuery,
     body: {
       query: {
         bool: {

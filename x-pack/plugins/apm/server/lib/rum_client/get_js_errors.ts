@@ -40,6 +40,7 @@ export async function getJSErrors({
   });
 
   const params = mergeProjection(projection, {
+    request_cache: true,
     body: {
       size: 0,
       track_total_hits: true,

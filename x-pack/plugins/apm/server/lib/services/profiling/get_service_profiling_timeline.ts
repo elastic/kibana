@@ -49,6 +49,7 @@ export async function getServiceProfilingTimeline({
       apm: {
         events: [ProcessorEvent.profile],
       },
+      request_cache: !kuery,
       body: {
         size: 0,
         query: {

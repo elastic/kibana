@@ -24,6 +24,7 @@ export async function getLegacyDataStatus(
       events: [ProcessorEvent.transaction],
       includeLegacyData: true,
     },
+    request_cache: true,
     body: {
       size: 0,
       query: {

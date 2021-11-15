@@ -48,6 +48,7 @@ export async function getEnvironments({
         ProcessorEvent.error,
       ],
     },
+    request_cache: true,
     body: {
       size: 0,
       query: {

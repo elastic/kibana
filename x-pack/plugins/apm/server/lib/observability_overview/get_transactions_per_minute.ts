@@ -43,6 +43,7 @@ export async function getTransactionsPerMinute({
           getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
+      request_cache: true,
       body: {
         size: 0,
         query: {

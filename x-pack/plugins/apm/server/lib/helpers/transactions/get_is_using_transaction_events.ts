@@ -73,7 +73,9 @@ async function getHasTransactions({
     apm: {
       events: [ProcessorEvent.transaction],
     },
+    request_cache: !kuery,
     body: {
+      size: 0,
       query: {
         bool: {
           filter: [

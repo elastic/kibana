@@ -8,11 +8,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AggregationOptionsByType } from '../../../../../src/core/types/elasticsearch';
 import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
-export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
+export type Projection = Omit<
+  APMEventESSearchRequest,
+  'body' | 'request_cache'
+> & {
+  request_cache?: boolean;
   body: Omit<
     Required<APMEventESSearchRequest>['body'],
-    'aggs' | 'aggregations'
+    'aggs' | 'aggregations' | 'size'
   > & {
+    size?: number;
     aggs?: {
       [key: string]: {
         terms: AggregationOptionsByType['terms'] & { field: string };

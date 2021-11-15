@@ -56,6 +56,7 @@ export async function getThroughput({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
+    request_cache: !kuery,
     body: {
       size: 0,
       query: {

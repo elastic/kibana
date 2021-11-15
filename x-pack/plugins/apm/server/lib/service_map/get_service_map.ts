@@ -103,6 +103,7 @@ async function getServicesData(options: IEnvOptions) {
         ProcessorEvent.error as const,
       ],
     },
+    request_cache: true,
     body: {
       size: 0,
       query: {

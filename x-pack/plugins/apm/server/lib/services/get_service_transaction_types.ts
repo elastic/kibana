@@ -35,6 +35,7 @@ export async function getServiceTransactionTypes({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
+    request_cache: true,
     body: {
       size: 0,
       query: {

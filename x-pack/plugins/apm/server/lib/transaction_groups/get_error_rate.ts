@@ -79,6 +79,7 @@ export async function getErrorRate({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
+    request_cache: !kuery,
     body: {
       size: 0,
       query: { bool: { filter } },

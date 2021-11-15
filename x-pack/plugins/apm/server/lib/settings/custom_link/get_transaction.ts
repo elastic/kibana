@@ -36,8 +36,10 @@ export async function getTransaction({
     apm: {
       events: [ProcessorEvent.transaction as const],
     },
-    size: 1,
+    // don't cache as we set size > 0
+    request_cache: false,
     body: {
+      size: 1,
       query: {
         bool: {
           filter: esFilters,
