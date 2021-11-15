@@ -17,17 +17,9 @@ import {
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
 
-const convertToVisDimension = (
-  columns: DatatableColumn[],
-  accessor: string | number | undefined
-) => {
+const convertToVisDimension = (columns: DatatableColumn[], accessor: string | undefined) => {
   if (!accessor) return;
-  let column;
-  if (typeof accessor === 'string') {
-    column = columns.find((c) => c.id === accessor);
-  } else {
-    column = columns[accessor as unknown as number];
-  }
+  const column = columns.find((c) => c.id === accessor);
   if (!column) return;
   return {
     accessor: column.id,
@@ -50,13 +42,6 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       default: false,
       help: i18n.translate('expressionHeatmap.function.percentageMode.help', {
         defaultMessage: 'When is on, tooltip and legends appear as percentages.',
-      }),
-    },
-    // used only in legacy heatmap, consider it as @deprecated
-    percentageFormatPattern: {
-      types: ['string'],
-      help: i18n.translate('expressionHeatmap.function.percentageFormatPattern.help', {
-        defaultMessage: 'Pattern of the percentage format.',
       }),
     },
     palette: {
@@ -99,34 +84,34 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       default: false,
     },
     xAccessor: {
-      types: ['string', 'number'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionHeatmap.function.args.xAccessorHelpText', {
         defaultMessage: 'The id of the x axis column as string or the number of the table index',
       }),
     },
     yAccessor: {
-      types: ['string', 'number'],
+      types: ['string', 'vis_dimension'],
 
       help: i18n.translate('expressionHeatmap.function.args.yAccessorHelpText', {
         defaultMessage: 'The id of the y axis column as string or the number of the table index',
       }),
     },
     valueAccessor: {
-      types: ['string', 'number'],
+      types: ['string', 'vis_dimension'],
 
       help: i18n.translate('expressionHeatmap.function.args.valueAccessorHelpText', {
         defaultMessage: 'The id of the value column as string or the number of the table index',
       }),
     },
     splitRowAccessor: {
-      types: ['string', 'number'],
+      types: ['string', 'vis_dimension'],
 
       help: i18n.translate('expressionHeatmap.function.args.splitRowAccessorHelpText', {
         defaultMessage: 'The id of the split row as string or the number of the table index',
       }),
     },
     splitColumnAccessor: {
-      types: ['string', 'number'],
+      types: ['string', 'vis_dimension'],
 
       help: i18n.translate('expressionHeatmap.function.args.splitColumnAccessorHelpText', {
         defaultMessage: 'The id of the split column as string or the number of the table index',
@@ -134,22 +119,27 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
   },
   fn(data, args, handlers) {
-    const valueDimension = args.valueAccessor
-      ? convertToVisDimension(data.columns, args.valueAccessor)
-      : undefined;
-    const yDimension = args.yAccessor
-      ? convertToVisDimension(data.columns, args.yAccessor)
-      : undefined;
+    const valueDimension =
+      typeof args.valueAccessor === 'string'
+        ? convertToVisDimension(data.columns, args.valueAccessor)
+        : args.valueAccessor;
+    const yDimension =
+      typeof args.yAccessor === 'string'
+        ? convertToVisDimension(data.columns, args.yAccessor)
+        : args.yAccessor;
 
-    const xDimension = args.xAccessor
-      ? convertToVisDimension(data.columns, args.xAccessor)
-      : undefined;
-    const splitRowDimension = args.splitRowAccessor
-      ? convertToVisDimension(data.columns, args.splitRowAccessor)
-      : undefined;
-    const splitColumnDimension = args.splitColumnAccessor
-      ? convertToVisDimension(data.columns, args.splitColumnAccessor)
-      : undefined;
+    const xDimension =
+      typeof args.xAccessor === 'string'
+        ? convertToVisDimension(data.columns, args.xAccessor)
+        : args.xAccessor;
+    const splitRowDimension =
+      typeof args.splitRowAccessor === 'string'
+        ? convertToVisDimension(data.columns, args.splitRowAccessor)
+        : args.splitRowAccessor;
+    const splitColumnDimension =
+      typeof args.splitColumnAccessor === 'string'
+        ? convertToVisDimension(data.columns, args.splitColumnAccessor)
+        : args.splitColumnAccessor;
 
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [];

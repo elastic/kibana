@@ -22,9 +22,6 @@ Object {
         "toAst": [Function],
       },
     ],
-    "percentageFormatPattern": Array [
-      "0,0.[00]%",
-    ],
     "percentageMode": Array [
       false,
     ],
@@ -35,13 +32,19 @@ Object {
       true,
     ],
     "valueAccessor": Array [
-      0,
+      Object {
+        "toAst": [Function],
+      },
     ],
     "xAccessor": Array [
-      1,
+      Object {
+        "toAst": [Function],
+      },
     ],
     "yAccessor": Array [
-      2,
+      Object {
+        "toAst": [Function],
+      },
     ],
   },
   "getArgument": [Function],

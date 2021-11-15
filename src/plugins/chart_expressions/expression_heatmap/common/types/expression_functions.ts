@@ -12,6 +12,7 @@ import {
   ExpressionValueRender,
 } from '../../../../expressions';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+
 import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
 // import { VisParams, visType } from './expression_renderers';
 import {
@@ -66,16 +67,15 @@ export type HeatmapGridConfigResult = HeatmapGridConfig & {
 
 export interface HeatmapArguments {
   percentageMode?: boolean;
-  percentageFormatPattern?: string;
   useDistinctBands?: boolean;
   showTooltip?: boolean;
   highlightInHover?: boolean;
   palette?: PaletteOutput<CustomPaletteState>;
-  xAccessor?: string | number;
-  yAccessor?: string | number;
-  valueAccessor?: string | number;
-  splitRowAccessor?: string | number;
-  splitColumnAccessor?: string | number;
+  xAccessor?: string | ExpressionValueVisDimension;
+  yAccessor?: string | ExpressionValueVisDimension;
+  valueAccessor?: string | ExpressionValueVisDimension;
+  splitRowAccessor?: string | ExpressionValueVisDimension;
+  splitColumnAccessor?: string | ExpressionValueVisDimension;
   legend: HeatmapLegendConfigResult;
   gridConfig: HeatmapGridConfigResult;
 }

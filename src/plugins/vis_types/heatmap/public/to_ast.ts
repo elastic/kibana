@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { VisToExpressionAst, getVisSchemas } from '../../../visualizations/public';
+import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './utils/palette';
 import type { HeatmapVisParams } from './types';
@@ -25,6 +25,17 @@ const prepareLegend = (params: HeatmapVisParams) => {
   return buildExpression([legend]);
 };
 
+const prepareDimension = (params: SchemaConfig) => {
+  const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
+
+  if (params.format) {
+    visdimension.addArgument('format', params.format.id);
+    visdimension.addArgument('formatParams', JSON.stringify(params.format.params));
+  }
+
+  return buildExpression([visdimension]);
+};
+
 const prepareGrid = (params: HeatmapVisParams) => {
   const gridConfig = buildExpressionFunction('heatmap_grid', {
     isCellLabelVisible: params.valueAxes?.[0].labels.show ?? false,
@@ -37,32 +48,43 @@ const prepareGrid = (params: HeatmapVisParams) => {
 export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
 
+  // fix formatter for percentage mode
+  if (vis.params.percentageMode === true) {
+    schemas.metric.forEach((metric: SchemaConfig) => {
+      metric.format = {
+        id: 'percent',
+        params: {
+          pattern:
+            vis.params.percentageFormatPattern ?? `0,0.[${'0'.repeat(DEFAULT_PERCENT_DECIMALS)}]%`,
+        },
+      };
+    });
+  }
+
   const expressionArgs = {
     showTooltip: vis.params.addTooltip,
     highlightInHover: vis.params.enableHover,
     useDistinctBands: vis.params.useDistinctBands ?? true,
     percentageMode: vis.params.percentageMode,
-    percentageFormatPattern:
-      vis.params.percentageFormatPattern ?? `0,0.[${'0'.repeat(DEFAULT_PERCENT_DECIMALS)}]%`,
     legend: prepareLegend(vis.params),
     gridConfig: prepareGrid(vis.params),
   };
 
   const visTypeHeatmap = buildExpressionFunction('heatmap', expressionArgs);
   if (schemas.metric.length) {
-    visTypeHeatmap.addArgument('valueAccessor', schemas.metric?.[0]?.accessor);
+    visTypeHeatmap.addArgument('valueAccessor', prepareDimension(schemas.metric[0]));
   }
   if (schemas.segment && schemas.segment.length) {
-    visTypeHeatmap.addArgument('xAccessor', schemas.segment?.[0]?.accessor);
+    visTypeHeatmap.addArgument('xAccessor', prepareDimension(schemas.segment[0]));
   }
   if (schemas.group && schemas.group.length) {
-    visTypeHeatmap.addArgument('yAccessor', schemas.group?.[0]?.accessor);
+    visTypeHeatmap.addArgument('yAccessor', prepareDimension(schemas.group[0]));
   }
   if (schemas.split_row && schemas.split_row.length) {
-    visTypeHeatmap.addArgument('splitRowAccessor', schemas.split_row?.[0]?.accessor);
+    visTypeHeatmap.addArgument('splitRowAccessor', prepareDimension(schemas.split_row[0]));
   }
   if (schemas.split_column && schemas.split_column.length) {
-    visTypeHeatmap.addArgument('splitColumnAccessor', schemas.split_column?.[0]?.accessor);
+    visTypeHeatmap.addArgument('splitColumnAccessor', prepareDimension(schemas.split_column[0]));
   }
   let palette;
   if (vis.params.setColorRange && vis.params.colorsRange && vis.params.colorsRange.length) {

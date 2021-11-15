@@ -24,7 +24,6 @@ describe('interpreter/functions#heatmap', () => {
   };
   const args: HeatmapArguments = {
     percentageMode: false,
-    shape: 'heatmap',
     legend: {
       isVisible: true,
       position: 'top',

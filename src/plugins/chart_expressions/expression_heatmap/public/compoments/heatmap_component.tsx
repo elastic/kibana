@@ -25,6 +25,7 @@ import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
 import { LegendToggle } from '../../../../charts/public';
 import type { DatatableColumn } from '../../../../expressions/public';
+import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import { getColorPicker } from '../utils/get_color_picker';
@@ -110,9 +111,20 @@ function computeColorRanges(
 
   return { colors, ranges };
 }
-const getAccessor = (value: string | number, columns: DatatableColumn[]) => {
-  return typeof value === 'string' ? value : columns[value ?? 0].id;
+
+const getAccessor = (value: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => {
+  if (typeof value === 'string') {
+    return value;
+  } else {
+    const accessor = value.accessor;
+    if (typeof accessor === 'number') {
+      return columns[accessor].id;
+    } else {
+      return accessor.id;
+    }
+  }
 };
+
 const HeatmapComponent: FC<HeatmapRenderProps> = ({
   data,
   args,
@@ -162,8 +174,9 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     [args.legend.position, setColor, uiState]
   );
   const table = data;
-  const valueAccessor =
-    args.valueAccessor !== undefined ? getAccessor(args.valueAccessor, table.columns) : undefined;
+  const valueAccessor = args.valueAccessor
+    ? getAccessor(args.valueAccessor, table.columns)
+    : undefined;
   const minMaxByColumnId = useMemo(
     () => findMinMaxByColumnId([valueAccessor!], table),
     [valueAccessor, table]
@@ -174,10 +187,8 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const paletteParams = args.palette?.params;
-  const xAccessor =
-    args.xAccessor !== undefined ? getAccessor(args.xAccessor, table.columns) : undefined;
-  const yAccessor =
-    args.yAccessor !== undefined ? getAccessor(args.yAccessor, table.columns) : undefined;
+  const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
+  const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
@@ -237,14 +248,9 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   }
 
   const xValuesFormatter = formatFactory(xAxisMeta?.params);
-  const metricFormatter = args.percentageMode
-    ? formatFactory({
-        id: 'percent',
-        params: {
-          pattern: args.percentageFormatPattern,
-        },
-      })
-    : formatFactory(valueColumn.meta.params);
+  const metricFormatter = formatFactory(
+    typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
+  );
 
   const { min, max } = minMaxByColumnId[valueAccessor!];
   const valueFormatter = (d: number) => {
