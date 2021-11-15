@@ -85,7 +85,6 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../containers/detection_engine/alerts/use_preview_index');
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();

@@ -27,7 +27,6 @@ jest.mock('react-router-dom', () => {
 });
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../../containers/detection_engine/alerts/use_preview_index');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../components/user_info');
 jest.mock('../../../../../common/hooks/use_app_toasts');
