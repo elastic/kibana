@@ -157,9 +157,7 @@ export default function ReactExpressionRenderer({
             ...defaultState,
             isEmpty: false,
           }));
-          if (onRender$) {
-            onRender$(item);
-          }
+          onRender$?.(item);
         })
     );
 
