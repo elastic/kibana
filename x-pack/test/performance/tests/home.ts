@@ -10,15 +10,16 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security']);
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   describe('Login', () => {
     it('login and navigate to homepage', async () => {
       await PageObjects.common.navigateToApp('login');
 
-      await retry.waitFor('login page visible', () => testSubjects.exists('loginSubmit'));
+      await testSubjects.existOrFail('loginSubmit', { timeout: 2000 });
 
       await PageObjects.security.login();
+
+      await testSubjects.existOrFail('homeApp', { timeout: 2000 });
     });
   });
 }
