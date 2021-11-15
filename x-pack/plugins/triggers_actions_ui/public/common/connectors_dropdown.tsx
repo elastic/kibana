@@ -28,7 +28,7 @@ export const connectorDeprecatedMessage = i18n.translate(
   { defaultMessage: 'This connector is deprecated. Update it, or create a new one.' }
 );
 
-export const isDeprecatedConnector = (
+export const checkConnectorIsDeprecated = (
   connector?: ActionConnector | ServiceNowActionConnector
 ): boolean => {
   if (connector == null) {

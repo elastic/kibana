@@ -50,7 +50,7 @@ import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout
 import {
   connectorDeprecatedMessage,
   deprecatedMessage,
-  isDeprecatedConnector,
+  checkConnectorIsDeprecated,
 } from '../../../../common/connectors_dropdown';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
@@ -203,7 +203,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
          * TODO: Remove when connectors can provide their own UX message.
          * Issue: https://github.com/elastic/kibana/issues/114507
          */
-        const showDeprecatedTooltip = isDeprecatedConnector(item);
+        const showDeprecatedTooltip = checkConnectorIsDeprecated(item);
         const name = getConnectorName(value, item);
 
         const link = (
@@ -490,7 +490,7 @@ function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: s
 }
 
 function getConnectorName(name: string, connector: ActionConnector): string {
-  return isDeprecatedConnector(connector) ? `${name} ${deprecatedMessage}` : name;
+  return checkConnectorIsDeprecated(connector) ? `${name} ${deprecatedMessage}` : name;
 }
 
 const DeleteOperation: React.FunctionComponent<{

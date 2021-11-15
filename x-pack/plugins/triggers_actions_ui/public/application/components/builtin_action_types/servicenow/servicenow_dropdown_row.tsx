@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   connectorDeprecatedMessage,
-  isDeprecatedConnector,
+  checkConnectorIsDeprecated,
 } from '../../../../common/connectors_dropdown';
 import { ActionConnector } from '../../../../types';
 import { deprecatedMessage, preconfiguredMessage } from '../../../../common/connectors_dropdown';
@@ -31,7 +31,7 @@ function ServiceNowSelectableRowComponent({
       <EuiFlexItem grow={false}>
         <span>{title}</span>
       </EuiFlexItem>
-      {isDeprecatedConnector(actionConnector) && (
+      {checkConnectorIsDeprecated(actionConnector) && (
         <EuiFlexItem grow={false}>
           <StyledIconTip
             aria-label={deprecatedTooltipTitle}
@@ -54,7 +54,7 @@ const getTitle = (connector: ActionConnector) => {
     title += ` ${preconfiguredMessage}`;
   }
 
-  if (isDeprecatedConnector(connector)) {
+  if (checkConnectorIsDeprecated(connector)) {
     title += ` ${deprecatedMessage}`;
   }
 
