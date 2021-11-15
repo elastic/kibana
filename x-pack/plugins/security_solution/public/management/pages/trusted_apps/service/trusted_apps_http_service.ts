@@ -35,6 +35,10 @@ import {
 import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 import { isGlobalEffectScope } from '../state/type_guards';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
+import {
+  validateTrustedAppHttpPostBody,
+  validateTrustedAppHttpPutBody,
+} from './validators/validate_trusted_app_http_body';
 
 export interface TrustedAppsService {
   getTrustedApp(params: GetOneTrustedAppRequestParams): Promise<GetOneTrustedAppResponse>;
@@ -92,6 +96,8 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async createTrustedApp(request: PostTrustedAppCreateRequest) {
+    await validateTrustedAppHttpPostBody(request);
+
     return this.http.post<PostTrustedAppCreateResponse>(TRUSTED_APPS_CREATE_API, {
       body: JSON.stringify(request),
     });
@@ -101,6 +107,8 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     params: PutTrustedAppsRequestParams,
     updatedTrustedApp: PutTrustedAppUpdateRequest
   ) {
+    await validateTrustedAppHttpPutBody(updatedTrustedApp);
+
     return this.http.put<PutTrustedAppUpdateResponse>(
       resolvePathVariables(TRUSTED_APPS_UPDATE_API, params),
       { body: JSON.stringify(updatedTrustedApp) }
