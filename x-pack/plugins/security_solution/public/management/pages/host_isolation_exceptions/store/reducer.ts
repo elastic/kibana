@@ -65,12 +65,6 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
         },
       };
     }
-    case 'hostIsolationExceptionsPageDataChanged': {
-      return {
-        ...state,
-        entries: action.payload,
-      };
-    }
     case 'userChangedUrl':
       return userChangedUrl(state, action);
   }
