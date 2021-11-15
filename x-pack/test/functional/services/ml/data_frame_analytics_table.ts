@@ -157,9 +157,13 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     }
 
     public async openResultsView(analyticsId: string) {
-      await this.assertJobRowViewButtonExists(analyticsId);
-      await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
-      await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 20 * 1000 });
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.assertJobRowViewButtonExists(analyticsId);
+        await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
+        await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', {
+          timeout: 5 * 1000,
+        });
+      });
     }
 
     public async openMapView(analyticsId: string) {
