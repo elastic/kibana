@@ -16,3 +16,5 @@ export class EndpointHostUnEnrolledError extends EndpointError {}
 export class FleetAgentNotFoundError extends NotFoundError {}
 
 export class FleetAgentPolicyNotFoundError extends NotFoundError {}
+
+export class FleetEndpointPackagePolicyNotFoundError extends NotFoundError {}

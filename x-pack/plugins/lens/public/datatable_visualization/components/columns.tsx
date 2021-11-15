@@ -215,20 +215,16 @@ export const createGridColumns = (
         showHide: false,
         showMoveLeft: false,
         showMoveRight: false,
-        showSortAsc: isReadOnly
-          ? false
-          : {
-              label: i18n.translate('xpack.lens.table.sort.ascLabel', {
-                defaultMessage: 'Sort ascending',
-              }),
-            },
-        showSortDesc: isReadOnly
-          ? false
-          : {
-              label: i18n.translate('xpack.lens.table.sort.descLabel', {
-                defaultMessage: 'Sort descending',
-              }),
-            },
+        showSortAsc: {
+          label: i18n.translate('xpack.lens.table.sort.ascLabel', {
+            defaultMessage: 'Sort ascending',
+          }),
+        },
+        showSortDesc: {
+          label: i18n.translate('xpack.lens.table.sort.descLabel', {
+            defaultMessage: 'Sort descending',
+          }),
+        },
         additional: additionalActions,
       },
     };
