@@ -81,7 +81,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('allows a role mapping to be deleted', async () => {
-      await testSubjects.click(`deleteRoleMappingButton-new_role_mapping`);
+      await testSubjects.click('euiCollapsedItemActionsButton');
+      await testSubjects.click('deleteRoleMappingButton-new_role_mapping');
       await testSubjects.click('confirmModalConfirmButton');
       await testSubjects.existOrFail('deletedRoleMappingSuccessToast');
     });
