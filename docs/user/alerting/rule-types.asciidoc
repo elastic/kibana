@@ -53,10 +53,10 @@ see {subscriptions}[the subscription page].
 |===
 
 [float]
-[[ml-rules]] beta:[]
+[[ml-rules]]
 === Machine learning rules
 
-{ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled checks on an {anomaly-job} to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
+beta:[] {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled checks on an {anomaly-job} to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
 
 [float]
 [[security-rules]]
