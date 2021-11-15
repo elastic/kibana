@@ -364,6 +364,10 @@ export class Embeddable
     }
   };
 
+  private onRender: ExpressionWrapperProps['onRender$'] = () => {
+    this.renderComplete.dispatchComplete();
+  };
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -371,12 +375,17 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
+    super.render(domNode as HTMLElement);
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
+
+    this.domNode.setAttribute('data-shared-item', '');
+
+    this.renderComplete.dispatchInProgress();
 
     const executionContext = {
       type: 'lens',
@@ -400,6 +409,7 @@ export class Embeddable
         searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
+        onRender$={this.onRender}
         interactive={!input.disableTriggers}
         renderMode={input.renderMode}
         syncColors={input.syncColors}
