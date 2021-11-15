@@ -7,6 +7,7 @@
 
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { ActionProps, HeaderActionProps } from '../../../../../common';
 import * as i18n from './translations';
 
@@ -18,7 +19,10 @@ export const RowCheckBox = ({
   columnValues,
   disabled,
   loadingEventIds,
+  data,
 }: ActionProps) => {
+  const ruleProducers = data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
+  const ruleProducer = ruleProducers[0];
   const handleSelectEvent = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (!disabled) {
@@ -35,7 +39,7 @@ export const RowCheckBox = ({
     <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
   ) : (
     <EuiCheckbox
-      data-test-subj="select-event"
+      data-test-subj={`select-event select-event-rule-producer-${ruleProducer}`}
       id={eventId}
       checked={checked && !disabled}
       disabled={disabled}

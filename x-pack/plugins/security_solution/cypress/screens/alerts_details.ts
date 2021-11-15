@@ -56,6 +56,8 @@ export const TABLE_CELL = '.euiTableRowCell';
 
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
+export const TABLE_CONTAINER = '[data-test-subj="event-fields-browser"]';
+
 export const TABLE_ROWS = '.euiTableRow';
 
 export const THREAT_DETAILS_ACCORDION = '.euiAccordion__triggerWrapper';

@@ -10,7 +10,7 @@ export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
   '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
 
-export const ALERT_CHECKBOX = '[data-test-subj="select-event"].euiCheckbox__input';
+export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__input';
 
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
