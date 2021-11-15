@@ -139,10 +139,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepRetention.countDescription"
-          defaultMessage="The minimum and maximum number of snapshots to store in your cluster. It should not exceed {maxNumber}."
-          values={{
-            maxNumber: <EuiCode>200</EuiCode>,
-          }}
+          defaultMessage="The minimum and maximum number of snapshots to store for the policy."
         />
       }
       fullWidth
@@ -225,7 +222,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={docLinks.links.apis.putSnapshotLifecyclePolicy}
+            href={docLinks.links.snapshotRestore.createSnapshot}
             target="_blank"
             iconType="help"
           >
