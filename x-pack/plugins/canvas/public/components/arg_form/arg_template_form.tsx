@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useRef, FC, memo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo, ReactPortal } from 'react';
 import deepEqual from 'react-fast-compare';
 import usePrevious from 'react-use/lib/usePrevious';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
@@ -18,7 +18,7 @@ interface ArgTemplateFormProps {
     config: ArgTemplateFormProps['argumentProps'],
     handlers: ArgTemplateFormProps['handlers'],
     onMount?: (ref: UpdatePropsRef<ArgTemplateFormProps['argumentProps']> | null) => void
-  ) => FC<any>;
+  ) => ReactPortal;
   argumentProps: {
     valueMissing?: boolean;
     label?: string;
@@ -46,34 +46,25 @@ const ArgTemplateFormComponent: React.FunctionComponent<ArgTemplateFormProps> = 
 }) => {
   const [updatedHandlers, setHandlers] = useState(mergeWithFormHandlers(handlers));
   const prevError = usePrevious(error);
-  const mountedArgumentRef = useRef<UpdatePropsRef<ArgTemplateFormProps['argumentProps']>>();
+  const [argument, setArgument] = useState<ReactPortal>();
 
+  const mountedArgumentRef = useRef<UpdatePropsRef<ArgTemplateFormProps['argumentProps']>>();
   const domNodeRef = useRef<HTMLDivElement>(null);
-  const [argument, setArgument] = useState<FC<any>>();
 
   useEffectOnce(() => () => {
-    console.log('unmounted');
     mountedArgumentRef.current = undefined;
   });
 
-  const onRef = useCallback((ref) => {
-    console.log('in onMount');
+  const onMount = useCallback((ref) => {
     if (!mountedArgumentRef.current && ref) {
       mountedArgumentRef.current = ref;
     }
   }, []);
 
   const renderTemplate = useCallback(
-    (domNode) => template && template(domNode, argumentProps, updatedHandlers, onRef),
-    [argumentProps, onRef, template, updatedHandlers]
+    (domNode) => template && template(domNode, argumentProps, updatedHandlers, onMount),
+    [argumentProps, onMount, template, updatedHandlers]
   );
-
-  useEffect(() => {
-    if (!argument && domNodeRef.current) {
-      const res = renderTemplate(domNodeRef.current);
-      if (res) setArgument(res);
-    }
-  }, [argument, renderTemplate]);
 
   const renderErrorTemplate = useCallback(
     () => React.createElement(errorTemplate, argumentProps),
@@ -81,20 +72,29 @@ const ArgTemplateFormComponent: React.FunctionComponent<ArgTemplateFormProps> = 
   );
 
   useEffect(() => {
-    setHandlers(mergeWithFormHandlers(handlers));
-  }, [handlers]);
+    if (!argument && domNodeRef.current) {
+      const arg = renderTemplate(domNodeRef.current);
+      if (arg) {
+        setArgument(arg);
+      }
+    }
+  }, [argument, renderTemplate]);
 
   useEffect(() => {
-    if (!prevError && error) {
-      updatedHandlers.destroy();
-    }
-  }, [prevError, error, updatedHandlers]);
+    setHandlers(mergeWithFormHandlers(handlers));
+  }, [handlers]);
 
   useEffect(() => {
     if (mountedArgumentRef.current) {
       mountedArgumentRef.current?.updateProps(argumentProps);
     }
   }, [argumentProps]);
+
+  useEffect(() => {
+    if (!prevError && error) {
+      updatedHandlers.destroy();
+    }
+  }, [prevError, error, updatedHandlers]);
 
   if (error) {
     mountedArgumentRef.current = undefined;

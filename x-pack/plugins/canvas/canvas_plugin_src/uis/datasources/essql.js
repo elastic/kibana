@@ -75,7 +75,7 @@ class EssqlDatasource extends PureComponent {
 
   render() {
     const { isInvalid } = this.props;
-    console.log(EsqlLang);
+
     return (
       <EuiFormRow
         isInvalid={isInvalid}
