@@ -226,6 +226,7 @@ export class KibanaFramework {
     return startPlugins.data.indexPatterns.indexPatternsServiceFactory(
       savedObjectsClient,
       elasticsearchClient
+      // todo does this need request
     );
   }
 

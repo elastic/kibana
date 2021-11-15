@@ -63,7 +63,8 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
             ...req.body,
             indexPatternsService: await data.indexPatterns.indexPatternsServiceFactory(
               savedObjectsClient,
-              esClient
+              esClient,
+              req
             ),
             context,
           }),

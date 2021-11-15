@@ -47,7 +47,8 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
       const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
         savedObjectsClient,
-        esClient
+        esClient,
+        req
       );
 
       try {

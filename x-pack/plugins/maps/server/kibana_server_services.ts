@@ -30,6 +30,7 @@ export const setIndexPatternsService = async (
   indexPatternsService = await indexPatternsServiceFactory(
     new SavedObjectsClient(getInternalRepository()),
     elasticsearchClient
+    // todo does this need to pass request
   );
 };
 export const getIndexPatternsService = () => indexPatternsService;

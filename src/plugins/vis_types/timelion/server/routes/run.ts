@@ -81,7 +81,8 @@ export function runRoute(
       const uiSettings = await context.core.uiSettings.client.getAll();
       const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
         context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser
+        context.core.elasticsearch.client.asCurrentUser,
+        request
       );
 
       const tlConfig = getTlConfig({

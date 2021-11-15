@@ -112,6 +112,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
         return await data.indexPatterns.indexPatternsServiceFactory(
           requestContext.core.savedObjects.client,
           requestContext.core.elasticsearch.client.asCurrentUser
+          // todo does this need request
         );
       },
       getFieldFormatsService: async (uiSettings) => {
