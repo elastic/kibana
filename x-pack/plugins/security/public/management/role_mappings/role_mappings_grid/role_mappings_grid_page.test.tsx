@@ -188,6 +188,7 @@ describe('RoleMappingsGridPage', () => {
     expect(roleMappingsAPI.getRoleMappings).toHaveBeenCalledTimes(1);
     expect(roleMappingsAPI.deleteRoleMappings).not.toHaveBeenCalled();
 
+    findTestSubject(wrapper, `euiCollapsedItemActionsButton`).simulate('click');
     findTestSubject(wrapper, `deleteRoleMappingButton-some-realm`).simulate('click');
     expect(findTestSubject(wrapper, 'deleteRoleMappingConfirmationModal')).toHaveLength(1);
 

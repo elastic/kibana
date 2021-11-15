@@ -63,6 +63,7 @@ const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
 };
 
 export class RolesGridPage extends Component<Props, State> {
+  private tableRef: React.RefObject<EuiInMemoryTable<Role>>;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -74,6 +75,7 @@ export class RolesGridPage extends Component<Props, State> {
       permissionDenied: false,
       includeReservedRoles: true,
     };
+    this.tableRef = React.createRef();
   }
 
   public componentDidMount() {
@@ -172,9 +174,10 @@ export class RolesGridPage extends Component<Props, State> {
                 direction: 'asc',
               },
             }}
-            rowProps={() => {
+            ref={this.tableRef}
+            rowProps={(role: Role) => {
               return {
-                'data-test-subj': 'roleRow',
+                'data-test-subj': `roleRow`,
               };
             }}
             isSelectable
@@ -463,6 +466,7 @@ export class RolesGridPage extends Component<Props, State> {
     );
   }
   private onCancelDelete = () => {
-    this.setState({ showDeleteConfirmation: false });
+    this.setState({ showDeleteConfirmation: false, selection: [] });
+    this.tableRef.current?.setSelection([]);
   };
 }

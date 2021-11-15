@@ -68,6 +68,7 @@ interface State {
 }
 
 export class RoleMappingsGridPage extends Component<Props, State> {
+  private tableRef: React.RefObject<EuiInMemoryTable<RoleMapping>>;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -78,6 +79,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       selectedItems: [],
       error: undefined,
     };
+    this.tableRef = React.createRef();
   }
 
   public componentDidMount() {
@@ -229,7 +231,13 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           {(deleteRoleMappingsPrompt) => {
             return (
               <EuiButton
-                onClick={() => deleteRoleMappingsPrompt(selectedItems, this.onRoleMappingsDeleted)}
+                onClick={() =>
+                  deleteRoleMappingsPrompt(
+                    selectedItems,
+                    this.onRoleMappingsDeleted,
+                    this.onRoleMappingsDeleteCancel
+                  )
+                }
                 color="danger"
                 data-test-subj="bulkDeleteActionButton"
               >
@@ -284,6 +292,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                 loading={loadState === 'loadingTable'}
                 message={message}
                 isSelectable={true}
+                ref={this.tableRef}
                 rowProps={() => {
                   return {
                     'data-test-subj': 'roleMappingRow',
@@ -478,6 +487,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     if (roleMappings.length) {
       this.reloadRoleMappings();
     }
+  };
+
+  private onRoleMappingsDeleteCancel = () => {
+    this.tableRef.current?.setSelection([]);
   };
 
   private async checkPrivileges() {
