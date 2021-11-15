@@ -11,7 +11,7 @@
  *2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useLayoutEffect, useState, useEffect, MouseEvent } from 'react';
+import React, { useMemo, useRef, useLayoutEffect, useState, useEffect, MouseEvent } from 'react';
 import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Process } from '../../hooks/use_process_tree';
@@ -47,7 +47,7 @@ export function ProcessTreeNode({
   }, [isSessionLeader, process.autoExpand]);
 
   useLayoutEffect(() => {
-    if (searchMatched !== null && textRef && textRef.current) {
+    if (searchMatched !== null && textRef.current) {
       const regex = new RegExp(searchMatched);
 
       const text = textRef.current.innerText;
@@ -59,13 +59,19 @@ export function ProcessTreeNode({
     }
   }, [searchMatched]);
 
-  const event = process.getDetails();
+  const processDetails = useMemo(() => {
+    return process.getDetails();
+  }, [process.events.length]);
 
-  if (!event) {
+  const hasExec = useMemo(() => {
+    return process.hasExec();
+  }, [process.events.length]);
+
+  if (!processDetails) {
     return null;
   }
 
-  const { interactive } = event.process;
+  const { interactive } = processDetails.process;
 
   const renderChildren = () => {
     const { children } = process;
@@ -132,7 +138,7 @@ export function ProcessTreeNode({
       working_directory: workingDirectory,
       exit_code: exitCode,
     } = process.getDetails().process;
-    if (process.hasExec()) {
+    if (hasExec) {
       return (
         <span ref={textRef}>
           <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
@@ -154,7 +160,7 @@ export function ProcessTreeNode({
     return (
       <span>
         {process.isUserEntered() && <EuiIcon css={styles.userEnteredIcon} type="user" />}
-        <EuiIcon type={process.hasExec() ? 'console' : 'branch'} /> {template()}
+        <EuiIcon type={hasExec ? 'console' : 'branch'} /> {template()}
         {isOrphan ? '(orphaned)' : ''}
       </span>
     );

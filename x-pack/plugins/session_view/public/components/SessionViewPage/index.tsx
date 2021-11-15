@@ -63,7 +63,7 @@ export const SessionViewPage = (props: RouteComponentProps) => {
             `}
         />
         <EuiSpacer />
-        <SessionView key={sessionEntityId} sessionEntityId={sessionEntityId} />
+        {sessionEntityId && <SessionView sessionEntityId={sessionEntityId} />}
         <EuiSpacer />
       </EuiPageContent>
     </EuiPage>

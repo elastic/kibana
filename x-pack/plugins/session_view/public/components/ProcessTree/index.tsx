@@ -89,17 +89,20 @@ export const ProcessTree = ({
     }
 
     // find the DOM element for the command which is selected by id
-    const processEl = scrollerRef.current.querySelector(`[data-id="${process.id}"]`);
+    const processEl = scrollerRef.current.querySelector<HTMLElement>(`[data-id="${process.id}"]`);
 
     if (processEl) {
       processEl.prepend(selectionAreaEl);
 
-      if (processEl.parentElement) {
-        const rect = processEl.getBoundingClientRect();
-        const elemTop = rect.top;
-        const elemBottom = rect.bottom;
-        const containerHeight = processEl.parentElement.offsetHeight;
-        const isVisible = elemTop >= 0 && elemBottom < containerHeight;
+      const container = processEl.parentElement;
+
+      if (container) {
+        const cTop = container.scrollTop;
+        const cBottom = cTop + container.clientHeight;
+
+        const eTop = processEl.offsetTop;
+        const eBottom = eTop + processEl.clientHeight;
+        const isVisible = eTop >= cTop && eBottom <= cBottom;
 
         if (!isVisible) {
           processEl.scrollIntoView();
@@ -128,7 +131,7 @@ export const ProcessTree = ({
           onProcessSelected={onProcessSelected}
         />
       )}
-      {orphans.forEach((process) => {
+      {orphans.map((process) => {
         return (
           <ProcessTreeNode
             key={process.id}
