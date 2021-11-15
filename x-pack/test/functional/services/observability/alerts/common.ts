@@ -98,6 +98,22 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.existOrFail('tGridEmptyState');
   };
 
+  const getCheckboxByNumber = async (number: number) => {
+    const dataGrid = await testSubjects.find('dataGridWrapper');
+    const checkboxes = await dataGrid.findAllByCssSelector('.euiCheckbox__input');
+    return checkboxes[number];
+  };
+
+  const clickCheckboxByNumber = async (number: number) => {
+    const checkbox = await getCheckboxByNumber(number);
+    return await checkbox.click();
+  };
+
+  const isCheckboxByNumberChecked = async (number: number) => {
+    const checkbox = await getCheckboxByNumber(number);
+    return Boolean(await checkbox.getAttribute('checked'));
+  };
+
   // Query Bar
   const getQueryBar = async () => {
     return await testSubjects.find('queryInput');
@@ -276,5 +292,8 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
+    getCheckboxByNumber,
+    clickCheckboxByNumber,
+    isCheckboxByNumberChecked,
   };
 }
