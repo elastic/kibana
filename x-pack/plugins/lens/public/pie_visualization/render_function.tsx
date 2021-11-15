@@ -28,7 +28,12 @@ import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
-import { getSliceValue, getFilterContext } from './render_helpers';
+import {
+  getSliceValue,
+  getFilterContext,
+  isTreemapOrMosaic,
+  generateByDataColorPalette,
+} from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import {
@@ -38,7 +43,6 @@ import {
 } from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
 import { getLegendAction } from './get_legend_action';
-import type { PieChartTypes } from '../../common/expressions/pie_chart/types';
 
 declare global {
   interface Window {
@@ -50,8 +54,6 @@ declare global {
 }
 
 const EMPTY_SLICE = Symbol('empty_slice');
-
-const isTreemapOrMosaic = (shape: PieChartTypes) => ['treemap', 'mosaic'].includes(shape);
 
 export function PieComponent(
   props: PieExpressionProps & {
@@ -112,6 +114,19 @@ export function PieComponent(
     })
   ).length;
 
+  let byDataPalette: Record<string, string> | undefined;
+
+  const shouldUseByDataPalette = !syncColors && ['mosaic'].includes(shape) && bucketColumns[1]?.id;
+
+  if (shouldUseByDataPalette) {
+    byDataPalette = generateByDataColorPalette(
+      firstTable,
+      bucketColumns[1].id,
+      paletteService,
+      palette
+    );
+  }
+
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
@@ -130,9 +145,14 @@ export function PieComponent(
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];
 
+          // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
+          // therefore change it for dask mode
+          const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+
           // Color is determined by round-robin on the index of the innermost slice
           // This has to be done recursively until we get to the slice index
           let tempParent: typeof d | typeof d['parent'] = d;
+
           while (tempParent.parent && tempParent.depth > 0) {
             seriesLayers.unshift({
               name: String(tempParent.parent.children[tempParent.sortIndex][0]),
@@ -142,12 +162,14 @@ export function PieComponent(
             tempParent = tempParent.parent;
           }
 
+          if (byDataPalette && seriesLayers[1]) {
+            return byDataPalette[seriesLayers[1].name] || defaultColor;
+          }
+
           if (isTreemapOrMosaic(shape)) {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             if (layerIndex < bucketColumns.length - 1) {
-              // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
-              // therefore change it for dask mode
-              return isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+              return defaultColor;
             }
             // only use the top level series layer for coloring
             if (seriesLayers.length > 1) {
@@ -166,7 +188,7 @@ export function PieComponent(
             palette.params
           );
 
-          return outputColor || 'rgba(0,0,0,0)';
+          return outputColor || defaultColor;
         },
       },
     };

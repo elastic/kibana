@@ -40,6 +40,24 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
+const applyPaletteToColumnConfig = (
+  columns: AccessorConfig[],
+  { shape, palette }: PieVisualizationState,
+  paletteService: PaletteRegistry
+) => {
+  const colorPickerIndex = shape === 'mosaic' ? columns.length - 1 : 0;
+
+  if (columns.length > 0 && colorPickerIndex >= 0) {
+    columns[colorPickerIndex] = {
+      columnId: columns[colorPickerIndex].columnId,
+      triggerIcon: 'colorBy',
+      palette: paletteService
+        .get(palette?.name || 'default')
+        .getCategoricalColors(10, palette?.params),
+    };
+  }
+};
+
 export const getPieVisualization = ({
   paletteService,
 }: {
@@ -128,15 +146,7 @@ export const getPieVisualization = ({
       new Set(originalOrder.concat(layer.groups))
     ).map((accessor) => ({ columnId: accessor }));
 
-    if (sortedColumns.length > 0) {
-      sortedColumns[0] = {
-        columnId: sortedColumns[0].columnId,
-        triggerIcon: 'colorBy',
-        palette: paletteService
-          .get(state.palette?.name || 'default')
-          .getCategoricalColors(10, state.palette?.params),
-      };
-    }
+    applyPaletteToColumnConfig(sortedColumns, state, paletteService);
 
     const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
       const baseProps = {
@@ -157,7 +167,7 @@ export const getPieVisualization = ({
             }),
             supportsMoreColumns: sortedColumns.length < MAX_TREEMAP_BUCKETS,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
-            minDimensions: state.shape === 'mosaic' ? 2 : 0,
+            requiredMinDimensionCount: state.shape === 'mosaic' ? 2 : 0,
           };
         default:
           return {

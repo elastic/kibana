@@ -8,6 +8,8 @@
 import { Datum, LayerValue } from '@elastic/charts';
 import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import { LensFilterEvent } from '../types';
+import { PieChartTypes, PieExpressionProps } from '../../common/expressions/pie_chart/types';
+import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
   const value = d[metricColumn.id];
@@ -35,3 +37,27 @@ export function getFilterContext(
     })),
   };
 }
+
+const extractUniqueTerms = (columnId: string, data: Datatable) => [
+  ...new Set(data.rows.map((item) => item[columnId])),
+];
+
+export const isTreemapOrMosaic = (shape: PieChartTypes) => ['treemap', 'mosaic'].includes(shape);
+
+export const generateByDataColorPalette = (
+  data: Datatable,
+  columnId: string,
+  paletteService: PaletteRegistry,
+  { name, params }: PieExpressionProps['args']['palette']
+) => {
+  const uniqTerms = extractUniqueTerms(columnId, data);
+  const colors = paletteService.get(name).getCategoricalColors(uniqTerms.length, params);
+
+  return uniqTerms.reduce<Record<string, string>>(
+    (acc, item, index) => ({
+      ...acc,
+      [item]: colors[index],
+    }),
+    {}
+  );
+};

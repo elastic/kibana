@@ -385,9 +385,19 @@ export function LayerPanel(
 
           {groups.map((group, groupIndex) => {
             const isMissing =
-              !isEmptyLayer && group.required && group.minDimensions
-                ? group.accessors.length < group.minDimensions
+              !isEmptyLayer && group.required && group.requiredMinDimensionCount
+                ? group.accessors.length < group.requiredMinDimensionCount
                 : group.accessors.length === 0;
+            const isMissingError = !group.requiredMinDimensionCount
+              ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
+                  defaultMessage: 'Required dimension',
+                })
+              : i18n.translate('xpack.lens.editorFrame.requiredTwoOrMoreDimensionsWarningLabel', {
+                  defaultMessage: 'Required {requiredMinDimensionCount} dimensions',
+                  values: {
+                    requiredMinDimensionCount: group.requiredMinDimensionCount,
+                  },
+                });
 
             return (
               <EuiFormRow
@@ -416,13 +426,7 @@ export function LayerPanel(
                 labelType="legend"
                 key={group.groupId}
                 isInvalid={isMissing}
-                error={
-                  isMissing
-                    ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
-                        defaultMessage: 'Required dimension',
-                      })
-                    : []
-                }
+                error={isMissing ? isMissingError : []}
               >
                 <>
                   {group.accessors.length ? (

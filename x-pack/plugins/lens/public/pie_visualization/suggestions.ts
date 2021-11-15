@@ -16,8 +16,7 @@ function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizatio
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-    table.changeType === 'reorder' ||
-    table.columns.some((col) => col.operation.scale === 'interval') // Histograms are not good for pie
+    table.changeType === 'reorder'
   );
 }
 

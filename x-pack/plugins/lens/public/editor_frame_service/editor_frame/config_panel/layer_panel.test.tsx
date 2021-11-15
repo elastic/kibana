@@ -227,7 +227,7 @@ describe('LayerPanel', () => {
       expect(group).toHaveLength(1);
     });
 
-    it('should render the required warning when only one group is configured (with minDimensions)', async () => {
+    it('should render the required warning when only one group is configured (with requiredMinDimensionCount)', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -246,7 +246,7 @@ describe('LayerPanel', () => {
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
             required: true,
-            minDimensions: 2,
+            requiredMinDimensionCount: 2,
           },
         ],
       });
@@ -255,7 +255,7 @@ describe('LayerPanel', () => {
 
       const group = instance
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error') === 'Required dimension');
+        .findWhere((e) => e.prop('error') === 'Required 2 dimensions');
 
       expect(group).toHaveLength(1);
     });
