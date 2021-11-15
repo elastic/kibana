@@ -8,7 +8,7 @@
 import { run, RunFn, createFailError } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { AxiosError } from 'axios';
-import bluebird from 'bluebird';
+import pMap from 'p-map';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
@@ -70,7 +70,7 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
 
   await ensureCreateEndpointHostIsolationExceptionList(kbn);
 
-  await bluebird.map(
+  await pMap(
     Array.from({ length: flags.count as unknown as number }),
     () =>
       kbn
