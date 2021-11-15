@@ -26,6 +26,7 @@ export default function enterSpaceFunctonalTests({
     );
 
     afterEach(async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
 
@@ -49,15 +50,12 @@ export default function enterSpaceFunctonalTests({
       });
 
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
-
       await PageObjects.spaceSelector.expectRoute(spaceId, '/app/canvas');
-
       await PageObjects.spaceSelector.openSpacesNav();
 
       // change spaces
       const newSpaceId = 'default';
       await PageObjects.spaceSelector.clickSpaceAvatar(newSpaceId);
-
       await PageObjects.spaceSelector.expectHomePage(newSpaceId);
     });
   });

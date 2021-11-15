@@ -764,7 +764,12 @@ export const AlertForm = ({
                 <EuiFieldSearch
                   fullWidth
                   data-test-subj="alertSearchField"
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={(e) => {
+                    setInputText(e.target.value);
+                    if (e.target.value === '') {
+                      setSearchText('');
+                    }
+                  }}
                   onKeyUp={(e) => {
                     if (e.keyCode === ENTER_KEY) {
                       setSearchText(inputText);

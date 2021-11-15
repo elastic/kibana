@@ -7,13 +7,18 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Router, Switch, useParams } from 'react-router-dom';
+import { Route, Router, useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  Breadcrumb,
+  BreadcrumbsProvider,
+  createBreadcrumbsChangeHandler,
+} from '../../components/breadcrumb';
 import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 
@@ -27,21 +32,12 @@ export const roleMappingsManagementApp = Object.freeze({
     const title = i18n.translate('xpack.security.management.roleMappingsTitle', {
       defaultMessage: 'Role Mappings',
     });
+
     return {
       id: this.id,
       order: 40,
       title,
       async mount({ element, setBreadcrumbs, history }) {
-        const [coreStart] = await getStartServices();
-        const roleMappingsBreadcrumbs = [
-          {
-            text: title,
-            href: `/`,
-          },
-        ];
-
-        coreStart.chrome.docTitle.change(title);
-
         const [
           [core],
           { RoleMappingsGridPage },
@@ -56,20 +52,9 @@ export const roleMappingsManagementApp = Object.freeze({
           import('../roles'),
         ]);
 
+        core.chrome.docTitle.change(title);
+
         const roleMappingsAPIClient = new RoleMappingsAPIClient(core.http);
-        const RoleMappingsGridPageWithBreadcrumbs = () => {
-          setBreadcrumbs(roleMappingsBreadcrumbs);
-          return (
-            <RoleMappingsGridPage
-              notifications={core.notifications}
-              rolesAPIClient={new RolesAPIClient(core.http)}
-              roleMappingsAPI={roleMappingsAPIClient}
-              docLinks={core.docLinks}
-              history={history}
-              navigateToApp={coreStart.application.navigateToApp}
-            />
-          );
-        };
 
         const EditRoleMappingsPageWithBreadcrumbs = () => {
           const { name } = useParams<{ name?: string }>();
@@ -78,26 +63,26 @@ export const roleMappingsManagementApp = Object.freeze({
           // See https://github.com/elastic/kibana/issues/82440
           const decodedName = name ? tryDecodeURIComponent(name) : undefined;
 
-          setBreadcrumbs([
-            ...roleMappingsBreadcrumbs,
-            name
+          const breadcrumbObj =
+            name && decodedName
               ? { text: decodedName, href: `/edit/${encodeURIComponent(name)}` }
               : {
                   text: i18n.translate('xpack.security.roleMappings.createBreadcrumb', {
                     defaultMessage: 'Create',
                   }),
-                },
-          ]);
+                };
 
           return (
-            <EditRoleMappingPage
-              name={decodedName}
-              roleMappingsAPI={roleMappingsAPIClient}
-              rolesAPIClient={new RolesAPIClient(core.http)}
-              notifications={core.notifications}
-              docLinks={core.docLinks}
-              history={history}
-            />
+            <Breadcrumb text={breadcrumbObj.text} href={breadcrumbObj.href}>
+              <EditRoleMappingPage
+                name={decodedName}
+                roleMappingsAPI={roleMappingsAPIClient}
+                rolesAPIClient={new RolesAPIClient(core.http)}
+                notifications={core.notifications}
+                docLinks={core.docLinks}
+                history={history}
+              />
+            </Breadcrumb>
           );
         };
 
@@ -105,14 +90,25 @@ export const roleMappingsManagementApp = Object.freeze({
           <KibanaContextProvider services={core}>
             <core.i18n.Context>
               <Router history={history}>
-                <Switch>
-                  <Route path={['/', '']} exact={true}>
-                    <RoleMappingsGridPageWithBreadcrumbs />
-                  </Route>
-                  <Route path="/edit/:name?">
-                    <EditRoleMappingsPageWithBreadcrumbs />
-                  </Route>
-                </Switch>
+                <BreadcrumbsProvider
+                  onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
+                >
+                  <Breadcrumb text={title} href="/">
+                    <Route path={['/', '']} exact={true}>
+                      <RoleMappingsGridPage
+                        notifications={core.notifications}
+                        rolesAPIClient={new RolesAPIClient(core.http)}
+                        roleMappingsAPI={roleMappingsAPIClient}
+                        docLinks={core.docLinks}
+                        history={history}
+                        navigateToApp={core.application.navigateToApp}
+                      />
+                    </Route>
+                    <Route path="/edit/:name?">
+                      <EditRoleMappingsPageWithBreadcrumbs />
+                    </Route>
+                  </Breadcrumb>
+                </BreadcrumbsProvider>
               </Router>
             </core.i18n.Context>
           </KibanaContextProvider>,
@@ -120,7 +116,6 @@ export const roleMappingsManagementApp = Object.freeze({
         );
 
         return () => {
-          coreStart.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

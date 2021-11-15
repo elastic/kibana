@@ -25,15 +25,16 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('find_rules', () => {
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
     });
 
     it('should return an empty find body correctly if no rules are loaded', async () => {
@@ -52,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a single rule when a single rule is loaded from a find with defaults added', async () => {
-      await createRule(supertest, getSimpleRule());
+      await createRule(supertest, log, getSimpleRule());
 
       // query the single rule from _find
       const { body } = await supertest
@@ -114,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ...getSimpleRule('rule-1'),
         actions: [action],
       };
-      await createRule(supertest, rule);
+      await createRule(supertest, log, rule);
 
       // query the single rule from _find
       const { body } = await supertest
@@ -159,7 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
         throttle: '1h', // <-- throttle makes this a scheduled action
         actions: [action],
       };
-      await createRule(supertest, rule);
+      await createRule(supertest, log, rule);
 
       // query the single rule from _find
       const { body } = await supertest
@@ -197,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // create a rule without actions
-        const createRuleBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // attach the legacy notification
         await supertest

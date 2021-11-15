@@ -105,7 +105,7 @@ export const CustomTypeNameWarningCheckbox: React.FunctionComponent<WarningCheck
       description={
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
-          defaultMessage="Mapping types are no longer supported in 8.0. Ensure no application code or scripts rely on {mappingType}."
+          defaultMessage="Mapping types are no longer supported in Elastic 8.x. Ensure no application code or scripts rely on {mappingType}."
           values={{
             mappingType: <EuiCode>{meta!.typeName as string}</EuiCode>,
           }}
