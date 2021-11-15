@@ -17,8 +17,7 @@ import {
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
 
-const convertToVisDimension = (columns: DatatableColumn[], accessor: string | undefined) => {
-  if (!accessor) return;
+const convertToVisDimension = (columns: DatatableColumn[], accessor: string) => {
   const column = columns.find((c) => c.id === accessor);
   if (!column) return;
   return {
@@ -26,6 +25,19 @@ const convertToVisDimension = (columns: DatatableColumn[], accessor: string | un
     format: column.meta.params,
     type: 'vis_dimension',
   } as unknown as ExpressionValueVisDimension;
+};
+
+const prepareHeatmapLogTable = (
+  columns: DatatableColumn[],
+  accessor: string | ExpressionValueVisDimension,
+  table: Dimension[],
+  label: string
+) => {
+  const dimension =
+    typeof accessor === 'string' ? convertToVisDimension(columns, accessor) : accessor;
+  if (dimension) {
+    table.push([[dimension], label]);
+  }
 };
 
 export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
@@ -119,75 +131,58 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
   },
   fn(data, args, handlers) {
-    const valueDimension =
-      typeof args.valueAccessor === 'string'
-        ? convertToVisDimension(data.columns, args.valueAccessor)
-        : args.valueAccessor;
-    const yDimension =
-      typeof args.yAccessor === 'string'
-        ? convertToVisDimension(data.columns, args.yAccessor)
-        : args.yAccessor;
-
-    const xDimension =
-      typeof args.xAccessor === 'string'
-        ? convertToVisDimension(data.columns, args.xAccessor)
-        : args.xAccessor;
-    const splitRowDimension =
-      typeof args.splitRowAccessor === 'string'
-        ? convertToVisDimension(data.columns, args.splitRowAccessor)
-        : args.splitRowAccessor;
-    const splitColumnDimension =
-      typeof args.splitColumnAccessor === 'string'
-        ? convertToVisDimension(data.columns, args.splitColumnAccessor)
-        : args.splitColumnAccessor;
-
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [];
-      if (yDimension) {
-        argsTable.push([
-          [yDimension],
-          i18n.translate('expressionHeatmap.function.dimension.yaxis', {
-            defaultMessage: 'Y axis',
-          }),
-        ]);
-      }
-
-      if (valueDimension) {
-        argsTable.push([
-          [valueDimension],
+      if (args.valueAccessor) {
+        prepareHeatmapLogTable(
+          data.columns,
+          args.valueAccessor,
+          argsTable,
           i18n.translate('expressionHeatmap.function.dimension.metric', {
             defaultMessage: 'Metric',
-          }),
-        ]);
+          })
+        );
       }
-
-      if (xDimension) {
-        argsTable.push([
-          [xDimension],
+      if (args.yAccessor) {
+        prepareHeatmapLogTable(
+          data.columns,
+          args.yAccessor,
+          argsTable,
+          i18n.translate('expressionHeatmap.function.dimension.yaxis', {
+            defaultMessage: 'Y axis',
+          })
+        );
+      }
+      if (args.xAccessor) {
+        prepareHeatmapLogTable(
+          data.columns,
+          args.xAccessor,
+          argsTable,
           i18n.translate('expressionHeatmap.function.dimension.xaxis', {
             defaultMessage: 'X axis',
-          }),
-        ]);
+          })
+        );
       }
-
-      if (splitRowDimension) {
-        argsTable.push([
-          [splitRowDimension],
+      if (args.splitRowAccessor) {
+        prepareHeatmapLogTable(
+          data.columns,
+          args.splitRowAccessor,
+          argsTable,
           i18n.translate('expressionHeatmap.function.dimension.splitRow', {
             defaultMessage: 'Split by row',
-          }),
-        ]);
+          })
+        );
       }
-
-      if (splitColumnDimension) {
-        argsTable.push([
-          [splitColumnDimension],
+      if (args.splitColumnAccessor) {
+        prepareHeatmapLogTable(
+          data.columns,
+          args.splitColumnAccessor,
+          argsTable,
           i18n.translate('expressionHeatmap.function.dimension.splitColumn', {
-            defaultMessage: 'Split by row',
-          }),
-        ]);
+            defaultMessage: 'Split by column',
+          })
+        );
       }
-
       const logTable = prepareLogTable(data, argsTable);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }

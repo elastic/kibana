@@ -33,7 +33,6 @@ const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: HeatmapArguments = {
   percentageMode: false,
-  shape: 'heatmap',
   legend: {
     isVisible: true,
     position: 'top',
