@@ -106,6 +106,7 @@ export interface TGridStandaloneProps {
   indexNames: string[];
   itemsPerPageOptions: number[];
   query: Query;
+  onTotalItemsChange?: (totalItems: number) => void;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -139,6 +140,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   indexNames,
   itemsPerPageOptions,
   onRuleChange,
+  onTotalItemsChange,
   query,
   renderCellValue,
   rowRenderers,
@@ -303,6 +305,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       }),
     [uiSettings, indexPatterns, browserFields, filters, query, start, end]
   );
+
+  useEffect(() => {
+    onTotalItemsChange?.(totalCount);
+  }, [totalCount]);
 
   useEffect(() => {
     setIsQueryLoading(loading);

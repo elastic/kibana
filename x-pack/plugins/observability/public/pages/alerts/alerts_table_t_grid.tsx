@@ -336,6 +336,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
+  const [totalItems, setTotalItems] = useState<number>(0);
 
   const casePermissions = useGetUserCasesPermissions();
 
@@ -403,6 +404,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
+      onTotalItemsChange: setTotalItems,
       query: {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
@@ -451,6 +453,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
             onClose={handleFlyoutClose}
             showPagination={true}
+            totalAlerts={totalItems}
           />
         </Suspense>
       )}

@@ -57,7 +57,7 @@ type AlertsFlyoutProps = {
   isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   selectedAlertId?: string;
-  alertCount?: number;
+  totalAlerts?: number;
   selectedAlertIndex?: number;
   showPagination?: boolean;
 } & EuiFlyoutProps;
@@ -79,7 +79,7 @@ export function AlertsFlyout({
   onClose,
   selectedAlertId,
   selectedAlertIndex = 0,
-  alertCount = -1,
+  totalAlerts = -1,
   showPagination = false,
 }: AlertsFlyoutProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
@@ -151,7 +151,7 @@ export function AlertsFlyout({
             {showPagination && (
               <EuiPagination
                 aria-label="Yadda yadda"
-                pageCount={alertCount}
+                pageCount={totalAlerts}
                 activePage={selectedAlertIndex}
                 onPageClick={(activePage) => console.log(activePage)}
                 compressed
