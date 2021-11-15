@@ -689,6 +689,10 @@ export class TaskRunner<
   }
 
   async cancel(): Promise<void> {
+    if (this.cancelled$.getValue()) {
+      return;
+    }
+
     this.cancelled$.next(true);
 
     // Write event log entry
