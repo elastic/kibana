@@ -1051,12 +1051,10 @@ describe('when on the endpoint list page', () => {
         // scroll to the bottom by pressing down arrow key
         // and keep it pressed
         userEvent.keyboard('ArrowDown>');
-        // wait for key up
-        await waitFor(() => {
-          userEvent.keyboard('/ArrowDown');
-        }).then(async () => {
-          expect(await renderResult.queryByTestId('activityLogLoadMoreTrigger')).toBeNull();
-        });
+        // end scrolling after 1s
+        await waitFor(() => {});
+        userEvent.keyboard('/ArrowDown');
+        expect(await renderResult.queryByTestId('activityLogLoadMoreTrigger')).toBeNull();
       });
 
       it('should correctly display non-empty comments only for actions', async () => {
