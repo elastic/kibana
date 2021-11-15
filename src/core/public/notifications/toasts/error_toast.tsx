@@ -29,6 +29,10 @@ interface ErrorToastProps {
   toastMessage: string;
   openModal: OverlayStart['openModal'];
   i18nContext: () => I18nStart['Context'];
+  actions?: {
+    onCancel: () => void;
+    onSave: () => void;
+  };
 }
 
 interface RequestError extends Error {
@@ -42,6 +46,8 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
   return false;
 };
 
+const isQuotaExceededError = (e: Error): boolean => e.name === 'QuotaExceededError';
+
 /**
  * This should instead be replaced by the overlay service once it's available.
  * This does not use React portals so that if the parent toast times out, this modal
@@ -53,7 +59,8 @@ function showErrorDialog({
   error,
   openModal,
   i18nContext,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext'>) {
+  actions,
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext' | 'actions'>) {
   const I18nContext = i18nContext();
   let text = '';
 
@@ -64,6 +71,42 @@ function showErrorDialog({
 
   if (error.stack) {
     text += error.stack;
+  }
+
+  let footer = (
+    <EuiButton onClick={() => modal.close()} fill>
+      <FormattedMessage id="core.notifications.errorToast.closeModal" defaultMessage="Close" />
+    </EuiButton>
+  );
+
+  if (isQuotaExceededError(error)) {
+    footer = (
+      <>
+        <EuiButton
+          onClick={() => {
+            actions?.onCancel();
+            modal.close();
+          }}
+        >
+          <FormattedMessage
+            id="core.notifications.errorToast.closeModal"
+            defaultMessage="Clear history"
+          />
+        </EuiButton>
+        <EuiButton
+          onClick={() => {
+            actions?.onSave();
+            modal.close();
+          }}
+          fill
+        >
+          <FormattedMessage
+            id="core.notifications.errorToast.closeModal"
+            defaultMessage="Stop saving"
+          />
+        </EuiButton>
+      </>
+    );
   }
 
   const modal = openModal(
@@ -84,14 +127,7 @@ function showErrorDialog({
               </React.Fragment>
             )}
           </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButton onClick={() => modal.close()} fill>
-              <FormattedMessage
-                id="core.notifications.errorToast.closeModal"
-                defaultMessage="Close"
-              />
-            </EuiButton>
-          </EuiModalFooter>
+          <EuiModalFooter>{footer}</EuiModalFooter>
         </I18nContext>
       </React.Fragment>
     )
@@ -104,6 +140,7 @@ export function ErrorToast({
   toastMessage,
   openModal,
   i18nContext,
+  actions,
 }: ErrorToastProps) {
   return (
     <React.Fragment>
@@ -112,7 +149,7 @@ export function ErrorToast({
         <EuiButton
           size="s"
           color="danger"
-          onClick={() => showErrorDialog({ title, error, openModal, i18nContext })}
+          onClick={() => showErrorDialog({ title, error, openModal, i18nContext, actions })}
         >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"

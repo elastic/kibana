@@ -46,10 +46,13 @@ export const useSendCurrentRequestToES = () => {
       const results = await sendRequestToES({ requests });
 
       let saveToHistoryError: undefined | Error;
+      const { historyDisabled } = settings.toJSON();
 
       results.forEach(({ request: { path, method, data } }) => {
         try {
-          history.addToHistory(path, method, data);
+          if (!historyDisabled) {
+            history.addToHistory(path, method, data);
+          }
         } catch (e) {
           // Grab only the first error
           if (!saveToHistoryError) {
@@ -69,6 +72,10 @@ export const useSendCurrentRequestToES = () => {
               defaultMessage:
                 'Request history is full. Clear the Console history to save new requests.',
             }),
+            actions: {
+              onCancel: () => history.clearHistory(),
+              onSave: () => settings.setHistoryDisabled(true),
+            },
           });
         } else {
           // Best effort, but still notify the user.
