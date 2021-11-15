@@ -125,7 +125,6 @@ export async function updateOneHostIsolationExceptionItem(
   fieldsToRemove.forEach((field) => {
     delete entry[field as keyof UpdateExceptionListItemSchema];
   });
-  console.log('the entry', entry);
   return http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
     body: JSON.stringify(entry),
   });

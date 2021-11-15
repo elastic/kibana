@@ -16,7 +16,6 @@ import { HostIsolationExceptionsPageState } from '../types';
 import { initialHostIsolationExceptionsPageState } from './builders';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
-import { createUninitialisedResourceState } from '../../../state';
 
 type StateReducer = ImmutableReducer<HostIsolationExceptionsPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -38,33 +37,6 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
   action
 ) => {
   switch (action.type) {
-    case 'hostIsolationExceptionsCreateEntry': {
-      return {
-        ...state,
-        form: {
-          entry: action.payload,
-          status: createUninitialisedResourceState(),
-        },
-      };
-    }
-    case 'hostIsolationExceptionsFormStateChanged': {
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          status: action.payload,
-        },
-      };
-    }
-    case 'hostIsolationExceptionsFormEntryChanged': {
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          entry: action.payload,
-        },
-      };
-    }
     case 'userChangedUrl':
       return userChangedUrl(state, action);
   }
