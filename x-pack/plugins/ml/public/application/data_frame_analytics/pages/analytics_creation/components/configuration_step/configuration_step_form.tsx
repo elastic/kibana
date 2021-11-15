@@ -667,17 +667,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           </EuiFormRow>
         </Fragment>
       )}
-      <EuiFormRow
-        fullWidth
-        isInvalid={requiredFieldsError !== undefined}
-        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-          defaultMessage: 'Invalid. {message}',
-          values: { message: requiredFieldsError },
-        })}
-      >
-        <Fragment />
-      </EuiFormRow>
-
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
@@ -688,6 +677,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         setUnsupportedFieldsError={setUnsupportedFieldsError}
         setFormState={setFormState}
       />
+      <EuiFormRow
+        fullWidth
+        isInvalid={requiredFieldsError !== undefined}
+        error={i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+          defaultMessage: 'Invalid. {message}',
+          values: { message: requiredFieldsError },
+        })}
+      >
+        <Fragment />
+      </EuiFormRow>
+      <EuiSpacer />
       {showScatterplotMatrix && (
         <>
           <EuiFormRow
