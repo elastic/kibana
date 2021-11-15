@@ -46,6 +46,10 @@ yargs(process.argv.slice(2))
           string: true,
           default: '10s',
         })
+        .option('duration', {
+          describe: 'Duration of script run',
+          string: true,
+        })
         .option('offset', {
           describe: 'Comparison window offset',
           string: true,
@@ -88,6 +92,12 @@ yargs(process.argv.slice(2))
       const { auth, ...rest } = parse(argv.kibanaUrl);
 
       const baseUrl = format(rest);
+
+      if (argv.duration) {
+        setTimeout(() => {
+          process.exit(0);
+        }, intervalToMs(argv.duration));
+      }
 
       axios.defaults.headers['kbn-xsrf'] = 'foo';
       axios.defaults.auth = auth
