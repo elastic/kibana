@@ -26,7 +26,6 @@ interface ScheduledExecutionOptions<
   subgroup?: string;
   context: Context;
   state: State;
-  staticContext: RawAlertStaticContext;
 }
 
 export type PublicAlertInstance<
@@ -46,10 +45,12 @@ export class AlertInstance<
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: AlertInstanceMeta;
   private state: State;
+  private staticContext: RawAlertStaticContext;
 
-  constructor({ state, meta = {} }: RawAlertInstance = {}) {
+  constructor({ state, meta = {}, staticContext = {} }: RawAlertInstance = {}) {
     this.state = (state || {}) as State;
     this.meta = meta;
+    this.staticContext = staticContext || {};
   }
 
   hasScheduledActions() {
@@ -136,16 +137,20 @@ export class AlertInstance<
     return this.state;
   }
 
+  getStaticContext() {
+    return this.staticContext;
+  }
+
   scheduleActions(
     actionGroup: ActionGroupIds,
     context: Context = {} as Context,
     staticContext: RawAlertStaticContext = {}
   ) {
     this.ensureHasNoScheduledActions();
+    this.replaceStaticContext(staticContext);
     this.scheduledExecutionOptions = {
       actionGroup,
       context,
-      staticContext,
       state: this.state,
     };
     return this;
@@ -158,11 +163,11 @@ export class AlertInstance<
     staticContext: RawAlertStaticContext = {}
   ) {
     this.ensureHasNoScheduledActions();
+    this.replaceStaticContext(staticContext);
     this.scheduledExecutionOptions = {
       actionGroup,
       subgroup,
       context,
-      staticContext,
       state: this.state,
     };
     return this;
@@ -176,6 +181,11 @@ export class AlertInstance<
 
   replaceState(state: State) {
     this.state = state;
+    return this;
+  }
+
+  replaceStaticContext(staticContext: RawAlertStaticContext) {
+    this.staticContext = staticContext;
     return this;
   }
 
@@ -194,6 +204,7 @@ export class AlertInstance<
     return {
       state: this.state,
       meta: this.meta,
+      staticContext: this.staticContext,
     };
   }
 }

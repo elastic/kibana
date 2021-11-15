@@ -27,18 +27,19 @@ export type AlertInstanceState = t.TypeOf<typeof stateSchema>;
 const contextSchema = t.record(t.string, t.unknown);
 export type AlertInstanceContext = t.TypeOf<typeof contextSchema>;
 
-export const rawAlertInstance = t.partial({
-  state: stateSchema,
-  meta: metaSchema,
-});
-export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;
-
 export const rawAlertStaticContext = t.partial({
   duration: t.number,
-  start: t.number,
-  end: t.number,
+  start: t.string,
+  end: t.string,
   threshold: t.number,
   value: t.number,
   reason: t.string,
 });
 export type RawAlertStaticContext = t.TypeOf<typeof rawAlertStaticContext>;
+
+export const rawAlertInstance = t.partial({
+  state: stateSchema,
+  meta: metaSchema,
+  staticContext: rawAlertStaticContext,
+});
+export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;

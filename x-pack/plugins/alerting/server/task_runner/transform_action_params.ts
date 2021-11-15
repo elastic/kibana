@@ -10,17 +10,9 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   AlertTypeParams,
+  RawAlertStaticContext,
 } from '../types';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
-
-export interface AlertMetadata {
-  start?: number;
-  duration?: number;
-  end?: number;
-  value?: number;
-  threshold?: number;
-  reason?: string;
-}
 
 interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
@@ -46,7 +38,7 @@ interface TransformActionParamsOptions {
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
-  alertMetadata: AlertMetadata;
+  staticContext: RawAlertStaticContext;
 }
 
 export function transformActionParams({
@@ -67,7 +59,7 @@ export function transformActionParams({
   state,
   kibanaBaseUrl,
   alertParams,
-  alertMetadata,
+  staticContext,
 }: TransformActionParamsOptions): AlertActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -98,12 +90,12 @@ export function transformActionParams({
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
       actionSubgroup: alertActionSubgroup,
-      ...(alertMetadata.start ? { start: alertMetadata.start } : {}),
-      ...(alertMetadata.duration ? { duration: alertMetadata.duration } : {}),
-      ...(alertMetadata.end ? { end: alertMetadata.end } : {}),
-      ...(alertMetadata.threshold ? { threshold: alertMetadata.threshold } : {}),
-      ...(alertMetadata.value ? { value: alertMetadata.value } : {}),
-      ...(alertMetadata.reason ? { reason: alertMetadata.reason } : {}),
+      ...(staticContext.start ? { start: staticContext.start } : {}),
+      ...(null != staticContext.duration ? { duration: staticContext.duration } : {}),
+      ...(staticContext.end ? { end: staticContext.end } : {}),
+      ...(null != staticContext.threshold ? { threshold: staticContext.threshold } : {}),
+      ...(staticContext.value ? { value: staticContext.value } : {}),
+      ...(staticContext.reason ? { reason: staticContext.reason } : {}),
     },
   };
   return actionsPlugin.renderActionParameterTemplates(

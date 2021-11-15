@@ -48,6 +48,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   WithoutReservedActionGroups,
+  RawAlertStaticContext,
 } from '../../common';
 import { NormalizedAlertType, UntypedNormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -212,6 +213,7 @@ export class TaskRunner<
       context,
       state,
     } = alertInstance.getScheduledActionOptions()!;
+    const staticContext = alertInstance.getStaticContext();
     alertInstance.updateLastScheduledActions(actionGroup, actionSubgroup);
     alertInstance.unscheduleActions();
     return executionHandler({
@@ -220,7 +222,7 @@ export class TaskRunner<
       context,
       state,
       alertInstanceId,
-      alertMetadata: {},
+      staticContext,
     });
   }
 
@@ -251,12 +253,7 @@ export class TaskRunner<
     } = alert;
     const {
       params: { alertId },
-      state: {
-        alertInstances: alertRawInstances = {},
-        alertTypeState = {},
-        alertStaticContext = {},
-        previousStartedAt,
-      },
+      state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const alertType = this.ruleTypeRegistry.get(alertTypeId);
@@ -354,15 +351,6 @@ export class TaskRunner<
         !alertInstance.hasScheduledActions() && originalAlertInstanceIds.has(id)
     );
 
-    // TODO
-    // Loop through active alerts and get context from alertInstance.getScheduledActionOptions()?.staticContext
-    // Loop through recovered alerts and get context from alertStaticContext
-    const alertContexts = mapValues(
-      alertInstances,
-      (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
-        alertInstance.getScheduledActionOptions()?.staticContext ?? {}
-    );
-
     logActiveAndRecoveredInstances({
       logger: this.logger,
       activeAlertInstances: activeAlerts,
@@ -370,8 +358,6 @@ export class TaskRunner<
       alertLabel,
     });
 
-    // TODO
-    // Move from state to static context
     trackAlertDurations({
       originalAlerts: originalAlertInstances,
       currentAlerts: activeAlerts,
@@ -450,7 +436,6 @@ export class TaskRunner<
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
-      alertStaticContext: {},
       alertInstances: mapValues<
         Record<string, AlertInstance<InstanceState, InstanceContext>>,
         RawAlertInstance
@@ -692,37 +677,42 @@ function trackAlertDurations<
   const recoveredAlertIds = Object.keys(recoveredAlerts);
   const newAlertIds = without(currentAlertIds, ...originalAlertIds);
 
-  // Inject start time into instance state of new instances
+  // Inject start time into static context of new alerts
   for (const id of newAlertIds) {
-    const state = currentAlerts[id].getState();
-    currentAlerts[id].replaceState({ ...state, start: currentTime });
+    const staticContext = currentAlerts[id].getStaticContext();
+    currentAlerts[id].replaceStaticContext({ ...staticContext, start: currentTime });
   }
 
-  // Calculate duration to date for active instances
+  // Calculate duration to date for active alerts
   for (const id of currentAlertIds) {
-    const state = originalAlertIds.includes(id)
-      ? originalAlerts[id].getState()
-      : currentAlerts[id].getState();
-    const duration = state.start
-      ? (new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()) * 1000 * 1000 // nanoseconds
+    const staticContext = originalAlertIds.includes(id)
+      ? originalAlerts[id].getStaticContext()
+      : currentAlerts[id].getStaticContext();
+    // console.log(`current alert static context ${JSON.stringify(staticContext)}`);
+    const duration = staticContext.start
+      ? (new Date(currentTime).valueOf() - new Date(staticContext.start as string).valueOf()) *
+        1000 *
+        1000 // nanoseconds
       : undefined;
-    currentAlerts[id].replaceState({
-      ...state,
-      ...(state.start ? { start: state.start } : {}),
+    currentAlerts[id].replaceStaticContext({
+      ...staticContext,
+      ...(staticContext.start ? { start: staticContext.start } : {}),
       ...(duration !== undefined ? { duration } : {}),
     });
   }
 
-  // Inject end time into instance state of recovered instances
+  // Inject end time into static context of recovered alerts
   for (const id of recoveredAlertIds) {
-    const state = recoveredAlerts[id].getState();
-    const duration = state.start
-      ? (new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()) * 1000 * 1000 // nanoseconds
+    const staticContext = recoveredAlerts[id].getStaticContext();
+    const duration = staticContext.start
+      ? (new Date(currentTime).valueOf() - new Date(staticContext.start as string).valueOf()) *
+        1000 *
+        1000 // nanoseconds
       : undefined;
-    recoveredAlerts[id].replaceState({
-      ...state,
+    recoveredAlerts[id].replaceStaticContext({
+      ...staticContext,
       ...(duration ? { duration } : {}),
-      ...(state.start ? { end: currentTime } : {}),
+      ...(staticContext.start ? { end: currentTime } : {}),
     });
   }
 }
@@ -777,12 +767,14 @@ function generateNewAndRecoveredInstanceEvents<
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
     const state = recoveredAlertInstances[id].getState();
+    const staticContext = recoveredAlertInstances[id].getStaticContext();
     const message = `${params.alertLabel} instance '${id}' has recovered`;
     logInstanceEvent(
       id,
       EVENT_LOG_ACTIONS.recoveredInstance,
       message,
       state,
+      staticContext,
       actionGroup,
       actionSubgroup
     );
@@ -792,12 +784,14 @@ function generateNewAndRecoveredInstanceEvents<
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const state = currentAlertInstances[id].getState();
+    const staticContext = currentAlertInstances[id].getStaticContext();
     const message = `${params.alertLabel} created new instance: '${id}'`;
     logInstanceEvent(
       id,
       EVENT_LOG_ACTIONS.newInstance,
       message,
       state,
+      staticContext,
       actionGroup,
       actionSubgroup
     );
@@ -807,6 +801,7 @@ function generateNewAndRecoveredInstanceEvents<
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const state = currentAlertInstances[id].getState();
+    const staticContext = currentAlertInstances[id].getStaticContext();
     const message = `${params.alertLabel} active instance: '${id}' in ${
       actionSubgroup
         ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
@@ -817,6 +812,7 @@ function generateNewAndRecoveredInstanceEvents<
       EVENT_LOG_ACTIONS.activeInstance,
       message,
       state,
+      staticContext,
       actionGroup,
       actionSubgroup
     );
@@ -827,6 +823,7 @@ function generateNewAndRecoveredInstanceEvents<
     action: string,
     message: string,
     state: InstanceState,
+    staticContext: RawAlertStaticContext,
     group?: string,
     subgroup?: string
   ) {
@@ -835,9 +832,11 @@ function generateNewAndRecoveredInstanceEvents<
         action,
         kind: 'alert',
         category: [ruleType.producer],
-        ...(state?.start ? { start: state.start as string } : {}),
-        ...(state?.end ? { end: state.end as string } : {}),
-        ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
+        ...(staticContext.start ? { start: staticContext.start as string } : {}),
+        ...(staticContext.end ? { end: staticContext.end as string } : {}),
+        ...(staticContext.duration !== undefined
+          ? { duration: staticContext.duration as number }
+          : {}),
       },
       kibana: {
         alerting: {
@@ -912,12 +911,17 @@ function scheduleActionsForRecoveredInstances<
       const instance = recoveredAlertInstances[id];
       instance.updateLastScheduledActions(recoveryActionGroup.id);
       instance.unscheduleActions();
+      const staticContext = instance.getStaticContext();
+      instance.replaceStaticContext({
+        ...staticContext,
+        reason: `Recovered from ${staticContext.reason}`,
+      });
       executionHandler({
         actionGroup: recoveryActionGroup.id,
         context: {},
         state: {},
         alertInstanceId: id,
-        alertMetadata: {},
+        staticContext: instance.getStaticContext(),
       });
       instance.scheduleActions(recoveryActionGroup.id);
     }
