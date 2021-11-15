@@ -54,6 +54,15 @@ const confirmModalOptionsDelete = {
   }),
 };
 
+const securityDataView = i18n.translate(
+  'indexPatternManagement.editIndexPattern.badge.securityDataViewTitle',
+  {
+    defaultMessage: 'Security Data View',
+  }
+);
+
+const securitySolution = 'security-solution';
+
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
     const { application, uiSettings, overlays, chrome, data } =
@@ -145,10 +154,15 @@ export const EditIndexPattern = withRouter(
           defaultIndex={defaultIndex}
         >
           {showTagsSection && (
-            <EuiFlexGroup wrap>
+            <EuiFlexGroup wrap gutterSize="s">
               {Boolean(indexPattern.timeFieldName) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
+                </EuiFlexItem>
+              )}
+              {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>{securityDataView}</EuiBadge>
                 </EuiFlexItem>
               )}
               {tags.map((tag: any) => (
