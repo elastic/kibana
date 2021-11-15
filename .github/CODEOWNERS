@@ -397,7 +397,7 @@
 # Security Solution sub teams
 /x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
-/x-pack/test/case_api_integration @elastic/security-threat-hunting
+/x-pack/test/cases_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 
 ## Security Solution sub teams - security-onboarding-and-lifecycle-mgt
