@@ -206,7 +206,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             trailingControlColumns,
             type: 'embedded',
             unit,
-            createFieldComponent,
           })}
         </InspectButtonContainer>
       </FullScreenContainer>
