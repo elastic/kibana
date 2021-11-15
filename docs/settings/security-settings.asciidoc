@@ -332,7 +332,7 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 xpack.security.audit.enabled: true
 xpack.security.audit.appender: <1>
   type: rolling-file
-  fileName: ./data/audit.log
+  fileName: ./logs/audit.log
   policy:
     type: time-interval
     interval: 24h <2>

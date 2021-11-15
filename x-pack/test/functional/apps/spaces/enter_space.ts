@@ -50,15 +50,12 @@ export default function enterSpaceFunctonalTests({
       });
 
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
-
       await PageObjects.spaceSelector.expectRoute(spaceId, '/app/canvas');
-
       await PageObjects.spaceSelector.openSpacesNav();
 
       // change spaces
       const newSpaceId = 'default';
       await PageObjects.spaceSelector.clickSpaceAvatar(newSpaceId);
-
       await PageObjects.spaceSelector.expectHomePage(newSpaceId);
     });
   });
