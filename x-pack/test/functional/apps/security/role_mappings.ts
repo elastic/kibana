@@ -163,6 +163,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
       });
 
+      it('allows a role mapping to be cloned', async () => {
+        await testSubjects.click('cloneRoleMappingButton-a_enabled_role_mapping');
+        await testSubjects.setValue('roleMappingFormNameInput', 'cloned_role_mapping');
+        await testSubjects.click('saveRoleMappingButton');
+        await testSubjects.existOrFail('savedRoleMappingSuccessToast');
+        const rows = await testSubjects.findAll('roleMappingRow');
+        expect(rows.length).to.eql(mappings.length + 1);
+      });
+
       it('allows a role mapping to be edited', async () => {
         await testSubjects.click('roleMappingName');
         await testSubjects.click('saveRoleMappingButton');
