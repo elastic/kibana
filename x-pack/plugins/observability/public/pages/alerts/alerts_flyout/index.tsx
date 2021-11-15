@@ -41,7 +41,7 @@ import {
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
-import React, { useMemo, useCallback, useContext } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { TopAlert } from '../';
 import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
@@ -50,7 +50,6 @@ import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { ExperimentalBadge } from '../../../components/shared/experimental_badge';
 import { translations, paths } from '../../../config';
-import { TimelineContext } from '../../../../../timelines/public';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -89,7 +88,6 @@ export function AlertsFlyout({
   const { services } = useKibana();
   const { http } = services;
   const prepend = http?.basePath.prepend;
-  const { setExpanded } = useContext(TimelineContext);
 
   const decoratedAlerts = useMemo(() => {
     const parseObservabilityAlert = parseAlert(observabilityRuleTypeRegistry);
@@ -99,8 +97,6 @@ export function AlertsFlyout({
   const onSelectPage = useCallback(
     (activePage: number) => {
       onSelectedAlertIndexChange?.(activePage);
-      // const alert = decoratedAlerts?.[activePage];
-      // alert && setExpanded?.(alert);
     },
     [onSelectedAlertIndexChange]
   );
@@ -110,8 +106,6 @@ export function AlertsFlyout({
     if (selectedAlertId != null) {
       // Fixme: O(n) lookup
       alertData = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId);
-      // } else if (selectedAlertIndex != null) {
-      //   alertData = decoratedAlerts?.[selectedAlertIndex];
     }
   }
   if (!alertData) {
