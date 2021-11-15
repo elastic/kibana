@@ -43,8 +43,9 @@ import {
   queryResponseToHostListResult,
   queryResponseToHostResult,
 } from './support/query_strategies';
-import { EndpointError, NotFoundError } from '../../errors';
+import { NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
