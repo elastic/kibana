@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { Integration } from '../../containers/overview_cti_links/use_ti_integrations';
 import { CtiEnabledModule } from './cti_enabled_module';
 import { CtiDisabledModule } from './cti_disabled_module';
 
@@ -18,7 +19,7 @@ export type ThreatIntelLinkPanelProps = Pick<
   hasSomeThreatIntelData: boolean | undefined;
   isSomeIntegrationsInstalled: boolean | undefined;
   isSomeIntegrationsDisabled: boolean | undefined;
-  installedIntegrationIds: string[];
+  installedIntegrations: Integration[];
 };
 
 const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {

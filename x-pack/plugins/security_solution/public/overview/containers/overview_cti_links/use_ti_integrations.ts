@@ -10,15 +10,28 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import { EPM_API_ROUTES, installationStatuses } from '../../../../../fleet/common';
 import { TI_INTEGRATION_PREFIX } from '../../../../common/cti/constants';
 
-interface Integration {
+interface IntegrationResponse {
   id: string;
   status: string;
+  savedObject?: {
+    attributes?: {
+      installed_kibana: Array<{
+        type: string;
+        id: string;
+      }>;
+    };
+  };
+}
+
+export interface Integration {
+  id: string;
+  dashboardIds: string[];
 }
 
 interface TiIntegrationStatus {
   isSomeIntegrationsInstalled: boolean | undefined;
   isSomeIntegrationsDisabled: boolean | undefined;
-  installedIntegrationIds: string[];
+  installedIntegrations: Integration[];
 }
 
 export const useTiIntegrations = () => {
@@ -29,35 +42,47 @@ export const useTiIntegrations = () => {
   useEffect(() => {
     const getPackages = async () => {
       try {
-        const { response: integrations } = await KibanaServices.get().http.fetch(
-          EPM_API_ROUTES.LIST_PATTERN,
-          {
-            method: 'GET',
-          }
-        );
-        const tiIntegrations = integrations.filter((integration: Integration) =>
+        const { response: integrations } = await KibanaServices.get().http.fetch<{
+          response: IntegrationResponse[];
+        }>(EPM_API_ROUTES.LIST_PATTERN, {
+          method: 'GET',
+        });
+        const tiIntegrations = integrations.filter((integration: IntegrationResponse) =>
           integration.id.startsWith(TI_INTEGRATION_PREFIX)
         );
 
-        const installedIntegrations = tiIntegrations.filter(
-          (integration: Integration) => integration.status === installationStatuses.Installed
-        );
+        const installedIntegrations = tiIntegrations
+          .filter(
+            (integration: IntegrationResponse) =>
+              integration.status === installationStatuses.Installed
+          )
+          .map((integration: IntegrationResponse) => {
+            const installedSavedObjects =
+              integration?.savedObject?.attributes?.installed_kibana ?? [];
+            const dashboardIds = installedSavedObjects
+              .filter((so) => so.type === 'dashboard')
+              .map((so) => so.id);
+            return {
+              id: integration.id,
+              dashboardIds,
+            };
+          });
+
         const isSomeIntegrationsDisabled = tiIntegrations.some(
-          (integration: Integration) => integration.status !== installationStatuses.Installed
+          (integration: IntegrationResponse) =>
+            integration.status !== installationStatuses.Installed
         );
 
         setTiIntegrationsStatus({
           isSomeIntegrationsDisabled,
           isSomeIntegrationsInstalled: installedIntegrations.length > 0,
-          installedIntegrationIds: installedIntegrations.map(
-            (integration: Integration) => integration.id
-          ),
+          installedIntegrations,
         });
       } catch (e) {
         setTiIntegrationsStatus({
           isSomeIntegrationsInstalled: undefined,
           isSomeIntegrationsDisabled: undefined,
-          installedIntegrationIds: [],
+          installedIntegrations: [],
         });
       }
     };
