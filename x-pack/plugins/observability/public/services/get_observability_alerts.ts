@@ -8,7 +8,7 @@
 import { CoreStart } from 'kibana/public';
 import { Alert } from '../../../alerting/common';
 
-const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts'];
+const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts', 'alerts_demo'];
 
 export async function getObservabilityAlerts({ core }: { core: CoreStart }) {
   try {

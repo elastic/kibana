@@ -71,6 +71,7 @@ export const createAlertsDemoExecutor = (libs: BackendLibs) =>
   >(async function ({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
+    state,
   }) {
     const { alertWithLifecycle } = services;
     const alertInstanceFactory: AlertInstanceFactory = (id, reason) =>
@@ -80,12 +81,15 @@ export const createAlertsDemoExecutor = (libs: BackendLibs) =>
           [ALERT_REASON]: reason,
         },
       });
+
+    const count = (state.count ?? 0) + 1;
     range(instances)
       .map(() => uuid.v4())
       .forEach((id: string) => {
         const tShirtSize = getTShirtSizeByIdAndThreshold(id, thresholds);
-        const alertInstance = alertInstanceFactory(id, tShirtSize);
-        alertInstance.scheduleActions(tShirtSize);
+        alertInstanceFactory(id, tShirtSize)
+          .replaceState({ triggerdOnCycle: count })
+          .scheduleActions(tShirtSize);
       });
   });
 

@@ -34,10 +34,10 @@ export interface RulesServiceSetup {
   createLifecycleRuleExecutor: LifecycleRuleExecutorCreator;
 }
 
-export type RuleRegistrationContext = 'observability.logs';
+export type RuleRegistrationContext = 'observability.alerts_demo';
 
 export interface BackendLibs {
   rules: RulesServiceSetup;
 }
 
-export type DemoFeatureId = 'logs'; // TODO must be one of the allowed consumers
+export type DemoFeatureId = 'alerts_demo'; // TODO must be one of the allowed consumers

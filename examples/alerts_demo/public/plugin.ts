@@ -17,6 +17,7 @@ import {
   AlertsDemoClientSetupDeps,
   AlertsDemoClientStartDeps,
 } from './types';
+import { ALERTS_DEMO_APP_ID } from '../common/constants';
 import { PLUGIN_NAME } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../src/core/public';
 // import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
@@ -47,9 +48,11 @@ export class AlertsDemoPlugin implements AlertsDemoPluginClass {
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createAlwaysFiringAlertType()
     );
+
+    // console.log(pluginsSetup.observability.observabilityRuleTypeRegistry.list(), '!!list');
     // pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
     pluginsSetup.developerExamples.register({
-      appId: 'alertsDemo',
+      appId: ALERTS_DEMO_APP_ID,
       title: 'Alerts Demo example',
       description: 'This alerting example walks you through how to set up a new rule.',
       links: [
@@ -64,7 +67,7 @@ export class AlertsDemoPlugin implements AlertsDemoPluginClass {
     });
     // Register an application into the side navigation menu
     core.application.register({
-      id: 'alertsDemo',
+      id: ALERTS_DEMO_APP_ID,
       title: PLUGIN_NAME,
       category: DEFAULT_APP_CATEGORIES.observability,
       async mount(params: AppMountParameters) {

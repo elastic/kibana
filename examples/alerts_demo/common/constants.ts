@@ -8,7 +8,7 @@
 
 import { AlertTypeParams } from '../../../x-pack/plugins/alerting/common';
 
-export const ALERTS_DEMO_APP_ID = 'AlertsDemo';
+export const ALERTS_DEMO_APP_ID = 'alerts_demo';
 
 // always firing
 export const DEFAULT_INSTANCES_TO_GENERATE = 5;

@@ -25,10 +25,14 @@ export interface ObservabilityRuleTypeModel<Params extends AlertTypeParams = Ale
 
 export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRegistryContract) {
   const formatters: Array<{ typeId: string; fn: ObservabilityRuleTypeFormatter }> = [];
-
+  const registeredRuleTypes: string[] = [];
   return {
+    list: () => {
+      return registeredRuleTypes;
+    },
     register: (type: ObservabilityRuleTypeModel<any>) => {
       const { format, ...rest } = type;
+      registeredRuleTypes.push(type.id);
       formatters.push({ typeId: type.id, fn: format });
       ruleTypeRegistry.register(rest);
     },

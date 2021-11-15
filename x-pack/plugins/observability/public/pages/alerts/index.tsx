@@ -80,6 +80,7 @@ function AlertsPage() {
             'observability.logs',
             'observability.metrics',
             'observability.uptime',
+            'observability.alerts_demo',
           ],
         },
       },

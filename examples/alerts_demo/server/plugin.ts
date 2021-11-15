@@ -31,7 +31,7 @@ export class AlertsDemoPlugin implements Plugin<void, void, AlertsDemoServerSetu
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.rules = new RulesService('logs', 'observability.logs', this.logger);
+    this.rules = new RulesService(ALERTS_DEMO_APP_ID, 'observability.alerts_demo', this.logger);
   }
 
   public setup(core: CoreSetup, { alerting, features, ruleRegistry }: AlertsDemoServerSetupDeps) {
