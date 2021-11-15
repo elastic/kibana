@@ -16,14 +16,14 @@ incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<str
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> | The type of saved object whose fields should be incremented |
-|  id | <code>string</code> | The id of the document whose fields should be incremented |
-|  counterFields | <code>Array&lt;string &#124; SavedObjectsIncrementCounterField&gt;</code> | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
-|  options | <code>SavedObjectsIncrementCounterOptions&lt;T&gt;</code> | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
+|  type | string | The type of saved object whose fields should be incremented |
+|  id | string | The id of the document whose fields should be incremented |
+|  counterFields | Array&lt;string \| SavedObjectsIncrementCounterField&gt; | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
+|  options | SavedObjectsIncrementCounterOptions&lt;T&gt; | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
 
 <b>Returns:</b>
 
-`Promise<SavedObject<T>>`
+Promise&lt;SavedObject&lt;T&gt;&gt;
 
 The saved object after the specified fields were incremented
 
@@ -65,6 +65,5 @@ repository.incrementCounter<{ appId: string }>(
   [ 'stats.apiCalls'],
   { upsertAttributes: { appId: 'myId' } }
 )
-
 ```
 
