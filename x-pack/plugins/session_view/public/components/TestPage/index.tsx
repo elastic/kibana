@@ -63,29 +63,37 @@ export const TestPage = (props: RouteComponentProps) => {
     mutate,
     isLoading,
     data: putData,
-  } = useMutation(() => {
-    return http.put(INTERNAL_TEST_ROUTE, { 
-      body: JSON.stringify({ 
-        index: indexName,
-        data: JSON.stringify([{ message }])
-      }), 
-    });
-  }, { onSuccess: () => {
-    notifications.toasts.addSuccess('Data Added!');
-  }});
+  } = useMutation(
+    () => {
+      return http.put(INTERNAL_TEST_ROUTE, {
+        body: JSON.stringify({
+          index: indexName,
+          data: JSON.stringify([{ message }]),
+        }),
+      });
+    },
+    {
+      onSuccess: () => {
+        notifications.toasts.addSuccess('Data Added!');
+      },
+    }
+  );
 
   // An example of using useQuery to hit an internal endpoint via mutation (PUT)
-  const {
-    mutate: deleteMutate,
-  } = useMutation(() => {
-    return http.delete(INTERNAL_TEST_ROUTE, { 
-      body: JSON.stringify({ 
-        index: indexName
-      })
-    });
-  }, { onSuccess: () => {
-    notifications.toasts.addSuccess('Data Deleted!');
-  }});
+  const { mutate: deleteMutate } = useMutation(
+    () => {
+      return http.delete(INTERNAL_TEST_ROUTE, {
+        body: JSON.stringify({
+          index: indexName,
+        }),
+      });
+    },
+    {
+      onSuccess: () => {
+        notifications.toasts.addSuccess('Data Deleted!');
+      },
+    }
+  );
 
   const handleInsertData = () => {
     mutate();
@@ -136,14 +144,12 @@ export const TestPage = (props: RouteComponentProps) => {
   return (
     <EuiPage>
       <EuiPageContent data-test-subj="sessionViewTestPage">
-        <EuiPageHeader 
+        <EuiPageHeader
           pageTitle="Plugin POC"
           iconType="logoKibana"
-          description={
-            `Below is a POC of a Kibana plugin, demonstrating data fetching patterns and data rendering.
+          description={`Below is a POC of a Kibana plugin, demonstrating data fetching patterns and data rendering.
             Please start by adding some mock data
-            `
-          }
+          `}
         />
         <EuiSpacer />
         <EuiFlexGroup>
@@ -208,20 +214,12 @@ export const TestPage = (props: RouteComponentProps) => {
             <div>
               put network data:
               <EuiSpacer />
-              {SOisLoading ? (
-                <div>Loading!</div>
-              ) : (
-                <pre>{JSON.stringify(SOputData, null, 2)}</pre>
-              )}
+              {SOisLoading ? <div>Loading!</div> : <pre>{JSON.stringify(SOputData, null, 2)}</pre>}
             </div>
             <div>
               get network data:
               <EuiSpacer />
-              {SOisFetching ? (
-                <div>Loading!</div>
-              ) : (
-                <pre>{JSON.stringify(SOgetData, null, 2)}</pre>
-              )}
+              {SOisFetching ? <div>Loading!</div> : <pre>{JSON.stringify(SOgetData, null, 2)}</pre>}
             </div>
             <EuiSpacer />
           </EuiFlexItem>

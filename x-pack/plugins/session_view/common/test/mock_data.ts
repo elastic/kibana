@@ -5,7 +5,7 @@
  * 2.0.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Action, ProcessEvent } from '../../public/hooks/use_process_tree';
+import { EventAction, ProcessEvent } from '../../public/hooks/use_process_tree';
 import uuid from 'uuid';
 
 export const getStart = () => {
@@ -14,7 +14,7 @@ export const getStart = () => {
     event: {
       kind: 'event',
       category: 'process',
-      action: Action.exec,
+      action: EventAction.exec,
     },
     process: {
       args: ['bash'],
@@ -111,7 +111,7 @@ export const getEvent = () => {
     event: {
       kind: 'event',
       category: 'process',
-      action: Action.exec,
+      action: EventAction.exec,
     },
     process: {
       args: randomElement.args,
@@ -187,7 +187,7 @@ export const getEnd = () => {
       event: {
         kind: 'event',
         category: 'process',
-        action: Action.exec,
+        action: EventAction.exec,
       },
       process: {
         args: ['df'],
@@ -259,7 +259,7 @@ export const getEnd = () => {
       event: {
         kind: 'event',
         category: 'process',
-        action: Action.fork,
+        action: EventAction.fork,
       },
       process: {
         args: ['df', 'nested'],
@@ -333,7 +333,7 @@ export const getEnd = () => {
       event: {
         kind: 'event',
         category: 'process',
-        action: Action.exec,
+        action: EventAction.exec,
       },
       process: {
         args: ['df', 'nested'],
@@ -407,7 +407,7 @@ export const getEnd = () => {
       event: {
         kind: 'event',
         category: 'process',
-        action: Action.end,
+        action: EventAction.end,
       },
       process: {
         args: ['df', 'nested'],
@@ -487,7 +487,7 @@ export const mockData: ProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: Action.exec,
+      action: EventAction.exec,
     },
     process: {
       args: ['bash'],
@@ -561,7 +561,7 @@ export const mockData: ProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: Action.exec,
+      action: EventAction.exec,
     },
     process: {
       args: ['ls', '-l'],
@@ -633,7 +633,7 @@ export const mockData: ProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: Action.exec,
+      action: EventAction.exec,
     },
     process: {
       args: ['df'],
@@ -705,7 +705,7 @@ export const mockData: ProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: Action.fork,
+      action: EventAction.fork,
     },
     process: {
       args: ['df', 'nested'],
@@ -779,7 +779,7 @@ export const mockData: ProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: Action.exec,
+      action: EventAction.exec,
     },
     process: {
       args: ['df', 'nested'],
@@ -853,7 +853,7 @@ export const mockData: ProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: Action.end,
+      action: EventAction.end,
     },
     process: {
       args: ['df', 'nested'],

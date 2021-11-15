@@ -11,8 +11,8 @@ import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
 interface ProcessTreeDeps {
-  // process.entity_id to act as root node
-  sessionId: string;
+  // process.entity_id to act as root node (typically a session (or entry session) leader).
+  sessionEntityId: string;
 
   // bi-directional paging support. allows us to load
   // processes before and after a particular process.entity_id
@@ -29,7 +29,7 @@ interface ProcessTreeDeps {
 }
 
 export const ProcessTree = ({
-  sessionId,
+  sessionEntityId,
   forward,
   backward,
   searchQuery,
@@ -39,7 +39,7 @@ export const ProcessTree = ({
   const styles = useStyles();
 
   const { sessionLeader, orphans, searchResults } = useProcessTree({
-    sessionId,
+    sessionEntityId,
     forward,
     backward,
     searchQuery,
@@ -89,10 +89,25 @@ export const ProcessTree = ({
     }
 
     // find the DOM element for the command which is selected by id
-    const processEl = scrollerRef.current.querySelector(`[data-id="${process.getEntityID()}"]`);
+    const processEl = scrollerRef.current.querySelector<HTMLElement>(`[data-id="${process.id}"]`);
 
     if (processEl) {
       processEl.prepend(selectionAreaEl);
+
+      const container = processEl.parentElement;
+
+      if (container) {
+        const cTop = container.scrollTop;
+        const cBottom = cTop + container.clientHeight;
+
+        const eTop = processEl.offsetTop;
+        const eBottom = eTop + processEl.clientHeight;
+        const isVisible = eTop >= cTop && eBottom <= cBottom;
+
+        if (!isVisible) {
+          processEl.scrollIntoView();
+        }
+      }
     }
   }, []);
 
@@ -102,13 +117,8 @@ export const ProcessTree = ({
     }
   }, [selectedProcess, selectProcess]);
 
-  // TODO: processes without parents.
-  // haven't decided whether to just add to session leader
-  // or some other UX treatment (reparenting to init?)
-  // eslint-disable-next-line no-console
-  console.log(orphans);
-
-  // TODO: search input and results navigation
+  // TODO: bubble the results up to parent component session_view, and show results navigation
+  // navigating should
   // eslint-disable-next-line no-console
   console.log(searchResults);
 
@@ -121,6 +131,16 @@ export const ProcessTree = ({
           onProcessSelected={onProcessSelected}
         />
       )}
+      {orphans.map((process) => {
+        return (
+          <ProcessTreeNode
+            key={process.id}
+            isOrphan
+            process={process}
+            onProcessSelected={onProcessSelected}
+          />
+        );
+      })}
       <div ref={selectionAreaRef} css={styles.selectionArea} />
     </div>
   );
