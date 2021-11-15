@@ -173,14 +173,14 @@ export const FilterList = ({
   defaultQuery: Filter;
 }) => {
   const [isOpenByCreation, setIsOpenByCreation] = useState(false);
-  const [activeFilterPopoverId, setActiveFilterPopoverId] = useState('');
+  const [activeFilterId, setActiveFilterId] = useState('');
   const [localFilters, setLocalFilters] = useState(() =>
     filters.map((filter) => ({ ...filter, id: generateId() }))
   );
 
   useEffect(() => {
     if (isOpenByCreation) {
-      setActiveFilterPopoverId(localFilters[localFilters.length - 1].id);
+      setActiveFilterId(localFilters[localFilters.length - 1].id);
     }
   }, [isOpenByCreation, localFilters]);
 
@@ -214,6 +214,14 @@ export const FilterList = ({
       )
     );
 
+  const changeActiveFilter = (filterId: string) => {
+    let newActiveFilterId = filterId;
+    if (activeFilterId === filterId) {
+      newActiveFilterId = ''; // toggle off
+    }
+    setActiveFilterId(newActiveFilterId);
+  };
+
   return (
     <>
       <DragDropBuckets
@@ -242,8 +250,8 @@ export const FilterList = ({
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
-                isOpen={filter.id === activeFilterPopoverId}
-                triggerClose={() => setActiveFilterPopoverId('')}
+                isOpen={filter.id === activeFilterId}
+                triggerClose={() => setActiveFilterId('')}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {
@@ -253,7 +261,7 @@ export const FilterList = ({
                   <EuiLink
                     className="lnsFiltersOperation__popoverButton"
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
-                    onClick={() => setActiveFilterPopoverId(filter.id)}
+                    onClick={() => changeActiveFilter(filter.id)}
                     color={isInvalid ? 'danger' : 'text'}
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',
