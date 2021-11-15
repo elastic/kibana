@@ -337,6 +337,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [totalItems, setTotalItems] = useState<number>(0);
+  const [activeAlertIndex, setActiveAlertIndex] = useState<number>(0);
 
   const casePermissions = useGetUserCasesPermissions();
 
@@ -452,6 +453,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             alert={flyoutAlert}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
             onClose={handleFlyoutClose}
+            onSelectedAlertIndexChange={setActiveAlertIndex}
+            selectedAlertIndex={activeAlertIndex}
             showPagination={true}
             totalAlerts={totalItems}
           />

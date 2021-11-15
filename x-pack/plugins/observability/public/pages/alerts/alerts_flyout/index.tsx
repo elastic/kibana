@@ -56,10 +56,11 @@ type AlertsFlyoutProps = {
   alerts?: Array<Record<string, unknown>>;
   isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  onSelectedAlertIndexChange?: (number) => void;
   selectedAlertId?: string;
-  totalAlerts?: number;
   selectedAlertIndex?: number;
   showPagination?: boolean;
+  totalAlerts?: number;
 } & EuiFlyoutProps;
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
@@ -77,10 +78,11 @@ export function AlertsFlyout({
   isInApp = false,
   observabilityRuleTypeRegistry,
   onClose,
+  onSelectedAlertIndexChange,
   selectedAlertId,
   selectedAlertIndex = 0,
-  totalAlerts = -1,
   showPagination = false,
+  totalAlerts = -1,
 }: AlertsFlyoutProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
   const { services } = useKibana();
@@ -94,6 +96,7 @@ export function AlertsFlyout({
 
   let alertData = alert;
   if (!alertData) {
+    // Fixme: O(n) lookup
     alertData = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId);
   }
   if (!alertData) {
@@ -137,7 +140,7 @@ export function AlertsFlyout({
   ];
 
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout" style={{ zIndex: 9999 }}>
+    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader hasBorder>
         <ExperimentalBadge />
         <EuiSpacer size="s" />
@@ -153,7 +156,7 @@ export function AlertsFlyout({
                 aria-label="Yadda yadda"
                 pageCount={totalAlerts}
                 activePage={selectedAlertIndex}
-                onPageClick={(activePage) => console.log(activePage)}
+                onPageClick={(activePage) => onSelectedAlertIndexChange?.(activePage)}
                 compressed
               />
             )}
