@@ -55,6 +55,7 @@ interface InterceptedRequest {
 }
 
 const WAIT_FOR_DELAY_MS: number = 100;
+const SCREENSHOT_TILE_DIMENSION = 800;
 
 export class HeadlessChromiumDriver {
   private readonly page: puppeteer.Page;
@@ -162,24 +163,14 @@ export class HeadlessChromiumDriver {
    */
   public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
-    const screenshot = await this.page.screenshot({
-      clip: {
-        x: boundingClientRect.left + scroll.x,
-        y: boundingClientRect.top + scroll.y,
-        height: boundingClientRect.height,
-        width: boundingClientRect.width,
-      },
-    });
+    const clip: puppeteer.ScreenshotClip = {
+      x: boundingClientRect.left + scroll.x,
+      y: boundingClientRect.top + scroll.y,
+      height: boundingClientRect.height,
+      width: boundingClientRect.width,
+    };
 
-    if (Buffer.isBuffer(screenshot)) {
-      return screenshot;
-    }
-
-    if (typeof screenshot === 'string') {
-      return Buffer.from(screenshot, 'base64');
-    }
-
-    return undefined;
+    return (await this.page.screenshot({ clip, encoding: 'binary' })) as Buffer | undefined;
   }
 
   public async evaluate(

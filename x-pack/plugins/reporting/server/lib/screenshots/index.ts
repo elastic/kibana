@@ -70,7 +70,6 @@ export interface PageSetupResults {
 
 export interface ScreenshotResults {
   timeRange: string | null;
-  screenshots: Screenshot[];
   error?: Error;
 
   /**

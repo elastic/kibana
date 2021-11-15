@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ElementsPositionAndAttribute, Screenshot } from './';
 
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
+  stream: Writable,
   elementsPositionAndAttributes: ElementsPositionAndAttribute[],
   logger: LevelLogger
 ): Promise<Screenshot[]> => {

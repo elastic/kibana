@@ -8,6 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
+import { Writable } from 'stream';
 import { ReportingCore } from '../../';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger } from '../../lib';
@@ -25,7 +26,8 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
-    layoutParams: LayoutParams & { selectors?: Partial<LayoutSelectorDictionary> }
+    layoutParams: LayoutParams & { selectors?: Partial<LayoutSelectorDictionary> },
+    stream: Writable
   ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
     const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
     const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
@@ -38,7 +40,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
     let apmBuffer: typeof apm.currentSpan;
-    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, stream, {
       logger,
       urlsOrUrlLocatorTuples: [urlOrUrlLocatorTuple],
       conditionalHeaders,

@@ -7,6 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
+import { Writable } from 'stream';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { numberToDuration } from '../../../common/schema_utils';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
@@ -36,6 +37,7 @@ export class ScreenshotObservableHandler {
 
   constructor(
     private readonly driver: HeadlessChromiumDriver,
+    private stream: Writable,
     opts: ScreenshotObservableOpts,
     private timeouts: PhaseTimeouts
   ) {
@@ -147,12 +149,11 @@ export class ScreenshotObservableHandler {
           const elements =
             data.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
-          const screenshots = await getScreenshots(this.driver, elements, this.logger);
+          await getScreenshots(this.driver, this.stream, elements, this.logger);
           const { timeRange, error: setupError } = data;
 
           return {
             timeRange,
-            screenshots,
             error: setupError,
             elementsPositionAndAttributes: elements,
           };

@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { catchError, finalize, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE_V2 } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
@@ -48,10 +48,10 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
             [url, locatorParams],
             job.browserTimezone,
             conditionalHeaders,
-            job.layout
+            job.layout,
+            stream
           );
         }),
-        tap(({ buffer }) => stream.write(buffer)),
         map(({ warnings }) => ({
           content_type: 'image/png',
           warnings,

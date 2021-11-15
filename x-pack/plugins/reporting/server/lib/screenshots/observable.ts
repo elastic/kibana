@@ -8,6 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
+import { Writable } from 'stream';
 import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
@@ -44,6 +45,7 @@ const getTimeouts = (captureConfig: CaptureConfig) => ({
 export function getScreenshots$(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory,
+  stream: Writable,
   opts: ScreenshotObservableOpts
 ): Rx.Observable<ScreenshotResults[]> {
   const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
@@ -55,7 +57,12 @@ export function getScreenshots$(
       apmCreatePage?.end();
       exit$.subscribe({ error: () => apmTrans?.end() });
 
-      const screen = new ScreenshotObservableHandler(driver, opts, getTimeouts(captureConfig));
+      const screen = new ScreenshotObservableHandler(
+        driver,
+        stream,
+        opts,
+        getTimeouts(captureConfig)
+      );
 
       return Rx.from(opts.urlsOrUrlLocatorTuples).pipe(
         concatMap((urlOrUrlLocatorTuple, index) =>
