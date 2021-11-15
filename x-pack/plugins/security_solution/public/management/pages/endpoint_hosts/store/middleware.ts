@@ -12,6 +12,7 @@ import { CoreStart, HttpStart } from 'kibana/public';
 import { DataViewBase, Query } from '@kbn/es-query';
 import {
   ActivityLog,
+  GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
   HostIsolationResponse,
@@ -576,9 +577,10 @@ async function loadEndpointDetails({
 
   // call the policy response api
   try {
-    const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
-      query: { agentId: selectedEndpoint },
-    });
+    const policyResponse = await coreStart.http.get<GetHostPolicyResponse>(
+      BASE_POLICY_RESPONSE_ROUTE,
+      { query: { agentId: selectedEndpoint } }
+    );
     dispatch({
       type: 'serverReturnedEndpointPolicyResponse',
       payload: policyResponse,
@@ -609,7 +611,7 @@ async function endpointDetailsMiddleware({
   if (listData(getState()).length === 0) {
     const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
     try {
-      const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
+      const response = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
         body: JSON.stringify({
           paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
         }),

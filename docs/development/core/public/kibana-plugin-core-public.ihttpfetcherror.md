@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IHttpFetchError extends Error 
+export interface IHttpFetchError<TResponseBody = unknown> extends Error 
 ```
 <b>Extends:</b> Error
 
@@ -16,7 +16,7 @@ export interface IHttpFetchError extends Error
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body?](./kibana-plugin-core-public.ihttpfetcherror.body.md) | any | <i>(Optional)</i> |
+|  [body?](./kibana-plugin-core-public.ihttpfetcherror.body.md) | TResponseBody | <i>(Optional)</i> |
 |  [name](./kibana-plugin-core-public.ihttpfetcherror.name.md) | string |  |
 |  [req](./kibana-plugin-core-public.ihttpfetcherror.req.md) | Request |  |
 |  [request](./kibana-plugin-core-public.ihttpfetcherror.request.md) | Request |  |

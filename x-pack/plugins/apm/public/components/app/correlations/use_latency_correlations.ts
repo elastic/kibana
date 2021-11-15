@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 
 import {
   DEBOUNCE_INTERVAL,
@@ -227,7 +227,7 @@ export function useLatencyCorrelations() {
       setResponse.flush();
     } catch (e) {
       if (!abortCtrl.current.signal.aborted) {
-        const err = e as Error | IHttpFetchError;
+        const err = e as Error | IHttpFetchError<ResponseErrorBody>;
         setResponse({
           error:
             'response' in err

@@ -26,7 +26,7 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
 
   return useQuery(
     [SAVED_QUERY_ID, { savedQueryId }],
-    () => http.get(`/internal/osquery/saved_query/${savedQueryId}`),
+    () => http.get<any>(`/internal/osquery/saved_query/${savedQueryId}`),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,

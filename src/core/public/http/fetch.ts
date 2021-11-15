@@ -92,9 +92,9 @@ export class Fetch {
         );
 
         if (optionsWithPath.asResponse) {
-          resolve(interceptedResponse);
+          resolve(interceptedResponse as HttpResponse<TResponseBody>);
         } else {
-          resolve(interceptedResponse.body);
+          resolve(interceptedResponse.body as TResponseBody);
         }
       } catch (error) {
         if (!(error instanceof HttpInterceptHaltError)) {
@@ -142,7 +142,9 @@ export class Fetch {
     return new Request(url, fetchOptions as RequestInit);
   }
 
-  private async fetchResponse(fetchOptions: HttpFetchOptionsWithPath): Promise<HttpResponse<any>> {
+  private async fetchResponse(
+    fetchOptions: HttpFetchOptionsWithPath
+  ): Promise<HttpResponse<unknown>> {
     const request = this.createRequest(fetchOptions);
     let response: Response;
     let body = null;
@@ -181,9 +183,15 @@ export class Fetch {
   }
 
   private shorthand(method: string): HttpHandler {
-    return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
-      const optionsWithPath = validateFetchArguments(pathOrOptions, options);
-      return this.fetch({ ...optionsWithPath, method });
+    return <T = unknown>(
+      pathOrOptions: string | HttpFetchOptionsWithPath,
+      options?: HttpFetchOptions
+    ) => {
+      const optionsWithPath: HttpFetchOptionsWithPath = validateFetchArguments(
+        pathOrOptions,
+        options
+      );
+      return this.fetch<HttpResponse<T>>({ ...optionsWithPath, method });
     };
   }
 }

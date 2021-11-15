@@ -97,6 +97,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Plugin\_2](./kibana-plugin-core-public.plugin_2.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)<!-- -->. |
+|  [ResponseErrorBody](./kibana-plugin-core-public.responseerrorbody.md) |  |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectError](./kibana-plugin-core-public.savedobjecterror.md) |  |

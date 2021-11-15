@@ -820,17 +820,17 @@ export interface HttpFetchQuery {
 // @public
 export interface HttpHandler {
     // (undocumented)
-    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
+    <TResponseBody = unknown>(path: string, options: HttpFetchOptions & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+    <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 // @public
@@ -882,7 +882,7 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse<TResponseBody = any> {
+export interface HttpResponse<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
     readonly request: Readonly<Request>;
@@ -949,9 +949,9 @@ export interface IExternalUrlPolicy {
 }
 
 // @public (undocumented)
-export interface IHttpFetchError extends Error {
+export interface IHttpFetchError<TResponseBody = unknown> extends Error {
     // (undocumented)
-    readonly body?: any;
+    readonly body?: TResponseBody;
     // (undocumented)
     readonly name: string;
     // @deprecated (undocumented)
@@ -971,7 +971,7 @@ export interface IHttpInterceptController {
 }
 
 // @public
-export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly response?: Readonly<Response>;
 }
@@ -1202,6 +1202,16 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
+}
+
+// @public (undocumented)
+export interface ResponseErrorBody {
+    // (undocumented)
+    attributes?: Record<string, unknown>;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
 }
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
