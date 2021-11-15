@@ -385,7 +385,7 @@ export function LayerPanel(
 
           {groups.map((group, groupIndex) => {
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
-
+            const isOptional = !group.required;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"
@@ -409,6 +409,15 @@ export function LayerPanel(
                       </>
                     )}
                   </>
+                }
+                labelAppend={
+                  isOptional ? (
+                    <span className="lnsLayerPanel__rowOptional">
+                      {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
+                        defaultMessage: 'Optional',
+                      })}
+                    </span>
+                  ) : null
                 }
                 labelType="legend"
                 key={group.groupId}

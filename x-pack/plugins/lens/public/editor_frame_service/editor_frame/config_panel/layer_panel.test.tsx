@@ -157,7 +157,7 @@ describe('LayerPanel', () => {
   });
 
   describe('single group', () => {
-    it('should render the non-editable state', async () => {
+    it('should render the non-editable state and optional label', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -172,8 +172,11 @@ describe('LayerPanel', () => {
       });
 
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
       const group = instance.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
       expect(group).toHaveLength(1);
+      const optionalLabel = instance.find('.lnsLayerPanel__rowOptional');
+      expect(optionalLabel).toHaveLength(1);
     });
 
     it('should render the group with a way to add a new column', async () => {
