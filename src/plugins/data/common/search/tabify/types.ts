@@ -41,6 +41,7 @@ export interface TabbedAggColumn {
   aggConfig: IAggConfig;
   id: string;
   name: string;
+  hasPrecisionError?: boolean;
 }
 
 /** @public **/
