@@ -7,10 +7,10 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
 import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -33,9 +33,16 @@ import {
 import { ExecutorType } from '../../../../../../alerting/server/types';
 import { AlertInstance } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
-import { IEventLogService } from '../../../../../../event_log/server';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
-import { CreateRuleOptions } from '../../rule_types/types';
+import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
+import {
+  createEqlAlertType,
+  createIndicatorMatchAlertType,
+  createMlAlertType,
+  createQueryAlertType,
+  createThresholdAlertType,
+} from '../../rule_types';
+import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 
 enum InvocationCount {
   HOUR = 1,
@@ -49,7 +56,9 @@ export const previewRulesRoute = async (
   config: ConfigType,
   ml: SetupPlugins['ml'],
   security: SetupPlugins['security'],
-  ruleOptions: CreateRuleOptions
+  ruleOptions: CreateRuleOptions,
+  securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
+  previewRuleDataClient: IRuleDataClient
 ) => {
   router.post(
     {
@@ -99,11 +108,16 @@ export const previewRulesRoute = async (
         await context.lists?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
-        const previewIndex = siemClient.getPreviewIndex();
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
         const runState: Record<string, unknown> = {};
+
+        const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
+          ...securityRuleTypeOptions,
+          ruleDataClient: previewRuleDataClient,
+          ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
+        });
 
         const runExecutors = async <
           TParams extends RuleParams,
@@ -173,26 +187,62 @@ export const previewRulesRoute = async (
           }
         };
 
-        const signalRuleAlertType = signalRulesAlertType({
-          ...ruleOptions,
-          lists: context.lists,
-          config,
-          indexNameOverride: previewIndex,
-          ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
-          // unused as we override the ruleExecutionLogClient
-          eventLogService: {} as unknown as IEventLogService,
-          eventsTelemetry: undefined,
-          ml: undefined,
-          refreshOverride: 'wait_for',
-        });
-
-        await runExecutors(
-          signalRuleAlertType.executor,
-          signalRuleAlertType.id,
-          signalRuleAlertType.name,
-          previewRuleParams,
-          alertInstanceFactoryStub
-        );
+        switch (previewRuleParams.type) {
+          case 'query':
+            const queryAlertType = previewRuleTypeWrapper(createQueryAlertType(ruleOptions));
+            await runExecutors(
+              queryAlertType.executor,
+              queryAlertType.id,
+              queryAlertType.name,
+              previewRuleParams,
+              alertInstanceFactoryStub
+            );
+            break;
+          case 'threshold':
+            const thresholdAlertType = previewRuleTypeWrapper(
+              createThresholdAlertType(ruleOptions)
+            );
+            await runExecutors(
+              thresholdAlertType.executor,
+              thresholdAlertType.id,
+              thresholdAlertType.name,
+              previewRuleParams,
+              alertInstanceFactoryStub
+            );
+            break;
+          case 'threat_match':
+            const threatMatchAlertType = previewRuleTypeWrapper(
+              createIndicatorMatchAlertType(ruleOptions)
+            );
+            await runExecutors(
+              threatMatchAlertType.executor,
+              threatMatchAlertType.id,
+              threatMatchAlertType.name,
+              previewRuleParams,
+              alertInstanceFactoryStub
+            );
+            break;
+          case 'eql':
+            const eqlAlertType = previewRuleTypeWrapper(createEqlAlertType(ruleOptions));
+            await runExecutors(
+              eqlAlertType.executor,
+              eqlAlertType.id,
+              eqlAlertType.name,
+              previewRuleParams,
+              alertInstanceFactoryStub
+            );
+            break;
+          case 'machine_learning':
+            const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
+            await runExecutors(
+              mlAlertType.executor,
+              mlAlertType.id,
+              mlAlertType.name,
+              previewRuleParams,
+              alertInstanceFactoryStub
+            );
+            break;
+        }
 
         const errors = warningsAndErrorsStore
           .filter((item) => item.newStatus === RuleExecutionStatus.failed)

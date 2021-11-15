@@ -41,7 +41,7 @@ import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, eventLogService }) =>
+  ({ lists, logger, config, ruleDataClient, eventLogService, ruleExecutionLogClientOverride }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -66,11 +66,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
         const esClient = scopedClusterClient.asCurrentUser;
 
-        const ruleStatusClient = new RuleExecutionLogClient({
-          underlyingClient: config.ruleExecutionLog.underlyingClient,
-          savedObjectsClient,
-          eventLogService,
-        });
+        const ruleStatusClient = ruleExecutionLogClientOverride
+          ? ruleExecutionLogClientOverride
+          : new RuleExecutionLogClient({
+              underlyingClient: config.ruleExecutionLog.underlyingClient,
+              savedObjectsClient,
+              eventLogService,
+            });
 
         const completeRule = {
           ruleConfig: rule,

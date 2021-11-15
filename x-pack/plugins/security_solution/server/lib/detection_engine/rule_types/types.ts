@@ -36,6 +36,7 @@ import {
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { IEventLogService } from '../../../../../event_log/server';
 import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
+import { IRuleExecutionLogClient } from '../rule_execution_log';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -89,13 +90,18 @@ export type SecurityAlertType<
   ) => Promise<SearchAfterAndBulkCreateReturnType & { state: TState }>;
 };
 
-export type CreateSecurityRuleTypeWrapper = (options: {
+export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   logger: Logger;
   config: ConfigType;
   ruleDataClient: IRuleDataClient;
   eventLogService: IEventLogService;
-}) => <
+  ruleExecutionLogClientOverride?: IRuleExecutionLogClient;
+}
+
+export type CreateSecurityRuleTypeWrapper = (
+  options: CreateSecurityRuleTypeWrapperProps
+) => <
   TParams extends RuleParams,
   TState extends AlertTypeState,
   TInstanceContext extends AlertInstanceContext = {}

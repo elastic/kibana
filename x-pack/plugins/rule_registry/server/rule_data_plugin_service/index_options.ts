@@ -95,6 +95,15 @@ export interface IndexOptions {
    * @example '.siem-signals', undefined
    */
   secondaryAlias?: string;
+
+  /**
+   * Optional prefix name that will be prepended to indices in addition to
+   * primary dataset and context naming convention.
+   *
+   * Currently only set to `.preview` for preview rule execution, able to be expanded
+   * later with more reason
+   */
+  additionalPrefix?: '.preview';
 }
 
 /**

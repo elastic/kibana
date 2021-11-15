@@ -40,7 +40,7 @@ export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults' as const;
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults' as const;
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
-export const DEFAULT_PREVIEW_INDEX = '.siem-preview-signals' as const;
+export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`

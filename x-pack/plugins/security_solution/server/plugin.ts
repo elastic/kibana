@@ -64,6 +64,7 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
+import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -173,6 +174,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
+    let previewRuleDataClient: IRuleDataClient | null = null;
 
     // rule options are used both to create and preview rules.
     const ruleOptions: CreateRuleOptions = {
@@ -182,51 +184,58 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
     };
 
-    if (isRuleRegistryEnabled) {
-      const aliasesFieldMap: FieldMap = {};
-      Object.entries(aadFieldConversion).forEach(([key, value]) => {
-        aliasesFieldMap[key] = {
-          type: 'alias',
-          path: value,
-        };
-      });
+    const aliasesFieldMap: FieldMap = {};
+    Object.entries(aadFieldConversion).forEach(([key, value]) => {
+      aliasesFieldMap[key] = {
+        type: 'alias',
+        path: value,
+      };
+    });
 
-      ruleDataClient = ruleDataService.initializeIndex({
-        feature: SERVER_APP_ID,
-        registrationContext: 'security',
-        dataset: Dataset.alerts,
-        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
-        componentTemplates: [
-          {
-            name: 'mappings',
-            mappings: mappingFromFieldMap(
-              { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
-              false
-            ),
-          },
-        ],
-        secondaryAlias: config.signalsIndex,
-      });
+    const ruleDataServiceOptions = {
+      feature: SERVER_APP_ID,
+      registrationContext: 'security',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(
+            { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
+            false
+          ),
+        },
+      ],
+      secondaryAlias: config.signalsIndex,
+    };
 
-      const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
-        lists: plugins.lists,
-        logger: this.logger,
-        config: this.config,
-        ruleDataClient,
-        eventLogService,
-      });
+    ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
+    const previewIlmPolicy = previewPolicy.policy;
 
-      plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions))
-      );
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
-      );
-      plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
-      plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
-      plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
-    }
+    previewRuleDataClient = ruleDataService.initializeIndex({
+      ...ruleDataServiceOptions,
+      additionalPrefix: '.preview',
+      ilmPolicy: previewIlmPolicy,
+    });
+
+    const securityRuleTypeOptions = {
+      lists: plugins.lists,
+      logger: this.logger,
+      config: this.config,
+      ruleDataClient,
+      eventLogService,
+    };
+
+    const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
+
+    plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
+    );
+    plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
@@ -240,7 +249,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger,
       ruleDataClient,
       ruleOptions,
-      core.getStartServices
+      core.getStartServices,
+      securityRuleTypeOptions,
+      previewRuleDataClient
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);

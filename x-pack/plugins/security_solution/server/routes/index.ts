@@ -62,11 +62,13 @@ import { ConfigType } from '../config';
 import { TelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
-import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
+import {
+  CreateRuleOptions,
+  CreateSecurityRuleTypeWrapperProps,
+} from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 import { createSourcererDataViewRoute } from '../lib/sourcerer/routes';
-import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -79,7 +81,9 @@ export const initRoutes = (
   logger: Logger,
   ruleDataClient: IRuleDataClient | null,
   ruleOptions: CreateRuleOptions,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
+  previewRuleDataClient: IRuleDataClient
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
@@ -90,7 +94,15 @@ export const initRoutes = (
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
   findRulesRoute(router, logger, isRuleRegistryEnabled);
-  previewRulesRoute(router, config, ml, security, ruleOptions);
+  previewRulesRoute(
+    router,
+    config,
+    ml,
+    security,
+    ruleOptions,
+    securityRuleTypeOptions,
+    previewRuleDataClient
+  );
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);
@@ -143,9 +155,6 @@ export const initRoutes = (
   createIndexRoute(router);
   readIndexRoute(router, ruleDataService);
   deleteIndexRoute(router);
-
-  // Detection Engine Preview Index  /api/detection_engine/preview/index
-  createPreviewIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router, isRuleRegistryEnabled);
