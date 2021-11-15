@@ -14,6 +14,7 @@ export default function ({
   getPageObjects,
   loadTestFile,
 }: PluginFunctionalProviderContext) {
+  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const es = getService('es');
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
@@ -21,6 +22,7 @@ export default function ({
   describe('index pattern field editor example', function () {
     this.tags('ciGroup2');
     before(async () => {
+      await esArchiver.emptyKibanaIndex();
       await browser.setWindowSize(1300, 900);
       await es.transport.request({
         path: '/blogs/_doc',
