@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from 'kibana/server';
 import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { MAPS_APP_PATH } from '../common/constants';
+import { APP_ID } from '../common/constants';
 
 export function registerIntegrations(
   core: CoreSetup,
@@ -28,7 +28,7 @@ export function registerIntegrations(
     icons: [
       {
         type: 'svg',
-        src: core.http.basePath.prepend(`${MAPS_APP_PATH}/assets/gdal_logo.svg`),
+        src: core.http.basePath.prepend(`/plugins/${APP_ID}/assets/gdal_logo.svg`),
       },
     ],
     categories: ['upload_file', 'geo'],
