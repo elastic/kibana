@@ -134,7 +134,7 @@ jest.mock('../../../../common/hooks/use_license');
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
-  const { act, screen, fireEvent } = reactTestingLibrary;
+  const { act, screen, fireEvent, waitFor } = reactTestingLibrary;
 
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -1051,13 +1051,12 @@ describe('when on the endpoint list page', () => {
         // scroll to the bottom by pressing down arrow key
         // and keep it pressed
         userEvent.keyboard('ArrowDown>');
-        // lift key up after half a second
-        // should give enough delay to move the callout
-        // past the date range filters and expose the bottom content
-        setTimeout(() => {
+        // wait for key up
+        await waitFor(() => {
           userEvent.keyboard('/ArrowDown');
-        }, 500);
-        expect(await renderResult.queryByTestId('activityLogLoadMoreTrigger')).toBeNull();
+        }).then(async () => {
+          expect(await renderResult.queryByTestId('activityLogLoadMoreTrigger')).toBeNull();
+        });
       });
 
       it('should correctly display non-empty comments only for actions', async () => {
