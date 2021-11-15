@@ -195,7 +195,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             query,
             renderCellValue,
             rowRenderers,
-            runtimeMappings,
             setQuery,
             sort,
             start,
@@ -203,7 +202,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             trailingControlColumns,
             type: 'embedded',
             unit,
-            createFieldComponent,
           })}
         </InspectButtonContainer>
       </FullScreenContainer>
