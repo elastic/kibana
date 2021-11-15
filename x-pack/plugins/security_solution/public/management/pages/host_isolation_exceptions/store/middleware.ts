@@ -26,14 +26,13 @@ import {
   asStaleResourceState,
 } from '../../../state/async_resource_builders';
 import {
-  deleteHostIsolationExceptionItems,
   getHostIsolationExceptionItems,
   createHostIsolationExceptionItem,
   getOneHostIsolationExceptionItem,
   updateOneHostIsolationExceptionItem,
 } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
-import { getCurrentListPageDataState, getCurrentLocation, getItemToDelete } from './selector';
+import { getCurrentListPageDataState, getCurrentLocation } from './selector';
 import { HostIsolationExceptionsPageAction } from './action';
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
@@ -52,12 +51,12 @@ export const createHostIsolationExceptionsPageMiddleware = (
       loadHostIsolationExceptionsList(store, coreStart.http);
     }
 
-    if (action.type === 'hostIsolationExceptionsCreateEntry') {
-      createHostIsolationException(store, coreStart.http);
+    if (action.type === 'hostIsolationExceptionsRefreshList') {
+      loadHostIsolationExceptionsList(store, coreStart.http);
     }
 
-    if (action.type === 'hostIsolationExceptionsSubmitDelete') {
-      deleteHostIsolationExceptionsItem(store, coreStart.http);
+    if (action.type === 'hostIsolationExceptionsCreateEntry') {
+      createHostIsolationException(store, coreStart.http);
     }
 
     if (action.type === 'hostIsolationExceptionsMarkToEdit') {
@@ -154,42 +153,6 @@ function isHostIsolationExceptionsPage(location: Immutable<AppLocation>) {
       exact: true,
     }) !== null
   );
-}
-
-async function deleteHostIsolationExceptionsItem(
-  store: ImmutableMiddlewareAPI<
-    HostIsolationExceptionsPageState,
-    HostIsolationExceptionsPageAction
-  >,
-  http: HttpSetup
-) {
-  const { dispatch } = store;
-  const itemToDelete = getItemToDelete(store.getState());
-  if (itemToDelete === undefined) {
-    return;
-  }
-
-  try {
-    dispatch({
-      type: 'hostIsolationExceptionsDeleteStatusChanged',
-      payload: {
-        type: 'LoadingResourceState',
-      },
-    });
-
-    await deleteHostIsolationExceptionItems(http, itemToDelete.id);
-
-    dispatch({
-      type: 'hostIsolationExceptionsDeleteStatusChanged',
-      payload: createLoadedResourceState(itemToDelete),
-    });
-    loadHostIsolationExceptionsList(store, http);
-  } catch (error) {
-    dispatch({
-      type: 'hostIsolationExceptionsDeleteStatusChanged',
-      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
-    });
-  }
 }
 
 async function loadHostIsolationExceptionsItem(
