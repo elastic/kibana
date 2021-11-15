@@ -21,10 +21,8 @@ import {
   mockStoreDeps,
 } from '../mocks';
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  SavedObjectSaveModal,
-  checkForDuplicateTitle,
-} from '../../../../../src/plugins/saved_objects/public';
+import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import { checkForDuplicateTitle } from '../saved_visualize_helpers';
 import { createMemoryHistory } from 'history';
 import {
   esFilters,
@@ -42,17 +40,9 @@ import moment from 'moment';
 import { setState, LensAppState } from '../state_management/index';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
-jest.mock('../../../../../src/plugins/saved_objects/public', () => {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
-    '../../../../../src/plugins/saved_objects/public'
-  );
-  return {
-    SavedObjectSaveModal,
-    SavedObjectSaveModalOrigin,
-    checkForDuplicateTitle: jest.fn(),
-  };
-});
+jest.mock('../saved_visualize_helpers/check_for_duplicate_title', () => ({
+  checkForDuplicateTitle: jest.fn(),
+}));
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

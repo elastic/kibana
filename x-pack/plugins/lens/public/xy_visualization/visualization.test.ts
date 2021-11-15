@@ -1622,7 +1622,8 @@ describe('xy_visualization', () => {
       expect(warningMessages).toHaveLength(1);
       expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
         <FormattedMessage
-          defaultMessage="{label} contains array values. Your visualization may not render as expected."
+          defaultMessage="{label} contains array values. Your visualization may not render as
+         expected."
           id="xpack.lens.xyVisualization.arrayValues"
           values={
             Object {

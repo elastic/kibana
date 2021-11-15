@@ -6,7 +6,7 @@
  */
 
 import { findObjectByTitle } from './find_object_by_title';
-import { SimpleSavedObject, SavedObjectsClientContract, SavedObject } from 'kibana/public';
+import { SimpleSavedObject, SavedObjectsClientContract, SavedObject } from 'src/core/public';
 
 describe('findObjectByTitle', () => {
   const savedObjectsClient: SavedObjectsClientContract = {} as SavedObjectsClientContract;
