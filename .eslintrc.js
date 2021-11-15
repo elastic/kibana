@@ -704,6 +704,7 @@ module.exports = {
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
+        '**/jest.config.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
@@ -848,6 +849,10 @@ module.exports = {
               {
                 name: 'semver',
                 message: 'Please use "semver/*/{function}" instead',
+              },
+              {
+                name: '@kbn/rule-data-utils',
+                message: `Import directly from @kbn/rule-data-utils/* submodules in public/common code`,
               },
             ],
           },
