@@ -7,14 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { getDataPath } from '@kbn/utils';
+import { spawn } from 'child_process';
 import del from 'del';
 import apm from 'elastic-apm-node';
 import fs from 'fs';
+import { uniq } from 'lodash';
 import path from 'path';
 import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page } from 'puppeteer';
+import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
-import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
+import { catchError, ignoreElements, map, mergeMap, reduce, takeUntil, tap } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ConfigType } from '../../../config';
@@ -37,6 +40,38 @@ export const DEFAULT_VIEWPORT = {
   width: 1950,
   height: 1200,
 };
+
+// Default args used by pptr
+// https://github.com/puppeteer/puppeteer/blob/13ea347/src/node/Launcher.ts#L168
+const DEFAULT_ARGS = [
+  '--disable-background-networking',
+  '--enable-features=NetworkService,NetworkServiceInProcess',
+  '--disable-background-timer-throttling',
+  '--disable-backgrounding-occluded-windows',
+  '--disable-breakpad',
+  '--disable-client-side-phishing-detection',
+  '--disable-component-extensions-with-background-pages',
+  '--disable-default-apps',
+  '--disable-dev-shm-usage',
+  '--disable-extensions',
+  '--disable-features=TranslateUI',
+  '--disable-hang-monitor',
+  '--disable-ipc-flooding-protection',
+  '--disable-popup-blocking',
+  '--disable-prompt-on-repost',
+  '--disable-renderer-backgrounding',
+  '--disable-sync',
+  '--force-color-profile=srgb',
+  '--metrics-recording-only',
+  '--no-first-run',
+  '--enable-automation',
+  '--password-store=basic',
+  '--use-mock-keychain',
+  '--remote-debugging-port=0',
+  '--headless',
+];
+
+const DIAGNOSTIC_TIME = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
@@ -270,5 +305,76 @@ export class HeadlessChromiumDriverFactory {
     );
 
     return Rx.merge(pageError$, browserDisconnect$);
+  }
+
+  diagnose(overrideFlags: string[] = []): Rx.Observable<string> {
+    const kbnArgs = this.getChromiumArgs();
+    const finalArgs = uniq([...DEFAULT_ARGS, ...kbnArgs, ...overrideFlags]);
+
+    // On non-windows platforms, `detached: true` makes child process a
+    // leader of a new process group, making it possible to kill child
+    // process tree with `.kill(-pid)` command. @see
+    // https://nodejs.org/api/child_process.html#child_process_options_detached
+    const browserProcess = spawn(this.options.binaryPath, finalArgs, {
+      detached: process.platform !== 'win32',
+    });
+
+    const rl = createInterface({ input: browserProcess.stderr });
+
+    const exit$ = Rx.fromEvent(browserProcess, 'exit').pipe(
+      map((code) => {
+        this.logger.error(`Browser exited abnormally, received code: ${code}`);
+        return i18n.translate('xpack.screenshotting.diagnostic.browserCrashed', {
+          defaultMessage: `Browser exited abnormally during startup`,
+        });
+      })
+    );
+
+    const error$ = Rx.fromEvent(browserProcess, 'error').pipe(
+      map((err) => {
+        this.logger.error(`Browser process threw an error on startup`);
+        this.logger.error(err as string | Error);
+        return i18n.translate('xpack.screenshotting.diagnostic.browserErrored', {
+          defaultMessage: `Browser process threw an error on startup`,
+        });
+      })
+    );
+
+    const browserProcessLogger = this.logger.get('chromium-stderr');
+    const log$ = Rx.fromEvent(rl, 'line').pipe(
+      tap((message: unknown) => {
+        if (typeof message === 'string') {
+          browserProcessLogger.info(message);
+        }
+      })
+    );
+
+    // Collect all events (exit, error and on log-lines), but let chromium keep spitting out
+    // logs as sometimes it's "bind" successfully for remote connections, but later emit
+    // a log indicative of an issue (for example, no default font found).
+    return Rx.merge(exit$, error$, log$).pipe(
+      takeUntil(Rx.timer(DIAGNOSTIC_TIME)),
+      reduce((acc, curr) => `${acc}${curr}\n`, ''),
+      tap(() => {
+        if (browserProcess && browserProcess.pid && !browserProcess.killed) {
+          browserProcess.kill('SIGKILL');
+          this.logger.info(
+            `Successfully sent 'SIGKILL' to browser process (PID: ${browserProcess.pid})`
+          );
+        }
+        browserProcess.removeAllListeners();
+        rl.removeAllListeners();
+        rl.close();
+        del(this.userDataDir, { force: true }).catch((error) => {
+          this.logger.error(`Error deleting user data directory at [${this.userDataDir}]!`);
+          this.logger.error(error);
+        });
+      }),
+      catchError((error) => {
+        this.logger.error(error);
+
+        return Rx.of(error);
+      })
+    );
   }
 }
