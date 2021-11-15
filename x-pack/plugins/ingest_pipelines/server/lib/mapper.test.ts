@@ -33,20 +33,19 @@ describe('mapper', () => {
 
     describe('missing the required headers errors', () => {
       it('single missing headers', () => {
-        const noHeadersCsv = 'test_header,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
-  
+        const noHeadersCsv =
+          'test_header,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
+
         expect(() => {
           csvToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
         }).toThrow(
-          new Error(
-            'Missing required headers: Include source_field header in the CSV file.'
-          )
+          new Error('Missing required headers: Include source_field header in the CSV file.')
         );
       });
 
       it('multiple missing headers', () => {
         const noHeadersCsv = 'srcip,,,,source.address,Copying srcip to source.address';
-  
+
         expect(() => {
           csvToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
         }).toThrow(
