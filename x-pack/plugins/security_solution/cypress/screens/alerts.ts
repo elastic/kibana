@@ -12,7 +12,7 @@ export const ALERTS = '[data-test-subj="events-viewer-panel"] [data-test-subj="e
 export const ALERTS_COUNT =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
 
-export const ALERT_CHECKBOX = '[data-test-subj="select-event"].euiCheckbox__input';
+export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__input';
 
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
