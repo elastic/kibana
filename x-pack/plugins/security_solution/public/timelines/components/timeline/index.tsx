@@ -64,6 +64,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
+  console.log('timeline data view selectedPatterns', selectedPatterns);
   const { graphEventId, savedObjectId, timelineType, description } = useDeepEqualSelector((state) =>
     pick(
       ['graphEventId', 'savedObjectId', 'timelineType', 'description'],

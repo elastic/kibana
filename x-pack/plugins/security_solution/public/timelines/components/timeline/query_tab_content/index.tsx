@@ -193,6 +193,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
+  console.log('query data view selectedPatterns', selectedPatterns);
   const { uiSettings } = useKibana().services;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);

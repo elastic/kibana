@@ -12,7 +12,7 @@ export const SOURCERER = {
   comboBoxOptions: '[data-test-subj="sourcerer-combo-option"]',
   badgeModified: '[data-test-subj="sourcerer-modified-badge"]',
   badgeModifiedOption: '[data-test-subj="security-modified-option-badge"]',
-  badgeAlerts: '[data-test-subj="sourcerer-modified-badge"]',
+  badgeAlerts: '[data-test-subj="sourcerer-alerts-badge"]',
   badgeAlertsOption: '[data-test-subj="security-alerts-option-badge"]',
   siemDefaultIndexInput:
     '[data-test-subj="advancedSetting-editField-securitySolution:defaultIndex"]',

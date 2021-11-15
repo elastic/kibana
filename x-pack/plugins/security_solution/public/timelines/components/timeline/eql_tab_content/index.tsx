@@ -181,6 +181,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
+  console.log('eql data view selectedPatterns', selectedPatterns);
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 

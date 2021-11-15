@@ -39,7 +39,7 @@ import {
   StyledFormRow,
 } from './helpers';
 
-interface SourcererComponentProps {
+export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
 
@@ -132,8 +132,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setPopoverIsOpen(false);
     setExpandAdvancedOptions(false);
   }, []);
-  const trigger = useMemo(
-    () => (
+  const trigger = useMemo(() => {
+    console.log('trigger', { isModified, isTimelineSourcerer });
+    return (
       <StyledButton
         aria-label={i18n.DATA_VIEW}
         data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-trigger' : 'sourcerer-trigger'}
@@ -156,9 +157,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           </StyledBadge>
         )}
       </StyledButton>
-    ),
-    [isTimelineSourcerer, loading, setPopoverIsOpenCb, isModified]
-  );
+    );
+  }, [isTimelineSourcerer, loading, setPopoverIsOpenCb, isModified]);
 
   const dataViewSelectOptions = useMemo(
     () =>
