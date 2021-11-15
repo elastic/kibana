@@ -243,6 +243,7 @@ export const mockAppIndexPattern = () => {
     hasAppData: { ux: true } as any,
     loadIndexPattern,
     indexPatterns: { ux: mockIndexPattern } as unknown as Record<AppDataType, IndexPattern>,
+    indexPatternErrors: {} as any,
   });
   return { spy, loadIndexPattern };
 };

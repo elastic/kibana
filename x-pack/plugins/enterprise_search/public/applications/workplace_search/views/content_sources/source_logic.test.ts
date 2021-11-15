@@ -20,6 +20,7 @@ import { expectedAsyncError } from '../../../test_helpers';
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
 import { SourceLogic } from './source_logic';
@@ -235,19 +236,8 @@ describe('SourceLogic', () => {
         expect(onUpdateSummarySpy).toHaveBeenCalledWith(contentSource.summary);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
@@ -295,20 +285,8 @@ describe('SourceLogic', () => {
         expect(actions.setSearchResults).toHaveBeenCalledWith(searchServerResponse);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.post.mockReturnValue(promise);
-
-        await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
       });
     });
 
@@ -367,19 +345,8 @@ describe('SourceLogic', () => {
         expect(onUpdateSourceNameSpy).toHaveBeenCalledWith(contentSource.name);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.patch.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.patch, () => {
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
@@ -413,19 +380,8 @@ describe('SourceLogic', () => {
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.delete.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
@@ -441,19 +397,8 @@ describe('SourceLogic', () => {
         expect(initializeSourceSpy).toHaveBeenCalledWith(contentSource.id);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.post.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
