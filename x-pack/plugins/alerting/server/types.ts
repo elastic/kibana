@@ -73,7 +73,8 @@ export interface AlertServices<
   ActionGroupIds extends string = never
 > extends Services {
   alertInstanceFactory: (
-    id: string
+    id: string,
+    staticContext: Record<string, unknown>
   ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 }
 
@@ -150,6 +151,7 @@ export interface AlertType<
     context?: ActionVariable[];
     state?: ActionVariable[];
     params?: ActionVariable[];
+    staticContext?: ActionVariable[];
   };
   minimumLicenseRequired: LicenseType;
   useSavedObjectReferences?: {

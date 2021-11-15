@@ -214,7 +214,14 @@ export class TaskRunner<
     } = alertInstance.getScheduledActionOptions()!;
     alertInstance.updateLastScheduledActions(actionGroup, actionSubgroup);
     alertInstance.unscheduleActions();
-    return executionHandler({ actionGroup, actionSubgroup, context, state, alertInstanceId });
+    return executionHandler({
+      actionGroup,
+      actionSubgroup,
+      context,
+      state,
+      alertInstanceId,
+      staticContext: alertInstance.getStaticContext(),
+    });
   }
 
   async executeAlertInstances(
@@ -244,7 +251,12 @@ export class TaskRunner<
     } = alert;
     const {
       params: { alertId },
-      state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
+      state: {
+        alertInstances: alertRawInstances = {},
+        alertTypeState = {},
+        alertStaticContext = {},
+        previousStartedAt,
+      },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const alertType = this.ruleTypeRegistry.get(alertTypeId);
@@ -342,6 +354,41 @@ export class TaskRunner<
         !alertInstance.hasScheduledActions() && originalAlertInstanceIds.has(id)
     );
 
+    // Merge persisted static contexts with any new static contexts
+    const executionStaticContexts = mapValues(
+      alertInstances,
+      (alertInstance: AlertInstance<InstanceState, InstanceContext>, id) =>
+        alertInstance.getStaticContext()
+    );
+    const originalAlertIds = Object.keys(alertStaticContext);
+    const currentAlertIds = Object.keys(executionStaticContexts);
+    const recoveredAlertIds = Object.keys(recoveredAlertInstances);
+    const newAlertIds = without(currentAlertIds, ...originalAlertIds);
+
+    const updatedAlertStaticContexts: Record<string, unknown> = {};
+
+    // For active alerts, merge existing context with updated context if available
+    for (const id of currentAlertIds) {
+      if (executionStaticContexts[id]) {
+        updatedAlertStaticContexts[id] = {
+          ...(alertStaticContext[id] as Record<string, unknown>),
+          ...executionStaticContexts[id],
+        };
+      } else {
+        updatedAlertStaticContexts[id] = alertStaticContext[id];
+      }
+    }
+
+    // For recovered alerts, copy over static context
+    for (const id of recoveredAlertIds) {
+      updatedAlertStaticContexts[id] = alertStaticContext[id];
+    }
+
+    // For new alerts, set context
+    for (const id of newAlertIds) {
+      updatedAlertStaticContexts[id] = executionStaticContexts[id];
+    }
+
     logActiveAndRecoveredInstances({
       logger: this.logger,
       activeAlertInstances: instancesWithScheduledActions,
@@ -427,6 +474,7 @@ export class TaskRunner<
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
+      alertStaticContext: updatedAlertStaticContexts || undefined,
       alertInstances: mapValues<
         Record<string, AlertInstance<InstanceState, InstanceContext>>,
         RawAlertInstance
@@ -893,6 +941,7 @@ function scheduleActionsForRecoveredInstances<
         context: {},
         state: {},
         alertInstanceId: id,
+        staticContext: instance.getStaticContext(),
       });
       instance.scheduleActions(recoveryActionGroup.id);
     }

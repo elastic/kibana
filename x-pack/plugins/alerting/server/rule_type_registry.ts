@@ -361,6 +361,7 @@ function normalizedActionVariables(actionVariables: AlertType['actionVariables']
     context: actionVariables?.context ?? [],
     state: actionVariables?.state ?? [],
     params: actionVariables?.params ?? [],
+    staticContext: actionVariables?.staticContext ?? [],
   };
 }
 

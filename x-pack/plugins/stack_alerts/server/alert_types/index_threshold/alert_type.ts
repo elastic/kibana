@@ -123,6 +123,10 @@ export function getAlertType(
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
         ...alertParamsVariables,
       ],
+      staticContext: [
+        { name: 'something', description: 'something about this alert' },
+        { name: 'this', description: 'something else about this alert' },
+      ],
     },
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -207,7 +211,10 @@ export function getAlertType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = options.services.alertInstanceFactory(instanceId);
+      const alertInstance = options.services.alertInstanceFactory(instanceId, {
+        something: `foo-${instanceId}`,
+        this: `bar-${instanceId}`,
+      });
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }

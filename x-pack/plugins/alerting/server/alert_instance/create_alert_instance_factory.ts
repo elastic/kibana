@@ -13,9 +13,17 @@ export function createAlertInstanceFactory<
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string
 >(alertInstances: Record<string, AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>) {
-  return (id: string): AlertInstance<InstanceState, InstanceContext, ActionGroupIds> => {
+  return (
+    id: string,
+    staticContext: Record<string, unknown>
+  ): AlertInstance<InstanceState, InstanceContext, ActionGroupIds> => {
     if (!alertInstances[id]) {
       alertInstances[id] = new AlertInstance<InstanceState, InstanceContext, ActionGroupIds>();
+      alertInstances[id].setStaticContext(staticContext ?? {});
+    } else {
+      // Merge existing static context with any new contexts
+      const currentStaticContext = alertInstances[id].getStaticContext();
+      alertInstances[id].setStaticContext({ ...currentStaticContext, ...staticContext });
     }
 
     return alertInstances[id];

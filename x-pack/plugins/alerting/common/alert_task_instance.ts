@@ -12,6 +12,7 @@ import { DateFromString } from './date_from_string';
 export const alertStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
+  alertStaticContext: t.record(t.string, t.unknown),
   previousStartedAt: t.union([t.null, DateFromString]),
 });
 

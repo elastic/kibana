@@ -17,8 +17,9 @@ export function transformActionVariables(actionVariables: ActionVariables): Acti
     : [];
   const paramsVars = prefixKeys(actionVariables.params, 'params.');
   const stateVars = prefixKeys(actionVariables.state, 'state.');
+  const staticContextVars = prefixKeys(actionVariables.staticContext, 'staticContext.');
 
-  return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
+  return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars, staticContextVars);
 }
 
 export enum AlertProvidedActionVariables {

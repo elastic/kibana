@@ -33,7 +33,11 @@ export type PublicAlertInstance<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   AlertInstance<State, Context, ActionGroupIds>,
-  'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+  | 'getState'
+  | 'replaceState'
+  | 'scheduleActions'
+  | 'scheduleActionsWithSubGroup'
+  | 'setStaticContext'
 >;
 
 export class AlertInstance<
@@ -44,10 +48,12 @@ export class AlertInstance<
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: AlertInstanceMeta;
   private state: State;
+  private staticContext: Record<string, unknown>;
 
-  constructor({ state, meta = {} }: RawAlertInstance = {}) {
+  constructor({ state, meta = {}, staticContext = {} }: RawAlertInstance = {}) {
     this.state = (state || {}) as State;
     this.meta = meta;
+    this.staticContext = (staticContext || {}) as Record<string, unknown>;
   }
 
   hasScheduledActions() {
@@ -170,6 +176,15 @@ export class AlertInstance<
     return this;
   }
 
+  setStaticContext(metadata: Record<string, unknown>) {
+    this.staticContext = metadata;
+    return this;
+  }
+
+  getStaticContext() {
+    return this.staticContext;
+  }
+
   updateLastScheduledActions(group: ActionGroupIds, subgroup?: string) {
     this.meta.lastScheduledActions = { group, subgroup, date: new Date() };
   }
@@ -185,6 +200,7 @@ export class AlertInstance<
     return {
       state: this.state,
       meta: this.meta,
+      staticContext: this.staticContext,
     };
   }
 }

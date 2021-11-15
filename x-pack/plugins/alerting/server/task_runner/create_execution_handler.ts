@@ -65,6 +65,7 @@ interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   alertInstanceId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
+  staticContext: Record<string, unknown>;
 }
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
@@ -113,6 +114,7 @@ export function createExecutionHandler<
     context,
     state,
     alertInstanceId,
+    staticContext,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
@@ -141,6 +143,7 @@ export function createExecutionHandler<
             state,
             kibanaBaseUrl,
             alertParams,
+            staticContext,
           }),
         };
       })

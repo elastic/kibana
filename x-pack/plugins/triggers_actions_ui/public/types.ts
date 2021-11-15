@@ -189,7 +189,7 @@ export type ActionConnectorTableItem = ActionConnector & {
 type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];
 };
-export const REQUIRED_ACTION_VARIABLES = ['state', 'params'] as const;
+export const REQUIRED_ACTION_VARIABLES = ['state', 'params', 'staticContext'] as const;
 export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;

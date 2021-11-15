@@ -30,5 +30,6 @@ export type AlertInstanceContext = t.TypeOf<typeof contextSchema>;
 export const rawAlertInstance = t.partial({
   state: stateSchema,
   meta: metaSchema,
+  staticContext: t.record(t.string, t.unknown),
 });
 export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;
