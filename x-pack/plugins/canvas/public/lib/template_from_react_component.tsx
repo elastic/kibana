@@ -9,14 +9,16 @@ import React, {
   ComponentType,
   forwardRef,
   ForwardRefRenderFunction,
+  useEffect,
   useImperativeHandle,
   useState,
 } from 'react';
-import { unmountComponentAtNode, render } from 'react-dom';
+import { unmountComponentAtNode, render, createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 import { ArgumentHandlers, UpdatePropsRef } from '../../types/arguments';
+import { usePlatformService } from '../services';
 
 export interface Props {
   renderError: Function;
@@ -25,13 +27,20 @@ export interface Props {
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
   const WrappedComponent: ForwardRefRenderFunction<UpdatePropsRef<Props>, Props> = (props, ref) => {
     const [updatedProps, setUpdatedProps] = useState<Props>(props);
-
+    usePlatformService();
     useImperativeHandle(ref, () => ({
       updateProps: (newProps: Props) => {
         setUpdatedProps(newProps);
       },
     }));
 
+    useEffect(() => {
+      console.log('mounted', props.label);
+
+      return () => {
+        console.log('unmounted');
+      }
+    })
     return (
       <ErrorBoundary>
         {({ error }) => {
@@ -67,17 +76,17 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
         <ForwardRefWrappedComponent
           {...config}
           ref={(ref) => {
+            handlers.done();
             onMount?.(ref);
           }}
         />
       );
-      render(el, domNode, () => {
-        handlers.done();
-      });
 
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
+      console.log('here');
+      return createPortal(el, domNode);
     } catch (err) {
       handlers.done();
       config.renderError();
