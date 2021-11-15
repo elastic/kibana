@@ -35,7 +35,11 @@ export const reportTypesList: Array<{
   { reportType: 'device-data-distribution', label: DEVICE_DISTRIBUTION_LABEL },
 ];
 
-export function ReportTypesSelect() {
+interface Props {
+  prepend: string;
+}
+
+export function ReportTypesSelect({ prepend }: Props) {
   const { setReportType, reportType: selectedReportType, allSeries } = useSeriesStorage();
 
   const onReportTypeChange = (reportType: ReportViewType) => {
@@ -59,6 +63,7 @@ export function ReportTypesSelect() {
       style={{ minWidth: 200 }}
       isInvalid={!selectedReportType && allSeries.length > 0}
       disabled={allSeries.length > 0}
+      prepend={prepend}
     />
   );
 }

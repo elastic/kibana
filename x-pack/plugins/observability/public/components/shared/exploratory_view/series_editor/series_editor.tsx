@@ -137,10 +137,9 @@ export const SeriesEditor = React.memo(function () {
             <EuiFormRow
               aria-label={REPORT_TYPE_ARIA_LABEL}
               id="report-type-label"
-              label={REPORT_TYPE_LABEL}
               isDisabled={true}
             >
-              <ReportTypesSelect />
+              <ReportTypesSelect prepend={REPORT_TYPE_LABEL} />
             </EuiFormRow>
           </EuiFlexItem>
           {reportType && (
