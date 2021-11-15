@@ -228,8 +228,8 @@ interface SourceParams {
 
 export const getSortPredicate = (column: DatatableColumn) => {
   const params = column.meta?.sourceParams?.params as SourceParams | undefined;
-  if (params?.otherBucket) return 'dataIndex';
   const sort: string | undefined = params?.orderBy;
+  if (params?.otherBucket || !sort) return 'dataIndex';
   // metric sorting
   if (sort && sort !== '_key') {
     if (params?.order === 'desc') {
