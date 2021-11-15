@@ -84,7 +84,7 @@ export function useFetchHostIsolationExceptionsList(): QueryObserverResult<
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['hostIsolationExceptions', location.filter, location.page_size, location.page_index],
+    ['hostIsolationExceptions', 'list', location.filter, location.page_size, location.page_index],
     () => {
       return getHostIsolationExceptionItems({
         http,
