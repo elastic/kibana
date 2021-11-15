@@ -9,12 +9,13 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 
-import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
+import type { AppMountParameters } from 'kibana/public';
+import type { SharePluginSetup } from '../shared_imports';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 
 import { RedirectApp } from './redirect_app';
 
-interface MountParams extends ManagementAppMountParams {
+interface MountParams extends AppMountParameters {
   apiClient: ReportingAPIClient;
   share: SharePluginSetup;
 }
