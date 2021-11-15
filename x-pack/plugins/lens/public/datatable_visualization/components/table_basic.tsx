@@ -262,8 +262,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
 
   const renderCellValue = useMemo(
-    () => createGridCell(formatters, columnConfig, DataContext, props.uiSettings),
-    [formatters, columnConfig, props.uiSettings]
+    () =>
+      createGridCell(
+        formatters,
+        columnConfig,
+        DataContext,
+        props.uiSettings,
+        props.args.fitRowToContent
+      ),
+    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
   );
 
   const columnVisibility = useMemo(
@@ -315,11 +322,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   if (isEmpty) {
     return (
-      <VisualizationContainer
-        className="lnsDataTableContainer"
-        reportTitle={props.args.title}
-        reportDescription={props.args.description}
-      >
+      <VisualizationContainer className="lnsDataTableContainer">
         <EmptyPlaceholder icon={LensIconChartDatatable} />
       </VisualizationContainer>
     );
@@ -332,11 +335,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <VisualizationContainer
-      className="lnsDataTableContainer"
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
+    <VisualizationContainer className="lnsDataTableContainer">
       <DataContext.Provider
         value={{
           table: firstLocalTable,
@@ -349,6 +348,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
+          rowHeightsOptions={
+            props.args.fitRowToContent
+              ? {
+                  defaultHeight: 'auto',
+                }
+              : undefined
+          }
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}

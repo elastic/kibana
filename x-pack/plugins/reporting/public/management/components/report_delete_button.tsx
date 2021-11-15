@@ -6,9 +6,10 @@
  */
 
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { Fragment, PureComponent } from 'react';
-import { Job } from '../lib/job';
-import { ListingProps } from './';
+import { Job } from '../../lib/job';
+import { ListingProps } from '../';
 
 type DeleteFn = () => Promise<void>;
 type Props = { jobsToDelete: Job[]; performDelete: DeleteFn } & ListingProps;
@@ -31,34 +32,25 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
   }
 
   private renderConfirm() {
-    const { intl, jobsToDelete } = this.props;
+    const { jobsToDelete } = this.props;
 
     const title =
       jobsToDelete.length > 1
-        ? intl.formatMessage(
-            {
-              id: 'xpack.reporting.listing.table.deleteNumConfirmTitle',
-              defaultMessage: `Delete {num} reports?`,
-            },
-            { num: jobsToDelete.length }
-          )
-        : intl.formatMessage(
-            {
-              id: 'xpack.reporting.listing.table.deleteConfirmTitle',
-              defaultMessage: `Delete the "{name}" report?`,
-            },
-            { name: jobsToDelete[0].title }
-          );
-    const message = intl.formatMessage({
-      id: 'xpack.reporting.listing.table.deleteConfirmMessage',
+        ? i18n.translate('xpack.reporting.listing.table.deleteNumConfirmTitle', {
+            defaultMessage: `Delete {num} reports?`,
+            values: { num: jobsToDelete.length },
+          })
+        : i18n.translate('xpack.reporting.listing.table.deleteConfirmTitle', {
+            defaultMessage: `Delete the "{name}" report?`,
+            values: { name: jobsToDelete[0].title },
+          });
+    const message = i18n.translate('xpack.reporting.listing.table.deleteConfirmMessage', {
       defaultMessage: `You can't recover deleted reports.`,
     });
-    const confirmButtonText = intl.formatMessage({
-      id: 'xpack.reporting.listing.table.deleteConfirmButton',
+    const confirmButtonText = i18n.translate('xpack.reporting.listing.table.deleteConfirmButton', {
       defaultMessage: `Delete`,
     });
-    const cancelButtonText = intl.formatMessage({
-      id: 'xpack.reporting.listing.table.deleteCancelButton',
+    const cancelButtonText = i18n.translate('xpack.reporting.listing.table.deleteCancelButton', {
       defaultMessage: `Cancel`,
     });
 
@@ -78,7 +70,7 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
   }
 
   public render() {
-    const { jobsToDelete, intl } = this.props;
+    const { jobsToDelete } = this.props;
     if (jobsToDelete.length === 0) return null;
 
     return (
@@ -89,13 +81,10 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
           color={'danger'}
           data-test-subj="deleteReportButton"
         >
-          {intl.formatMessage(
-            {
-              id: 'xpack.reporting.listing.table.deleteReportButton',
-              defaultMessage: `Delete {num, plural, one {report} other {reports} }`,
-            },
-            { num: jobsToDelete.length }
-          )}
+          {i18n.translate('xpack.reporting.listing.table.deleteReportButton', {
+            defaultMessage: `Delete {num, plural, one {report} other {reports} }`,
+            values: { num: jobsToDelete.length },
+          })}
         </EuiButton>
         {this.state.showConfirm ? this.renderConfirm() : null}
       </Fragment>
