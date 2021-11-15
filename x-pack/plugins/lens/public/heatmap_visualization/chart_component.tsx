@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -396,23 +396,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 const MemoizedChart = React.memo(HeatmapComponent);
 
 export function HeatmapChartReportable(props: HeatmapRenderProps) {
-  const [state, setState] = useState({
-    isReady: false,
-  });
-
-  // It takes a cycle for the chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setState({ isReady: true });
-  }, [setState]);
-
   return (
-    <VisualizationContainer
-      className="lnsHeatmapExpression__container"
-      isReady={state.isReady}
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
+    <VisualizationContainer className="lnsHeatmapExpression__container">
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
