@@ -90,7 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('useTimeRange disabled', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/116892
+    describe.skip('useTimeRange disabled', () => {
       before(async () => {
         await setAutocompleteUseTimeRange(false);
       });
