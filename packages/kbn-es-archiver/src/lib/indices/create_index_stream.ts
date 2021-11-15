@@ -62,6 +62,10 @@ export function createCreateIndexStream({
     const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
     const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
 
+    if (docsOnly) {
+      return;
+    }
+
     async function attemptToCreate(attemptNumber = 1) {
       try {
         if (isKibana && !kibanaIndexAlreadyDeleted) {
