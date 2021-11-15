@@ -41,6 +41,10 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKeys.PARAMS]: getBrowserNormalizer(ConfigKeys.PARAMS),
   [ConfigKeys.SCREENSHOTS]: getBrowserNormalizer(ConfigKeys.SCREENSHOTS),
   [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SYNTHETICS_ARGS),
+  [ConfigKeys.DOWNLOAD_SPEED]: getBrowserNormalizer(ConfigKeys.DOWNLOAD_SPEED),
+  [ConfigKeys.UPLOAD_SPEED]: getBrowserNormalizer(ConfigKeys.UPLOAD_SPEED),
+  [ConfigKeys.LATENCY]: getBrowserNormalizer(ConfigKeys.LATENCY),
+  [ConfigKeys.THROTTLING_CONFIG]: getBrowserNormalizer(ConfigKeys.THROTTLING_CONFIG),
   [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: getBrowserJsonToJavascriptNormalizer(
     ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES
   ),

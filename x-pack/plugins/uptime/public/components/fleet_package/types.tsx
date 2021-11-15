@@ -115,6 +115,10 @@ export enum ConfigKeys {
   TLS_VERSION = 'ssl.supported_protocols',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
+  THROTTLING_CONFIG = 'throttling.config',
+  DOWNLOAD_SPEED = 'throttling.download_speed',
+  UPLOAD_SPEED = 'throttling.upload_speed',
+  LATENCY = 'throttling.latency',
   URLS = 'urls',
   USERNAME = 'username',
   WAIT = 'wait',
@@ -217,6 +221,10 @@ export interface IBrowserAdvancedFields {
   [ConfigKeys.JOURNEY_FILTERS_MATCH]: string;
   [ConfigKeys.JOURNEY_FILTERS_TAGS]: string[];
   [ConfigKeys.IGNORE_HTTPS_ERRORS]: boolean;
+  [ConfigKeys.DOWNLOAD_SPEED]: string;
+  [ConfigKeys.UPLOAD_SPEED]: string;
+  [ConfigKeys.LATENCY]: string;
+  [ConfigKeys.THROTTLING_CONFIG]: string;
 }
 
 export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;

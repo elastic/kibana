@@ -113,6 +113,12 @@ const validateICMP: ValidationLibrary = {
   ...validateCommon,
 };
 
+const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) => {
+  if (speed === undefined || speed === '') return false;
+  const throttleValue = parseFloat(speed);
+  return isNaN(throttleValue) || (allowZero ? throttleValue < 0 : throttleValue <= 0);
+};
+
 const validateBrowser: ValidationLibrary = {
   ...validateCommon,
   [ConfigKeys.SOURCE_ZIP_URL]: ({
@@ -123,6 +129,11 @@ const validateBrowser: ValidationLibrary = {
     [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
     [ConfigKeys.SOURCE_INLINE]: inlineScript,
   }) => !zipUrl && !inlineScript,
+  [ConfigKeys.DOWNLOAD_SPEED]: ({ [ConfigKeys.DOWNLOAD_SPEED]: downloadSpeed }) =>
+    validateThrottleValue(downloadSpeed),
+  [ConfigKeys.UPLOAD_SPEED]: ({ [ConfigKeys.UPLOAD_SPEED]: uploadSpeed }) =>
+    validateThrottleValue(uploadSpeed),
+  [ConfigKeys.LATENCY]: ({ [ConfigKeys.LATENCY]: latency }) => validateThrottleValue(latency, true),
 };
 
 export type ValidateDictionary = Record<DataStream, Validation>;

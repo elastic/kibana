@@ -25,6 +25,10 @@ export const initialValues: IBrowserAdvancedFields = {
   [ConfigKeys.JOURNEY_FILTERS_MATCH]: '',
   [ConfigKeys.JOURNEY_FILTERS_TAGS]: [],
   [ConfigKeys.IGNORE_HTTPS_ERRORS]: false,
+  [ConfigKeys.DOWNLOAD_SPEED]: '5',
+  [ConfigKeys.UPLOAD_SPEED]: '3',
+  [ConfigKeys.LATENCY]: '20',
+  [ConfigKeys.THROTTLING_CONFIG]: '5d/3u/20l',
 };
 
 const defaultContext: IBrowserAdvancedFieldsContext = {
