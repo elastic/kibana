@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import type { IntervalHistogram as PerfIntervalHistogram } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
 import type { IntervalHistogram } from '../types';
@@ -14,13 +13,13 @@ import type { IntervalHistogram } from '../types';
 /**
  * Nanosecond to milisecond conversion unit
  */
-export const ONE_MILLISECOND_AS_NANOSECONDS = 1000000;
+export const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
 
 /**
  * Converts time metric from ns to ms
  **/
 export function nsToMs(metric: number) {
-  return moment.duration(metric / ONE_MILLISECOND_AS_NANOSECONDS).asMilliseconds();
+  return metric / ONE_MILLISECOND_AS_NANOSECONDS;
 }
 
 export class EventLoopDelaysMonitor {
@@ -58,7 +57,7 @@ export class EventLoopDelaysMonitor {
       stddev: stddevNs,
     } = this.loopMonitor;
 
-    const collectedDataMs: IntervalHistogram = {
+    const collectedData: IntervalHistogram = {
       min: nsToMs(minNs),
       max: nsToMs(maxNs),
       mean: nsToMs(meanNs),
@@ -75,7 +74,7 @@ export class EventLoopDelaysMonitor {
     };
 
     this.loopMonitor.enable();
-    return collectedDataMs;
+    return collectedData;
   }
 
   /**
