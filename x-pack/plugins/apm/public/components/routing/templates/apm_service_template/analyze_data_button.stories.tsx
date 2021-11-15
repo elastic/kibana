@@ -9,12 +9,14 @@ import type { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
-import { MockContextProvider } from '../../../../context/mock/mock_context';
+import {
+  MockContextProvider,
+  MockContextValue,
+} from '../../../../context/mock/mock_context';
 import { AnalyzeDataButton } from './analyze_data_button';
 
-interface Args {
+interface Args extends MockContextValue {
   agentName: string;
-  canShowDashboard: boolean;
   environment?: string;
   serviceName: string;
 }
@@ -24,18 +26,11 @@ const stories: Meta<Args> = {
   component: AnalyzeDataButton,
   decorators: [
     (StoryComponent, { args }) => {
-      const { agentName, canShowDashboard, environment, serviceName } = args;
-
-      const coreStart = {
-        application: {
-          capabilities: { dashboard: { show: canShowDashboard } },
-        },
-      };
+      const { agentName, environment, serviceName } = args;
 
       return (
         <MockContextProvider
           value={{
-            coreStart,
             path: `/services/${serviceName}/overview?rangeFrom=now-15m&rangeTo=now&environment=${
               environment ?? ENVIRONMENT_ALL.value
             }&kuery=`,
@@ -63,7 +58,6 @@ export const Example: Story<Args> = () => {
 };
 Example.args = {
   agentName: 'iOS/swift',
-  canShowDashboard: true,
   environment: 'testEnvironment',
   serviceName: 'testServiceName',
 };

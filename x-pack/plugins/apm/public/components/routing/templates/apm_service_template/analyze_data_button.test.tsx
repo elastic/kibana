@@ -25,14 +25,6 @@ describe('AnalyzeDataButton', () => {
     });
   });
 
-  describe('with no dashboard show capabilities', () => {
-    it('renders nothing', () => {
-      render(<Example canShowDashboard={false} />);
-
-      expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    });
-  });
-
   describe('with a RUM agent', () => {
     it('uses a ux dataType', () => {
       render(<Example agentName="rum-js" />);

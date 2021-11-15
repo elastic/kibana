@@ -40,7 +40,7 @@ const mockCoreStart = {
   application: {
     capabilities: {
       apm: { save: true },
-      dashboard: {},
+      dashboard: { show: true },
       ml: {},
     },
     currentAppId$: new Observable(),
