@@ -9,7 +9,15 @@ import React, { useContext } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiBadge, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  EuiBadge,
+  EuiSpacer,
+  EuiIcon,
+} from '@elastic/eui';
 import { parseTimestamp } from '../parse_timestamp';
 import { Ping } from '../../../../../common/runtime_types';
 import {
@@ -22,11 +30,15 @@ import {
 import { UptimeThemeContext } from '../../../../contexts';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
+import { getMonitorObject } from '../actions/list_actions';
+import { DurationInfo } from './duration_info';
 
 interface MonitorListStatusColumnProps {
   status: string;
+  monitorId: string;
   timestamp: string;
   summaryPings: Ping[];
+  monitorListObjects: object[];
 }
 
 const StatusColumnFlexG = styled(EuiFlexGroup)`
@@ -115,6 +127,25 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
     statusMessage = `${absUpChecks.size}/${totalLocations}`;
   }
 
+  // if (totalLocations === 1) {
+  //   return {
+  //     statusMessage: i18n.translate(
+  //       'xpack.uptime.monitorList.statusColumn.locStatusMessage.onlyLocation',
+  //       {
+  //         defaultMessage: 'in {location}',
+  //         values: { location: upPings.size > 0 ? upPings[0] : downPings[0] },
+  //       }
+  //     ),
+  //     locTooltip: (
+  //       <>
+  //         <span>{upsMessage}</span>
+  //         <EuiSpacer size="xs" />
+  //         <span>{downMessage}</span>
+  //       </>
+  //     ),
+  //   };
+  // }
+
   if (totalLocations > 1) {
     return {
       statusMessage: i18n.translate(
@@ -145,9 +176,13 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
 
 export const MonitorListStatusColumn = ({
   status,
+  monitorId,
   summaryPings = [],
   timestamp: tsString,
+  monitorListObjects,
 }: MonitorListStatusColumnProps) => {
+  const objMonitor = getMonitorObject(monitorId, monitorListObjects);
+
   const timestamp = parseTimestamp(tsString);
 
   const {
@@ -158,15 +193,22 @@ export const MonitorListStatusColumn = ({
 
   return (
     <div>
-      <StatusColumnFlexG alignItems="center" gutterSize="none" wrap={false} responsive={false}>
+      <StatusColumnFlexG alignItems="center" gutterSize="xs" wrap={false} responsive={false}>
         <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
           <EuiBadge
             className="eui-textCenter"
-            color={status === STATUS.UP ? 'secondary' : dangerBehindText}
+            color={!objMonitor ? 'default' : status === STATUS.UP ? 'secondary' : dangerBehindText}
           >
             {getHealthMessage(status)}
           </EuiBadge>
         </EuiFlexItem>
+        {!objMonitor && (
+          <EuiFlexItem style={{ flexBasis: 40 }} grow={false}>
+            <EuiBadge className="eui-textCenter" color={'warning'}>
+              STALE
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
       </StatusColumnFlexG>
       <EuiSpacer size="xs" />
       <EuiText size="xs">
@@ -181,15 +223,10 @@ export const MonitorListStatusColumn = ({
             {statusMessage},
           </PaddedText>
         </EuiToolTip>
-        <EuiToolTip
-          content={
-            <EuiText color="ghost" size="xs">
-              {timestamp.toLocaleString()}
-            </EuiText>
-          }
-        >
+        <EuiToolTip content={<DurationInfo ping={summaryPings[0]} timestamp={tsString} />}>
           <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-            Checked {getShortTimeStamp(timestamp)}
+            {getShortTimeStamp(timestamp) + ' '}
+            <EuiIcon type="clock" />
           </EuiText>
         </EuiToolTip>
       </EuiText>

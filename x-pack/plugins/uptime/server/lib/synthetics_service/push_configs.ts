@@ -6,52 +6,53 @@
  */
 
 import axios from 'axios';
-import { CoreSetup } from 'kibana/server';
+import { CoreStart, SavedObjectsClientContract } from 'kibana/server';
+import { getMonitors } from './get_monitors';
+import { UptimeConfig } from '../../config';
+import { getDefaultESHosts } from './get_cloud_es_host';
+import { CloudSetup } from '../../../../cloud/server';
+import { SyntheticsServiceApiKey } from '../../../common/runtime_types';
 
-export const pushConfigs = async ({ core }: { core: CoreSetup }) => {
+export const pushConfigs = async ({
+  savedObjectsClient,
+  core,
+  config,
+  cloud,
+  apiKey,
+}: {
+  savedObjectsClient?: SavedObjectsClientContract;
+  core?: CoreStart;
+  config: UptimeConfig;
+  cloud?: CloudSetup;
+  apiKey: SyntheticsServiceApiKey;
+}) => {
+  const monitors = await getMonitors({ savedObjectsClient, core });
+  const esHosts = getDefaultESHosts({ config, cloud });
+  const data = {
+    monitors,
+    output: {
+      hosts: esHosts,
+      api_key: `${apiKey.id}:${apiKey.api_key}`,
+    },
+  };
+
   try {
     // service doesn't currently take api key, but will need to be passed
     await axios({
       method: 'POST',
-      url: 'https://us-central.synthetics.elastic.dev/cronjob',
-      data: {
-        monitors: [
-          {
-            type: 'browser',
-            name: 'Todos Monitor',
-            id: 'todos-monitor',
-            schedule: '@every 5m',
-            source: {
-              zip_url: {
-                url: 'https://github.com/elastic/synthetics/archive/refs/heads/master.zip',
-                folder: 'examples/todos',
-                target_directory: '/tmp/synthetics/suite',
-              },
-            },
-          },
-          {
-            type: 'browser',
-            name: 'Elastic Monitor',
-            id: 'elastic-monitor',
-            schedule: '@every 10m',
-            source: {
-              inline: {
-                script:
-                  "step(\"load homepage\", async () => { await page.goto('https://www.elastic.co', { waitUntil: 'networkidle', timeout: 120000 }); });",
-              },
-            },
-          },
-        ],
-        'cloud.id': '',
-        'cloud.auth': '',
-      },
+      url: config.unsafe.service.url,
+      data,
       /* these credentials will come from user input, most likely in the form of a saved object when the admin
        * enables the synthetics service */
       headers: {
-        Authorization: 'Basic ' + Buffer.from('username:password').toString('base64'),
+        Authorization:
+          'Basic ' +
+          Buffer.from(
+            `${config.unsafe.service.username}:${config.unsafe.service.password}`
+          ).toString('base64'),
       },
     });
   } catch (e) {
-    throw e;
+    console.log(e);
   }
 };

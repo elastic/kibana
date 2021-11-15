@@ -30,6 +30,8 @@ import { createLastSuccessfulStepRoute } from './synthetics/last_successful_step
 
 import { createGetAPIKeysRoute } from './synthetics_service/generate_service_api_key';
 import { createSyncSyntheticsConfig } from './synthetics_service/sync_synthetics_config';
+import { deleteSyntheticsConfig } from './synthetics_service/delete_synthetics_config';
+import { getSyntheticsConfig } from './synthetics_service/get_synthetics_config';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -59,4 +61,6 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
 export const syntheticsServiceRestApiRoutes: UMRestApiRouteFactory[] = [
   createGetAPIKeysRoute,
   createSyncSyntheticsConfig,
+  deleteSyntheticsConfig,
+  getSyntheticsConfig,
 ];

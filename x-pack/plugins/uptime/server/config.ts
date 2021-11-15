@@ -11,7 +11,19 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const config: PluginConfigDescriptor = {
   schema: schema.maybe(
     schema.object({
-      index: schema.string(),
+      index: schema.maybe(schema.string()),
+      unsafe: schema.maybe(
+        schema.object({
+          service: schema.maybe(
+            schema.object({
+              username: schema.string(),
+              password: schema.string(),
+              url: schema.maybe(schema.string()),
+              hosts: schema.arrayOf(schema.string()),
+            })
+          ),
+        })
+      ),
     })
   ),
 };

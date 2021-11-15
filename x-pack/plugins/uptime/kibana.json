@@ -10,7 +10,8 @@
     "home",
     "ml",
     "fleet",
-    "security"
+    "security",
+    "cloud"
   ],
   "requiredPlugins": [
     "alerting",

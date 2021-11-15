@@ -14,7 +14,7 @@ import {
   syntheticsServiceRestApiRoutes,
   uptimeRouteWrapper,
 } from './rest_api';
-import { UptimeCoreSetup, UptimeCorePluginsSetup, UptimeCorePluginsStart } from './lib/adapters';
+import { UptimeCoreSetup, UptimeCorePluginsSetup } from './lib/adapters';
 
 import { statusCheckAlertFactory } from './lib/alerts/status_check';
 import { tlsAlertFactory } from './lib/alerts/tls';
@@ -29,7 +29,7 @@ export const initUptimeServer = (
   logger: Logger
 ) => {
   restApiRoutes.forEach((route) =>
-    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route, plugins)))
+    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route), server))
   );
 
   const {
@@ -55,13 +55,8 @@ export const initUptimeServer = (
   registerType(tlsLegacyAlert);
 };
 
-export const initSyntheticsServiceServer = (
-  server: UptimeCoreSetup,
-  libs: UMServerLibs,
-  plugins: UptimeCorePluginsStart,
-  logger: Logger
-) => {
+export const initSyntheticsServiceServer = (server: UptimeCoreSetup, libs: UMServerLibs) => {
   syntheticsServiceRestApiRoutes.forEach((route) => {
-    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route, plugins)));
+    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route), server));
   });
 };

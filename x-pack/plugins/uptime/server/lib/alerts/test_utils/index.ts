@@ -13,6 +13,7 @@ import type { IRuleDataClient } from '../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { getUptimeESMockClient } from '../../requests/helper';
 import { alertsMock } from '../../../../../alerting/server/mocks';
+import { CloudSetup } from '../../../../../cloud/server';
 import { DynamicSettings } from '../../../../common/runtime_types';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
@@ -25,9 +26,10 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
  */
 export const bootstrapDependencies = (customRequests?: any, customPlugins: any = {}) => {
   const router = {} as UptimeRouter;
+  const cloud = {} as CloudSetup;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server: UptimeCoreSetup = { router };
+  const server: UptimeCoreSetup = { router, cloud };
   const plugins: UptimeCorePluginsSetup = customPlugins as any;
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };

@@ -36,8 +36,8 @@ export const MonitorListHeader: React.FC = () => {
         <EuiFlexItem grow={false}>
           <StatusFilter />
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiButton fullWidth={false} onClick={showModal}>
+        <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+          <EuiButton iconType="plus" fullWidth={false} onClick={showModal} style={{ width: 150 }}>
             Add monitor
           </EuiButton>
         </EuiFlexItem>

@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   getBreakpoint,
+  EuiBadge,
 } from '@elastic/eui';
 import { X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
@@ -36,12 +37,16 @@ import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
-import { AddMonitor } from './actions/add_monitor';
+import { AddMonitor } from './actions/edit_monitor';
+import { ListActions } from './actions/list_actions';
+import { MonitorSavedObject } from '../../../../common/types';
 
 interface Props extends MonitorListProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
+  monitorListObjects: object[];
+  allMonListObjs: object[];
 }
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
@@ -54,7 +59,16 @@ export const MonitorListComponent: ({
   monitorList: { list, error, loading },
   pageSize,
   setPageSize,
-}: Props) => any = ({ filters, monitorList: { list, error, loading }, pageSize, setPageSize }) => {
+  monitorListObjects,
+  allMonListObjs,
+}: Props) => any = ({
+  filters,
+  monitorListObjects,
+  monitorList: { list, error, loading },
+  pageSize,
+  setPageSize,
+  allMonListObjs,
+}) => {
   const [expandedDrawerIds, updateExpandedDrawerIds] = useState<string[]>([]);
   const { width } = useWindowSize();
   const [hideExtraColumns, setHideExtraColumns] = useState(false);
@@ -104,14 +118,24 @@ export const MonitorListComponent: ({
         mobileOptions: {
           fullWidth: true,
         },
-        render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
-          return (
-            <MonitorListStatusColumn
-              status={status}
-              timestamp={timestamp}
-              summaryPings={summaryPings ?? []}
-            />
-          );
+        render: (status: string, summary: MonitorSummary) => {
+          if (summary.state) {
+            const {
+              state: { timestamp, summaryPings },
+            } = summary;
+
+            return (
+              <MonitorListStatusColumn
+                monitorId={summary.monitor_id}
+                status={status}
+                timestamp={timestamp}
+                summaryPings={summaryPings ?? []}
+                monitorListObjects={allMonListObjs}
+              />
+            );
+          } else {
+            return <EuiBadge color="primary">PENDING</EuiBadge>;
+          }
         },
       },
       {
@@ -121,7 +145,13 @@ export const MonitorListComponent: ({
         mobileOptions: {
           fullWidth: true,
         },
-        render: (_name: string, summary: MonitorSummary) => <MonitorNameColumn summary={summary} />,
+        render: (_name: string, summary: MonitorSummary) => (
+          <MonitorNameColumn
+            monitorId={summary.monitor_id || summary.id}
+            summary={summary}
+            monitorListObjects={allMonListObjs}
+          />
+        ),
         sortable: true,
       },
       {
@@ -129,9 +159,9 @@ export const MonitorListComponent: ({
         field: 'state.url.full',
         name: URL_LABEL,
         width: '30%',
-        render: (url: string) => (
+        render: (url: string, summary: MonitorSummary) => (
           <EuiLink href={url} target="_blank" color="text" external>
-            {url}
+            {url ?? summary.urls}
           </EuiLink>
         ),
       },
@@ -140,13 +170,14 @@ export const MonitorListComponent: ({
         field: 'state.monitor.name',
         name: TAGS_LABEL,
         width: '12%',
-        render: (_name: string, summary: MonitorSummary) => <MonitorTags summary={summary} />,
+        render: (_name: string, summary: MonitorSummary) =>
+          summary.state ? <MonitorTags summary={summary} /> : null,
       },
       {
         align: 'left' as const,
         field: 'state.tls.server.x509',
         name: labels.TLS_COLUMN_LABEL,
-        render: (x509: X509Expiry) => <CertStatusColumn expiry={x509} />,
+        render: (x509: X509Expiry, summary: MonitorSummary) => <CertStatusColumn expiry={x509} />,
       },
     ],
     ...(!hideExtraColumns
@@ -158,12 +189,13 @@ export const MonitorListComponent: ({
             mobileOptions: {
               show: false,
             },
-            render: (monitorId: string) => (
-              <MonitorBarSeries
-                histogramSeries={histogramsById?.[monitorId]?.points}
-                minInterval={minInterval!}
-              />
-            ),
+            render: (monitorId: string, summary: MonitorSummary) =>
+              summary.state ? (
+                <MonitorBarSeries
+                  histogramSeries={histogramsById?.[monitorId]?.points}
+                  minInterval={minInterval!}
+                />
+              ) : null,
           },
         ]
       : []),
@@ -173,12 +205,13 @@ export const MonitorListComponent: ({
         field: '',
         name: STATUS_ALERT_COLUMN,
         width: '100px',
-        render: (item: MonitorSummary) => (
-          <EnableMonitorAlert
-            monitorId={item.monitor_id}
-            selectedMonitor={item.state.summaryPings[0]}
-          />
-        ),
+        render: (item: MonitorSummary) =>
+          item.state ? (
+            <EnableMonitorAlert
+              monitorId={item.monitor_id}
+              selectedMonitor={item.state.summaryPings[0]}
+            />
+          ) : null,
       },
       {
         align: 'center' as const,
@@ -186,7 +219,7 @@ export const MonitorListComponent: ({
         name: '',
         width: '50px',
         render: (item: MonitorSummary) => (
-          <AddMonitor monitorId={item.monitor_id} selectedMonitor={item.state.summaryPings[0]} />
+          <ListActions monitorId={item.monitor_id ?? item.id} monitorListObjects={allMonListObjs} />
         ),
       },
     ],
@@ -226,7 +259,7 @@ export const MonitorListComponent: ({
         hasActions={true}
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
-        items={items}
+        items={[...items, ...(monitorListObjects ?? [])]}
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
         tableLayout={'auto'}

@@ -15,6 +15,10 @@ import { UptimeRefreshContext } from '../../../contexts';
 import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
 import { useMappingCheck } from '../../../hooks/use_mapping_check';
 
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { uptimeMonitorType } from './actions/add_monitor_modal';
+import { useFetcher } from '../../../../../observability/public';
+
 export interface MonitorListProps {
   filters?: string;
 }
@@ -30,6 +34,10 @@ const getPageSizeValue = () => {
 };
 
 export const MonitorList: React.FC<MonitorListProps> = (props) => {
+  const {
+    services: { savedObjects },
+  } = useKibana();
+
   const filters = useSelector(esKuerySelector);
 
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue);
@@ -43,6 +51,22 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
 
   const monitorList = useSelector(monitorListSelector);
   useMappingCheck(monitorList.error);
+
+  const { data: monitorObjects } = useFetcher(async () => {
+    return savedObjects?.client.find({ type: uptimeMonitorType });
+  }, [lastRefresh]);
+
+  const objMonitors = monitorObjects?.savedObjects
+    .map(({ attributes, id }) => ({
+      ...(attributes as object),
+      id,
+    }))
+    .filter(({ id }) => {
+      if (monitorList.list.summaries.length > 0) {
+        return !monitorList.list.summaries.find((item) => item.monitor_id.includes(id));
+      }
+      return true;
+    });
 
   useEffect(() => {
     dispatch(
@@ -82,6 +106,8 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
       monitorList={monitorList}
       pageSize={pageSize}
       setPageSize={setPageSize}
+      monitorListObjects={objMonitors}
+      allMonListObjs={monitorObjects?.savedObjects}
     />
   );
 };

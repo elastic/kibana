@@ -32,6 +32,9 @@ import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from './config';
 import { UptimeRouter } from './types';
 
+import { ConcreteTaskInstance } from '../../task_manager/server';
+import type { CloudSetup } from '../../cloud/server';
+
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
 export class Plugin implements PluginType {
@@ -39,13 +42,16 @@ export class Plugin implements PluginType {
   private initContext: PluginInitializerContext;
   private logger?: Logger;
   private router?: UptimeRouter;
+  private cloud?: CloudSetup;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.initContext = _initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
+  public setup(core: CoreSetup<UptimeCorePluginsStart>, plugins: UptimeCorePluginsSetup) {
     const config = this.initContext.config.get<UptimeConfig>();
+
+    this.cloud = plugins.cloud;
 
     savedObjectsAdapter.config = config;
 
@@ -66,9 +72,25 @@ export class Plugin implements PluginType {
       ],
     });
 
-    initServerWithKibana({ router: this.router }, plugins, ruleDataClient, this.logger);
-    core.getStartServices().then(([_coreStart, corePlugins]) => {
-      initSyntheticsServiceServerWithKibana({ router: this.router }, corePlugins, this.logger);
+    initServerWithKibana(
+      { router: this.router, cloud: this.cloud, config },
+      plugins,
+      ruleDataClient,
+      this.logger,
+      config
+    );
+    const self = this;
+    core.getStartServices().then(([, startPlugins]) => {
+      initSyntheticsServiceServerWithKibana(
+        {
+          router: self.router!,
+          cloud: this.cloud,
+          security: startPlugins.security,
+          config,
+        },
+        startPlugins,
+        config
+      );
     });
     core.savedObjects.registerType(umDynamicSettings);
     core.savedObjects.registerType(uptimeMonitor);
@@ -94,7 +116,7 @@ export class Plugin implements PluginType {
 
         // Optional, how many attempts before marking task as failed.
         // This defaults to what is configured at the task manager level.
-        maxAttempts: 5,
+        maxAttempts: 1,
 
         // The maximum number tasks of this type that can be run concurrently per Kibana instance.
         // Setting this value will force Task Manager to poll for this task type seperatly from other task types which
@@ -103,12 +125,27 @@ export class Plugin implements PluginType {
 
         // The createTaskRunner function / method returns an object that is responsible for
         // performing the work of the task. context: { taskInstance }, is documented below.
-        createTaskRunner(context) {
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             // Perform the work of the task. The return value should fit the TaskResult interface, documented
             // below. Invalid return values will result in a logged warning.
             async run() {
-              await syncSyntheticsConfig({ core });
+              const { params, state, id } = taskInstance;
+              const prevState = state || { count: 0 };
+
+              const [coreStart] = await core.getStartServices();
+              await syncSyntheticsConfig({
+                config,
+                core: coreStart,
+                cloud: plugins.cloud,
+                savedObjectsClient: coreStart.savedObjects.createInternalRepository([
+                  syntheticsServiceApiKey.name,
+                ]),
+              });
+              console.log(
+                'RUNNINGNNNNN SYNTHETIC TASK MANAGER   ' + new Date(Date.now()).toISOString()
+              );
+              return { state };
             },
 
             // Optional, will be called if a running instance of this task times out, allowing the task
@@ -128,11 +165,13 @@ export class Plugin implements PluginType {
 
   public start(core: CoreStart, plugins: UptimeCorePluginsStart) {
     this.savedObjectsClient = core.savedObjects.createInternalRepository();
+
     plugins.taskManager
-      .schedule({
+      .ensureScheduled({
+        id: 'syntheticsService:sync-task-id',
         taskType: `syntheticsService:sync`,
         schedule: {
-          interval: '3m',
+          interval: '5m',
         },
         params: {},
         state: {},

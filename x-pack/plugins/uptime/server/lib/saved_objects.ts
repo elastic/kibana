@@ -8,22 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../common/constants';
 import { DynamicSettings, SyntheticsServiceApiKey } from '../../common/runtime_types';
-import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { UMSavedObjectsQueryFn } from './adapters';
-import { UptimeConfig } from '../config';
-
-export interface UMSavedObjectsAdapter {
-  config: UptimeConfig;
-  getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
-  setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
-  getSyntheticsServiceApiKey: UMSavedObjectsQueryFn<SyntheticsServiceApiKey>;
-  setSyntheticsServiceApiKey: UMSavedObjectsQueryFn<void, SyntheticsServiceApiKey>;
-}
+import {
+  SavedObjectsType,
+  SavedObjectsErrorHelpers,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from '../../../../../src/core/server';
 
 export const settingsObjectType = 'uptime-dynamic-settings';
 export const uptimeMonitorType = 'uptime-monitor';
 export const settingsObjectId = 'uptime-dynamic-settings-singleton';
 export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
+export const syntheticsApiKeyID = 'uptime-synthetics-api-key-singleton';
 
 export const umDynamicSettings: SavedObjectsType = {
   name: settingsObjectType,
@@ -86,7 +82,7 @@ export const syntheticsServiceApiKey: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
     icon: 'uptimeApp',
     getTitle: () =>
       i18n.translate('xpack.uptime.uptimeSettings.index', {
@@ -119,16 +115,20 @@ export const uptimeMonitor: SavedObjectsType = {
   management: {
     importableAndExportable: true,
     icon: 'uptimeApp',
-    getTitle: () =>
+    getTitle: (savedObject) =>
+      savedObject.attributes.name +
+      ' - ' +
       i18n.translate('xpack.uptime.uptimeSettings.index', {
         defaultMessage: 'Uptime - Monitor',
       }),
   },
 };
 
-export const savedObjectsAdapter: UMSavedObjectsAdapter = {
+type Client = SavedObjectsClientContract | ISavedObjectsRepository;
+
+export const savedObjectsAdapter = {
   config: null,
-  getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
+  getUptimeDynamicSettings: async (client: Client): Promise<DynamicSettings> => {
     try {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
       return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
@@ -143,29 +143,33 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       throw getErr;
     }
   },
-  setUptimeDynamicSettings: async (client, settings): Promise<void> => {
+  setUptimeDynamicSettings: async (client: Client, settings): Promise<void> => {
     await client.create(umDynamicSettings.name, settings, {
       id: settingsObjectId,
       overwrite: true,
     });
   },
-  getSyntheticsServiceApiKey: async (client): Promise<SyntheticsServiceApiKey> => {
+  getSyntheticsServiceApiKey: async (client: Client): Promise<SyntheticsServiceApiKey> => {
     try {
       const obj = await client.get<SyntheticsServiceApiKey>(
         syntheticsServiceApiKey.name,
-        settingsObjectId
+        syntheticsApiKeyID
       );
-      return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
+      return obj?.attributes;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         // TO DO: surface a UI error that Synthetics service is not able to be enabled
+      } else {
+        throw getErr;
       }
-      throw getErr;
     }
   },
-  setSyntheticsServiceApiKey: async (client, settings): Promise<void> => {
-    await client.create(syntheticsServiceApiKey.name, settings, {
-      id: settingsObjectId,
+  setSyntheticsServiceApiKey: async (
+    client: Client,
+    apiKey: SyntheticsServiceApiKey
+  ): Promise<void> => {
+    await client.create(syntheticsServiceApiKey.name, apiKey, {
+      id: syntheticsApiKeyID,
       overwrite: true,
     });
   },

@@ -37,5 +37,7 @@ export enum API_URLS {
   CONNECTOR_TYPES = '/api/actions/connector_types',
 
   API_KEYS = '/api/uptime/service/key',
-  SYNC_CONFIG = '/api/uptime/service/config',
+  SYNC_CONFIG = '/api/uptime/service/config/refresh',
+  DELETE_CONFIG = '/api/uptime/service/config/delete',
+  GET_IN_PROGRESS_JOBS = '/api/uptime/service/config/get',
 }

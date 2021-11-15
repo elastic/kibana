@@ -6,23 +6,22 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type {
-  SavedObjectsClientContract,
-  ISavedObjectsRepository,
-  IScopedClusterClient,
-} from 'src/core/server';
+import type { IScopedClusterClient } from 'src/core/server';
 import { ObservabilityPluginSetup } from '../../../../../observability/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../../../../security/server';
+import { SecurityPluginStart } from '../../../../../security/server';
+import type { CloudSetup } from '../../../../../cloud/server';
+
 import {
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '../../../../../task_manager/server';
 import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
+import { UptimeConfig } from '../../../config';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: {
@@ -31,13 +30,11 @@ export type UMElasticsearchQueryFn<P, R = any> = (
   } & P
 ) => Promise<R>;
 
-export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
-  client: SavedObjectsClientContract | ISavedObjectsRepository,
-  params?: P
-) => Promise<T> | T;
-
 export interface UptimeCoreSetup {
+  config: UptimeConfig;
   router: UptimeRouter;
+  cloud?: CloudSetup;
+  security?: SecurityPluginStart;
 }
 
 export interface UptimeCorePluginsSetup {
@@ -48,8 +45,8 @@ export interface UptimeCorePluginsSetup {
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  security: SecurityPluginSetup;
   taskManager: TaskManagerSetupContract;
+  cloud?: CloudSetup;
 }
 
 export interface UptimeCorePluginsStart {

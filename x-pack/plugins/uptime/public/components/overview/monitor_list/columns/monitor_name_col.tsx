@@ -13,9 +13,14 @@ import { useGetUrlParams } from '../../../../hooks';
 import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
 import { MonitorSummary } from '../../../../../common/runtime_types/monitor';
 import { useFilterUpdate } from '../../../../hooks/use_filter_update';
+import { MonitorSavedObject } from '../../../../../common/types';
+import { getMonitorObject } from '../actions/list_actions';
 
 interface Props {
+  monitorId: string;
   summary: MonitorSummary;
+  monitorListObjects: MonitorSavedObject[];
+  monitorSavedObject: MonitorSavedObject;
 }
 
 export const parseCurrentFilters = (filters: string) => {
@@ -35,7 +40,24 @@ const MONITOR_TYPES: Record<string, string> = {
   icmp: 'ICMP Ping',
 };
 
-export const MonitorNameColumn = ({ summary }: Props) => {
+export const MonitorNameColumn = ({
+  monitorId,
+  summary,
+  monitorSavedObject,
+  monitorListObjects,
+}: Props) => {
+  const objMonitor = getMonitorObject(monitorId, monitorListObjects);
+
+  let monitorName = '';
+  let monitorType = '';
+  if (summary.state) {
+    monitorName = summary.state.monitor.name;
+    monitorType = summary.state.monitor.type;
+  } else {
+    monitorName = objMonitor?.attributes.name;
+    monitorType = objMonitor?.attributes.type;
+  }
+
   const params = useGetUrlParams();
 
   const linkParameters = stringifyUrlParams(params, true);
@@ -54,29 +76,27 @@ export const MonitorNameColumn = ({ summary }: Props) => {
   const filterLabel = i18n.translate('xpack.uptime.monitorList.monitorType.filter', {
     defaultMessage: 'Filter all monitors with type {type}',
     values: {
-      type: summary.state.monitor.type,
+      type: monitorType,
     },
   });
 
   return (
     <div>
-      <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
-        {summary.state.monitor.name
-          ? summary.state.monitor.name
-          : `Unnamed - ${summary.monitor_id}`}
+      <MonitorPageLink monitorId={monitorId} linkParameters={linkParameters}>
+        {monitorName ? monitorName : `Unnamed - ${monitorId}`}
       </MonitorPageLink>
       <div>
         <EuiButtonEmpty
           color="text"
           title={filterLabel}
           onClick={() => {
-            setFilterType([summary.state.monitor.type]);
+            setFilterType([monitorType]);
           }}
           size="xs"
           flush="left"
           style={{ border: 'none' }}
         >
-          <EuiText size="xs">{MONITOR_TYPES[summary.state.monitor.type]}</EuiText>
+          <EuiText size="xs">{MONITOR_TYPES[monitorType]}</EuiText>
         </EuiButtonEmpty>
       </div>
     </div>
