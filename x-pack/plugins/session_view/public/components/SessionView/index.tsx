@@ -12,7 +12,7 @@ import { CoreStart } from '../../../../../../src/core/public';
 import { ProcessTree } from '../ProcessTree';
 import { Process, ProcessEvent } from '../../hooks/use_process_tree';
 import { useStyles } from './styles';
-import { INTERNAL_TEST_ROUTE } from '../../../common/constants';
+import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
@@ -59,7 +59,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   const { data: getData } = useQuery<ProcessEventResults, Error>(
     ['process-tree', 'process_tree'],
     () =>
-      http.get<ProcessEventResults>(INTERNAL_TEST_ROUTE, {
+      http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
         query: {
           indexes: ['cmd*', '.siem-signals-*'],
           sessionEntityId

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import uuid from 'uuid';
 import { IRouter } from '../../../../../src/core/server';
-import { INTERNAL_TEST_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../common/constants';
+import { INTERNAL_TEST_ROUTE } from '../../common/constants';
 
 export const registerTestRoute = (router: IRouter) => {
   router.get(
@@ -15,8 +16,7 @@ export const registerTestRoute = (router: IRouter) => {
       path: INTERNAL_TEST_ROUTE,
       validate: {
         query: schema.object({
-          indexes: schema.maybe(schema.arrayOf(schema.string())),
-          sessionEntityId: schema.maybe(schema.string()),
+          index: schema.maybe(schema.string()),
         }),
       },
     },
@@ -24,17 +24,10 @@ export const registerTestRoute = (router: IRouter) => {
       // TODO (Jiawei & Paulo): Evaluate saved objects & ES client
       const client = context.core.elasticsearch.client.asCurrentUser;
 
-      const { indexes, sessionEntityId } = request.query;
+      const { index } = request.query;
 
       const search = await client.search({
-        index: indexes,
-        query: {
-          match: {
-            'process.entry.entity_id': sessionEntityId,
-          },
-        },
-        size: PROCESS_EVENTS_PER_PAGE,
-        sort: '@timestamp',
+        index: [`${index}`]
       });
 
       return response.ok({ body: search.body.hits });
@@ -66,7 +59,7 @@ export const registerTestRoute = (router: IRouter) => {
             timestamp: new Date().toISOString(),
           },
         });
-      });
+      })
 
       await Promise.all(requests);
 
@@ -83,7 +76,7 @@ export const registerTestRoute = (router: IRouter) => {
       path: INTERNAL_TEST_ROUTE,
       validate: {
         body: schema.object({
-          index: schema.string(),
+          index: schema.string()
         }),
       },
     },
@@ -91,18 +84,18 @@ export const registerTestRoute = (router: IRouter) => {
       const { index } = request.body;
       const client = context.core.elasticsearch.client.asCurrentUser;
 
-      await client.deleteByQuery({
+      await client.deleteByQuery({ 
         index,
         body: {
           query: { match_all: {} },
         },
       });
-
+      
       return response.ok({
         body: {
           message: 'ok!',
         },
       });
-    }
-  );
+    },
+  )
 };

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from 'react-query';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPage, EuiPageContent, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
-import { BASE_PATH } from '../../../common/constants';
+import { RECENT_SESSION_ROUTE, BASE_PATH } from '../../../common/constants';
 
 import { SessionView } from '../SessionView';
+import { ProcessEvent } from '../../hooks/use_process_tree';
 
-// TODO: sourced from local test data. eventually, session list table will pass in process.entry.entity_id
-const testRootEntityId = '44f4dece-d963-51c9-bfa3-875c0c8e1ec3';
+interface RecentSessionResults {
+  hits: any[];
+}
 
 export const SessionViewPage = (props: RouteComponentProps) => {
   const { chrome, http } = useKibana<CoreStart>().services;
@@ -26,6 +29,28 @@ export const SessionViewPage = (props: RouteComponentProps) => {
     },
   ]);
   chrome.docTitle.change('Process Tree');
+
+  // loads the entity_id of most recent 'interactive' session
+  const { data } = useQuery<RecentSessionResults, Error>(['recent-session', 'recent_session'], () =>
+    http.get<RecentSessionResults>(RECENT_SESSION_ROUTE, {
+      query: {
+        indexes: ['cmd*', '.siem-signals*'],
+      },
+    })
+  );
+
+  const [sessionEntityId, setSessionEntityId] = useState('');
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    if (data.hits.length) {
+      const event = data.hits[0]._source as ProcessEvent;
+      setSessionEntityId(event.process.entry.entity_id);
+    }
+  }, [data]);
 
   return (
     <EuiPage>
@@ -38,7 +63,7 @@ export const SessionViewPage = (props: RouteComponentProps) => {
             `}
         />
         <EuiSpacer />
-        <SessionView sessionEntityId={testRootEntityId} />
+        <SessionView key={sessionEntityId} sessionEntityId={sessionEntityId} />
         <EuiSpacer />
       </EuiPageContent>
     </EuiPage>
