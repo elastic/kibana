@@ -95,7 +95,6 @@ describe('Timeline', () => {
       end: endDate,
       eqlOptions: {},
       expandedDetail: {},
-      eventType: 'all',
       timelineId: TimelineId.test,
       isLive: false,
       itemsPerPage: 5,
@@ -106,7 +105,6 @@ describe('Timeline', () => {
       showExpandedDetails: false,
       start: startDate,
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.eql,
     };
   });
