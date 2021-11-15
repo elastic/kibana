@@ -128,7 +128,6 @@ export const IndexPatternTable = ({
             {index.id && index.id.indexOf(securitySolution) === 0 && (
               <EuiBadge>{securityDataView}</EuiBadge>
             )}
-
             {index.tags &&
               index.tags.map(({ key: tagKey, name: tagName }) => (
                 <EuiBadge key={tagKey}>{tagName}</EuiBadge>
