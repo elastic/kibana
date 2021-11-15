@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -16,163 +16,51 @@ import {
   EuiAccordion,
   EuiIconTip,
 } from '@elastic/eui';
-import { uniq } from 'lodash';
-import { CoreStart } from 'kibana/public';
-import { FieldStatsResponse } from '../../../../../common';
-import { AggFunctionsMapping, esQuery } from '../../../../../../../../src/plugins/data/public';
+import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
-import { updateColumnParam, isReferenced } from '../../layer_helpers';
-import { DataType, FrameDatasourceAPI } from '../../../../types';
-import { FiltersIndexPatternColumn, OperationDefinition, operationDefinitionMap } from '../index';
+import { updateColumnParam } from '../../layer_helpers';
+import type { DataType } from '../../../../types';
+import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
-import type { IndexPatternLayer, IndexPattern } from '../../../types';
-import { defaultLabel } from '../filters';
+import { FieldInputs } from './field_inputs';
+import { FieldInput as FieldInputBase } from '../../../dimension_panel/field_input';
+import type { TermsIndexPatternColumn } from './types';
+import {
+  getDisallowedTermsMessage,
+  getMultiTermsScriptedFieldErrorMessage,
+  isSortableByColumn,
+} from './helpers';
 
-function ofName(name?: string) {
+export type { TermsIndexPatternColumn } from './types';
+
+const MULTI_KEY_VISUAL_SEPARATOR = '›';
+
+const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+  defaultMessage: 'Missing field',
+});
+
+function ofName(name?: string, count: number = 0) {
+  if (count) {
+    return i18n.translate('xpack.lens.indexPattern.multipleTermsOf', {
+      defaultMessage: 'Top values of {name} + {count} other',
+      values: {
+        name: name ?? missingFieldLabel,
+        count,
+      },
+    });
+  }
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
     defaultMessage: 'Top values of {name}',
     values: {
-      name:
-        name ??
-        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
-          defaultMessage: 'Missing field',
-        }),
+      name: name ?? missingFieldLabel,
     },
   });
 }
 
-function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
-  const column = layer.columns[columnId];
-  return (
-    column &&
-    !column.isBucketed &&
-    column.operationType !== 'last_value' &&
-    !('references' in column) &&
-    !isReferenced(layer, columnId)
-  );
-}
-
-function getDisallowedTermsMessage(
-  layer: IndexPatternLayer,
-  columnId: string,
-  indexPattern: IndexPattern
-) {
-  const hasMultipleShifts =
-    uniq(
-      Object.values(layer.columns)
-        .filter((col) => operationDefinitionMap[col.operationType].shiftable)
-        .map((col) => col.timeShift || '')
-    ).length > 1;
-  if (!hasMultipleShifts) {
-    return undefined;
-  }
-  return {
-    message: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShifts', {
-      defaultMessage:
-        'In a single layer, you are unable to combine metrics with different time shifts and dynamic top values. Use the same time shift value for all metrics, or use filters instead of top values.',
-    }),
-    fixAction: {
-      label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
-        defaultMessage: 'Use filters',
-      }),
-      newState: async (core: CoreStart, frame: FrameDatasourceAPI, layerId: string) => {
-        const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
-        const fieldName = currentColumn.sourceField;
-        const activeDataFieldNameMatch =
-          frame.activeData?.[layerId].columns.find(({ id }) => id === columnId)?.meta.field ===
-          fieldName;
-        let currentTerms = uniq(
-          frame.activeData?.[layerId].rows
-            .map((row) => row[columnId] as string)
-            .filter((term) => typeof term === 'string' && term !== '__other__') || []
-        );
-        if (!activeDataFieldNameMatch || currentTerms.length === 0) {
-          const response: FieldStatsResponse<string | number> = await core.http.post(
-            `/api/lens/index_stats/${indexPattern.id}/field`,
-            {
-              body: JSON.stringify({
-                fieldName,
-                dslQuery: esQuery.buildEsQuery(
-                  indexPattern,
-                  frame.query,
-                  frame.filters,
-                  esQuery.getEsQueryConfig(core.uiSettings)
-                ),
-                fromDate: frame.dateRange.fromDate,
-                toDate: frame.dateRange.toDate,
-                size: currentColumn.params.size,
-              }),
-            }
-          );
-          currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
-        }
-        return {
-          ...layer,
-          columns: {
-            ...layer.columns,
-            [columnId]: {
-              label: i18n.translate('xpack.lens.indexPattern.pinnedTopValuesLabel', {
-                defaultMessage: 'Filters of {field}',
-                values: {
-                  field: fieldName,
-                },
-              }),
-              customLabel: true,
-              isBucketed: layer.columns[columnId].isBucketed,
-              dataType: 'string',
-              operationType: 'filters',
-              params: {
-                filters:
-                  currentTerms.length > 0
-                    ? currentTerms.map((term) => ({
-                        input: {
-                          query: `${fieldName}: "${term}"`,
-                          language: 'kuery',
-                        },
-                        label: term,
-                      }))
-                    : [
-                        {
-                          input: {
-                            query: '*',
-                            language: 'kuery',
-                          },
-                          label: defaultLabel,
-                        },
-                      ],
-              },
-            } as FiltersIndexPatternColumn,
-          },
-        };
-      },
-    },
-  };
-}
-
 const DEFAULT_SIZE = 3;
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
-
-export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'terms';
-  params: {
-    size: number;
-    // if order is alphabetical, the `fallback` flag indicates whether it became alphabetical because there wasn't
-    // another option or whether the user explicitly chose to make it alphabetical.
-    orderBy: { type: 'alphabetical'; fallback?: boolean } | { type: 'column'; columnId: string };
-    orderDirection: 'asc' | 'desc';
-    otherBucket?: boolean;
-    missingBucket?: boolean;
-    // Terms on numeric fields can be formatted
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
-  };
-}
 
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {
   type: 'terms',
@@ -197,6 +85,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         indexPattern
       ) || []),
       getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
+      getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern) || '',
     ].filter(Boolean);
     return messages.length ? messages : undefined;
   },
@@ -242,11 +131,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, orderedColumnIds) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
+    if (column.params?.secondaryFields?.length) {
+      return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
+        id: columnId,
+        enabled: true,
+        schema: 'segment',
+        fields: [column.sourceField, ...column.params.secondaryFields],
+        orderBy:
+          column.params.orderBy.type === 'alphabetical'
+            ? '_key'
+            : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+        order: column.params.orderDirection,
+        size: column.params.size,
+        otherBucket: Boolean(column.params.otherBucket),
+        otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
+          defaultMessage: 'Other',
+        }),
+        separatorLabel: MULTI_KEY_VISUAL_SEPARATOR,
+      }).toAst();
+    }
+    return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
       schema: 'segment',
-      fields: [column.sourceField, 'geo.dest'],
+      field: column.sourceField,
       orderBy:
         column.params.orderBy.type === 'alphabetical'
           ? '_key'
@@ -257,10 +165,17 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
       }),
+      missingBucket: column.params.otherBucket && column.params.missingBucket,
+      missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
+        defaultMessage: '(missing value)',
+      }),
     }).toAst();
   },
   getDefaultLabel: (column, indexPattern) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)?.displayName),
+    ofName(
+      indexPattern.getFieldByName(column.sourceField)?.displayName,
+      column.params.secondaryFields?.length
+    ),
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
     if ('format' in newParams && field.type !== 'number') {
@@ -269,7 +184,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, newParams.secondaryFields?.length),
       sourceField: field.name,
       params: newParams,
     };
@@ -305,6 +220,62 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       }
     }
     return currentColumn;
+  },
+  renderFieldInput: function FieldInput(props) {
+    const {
+      layer,
+      selectedColumn,
+      columnId,
+      indexPattern,
+      existingFields,
+      operationSupportMatrix,
+      updateLayer,
+    } = props;
+    const onFieldSelectChange = useCallback(
+      (fields) => {
+        updateLayer({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            [columnId]: {
+              ...layer.columns[columnId],
+              sourceField: fields[0],
+              label: ofName(indexPattern.getFieldByName(fields[0])?.displayName, fields.length - 1),
+              params: {
+                ...layer.columns[columnId].params,
+                secondaryFields: fields.length > 1 ? fields.slice(1) : undefined,
+              },
+            },
+          } as Record<string, TermsIndexPatternColumn>,
+        });
+      },
+      [columnId, indexPattern, layer, updateLayer]
+    );
+    const currentColumn = layer.columns[columnId];
+    // let the default component do its job in case of incomplete informations
+    if (!currentColumn || !selectedColumn) {
+      return <FieldInputBase {...props} />;
+    }
+    return (
+      <EuiFormRow
+        data-test-subj="indexPattern-field-selection-row"
+        label={i18n.translate('xpack.lens.indexPattern.terms.chooseFields', {
+          defaultMessage: '{count, plural, zero {Field} other {Fields}}',
+          values: {
+            count: selectedColumn.params.secondaryFields?.length || 0,
+          },
+        })}
+        fullWidth
+      >
+        <FieldInputs
+          column={selectedColumn}
+          indexPattern={indexPattern}
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          onChange={onFieldSelectChange}
+        />
+      </EuiFormRow>
+    );
   },
   paramEditor: function ParamEditor({ layer, updateLayer, currentColumn, columnId, indexPattern }) {
     const hasRestrictions = indexPattern.hasRestrictions;
@@ -342,6 +313,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         defaultMessage: 'Alphabetical',
       }),
     });
+
     return (
       <>
         <ValuesInput

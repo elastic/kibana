@@ -37,7 +37,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   selectedOperationType?: OperationType;
   selectedField?: string;
   incompleteOperation?: OperationType;
-  operationSupportMatrix: OperationSupportMatrix;
+  operationByField: OperationSupportMatrix['operationByField'];
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn?: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
@@ -54,7 +54,7 @@ export function FieldSelect({
   incompleteOperation,
   selectedOperationType,
   selectedField,
-  operationSupportMatrix,
+  operationByField,
   onChoose,
   onDeleteColumn,
   existingFields,
@@ -62,7 +62,6 @@ export function FieldSelect({
   markAllFieldsCompatible,
   ...rest
 }: FieldSelectProps) {
-  const { operationByField } = operationSupportMatrix;
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
 
@@ -85,6 +84,9 @@ export function FieldSelect({
       return items
         .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => {
+          const compatible =
+            markAllFieldsCompatible || isCompatibleWithCurrentOperation(field) ? 1 : 0;
+          const exists = containsData(field);
           return {
             label: currentIndexPattern.getFieldByName(field)?.displayName,
             value: {
@@ -99,30 +101,18 @@ export function FieldSelect({
                   ? currentOperationType
                   : operationByField[field]!.values().next().value,
             },
-            exists: containsData(field),
-            compatible: markAllFieldsCompatible || isCompatibleWithCurrentOperation(field),
+            exists,
+            compatible,
+            className: classNames({
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              'lnFieldSelect__option--incompatible': !compatible,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              'lnFieldSelect__option--nonExistant': !exists,
+            }),
+            'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${field}`,
           };
         })
-        .sort((a, b) => {
-          if (a.compatible && !b.compatible) {
-            return -1;
-          }
-          if (!a.compatible && b.compatible) {
-            return 1;
-          }
-          return 0;
-        })
-        .map(({ label, value, compatible, exists }) => ({
-          label,
-          value,
-          className: classNames({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            'lnFieldSelect__option--incompatible': !compatible,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            'lnFieldSelect__option--nonExistant': !exists,
-          }),
-          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${value.field}`,
-        }));
+        .sort((a, b) => b.compatible - a.compatible);
     }
 
     const [metaFields, nonMetaFields] = partition(

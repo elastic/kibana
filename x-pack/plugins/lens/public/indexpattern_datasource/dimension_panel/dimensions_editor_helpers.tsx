@@ -16,7 +16,7 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { operationDefinitionMap } from '../operations';
 import { useDebouncedValue } from '../../shared_components';
 
 export const formulaOperationName = 'formula';
@@ -198,26 +198,3 @@ export const DimensionEditorTabs = ({
     </EuiTabs>
   );
 };
-
-export function getErrorMessage(
-  selectedColumn: IndexPatternColumn | undefined,
-  incompleteOperation: boolean,
-  input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
-  fieldInvalid: boolean
-) {
-  if (selectedColumn && incompleteOperation) {
-    if (input === 'field') {
-      return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-        defaultMessage: 'This field does not work with the selected function.',
-      });
-    }
-    return i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {
-      defaultMessage: 'To use this function, select a field.',
-    });
-  }
-  if (fieldInvalid) {
-    return i18n.translate('xpack.lens.indexPattern.invalidFieldLabel', {
-      defaultMessage: 'Invalid field. Check your data view or pick another field.',
-    });
-  }
-}

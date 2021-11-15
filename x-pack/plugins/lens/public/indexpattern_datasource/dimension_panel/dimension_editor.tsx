@@ -10,7 +10,6 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
-  EuiFormRow,
   EuiSpacer,
   EuiListGroupItemProps,
   EuiFormLabel,
@@ -33,7 +32,6 @@ import {
   DEFAULT_TIME_SCALE,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
-import { FieldSelect } from './field_select';
 import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternLayer } from '../types';
@@ -54,9 +52,9 @@ import {
   DimensionEditorTabs,
   CalloutWarning,
   LabelInput,
-  getErrorMessage,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
+import { FieldInput } from './field_input';
 
 const operationPanels = getOperationDisplay();
 
@@ -401,22 +399,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 
   // Need to workout early on the error to decide whether to show this or an help text
-  const fieldErrorMessage =
-    ((selectedOperationDefinition?.input !== 'fullReference' &&
-      selectedOperationDefinition?.input !== 'managedReference') ||
-      (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
-    getErrorMessage(
-      selectedColumn,
-      Boolean(incompleteOperation),
-      selectedOperationDefinition?.input,
-      currentFieldIsInvalid
-    );
+  // const fieldErrorMessage =
+  //   ((selectedOperationDefinition?.input !== 'fullReference' &&
+  //     selectedOperationDefinition?.input !== 'managedReference') ||
+  //     (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
+  //   getErrorMessage(
+  //     selectedColumn,
+  //     Boolean(incompleteOperation),
+  //     selectedOperationDefinition?.input,
+  //     currentFieldIsInvalid
+  //   );
 
   const shouldDisplayExtraOptions =
     !currentFieldIsInvalid &&
     !incompleteInfo &&
     selectedColumn &&
     isQuickFunction(selectedColumn.operationType);
+
+  const FieldInputComponent = selectedOperationDefinition?.renderFieldInput || FieldInput;
 
   const quickFunctions = (
     <>
@@ -488,69 +488,100 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
         {!selectedColumn ||
         selectedOperationDefinition?.input === 'field' ||
-        (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field') ||
+        (incompleteOperation && operationDefinitionMap[incompleteOperation]?.input === 'field') ||
         temporaryQuickFunction ? (
-          <EuiFormRow
-            data-test-subj="indexPattern-field-selection-row"
-            label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-              defaultMessage: 'Select a field',
+          <FieldInputComponent
+            layer={state.layers[layerId]}
+            selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
+            columnId={columnId}
+            indexPattern={currentIndexPattern}
+            existingFields={state.existingFields}
+            operationSupportMatrix={operationSupportMatrix}
+            updateLayer={(newLayer) => {
+              if (temporaryQuickFunction) {
+                setTemporaryState('none');
+              }
+              setStateWrapper(newLayer);
+            }}
+            incompleteField={incompleteField}
+            incompleteOperation={incompleteOperation}
+            incompleteParams={incompleteParams}
+            currentFieldIsInvalid={currentFieldIsInvalid}
+            helpMessage={selectedOperationDefinition?.getHelpMessage?.({
+              data: props.data,
+              uiSettings: props.uiSettings,
+              currentColumn: state.layers[layerId].columns[columnId],
             })}
-            fullWidth
-            isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
-            error={fieldErrorMessage}
-            labelAppend={
-              !fieldErrorMessage &&
-              selectedOperationDefinition?.getHelpMessage?.({
-                data: props.data,
-                uiSettings: props.uiSettings,
-                currentColumn: state.layers[layerId].columns[columnId],
-              })
-            }
-          >
-            <FieldSelect
-              fieldIsInvalid={currentFieldIsInvalid}
-              currentIndexPattern={currentIndexPattern}
-              existingFields={state.existingFields}
-              operationSupportMatrix={operationSupportMatrix}
-              selectedOperationType={
-                // Allows operation to be selected before creating a valid column
-                selectedColumn ? selectedColumn.operationType : incompleteOperation
-              }
-              selectedField={
-                // Allows field to be selected
-                incompleteField
-                  ? incompleteField
-                  : (selectedColumn as FieldBasedIndexPatternColumn)?.sourceField
-              }
-              incompleteOperation={incompleteOperation}
-              onChoose={(choice) => {
-                if (temporaryQuickFunction) {
-                  setTemporaryState('none');
-                }
-                setStateWrapper(
-                  insertOrReplaceColumn({
-                    layer: state.layers[layerId],
-                    columnId,
-                    indexPattern: currentIndexPattern,
-                    op: choice.operationType,
-                    field: currentIndexPattern.getFieldByName(choice.field),
-                    visualizationGroups: dimensionGroups,
-                    targetGroup: props.groupId,
-                    incompleteParams,
-                  }),
-                  { forceRender: temporaryQuickFunction }
-                );
-              }}
-            />
-          </EuiFormRow>
-        ) : null}
+            dimensionGroups={dimensionGroups}
+            groupId={props.groupId}
+          />
+        ) : //  (
+        //   <EuiFormRow
+        //     data-test-subj="indexPattern-field-selection-row"
+        //     label={i18n.translate('xpack.lens.indexPattern.chooseField', {
+        //       defaultMessage: 'Field',
+        //     })}
+        //     fullWidth
+        //     isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
+        //     error={fieldErrorMessage}
+        //     labelAppend={
+        //       !fieldErrorMessage &&
+        //       selectedOperationDefinition?.getHelpMessage?.({
+        //         data: props.data,
+        //         uiSettings: props.uiSettings,
+        //         currentColumn: state.layers[layerId].columns[columnId],
+        //       })
+        //     }
+        //   >
+        //     <FieldSelect
+        //       fieldIsInvalid={currentFieldIsInvalid}
+        //       currentIndexPattern={currentIndexPattern}
+        //       existingFields={state.existingFields}
+        //       operationByField={operationByField}
+        //       selectedOperationType={
+        //         // Allows operation to be selected before creating a valid column
+        //         selectedColumn ? selectedColumn.operationType : incompleteOperation
+        //       }
+        //       selectedField={
+        //         // Allows field to be selected
+        //         incompleteField
+        //           ? incompleteField
+        //           : (selectedColumn as FieldBasedIndexPatternColumn)?.sourceField
+        //       }
+        //       incompleteOperation={incompleteOperation}
+        //       onChoose={(choice) => {
+        //         if (temporaryQuickFunction) {
+        //           setTemporaryState('none');
+        //         }
+        //         setStateWrapper(
+        //           insertOrReplaceColumn({
+        //             layer: state.layers[layerId],
+        //             columnId,
+        //             indexPattern: currentIndexPattern,
+        //             op: choice.operationType,
+        //             field: currentIndexPattern.getFieldByName(choice.field),
+        //             visualizationGroups: dimensionGroups,
+        //             targetGroup: props.groupId,
+        //             incompleteParams,
+        //           }),
+        //           { forceRender: temporaryQuickFunction }
+        //         );
+        //       }}
+        //     />
+        //   </EuiFormRow>
+        null}
 
         {shouldDisplayExtraOptions && ParamEditor && (
           <ParamEditor
             layer={state.layers[layerId]}
             layerId={layerId}
             activeData={props.activeData}
-            updateLayer={setStateWrapper}
+            updateLayer={(setter) => {
+              if (temporaryQuickFunction) {
+                setTemporaryState('none');
+              }
+              setStateWrapper(setter, { forceRender: temporaryQuickFunction });
+            }}
             columnId={columnId}
             currentColumn={state.layers[layerId].columns[columnId]}
             dateRange={dateRange}

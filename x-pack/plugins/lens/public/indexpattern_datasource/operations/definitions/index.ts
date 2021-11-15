@@ -52,13 +52,17 @@ import {
 import { staticValueOperation, StaticValueIndexPatternColumn } from './static_value';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
-import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
+import type {
+  BaseIndexPatternColumn,
+  IncompleteColumn,
+  ReferenceBasedIndexPatternColumn,
+} from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
-import { IndexPatternDimensionEditorProps } from '../../dimension_panel';
+import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 
 /**
  * A union type of all available column types. If a column is of an unknown type somewhere
@@ -199,6 +203,28 @@ export interface ParamEditorProps<C> {
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
 }
 
+export interface FieldInputProps<C> {
+  layer: IndexPatternLayer;
+  selectedColumn?: C;
+  columnId: string;
+  indexPattern: IndexPattern;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
+  currentFieldIsInvalid: boolean;
+  incompleteField: IncompleteColumn['sourceField'] | null;
+  incompleteOperation: IncompleteColumn['operationType'];
+  incompleteParams: Omit<IncompleteColumn, 'sourceField' | 'operationType'>;
+  dimensionGroups: IndexPatternDimensionEditorProps['dimensionGroups'];
+  groupId: IndexPatternDimensionEditorProps['groupId'];
+  /**
+   * indexPatternId -> fieldName -> boolean
+   */
+  existingFields: Record<string, Record<string, boolean>>;
+  operationSupportMatrix: OperationSupportMatrix;
+  helpMessage?: React.ReactNode;
+}
+
 export interface HelpProps<C> {
   currentColumn: C;
   uiSettings: IUiSettingsClient;
@@ -322,6 +348,8 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     description: string;
     section: 'elasticsearch' | 'calculation';
   };
+
+  renderFieldInput?: React.ComponentType<FieldInputProps<C>>;
 }
 
 interface BaseBuildColumnArgs {
