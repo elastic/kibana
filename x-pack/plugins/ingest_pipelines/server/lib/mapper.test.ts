@@ -31,16 +31,30 @@ describe('mapper', () => {
       );
     });
 
-    it('missing the required headers errors', () => {
-      const noHeadersCsv = 'srcip,,,,source.address,Copying srcip to source.address';
+    describe('missing the required headers errors', () => {
+      it('single missing headers', () => {
+        const noHeadersCsv = 'test_header,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
+  
+        expect(() => {
+          csvToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
+        }).toThrow(
+          new Error(
+            'Missing required headers: Include source_field header in the CSV file.'
+          )
+        );
+      });
 
-      expect(() => {
-        csvToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
-      }).toThrow(
-        new Error(
-          'Missing required headers: Include [source_field, destination_field] header(s) in the CSV file.'
-        )
-      );
+      it('multiple missing headers', () => {
+        const noHeadersCsv = 'srcip,,,,source.address,Copying srcip to source.address';
+  
+        expect(() => {
+          csvToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
+        }).toThrow(
+          new Error(
+            'Missing required headers: Include source_field, destination_field headers in the CSV file.'
+          )
+        );
+      });
     });
 
     it('unacceptable format action errors', () => {
