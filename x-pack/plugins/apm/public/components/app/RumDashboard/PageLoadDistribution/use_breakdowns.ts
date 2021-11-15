@@ -24,7 +24,7 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
     (callApmApi) => {
       if (start && end && field && value) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/page-load-distribution/breakdown',
+          endpoint: 'GET /internal/apm/ux/page-load-distribution/breakdown',
           params: {
             query: {
               start,
