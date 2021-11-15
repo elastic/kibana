@@ -13,7 +13,7 @@ collect(): IntervalHistogram;
 ```
 <b>Returns:</b>
 
-`IntervalHistogram`
+IntervalHistogram
 
 {<!-- -->IntervalHistogram<!-- -->}
 
