@@ -25,6 +25,7 @@ import {
   EuiComboBox,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useServiceLocations } from './use_service_locations';
 import { apiService } from '../../../../state/api/utils';
@@ -110,7 +111,7 @@ export const AddMonitorModal = ({ setIsModalVisible, monitor }: Props) => {
   const [schedule, setSchedule] = useState(2);
   const [inlineScript, setInlineScript] = useState(
     existingObj.source?.inline.script ??
-      "step(\"load homepage\", async () => { await page.goto('https://www.elastic.co', { waitUntil: 'networkidle', timeout: 120000 }); });"
+      'step("load homepage", async () => { await page.goto(\'https://www.elastic.co\'); });'
   );
 
   const [isSaving, setIsSaving] = useState(false);
@@ -284,7 +285,11 @@ export const AddMonitorModal = ({ setIsModalVisible, monitor }: Props) => {
   };
 
   return (
-    <EuiModal onClose={closeModal} initialFocus="[name=popswitch]" style={{ width: 600 }}>
+    <FlexModal
+      onClose={closeModal}
+      initialFocus="[name=popswitch]"
+      style={{ width: 650, height: '90vh' }}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h1>{monitor ? 'Edit monitor' : 'Add monitor'}</h1>
@@ -296,9 +301,7 @@ export const AddMonitorModal = ({ setIsModalVisible, monitor }: Props) => {
       <EuiModalFooter>
         <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
 
-        <EuiButton onClick={onTestRun} isLoading={isTestRunning}>
-          Test run
-        </EuiButton>
+        <EuiButton onClick={onTestRun}>{testMonitor ? 'Update Test run' : 'Test run'}</EuiButton>
 
         <EuiButton onClick={saveMonitor} fill isLoading={isSaving}>
           Save
@@ -308,6 +311,14 @@ export const AddMonitorModal = ({ setIsModalVisible, monitor }: Props) => {
       {testMonitor && (
         <TestRunResult monitorId={testMonitor?.id + '-inline'} monitor={testMonitor} />
       )}
-    </EuiModal>
+    </FlexModal>
   );
 };
+
+const FlexModal = styled(EuiModal)`
+  &&& {
+    .euiModal__flex {
+      max-height: initial;
+    }
+  }
+`;
