@@ -122,6 +122,29 @@ describe('sourcerer store helpers', () => {
         },
       });
     });
+    it('sets to alerts in timeline even when does not yet exist', () => {
+      const dataViewNoSignals = {
+        ...mockGlobalState.sourcerer.defaultDataView,
+        patternList: patternListNoSignals,
+      };
+      const stateNoSignals = {
+        ...mockGlobalState.sourcerer,
+        defaultDataView: dataViewNoSignals,
+        kibanaDataViews: [dataViewNoSignals],
+      };
+      const result = validateSelectedPatterns(stateNoSignals, {
+        ...payload,
+        id: SourcererScopeName.timeline,
+        selectedPatterns: [`${mockGlobalState.sourcerer.signalIndexName}`],
+      });
+      expect(result).toEqual({
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          selectedDataViewId: dataView.id,
+          selectedPatterns: [signalIndexName],
+        },
+      });
+    });
     describe('handles missing dataViewId, 7.16 -> 8.0', () => {
       it('selectedPatterns.length > 0 & all selectedPatterns exist in defaultDataView, set dataViewId to defaultDataView.id', () => {
         const result = validateSelectedPatterns(mockGlobalState.sourcerer, {

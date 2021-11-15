@@ -54,6 +54,7 @@ export const validateSelectedPatterns = (
         )
       : // 7.16 -> 8.0 this will get hit because dataView == null
         dedupePatterns;
+
   if (selectedPatterns.length > 0 && dataView == null) {
     // we have index patterns, but not a data view id
     // find out if we have these index patterns in the defaultDataView
