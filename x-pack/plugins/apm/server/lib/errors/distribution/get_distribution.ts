@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Setup } from '../../helpers/setup_request';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 import { getBuckets } from './get_buckets';
@@ -64,7 +65,10 @@ export async function getErrorDistribution({
 
   return {
     currentPeriod: currentPeriod.buckets,
-    previousPeriod: previousPeriod.buckets,
+    previousPeriod: offsetPreviousPeriodCoordinates({
+      currentPeriodTimeseries: currentPeriod.buckets,
+      previousPeriodTimeseries: previousPeriod.buckets,
+    }),
     bucketSize,
   };
 }

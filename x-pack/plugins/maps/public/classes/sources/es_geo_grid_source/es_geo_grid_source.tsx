@@ -83,11 +83,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   constructor(descriptor: Partial<ESGeoGridSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
-    super(
-      sourceDescriptor,
-      inspectorAdapters,
-      descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE
-    );
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 

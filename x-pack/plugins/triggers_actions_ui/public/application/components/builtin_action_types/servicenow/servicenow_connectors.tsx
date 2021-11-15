@@ -26,6 +26,9 @@ import { isDeprecatedConnector } from '../../../../common/connectors_dropdown';
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
+
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowActionConnector>> =
   ({
     action,
@@ -156,7 +159,9 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
             onCancel={onModalCancel}
           />
         )}
-        {requiresNewApplication && <InstallationCallout />}
+        {requiresNewApplication && (
+          <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''} />
+        )}
         {!requiresNewApplication && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
         <Credentials
           action={action}
@@ -167,7 +172,10 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
           editActionConfig={editActionConfig}
         />
         {showApplicationRequiredCallout && requiresNewApplication && (
-          <ApplicationRequiredCallout message={applicationInfoErrorMsg} />
+          <ApplicationRequiredCallout
+            message={applicationInfoErrorMsg}
+            appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
+          />
         )}
       </>
     );

@@ -8,7 +8,8 @@
 import { ITileLayerArguments } from '../tile_layer/tile_layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { DataFilters, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { ITMSSource, AbstractTMSSource } from '../../sources/tms_source';
+import { AbstractSource } from '../../sources/source';
+import { ITMSSource } from '../../sources/tms_source';
 import { ILayer } from '../layer';
 import { VectorTileLayer } from './vector_tile_layer';
 import { DataRequestContext } from '../../../actions';
@@ -19,7 +20,7 @@ const sourceDescriptor: XYZTMSSourceDescriptor = {
   id: 'mockSourceId',
 };
 
-class MockTileSource extends AbstractTMSSource implements ITMSSource {
+class MockTileSource extends AbstractSource implements ITMSSource {
   readonly _descriptor: XYZTMSSourceDescriptor;
   constructor(descriptor: XYZTMSSourceDescriptor) {
     super(descriptor, {});

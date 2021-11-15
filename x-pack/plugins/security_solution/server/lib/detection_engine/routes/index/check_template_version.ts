@@ -43,10 +43,12 @@ export const templateNeedsUpdate = async ({
 
 export const fieldAliasesOutdated = async (esClient: ElasticsearchClient, index: string) => {
   const { body: indexMappings } = await esClient.indices.get({ index });
-  for (const [_, mapping] of Object.entries(indexMappings)) {
-    const aliasesVersion = get(mapping.mappings?._meta, ALIAS_VERSION_FIELD) ?? 0;
-    if (aliasesVersion < SIGNALS_FIELD_ALIASES_VERSION) {
-      return true;
+  for (const [indexName, mapping] of Object.entries(indexMappings)) {
+    if (indexName.startsWith(`${index}-`)) {
+      const aliasesVersion = get(mapping.mappings?._meta, ALIAS_VERSION_FIELD) ?? 0;
+      if (aliasesVersion < SIGNALS_FIELD_ALIASES_VERSION) {
+        return true;
+      }
     }
   }
   return false;

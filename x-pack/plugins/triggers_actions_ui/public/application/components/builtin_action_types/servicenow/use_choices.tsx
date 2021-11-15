@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, IToasts } from 'kibana/public';
 
 import { ActionConnector } from '../../../../types';
 import { Choice, Fields } from './types';
@@ -14,10 +14,7 @@ import { useGetChoices } from './use_get_choices';
 
 export interface UseChoicesProps {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   actionConnector?: ActionConnector;
   fields: string[];
 }

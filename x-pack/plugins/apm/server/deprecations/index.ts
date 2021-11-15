@@ -38,6 +38,8 @@ export function getDeprecations({
     const isCloudEnabled = !!cloudSetup?.isCloudEnabled;
 
     const hasCloudAgentPolicy = !isEmpty(cloudAgentPolicy);
+    // TODO: remove when docs support "main"
+    const docBranch = branch === 'main' ? 'master' : branch;
 
     if (isCloudEnabled && !hasCloudAgentPolicy) {
       deprecations.push({
@@ -48,7 +50,7 @@ export function getDeprecations({
           defaultMessage:
             'Running the APM Server binary directly is considered a legacy option and is deprecated since 7.16. Switch to APM Server managed by an Elastic Agent instead. Read our documentation to learn more.',
         }),
-        documentationUrl: `https://www.elastic.co/guide/en/apm/server/${branch}/apm-integration.html`,
+        documentationUrl: `https://www.elastic.co/guide/en/apm/server/${docBranch}/apm-integration.html`,
         level: 'warning',
         correctiveActions: {
           manualSteps: [

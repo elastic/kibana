@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { useHttp } from '../../../../common/lib/kibana/hooks';
-import { useLicense } from '../../../../common/hooks/use_license';
+import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { State } from '../../../../common/store';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
@@ -42,30 +42,30 @@ export function useHostIsolationExceptionsNavigateCallback() {
 
 /**
  * Checks if the current user should be able to see the host isolation exceptions
- * menu item based on their current license level and existing excepted items.
+ * menu item based on their current privileges
  */
 export function useCanSeeHostIsolationExceptionsMenu() {
-  const license = useLicense();
   const http = useHttp();
+  const privileges = useEndpointPrivileges();
 
-  const [hasExceptions, setHasExceptions] = useState(license.isPlatinumPlus());
+  const [canSeeMenu, setCanSeeMenu] = useState(privileges.canIsolateHost);
 
   useEffect(() => {
     async function checkIfHasExceptions() {
       try {
         const summary = await getHostIsolationExceptionSummary(http);
         if (summary?.total > 0) {
-          setHasExceptions(true);
+          setCanSeeMenu(true);
         }
       } catch (error) {
         // an error will ocurr if the exception list does not exist
-        setHasExceptions(false);
+        setCanSeeMenu(false);
       }
     }
-    if (!license.isPlatinumPlus()) {
+    if (!privileges.canIsolateHost) {
       checkIfHasExceptions();
     }
-  }, [http, license]);
+  }, [http, privileges.canIsolateHost]);
 
-  return hasExceptions;
+  return canSeeMenu;
 }

@@ -199,6 +199,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           actionTypesIndex && actionTypesIndex[item.actionTypeId]
         );
 
+        /**
+         * TODO: Remove when connectors can provide their own UX message.
+         * Issue: https://github.com/elastic/kibana/issues/114507
+         */
         const showDeprecatedTooltip = isDeprecatedConnector(item);
         const name = getConnectorName(value, item);
 

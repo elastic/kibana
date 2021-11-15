@@ -6,10 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { first, map, share } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -61,15 +60,12 @@ import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
-import {
-  getHealthStatusStream,
-  scheduleAlertingHealthCheck,
-  initializeAlertingHealth,
-} from './health';
+import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
 import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
+import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -104,6 +100,7 @@ export interface PluginSetupContract {
       RecoveryActionGroupId
     >
   ): void;
+  getSecurityHealth: () => Promise<SecurityHealth>;
 }
 
 export interface PluginStartContract {
@@ -214,7 +211,13 @@ export class AlertingPlugin {
         usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
-      initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, kibanaIndex);
+      initializeAlertingTelemetry(
+        this.telemetryLogger,
+        core,
+        plugins.taskManager,
+        kibanaIndex,
+        this.eventLogService
+      );
     }
 
     // Usage counter for telemetry
@@ -236,33 +239,10 @@ export class AlertingPlugin {
     );
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
-      level: ServiceStatusLevels.degraded,
-      summary: 'Alerting is initializing',
+      level: ServiceStatusLevels.available,
+      summary: 'Alerting is (probably) ready',
     });
     core.status.set(serviceStatus$);
-
-    core.getStartServices().then(async ([coreStart, startPlugins]) => {
-      combineLatest([
-        core.status.derivedStatus$,
-        getHealthStatusStream(
-          startPlugins.taskManager,
-          this.logger,
-          coreStart.savedObjects,
-          this.config
-        ),
-      ])
-        .pipe(
-          map(([derivedStatus, healthStatus]) => {
-            if (healthStatus.level > derivedStatus.level) {
-              return healthStatus as ServiceStatus;
-            } else {
-              return derivedStatus;
-            }
-          }),
-          share()
-        )
-        .subscribe(serviceStatus$);
-    });
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
@@ -313,6 +293,16 @@ export class AlertingPlugin {
         } else {
           ruleTypeRegistry.register(alertType);
         }
+      },
+      getSecurityHealth: async () => {
+        return await getSecurityHealth(
+          async () => (this.licenseState ? this.licenseState.getIsSecurityEnabled() : null),
+          async () => plugins.encryptedSavedObjects.canEncrypt,
+          async () => {
+            const [, { security }] = await core.getStartServices();
+            return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
+          }
+        );
       },
     };
   }

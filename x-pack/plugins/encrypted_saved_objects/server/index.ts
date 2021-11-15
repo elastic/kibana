@@ -10,9 +10,10 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 
-export { EncryptedSavedObjectTypeRegistration, EncryptionError } from './crypto';
-export { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
-export { EncryptedSavedObjectsClient } from './saved_objects';
+export type { EncryptedSavedObjectTypeRegistration } from './crypto';
+export { EncryptionError } from './crypto';
+export type { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
+export type { EncryptedSavedObjectsClient } from './saved_objects';
 export type { IsMigrationNeededPredicate } from './create_migration';
 
 export const config: PluginConfigDescriptor = {

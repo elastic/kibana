@@ -35,7 +35,10 @@ export const isDeprecatedConnector = (
     return false;
   }
 
-  if (isConnectorWithConfig(connector)) {
+  if (
+    isConnectorWithConfig(connector) &&
+    (connector.actionTypeId === '.servicenow' || connector.actionTypeId === '.servicenow-sir')
+  ) {
     /**
      * Connectors after the Elastic ServiceNow application use the
      * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)

@@ -10,7 +10,7 @@ import {
   getEmptyFindResult,
   getAlertMock,
   getCreateRequest,
-  getRuleExecutionStatuses,
+  getRuleExecutionStatusSucceeded,
   getFindResultWithSingleHit,
   createMlRuleRequest,
   getBasicEmptySearchResponse,
@@ -43,7 +43,9 @@ describe.each([
     clients.rulesClient.create.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // creation succeeds
-    clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses()); // needed to transform: ;
+    clients.ruleExecutionLogClient.getCurrentStatus.mockResolvedValue(
+      getRuleExecutionStatusSucceeded()
+    );
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())

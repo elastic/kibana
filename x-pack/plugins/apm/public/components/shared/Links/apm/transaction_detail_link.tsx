@@ -10,10 +10,11 @@ import { useLocation } from 'react-router-dom';
 import { EuiLink } from '@elastic/eui';
 import { pickBy, identity } from 'lodash';
 import { getLegacyApmHref, APMLinkExtendProps } from './APMLink';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { TimeRangeComparisonType } from '../../../../../common/runtime_types/comparison_type_rt';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -23,6 +24,8 @@ interface Props extends APMLinkExtendProps {
   transactionType: string;
   latencyAggregationType?: string;
   environment?: string;
+  comparisonEnabled?: boolean;
+  comparisonType?: TimeRangeComparisonType;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [
@@ -38,9 +41,11 @@ export function TransactionDetailLink({
   transactionType,
   latencyAggregationType,
   environment,
+  comparisonEnabled,
+  comparisonType,
   ...rest
 }: Props) {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { core } = useApmPluginContext();
   const location = useLocation();
   const href = getLegacyApmHref({
@@ -51,6 +56,8 @@ export function TransactionDetailLink({
       transactionId,
       transactionName,
       transactionType,
+      comparisonEnabled,
+      comparisonType,
       ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
       ...pickBy({ latencyAggregationType, environment }, identity),
     },

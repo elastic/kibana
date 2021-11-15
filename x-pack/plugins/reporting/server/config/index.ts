@@ -11,7 +11,8 @@ import { get } from 'lodash';
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
 export { registerUiSettings } from './ui_settings';
-export { ConfigSchema, ReportingConfigType };
+export type { ReportingConfigType };
+export { ConfigSchema };
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: { poll: true, roles: true },

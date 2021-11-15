@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-
+import { DataViewBase } from '@kbn/es-query';
 import { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
 import { BrowserField } from '../../../../common/containers/source';
@@ -21,7 +21,6 @@ import {
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import * as i18n from '../step_define_rule/translations';
 import { MyLabelButton } from '../step_define_rule';
 
@@ -30,8 +29,8 @@ const CommonUseField = getUseField({ component: Field });
 interface ThreatMatchInputProps {
   threatMapping: FieldHook;
   threatBrowserFields: Readonly<Record<string, Partial<BrowserField>>>;
-  threatIndexPatterns: IndexPattern;
-  indexPatterns: IndexPattern;
+  threatIndexPatterns: DataViewBase;
+  indexPatterns: DataViewBase;
   threatIndexPatternsLoading: boolean;
   threatIndexModified: boolean;
   handleResetThreatIndices: () => void;

@@ -48,6 +48,13 @@ export const getListItems: HostIsolationExceptionsSelector<Immutable<ExceptionLi
     return apiResponseData?.data || [];
   });
 
+export const getTotalListItems: HostIsolationExceptionsSelector<Immutable<number>> = createSelector(
+  getListApiSuccessResponse,
+  (apiResponseData) => {
+    return apiResponseData?.total || 0;
+  }
+);
+
 export const getListPagination: HostIsolationExceptionsSelector<Pagination> = createSelector(
   getListApiSuccessResponse,
   // memoized via `reselect` until the API response changes
@@ -85,9 +92,6 @@ export const showDeleteModal: HostIsolationExceptionsSelector<boolean> = createS
     return Boolean(item);
   }
 );
-
-export const getItemToDelete: HostIsolationExceptionsSelector<StoreState['deletion']['item']> =
-  createSelector(getDeletionState, ({ item }) => item);
 
 export const isDeletionInProgress: HostIsolationExceptionsSelector<boolean> = createSelector(
   getDeletionState,

@@ -476,7 +476,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -486,7 +486,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -522,7 +522,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -532,7 +532,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -640,7 +640,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -704,7 +704,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -734,7 +734,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -743,16 +743,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 0
-                </p>
+                Trusted App 0
               </div>
             </div>
             <hr
@@ -859,7 +856,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -869,7 +866,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -905,7 +902,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -915,7 +912,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -1023,7 +1020,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -1087,7 +1084,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -1117,7 +1114,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -1126,16 +1123,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 1
-                </p>
+                Trusted App 1
               </div>
             </div>
             <hr
@@ -1242,7 +1236,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -1252,7 +1246,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -1288,7 +1282,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -1298,7 +1292,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -1406,7 +1400,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -1470,7 +1464,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -1500,7 +1494,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -1509,16 +1503,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 2
-                </p>
+                Trusted App 2
               </div>
             </div>
             <hr
@@ -1625,7 +1616,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -1635,7 +1626,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -1671,7 +1662,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -1681,7 +1672,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -1789,7 +1780,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -1853,7 +1844,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -1883,7 +1874,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -1892,16 +1883,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 3
-                </p>
+                Trusted App 3
               </div>
             </div>
             <hr
@@ -2008,7 +1996,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -2018,7 +2006,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -2054,7 +2042,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -2064,7 +2052,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -2172,7 +2160,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -2236,7 +2224,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -2266,7 +2254,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -2275,16 +2263,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 4
-                </p>
+                Trusted App 4
               </div>
             </div>
             <hr
@@ -2391,7 +2376,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -2401,7 +2386,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -2437,7 +2422,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -2447,7 +2432,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -2555,7 +2540,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -2619,7 +2604,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -2649,7 +2634,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -2658,16 +2643,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 5
-                </p>
+                Trusted App 5
               </div>
             </div>
             <hr
@@ -2774,7 +2756,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -2784,7 +2766,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -2820,7 +2802,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -2830,7 +2812,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -2938,7 +2920,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -3002,7 +2984,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -3032,7 +3014,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -3041,16 +3023,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 6
-                </p>
+                Trusted App 6
               </div>
             </div>
             <hr
@@ -3157,7 +3136,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -3167,7 +3146,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -3203,7 +3182,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -3213,7 +3192,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -3321,7 +3300,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -3385,7 +3364,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -3415,7 +3394,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -3424,16 +3403,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 7
-                </p>
+                Trusted App 7
               </div>
             </div>
             <hr
@@ -3540,7 +3516,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -3550,7 +3526,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -3586,7 +3562,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -3596,7 +3572,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -3704,7 +3680,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -3768,7 +3744,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -3798,7 +3774,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -3807,16 +3783,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 8
-                </p>
+                Trusted App 8
               </div>
             </div>
             <hr
@@ -3923,7 +3896,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -3933,7 +3906,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -3969,7 +3942,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -3979,7 +3952,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -4087,7 +4060,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -4151,7 +4124,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -4181,7 +4154,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -4190,16 +4163,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 9
-                </p>
+                Trusted App 9
               </div>
             </div>
             <hr
@@ -4613,7 +4583,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -4623,7 +4593,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -4659,7 +4629,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -4669,7 +4639,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -4777,7 +4747,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -4841,7 +4811,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -4871,7 +4841,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -4880,16 +4850,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 0
-                </p>
+                Trusted App 0
               </div>
             </div>
             <hr
@@ -4996,7 +4963,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -5006,7 +4973,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -5042,7 +5009,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -5052,7 +5019,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -5160,7 +5127,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -5224,7 +5191,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -5254,7 +5221,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -5263,16 +5230,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 1
-                </p>
+                Trusted App 1
               </div>
             </div>
             <hr
@@ -5379,7 +5343,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -5389,7 +5353,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -5425,7 +5389,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -5435,7 +5399,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -5543,7 +5507,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -5607,7 +5571,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -5637,7 +5601,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -5646,16 +5610,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 2
-                </p>
+                Trusted App 2
               </div>
             </div>
             <hr
@@ -5762,7 +5723,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -5772,7 +5733,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -5808,7 +5769,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -5818,7 +5779,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -5926,7 +5887,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -5990,7 +5951,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -6020,7 +5981,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -6029,16 +5990,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 3
-                </p>
+                Trusted App 3
               </div>
             </div>
             <hr
@@ -6145,7 +6103,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -6155,7 +6113,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -6191,7 +6149,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -6201,7 +6159,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -6309,7 +6267,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -6373,7 +6331,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -6403,7 +6361,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -6412,16 +6370,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 4
-                </p>
+                Trusted App 4
               </div>
             </div>
             <hr
@@ -6528,7 +6483,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -6538,7 +6493,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -6574,7 +6529,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -6584,7 +6539,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -6692,7 +6647,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -6756,7 +6711,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -6786,7 +6741,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -6795,16 +6750,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 5
-                </p>
+                Trusted App 5
               </div>
             </div>
             <hr
@@ -6911,7 +6863,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -6921,7 +6873,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -6957,7 +6909,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -6967,7 +6919,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -7075,7 +7027,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -7139,7 +7091,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -7169,7 +7121,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -7178,16 +7130,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 6
-                </p>
+                Trusted App 6
               </div>
             </div>
             <hr
@@ -7294,7 +7243,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -7304,7 +7253,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -7340,7 +7289,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -7350,7 +7299,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -7458,7 +7407,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -7522,7 +7471,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -7552,7 +7501,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -7561,16 +7510,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 7
-                </p>
+                Trusted App 7
               </div>
             </div>
             <hr
@@ -7677,7 +7623,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -7687,7 +7633,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -7723,7 +7669,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -7733,7 +7679,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -7841,7 +7787,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -7905,7 +7851,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -7935,7 +7881,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -7944,16 +7890,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 8
-                </p>
+                Trusted App 8
               </div>
             </div>
             <hr
@@ -8060,7 +8003,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -8070,7 +8013,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -8106,7 +8049,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -8116,7 +8059,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -8224,7 +8167,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -8288,7 +8231,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -8318,7 +8261,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -8327,16 +8270,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 9
-                </p>
+                Trusted App 9
               </div>
             </div>
             <hr
@@ -8707,7 +8647,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -8717,7 +8657,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -8753,7 +8693,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -8763,7 +8703,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -8871,7 +8811,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -8935,7 +8875,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -8965,7 +8905,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -8974,16 +8914,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 0
-                </p>
+                Trusted App 0
               </div>
             </div>
             <hr
@@ -9090,7 +9027,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -9100,7 +9037,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -9136,7 +9073,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -9146,7 +9083,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -9254,7 +9191,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -9318,7 +9255,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -9348,7 +9285,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -9357,16 +9294,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 1
-                </p>
+                Trusted App 1
               </div>
             </div>
             <hr
@@ -9473,7 +9407,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -9483,7 +9417,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -9519,7 +9453,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -9529,7 +9463,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -9637,7 +9571,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -9701,7 +9635,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -9731,7 +9665,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -9740,16 +9674,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 2
-                </p>
+                Trusted App 2
               </div>
             </div>
             <hr
@@ -9856,7 +9787,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -9866,7 +9797,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -9902,7 +9833,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -9912,7 +9843,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -10020,7 +9951,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -10084,7 +10015,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -10114,7 +10045,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -10123,16 +10054,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 3
-                </p>
+                Trusted App 3
               </div>
             </div>
             <hr
@@ -10239,7 +10167,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -10249,7 +10177,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -10285,7 +10213,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -10295,7 +10223,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -10403,7 +10331,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -10467,7 +10395,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -10497,7 +10425,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -10506,16 +10434,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 4
-                </p>
+                Trusted App 4
               </div>
             </div>
             <hr
@@ -10622,7 +10547,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -10632,7 +10557,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -10668,7 +10593,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -10678,7 +10603,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -10786,7 +10711,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -10850,7 +10775,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -10880,7 +10805,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -10889,16 +10814,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 5
-                </p>
+                Trusted App 5
               </div>
             </div>
             <hr
@@ -11005,7 +10927,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -11015,7 +10937,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -11051,7 +10973,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -11061,7 +10983,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -11169,7 +11091,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -11233,7 +11155,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -11263,7 +11185,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -11272,16 +11194,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 6
-                </p>
+                Trusted App 6
               </div>
             </div>
             <hr
@@ -11388,7 +11307,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -11398,7 +11317,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -11434,7 +11353,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -11444,7 +11363,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -11552,7 +11471,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -11616,7 +11535,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -11646,7 +11565,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -11655,16 +11574,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 7
-                </p>
+                Trusted App 7
               </div>
             </div>
             <hr
@@ -11771,7 +11687,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -11781,7 +11697,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -11817,7 +11733,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -11827,7 +11743,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -11935,7 +11851,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -11999,7 +11915,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -12029,7 +11945,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -12038,16 +11954,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 8
-                </p>
+                Trusted App 8
               </div>
             </div>
             <hr
@@ -12154,7 +12067,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Last updated
                                   </div>
@@ -12164,7 +12077,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-updated-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -12200,7 +12113,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-label"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     Created
                                   </div>
@@ -12210,7 +12123,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                   data-test-subj="trustedAppCard-header-created-value"
                                 >
                                   <div
-                                    class="euiText euiText--small"
+                                    class="euiText euiText--small eui-textBreakWord"
                                   >
                                     <strong>
                                       1 minute ago
@@ -12318,7 +12231,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -12382,7 +12295,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                               data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-value"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--small eui-textBreakWord"
                               >
                                 someone
                               </div>
@@ -12412,7 +12325,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       data-test-subj="trustedAppCard-subHeader-effectScope-value"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--extraSmall eui-textBreakWord"
                       >
                         Applied globally
                       </div>
@@ -12421,16 +12334,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
-                class="euiText euiText--medium"
+                class="euiText euiText--medium eui-textBreakWord"
+                data-test-subj="trustedAppCard-description"
               >
-                <p
-                  data-test-subj="trustedAppCard-description"
-                >
-                  Trusted App 9
-                </p>
+                Trusted App 9
               </div>
             </div>
             <hr

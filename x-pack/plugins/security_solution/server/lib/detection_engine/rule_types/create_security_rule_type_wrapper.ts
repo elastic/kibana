@@ -37,6 +37,7 @@ import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './fact
 import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_log';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
+import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -66,9 +67,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         const esClient = scopedClusterClient.asCurrentUser;
 
         const ruleStatusClient = new RuleExecutionLogClient({
+          underlyingClient: config.ruleExecutionLog.underlyingClient,
           savedObjectsClient,
           eventLogService,
-          underlyingClient: config.ruleExecutionLog.underlyingClient,
         });
 
         const completeRule = {
@@ -225,8 +226,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             refresh
           );
 
+          const legacySignalFields: string[] = Object.keys(aadFieldConversion);
           const wrapHits = wrapHitsFactory({
-            ignoreFields,
+            ignoreFields: [...ignoreFields, ...legacySignalFields],
             mergeStrategy,
             completeRule,
             spaceId,
@@ -234,7 +236,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const wrapSequences = wrapSequencesFactory({
             logger,
-            ignoreFields,
+            ignoreFields: [...ignoreFields, ...legacySignalFields],
             mergeStrategy,
             completeRule,
             spaceId,
@@ -300,7 +302,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ?.kibana_siem_app_url,
               });
 
-              logger.info(
+              logger.debug(
                 buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
               );
 
@@ -351,8 +353,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             }
 
-            // adding this log line so we can get some information from cloud
-            logger.info(
+            logger.debug(
               buildRuleMessage(
                 `[+] Finished indexing ${createdSignalsCount} ${
                   !isEmpty(tuples)

@@ -58,7 +58,7 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import { WrappedRACAlert } from '../rule_types/types';
+import { RACAlert, WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 interface SortExceptionsReturn {
@@ -983,6 +983,10 @@ export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit 
 
 export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
   return (event as WrappedRACAlert)?._source?.[ALERT_UUID] != null;
+};
+
+export const isRACAlert = (event: unknown): event is RACAlert => {
+  return get(event, ALERT_UUID) != null;
 };
 
 export const racFieldMappings: Record<string, string> = {

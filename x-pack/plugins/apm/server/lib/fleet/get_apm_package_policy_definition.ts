@@ -45,7 +45,7 @@ export function getApmPackagePolicyDefinition(
   };
 }
 
-function preprocessLegacyFields({
+export function preprocessLegacyFields({
   apmServerSchema,
 }: {
   apmServerSchema: Record<string, any>;
@@ -63,6 +63,10 @@ function preprocessLegacyFields({
     {
       key: 'apm-server.auth.anonymous.allow_service',
       legacyKey: 'apm-server.rum.allow_service_names',
+    },
+    {
+      key: 'apm-server.auth.secret_token',
+      legacyKey: 'apm-server.secret_token',
     },
   ].forEach(({ key, legacyKey }) => {
     if (!copyOfApmServerSchema[key]) {

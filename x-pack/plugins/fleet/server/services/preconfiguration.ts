@@ -20,7 +20,11 @@ import type {
   PreconfigurationError,
   PreconfiguredOutput,
 } from '../../common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, normalizeHostsForAgents } from '../../common';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  normalizeHostsForAgents,
+} from '../../common';
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
@@ -33,7 +37,7 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { overridePackageInputs } from './package_policy';
+import { overridePackageInputs, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
@@ -51,6 +55,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
 ): boolean {
   return (
     existingOutput.is_default !== preconfiguredOutput.is_default ||
+    existingOutput.is_default_monitoring !== preconfiguredOutput.is_default_monitoring ||
     existingOutput.name !== preconfiguredOutput.name ||
     existingOutput.type !== preconfiguredOutput.type ||
     (preconfiguredOutput.hosts &&
@@ -99,21 +104,13 @@ export async function ensurePreconfiguredOutputs(
       const isCreate = !existingOutput;
       const isUpdateWithNewData =
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
-      // If a default output already exists, delete it in favor of the preconfigured one
-      if (isCreate || isUpdateWithNewData) {
-        const defaultOutputId = await outputService.getDefaultOutputId(soClient);
-
-        if (defaultOutputId && defaultOutputId !== output.id) {
-          await outputService.delete(soClient, defaultOutputId);
-        }
-      }
 
       if (isCreate) {
-        await outputService.create(soClient, data, { id, overwrite: true });
+        await outputService.create(soClient, data, { id, fromPreconfiguration: true });
       } else if (isUpdateWithNewData) {
-        await outputService.update(soClient, id, data);
+        await outputService.update(soClient, id, data, { fromPreconfiguration: true });
         // Bump revision of all policies using that output
-        if (outputData.is_default) {
+        if (outputData.is_default || outputData.is_default_monitoring) {
           await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
         } else {
           await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
@@ -135,7 +132,7 @@ export async function cleanPreconfiguredOutputs(
   for (const output of existingPreconfiguredOutput) {
     if (!outputs.find(({ id }) => output.id === id)) {
       logger.info(`Deleting preconfigured output ${output.id}`);
-      await outputService.delete(soClient, output.id);
+      await outputService.delete(soClient, output.id, { fromPreconfiguration: true });
     }
   }
 }
@@ -147,6 +144,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   packages: PreconfiguredPackage[] = [],
   defaultOutput: Output
 ): Promise<PreconfigurationResult> {
+  const logger = appContextService.getLogger();
+
   // Validate configured packages to ensure there are no version conflicts
   const packageNames = groupBy(packages, (pkg) => pkg.name);
   const duplicatePackages = Object.entries(packageNames).filter(
@@ -181,15 +180,20 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   });
 
   const fulfilledPackages = [];
-  const rejectedPackages = [];
+  const rejectedPackages: PreconfigurationError[] = [];
   for (let i = 0; i < preconfiguredPackages.length; i++) {
     const packageResult = preconfiguredPackages[i];
-    if ('error' in packageResult)
+    if ('error' in packageResult) {
+      logger.warn(
+        `Failed installing package [${packages[i].name}] due to error: [${packageResult.error}]`
+      );
       rejectedPackages.push({
         package: { name: packages[i].name, version: packages[i].version },
         error: packageResult.error,
-      } as PreconfigurationError);
-    else fulfilledPackages.push(packageResult);
+      });
+    } else {
+      fulfilledPackages.push(packageResult);
+    }
   }
 
   // Keeping this outside of the Promise.all because it introduces a race condition.
@@ -264,14 +268,14 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   );
 
   const fulfilledPolicies = [];
-  const rejectedPolicies = [];
+  const rejectedPolicies: PreconfigurationError[] = [];
   for (let i = 0; i < preconfiguredPolicies.length; i++) {
     const policyResult = preconfiguredPolicies[i];
     if (policyResult.status === 'rejected') {
       rejectedPolicies.push({
         error: policyResult.reason as Error,
         agentPolicy: { name: policies[i].name },
-      } as PreconfigurationError);
+      });
       continue;
     }
     fulfilledPolicies.push(policyResult.value);
@@ -288,10 +292,25 @@ export async function ensurePreconfiguredPackagesAndPolicies(
               pkgName: pkg.name,
             });
             if (!installedPackage) {
+              const rejectedPackage = rejectedPackages.find((rp) => rp.package?.name === pkg.name);
+
+              if (rejectedPackage) {
+                throw new Error(
+                  i18n.translate('xpack.fleet.preconfiguration.packageRejectedError', {
+                    defaultMessage: `[{agentPolicyName}] could not be added. [{pkgName}] could not be installed due to error: [{errorMessage}]`,
+                    values: {
+                      agentPolicyName: preconfiguredAgentPolicy.name,
+                      pkgName: pkg.name,
+                      errorMessage: rejectedPackage.error.toString(),
+                    },
+                  })
+                );
+              }
+
               throw new Error(
                 i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
                   defaultMessage:
-                    '{agentPolicyName} could not be added. {pkgName} is not installed, add {pkgName} to `{packagesConfigValue}` or remove it from {packagePolicyName}.',
+                    '[{agentPolicyName}] could not be added. [{pkgName}] is not installed, add [{pkgName}] to [{packagesConfigValue}] or remove it from [{packagePolicyName}].',
                   values: {
                     agentPolicyName: preconfiguredAgentPolicy.name,
                     packagePolicyName: name,
@@ -327,14 +346,16 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies
-    .filter(({ policy }) => policy?.package_policies)
-    .flatMap<string>(({ policy }) => policy?.package_policies as string[]);
-
+  // Handle automatic package policy upgrades for managed packages and package with
+  // the `keep_policies_up_to_date` setting enabled
+  const allPackagePolicyIds = await packagePolicyService.listIds(soClient, {
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+  });
   const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
     soClient,
     esClient,
-    fulfilledPolicyPackagePolicyIds
+    allPackagePolicyIds.items
   );
 
   return {
@@ -361,7 +382,9 @@ export function comparePreconfiguredPolicyToCurrent(
   policyFromConfig: PreconfiguredAgentPolicy,
   currentPolicy: AgentPolicy
 ) {
-  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id');
+  // Namespace is omitted from being compared because even for managed policies, we still
+  // want users to be able to pick their own namespace: https://github.com/elastic/kibana/issues/110533
+  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id', 'namespace');
   const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
 
   return {
