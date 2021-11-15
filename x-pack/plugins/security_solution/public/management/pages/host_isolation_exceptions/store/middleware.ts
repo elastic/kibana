@@ -8,32 +8,24 @@
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { CoreStart, HttpSetup, HttpStart } from 'kibana/public';
-import { matchPath } from 'react-router-dom';
 import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
-import { AppLocation, Immutable, ImmutableObject } from '../../../../../common/endpoint/types';
+import { ImmutableObject } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
-import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
-import { parseQueryFilterToKQL } from '../../../common/utils';
 import {
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
-  asStaleResourceState,
 } from '../../../state/async_resource_builders';
 import {
-  deleteHostIsolationExceptionItems,
-  getHostIsolationExceptionItems,
   createHostIsolationExceptionItem,
   getOneHostIsolationExceptionItem,
   updateOneHostIsolationExceptionItem,
 } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
-import { getCurrentListPageDataState, getCurrentLocation, getItemToDelete } from './selector';
 import { HostIsolationExceptionsPageAction } from './action';
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
@@ -48,16 +40,8 @@ export const createHostIsolationExceptionsPageMiddleware = (
   return (store) => (next) => async (action) => {
     next(action);
 
-    if (action.type === 'userChangedUrl' && isHostIsolationExceptionsPage(action.payload)) {
-      loadHostIsolationExceptionsList(store, coreStart.http);
-    }
-
     if (action.type === 'hostIsolationExceptionsCreateEntry') {
       createHostIsolationException(store, coreStart.http);
-    }
-
-    if (action.type === 'hostIsolationExceptionsSubmitDelete') {
-      deleteHostIsolationExceptionsItem(store, coreStart.http);
     }
 
     if (action.type === 'hostIsolationExceptionsMarkToEdit') {
@@ -100,93 +84,6 @@ async function createHostIsolationException(
   } catch (error) {
     dispatch({
       type: 'hostIsolationExceptionsFormStateChanged',
-      payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
-    });
-  }
-}
-
-async function loadHostIsolationExceptionsList(
-  store: ImmutableMiddlewareAPI<
-    HostIsolationExceptionsPageState,
-    HostIsolationExceptionsPageAction
-  >,
-  http: HttpStart
-) {
-  const { dispatch } = store;
-  try {
-    const {
-      page_size: pageSize,
-      page_index: pageIndex,
-      filter,
-    } = getCurrentLocation(store.getState());
-    const query = {
-      http,
-      page: pageIndex + 1,
-      perPage: pageSize,
-      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
-    };
-
-    dispatch({
-      type: 'hostIsolationExceptionsPageDataChanged',
-      payload: createLoadingResourceState(
-        asStaleResourceState(getCurrentListPageDataState(store.getState()))
-      ),
-    });
-
-    const entries = await getHostIsolationExceptionItems(query);
-
-    dispatch({
-      type: 'hostIsolationExceptionsPageDataChanged',
-      payload: createLoadedResourceState(entries),
-    });
-  } catch (error) {
-    dispatch({
-      type: 'hostIsolationExceptionsPageDataChanged',
-      payload: createFailedResourceState<FoundExceptionListItemSchema>(error.body ?? error),
-    });
-  }
-}
-
-function isHostIsolationExceptionsPage(location: Immutable<AppLocation>) {
-  return (
-    matchPath(location.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
-      exact: true,
-    }) !== null
-  );
-}
-
-async function deleteHostIsolationExceptionsItem(
-  store: ImmutableMiddlewareAPI<
-    HostIsolationExceptionsPageState,
-    HostIsolationExceptionsPageAction
-  >,
-  http: HttpSetup
-) {
-  const { dispatch } = store;
-  const itemToDelete = getItemToDelete(store.getState());
-  if (itemToDelete === undefined) {
-    return;
-  }
-
-  try {
-    dispatch({
-      type: 'hostIsolationExceptionsDeleteStatusChanged',
-      payload: {
-        type: 'LoadingResourceState',
-      },
-    });
-
-    await deleteHostIsolationExceptionItems(http, itemToDelete.id);
-
-    dispatch({
-      type: 'hostIsolationExceptionsDeleteStatusChanged',
-      payload: createLoadedResourceState(itemToDelete),
-    });
-    loadHostIsolationExceptionsList(store, http);
-  } catch (error) {
-    dispatch({
-      type: 'hostIsolationExceptionsDeleteStatusChanged',
       payload: createFailedResourceState<ExceptionListItemSchema>(error.body ?? error),
     });
   }
