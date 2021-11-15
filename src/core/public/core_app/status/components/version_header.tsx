@@ -22,7 +22,7 @@ export const VersionHeader: FC<VersionHeaderProps> = ({ version }) => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <p data-test-subj="statusBuildNumber">
+            <p data-test-subj="statusBuildVersion">
               <FormattedMessage
                 id="core.statusPage.statusApp.statusActions.versionText"
                 defaultMessage="VERSION: {versionNum}"
