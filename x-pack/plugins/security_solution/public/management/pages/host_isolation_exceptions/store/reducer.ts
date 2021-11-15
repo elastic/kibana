@@ -15,14 +15,8 @@ import { extractHostIsolationExceptionsPageLocation } from '../../../common/rout
 import { HostIsolationExceptionsPageState } from '../types';
 import { initialHostIsolationExceptionsPageState } from './builders';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
-import { UserChangedUrl } from '../../../../common/store/routing/action';
 
 type StateReducer = ImmutableReducer<HostIsolationExceptionsPageState, AppAction>;
-type CaseReducer<T extends AppAction> = (
-  state: Immutable<HostIsolationExceptionsPageState>,
-  action: Immutable<T>
-) => Immutable<HostIsolationExceptionsPageState>;
-
 const isHostIsolationExceptionsPageLocation = (location: Immutable<AppLocation>) => {
   return (
     matchPath(location.pathname ?? '', {
@@ -47,5 +41,3 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
   }
   return state;
 };
-
-const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {};
