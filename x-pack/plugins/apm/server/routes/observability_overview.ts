@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
 import { getTransactionsPerMinute } from '../lib/observability_overview/get_transactions_per_minute';
@@ -14,8 +14,8 @@ import { getHasData } from '../lib/observability_overview/has_data';
 import { rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { withApmSpan } from '../utils/with_apm_span';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/observability_overview/has_data',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, pickBy } from 'lodash';
+import { isArray, isEmpty, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
@@ -72,12 +72,15 @@ const ActionsTableComponent = () => {
   const handlePlayClick = useCallback(
     (item) =>
       push('/live_queries/new', {
-        form: pickBy({
-          agentIds: item.fields.agents,
-          query: item._source.data.query,
-          ecs_mapping: item._source.data.ecs_mapping,
-          savedQueryId: item._source.data.saved_query_id,
-        }),
+        form: pickBy(
+          {
+            agentIds: item.fields.agents,
+            query: item._source.data.query,
+            ecs_mapping: item._source.data.ecs_mapping,
+            savedQueryId: item._source.data.saved_query_id,
+          },
+          (value) => !isEmpty(value)
+        ),
       }),
     [push]
   );
