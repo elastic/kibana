@@ -6,9 +6,16 @@
  */
 
 import { useState } from '@storybook/addons';
+import { addParameters } from '@storybook/react';
 import React from 'react';
 
 import { HostsInput as Component } from '.';
+
+addParameters({
+  options: {
+    enableShortcuts: false,
+  },
+});
 
 export default {
   component: Component,
