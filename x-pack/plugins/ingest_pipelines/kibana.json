@@ -7,7 +7,7 @@
     "name": "Stack Management",
     "githubTeam": "kibana-stack-management"
   },
-  "requiredPlugins": ["management", "features", "share"],
+  "requiredPlugins": ["management", "features", "share", "fileUpload"],
   "optionalPlugins": ["security", "usageCollection"],
   "configPath": ["xpack", "ingest_pipelines"],
   "requiredBundles": ["esUiShared", "kibanaReact"]

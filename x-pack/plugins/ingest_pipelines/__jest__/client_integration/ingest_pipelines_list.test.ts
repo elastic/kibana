@@ -58,8 +58,8 @@ describe('<PipelinesList />', () => {
       expect(exists('documentationLink')).toBe(true);
       expect(find('documentationLink').text()).toBe('Ingest Pipelines docs');
 
-      // Verify create button exists
-      expect(exists('createPipelineButton')).toBe(true);
+      // Verify create dropdown exists
+      expect(exists('createPipelineDropdown')).toBe(true);
 
       // Verify table content
       const { tableCellsValues } = table.getMetaData('pipelinesTable');

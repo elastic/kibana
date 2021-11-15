@@ -21,7 +21,13 @@ import {
   SectionLoading,
 } from '../shared_imports';
 
-import { PipelinesList, PipelinesCreate, PipelinesEdit, PipelinesClone } from './sections';
+import {
+  PipelinesList,
+  PipelinesCreate,
+  PipelinesEdit,
+  PipelinesClone,
+  PipelinesCreateFromCsv,
+} from './sections';
 import { ROUTES } from './services/navigation';
 
 export const AppWithoutRouter = () => (
@@ -30,6 +36,7 @@ export const AppWithoutRouter = () => (
     <Route exact path={ROUTES.clone} component={PipelinesClone} />
     <Route exact path={ROUTES.create} component={PipelinesCreate} />
     <Route exact path={ROUTES.edit} component={PipelinesEdit} />
+    <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
     {/* Catch all */}
     <Route component={PipelinesList} />
   </Switch>

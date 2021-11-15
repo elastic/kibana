@@ -11,6 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { NotificationsSetup, IUiSettingsClient } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { SharePluginStart } from 'src/plugins/share/public';
+import type { FileUploadPluginStart } from '../../../file_upload/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -18,17 +19,25 @@ import { API_BASE_PATH } from '../../common/constants';
 import { AuthorizationProvider } from '../shared_imports';
 
 import { App } from './app';
-import { DocumentationService, UiMetricService, ApiService, BreadcrumbService } from './services';
+import {
+  DocumentationService,
+  UiMetricService,
+  ApiService,
+  BreadcrumbService,
+  FileReaderService,
+} from './services';
 
 export interface AppServices {
   breadcrumbs: BreadcrumbService;
   metric: UiMetricService;
   documentation: DocumentationService;
   api: ApiService;
+  fileReader: FileReaderService;
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
   urlGenerators: SharePluginStart['urlGenerators'];
+  fileUpload: FileUploadPluginStart;
 }
 
 export interface CoreServices {

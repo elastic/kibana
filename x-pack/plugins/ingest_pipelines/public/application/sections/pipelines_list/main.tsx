@@ -160,7 +160,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         description={
           <FormattedMessage
             id="xpack.ingestPipelines.list.pipelinesDescription"
-            defaultMessage="Define a pipeline for preprocessing documents before indexing."
+            defaultMessage="Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing."
           />
         }
         rightSideItems={[

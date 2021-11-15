@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { PipelinesCreate } from './pipelines_create';
-export { PipelinesCreateFromCsv } from '../pipelines_create_from_csv';
+export { csvToIngestPipeline } from './mapper';

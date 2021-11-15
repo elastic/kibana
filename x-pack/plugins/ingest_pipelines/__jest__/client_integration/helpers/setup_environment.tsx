@@ -16,6 +16,7 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   scopedHistoryMock,
+  uiSettingsServiceMock,
 } from '../../../../../../src/core/public/mocks';
 
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
@@ -41,12 +42,20 @@ const appServices = {
   metric: uiMetricService,
   documentation: documentationService,
   api: apiService,
+  fileReader: {
+    readFile: jest.fn((file) => file.text()),
+  },
   notifications: notificationServiceMock.createSetupContract(),
   history,
+  uiSettings: uiSettingsServiceMock.createSetupContract(),
   urlGenerators: {
     getUrlGenerator: jest.fn().mockReturnValue({
       createUrl: jest.fn(),
     }),
+  },
+  fileUpload: {
+    getMaxBytes: jest.fn().mockReturnValue(100),
+    getMaxBytesFormatted: jest.fn().mockReturnValue('100'),
   },
 };
 
