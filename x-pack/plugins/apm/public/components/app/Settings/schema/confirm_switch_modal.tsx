@@ -58,12 +58,6 @@ export function ConfirmSwitchModal({
       }}
       confirmButtonDisabled={!isConfirmChecked}
     >
-      <p>
-        {i18n.translate('xpack.apm.settings.schema.confirm.descriptionText', {
-          defaultMessage:
-            'Please note Stack monitoring is not currently supported with Fleet-managed APM.',
-        })}
-      </p>
       {!hasUnsupportedConfigs && (
         <p>
           {i18n.translate(

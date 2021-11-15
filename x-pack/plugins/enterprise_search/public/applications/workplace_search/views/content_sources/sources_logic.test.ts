@@ -12,11 +12,10 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
 
-import { expectedAsyncError } from '../../../test_helpers';
-
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
 import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_logic';
@@ -185,19 +184,8 @@ describe('SourcesLogic', () => {
         expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources');
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SourcesLogic.actions.initializeSources();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
 
       it('handles early logic unmount gracefully in org context', async () => {
@@ -259,19 +247,8 @@ describe('SourcesLogic', () => {
         );
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.put.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         SourcesLogic.actions.setSourceSearchability(id, true);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
@@ -367,19 +344,8 @@ describe('SourcesLogic', () => {
       expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources/status');
     });
 
-    it('handles error', async () => {
-      const error = {
-        response: {
-          error: 'this is an error',
-          status: 400,
-        },
-      };
-      const promise = Promise.reject(error);
-      http.get.mockReturnValue(promise);
+    itShowsServerErrorAsFlashMessage(http.get, () => {
       fetchSourceStatuses(true, mockBreakpoint);
-      await expectedAsyncError(promise);
-
-      expect(flashAPIErrors).toHaveBeenCalledWith(error);
     });
   });
 });

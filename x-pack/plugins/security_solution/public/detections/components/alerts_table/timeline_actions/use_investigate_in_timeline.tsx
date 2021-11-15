@@ -30,7 +30,6 @@ interface UseInvestigateInTimelineActionProps {
 
 export const useInvestigateInTimeline = ({
   ecsRowData,
-  nonEcsRowData,
   alertIds,
   onInvestigateInTimelineAlertClick,
 }: UseInvestigateInTimelineActionProps) => {
@@ -90,7 +89,6 @@ export const useInvestigateInTimeline = ({
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: alertsEcsData,
-        nonEcsData: nonEcsRowData ?? [],
         searchStrategyClient,
         updateTimelineIsLoading,
       });
@@ -100,7 +98,6 @@ export const useInvestigateInTimeline = ({
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: ecsRowData,
-        nonEcsData: nonEcsRowData ?? [],
         searchStrategyClient,
         updateTimelineIsLoading,
       });
@@ -109,7 +106,6 @@ export const useInvestigateInTimeline = ({
     alertsEcsData,
     createTimeline,
     ecsRowData,
-    nonEcsRowData,
     onInvestigateInTimelineAlertClick,
     searchStrategyClient,
     updateTimelineIsLoading,
