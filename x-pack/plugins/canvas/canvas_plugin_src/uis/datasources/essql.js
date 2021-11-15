@@ -17,11 +17,6 @@ import { DataSourceStrings, SQL_URL } from '../../../i18n';
 const { Essql: strings } = DataSourceStrings;
 
 class EssqlDatasource extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.editor = null;
-  }
-
   componentDidMount() {
     const query = this.getQuery();
     if (typeof query !== 'string') {
@@ -63,13 +58,8 @@ class EssqlDatasource extends PureComponent {
   };
 
   editorDidMount = (editor) => {
-    // Updating tab size for the editor
     const model = editor.getModel();
-    if (model) {
-      model.updateOptions({ tabSize: 2 });
-    }
-
-    this.editor = editor;
+    model?.updateOptions({ tabSize: 2 });
   };
 
   render() {
