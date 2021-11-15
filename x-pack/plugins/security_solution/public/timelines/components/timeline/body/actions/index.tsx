@@ -19,7 +19,7 @@ import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   setActiveTabTimeline,
@@ -136,7 +136,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     <ActionsContainer>
       {showCheckboxes && !tGridEnabled && (
         <div key="select-event-container" data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             {loadingEventIds.includes(eventId) ? (
               <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
             ) : (
@@ -152,13 +152,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
         </div>
       )}
       <div key="expand-event">
-        <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
             <EuiButtonIcon
               aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
               data-test-subj="expand-event"
               iconType="expand"
               onClick={onEventDetailsPanelOpened}
+              size="s"
             />
           </EuiToolTip>
         </EventsTdContent>
@@ -205,7 +206,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
         />
         {isDisabled === false ? (
           <div>
-            <EventsTdContent textAlign="center" width={36}>
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip
                 data-test-subj="view-in-analyzer-tool-tip"
                 content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
@@ -218,6 +219,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   data-test-subj="view-in-analyzer"
                   iconType="analyzeEvent"
                   onClick={handleClick}
+                  size="s"
                 />
               </EuiToolTip>
             </EventsTdContent>

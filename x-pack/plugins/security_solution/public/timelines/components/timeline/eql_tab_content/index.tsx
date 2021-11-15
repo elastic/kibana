@@ -14,7 +14,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -55,7 +55,8 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
-import { defaultControlColumn } from '../body/control_columns';
+import { HeaderActions } from '../body/actions/header_actions';
+import { getDefaultControlColumn } from '../body/control_columns';
 import { Sort } from '../body/sort';
 
 const TimelineHeaderContainer = styled.div`
@@ -151,6 +152,8 @@ export type Props = OwnProps & PropsFromRedux;
 
 const NO_SORTING: Sort[] = [];
 
+const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+
 export const EqlTabContentComponent: React.FC<Props> = ({
   activeTab,
   columns,
@@ -179,7 +182,12 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     docValueFields,
     loading: loadingSourcerer,
     selectedPatterns,
+<<<<<<< HEAD
   } = useSourcererScope(SourcererScopeName.timeline);
+=======
+  } = useSourcererDataView(SourcererScopeName.timeline);
+  const ACTION_BUTTON_COUNT = 5;
+>>>>>>> e4814b91cac ([Security Solution] Adjusts the width of the `Actions` column and action icon buttons (#118454))
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
@@ -242,8 +250,14 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
-  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
-  const trailingControlColumns: ControlColumnProps[] = [];
+  const leadingControlColumns = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      })),
+    []
+  );
 
   return (
     <>
