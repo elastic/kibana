@@ -415,7 +415,7 @@
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 
-## Security Telemetry
+## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-telemetry
 x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-telemetry
 
