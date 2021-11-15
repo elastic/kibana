@@ -11051,8 +11051,6 @@
     "xpack.fleet.settings.fleetServerHostsDifferentPathOrProtocolError": "各URLのプロトコルとパスは同じでなければなりません",
     "xpack.fleet.settings.fleetServerHostsEmptyError": "1つ以上のURLが必要です。",
     "xpack.fleet.settings.fleetServerHostsError": "無効なURL",
-    "xpack.fleet.settings.fleetServerHostsHelpTect": "エージェントがFleetサーバーに接続するために使用するURLを指定します。複数のURLが存在する場合、Fleetは登録目的で最初に指定されたURLを表示します。Fleetサーバーはデフォルトで8220番ポートを使用します。{link}を参照してください。",
-    "xpack.fleet.settings.fleetServerHostsLabel": "Fleetサーバーホスト",
     "xpack.fleet.settings.flyoutTitle": "Fleet 設定",
     "xpack.fleet.settings.globalOutputDescription": "これらの設定はグローバルにすべてのエージェントポリシーの{outputs}セクションに適用され、すべての登録されたエージェントに影響します。",
     "xpack.fleet.settings.invalidYamlFormatErrorMessage": "無効なYAML形式：{reason}",

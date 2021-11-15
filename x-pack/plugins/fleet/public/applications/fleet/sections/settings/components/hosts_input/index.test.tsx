@@ -10,7 +10,7 @@ import { fireEvent, act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { HostsInput } from './hosts_input';
+import { HostsInput } from '.';
 
 function renderInput(
   value = ['http://host1.com'],
