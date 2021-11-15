@@ -105,28 +105,28 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       types: ['string', 'vis_dimension'],
 
       help: i18n.translate('expressionHeatmap.function.args.yAccessorHelpText', {
-        defaultMessage: 'The id of the y axis column as string or the number of the table index',
+        defaultMessage: 'The id of the y axis column or the corresponding dimension',
       }),
     },
     valueAccessor: {
       types: ['string', 'vis_dimension'],
 
       help: i18n.translate('expressionHeatmap.function.args.valueAccessorHelpText', {
-        defaultMessage: 'The id of the value column as string or the number of the table index',
+        defaultMessage: 'The id of the value column or the corresponding dimension',
       }),
     },
     splitRowAccessor: {
       types: ['string', 'vis_dimension'],
 
       help: i18n.translate('expressionHeatmap.function.args.splitRowAccessorHelpText', {
-        defaultMessage: 'The id of the split row as string or the number of the table index',
+        defaultMessage: 'The id of the split row or the corresponding dimension',
       }),
     },
     splitColumnAccessor: {
       types: ['string', 'vis_dimension'],
 
       help: i18n.translate('expressionHeatmap.function.args.splitColumnAccessorHelpText', {
-        defaultMessage: 'The id of the split column as string or the number of the table index',
+        defaultMessage: 'The id of the split column or the corresponding dimension',
       }),
     },
   },
