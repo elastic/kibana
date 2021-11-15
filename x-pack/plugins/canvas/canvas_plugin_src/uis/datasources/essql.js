@@ -8,7 +8,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EsqlLang } from '@kbn/monaco';
-import { EuiFormRow, EuiTextArea, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { CodeEditorField } from '../../../../../../src/plugins/kibana_react/public';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
@@ -57,8 +57,7 @@ class EssqlDatasource extends PureComponent {
       });
   };
 
-  onChange = (e) => {
-    const { value } = e.target;
+  onChange = (value) => {
     this.props.setInvalid(!value.trim());
     this.setArg(this.getArgName(), value);
   };
@@ -93,26 +92,20 @@ class EssqlDatasource extends PureComponent {
           value={this.getQuery()}
           onChange={this.onChange}
           className="canvasTextArea__code"
-          placeholder={this.defaultQuery}
           options={{
-            fontSize: 12,
+            fontSize: 14,
             scrollBeyondLastLine: false,
             quickSuggestions: true,
             minimap: { enabled: false },
             wordWrap: 'on',
             wrappingIndent: 'indent',
+            lineNumbers: 'off',
+            glyphMargin: false,
+            folding: false,
           }}
-          height="150px"
+          height="350px"
           editorDidMount={this.editorDidMount}
         />
-        {/* <EuiTextArea
-          placeholder={this.defaultQuery}
-          isInvalid={isInvalid}
-          className="canvasTextArea__code"
-          value={this.getQuery()}
-          onChange={this.onChange}
-          rows={15}
-        /> */}
       </EuiFormRow>
     );
   }
