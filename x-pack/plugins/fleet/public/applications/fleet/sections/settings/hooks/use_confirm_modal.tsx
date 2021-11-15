@@ -46,23 +46,23 @@ export function useConfirmModal() {
 }
 
 export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
-  const [isVisible, setIsVisble] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [modal, setModal] = useState<ModalState>({
     onCancel: () => {},
     onConfirm: () => {},
   });
 
   const showModal = useCallback(({ title, description, onConfirm, onCancel }) => {
-    setIsVisble(true);
+    setIsVisible(true);
     setModal({
       title,
       description,
       onConfirm: () => {
-        setIsVisble(false);
+        setIsVisible(false);
         onConfirm();
       },
       onCancel: () => {
-        setIsVisble(false);
+        setIsVisible(false);
         onCancel();
       },
     });

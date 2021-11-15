@@ -76,7 +76,7 @@ export function useFleetServerHostsForm(
   fleetServerHostsDefaultValue: string[],
   onSuccess: () => void
 ) {
-  const [isLoading, setIsloading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
 
@@ -110,7 +110,7 @@ export function useFleetServerHostsForm(
       ) {
         return;
       }
-      setIsloading(true);
+      setIsLoading(true);
       const settingsResponse = await sendPutSettings({
         fleet_server_hosts: fleetServerHostsInput.value,
       });
@@ -122,10 +122,10 @@ export function useFleetServerHostsForm(
           defaultMessage: 'Settings saved',
         })
       );
-      setIsloading(false);
+      setIsLoading(false);
       onSuccess();
     } catch (error) {
-      setIsloading(false);
+      setIsLoading(false);
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.settings.fleetServerHostsFlyout.errorToastTitle', {
           defaultMessage: 'An error happened while saving settings',
