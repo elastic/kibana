@@ -6,6 +6,8 @@
  */
 
 import { EuiTextColor, EuiFlexItem, EuiSpacer, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { ALERT_REASON, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
 import React, { useMemo } from 'react';
 
 import styled from 'styled-components';
@@ -34,14 +36,17 @@ export const ReasonComponent: React.FC<Props> = ({ eventId, data }) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
   const reason = useMemo(() => {
-    const siemSignalsReason = getFieldValue({ category: 'signal', field: 'signal.reason' }, data);
-    const aadReason = getFieldValue({ category: 'kibana', field: 'kibana.alert.reason' }, data);
+    const siemSignalsReason = getFieldValue(
+      { category: 'signal', field: 'signal.alert.reason' },
+      data
+    );
+    const aadReason = getFieldValue({ category: 'kibana', field: ALERT_REASON }, data);
     return aadReason.length > 0 ? aadReason : siemSignalsReason;
   }, [data]);
 
   const ruleId = useMemo(() => {
     const siemSignalsRuleId = getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data);
-    const aadRuleId = getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data);
+    const aadRuleId = getFieldValue({ category: 'kibana', field: ALERT_RULE_UUID }, data);
     return aadRuleId.length > 0 ? aadRuleId : siemSignalsRuleId;
   }, [data]);
 

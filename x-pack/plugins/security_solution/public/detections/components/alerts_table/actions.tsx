@@ -264,7 +264,6 @@ export const isThresholdRule = (ecsData: Ecs) => {
   return Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold';
 };
 
-// TODO: what to do here?
 export const buildAlertsKqlFilter = (
   key: '_id' | 'signal.group.id' | 'kibana.alert.group.id',
   alertIds: string[]
@@ -285,7 +284,6 @@ export const buildAlertsKqlFilter = (
         negate: false,
         disabled: false,
         type: 'phrases',
-        // key: key.replace('signal.', 'kibana.alert.'),
         key,
         value: alertIds.join(),
         params: alertIds,

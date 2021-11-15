@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
 
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -350,7 +351,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={'sortRight'} />
                 </EuiFlexItem>
-                <EuiFlexItem>{'kibana.alert.rule.risk_score'}</EuiFlexItem>
+                <EuiFlexItem>{ALERT_RULE_RISK_SCORE}</EuiFlexItem>
               </EuiFlexGroup>
             ),
           };

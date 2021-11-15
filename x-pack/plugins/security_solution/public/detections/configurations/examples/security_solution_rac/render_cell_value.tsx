@@ -6,6 +6,7 @@
  */
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { ALERT_RULE_SEVERITY, ALERT_REASON } from '@kbn/rule-data-utils';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../../common/components/draggables';
@@ -46,7 +47,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
 
     switch (columnId) {
       case 'signal.rule.severity':
-      case 'kibana.alert.rule.severity':
+      case ALERT_RULE_SEVERITY:
         return (
           <DefaultDraggable
             data-test-subj="custom-severity"
@@ -58,7 +59,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
           </DefaultDraggable>
         );
       case 'signal.reason':
-      case 'kibana.alert.reason':
+      case ALERT_REASON:
         return <TruncatableText data-test-subj="custom-reason">{reason}</TruncatableText>;
       default:
         return (

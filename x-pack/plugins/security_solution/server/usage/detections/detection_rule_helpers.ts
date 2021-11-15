@@ -197,7 +197,6 @@ export const getDetectionRuleMetrics = async (
 
   try {
     const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
-    // TODO: multi-terms? script?
     const { body: detectionAlertsResp } = (await esClient.search({
       index: `${signalsIndex}*`,
       size: MAX_RESULTS_WINDOW,
