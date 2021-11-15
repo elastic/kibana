@@ -18,10 +18,10 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: { poll: true, roles: true },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
-    unused('capture.browser.chromium.maxScreenshotDimension', { level: 'critical' }), // unused since 7.8
-    unused('poll.jobCompletionNotifier.intervalErrorMultiplier', { level: 'critical' }), // unused since 7.10
-    unused('poll.jobsRefresh.intervalErrorMultiplier', { level: 'critical' }), // unused since 7.10
-    unused('capture.viewport', { level: 'critical' }), // deprecated as unused since 7.16
+    unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8
+    unused('poll.jobCompletionNotifier.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
+    unused('poll.jobsRefresh.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
+    unused('capture.viewport', { level: 'warning' }), // deprecated as unused since 7.16
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
       if (reporting?.roles?.enabled !== false) {
