@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -19,6 +19,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const comboBox = getService('comboBox');
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
+
+  const FORMULA_TAB_HEIGHT = 40;
 
   const PageObjects = getPageObjects([
     'common',
@@ -131,7 +133,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           : `lns-indexPatternDimension-${opts.operation}`;
         await retry.try(async () => {
           await testSubjects.exists(operationSelector);
-          await testSubjects.click(operationSelector);
+          await testSubjects.click(operationSelector, undefined, FORMULA_TAB_HEIGHT);
         });
       }
       if (opts.field) {
@@ -1110,7 +1112,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         draggedOver,
         dropTarget
       );
-      await delay(150);
+      await setTimeoutAsync(150);
     },
 
     /**

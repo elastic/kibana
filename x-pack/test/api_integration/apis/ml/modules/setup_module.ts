@@ -190,13 +190,13 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for apm_transaction with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm',
-      indexPattern: { name: 'ft_module_apm', timeField: '@timestamp' },
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      indexPattern: { name: 'ft_module_apm_transaction', timeField: '@timestamp' },
       module: 'apm_transaction',
       user: USER.ML_POWERUSER,
       requestBody: {
         prefix: 'pf5_',
-        indexPatternName: 'ft_module_apm',
+        indexPatternName: 'ft_module_apm_transaction',
         startDatafeed: true,
         end: Date.now(),
       },
@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 200,
         jobs: [
           {
-            jobId: 'pf5_high_mean_transaction_duration',
+            jobId: 'pf5_apm_tx_metrics',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
