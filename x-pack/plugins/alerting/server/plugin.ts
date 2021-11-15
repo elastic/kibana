@@ -244,29 +244,6 @@ export class AlertingPlugin {
     });
     core.status.set(serviceStatus$);
 
-    // core.getStartServices().then(async ([coreStart, startPlugins]) => {
-    //   combineLatest([
-    //     core.status.derivedStatus$,
-    //     getHealthStatusStream(
-    //       startPlugins.taskManager,
-    //       this.logger,
-    //       coreStart.savedObjects,
-    //       this.config
-    //     ),
-    //   ])
-    //     .pipe(
-    //       map(([derivedStatus, healthStatus]) => {
-    //         if (healthStatus.level > derivedStatus.level) {
-    //           return healthStatus as ServiceStatus;
-    //         } else {
-    //           return derivedStatus;
-    //         }
-    //       }),
-    //       share()
-    //     )
-    //     .subscribe(serviceStatus$);
-    // });
-
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
