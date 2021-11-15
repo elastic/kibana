@@ -121,7 +121,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             label={
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.brower.proxyURL.label"
-                defaultMessage="Zip Proxy URL"
+                defaultMessage="Proxy Zip URL"
               />
             }
             labelAppend={<OptionalLabel />}
