@@ -7,30 +7,16 @@
 
 /* eslint-disable no-console */
 
+import { argv } from 'yargs';
 import Url from 'url';
 import cypress from 'cypress';
 import { FtrProviderContext } from './ftr_provider_context';
 import { createApmUsersAndRoles } from '../scripts/create-apm-users-and-roles/create_apm_users_and_roles';
 import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 
-export function cypressRunTests(spec?: string) {
-  return async ({ getService }: FtrProviderContext) => {
-    const result = await cypressStart(getService, cypress.run, spec);
-
-    if (result && (result.status === 'failed' || result.totalFailed > 0)) {
-      throw new Error(`APM Cypress tests failed`);
-    }
-  };
-}
-
-export async function cypressOpenTests({ getService }: FtrProviderContext) {
-  await cypressStart(getService, cypress.open);
-}
-
-async function cypressStart(
+export async function cypressStart(
   getService: FtrProviderContext['getService'],
-  cypressExecution: typeof cypress.run | typeof cypress.open,
-  spec?: string
+  cypressExecution: typeof cypress.run | typeof cypress.open
 ) {
   const config = getService('config');
 
@@ -68,8 +54,9 @@ async function cypressStart(
   console.log(`Loading ES archive "${archiveName}"`);
   await esArchiverLoad(archiveName);
 
+  const spec = argv.grep as string | undefined;
   const res = await cypressExecution({
-    ...(spec !== undefined ? { spec } : {}),
+    ...(spec ? { spec } : {}),
     config: { baseUrl: kibanaUrl },
     env: {
       KIBANA_URL: kibanaUrl,

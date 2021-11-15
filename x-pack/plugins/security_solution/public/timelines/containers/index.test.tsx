@@ -113,6 +113,7 @@ describe('useTimelineEvents', () => {
     filterQuery: '',
     startDate: '',
     limit: 25,
+    runtimeMappings: {},
     sort: initSortDefault,
     skip: false,
   };

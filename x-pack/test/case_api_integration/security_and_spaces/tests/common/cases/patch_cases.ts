@@ -67,6 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const log = getService('log');
 
   describe('patch_cases', () => {
     afterEach(async () => {
@@ -792,12 +793,12 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('detections rule', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest);
+          await createSignalsIndex(supertest, log);
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(supertest);
+          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
@@ -805,10 +806,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const postedCase = await createCase(supertest, postCaseReq);
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -865,10 +866,10 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -918,10 +919,10 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -987,10 +988,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
 
           const postedCase = await createCase(supertest, postCaseReq);
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');

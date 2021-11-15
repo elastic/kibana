@@ -50,7 +50,10 @@ import {
   TRANSFORM_STATES,
 } from '../../../../../common/constants';
 import { TransformStats } from '../types';
-import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
+import {
+  metadataTransformPrefix,
+  METADATA_UNITED_TRANSFORM,
+} from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -1083,6 +1086,11 @@ describe('when on the endpoint list page', () => {
         ).toBe('Policy Response');
       });
 
+      it('should display timestamp', () => {
+        const timestamp = renderResult.queryByTestId('endpointDetailsPolicyResponseTimestamp');
+        expect(timestamp).not.toBeNull();
+      });
+
       it('should show a configuration section for each protection', async () => {
         const configAccordions = await renderResult.findAllByTestId(
           'endpointDetailsPolicyResponseConfigAccordion'
@@ -1456,6 +1464,24 @@ describe('when on the endpoint list page', () => {
       render();
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).toBeInTheDocument();
+    });
+
+    it('displays correct transform id when in failed state', async () => {
+      const transforms: TransformStats[] = [
+        {
+          id: `${metadataTransformPrefix}-0.20.0`,
+          state: TRANSFORM_STATES.STARTED,
+        } as TransformStats,
+        {
+          id: `${METADATA_UNITED_TRANSFORM}-1.2.1`,
+          state: TRANSFORM_STATES.FAILED,
+        } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).not.toHaveTextContent(transforms[0].id);
+      expect(banner).toHaveTextContent(transforms[1].id);
     });
   });
 });
