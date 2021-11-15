@@ -46,6 +46,7 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
+import { termQuery } from '../../../../observability/server';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
   ALERT_EVALUATION_THRESHOLD_NON_TYPED;
@@ -157,24 +158,11 @@ export function registerTransactionDurationAnomalyAlertType({
                       },
                     },
                   },
-                  ...(alertParams.serviceName
-                    ? [
-                        {
-                          term: {
-                            partition_field_value: alertParams.serviceName,
-                          },
-                        },
-                      ]
-                    : []),
-                  ...(alertParams.transactionType
-                    ? [
-                        {
-                          term: {
-                            by_field_value: alertParams.transactionType,
-                          },
-                        },
-                      ]
-                    : []),
+                  ...termQuery(
+                    'partition_field_value',
+                    alertParams.serviceName
+                  ),
+                  ...termQuery('by_field_value', alertParams.transactionType),
                 ] as QueryDslQueryContainer[],
               },
             },

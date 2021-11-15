@@ -336,6 +336,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                         <EuiFlexGroup
                           gutterSize="xs"
                           responsive={false}
+                          alignItems="center"
                           className="lnsChartSwitch__append"
                         >
                           {v.selection.dataLoss !== 'nothing' ? (

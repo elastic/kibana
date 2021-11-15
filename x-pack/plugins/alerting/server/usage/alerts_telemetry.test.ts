@@ -106,11 +106,21 @@ Object {
   "count_rules_namespaces": 0,
   "count_total": 4,
   "schedule_time": Object {
+    "avg": "4.5s",
+    "max": "10s",
+    "min": "1s",
+  },
+  "schedule_time_number_s": Object {
     "avg": 4.5,
     "max": 10,
     "min": 1,
   },
   "throttle_time": Object {
+    "avg": "30s",
+    "max": "60s",
+    "min": "0s",
+  },
+  "throttle_time_number_s": Object {
     "avg": 30,
     "max": 60,
     "min": 0,

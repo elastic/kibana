@@ -13,7 +13,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -54,13 +58,6 @@ export async function getErrorRate({
 }> {
   const { apmEventClient } = setup;
 
-  const transactionNamefilter = transactionName
-    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
-    : [];
-  const transactionTypefilter = transactionType
-    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-    : [];
-
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     {
@@ -68,8 +65,8 @@ export async function getErrorRate({
         [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
       },
     },
-    ...transactionNamefilter,
-    ...transactionTypefilter,
+    ...termQuery(TRANSACTION_NAME, transactionName),
+    ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),

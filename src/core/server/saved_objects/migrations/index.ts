@@ -7,8 +7,8 @@
  */
 
 export type { MigrationResult } from './core';
-export { KibanaMigrator } from './kibana';
-export type { IKibanaMigrator } from './kibana';
+export { KibanaMigrator } from './kibana_migrator';
+export type { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
 export type {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,

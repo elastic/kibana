@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockHttpValues,
-  mockFlashMessageHelpers,
-} from '../../../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/engine_logic.mock';
 
 jest.mock('../../curations_logic', () => ({
@@ -24,6 +20,7 @@ jest.mock('../../curations_logic', () => ({
 import { nextTick } from '@kbn/test/jest';
 
 import { CurationsLogic } from '../..';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { EngineLogic } from '../../../engine';
 
 import { CurationsSettingsLogic } from './curations_settings_logic';
@@ -39,7 +36,6 @@ const DEFAULT_VALUES = {
 describe('CurationsSettingsLogic', () => {
   const { mount } = new LogicMounter(CurationsSettingsLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -105,14 +101,8 @@ describe('CurationsSettingsLogic', () => {
         });
       });
 
-      it('presents any API errors to the user', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
-        mount();
-
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         CurationsSettingsLogic.actions.loadCurationsSettings();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -223,14 +213,8 @@ describe('CurationsSettingsLogic', () => {
         expect(CurationsLogic.actions.loadCurations).toHaveBeenCalled();
       });
 
-      it('presents any API errors to the user', async () => {
-        http.put.mockReturnValueOnce(Promise.reject('error'));
-        mount();
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationsSettingsLogic.actions.updateCurationsSetting({});
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });
