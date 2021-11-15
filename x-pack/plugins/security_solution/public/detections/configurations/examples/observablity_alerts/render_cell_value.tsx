@@ -9,7 +9,7 @@ import moment from 'moment';
 import React from 'react';
 
 import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
-import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
 
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';

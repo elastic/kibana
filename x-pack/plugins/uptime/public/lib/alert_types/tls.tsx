@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils/technical_field_names';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from '../../../common/translations';
