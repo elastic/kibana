@@ -113,8 +113,6 @@ export function CollapsibleNav({
         (link) =>
           // Filterting out hidden links,
           !link.hidden &&
-          // integrations link in favor of a specific Add Data button at the bottom,
-          link.id !== 'integrations' &&
           // and non-data overview pages
           !overviewIDsToHide.includes(link.id)
       ),
