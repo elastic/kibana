@@ -67,7 +67,11 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
   ({ afterCaseCreated, onClose, onSuccess, disableAlerts }) => (
     <>
       <GlobalStyle />
-      <StyledFlyout onClose={onClose} data-test-subj="create-case-flyout">
+      <StyledFlyout
+        onClose={onClose}
+        data-test-subj="create-case-flyout"
+        maskProps={{ className: maskOverlayClassName }}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>{i18n.CREATE_TITLE}</h2>
