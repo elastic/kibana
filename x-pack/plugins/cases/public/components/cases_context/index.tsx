@@ -6,42 +6,68 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ChromeBreadcrumb } from 'kibana/public';
+import useObservable from 'react-use/lib/useObservable';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
+import { useKibana } from '../../common/lib/kibana';
 
 export interface CasesContextValue {
   owner: string[];
   appId: string;
+  appTitle: string;
   userCanCrud: boolean;
   basePath: string;
-  rootBreadcrumbs: ChromeBreadcrumb[];
-}
-export interface CasesContextProps extends Omit<CasesContextValue, 'basePath' | 'rootBreadcrumbs'> {
-  basePath?: string;
-  rootBreadcrumbs?: ChromeBreadcrumb[];
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
+export interface CasesContextProps
+  extends Omit<CasesContextValue, 'appId' | 'appTitle' | 'basePath'> {
+  basePath?: string;
+}
+
+export interface CasesContextStateValue
+  extends Omit<CasesContextValue, 'appId' | 'appTitle' | 'userCanCrud'> {
+  appId?: string;
+  appTitle?: string;
+  userCanCrud?: boolean;
+}
+
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { owner, appId, userCanCrud, basePath = DEFAULT_BASE_PATH, rootBreadcrumbs = [] },
+  value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH },
 }) => {
-  const [value, setValue] = useState<CasesContextValue>({
+  const { currentAppId$, applications$ } = useKibana().services.application;
+  const appId = useObservable(currentAppId$);
+  const applications = useObservable(applications$);
+  const appTitle = appId ? applications?.get(appId)?.category?.label : undefined;
+
+  const [value, setValue] = useState<CasesContextStateValue>({
     owner,
-    appId,
     userCanCrud,
     basePath,
-    rootBreadcrumbs,
   });
 
   /**
    * `userCanCrud` prop may change by the parent plugin.
-   * We need to re-render in that case, the rest of props are never updated.
+   * `appId` and `appTitle` are dynamically retrieved from kibana context.
+   * We need to update the state if any of these values change, the rest of props are never updated.
    */
   useEffect(() => {
-    setValue((prev) => ({ ...prev, userCanCrud }));
-  }, [userCanCrud]);
+    if (appId && appTitle) {
+      setValue((prev) => ({
+        ...prev,
+        appId,
+        appTitle,
+        userCanCrud,
+      }));
+    }
+  }, [appTitle, appId, userCanCrud]);
 
-  return <CasesContext.Provider value={value}>{children}</CasesContext.Provider>;
+  return isCasesContextValue(value) ? (
+    <CasesContext.Provider value={value}>{children}</CasesContext.Provider>
+  ) : null;
 };
+
+function isCasesContextValue(value: CasesContextStateValue): value is CasesContextValue {
+  return value.appId != null && value.appTitle != null && value.userCanCrud != null;
+}

@@ -15,10 +15,8 @@ export type GetCasesProps = CasesProps & CasesContextProps;
 const CasesLazy: React.FC<CasesProps> = lazy(() => import('../components/app'));
 export const getCasesLazy = ({
   owner,
-  appId,
   userCanCrud,
   basePath,
-  rootBreadcrumbs,
   disableAlerts,
   onComponentInitialized,
   actionsNavigation,
@@ -29,7 +27,7 @@ export const getCasesLazy = ({
   hideSyncAlerts,
   timelineIntegration,
 }: GetCasesProps) => (
-  <CasesProvider value={{ owner, appId, userCanCrud, basePath, rootBreadcrumbs }}>
+  <CasesProvider value={{ owner, userCanCrud, basePath }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesLazy
         disableAlerts={disableAlerts}

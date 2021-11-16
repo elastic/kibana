@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { observabilityFeatureId, observabilityAppId, casesPath } from '../../../common';
+import { observabilityFeatureId, casesPath } from '../../../common';
 
 export const CASES_OWNER = observabilityFeatureId;
-export const APP_ID = observabilityAppId;
 export const CASES_PATH = casesPath;

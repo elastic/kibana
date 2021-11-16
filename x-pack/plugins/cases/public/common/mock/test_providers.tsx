@@ -17,13 +17,10 @@ import {
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
-import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 
 interface Props {
   children: React.ReactNode;
-  appId?: string;
   userCanCrud?: boolean;
-  rootBreadcrumbs?: ChromeBreadcrumb[];
 }
 
 export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
@@ -32,18 +29,11 @@ window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({
-  children,
-  appId = 'testAppId',
-  userCanCrud = true,
-  rootBreadcrumbs = [{ text: 'Root', href: '/root' }],
-}) => (
+const TestProvidersComponent: React.FC<Props> = ({ children, userCanCrud = true }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <CasesProvider
-          value={{ owner: [SECURITY_SOLUTION_OWNER], appId, userCanCrud, rootBreadcrumbs }}
-        >
+        <CasesProvider value={{ owner: [SECURITY_SOLUTION_OWNER], userCanCrud }}>
           {children}
         </CasesProvider>
       </ThemeProvider>

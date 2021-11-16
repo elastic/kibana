@@ -14,7 +14,7 @@ import { GetAllCasesSelectorModalProps } from '../../../../../../cases/public';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { Case, SubCase } from '../../../../../../cases/common';
-import { casesPath, observabilityAppId, observabilityFeatureId } from '../../../../../common';
+import { casesPath, observabilityFeatureId } from '../../../../../common';
 import { parseRelativeDate } from '../components/date_range_picker';
 
 export interface AddToCaseProps {
@@ -43,7 +43,6 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
 
   const getAllCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
     onRowClick: onCaseClicked,
-    appId: observabilityAppId,
     userCanCrud: true,
     owner: [observabilityFeatureId],
     onClose: () => {

@@ -74,7 +74,6 @@ describe('AddToCaseAction', function () {
     expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
     expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledWith(
       expect.objectContaining({
-        appId: 'observability-overview',
         owner: ['observability'],
         userCanCrud: true,
       })

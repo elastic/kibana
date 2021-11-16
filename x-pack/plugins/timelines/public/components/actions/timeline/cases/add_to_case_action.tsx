@@ -51,7 +51,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const allCasesSelectorModalProps = useMemo(() => {
     const { ruleId, ruleName } = normalizedEventFields(event);
     return {
-      appId,
       alertData: {
         alertId: eventId,
         index: eventIndex ?? '',
@@ -73,7 +72,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: false })),
     };
   }, [
-    appId,
     casePermissions?.crud,
     onCaseSuccess,
     onCaseClicked,
@@ -91,7 +89,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const createCaseFlyoutProps = useMemo(() => {
     return {
-      appId,
       afterCaseCreated: attachAlertToCase,
       onClose: closeCaseFlyoutOpen,
       onSuccess: onCaseSuccess,
@@ -105,7 +102,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     closeCaseFlyoutOpen,
     onCaseSuccess,
     useInsertTimeline,
-    appId,
     owner,
     disableAlerts,
     casePermissions,

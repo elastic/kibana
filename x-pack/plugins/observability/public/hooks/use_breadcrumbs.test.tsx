@@ -15,10 +15,7 @@ import { useBreadcrumbs } from './use_breadcrumbs';
 const setBreadcrumbs = jest.fn();
 const setTitle = jest.fn();
 const kibanaServices = {
-  application: {
-    getUrlForApp: (appId: string, { path }: { path: string }) => path,
-    navigateToApp: () => {},
-  },
+  application: { getUrlForApp: () => {}, navigateToApp: () => {} },
   chrome: { setBreadcrumbs, docTitle: { change: setTitle } },
   uiSettings: { get: () => true },
 } as unknown as Partial<CoreStart>;

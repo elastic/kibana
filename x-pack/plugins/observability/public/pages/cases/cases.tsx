@@ -9,10 +9,9 @@ import React, { Suspense, useCallback, useState } from 'react';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchAlertData, useFetchAlertDetail } from './helpers';
-import { CASES_OWNER, APP_ID, CASES_PATH } from './constants';
+import { CASES_OWNER, CASES_PATH } from './constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
-import { useRootBreadcrumb } from '../../hooks/use_breadcrumbs';
 
 interface CasesProps {
   userCanCrud: boolean;
@@ -23,8 +22,6 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
   const { observabilityRuleTypeRegistry } = usePluginContext();
-  const rootBreadcrumb = useRootBreadcrumb();
-
   const [selectedAlertId, setSelectedAlertId] = useState<string>('');
 
   const handleFlyoutClose = useCallback(() => {
@@ -45,7 +42,6 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
         </Suspense>
       )}
       {casesUi.getCases({
-        appId: APP_ID,
         basePath: CASES_PATH,
         disableAlerts: true,
         userCanCrud,
@@ -70,7 +66,6 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
           },
         },
         hideSyncAlerts: true,
-        rootBreadcrumbs: [rootBreadcrumb],
       })}
     </>
   );

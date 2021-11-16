@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { APP_ID, APP_UI_ID } from '../../../../common/constants';
+import { APP_ID } from '../../../../common/constants';
 
 const MAX_CASES_TO_SHOW = 3;
 const RecentCasesComponent = () => {
@@ -17,7 +17,6 @@ const RecentCasesComponent = () => {
   const userCanCrud = useGetUserCasesPermissions()?.crud ?? false;
 
   return casesUi.getRecentCases({
-    appId: APP_UI_ID,
     userCanCrud,
     maxCasesToShow: MAX_CASES_TO_SHOW,
     owner: [APP_ID],

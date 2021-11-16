@@ -162,7 +162,6 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       </EuiPopover>
       {isCaseModalOpen &&
         cases.getAllCasesSelectorModal({
-          appId: APP_UI_ID,
           onRowClick,
           userCanCrud: userPermissions?.crud ?? false,
           owner: [APP_ID],

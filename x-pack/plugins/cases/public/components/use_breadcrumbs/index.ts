@@ -60,13 +60,13 @@ const useApplyBreadcrumbs = () => {
 };
 
 export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
-  const { rootBreadcrumbs, appId } = useCasesContext();
+  const { appId, appTitle } = useCasesContext();
   const { getAppUrl } = useNavigation(appId);
   const applyBreadcrumbs = useApplyBreadcrumbs();
 
   useEffect(() => {
     applyBreadcrumbs([
-      ...rootBreadcrumbs,
+      { text: appTitle, href: getAppUrl() },
       {
         text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
         ...(pageDeepLink !== CasesDeepLinkId.cases
@@ -83,27 +83,25 @@ export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
           ]
         : []),
     ]);
-  }, [pageDeepLink, rootBreadcrumbs, getAppUrl, applyBreadcrumbs]);
+  }, [pageDeepLink, appTitle, getAppUrl, applyBreadcrumbs]);
 };
 
 export const useCasesTitleBreadcrumbs = (caseTitle: string) => {
-  const { rootBreadcrumbs, appId } = useCasesContext();
+  const { appId, appTitle } = useCasesContext();
   const { getAppUrl } = useNavigation(appId);
   const applyBreadcrumbs = useApplyBreadcrumbs();
 
   useEffect(() => {
-    if (rootBreadcrumbs) {
-      const casesBreadcrumbs: ChromeBreadcrumb[] = [
-        ...rootBreadcrumbs,
-        {
-          text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
-          href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
-        },
-        {
-          text: caseTitle,
-        },
-      ];
-      applyBreadcrumbs(casesBreadcrumbs);
-    }
-  }, [caseTitle, rootBreadcrumbs, getAppUrl, applyBreadcrumbs]);
+    const casesBreadcrumbs: ChromeBreadcrumb[] = [
+      { text: appTitle, href: getAppUrl() },
+      {
+        text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
+        href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
+      },
+      {
+        text: caseTitle,
+      },
+    ];
+    applyBreadcrumbs(casesBreadcrumbs);
+  }, [caseTitle, appTitle, getAppUrl, applyBreadcrumbs]);
 };

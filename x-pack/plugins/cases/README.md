@@ -46,7 +46,6 @@ cases: CasesUiStart;
 const { cases } = useKibana().services;
 // call in the return as you would any component
 cases.getCases({
-  appId: 'securitySolutionUI',
   basePath: '/investigate/cases',
   userCanCrud: true,
   owner: ['securitySolution'],
@@ -60,7 +59,6 @@ cases.getCases({
       useInsertTimeline,
     },
   },
-  rootBreadcrumbs: [{ text: 'Security Solution', href: 'app/security' }],
 });
 ```
 
@@ -72,11 +70,9 @@ Arguments:
 
 | Property                                                             | Description                                                                                   |
 | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| appId                                                                | `string;` application id used to register the plugin                                          |
 | userCanCrud                                                          | `boolean;` user permissions to crud                                                           |
 | owner                                                                | `string[];` owner ids of the cases                                                            |
 | basePath                                                             | `string;` path to mount the Cases router on top of                                            |
-| rootBreadcrumbs                                                      | `ChromeBreadcrumb[];` array of breadcrumbs to use as root                                     |
 | useFetchAlertData                                                    | `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts                        |
 | disableAlerts?                                                       | `boolean` (default: false) flag to not show alerts information                                |
 | actionsNavigation?                                                   | <code>CasesNavigation<string, 'configurable'></code>                                          |
@@ -100,7 +96,6 @@ Arguments:
 
 | Property        | Description                                                                                       |
 | --------------- | ------------------------------------------------------------------------------------------------- |
-| appId           | `string;` application id used to register the plugin                                              |
 | userCanCrud     | `boolean;` user permissions to crud                                                               |
 | owner           | `string[];` owner ids of the cases                                                                |
 | alertData?      | `Omit<CommentRequestAlertType, 'type'>;` alert data to post to case                               |
@@ -118,7 +113,6 @@ Arguments:
 
 | Property          | Description                                                                                                        |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| appId             | `string;` application id used to register the plugin                                                               |
 | userCanCrud       | `boolean;` user permissions to crud                                                                                |
 | owner             | `string[];` owner ids of the cases                                                                                 |
 | onClose           | `() => void;` callback when create case is canceled                                                                |
@@ -135,7 +129,6 @@ Arguments:
 
 | Property       | Description                                          |
 | -------------- | ---------------------------------------------------- |
-| appId          | `string;` application id used to register the plugin |
 | userCanCrud    | `boolean;` user permissions to crud                  |
 | owner          | `string[];` owner ids of the cases                   |
 | maxCasesToShow | `number;` number of cases to show in widget          |

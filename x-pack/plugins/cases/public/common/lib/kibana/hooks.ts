@@ -114,7 +114,7 @@ export const useAppUrl = (appId: string) => {
   const { getUrlForApp } = useKibana().services.application;
 
   const getAppUrl = useCallback(
-    ({ ...options }: { deepLinkId?: string; path?: string; absolute?: boolean }) =>
+    (options?: { deepLinkId?: string; path?: string; absolute?: boolean }) =>
       getUrlForApp(appId, options),
     [appId, getUrlForApp]
   );
