@@ -15,7 +15,7 @@ see {subscriptions}[the subscription page].
 [[stack-rules]]
 === Stack rules
 
-<<create-and-manage-rules, Stack rules>> are built into {kib}.  To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
+<<create-and-manage-rules, Stack rules>> are built into {kib}. To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information. In the full rules list in the UI, Stack rules are shown under the proper category `STACK RULES`.
 
 [cols="2*<"]
 |===
@@ -38,14 +38,23 @@ see {subscriptions}[the subscription page].
 [[observability-rules]]
 === Observability rules
 
+In the rules list in the Management UI, Observability rules are shown under the multiple categories `APM AND USER EXPERIENCE`, `LOGS`, `METRICS`, `STACK MONITORING` and `UPTIME`.
+
 [cols="2*<"]
 |===
+
+
+| <<apm-alerts, APM and User Experience>>
+| Allows to define rules to detect complex conditions within *APM* data and trigger built-in actions when those conditions are met.
 
 | {observability-guide}/create-alerts.html[Logs rules]
 | Detect complex conditions in the *Logs* app.
 
 | {observability-guide}/create-alerts.html[Metrics rules]
 | Detect complex conditions in the *Metrics* app.
+
+| <<kibana-alerts,Stack Monitoring>>
+| Provide {kib} Alerting rules out-of-the box to notify you of potential issues in the Elastic Stack.
 
 | {observability-guide}/create-alerts.html[Uptime rules]
 | Detect complex conditions in the *Uptime* app.
@@ -56,7 +65,7 @@ see {subscriptions}[the subscription page].
 [[ml-rules]]
 === Machine learning rules
 
-beta:[] {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled checks on an {anomaly-job} to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
+beta:[] {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled checks on an {anomaly-job} to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered. In the rules list in the Management UI, Machine learning rules are shown under the proper category `MACHINE LEARNING`.
 
 [float]
 [[security-rules]]
