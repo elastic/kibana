@@ -14,24 +14,24 @@ import {
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   TIMESTAMP,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils';
-import { StoryContext } from '@storybook/react';
-import React, { ComponentType } from 'react';
-import { MemoryRouter, Route } from 'react-router-dom';
+  SPACE_IDS,
+} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+import { Meta, Story } from '@storybook/react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
@@ -42,11 +42,11 @@ import {
 import { LatencyChart } from './';
 
 interface Args {
-  alertsResponse: APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>;
-  latencyChartResponse: APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+  alertsResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>;
+  latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 }
 
-export default {
+const stories: Meta<Args> = {
   title: 'shared/charts/LatencyChart',
   component: LatencyChart,
   argTypes: {
@@ -57,7 +57,7 @@ export default {
     },
   },
   decorators: [
-    (Story: ComponentType, { args }: StoryContext) => {
+    (StoryComponent, { args }) => {
       const { alertsResponse, latencyChartResponse } = args as Args;
       const serviceName = 'testService';
 
@@ -70,7 +70,7 @@ export default {
             basePath: { prepend: () => {} },
             get: (endpoint: string) => {
               switch (endpoint) {
-                case `/api/apm/services/${serviceName}/transactions/charts/latency`:
+                case `/internal/apm/services/${serviceName}/transactions/charts/latency`:
                   return latencyChartResponse;
                 default:
                   return {};
@@ -88,44 +88,46 @@ export default {
       const transactionType = `${Math.random()}`; // So we don't memoize
 
       return (
-        <ApmPluginContext.Provider value={apmPluginContextMock}>
-          <MemoryRouter initialEntries={[`/services/${serviceName}`]}>
-            <Route path="/services/{serviceName}">
-              <KibanaContextProvider
-                services={{ ...apmPluginContextMock.core }}
+        <MemoryRouter
+          initialEntries={[
+            `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&transactionType=request&comparisonEnabled=true&comparisonType=day`,
+          ]}
+        >
+          <MockApmPluginContextWrapper value={apmPluginContextMock}>
+            <KibanaContextProvider services={{ ...apmPluginContextMock.core }}>
+              <MockUrlParamsContextProvider
+                params={{
+                  latencyAggregationType: LatencyAggregationType.avg,
+                }}
               >
-                <MockUrlParamsContextProvider
-                  params={{
-                    latencyAggregationType: LatencyAggregationType.avg,
+                <APMServiceContext.Provider
+                  value={{
+                    alerts: alertsResponse.alerts,
+                    serviceName,
+                    transactionType,
+                    transactionTypes: [],
                   }}
                 >
-                  <APMServiceContext.Provider
-                    value={{
-                      alerts: alertsResponse.alerts,
-                      serviceName,
-                      transactionType,
-                      transactionTypes: [],
-                    }}
-                  >
-                    <ChartPointerEventContextProvider>
-                      <Story />
-                    </ChartPointerEventContextProvider>
-                  </APMServiceContext.Provider>
-                </MockUrlParamsContextProvider>
-              </KibanaContextProvider>
-            </Route>
-          </MemoryRouter>
-        </ApmPluginContext.Provider>
+                  <ChartPointerEventContextProvider>
+                    <StoryComponent />
+                  </ChartPointerEventContextProvider>
+                </APMServiceContext.Provider>
+              </MockUrlParamsContextProvider>
+            </KibanaContextProvider>
+          </MockApmPluginContextWrapper>
+        </MemoryRouter>
       );
     },
   ],
 };
 
-export function Example(_args: Args) {
+export default stories;
+
+export const Example: Story<Args> = () => {
   return (
     <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
   );
-}
+};
 Example.args = {
   alertsResponse: {
     alerts: [
@@ -139,6 +141,7 @@ Example.args = {
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
         [ALERT_RULE_PRODUCER]: ['apm'],
+        [ALERT_RULE_CONSUMER]: ['apm'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
@@ -149,9 +152,11 @@ Example.args = {
         [ALERT_START]: ['2021-06-02T04:00:00.000Z'],
         'event.kind': ['state'],
         [ALERT_RULE_CATEGORY]: ['Latency threshold'],
+        [SPACE_IDS]: [],
       },
       {
         [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
+
         [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
         [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
@@ -160,6 +165,7 @@ Example.args = {
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
         [ALERT_RULE_PRODUCER]: ['apm'],
+        [ALERT_RULE_CONSUMER]: ['apm'],
         [ALERT_SEVERITY]: ['warning'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
@@ -171,9 +177,11 @@ Example.args = {
         [ALERT_START]: ['2021-06-02T10:45:00.000Z'],
         'event.kind': ['state'],
         [ALERT_RULE_CATEGORY]: ['Latency threshold'],
+        [SPACE_IDS]: [],
       },
       {
         [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
+
         [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
         [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
@@ -182,6 +190,7 @@ Example.args = {
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
         [ALERT_RULE_PRODUCER]: ['apm'],
+        [ALERT_RULE_CONSUMER]: ['apm'],
         [ALERT_SEVERITY]: ['critical'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
@@ -193,6 +202,7 @@ Example.args = {
         [ALERT_START]: ['2021-06-02T16:50:00.000Z'],
         'event.kind': ['state'],
         [ALERT_RULE_CATEGORY]: ['Latency threshold'],
+        [SPACE_IDS]: [],
       },
     ],
   },
@@ -801,19 +811,24 @@ Example.args = {
         },
       ],
     },
-    previousPeriod: { latencyTimeseries: [] },
+    previousPeriod: { latencyTimeseries: [], overallAvgDuration: null },
   },
 };
 
-export function NoData(_args: Args) {
+export const NoData: Story<Args> = () => {
   return (
     <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
   );
-}
+};
 NoData.args = {
   alertsResponse: { alerts: [] },
   latencyChartResponse: {
-    currentPeriod: { latencyTimeseries: [] },
-    previousPeriod: { latencyTimeseries: [] },
+    anomalyTimeseries: {
+      jobId: 'apm-production-00aa-high_mean_transaction_duration',
+      anomalyScore: [],
+      anomalyBoundaries: [],
+    },
+    currentPeriod: { latencyTimeseries: [], overallAvgDuration: null },
+    previousPeriod: { latencyTimeseries: [], overallAvgDuration: null },
   },
 };

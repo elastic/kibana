@@ -9,11 +9,12 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FilterValueLabel } from '../../../../../../observability/public';
 import { FiltersUIHook } from '../hooks/useLocalUIFilters';
 import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { SelectedWildcards } from './selected_wildcards';
 
 interface Props {
   indexPattern?: IndexPattern;
@@ -34,15 +35,19 @@ export function SelectedFilters({
   invertFilter,
   clearValues,
 }: Props) {
-  const { uxUiFilters } = useUrlParams();
+  const {
+    uxUiFilters,
+    urlParams: { searchTerm },
+  } = useLegacyUrlParams();
   const { transactionUrl } = uxUiFilters;
 
   const urlValues = transactionUrl ?? [];
 
   const hasValues = filters.some((filter) => filter.value?.length > 0);
 
-  return indexPattern && (hasValues || urlValues.length > 0) ? (
+  return indexPattern && (hasValues || urlValues.length > 0 || searchTerm) ? (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+      <SelectedWildcards indexPattern={indexPattern} />
       {(filters ?? []).map(({ name, title, fieldName, excluded }) => (
         <Fragment key={name}>
           {((uxUiFilters?.[name] ?? []) as string[]).map((value) => (

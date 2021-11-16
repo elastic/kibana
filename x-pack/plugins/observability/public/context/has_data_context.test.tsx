@@ -24,10 +24,7 @@ import { act } from '@testing-library/react';
 const relativeStart = '2020-10-08T06:00:00.000Z';
 const relativeEnd = '2020-10-08T07:00:00.000Z';
 
-const sampleAPMIndices = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'apm_oss.transactionIndices': 'apm-*',
-} as ApmIndicesConfig;
+const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
 function wrapper({ children }: { children: React.ReactElement }) {
   const history = createMemoryHistory();
@@ -559,7 +556,7 @@ describe('HasDataContextProvider', () => {
             status: 'success',
           },
         },
-        hasAnyData: false,
+        hasAnyData: true,
         isAllRequestsComplete: true,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),

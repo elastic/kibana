@@ -14,8 +14,9 @@ import {
   countScopeApi,
   getPluginApiDocId,
   snakeToCamel,
-  camelToSnake,
   groupPluginApi,
+  getFileName,
+  getSlug,
 } from '../utils';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
 import { WritePluginDocsOpts } from './types';
@@ -65,6 +66,8 @@ export function writePluginDoc(
   log.debug(`Writing plugin file for ${doc.id}`);
 
   const fileName = getFileName(doc.id);
+  const slug = getSlug(doc.id);
+
   // Append "obj" to avoid special names in here. 'case' is one in particular that
   // caused issues.
   const json = getJsonName(fileName) + 'Obj';
@@ -73,8 +76,8 @@ export function writePluginDoc(
     dedent(`
 ---
 id: ${getPluginApiDocId(doc.id)}
-slug: /kibana-dev-docs/${doc.id}PluginApi
-title: ${doc.id}
+slug: /kibana-dev-docs/api/${slug}
+title: "${doc.id}"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the ${doc.id} plugin
 date: 2020-11-16
@@ -120,10 +123,6 @@ ${
 
 function getJsonName(name: string): string {
   return snakeToCamel(getFileName(name));
-}
-
-function getFileName(name: string): string {
-  return camelToSnake(name.replace('.', '_'));
 }
 
 function scopApiToMdx(scope: ScopeApi, title: string, json: string, scopeName: string): string {

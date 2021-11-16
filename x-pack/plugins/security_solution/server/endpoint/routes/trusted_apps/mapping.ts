@@ -122,7 +122,7 @@ export const exceptionListItemToTrustedApp = (
     const grouped = entriesToConditionEntriesMap(exceptionListItem.entries);
 
     return {
-      id: exceptionListItem.id,
+      id: exceptionListItem.item_id,
       version: exceptionListItem._version || '',
       name: exceptionListItem.name,
       description: exceptionListItem.description,

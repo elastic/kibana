@@ -50,10 +50,10 @@ export async function createAnomalyDetectionJobs(
       `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
-    const indexPatternName = indices['apm_oss.metricsIndices'];
+    const dataViewName = indices.metric;
     const responses = await Promise.all(
       uniqueMlJobEnvs.map((environment) =>
-        createAnomalyDetectionJob({ ml, environment, indexPatternName })
+        createAnomalyDetectionJob({ ml, environment, dataViewName })
       )
     );
     const jobResponses = responses.flatMap((response) => response.jobs);
@@ -73,11 +73,11 @@ export async function createAnomalyDetectionJobs(
 async function createAnomalyDetectionJob({
   ml,
   environment,
-  indexPatternName,
+  dataViewName,
 }: {
   ml: Required<Setup>['ml'];
   environment: string;
-  indexPatternName: string;
+  dataViewName: string;
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuid().substr(-4);
@@ -86,7 +86,7 @@ async function createAnomalyDetectionJob({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
-      indexPatternName,
+      indexPatternName: dataViewName,
       applyToAllSpaces: true,
       start: moment().subtract(4, 'weeks').valueOf(),
       query: {

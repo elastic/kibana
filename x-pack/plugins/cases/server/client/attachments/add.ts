@@ -263,7 +263,7 @@ async function getCombinedCase({
             id,
           }),
         ]
-      : [Promise.reject('case connector feature is disabled')]),
+      : [Promise.reject(new Error('case connector feature is disabled'))]),
   ]);
 
   if (subCasePromise.status === 'fulfilled') {

@@ -38,31 +38,35 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
   action
 ) => {
   switch (action.type) {
-    case 'hostIsolationExceptionsPageDataChanged': {
+    case 'hostIsolationExceptionsCreateEntry': {
       return {
         ...state,
-        entries: action.payload,
-      };
-    }
-    case 'userChangedUrl':
-      return userChangedUrl(state, action);
-    case 'hostIsolationExceptionsMarkToDelete': {
-      return {
-        ...state,
-        deletion: {
-          item: action.payload,
+        form: {
+          entry: action.payload,
           status: createUninitialisedResourceState(),
         },
       };
     }
-    case 'hostIsolationExceptionsDeleteStatusChanged':
+    case 'hostIsolationExceptionsFormStateChanged': {
       return {
         ...state,
-        deletion: {
-          ...state.deletion,
+        form: {
+          ...state.form,
           status: action.payload,
         },
       };
+    }
+    case 'hostIsolationExceptionsFormEntryChanged': {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          entry: action.payload,
+        },
+      };
+    }
+    case 'userChangedUrl':
+      return userChangedUrl(state, action);
   }
   return state;
 };

@@ -24,27 +24,47 @@ export const INVESTIGATION_TIME_ENRICHMENT_SECTION =
 
 export const JSON_VIEW_WRAPPER = '[data-test-subj="jsonViewWrapper"]';
 
-export const JSON_CONTENT = '[data-test-subj="jsonView"]';
-
 export const JSON_LINES = '.euiCodeBlock__line';
 
 export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
+
+export const JSON_TEXT = '[data-test-subj="jsonView"]';
+
+export const OVERVIEW_HOST_NAME =
+  '[data-test-subj="eventDetails"] [data-test-subj="host-details-button"]';
+
+export const OVERVIEW_RISK_SCORE =
+  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=risk_score]';
+
+export const OVERVIEW_RULE =
+  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=rule\\.name]';
+
+export const OVERVIEW_SEVERITY =
+  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=rule\\.severity]';
+
+export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj$=status]';
+
+export const OVERVIEW_THRESHOLD_COUNT =
+  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=threshold_result\\.count]';
+
+export const OVERVIEW_THRESHOLD_VALUE =
+  '[data-test-subj="eventDetails"] [data-test-subj$=threshold_result\\.terms]';
+
+export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
 export const TABLE_CELL = '.euiTableRowCell';
 
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
-export const TABLE_ROWS = '.euiTableRow';
+export const TABLE_CONTAINER = '[data-test-subj="event-fields-browser"]';
 
-export const THREAT_CONTENT = '[data-test-subj^=draggable-content-]';
+export const TABLE_ROWS = '.euiTableRow';
 
 export const THREAT_DETAILS_ACCORDION = '.euiAccordion__triggerWrapper';
 
 export const THREAT_DETAILS_VIEW = '[data-test-subj="threat-details-view-0"]';
 
 export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
-
-export const THREAT_SUMMARY_VIEW = '[data-test-subj="threat-summary-view"]';
 
 export const TITLE = '.euiTitle';
 

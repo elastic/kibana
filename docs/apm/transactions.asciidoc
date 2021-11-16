@@ -2,7 +2,7 @@
 [[transactions]]
 === Transactions
 
-TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
+TIP: A {apm-guide-ref}/data-model-transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
 [role="screenshot"]

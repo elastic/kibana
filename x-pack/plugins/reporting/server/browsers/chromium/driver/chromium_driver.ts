@@ -210,36 +210,16 @@ export class HeadlessChromiumDriver {
     return resp;
   }
 
-  public async waitFor(
-    {
-      fn,
-      args,
-      toEqual,
-      timeout,
-    }: {
-      fn: EvaluateFn;
-      args: SerializableOrJSHandle[];
-      toEqual: number;
-      timeout: number;
-    },
-    context: EvaluateMetaOpts,
-    logger: LevelLogger
-  ): Promise<void> {
-    const startTime = Date.now();
-
-    while (true) {
-      const result = await this.evaluate({ fn, args }, context, logger);
-      if (result === toEqual) {
-        return;
-      }
-
-      if (Date.now() - startTime > timeout) {
-        throw new Error(
-          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
-        );
-      }
-      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
-    }
+  public async waitFor({
+    fn,
+    args,
+    timeout,
+  }: {
+    fn: EvaluateFn;
+    args: SerializableOrJSHandle[];
+    timeout: number;
+  }): Promise<void> {
+    await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
   public async setViewport(
@@ -265,7 +245,7 @@ export class HeadlessChromiumDriver {
     }
 
     // @ts-ignore
-    // FIXME: use `await page.target().createCDPSession();`
+    // FIXME: retrieve the client in open() and  pass in the client
     const client = this.page._client;
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
@@ -372,7 +352,6 @@ export class HeadlessChromiumDriver {
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
-    // @ts-ignore
     const targetId = target._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);

@@ -61,7 +61,11 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
     const isUpgrade = useMemo(
       () =>
-        ['upgrade-from-fleet-policy-list', 'upgrade-from-integrations-policy-list'].includes(from),
+        [
+          'upgrade-from-fleet-policy-list',
+          'upgrade-from-integrations-policy-list',
+          'upgrade-from-extension',
+        ].includes(from),
       [from]
     );
 
@@ -119,16 +123,33 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
         );
       }
 
-      return isEdit ? (
-        <EuiText>
-          <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
-            <FormattedMessage
-              id="xpack.fleet.editPackagePolicy.pageTitle"
-              defaultMessage="Edit integration"
-            />
-          </h1>
-        </EuiText>
-      ) : (
+      if (isEdit) {
+        return (
+          <EuiText>
+            <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
+              <FormattedMessage
+                id="xpack.fleet.editPackagePolicy.pageTitle"
+                defaultMessage="Edit integration"
+              />
+            </h1>
+          </EuiText>
+        );
+      }
+
+      if (isUpgrade) {
+        return (
+          <EuiText>
+            <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
+              <FormattedMessage
+                id="xpack.fleet.upgradePackagePolicy.pageTitle"
+                defaultMessage="Upgrade integration"
+              />
+            </h1>
+          </EuiText>
+        );
+      }
+
+      return (
         <EuiText>
           <h1>
             <FormattedMessage

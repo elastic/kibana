@@ -5,7 +5,10 @@
  * 2.0.
  */
 import * as rt from 'io-ts';
+import { Unit } from '@elastic/datemath';
 import { ANOMALY_THRESHOLD } from '../../infra_ml';
+import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
+import { SnapshotCustomMetricInput } from '../../http_api';
 
 // TODO: Have threshold and inventory alerts import these types from this file instead of from their
 // local directories
@@ -53,4 +56,26 @@ export interface MetricAnomalyParams {
   spaceId?: string;
   threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
   influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
+}
+
+// Types for the executor
+
+export interface InventoryMetricConditions {
+  metric: SnapshotMetricType;
+  timeSize: number;
+  timeUnit: Unit;
+  sourceId?: string;
+  threshold: number[];
+  comparator: Comparator;
+  customMetric?: SnapshotCustomMetricInput;
+  warningThreshold?: number[];
+  warningComparator?: Comparator;
+}
+
+export interface InventoryMetricThresholdParams {
+  criteria: InventoryMetricConditions[];
+  filterQuery?: string;
+  nodeType: InventoryItemType;
+  sourceId?: string;
+  alertOnNoData?: boolean;
 }

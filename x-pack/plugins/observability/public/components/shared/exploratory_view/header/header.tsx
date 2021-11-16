@@ -10,22 +10,20 @@ import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { LastUpdated } from './last_updated';
-import { combineTimeRanges } from '../lens_embeddable';
 import { ExpViewActionMenu } from '../components/action_menu';
+import { useExpViewTimeRange } from '../hooks/use_time_range';
+import { LastUpdated } from './last_updated';
+import type { ChartTimeRange } from './last_updated';
 
 interface Props {
-  seriesId?: number;
-  lastUpdated?: number;
+  chartTimeRange?: ChartTimeRange;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
-export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }: Props) {
-  const { getSeries, allSeries, setLastRefresh, reportType } = useSeriesStorage();
+export function ExploratoryViewHeader({ lensAttributes, chartTimeRange }: Props) {
+  const { setLastRefresh } = useSeriesStorage();
 
-  const series = seriesId ? getSeries(seriesId) : undefined;
-
-  const timeRange = combineTimeRanges(reportType, allSeries, series);
+  const timeRange = useExpViewTimeRange();
 
   return (
     <>
@@ -49,7 +47,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes, lastUpdated }:
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LastUpdated lastUpdated={lastUpdated} />
+          <LastUpdated chartTimeRange={chartTimeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>

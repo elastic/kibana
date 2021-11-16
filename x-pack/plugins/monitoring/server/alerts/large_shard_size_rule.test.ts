@@ -85,14 +85,10 @@ describe('LargeShardSizeRule', () => {
     const shardSize = 0;
     const clusterUuid = 'abc123';
     const clusterName = 'testCluster';
-    const nodeId = 'myNodeId';
-    const nodeName = 'myNodeName';
     const stat = {
       shardIndex,
       shardSize,
       clusterUuid,
-      nodeId,
-      nodeName,
     };
 
     const replaceState = jest.fn();

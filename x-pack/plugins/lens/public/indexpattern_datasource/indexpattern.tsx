@@ -42,7 +42,7 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { isDraggedField, normalizeOperationDataType } from './utils';
+import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
@@ -57,8 +57,9 @@ import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
-
-export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
+import { getPrecisionErrorWarningMessages } from './utils';
+export type { OperationType, IndexPatternColumn } from './operations';
+export { deleteColumn } from './operations';
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
@@ -268,6 +269,12 @@ export function getIndexPatternDatasource({
       return columnLabelMap;
     },
 
+    isValidColumn: (state: IndexPatternPrivateState, layerId: string, columnId: string) => {
+      const layer = state.layers[layerId];
+
+      return !isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId]);
+    },
+
     renderDimensionTrigger: (
       domElement: Element,
       props: DatasourceDimensionTriggerProps<IndexPatternPrivateState>
@@ -444,21 +451,23 @@ export function getIndexPatternDatasource({
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
-        (
-          getErrorMessages(
-            layer,
-            state.indexPatterns[layer.indexPatternId],
-            state,
-            layerId,
-            core
-          ) ?? []
-        ).map((message) => ({
-          shortMessage: '', // Not displayed currently
-          longMessage: typeof message === 'string' ? message : message.message,
-          fixAction: typeof message === 'object' ? message.fixAction : undefined,
-        }))
-      );
+      const layerErrors = Object.entries(state.layers)
+        .filter(([_, layer]) => !!state.indexPatterns[layer.indexPatternId])
+        .map(([layerId, layer]) =>
+          (
+            getErrorMessages(
+              layer,
+              state.indexPatterns[layer.indexPatternId],
+              state,
+              layerId,
+              core
+            ) ?? []
+          ).map((message) => ({
+            shortMessage: '', // Not displayed currently
+            longMessage: typeof message === 'string' ? message : message.message,
+            fixAction: typeof message === 'object' ? message.fixAction : undefined,
+          }))
+        );
 
       // Single layer case, no need to explain more
       if (layerErrors.length <= 1) {
@@ -493,7 +502,12 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
-    getWarningMessages: getStateTimeShiftWarningMessages,
+    getWarningMessages: (state, frame) => {
+      return [
+        ...(getStateTimeShiftWarningMessages(state, frame) || []),
+        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks),
+      ];
+    },
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !state.indexPatterns[id]);

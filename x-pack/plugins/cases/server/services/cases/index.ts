@@ -19,7 +19,7 @@ import {
   SavedObjectsResolveResponse,
 } from 'kibana/server';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder, KueryNode } from '../../../../../../src/plugins/data/common';
 
 import { SecurityPluginSetup } from '../../../../security/server';

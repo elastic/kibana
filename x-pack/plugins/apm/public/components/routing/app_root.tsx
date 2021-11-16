@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { Route } from 'react-router-dom';
@@ -17,7 +16,10 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { HeaderMenuPortal } from '../../../../observability/public';
+import {
+  HeaderMenuPortal,
+  InspectorContextProvider,
+} from '../../../../observability/public';
 import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
@@ -26,7 +28,6 @@ import {
 } from '../../context/apm_plugin/apm_plugin_context';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { BreadcrumbsContextProvider } from '../../context/breadcrumbs/context';
-import { InspectorContextProvider } from '../../context/inspector/inspector_context';
 import { LicenseProvider } from '../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';

@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { cloneDeep, isEqual } from 'lodash';
 import moment from 'moment';
 
 export type TabId = 'source_sync_frequency' | 'blocked_time_windows';
@@ -19,24 +20,74 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { BlockedWindow } from '../../../../types';
 
 import {
-  SYNC_ENABLED_MESSAGE,
-  SYNC_DISABLED_MESSAGE,
-  SYNC_SETTINGS_UPDATED_MESSAGE,
-} from '../../constants';
+  BlockedWindow,
+  DayOfWeek,
+  IndexingSchedule,
+  ContentSourceFullData,
+  SyncJobType,
+  TimeUnit,
+} from '../../../../types';
+
+import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';
 import { SourceLogic } from '../../source_logic';
+
+type BlockedWindowPropType = 'jobType' | 'day' | 'start' | 'end';
+
+interface ServerBlockedWindow {
+  job_type: string;
+  day: string;
+  start: string;
+  end: string;
+}
+
+interface ServerSyncSettingsBody {
+  content_source: {
+    indexing: {
+      enabled?: boolean;
+      features?: {
+        content_extraction: { enabled: boolean };
+        thumbnails: { enabled: boolean };
+      };
+      schedule?: {
+        full: string;
+        incremental: string;
+        delete: string;
+        permissions?: string;
+        blocked_windows?: ServerBlockedWindow[];
+      };
+    };
+  };
+}
 
 interface SynchronizationActions {
   setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
   handleSelectedTabChanged(tabId: TabId): TabId;
   addBlockedWindow(): void;
-  updateSyncSettings(): void;
+  removeBlockedWindow(index: number): number;
+  updateFrequencySettings(): void;
+  updateObjectsAndAssetsSettings(): void;
   resetSyncSettings(): void;
   updateSyncEnabled(enabled: boolean): boolean;
   setThumbnailsChecked(checked: boolean): boolean;
+  setSyncFrequency(
+    type: SyncJobType,
+    value: string,
+    unit: TimeUnit
+  ): { type: SyncJobType; value: number; unit: TimeUnit };
+  setBlockedTimeWindow(
+    index: number,
+    prop: BlockedWindowPropType,
+    value: string
+  ): {
+    index: number;
+    prop: BlockedWindowPropType;
+    value: string;
+  };
   setContentExtractionChecked(checked: boolean): boolean;
+  setServerSchedule(schedule: IndexingSchedule): IndexingSchedule;
+  updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
 }
 
 interface SynchronizationValues {
@@ -45,14 +96,19 @@ interface SynchronizationValues {
   hasUnsavedObjectsAndAssetsChanges: boolean;
   thumbnailsChecked: boolean;
   contentExtractionChecked: boolean;
-  blockedWindows: BlockedWindow[];
+  cachedSchedule: IndexingSchedule;
+  schedule: IndexingSchedule;
 }
 
 export const emptyBlockedWindow: BlockedWindow = {
   jobType: 'full',
   day: 'monday',
-  start: moment().set('hour', 11).set('minutes', 0),
-  end: moment().set('hour', 13).set('minutes', 0),
+  start: '11:00:00Z',
+  end: '13:00:00Z',
+};
+
+type BlockedWindowMap = {
+  [prop in keyof BlockedWindow]: SyncJobType | DayOfWeek | 'all' | string;
 };
 
 export const SynchronizationLogic = kea<
@@ -64,8 +120,22 @@ export const SynchronizationLogic = kea<
     handleSelectedTabChanged: (tabId: TabId) => tabId,
     updateSyncEnabled: (enabled: boolean) => enabled,
     setThumbnailsChecked: (checked: boolean) => checked,
+    setSyncFrequency: (type: SyncJobType, value: string, unit: TimeUnit) => ({
+      type,
+      value,
+      unit,
+    }),
+    setBlockedTimeWindow: (index: number, prop: BlockedWindowPropType, value: string) => ({
+      index,
+      prop,
+      value,
+    }),
     setContentExtractionChecked: (checked: boolean) => checked,
-    updateSyncSettings: true,
+    updateServerSettings: (body: ServerSyncSettingsBody) => body,
+    setServerSchedule: (schedule: IndexingSchedule) => schedule,
+    removeBlockedWindow: (index: number) => index,
+    updateFrequencySettings: true,
+    updateObjectsAndAssetsSettings: true,
     resetSyncSettings: true,
     addBlockedWindow: true,
   },
@@ -76,22 +146,86 @@ export const SynchronizationLogic = kea<
         setNavigatingBetweenTabs: (_, navigatingBetweenTabs) => navigatingBetweenTabs,
       },
     ],
-    blockedWindows: [
-      [],
-      {
-        addBlockedWindow: (state, _) => [...state, emptyBlockedWindow],
-      },
-    ],
     thumbnailsChecked: [
       props.contentSource.indexing.features.thumbnails.enabled,
       {
         setThumbnailsChecked: (_, thumbnailsChecked) => thumbnailsChecked,
+        resetSyncSettings: () => props.contentSource.indexing.features.thumbnails.enabled,
       },
     ],
     contentExtractionChecked: [
       props.contentSource.indexing.features.contentExtraction.enabled,
       {
         setContentExtractionChecked: (_, contentExtractionChecked) => contentExtractionChecked,
+        resetSyncSettings: () => props.contentSource.indexing.features.contentExtraction.enabled,
+      },
+    ],
+    cachedSchedule: [
+      stripScheduleSeconds(props.contentSource.indexing.schedule),
+      {
+        setServerSchedule: (_, schedule) => schedule,
+      },
+    ],
+    schedule: [
+      stripScheduleSeconds(props.contentSource.indexing.schedule),
+      {
+        resetSyncSettings: () => stripScheduleSeconds(props.contentSource.indexing.schedule),
+        setServerSchedule: (_, schedule) => schedule,
+        setSyncFrequency: (state, { type, value, unit }) => {
+          let currentValue;
+          const schedule = cloneDeep(state);
+          const duration = schedule[type];
+
+          switch (unit) {
+            case 'days':
+              currentValue = moment.duration(duration).days();
+              break;
+            case 'hours':
+              currentValue = moment.duration(duration).hours();
+              break;
+            default:
+              currentValue = moment.duration(duration).minutes();
+              break;
+          }
+
+          // momentJS doesn't seem to have a way to simply set the minutes/hours/days, so we have
+          // to subtract the current value and then add the new value.
+          // https://momentjs.com/docs/#/durations/
+          schedule[type] = moment
+            .duration(duration)
+            .subtract(currentValue, unit)
+            .add(value, unit)
+            .toISOString();
+
+          return schedule;
+        },
+        addBlockedWindow: (state, _) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows || [];
+          blockedWindows.push(emptyBlockedWindow);
+          schedule.blockedWindows = blockedWindows;
+          return schedule;
+        },
+        removeBlockedWindow: (state, index) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows;
+          blockedWindows!.splice(index, 1);
+          if (blockedWindows!.length > 0) {
+            schedule.blockedWindows = blockedWindows;
+          } else {
+            delete schedule.blockedWindows;
+          }
+          return schedule;
+        },
+        setBlockedTimeWindow: (state, { index, prop, value }) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows;
+          const blockedWindow = blockedWindows![index] as BlockedWindowMap;
+          blockedWindow[prop] = value;
+          (blockedWindows![index] as BlockedWindowMap) = blockedWindow;
+          schedule.blockedWindows = blockedWindows;
+          return schedule;
+        },
       },
     ],
   }),
@@ -118,6 +252,10 @@ export const SynchronizationLogic = kea<
         );
       },
     ],
+    hasUnsavedFrequencyChanges: [
+      () => [selectors.cachedSchedule, selectors.schedule],
+      (cachedSchedule, schedule) => !isEqual(cachedSchedule, schedule),
+    ],
   }),
   listeners: ({ actions, values, props }) => ({
     handleSelectedTabChanged: async (tabId, breakpoint) => {
@@ -140,46 +278,49 @@ export const SynchronizationLogic = kea<
       actions.setNavigatingBetweenTabs(false);
     },
     updateSyncEnabled: async (enabled) => {
-      const { id: sourceId } = props.contentSource;
-      const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
-      const successMessage = enabled ? SYNC_ENABLED_MESSAGE : SYNC_DISABLED_MESSAGE;
-
-      try {
-        const response = await HttpLogic.values.http.patch(route, {
-          body: JSON.stringify({ content_source: { indexing: { enabled } } }),
-        });
-
-        SourceLogic.actions.setContentSource(response);
-        flashSuccessToast(successMessage);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
+      actions.updateServerSettings({
+        content_source: {
+          indexing: { enabled },
+        },
+      });
     },
-    resetSyncSettings: () => {
-      actions.setThumbnailsChecked(props.contentSource.indexing.features.thumbnails.enabled);
-      actions.setContentExtractionChecked(
-        props.contentSource.indexing.features.contentExtraction.enabled
-      );
-    },
-    updateSyncSettings: async () => {
-      const { id: sourceId } = props.contentSource;
-      const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
-
-      try {
-        const response = await HttpLogic.values.http.patch(route, {
-          body: JSON.stringify({
-            content_source: {
-              indexing: {
-                features: {
-                  content_extraction: { enabled: values.contentExtractionChecked },
-                  thumbnails: { enabled: values.thumbnailsChecked },
-                },
-              },
+    updateObjectsAndAssetsSettings: () => {
+      actions.updateServerSettings({
+        content_source: {
+          indexing: {
+            features: {
+              content_extraction: { enabled: values.contentExtractionChecked },
+              thumbnails: { enabled: values.thumbnailsChecked },
             },
-          }),
+          },
+        },
+      });
+    },
+    updateFrequencySettings: () => {
+      actions.updateServerSettings({
+        content_source: {
+          indexing: {
+            schedule: {
+              full: values.schedule.full,
+              incremental: values.schedule.incremental,
+              delete: values.schedule.delete,
+              blocked_windows: formatBlockedWindowsForServer(values.schedule.blockedWindows),
+            },
+          },
+        },
+      });
+    },
+    updateServerSettings: async (body: ServerSyncSettingsBody) => {
+      const { id: sourceId } = props.contentSource;
+      const route = `/internal/workplace_search/org/sources/${sourceId}/settings`;
+
+      try {
+        const response = await HttpLogic.values.http.patch<ContentSourceFullData>(route, {
+          body: JSON.stringify(body),
         });
 
         SourceLogic.actions.setContentSource(response);
+        SynchronizationLogic.actions.setServerSchedule(response.indexing.schedule);
         flashSuccessToast(SYNC_SETTINGS_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
@@ -187,3 +328,35 @@ export const SynchronizationLogic = kea<
     },
   }),
 });
+
+const SECONDS_IN_MS = 1000;
+const getDurationMS = (time: string): number => moment.duration(time).seconds() * SECONDS_IN_MS;
+const getISOStringWithoutSeconds = (time: string): string =>
+  moment.duration(time).subtract(getDurationMS(time)).toISOString();
+
+// The API allows for setting schedule values with seconds. The UI feature does not allow for setting
+// values with seconds. This function strips the seconds from the schedule values for equality checks
+// to determine if the user has unsaved changes.
+export const stripScheduleSeconds = (schedule: IndexingSchedule): IndexingSchedule => {
+  const _schedule = cloneDeep(schedule);
+  const { full, incremental, delete: _delete, permissions } = _schedule;
+  _schedule.full = getISOStringWithoutSeconds(full);
+  _schedule.incremental = getISOStringWithoutSeconds(incremental);
+  _schedule.delete = getISOStringWithoutSeconds(_delete);
+  if (permissions) _schedule.permissions = getISOStringWithoutSeconds(permissions);
+
+  return _schedule;
+};
+
+const formatBlockedWindowsForServer = (
+  blockedWindows?: BlockedWindow[]
+): ServerBlockedWindow[] | undefined => {
+  if (!blockedWindows || blockedWindows.length < 1) return [];
+
+  return blockedWindows.map(({ jobType, day, start, end }) => ({
+    job_type: jobType,
+    day,
+    start,
+    end,
+  }));
+};

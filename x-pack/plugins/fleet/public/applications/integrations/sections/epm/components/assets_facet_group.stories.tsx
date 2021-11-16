@@ -36,15 +36,16 @@ export const AssetsFacetGroup = ({ width }: Args) => {
             lens: [],
             security_rule: [],
             ml_module: [],
+            tag: [],
           },
           elasticsearch: {
             component_template: [],
             data_stream_ilm_policy: [],
-            data_stream: [],
             ilm_policy: [],
             index_template: [],
             ingest_pipeline: [],
             transform: [],
+            ml_model: [],
           },
         }}
       />

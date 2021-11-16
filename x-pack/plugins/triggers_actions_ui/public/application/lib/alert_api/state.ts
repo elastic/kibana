@@ -34,10 +34,10 @@ export async function loadAlertState({
   alertId: string;
 }): Promise<AlertTaskState> {
   return await http
-    .get(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${alertId}/state`)
-    .then((state: AsApiContract<AlertTaskState> | EmptyHttpResponse) =>
-      state ? rewriteBodyRes(state) : {}
+    .get<AsApiContract<AlertTaskState> | EmptyHttpResponse>(
+      `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${alertId}/state`
     )
+    .then((state) => (state ? rewriteBodyRes(state) : {}))
     .then((state: AlertTaskState) => {
       return pipe(
         alertStateSchema.decode(state),

@@ -7,14 +7,14 @@
 
 import { Logger } from 'kibana/server';
 import { chunk } from 'lodash';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery, termQuery } from '../../../../observability/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getServicesProjection } from '../../projections/services';
-import { mergeProjection } from '../../projections/util/merge_projection';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../helpers/setup_request';
@@ -26,6 +26,7 @@ import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 
 export interface IEnvOptions {
   setup: Setup;
@@ -53,10 +54,7 @@ async function getConnectionData({
       end,
     });
 
-    const chunks = chunk(
-      traceIds,
-      setup.config['xpack.apm.serviceMapMaxTracesPerRequest']
-    );
+    const chunks = chunk(traceIds, setup.config.serviceMapMaxTracesPerRequest);
 
     const init = {
       connections: [],
@@ -97,40 +95,29 @@ async function getServicesData(options: IEnvOptions) {
   const { environment, setup, searchAggregatedTransactions, start, end } =
     options;
 
-  const projection = getServicesProjection({
-    setup,
-    searchAggregatedTransactions,
-    kuery: '',
-    start,
-    end,
-  });
-
-  let filter = [
-    ...projection.body.query.bool.filter,
-    ...environmentQuery(environment),
-  ];
-
-  if (options.serviceName) {
-    filter = filter.concat({
-      term: {
-        [SERVICE_NAME]: options.serviceName,
-      },
-    });
-  }
-
-  const params = mergeProjection(projection, {
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForTransactions(searchAggregatedTransactions),
+        ProcessorEvent.metric as const,
+        ProcessorEvent.error as const,
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          ...projection.body.query.bool,
-          filter,
+          filter: [
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...termQuery(SERVICE_NAME, options.serviceName),
+          ],
         },
       },
       aggs: {
         services: {
           terms: {
-            field: projection.body.aggs.services.terms.field,
+            field: SERVICE_NAME,
             size: 500,
           },
           aggs: {
@@ -143,7 +130,7 @@ async function getServicesData(options: IEnvOptions) {
         },
       },
     },
-  });
+  };
 
   const { apmEventClient } = setup;
 
@@ -169,7 +156,6 @@ async function getServicesData(options: IEnvOptions) {
 
 export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
 export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
-export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export function getServiceMap(options: IEnvOptions) {
   return withApmSpan('get_service_map', async () => {

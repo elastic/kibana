@@ -20,9 +20,6 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 
 [cols="2*<"]
 |===
-| `xpack.fleet.enabled` {ess-icon}
-  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-  Set to `true` (default) to enable {fleet}. 
 | `xpack.fleet.agents.enabled` {ess-icon}
   | Set to `true` (default) to enable {fleet}. 
 |===
@@ -101,7 +98,7 @@ Optional properties are:
     prevent that specific `var` from being edited by the user.
 
 | `xpack.fleet.outputs`
-  | List of ouputs that are configured when the {fleet} app starts.
+  | List of outputs that are configured when the {fleet} app starts.
 Required properties are:
 
   `id`:: Unique ID for this output. The ID should be a string.

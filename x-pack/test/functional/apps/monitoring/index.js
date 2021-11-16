@@ -34,19 +34,20 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./kibana/instance'));
     loadTestFile(require.resolve('./kibana/instance_mb'));
 
-    // loadTestFile(require.resolve('./logstash/overview'));
-    // loadTestFile(require.resolve('./logstash/nodes'));
-    // loadTestFile(require.resolve('./logstash/node'));
-
+    loadTestFile(require.resolve('./logstash/overview'));
+    loadTestFile(require.resolve('./logstash/overview_mb'));
+    loadTestFile(require.resolve('./logstash/nodes'));
+    loadTestFile(require.resolve('./logstash/nodes_mb'));
     loadTestFile(require.resolve('./logstash/pipelines'));
     loadTestFile(require.resolve('./logstash/pipelines_mb'));
-
+    loadTestFile(require.resolve('./logstash/node_detail'));
+    loadTestFile(require.resolve('./logstash/node_detail_mb'));
     loadTestFile(require.resolve('./beats/cluster'));
     loadTestFile(require.resolve('./beats/overview'));
     loadTestFile(require.resolve('./beats/listing'));
     loadTestFile(require.resolve('./beats/beat_detail'));
 
-    // loadTestFile(require.resolve('./time_filter'));
+    loadTestFile(require.resolve('./time_filter'));
     loadTestFile(require.resolve('./enable_monitoring'));
 
     loadTestFile(require.resolve('./setup/metricbeat_migration'));

@@ -13,6 +13,7 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
+import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../fleet/common';
 
 jest.mock('./policy_forms/components/policy_form_layout');
 
@@ -23,6 +24,7 @@ describe('Policy Details', () => {
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
+  let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let http: typeof coreStart.http;
   let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
@@ -32,13 +34,20 @@ describe('Policy Details', () => {
     const appContextMockRenderer = createAppRootMockRenderer();
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
-    ({ history, coreStart } = appContextMockRenderer);
+    ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
     render = (ui) => mount(ui, { wrappingComponent: AppWrapper });
     http = coreStart.http;
   });
 
   describe('when displayed with invalid id', () => {
+    let releaseApiFailure: () => void;
+
     beforeEach(() => {
+      http.get.mockImplementation(async () => {
+        await new Promise((_, reject) => {
+          releaseApiFailure = reject.bind(null, new Error('policy not found'));
+        });
+      });
       history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
     });
@@ -46,7 +55,19 @@ describe('Policy Details', () => {
     it('should NOT display timeline', async () => {
       expect(policyView.find('flyoutOverlay')).toHaveLength(0);
     });
+
+    it('should show loader followed by error message', async () => {
+      expect(policyView.find('EuiLoadingSpinner').length).toBe(1);
+      releaseApiFailure();
+      await middlewareSpy.waitForAction('serverFailedToReturnPolicyDetailsData');
+      policyView.update();
+      const callout = policyView.find('EuiCallOut');
+      expect(callout).toHaveLength(1);
+      expect(callout.prop('color')).toEqual('danger');
+      expect(callout.text()).toEqual('policy not found');
+    });
   });
+
   describe('when displayed with valid id', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 
@@ -60,7 +81,7 @@ describe('Policy Details', () => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/fleet/package_policies/1') {
+          if (path === `${PACKAGE_POLICY_API_ROOT}/1`) {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
               item: policyPackagePolicy,
@@ -69,7 +90,7 @@ describe('Policy Details', () => {
           }
 
           // GET Agent status for agent policy
-          if (path === '/api/fleet/agent-status') {
+          if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
               results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },

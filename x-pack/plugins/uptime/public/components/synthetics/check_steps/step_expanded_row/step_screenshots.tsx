@@ -36,6 +36,7 @@ export const StepScreenshots = ({ step }: Props) => {
         timestamp: step['@timestamp'],
         monitorId: step.monitor.id,
         stepIndex: step.synthetics?.step?.index!,
+        location: step.observer?.geo?.name,
       });
     }
   }, [step._id, step['@timestamp']]);

@@ -66,7 +66,10 @@ export const useRequestProfile = () => {
     }
 
     try {
-      const resp = await http.post('../api/searchprofiler/profile', {
+      const resp = await http.post<
+        | { ok: true; resp: { profile: { shards: ShardSerialized[] } } }
+        | { ok: false; err: { msg: string } }
+      >('../api/searchprofiler/profile', {
         body: JSON.stringify(payload),
         headers: { 'Content-Type': 'application/json' },
       });

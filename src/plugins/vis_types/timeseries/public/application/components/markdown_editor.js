@@ -116,7 +116,7 @@ export class MarkdownEditor extends Component {
         <div className="tvbMarkdownEditor__editor">
           <CodeEditor
             editorDidMount={this.handleOnLoad}
-            languageId={MarkdownLang.ID}
+            languageId={MarkdownLang}
             options={{
               fontSize: '14px',
               wordWrap: 'on',

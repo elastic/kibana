@@ -29,7 +29,7 @@ Refer to [divio documentation](https://documentation.divio.com/) for guidance on
 
 #### Location
 
-If the information spans multiple plugins, consider adding it to the [dev_docs](https://github.com/elastic/kibana/tree/master/dev_docs) folder. If it is plugin specific, consider adding it inside the plugin folder. Write it in an mdx file if you would like it to show up in our new (beta) documentation system.
+If the information spans multiple plugins, consider adding it to the [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder. If it is plugin specific, consider adding it inside the plugin folder. Write it in an mdx file if you would like it to show up in our new (beta) documentation system.
 
 <DocCallOut title="internal only">
 
@@ -139,7 +139,7 @@ export type foo: string | AnInterface;
 
 ### Example plugins
 
-Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/master/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
+Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
 
 ## Performance
 
@@ -165,7 +165,7 @@ all of our apps are accessible.
 
 ## Localization
 
-Kibana is translated into other languages. Use our i18n utilities to ensure your public facing strings will be translated to ensure all Kibana apps are localized. Read and adhere to our [i18n guidelines](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/GUIDELINE.md)
+Kibana is translated into other languages. Use our i18n utilities to ensure your public facing strings will be translated to ensure all Kibana apps are localized. Read and adhere to our [i18n guidelines](https://github.com/elastic/kibana/blob/main/packages/kbn-i18n/GUIDELINE.md)
 
 <DocCallOut title="Internal only">
   Elasticians, check out the #kibana-localization channel to ask questions and receive guidance.
@@ -173,7 +173,7 @@ Kibana is translated into other languages. Use our i18n utilities to ensure your
 
 ## Styleguide
 
-We use es-lint rules when possible, but please review our [styleguide](https://github.com/elastic/kibana/blob/master/STYLEGUIDE.mdx), which includes recommendations that can't be linted on.
+We use es-lint rules when possible, but please review our [styleguide](https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx), which includes recommendations that can't be linted on.
 
 Es-lint overrides on a per-plugin level are discouraged.
 
@@ -196,7 +196,7 @@ Over-refactoring can be a problem in it's own right, but it's still important to
 Try not to put your PR in review mode, or merge large changes, right before Feature Freeze. It's inevitably one of the most volatile times for the
 Kibana code base, try not to contribute to this volatility. Doing this can:
 
-- increase the likelyhood of conflicts from other features being merged at the last minute
+- increase the likelihood of conflicts from other features being merged at the last minute
 - means your feature has less QA time
 - means your feature gets less careful review as reviewers are often swamped at this time
 
@@ -231,7 +231,7 @@ Consider how you want to handle the PR review. Reviewing each PR going into the 
 
 **3. Use an example plugin**
 
-If you are building a service for developers, create an [example plugin](https://github.com/elastic/kibana/tree/master/examples) to showcase and test intended usage. This is a great way for reviewers and PMs to play around with a feature through the UI, before the production UI is ready. This can also help developers consuming your services get hands on.
+If you are building a service for developers, create an [example plugin](https://github.com/elastic/kibana/tree/main/examples) to showcase and test intended usage. This is a great way for reviewers and PMs to play around with a feature through the UI, before the production UI is ready. This can also help developers consuming your services get hands on.
 
 ## Embrace the monorepo
 
@@ -241,7 +241,7 @@ When experimenting with code, it's completely fine to create a separate GitHub r
 
 There are some exceptions where a separate repo makes sense. However, they are exceptions to the rule. A separate repo has proven beneficial when there's a dedicated team collaborating on a package which has multiple consumers, for example [EUI](https://github.com/elastic/eui).
 
-It may be tempting to get caught up in the dream of writing the next package which is published to npm and downloaded millions of times a week. Knowing the quality of developers that are working on Kibana, this is a real possibility. However, knowing which packages will see mass adoption is impossible to predict. Instead of jumping directly to writing code in a separate repo and accepting all of the complications that come along with it, prefer keeping code inside the Kibana repo. A [Kibana package](https://github.com/elastic/kibana/tree/master/packages) can be used to publish a package to npm, while still keeping the code inside the Kibana repo. Move code to an external repo only when there is a good reason, for example to enable external contributions.
+It may be tempting to get caught up in the dream of writing the next package which is published to npm and downloaded millions of times a week. Knowing the quality of developers that are working on Kibana, this is a real possibility. However, knowing which packages will see mass adoption is impossible to predict. Instead of jumping directly to writing code in a separate repo and accepting all of the complications that come along with it, prefer keeping code inside the Kibana repo. A [Kibana package](https://github.com/elastic/kibana/tree/main/packages) can be used to publish a package to npm, while still keeping the code inside the Kibana repo. Move code to an external repo only when there is a good reason, for example to enable external contributions.
 
 ## Security best practices
 

@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
@@ -30,7 +30,7 @@ import { ElasticDocsLink } from '../Links/ElasticDocsLink';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 type ApiResponse =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 interface InitialState {
   requestId: string;
@@ -100,7 +100,7 @@ export function TransactionsTable({
   const { transactionType, serviceName } = useApmServiceContext();
   const {
     urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -116,7 +116,7 @@ export function TransactionsTable({
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
+          'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -189,7 +189,7 @@ export function TransactionsTable({
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -222,6 +222,7 @@ export function TransactionsTable({
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,
+    comparisonType,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;

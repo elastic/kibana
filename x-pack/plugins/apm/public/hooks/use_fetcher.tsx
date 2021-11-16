@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { IHttpFetchError } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { useInspectorContext } from '../context/inspector/use_inspector_context';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import {
   AutoAbortedAPMClient,
   callApmApi,
 } from '../services/rest/createCallApmApi';
+import { useInspectorContext } from '../../../observability/public';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -26,10 +26,12 @@ export enum FETCH_STATUS {
 export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
-  error?: IHttpFetchError;
+  error?: IHttpFetchError<ResponseErrorBody>;
 }
 
-function getDetailsFromErrorResponse(error: IHttpFetchError) {
+function getDetailsFromErrorResponse(
+  error: IHttpFetchError<ResponseErrorBody>
+) {
   const message = error.body?.message ?? error.response?.statusText;
   return (
     <>
@@ -118,7 +120,7 @@ export function useFetcher<TReturn>(
           } as FetcherResult<InferResponseType<TReturn>>);
         }
       } catch (e) {
-        const err = e as Error | IHttpFetchError;
+        const err = e as Error | IHttpFetchError<ResponseErrorBody>;
 
         if (!signal.aborted) {
           const errorDetails =

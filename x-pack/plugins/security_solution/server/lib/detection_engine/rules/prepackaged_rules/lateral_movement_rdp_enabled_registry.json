@@ -35,12 +35,19 @@
         {
           "id": "T1021",
           "name": "Remote Services",
-          "reference": "https://attack.mitre.org/techniques/T1021/"
+          "reference": "https://attack.mitre.org/techniques/T1021/",
+          "subtechnique": [
+            {
+              "id": "T1021.001",
+              "name": "Remote Desktop Protocol",
+              "reference": "https://attack.mitre.org/techniques/T1021/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

@@ -30,11 +30,13 @@ export enum AlertExecutionStatusErrorReasons {
   Execute = 'execute',
   Unknown = 'unknown',
   License = 'license',
+  Timeout = 'timeout',
 }
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   lastExecutionDate: Date;
+  lastDuration?: number;
   error?: {
     reason: AlertExecutionStatusErrorReasons;
     message: string;

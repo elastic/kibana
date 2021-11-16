@@ -13,14 +13,14 @@ import { DataProvider } from '../../../../common/types/timeline';
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_selector');
 jest.mock('../../containers/sourcerer', () => ({
-  useSourcererScope: jest.fn().mockReturnValue({ browserFields: {} }),
+  useSourcererDataView: jest.fn().mockReturnValue({ browserFields: {} }),
 }));
 
 describe('useHoverActionItems', () => {
   const defaultProps: UseHoverActionItemsProps = {
     dataProvider: [{} as DataProvider],
     defaultFocusedButtonRef: null,
-    field: 'signal.rule.name',
+    field: 'kibana.alert.rule.name',
     handleHoverActionClicked: jest.fn(),
     hideTopN: false,
     isCaseView: false,
@@ -97,7 +97,7 @@ describe('useHoverActionItems', () => {
         'hover-actions-filter-out'
       );
       expect(result.current.overflowActionItems[2].props['data-test-subj']).toEqual(
-        'more-actions-signal.rule.name'
+        'more-actions-kibana.alert.rule.name'
       );
       expect(result.current.overflowActionItems[2].props.items[0].props['data-test-subj']).toEqual(
         'hover-actions-toggle-column'

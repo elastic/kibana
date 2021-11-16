@@ -61,7 +61,7 @@ export const staticValueOperation: OperationDefinition<
   getErrorMessage(layer, columnId) {
     const column = layer.columns[columnId] as StaticValueIndexPatternColumn;
 
-    return !isValidNumber(column.params.value)
+    return column.params.value != null && !isValidNumber(column.params.value)
       ? [
           i18n.translate('xpack.lens.indexPattern.staticValueError', {
             defaultMessage: 'The static value of {value} is not a valid number',
@@ -95,7 +95,7 @@ export const staticValueOperation: OperationDefinition<
         arguments: {
           id: [columnId],
           name: [label || defaultLabel],
-          expression: [isValidNumber(params.value) ? params.value! : String(defaultValue)],
+          expression: [String(isValidNumber(params.value) ? params.value! : defaultValue)],
         },
       },
     ];
@@ -118,7 +118,7 @@ export const staticValueOperation: OperationDefinition<
       operationType: 'static_value',
       isBucketed: false,
       scale: 'ratio',
-      params: { ...previousParams, value: previousParams.value ?? String(defaultValue) },
+      params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
       references: [],
     };
   },
@@ -137,13 +137,12 @@ export const staticValueOperation: OperationDefinition<
   },
 
   paramEditor: function StaticValueEditor({
-    layer,
     updateLayer,
     currentColumn,
     columnId,
     activeData,
     layerId,
-    indexPattern,
+    paramEditorCustomProps,
   }) {
     const onChange = useCallback(
       (newValue) => {
@@ -176,10 +175,7 @@ export const staticValueOperation: OperationDefinition<
 
     // Pick the data from the current activeData (to be used when the current operation is not static_value)
     const activeDataValue =
-      activeData &&
-      activeData[layerId] &&
-      activeData[layerId]?.rows?.length === 1 &&
-      activeData[layerId].rows[0][columnId];
+      activeData?.[layerId]?.rows?.length === 1 && activeData[layerId].rows[0][columnId];
 
     const fallbackValue =
       currentColumn?.operationType !== 'static_value' && activeDataValue != null
@@ -204,11 +200,7 @@ export const staticValueOperation: OperationDefinition<
 
     return (
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>
-          {i18n.translate('xpack.lens.indexPattern.staticValue.label', {
-            defaultMessage: 'Threshold value',
-          })}
-        </EuiFormLabel>
+        <EuiFormLabel>{paramEditorCustomProps?.label || defaultLabel}</EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiFieldNumber
           data-test-subj="lns-indexPattern-static_value-input"

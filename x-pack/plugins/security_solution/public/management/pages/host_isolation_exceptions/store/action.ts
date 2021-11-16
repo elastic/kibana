@@ -5,28 +5,37 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Action } from 'redux';
 import { HostIsolationExceptionsPageState } from '../types';
 
-export type HostIsolationExceptionsPageDataChanged =
-  Action<'hostIsolationExceptionsPageDataChanged'> & {
-    payload: HostIsolationExceptionsPageState['entries'];
+export type HostIsolationExceptionsFormStateChanged =
+  Action<'hostIsolationExceptionsFormStateChanged'> & {
+    payload: HostIsolationExceptionsPageState['form']['status'];
   };
 
-export type HostIsolationExceptionsDeleteItem = Action<'hostIsolationExceptionsMarkToDelete'> & {
-  payload?: ExceptionListItemSchema;
+export type HostIsolationExceptionsFormEntryChanged =
+  Action<'hostIsolationExceptionsFormEntryChanged'> & {
+    payload: HostIsolationExceptionsPageState['form']['entry'];
+  };
+
+export type HostIsolationExceptionsCreateEntry = Action<'hostIsolationExceptionsCreateEntry'> & {
+  payload: HostIsolationExceptionsPageState['form']['entry'];
 };
 
-export type HostIsolationExceptionsSubmitDelete = Action<'hostIsolationExceptionsSubmitDelete'>;
-
-export type HostIsolationExceptionsDeleteStatusChanged =
-  Action<'hostIsolationExceptionsDeleteStatusChanged'> & {
-    payload: HostIsolationExceptionsPageState['deletion']['status'];
+export type HostIsolationExceptionsMarkToEdit = Action<'hostIsolationExceptionsMarkToEdit'> & {
+  payload: {
+    id: string;
   };
+};
+
+export type HostIsolationExceptionsSubmitEdit = Action<'hostIsolationExceptionsSubmitEdit'> & {
+  payload: UpdateExceptionListItemSchema;
+};
 
 export type HostIsolationExceptionsPageAction =
-  | HostIsolationExceptionsPageDataChanged
-  | HostIsolationExceptionsDeleteItem
-  | HostIsolationExceptionsSubmitDelete
-  | HostIsolationExceptionsDeleteStatusChanged;
+  | HostIsolationExceptionsCreateEntry
+  | HostIsolationExceptionsFormStateChanged
+  | HostIsolationExceptionsFormEntryChanged
+  | HostIsolationExceptionsMarkToEdit
+  | HostIsolationExceptionsSubmitEdit;

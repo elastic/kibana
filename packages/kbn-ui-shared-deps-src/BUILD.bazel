@@ -38,11 +38,10 @@ RUNTIME_DEPS = [
   "//packages/kbn-monaco",
   "//packages/kbn-std",
   "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-utils",
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath",
+  "//packages/elastic-datemath:npm_module_types",
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-analytics",
   "//packages/kbn-babel-preset",
@@ -50,9 +49,7 @@ TYPES_DEPS = [
   "//packages/kbn-monaco",
   "//packages/kbn-std",
   "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-utils",
   "@npm//@elastic/eui",
-  "@npm//resize-observer-polyfill",
   "@npm//webpack",
 ]
 

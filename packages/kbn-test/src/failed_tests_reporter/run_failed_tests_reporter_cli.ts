@@ -51,9 +51,9 @@ export function runFailedTestsReporterCli() {
           branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH || '';
           isPr = !!process.env.ghprbPullId;
 
-          const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
-          if (!isMasterOrVersion || isPr) {
-            log.info('Failure issues only created on master/version branch jobs');
+          const isMainOrVersion = branch === 'main' || branch.match(/^\d+\.(x|\d+)$/);
+          if (!isMainOrVersion || isPr) {
+            log.info('Failure issues only created on main/version branch jobs');
             updateGithub = false;
           }
         }
@@ -98,8 +98,6 @@ export function runFailedTestsReporterCli() {
         const report = await readTestReport(reportPath);
         const messages = Array.from(getReportMessageIter(report));
         const failures = await getFailures(report);
-
-        reportFailuresToFile(log, failures);
 
         if (indexInEs) {
           await reportFailuresToEs(log, failures);
@@ -146,6 +144,8 @@ export function runFailedTestsReporterCli() {
               branch
             );
             const url = existingIssue.html_url;
+            failure.githubIssue = url;
+            failure.failureCount = updateGithub ? newFailureCount : newFailureCount - 1;
             pushMessage(`Test has failed ${newFailureCount - 1} times on tracked branches: ${url}`);
             if (updateGithub) {
               pushMessage(`Updated existing issue: ${url} (fail count: ${newFailureCount})`);
@@ -157,8 +157,10 @@ export function runFailedTestsReporterCli() {
           pushMessage('Test has not failed recently on tracked branches');
           if (updateGithub) {
             pushMessage(`Created new issue: ${newIssue.html_url}`);
+            failure.githubIssue = newIssue.html_url;
           }
           newlyCreatedIssues.push({ failure, newIssue });
+          failure.failureCount = updateGithub ? 1 : 0;
         }
 
         // mutates report to include messages and writes updated report to disk
@@ -169,6 +171,8 @@ export function runFailedTestsReporterCli() {
           reportPath,
           dryRun: !flags['report-update'],
         });
+
+        reportFailuresToFile(log, failures);
       }
     },
     {

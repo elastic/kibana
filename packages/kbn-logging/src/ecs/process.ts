@@ -21,7 +21,7 @@ interface NestedFields {
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.12/ecs-process.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-process.html
  *
  * @internal
  */
@@ -36,7 +36,6 @@ export interface EcsProcess extends NestedFields {
   name?: string;
   pgid?: number;
   pid?: number;
-  ppid?: number;
   start?: string;
   title?: string;
   uptime?: number;

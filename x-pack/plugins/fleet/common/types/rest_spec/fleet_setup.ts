@@ -13,6 +13,7 @@ export interface PostFleetSetupResponse {
 export interface GetFleetStatusResponse {
   isReady: boolean;
   missing_requirements: Array<
+    | 'security_required'
     | 'tls_required'
     | 'api_keys'
     | 'fleet_admin_user'

@@ -50,7 +50,7 @@ import {
 } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
@@ -111,7 +111,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -179,6 +179,7 @@ const HostsComponent = () => {
                   />
                 }
                 title={i18n.PAGE_TITLE}
+                border
               />
 
               <HostsKpiComponent
@@ -216,8 +217,6 @@ const HostsComponent = () => {
         </StyledFullHeightContainer>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

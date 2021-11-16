@@ -50,9 +50,15 @@ describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
   let savedObjectsClient: SavedObjectsClientCommon;
   let SOClientGetDelay = 0;
+  const uiSettings = {
+    get: () => Promise.resolve(false),
+    getAll: () => {},
+    set: () => () => {},
+    remove: jest.fn(),
+  } as any as UiSettingsCommon;
+  const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
 
   beforeEach(() => {
-    const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
@@ -86,10 +92,7 @@ describe('IndexPatterns', () => {
       });
 
     indexPatterns = new DataViewsService({
-      uiSettings: {
-        get: () => Promise.resolve(false),
-        getAll: () => {},
-      } as any as UiSettingsCommon,
+      uiSettings,
       savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
@@ -273,5 +276,50 @@ describe('IndexPatterns', () => {
 
     // successful subsequent request
     expect(async () => await indexPatterns.get(id)).toBeDefined();
+  });
+
+  describe('getDefaultDataView', () => {
+    test('gets default data view', async () => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+
+      expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('returns undefined if no data views exist', async () => {
+      savedObjectsClient.find = jest.fn(
+        () => Promise.resolve([]) as Promise<Array<SavedObject<any>>>
+      );
+      savedObjectsClient.get = jest.fn(() => Promise.resolve(undefined) as Promise<any>);
+      indexPatterns.clearCache();
+      expect(await indexPatterns.getDefaultDataView()).toBeUndefined();
+    });
+
+    test("default doesn't exist, grabs another data view", async () => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+      uiSettings.get = jest.fn().mockResolvedValue(['bar']);
+
+      savedObjectsClient.find = jest.fn(
+        () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
+      );
+
+      savedObjectsClient.get = jest.fn().mockResolvedValue({
+        id: 'bar',
+        version: 'foo',
+        attributes: {
+          title: 'something',
+        },
+      });
+
+      expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(uiSettings.remove).toBeCalledTimes(1);
+    });
   });
 });

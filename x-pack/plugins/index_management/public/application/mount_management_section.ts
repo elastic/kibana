@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';

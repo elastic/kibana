@@ -8,10 +8,10 @@
 
 /* eslint-disable no-bitwise */
 
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { Node, TypeFormatFlags } from 'ts-morph';
 import { isNamedNode } from '../tsmorph_utils';
-import { Reference } from '../types';
+import { PluginOrPackage, Reference } from '../types';
 import { extractImportReferences } from './extract_import_refs';
 import { getTypeKind } from './get_type_kind';
 
@@ -29,7 +29,7 @@ import { getTypeKind } from './get_type_kind';
  */
 export function getSignature(
   node: Node,
-  plugins: KibanaPlatformPlugin[],
+  plugins: PluginOrPackage[],
   log: ToolingLog
 ): Array<string | Reference> | undefined {
   let signature = '';

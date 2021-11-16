@@ -4,6 +4,735 @@
     "classes": [
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlGroupContainer",
+        "type": "Class",
+        "tags": [],
+        "label": "ControlGroupContainer",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ControlGroupContainer",
+            "text": "ControlGroupContainer"
+          },
+          " extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.Container",
+            "text": "Container"
+          },
+          "<",
+          "ControlInput",
+          ", ",
+          "ControlGroupInput",
+          ", ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ControlGroupOutput",
+            "text": "ControlGroupOutput"
+          },
+          ">"
+        ],
+        "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainer.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"control_group\""
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainer.untilReady",
+            "type": "Function",
+            "tags": [],
+            "label": "untilReady",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainer.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainer.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "ControlGroupInput"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainer.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "parent",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.Container",
+                    "text": "Container"
+                  },
+                  "<{}, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ContainerInput",
+                    "text": "ContainerInput"
+                  },
+                  "<{}>, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ContainerOutput",
+                    "text": "ContainerOutput"
+                  },
+                  "> | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainer.createNewPanelState",
+            "type": "Function",
+            "tags": [],
+            "label": "createNewPanelState",
+            "description": [],
+            "signature": [
+              "<TEmbeddableInput extends ",
+              "ControlInput",
+              " = ",
+              "ControlInput",
+              ">(factory: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableFactory",
+                "text": "EmbeddableFactory"
+              },
+              "<",
+              "ControlInput",
+              ", ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlOutput",
+                "text": "ControlOutput"
+              },
+              ", ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlEmbeddable",
+                "text": "ControlEmbeddable"
+              },
+              "<",
+              "ControlInput",
+              ", ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlOutput",
+                "text": "ControlOutput"
+              },
+              ">, ",
+              "SavedObjectAttributes",
+              ">, partial?: Partial<TEmbeddableInput>) => ",
+              "ControlPanelState",
+              "<TEmbeddableInput>"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainer.createNewPanelState.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "factory",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EmbeddableFactory",
+                    "text": "EmbeddableFactory"
+                  },
+                  "<",
+                  "ControlInput",
+                  ", ",
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ControlOutput",
+                    "text": "ControlOutput"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ControlEmbeddable",
+                    "text": "ControlEmbeddable"
+                  },
+                  "<",
+                  "ControlInput",
+                  ", ",
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ControlOutput",
+                    "text": "ControlOutput"
+                  },
+                  ">, ",
+                  "SavedObjectAttributes",
+                  ">"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainer.createNewPanelState.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "partial",
+                "description": [],
+                "signature": [
+                  "Partial<TEmbeddableInput>"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainer.getInheritedInput",
+            "type": "Function",
+            "tags": [],
+            "label": "getInheritedInput",
+            "description": [],
+            "signature": [
+              "(id: string) => ",
+              "ControlInput"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainer.getInheritedInput.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainer.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainer.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [],
+            "signature": [
+              "(dom: HTMLElement) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainer.render.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dom",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlGroupContainerFactory",
+        "type": "Class",
+        "tags": [],
+        "label": "ControlGroupContainerFactory",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ControlGroupContainerFactory",
+            "text": "ControlGroupContainerFactory"
+          },
+          " implements ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableFactoryDefinition",
+            "text": "EmbeddableFactoryDefinition"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ">, ",
+          "SavedObjectAttributes",
+          ">"
+        ],
+        "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.isContainerType",
+            "type": "boolean",
+            "tags": [],
+            "label": "isContainerType",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"control_group\""
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "persistableStateService",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "common",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-common.EmbeddablePersistableStateService",
+                    "text": "EmbeddablePersistableStateService"
+                  }
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.isEditable",
+            "type": "Function",
+            "tags": [],
+            "label": "isEditable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.getDefaultInput",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultInput",
+            "description": [],
+            "signature": [
+              "() => Partial<",
+              "ControlGroupInput",
+              ">"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(initialInput: ",
+              "ControlGroupInput",
+              ", parent?: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.Container",
+                "text": "Container"
+              },
+              "<{}, ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ContainerInput",
+                "text": "ContainerInput"
+              },
+              "<{}>, ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ContainerOutput",
+                "text": "ContainerOutput"
+              },
+              "> | undefined) => Promise<",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              },
+              ">"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "ControlGroupInput"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "parent",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.Container",
+                    "text": "Container"
+                  },
+                  "<{}, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ContainerInput",
+                    "text": "ContainerInput"
+                  },
+                  "<{}>, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ContainerOutput",
+                    "text": "ContainerOutput"
+                  },
+                  "> | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.inject",
+            "type": "Function",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ", references: ",
+              "SavedObjectReference",
+              "[]) => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              }
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.inject.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.inject.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.extract",
+            "type": "Function",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ") => { state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              "; references: ",
+              "SavedObjectReference",
+              "[]; }"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.extract.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.PluginServiceProvider",
         "type": "Class",
         "tags": [],
@@ -598,7 +1327,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">) => any"
         ],
         "path": "src/plugins/presentation_util/common/lib/test_helpers/function_wrapper.ts",
@@ -1232,7 +1967,7 @@
         "label": "SolutionToolbarPopover",
         "description": [],
         "signature": [
-          "({ label, iconType, primary, iconSide, ...popover }: ",
+          "({ label, iconType, primary, iconSide, children, ...popover }: ",
           "Props",
           ") => JSX.Element"
         ],
@@ -1244,7 +1979,7 @@
             "id": "def-public.SolutionToolbarPopover.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  label,\n  iconType,\n  primary,\n  iconSide,\n  ...popover\n}",
+            "label": "{\n  label,\n  iconType,\n  primary,\n  iconSide,\n  children,\n  ...popover\n}",
             "description": [],
             "signature": [
               "Props"
@@ -1333,6 +2068,469 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.CommonControlOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "CommonControlOutput",
+        "description": [],
+        "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.CommonControlOutput.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.CommonControlOutput.dataViews",
+            "type": "Array",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlEditorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlEditorProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ControlEditorProps",
+            "text": "ControlEditorProps"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlEditorProps.initialInput",
+            "type": "Object",
+            "tags": [],
+            "label": "initialInput",
+            "description": [],
+            "signature": [
+              "Partial<T> | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlEditorProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(partial: Partial<T>) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlEditorProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "partial",
+                "description": [],
+                "signature": [
+                  "Partial<T>"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlEditorProps.setValidState",
+            "type": "Function",
+            "tags": [],
+            "label": "setValidState",
+            "description": [],
+            "signature": [
+              "(valid: boolean) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlEditorProps.setValidState.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "valid",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlEditorProps.setDefaultTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "setDefaultTitle",
+            "description": [],
+            "signature": [
+              "(defaultTitle: string) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlEditorProps.setDefaultTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "defaultTitle",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlGroupInput",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlGroupInput",
+        "description": [],
+        "signature": [
+          "ControlGroupInput",
+          " extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ",",
+          "ControlInput"
+        ],
+        "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupInput.defaultControlWidth",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultControlWidth",
+            "description": [],
+            "signature": [
+              "\"auto\" | \"small\" | \"medium\" | \"large\" | undefined"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupInput.controlStyle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controlStyle",
+            "description": [],
+            "signature": [
+              "\"twoLine\" | \"oneLine\""
+            ],
+            "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupInput.panels",
+            "type": "Object",
+            "tags": [],
+            "label": "panels",
+            "description": [],
+            "signature": [
+              "ControlsPanels"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlPanelState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlPanelState",
+        "description": [],
+        "signature": [
+          "ControlPanelState",
+          "<TEmbeddableInput> extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.PanelState",
+            "text": "PanelState"
+          },
+          "<TEmbeddableInput>"
+        ],
+        "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlPanelState.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlPanelState.width",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "\"auto\" | \"small\" | \"medium\" | \"large\""
+            ],
+            "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlsPanels",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlsPanels",
+        "description": [],
+        "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlsPanels.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.IEditableControlFactory",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEditableControlFactory",
+        "description": [
+          "\nControl embeddable editor types"
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.IEditableControlFactory",
+            "text": "IEditableControlFactory"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.IEditableControlFactory.controlEditorComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "controlEditorComponent",
+            "description": [],
+            "signature": [
+              "((props: ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlEditorProps",
+                "text": "ControlEditorProps"
+              },
+              "<T>) => JSX.Element) | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.IEditableControlFactory.controlEditorComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ControlEditorProps",
+                    "text": "ControlEditorProps"
+                  },
+                  "<T>"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.IEditableControlFactory.presaveTransformFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "presaveTransformFunction",
+            "description": [],
+            "signature": [
+              "((newState: Partial<T>, embeddable?: ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlEmbeddable",
+                "text": "ControlEmbeddable"
+              },
+              "<T, ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ControlOutput",
+                "text": "ControlOutput"
+              },
+              "> | undefined) => Partial<T>) | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.IEditableControlFactory.presaveTransformFunction.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newState",
+                "description": [],
+                "signature": [
+                  "Partial<T>"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.IEditableControlFactory.presaveTransformFunction.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "embeddable",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ControlEmbeddable",
+                    "text": "ControlEmbeddable"
+                  },
+                  "<T, ",
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ControlOutput",
+                    "text": "ControlOutput"
+                  },
+                  "> | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "presentationUtil",
         "id": "def-public.KibanaPluginServiceParams",
@@ -1427,6 +2625,135 @@
               "<object> | undefined"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.OptionsListEmbeddableInput",
+        "type": "Interface",
+        "tags": [],
+        "label": "OptionsListEmbeddableInput",
+        "description": [],
+        "signature": [
+          "OptionsListEmbeddableInput",
+          " extends ",
+          "ControlInput"
+        ],
+        "path": "src/plugins/presentation_util/common/controls/control_types/options_list/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.OptionsListEmbeddableInput.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/controls/control_types/options_list/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.OptionsListEmbeddableInput.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/controls/control_types/options_list/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.OptionsListEmbeddableInput.selectedOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "selectedOptions",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/control_types/options_list/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.OptionsListEmbeddableInput.singleSelect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "singleSelect",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/control_types/options_list/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.OptionsListEmbeddableInput.loading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/control_types/options_list/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ParentIgnoreSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParentIgnoreSettings",
+        "description": [],
+        "path": "src/plugins/presentation_util/common/controls/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ParentIgnoreSettings.ignoreFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreFilters",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ParentIgnoreSettings.ignoreQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreQuery",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ParentIgnoreSettings.ignoreTimerange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreTimerange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/presentation_util/common/controls/types.ts",
             "deprecated": false
           }
         ],
@@ -1630,7 +2957,7 @@
             "label": "isProjectEnabled",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\") => boolean"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\") => boolean"
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
@@ -1638,12 +2965,12 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-public.PresentationLabsService.isProjectEnabled.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
@@ -1660,7 +2987,7 @@
             "label": "getProjectIDs",
             "description": [],
             "signature": [
-              "() => readonly [\"labs:dashboard:deferBelowFold\"]"
+              "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\"]"
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
@@ -1675,7 +3002,7 @@
             "label": "getProject",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\") => ",
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\") => ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -1690,12 +3017,12 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-public.PresentationLabsService.getProject.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
@@ -1712,7 +3039,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\", ",
+              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -1750,7 +3077,7 @@
             "label": "setProjectStatus",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
@@ -1758,12 +3085,12 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-public.PresentationLabsService.setProjectStatus.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
@@ -1864,19 +3191,6 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.QuickButtonProps.isDarkModeEnabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDarkModeEnabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2013,6 +3327,223 @@
     "misc": [
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.CONTROL_GROUP_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "CONTROL_GROUP_TYPE",
+        "description": [],
+        "signature": [
+          "\"control_group\""
+        ],
+        "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlEmbeddable",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlEmbeddable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<TControlEmbeddableInput, TControlEmbeddableOutput>"
+        ],
+        "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlFactory",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableFactory",
+            "text": "EmbeddableFactory"
+          },
+          "<",
+          "ControlInput",
+          ", ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ControlOutput",
+            "text": "ControlOutput"
+          },
+          ", ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ControlEmbeddable",
+            "text": "ControlEmbeddable"
+          },
+          "<",
+          "ControlInput",
+          ", ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ControlOutput",
+            "text": "ControlOutput"
+          },
+          ">, ",
+          "SavedObjectAttributes",
+          ">"
+        ],
+        "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlGroupOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlGroupOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerOutput",
+            "text": "ContainerOutput"
+          },
+          " & ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.CommonControlOutput",
+            "text": "CommonControlOutput"
+          }
+        ],
+        "path": "src/plugins/presentation_util/public/components/controls/control_group/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlInput",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlInput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          " & { query?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; timeRange?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; controlStyle?: \"twoLine\" | \"oneLine\" | undefined; ignoreParentSettings?: ",
+          "ParentIgnoreSettings",
+          " | undefined; }"
+        ],
+        "path": "src/plugins/presentation_util/common/controls/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          " & ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.CommonControlOutput",
+            "text": "CommonControlOutput"
+          }
+        ],
+        "path": "src/plugins/presentation_util/public/components/controls/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlStyle",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlStyle",
+        "description": [],
+        "signature": [
+          "\"twoLine\" | \"oneLine\""
+        ],
+        "path": "src/plugins/presentation_util/common/controls/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ControlWidth",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlWidth",
+        "description": [],
+        "signature": [
+          "\"auto\" | \"small\" | \"medium\" | \"large\""
+        ],
+        "path": "src/plugins/presentation_util/common/controls/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.imageTypes",
         "type": "Array",
         "tags": [],
@@ -2070,6 +3601,20 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.OPTIONS_LIST_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "OPTIONS_LIST_CONTROL",
+        "description": [],
+        "signature": [
+          "\"optionsListControl\""
+        ],
+        "path": "src/plugins/presentation_util/common/controls/control_types/options_list/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -2165,7 +3710,7 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:dashboard:deferBelowFold\""
+          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -2306,7 +3851,7 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:dashboard:deferBelowFold\"]"
+          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -2396,6 +3941,19 @@
           ],
           "path": "src/plugins/presentation_util/public/types.ts",
           "deprecated": false
+        },
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.controlsService",
+          "type": "Object",
+          "tags": [],
+          "label": "controlsService",
+          "description": [],
+          "signature": [
+            "PresentationControlsService"
+          ],
+          "path": "src/plugins/presentation_util/public/types.ts",
+          "deprecated": false
         }
       ],
       "lifecycle": "start",
@@ -2436,7 +3994,7 @@
         "label": "getProjectIDs",
         "description": [],
         "signature": [
-          "() => readonly [\"labs:dashboard:deferBelowFold\"]"
+          "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -2518,12 +4076,12 @@
           {
             "parentPluginId": "presentationUtil",
             "id": "def-common.ProjectConfig.id",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "id",
             "description": [],
             "signature": [
-              "\"labs:dashboard:deferBelowFold\""
+              "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false
@@ -2600,6 +4158,20 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.DASHBOARD_CONTROLS",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_CONTROLS",
+        "description": [],
+        "signature": [
+          "\"labs:dashboard:dashboardControls\""
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "presentationUtil",
         "id": "def-common.DEFER_BELOW_FOLD",
@@ -2721,7 +4293,7 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:dashboard:deferBelowFold\""
+          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -2786,7 +4358,7 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:dashboard:deferBelowFold\"]"
+          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -2889,6 +4461,103 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DEFER_BELOW_FOLD.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"dashboard\"[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.DASHBOARD_CONTROLS",
+            "type": "Object",
+            "tags": [],
+            "label": "[DASHBOARD_CONTROLS]",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:dashboardControls\""
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.solutions",
                 "type": "Array",
                 "tags": [],
                 "label": "solutions",

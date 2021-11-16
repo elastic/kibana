@@ -48,7 +48,7 @@ function ServiceNodeOverview() {
         return undefined;
       }
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
+        endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
         params: {
           path: {
             serviceName,

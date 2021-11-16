@@ -10,7 +10,7 @@ import React from 'react';
 import { HeaderPage, HeaderPageProps } from '../../../common/components/header_page';
 
 const DetectionEngineHeaderPageComponent: React.FC<HeaderPageProps> = (props) => (
-  <HeaderPage hideSourcerer={true} {...props} />
+  <HeaderPage {...props} />
 );
 
 export const DetectionEngineHeaderPage = React.memo(DetectionEngineHeaderPageComponent);

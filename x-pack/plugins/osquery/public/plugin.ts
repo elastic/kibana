@@ -37,18 +37,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public setup(core: CoreSetup): OsqueryPluginSetup {
-    const config = this.initializerContext.config.get<{
-      enabled: boolean;
-      actionEnabled: boolean;
-      scheduledQueries: boolean;
-      savedQueries: boolean;
-      packs: boolean;
-    }>();
-
-    if (!config.enabled) {
-      return {};
-    }
-
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
     // Register an application into the side navigation menu
@@ -78,18 +66,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
-    const config = this.initializerContext.config.get<{
-      enabled: boolean;
-      actionEnabled: boolean;
-      scheduledQueries: boolean;
-      savedQueries: boolean;
-      packs: boolean;
-    }>();
-
-    if (!config.enabled) {
-      return {};
-    }
-
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 

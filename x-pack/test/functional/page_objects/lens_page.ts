@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -19,6 +19,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const comboBox = getService('comboBox');
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
+
+  const FORMULA_TAB_HEIGHT = 40;
 
   const PageObjects = getPageObjects([
     'common',
@@ -129,9 +131,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const operationSelector = opts.isPreviousIncompatible
           ? `lns-indexPatternDimension-${opts.operation} incompatible`
           : `lns-indexPatternDimension-${opts.operation}`;
-        await testSubjects.click(operationSelector);
-      }
+        async function getAriaPressed() {
+          const operationSelectorContainer = await testSubjects.find(operationSelector);
+          await testSubjects.click(operationSelector, undefined, FORMULA_TAB_HEIGHT);
+          const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
+          return ariaPressed;
+        }
 
+        // adding retry here as it seems that there is a flakiness of the operation click
+        // it seems that the aria-pressed attribute is updated to true when the button is clicked
+        await retry.waitFor('aria pressed to be true', async () => {
+          const ariaPressedStatus = await getAriaPressed();
+          return ariaPressedStatus === 'true';
+        });
+      }
       if (opts.field) {
         const target = await testSubjects.find('indexPattern-dimension-field');
         await comboBox.openOptionsList(target);
@@ -244,6 +257,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async waitForField(field: string) {
       await retry.try(async () => {
         await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
+      });
+    },
+
+    async waitForMissingDataViewWarning() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`missing-refs-failure`);
+      });
+    },
+
+    async waitForMissingDataViewWarningDisappear() {
+      await retry.try(async () => {
+        await testSubjects.missingOrFail(`missing-refs-failure`);
+      });
+    },
+
+    async waitForEmptyWorkspace() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`empty-workspace`);
+      });
+    },
+
+    async waitForWorkspaceWithVisualization() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsVisualizationContainer`);
       });
     },
 
@@ -676,7 +713,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async switchFirstLayerIndexPattern(name: string) {
       await testSubjects.click('lns_layerIndexPatternLabel');
-      await find.clickByCssSelector(`[title="${name}"]`);
+      await find.clickByCssSelector(`.lnsChangeIndexPatternPopover [title="${name}"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -773,6 +810,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableHeader(index = 0) {
+      log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
@@ -873,12 +911,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async toggleColumnVisibility(dimension: string) {
+    async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
       const id = 'lns-table-column-hidden';
+      await PageObjects.common.sleep(500);
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status before the toggle = ${isChecked}`);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await PageObjects.common.sleep(500);
+      const isChecked2 = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status after the toggle = ${isChecked2}`);
       await this.closeDimensionEditor();
+      await PageObjects.common.sleep(500);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -1061,7 +1105,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         draggedOver,
         dropTarget
       );
-      await delay(150);
+      await setTimeoutAsync(150);
     },
 
     /**
@@ -1094,6 +1138,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async toggleFullscreen() {
       await testSubjects.click('lnsFormula-fullscreen');
+    },
+
+    async goToListingPageViaBreadcrumbs() {
+      await retry.try(async () => {
+        await testSubjects.click('breadcrumb first');
+        if (await testSubjects.exists('appLeaveConfirmModal')) {
+          await testSubjects.exists('confirmModalConfirmButton');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
+        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+      });
     },
 
     async typeFormula(formula: string) {

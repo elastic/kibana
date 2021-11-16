@@ -59,6 +59,11 @@ export const LAYOUT_TYPES = {
   PRINT: 'print',
 };
 
+export const DEFAULT_VIEWPORT = {
+  width: 1950,
+  height: 1200,
+};
+
 // Export Type Definitions
 export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';
@@ -116,7 +121,7 @@ export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATO
  * be injected to the page
  */
 export const getRedirectAppPath = () => {
-  return '/app/management/insightsAndAlerting/reporting/r';
+  return '/app/reportingRedirect';
 };
 
 // Statuses

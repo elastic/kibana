@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { APP_ID, SecurityPageName } from '../../../../common/constants';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const NavigateToHost: React.FC<{ name: string }> = ({ name }): JSX.Element => {
@@ -27,7 +27,7 @@ export const NavigateToHost: React.FC<{ name: string }> = ({ name }): JSX.Elemen
           query: { match_phrase: { 'host.name': name } },
         },
       ]);
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
       });
     },

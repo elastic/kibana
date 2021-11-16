@@ -15,7 +15,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils/technical_field_names';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
@@ -139,7 +139,7 @@ const EventRenderedViewComponent = ({
             </ActionsContainer>
           );
         },
-        width: '120px',
+        width: '152px',
       },
       {
         field: 'ecs.timestamp',
@@ -180,19 +180,21 @@ const EventRenderedViewComponent = ({
             rowRenderer.isInstance(ecsData)
           );
           return (
-            <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
               {reason && <EuiFlexItem>{reason}</EuiFlexItem>}
               {rowRenderersValid.length > 0 &&
                 rowRenderersValid.map((rowRenderer) => (
                   <>
                     <EuiHorizontalRule size="half" margin="xs" />
-                    <EventRenderedFlexItem>
-                      {rowRenderer.renderRow({
-                        browserFields,
-                        data: ecsData,
-                        isDraggable: false,
-                        timelineId: 'NONE',
-                      })}
+                    <EventRenderedFlexItem className="eui-xScroll">
+                      <div className="eui-displayInlineBlock">
+                        {rowRenderer.renderRow({
+                          browserFields,
+                          data: ecsData,
+                          isDraggable: false,
+                          timelineId: 'NONE',
+                        })}
+                      </div>
                     </EventRenderedFlexItem>
                   </>
                 ))}

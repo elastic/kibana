@@ -9,3 +9,4 @@
 export { createTestEsCluster } from './test_es_cluster';
 export type { CreateTestEsClusterOptions, EsTestCluster, ICluster } from './test_es_cluster';
 export { esTestConfig } from './es_test_config';
+export { convertToKibanaClient } from './client_to_kibana_client';

@@ -17,7 +17,7 @@ import uuid from 'uuid';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -42,7 +42,7 @@ let hasDisplayedToast = false;
 function useServicesFetcher() {
   const {
     urlParams: { comparisonEnabled, comparisonType },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
@@ -64,7 +64,7 @@ function useServicesFetcher() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services',
+          endpoint: 'GET /internal/apm/services',
           params: {
             query: {
               environment,
@@ -90,7 +90,7 @@ function useServicesFetcher() {
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/detailed_statistics',
+          endpoint: 'GET /internal/apm/services/detailed_statistics',
           params: {
             query: {
               environment,

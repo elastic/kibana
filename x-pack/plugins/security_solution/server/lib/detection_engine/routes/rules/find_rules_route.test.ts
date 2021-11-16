@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
@@ -23,9 +24,11 @@ describe.each([
 ])('find_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
@@ -33,9 +36,11 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus());
+    clients.ruleExecutionLogClient.getCurrentStatusBulk.mockResolvedValue(
+      getFindBulkResultStatus()
+    );
 
-    findRulesRoute(server.router, isRuleRegistryEnabled);
+    findRulesRoute(server.router, logger, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -45,7 +50,7 @@ describe.each([
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getFindRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
@@ -79,6 +80,7 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 
 export interface TGridStandaloneProps {
   appId: string;
+  casesOwner: string;
   casePermissions: {
     crud: boolean;
     read: boolean;
@@ -107,6 +109,7 @@ export interface TGridStandaloneProps {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  runtimeMappings: MappingRuntimeFields;
   setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
@@ -121,6 +124,7 @@ export interface TGridStandaloneProps {
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   afterCaseSelection,
   appId,
+  casesOwner,
   casePermissions,
   columns,
   defaultCellActions,
@@ -138,6 +142,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   query,
   renderCellValue,
   rowRenderers,
+  runtimeMappings,
   setRefetch,
   start,
   sort,
@@ -217,10 +222,11 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     entityType,
     excludeEcsData: true,
     fields,
-    filterQuery: combinedQueries!.filterQuery,
+    filterQuery: combinedQueries?.filterQuery,
     id: STANDALONE_ID,
     indexNames,
     limit: itemsPerPageStore,
+    runtimeMappings,
     sort: sortField,
     startDate: start,
     endDate: end,
@@ -271,9 +277,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       event: selectedEvent,
       casePermissions: casePermissions ?? null,
       appId,
+      owner: casesOwner,
       onClose: afterCaseSelection,
     };
-  }, [appId, casePermissions, afterCaseSelection, selectedEvent]);
+  }, [appId, casePermissions, afterCaseSelection, selectedEvent, casesOwner]);
 
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),

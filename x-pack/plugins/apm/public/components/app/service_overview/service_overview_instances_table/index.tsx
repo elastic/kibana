@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
@@ -29,11 +29,11 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 
 type ServiceInstanceMainStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem =
   ServiceInstanceMainStatistics['currentPeriod'][0];
 type ServiceInstanceDetailedStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export interface TableOptions {
   pageIndex: number;
@@ -76,7 +76,7 @@ export function ServiceOverviewInstancesTable({
 
   const {
     urlParams: { latencyAggregationType, comparisonEnabled },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const [itemIdToOpenActionMenuRowMap, setItemIdToOpenActionMenuRowMap] =
     useState<Record<string, boolean>>({});

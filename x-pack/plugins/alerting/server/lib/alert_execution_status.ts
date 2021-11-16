@@ -32,11 +32,13 @@ export function executionStatusFromError(error: Error): AlertExecutionStatus {
 
 export function alertExecutionStatusToRaw({
   lastExecutionDate,
+  lastDuration,
   status,
   error,
 }: AlertExecutionStatus): RawAlertExecutionStatus {
   return {
     lastExecutionDate: lastExecutionDate.toISOString(),
+    lastDuration: lastDuration ?? 0,
     status,
     // explicitly setting to null (in case undefined) due to partial update concerns
     error: error ?? null,
@@ -50,7 +52,7 @@ export function alertExecutionStatusFromRaw(
 ): AlertExecutionStatus | undefined {
   if (!rawAlertExecutionStatus) return undefined;
 
-  const { lastExecutionDate, status = 'unknown', error } = rawAlertExecutionStatus;
+  const { lastExecutionDate, lastDuration, status = 'unknown', error } = rawAlertExecutionStatus;
 
   let parsedDateMillis = lastExecutionDate ? Date.parse(lastExecutionDate) : Date.now();
   if (isNaN(parsedDateMillis)) {
@@ -60,12 +62,20 @@ export function alertExecutionStatusFromRaw(
     parsedDateMillis = Date.now();
   }
 
-  const parsedDate = new Date(parsedDateMillis);
-  if (error) {
-    return { lastExecutionDate: parsedDate, status, error };
-  } else {
-    return { lastExecutionDate: parsedDate, status };
+  const executionStatus: AlertExecutionStatus = {
+    status,
+    lastExecutionDate: new Date(parsedDateMillis),
+  };
+
+  if (null != lastDuration) {
+    executionStatus.lastDuration = lastDuration;
   }
+
+  if (error) {
+    executionStatus.error = error;
+  }
+
+  return executionStatus;
 }
 
 export const getAlertExecutionStatusPending = (lastExecutionDate: string) => ({

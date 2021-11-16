@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
@@ -214,7 +214,7 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  *
  * From the perspective of application code and APIs the SavedObjectsClient is
  * a black box that persists objects. One of the internal details that users have
- * no control over is that we use an elasticsearch index for persistance and that
+ * no control over is that we use an elasticsearch index for persistence and that
  * index might be missing.
  *
  * At the time of writing we are in the process of transitioning away from the

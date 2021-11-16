@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
-import { StatusIcon } from '../status_icon/index.js';
+import { StatusIcon } from '../status_icon';
 import { AlertsStatus } from '../../alerts/status';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

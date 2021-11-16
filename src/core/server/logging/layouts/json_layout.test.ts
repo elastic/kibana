@@ -58,6 +58,16 @@ const records: LogRecord[] = [
     timestamp,
     pid: 5355,
   },
+  {
+    context: 'context-7',
+    level: LogLevel.Trace,
+    message: 'message-6',
+    timestamp,
+    pid: 5355,
+    spanId: 'spanId-1',
+    traceId: 'traceId-1',
+    transactionId: 'transactionId-1',
+  },
 ];
 
 test('`createConfigSchema()` creates correct schema.', () => {
@@ -66,15 +76,17 @@ test('`createConfigSchema()` creates correct schema.', () => {
   expect(layoutSchema.validate({ type: 'json' })).toEqual({ type: 'json' });
 });
 
-test('`format()` correctly formats record.', () => {
+test('`format()` correctly formats record and includes correct ECS version.', () => {
   const layout = new JsonLayout();
 
   for (const record of records) {
-    expect(layout.format(record)).toMatchSnapshot();
+    const { ecs, ...restOfRecord } = JSON.parse(layout.format(record));
+    expect(ecs).toStrictEqual({ version: '8.0.0' });
+    expect(restOfRecord).toMatchSnapshot();
   }
 });
 
-test('`format()` correctly formats record with meta-data and correct ECS version', () => {
+test('`format()` correctly formats record with meta-data', () => {
   const layout = new JsonLayout();
 
   expect(
@@ -86,6 +98,7 @@ test('`format()` correctly formats record with meta-data and correct ECS version
         timestamp,
         pid: 5355,
         meta: {
+          // @ts-expect-error ECS custom meta
           version: {
             from: 'v7',
             to: 'v8',
@@ -94,7 +107,7 @@ test('`format()` correctly formats record with meta-data and correct ECS version
       })
     )
   ).toStrictEqual({
-    ecs: { version: '1.12.0' },
+    ecs: { version: expect.any(String) },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     log: {
       level: 'DEBUG',
@@ -128,6 +141,7 @@ test('`format()` correctly formats error record with meta-data', () => {
         timestamp,
         pid: 5355,
         meta: {
+          // @ts-expect-error ECS custom meta
           version: {
             from: 'v7',
             to: 'v8',
@@ -170,6 +184,7 @@ test('format() meta can merge override logs', () => {
         pid: 3,
         meta: {
           log: {
+            // @ts-expect-error ECS custom meta
             kbn_custom_field: 'hello',
           },
         },
@@ -201,6 +216,7 @@ test('format() meta can not override message', () => {
         context: 'bar',
         pid: 3,
         meta: {
+          // @ts-expect-error cannot override message
           message: 'baz',
         },
       })
@@ -230,7 +246,8 @@ test('format() meta can not override ecs version', () => {
         context: 'bar',
         pid: 3,
         meta: {
-          message: 'baz',
+          // @ts-expect-error cannot override ecs version
+          ecs: 1,
         },
       })
     )
@@ -260,6 +277,7 @@ test('format() meta can not override logger or level', () => {
         pid: 3,
         meta: {
           log: {
+            // @ts-expect-error cannot override log.level
             level: 'IGNORE',
             logger: 'me',
           },
@@ -291,6 +309,7 @@ test('format() meta can not override timestamp', () => {
         context: 'bar',
         pid: 3,
         meta: {
+          // @ts-expect-error cannot override @timestamp
           '@timestamp': '2099-02-01T09:30:22.011-05:00',
         },
       })
@@ -306,5 +325,42 @@ test('format() meta can not override timestamp', () => {
     process: {
       pid: 3,
     },
+  });
+});
+
+test('format() meta can not override tracing properties', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          span: { id: 'span_override' },
+          trace: { id: 'trace_override' },
+          transaction: { id: 'transaction_override' },
+        },
+        spanId: 'spanId-1',
+        traceId: 'traceId-1',
+        transactionId: 'transactionId-1',
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+    span: { id: 'spanId-1' },
+    trace: { id: 'traceId-1' },
+    transaction: { id: 'transactionId-1' },
   });
 });

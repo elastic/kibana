@@ -62,8 +62,8 @@ export const ReplacementCard = ({ replacements }: Props) => {
     return null;
   }
 
-  const buttons = replacements.map((replacement) => (
-    <EuiFlexItem grow={false}>
+  const buttons = replacements.map((replacement, index) => (
+    <EuiFlexItem grow={false} key={`button-${index}`}>
       <span>
         <EuiButton
           key={replacement.id}
@@ -91,7 +91,7 @@ export const ReplacementCard = ({ replacements }: Props) => {
       <EuiAccordion id={idGenerator()} buttonContent={alsoAvailable} paddingSize="none">
         <EuiPanel color="subdued" hasShadow={false} paddingSize="m">
           <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
+            <EuiFlexItem key="message">
               <EuiText size="s">
                 <FormattedMessage
                   id="customIntegrations.components.replacementAccordion.recommendationDescription"
@@ -103,7 +103,7 @@ export const ReplacementCard = ({ replacements }: Props) => {
                 />
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem key="buttons">
               <EuiFlexGroup direction="column" gutterSize="m">
                 {buttons}
               </EuiFlexGroup>

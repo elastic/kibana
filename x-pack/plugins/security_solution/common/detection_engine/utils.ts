@@ -51,7 +51,8 @@ export const normalizeThresholdField = (
     ? thresholdField
     : isEmpty(thresholdField)
     ? []
-    : [thresholdField!];
+    : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      [thresholdField!];
 };
 
 export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {

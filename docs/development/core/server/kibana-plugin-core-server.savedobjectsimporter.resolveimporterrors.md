@@ -4,7 +4,7 @@
 
 ## SavedObjectsImporter.resolveImportErrors() method
 
-Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations.
+Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed information.
 
 <b>Signature:</b>
 
@@ -16,11 +16,11 @@ resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedO
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { readStream, createNewCopies, namespace, retries, } | <code>SavedObjectsResolveImportErrorsOptions</code> |  |
+|  { readStream, createNewCopies, namespace, retries, } | SavedObjectsResolveImportErrorsOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsImportResponse>`
+Promise&lt;SavedObjectsImportResponse&gt;
 
 ## Exceptions
 

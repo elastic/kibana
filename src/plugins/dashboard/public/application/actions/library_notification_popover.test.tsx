@@ -7,8 +7,9 @@
  */
 
 import React from 'react';
-import { DashboardContainer } from '..';
 import { mountWithIntl } from '@kbn/test/jest';
+
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
 import {

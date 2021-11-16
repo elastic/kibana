@@ -80,14 +80,14 @@ describe('static_value', () => {
     };
   });
 
-  function getLayerWithStaticValue(newValue: string): IndexPatternLayer {
+  function getLayerWithStaticValue(newValue: string | null | undefined): IndexPatternLayer {
     return {
       ...layer,
       columns: {
         ...layer.columns,
         col2: {
           ...layer.columns.col2,
-          label: `Static value: ${newValue}`,
+          label: `Static value: ${newValue ?? String(newValue)}`,
           params: {
             value: newValue,
           },
@@ -155,8 +155,9 @@ describe('static_value', () => {
       ).toBeUndefined();
     });
 
-    it('should return error for invalid values', () => {
-      for (const value of ['NaN', 'Infinity', 'string']) {
+    it.each(['NaN', 'Infinity', 'string'])(
+      'should return error for invalid values: %s',
+      (value) => {
         expect(
           staticValueOperation.getErrorMessage!(
             getLayerWithStaticValue(value),
@@ -165,6 +166,16 @@ describe('static_value', () => {
           )
         ).toEqual(expect.arrayContaining([expect.stringMatching('is not a valid number')]));
       }
+    );
+
+    it.each([null, undefined])('should return no error for: %s', (value) => {
+      expect(
+        staticValueOperation.getErrorMessage!(
+          getLayerWithStaticValue(value),
+          'col2',
+          createMockedIndexPattern()
+        )
+      ).toBe(undefined);
     });
   });
 
@@ -325,6 +336,36 @@ describe('static_value', () => {
       const input = instance.find('[data-test-subj="lns-indexPattern-static_value-input"]');
 
       expect(input.prop('value')).toEqual('23');
+    });
+
+    it('should allow 0 as initial value', () => {
+      const updateLayerSpy = jest.fn();
+      const zeroLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            operationType: 'static_value',
+            references: [],
+            params: {
+              value: '0',
+            },
+          },
+        },
+      } as IndexPatternLayer;
+      const instance = shallow(
+        <ParamEditor
+          {...defaultProps}
+          layer={zeroLayer}
+          updateLayer={updateLayerSpy}
+          columnId="col2"
+          currentColumn={zeroLayer.columns.col2 as StaticValueIndexPatternColumn}
+        />
+      );
+
+      const input = instance.find('[data-test-subj="lns-indexPattern-static_value-input"]');
+      expect(input.prop('value')).toEqual('0');
     });
 
     it('should update state on change', async () => {

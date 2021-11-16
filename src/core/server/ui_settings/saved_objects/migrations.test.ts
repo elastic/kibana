@@ -162,4 +162,52 @@ describe('ui_settings 8.0.0 migrations', () => {
       migrationVersion: {},
     });
   });
+  test('removes telemetry:optIn and xPackMonitoring:allowReport from ui_settings', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'telemetry:optIn': false,
+        'xPackMonitoring:allowReport': false,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+  test('removes custom theme:version setting', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'theme:version': 'v7',
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
 });

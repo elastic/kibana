@@ -7,22 +7,21 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, fieldFormatsOptions, indexPatternNameForTest } from './helpers';
+import {
+  setupEnvironment,
+  fieldFormatsOptions,
+  indexPatternNameForTest,
+  EsDoc,
+  setSearchResponseLatency,
+} from './helpers';
 import {
   setup,
   setIndexPatternFields,
   getSearchCallMeta,
   setSearchResponse,
   FieldEditorFlyoutContentTestBed,
-  TestDoc,
 } from './field_editor_flyout_preview.helpers';
-import { createPreviewError } from './helpers/mocks';
-
-interface EsDoc {
-  _id: string;
-  _index: string;
-  _source: TestDoc;
-}
+import { mockDocuments, createPreviewError } from './helpers/mocks';
 
 describe('Field editor Preview panel', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -37,36 +36,6 @@ describe('Field editor Preview panel', () => {
   });
 
   let testBed: FieldEditorFlyoutContentTestBed;
-
-  const mockDocuments: EsDoc[] = [
-    {
-      _id: '001',
-      _index: 'testIndex',
-      _source: {
-        title: 'First doc - title',
-        subTitle: 'First doc - subTitle',
-        description: 'First doc - description',
-      },
-    },
-    {
-      _id: '002',
-      _index: 'testIndex',
-      _source: {
-        title: 'Second doc - title',
-        subTitle: 'Second doc - subTitle',
-        description: 'Second doc - description',
-      },
-    },
-    {
-      _id: '003',
-      _index: 'testIndex',
-      _source: {
-        title: 'Third doc - title',
-        subTitle: 'Third doc - subTitle',
-        description: 'Third doc - description',
-      },
-    },
-  ];
 
   const [doc1, doc2, doc3] = mockDocuments;
 
@@ -86,43 +55,31 @@ describe('Field editor Preview panel', () => {
   ];
 
   beforeEach(async () => {
+    server.respondImmediately = true;
+    server.autoRespond = true;
+
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
     setIndexPatternFields(indexPatternFields);
     setSearchResponse(mockDocuments);
+    setSearchResponseLatency(0);
 
     testBed = await setup();
   });
 
-  test('should display the preview panel when either "set value" or "set format" is activated', async () => {
-    const {
-      exists,
-      actions: { toggleFormRow },
-    } = testBed;
+  test('should display the preview panel along with the editor', async () => {
+    const { exists } = testBed;
 
-    expect(exists('previewPanel')).toBe(false);
-
-    await toggleFormRow('value');
     expect(exists('previewPanel')).toBe(true);
-
-    await toggleFormRow('value', 'off');
-    expect(exists('previewPanel')).toBe(false);
-
-    await toggleFormRow('format');
-    expect(exists('previewPanel')).toBe(true);
-
-    await toggleFormRow('format', 'off');
-    expect(exists('previewPanel')).toBe(false);
   });
 
   test('should correctly set the title and subtitle of the panel', async () => {
     const {
       find,
-      actions: { toggleFormRow, fields, waitForUpdates },
+      actions: { toggleFormRow, fields },
     } = testBed;
 
     await toggleFormRow('value');
     await fields.updateName('myRuntimeField');
-    await waitForUpdates();
 
     expect(find('previewPanel.title').text()).toBe('Preview');
     expect(find('previewPanel.subTitle').text()).toBe(`From: ${indexPatternNameForTest}`);
@@ -130,12 +87,11 @@ describe('Field editor Preview panel', () => {
 
   test('should list the list of fields of the index pattern', async () => {
     const {
-      actions: { toggleFormRow, fields, getRenderedIndexPatternFields, waitForUpdates },
+      actions: { toggleFormRow, fields, getRenderedIndexPatternFields },
     } = testBed;
 
     await toggleFormRow('value');
     await fields.updateName('myRuntimeField');
-    await waitForUpdates();
 
     expect(getRenderedIndexPatternFields()).toEqual([
       {
@@ -158,18 +114,11 @@ describe('Field editor Preview panel', () => {
       exists,
       find,
       component,
-      actions: {
-        toggleFormRow,
-        fields,
-        setFilterFieldsValue,
-        getRenderedIndexPatternFields,
-        waitForUpdates,
-      },
+      actions: { toggleFormRow, fields, setFilterFieldsValue, getRenderedIndexPatternFields },
     } = testBed;
 
     await toggleFormRow('value');
     await fields.updateName('myRuntimeField');
-    await waitForUpdates();
 
     // Should find a single field
     await setFilterFieldsValue('descr');
@@ -218,26 +167,21 @@ describe('Field editor Preview panel', () => {
         fields,
         getWrapperRenderedIndexPatternFields,
         getRenderedIndexPatternFields,
-        waitForUpdates,
       },
     } = testBed;
 
     await toggleFormRow('value');
     await fields.updateName('myRuntimeField');
-    await waitForUpdates();
 
     const fieldsRendered = getWrapperRenderedIndexPatternFields();
 
-    if (fieldsRendered === null) {
-      throw new Error('No index pattern field rendered.');
-    }
-
-    expect(fieldsRendered.length).toBe(Object.keys(doc1._source).length);
+    expect(fieldsRendered).not.toBe(null);
+    expect(fieldsRendered!.length).toBe(Object.keys(doc1._source).length);
     // make sure that the last one if the "description" field
-    expect(fieldsRendered.at(2).text()).toBe('descriptionFirst doc - description');
+    expect(fieldsRendered!.at(2).text()).toBe('descriptionFirst doc - description');
 
     // Click the third field in the list ("description")
-    const descriptionField = fieldsRendered.at(2);
+    const descriptionField = fieldsRendered!.at(2);
     find('pinFieldButton', descriptionField).simulate('click');
     component.update();
 
@@ -252,7 +196,7 @@ describe('Field editor Preview panel', () => {
     test('should display an empty prompt if no name and no script are defined', async () => {
       const {
         exists,
-        actions: { toggleFormRow, fields, waitForUpdates },
+        actions: { toggleFormRow, fields },
       } = testBed;
 
       await toggleFormRow('value');
@@ -260,20 +204,16 @@ describe('Field editor Preview panel', () => {
       expect(exists('previewPanel.emptyPrompt')).toBe(true);
 
       await fields.updateName('someName');
-      await waitForUpdates();
       expect(exists('previewPanel.emptyPrompt')).toBe(false);
 
       await fields.updateName(' ');
-      await waitForUpdates();
       expect(exists('previewPanel.emptyPrompt')).toBe(true);
 
       // The name is empty and the empty prompt is displayed, let's now add a script...
       await fields.updateScript('echo("hello")');
-      await waitForUpdates();
       expect(exists('previewPanel.emptyPrompt')).toBe(false);
 
       await fields.updateScript(' ');
-      await waitForUpdates();
       expect(exists('previewPanel.emptyPrompt')).toBe(true);
     });
 
@@ -286,9 +226,8 @@ describe('Field editor Preview panel', () => {
         },
       };
 
-      // We open the editor with a field to edit. The preview panel should be open
-      // and the empty prompt should not be there as we have a script and we'll load
-      // the preview.
+      // We open the editor with a field to edit the empty prompt should not be there
+      // as we have a script and we'll load the preview.
       await act(async () => {
         testBed = await setup({ field });
       });
@@ -296,7 +235,6 @@ describe('Field editor Preview panel', () => {
       const { exists, component } = testBed;
       component.update();
 
-      expect(exists('previewPanel')).toBe(true);
       expect(exists('previewPanel.emptyPrompt')).toBe(false);
     });
 
@@ -310,9 +248,6 @@ describe('Field editor Preview panel', () => {
         },
       };
 
-      // We open the editor with a field to edit. The preview panel should be open
-      // and the empty prompt should not be there as we have a script and we'll load
-      // the preview.
       await act(async () => {
         testBed = await setup({ field });
       });
@@ -320,7 +255,6 @@ describe('Field editor Preview panel', () => {
       const { exists, component } = testBed;
       component.update();
 
-      expect(exists('previewPanel')).toBe(true);
       expect(exists('previewPanel.emptyPrompt')).toBe(false);
     });
   });
@@ -328,14 +262,15 @@ describe('Field editor Preview panel', () => {
   describe('key & value', () => {
     test('should set an empty value when no script is provided', async () => {
       const {
-        actions: { toggleFormRow, fields, getRenderedFieldsPreview, waitForUpdates },
+        actions: { toggleFormRow, fields, getRenderedFieldsPreview },
       } = testBed;
 
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
-      await waitForUpdates();
 
-      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: '-' }]);
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'Value not set' },
+      ]);
     });
 
     test('should set the value returned by the painless _execute API', async () => {
@@ -346,7 +281,7 @@ describe('Field editor Preview panel', () => {
         actions: {
           toggleFormRow,
           fields,
-          waitForDocumentsAndPreviewUpdate,
+          waitForUpdates,
           getLatestPreviewHttpRequest,
           getRenderedFieldsPreview,
         },
@@ -355,7 +290,7 @@ describe('Field editor Preview panel', () => {
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
-      await waitForDocumentsAndPreviewUpdate();
+      await waitForUpdates(); // Run validations
       const request = getLatestPreviewHttpRequest(server);
 
       // Make sure the payload sent is correct
@@ -366,6 +301,7 @@ describe('Field editor Preview panel', () => {
           subTitle: 'First doc - subTitle',
           title: 'First doc - title',
         },
+        documentId: '001',
         index: 'testIndex',
         script: {
           source: 'echo("hello")',
@@ -376,46 +312,6 @@ describe('Field editor Preview panel', () => {
       expect(getRenderedFieldsPreview()).toEqual([
         { key: 'myRuntimeField', value: scriptEmitResponse },
       ]);
-    });
-
-    test('should display an updating indicator while fetching the preview', async () => {
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
-
-      const {
-        exists,
-        actions: { toggleFormRow, fields, waitForUpdates, waitForDocumentsAndPreviewUpdate },
-      } = testBed;
-
-      await toggleFormRow('value');
-      await waitForUpdates(); // wait for docs to be fetched
-      expect(exists('isUpdatingIndicator')).toBe(false);
-
-      await fields.updateScript('echo("hello")');
-      expect(exists('isUpdatingIndicator')).toBe(true);
-
-      await waitForDocumentsAndPreviewUpdate();
-      expect(exists('isUpdatingIndicator')).toBe(false);
-    });
-
-    test('should not display the updating indicator when neither the type nor the script has changed', async () => {
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
-
-      const {
-        exists,
-        actions: { toggleFormRow, fields, waitForUpdates, waitForDocumentsAndPreviewUpdate },
-      } = testBed;
-
-      await toggleFormRow('value');
-      await waitForUpdates(); // wait for docs to be fetched
-      await fields.updateName('myRuntimeField');
-      await fields.updateScript('echo("hello")');
-      expect(exists('isUpdatingIndicator')).toBe(true);
-      await waitForDocumentsAndPreviewUpdate();
-      expect(exists('isUpdatingIndicator')).toBe(false);
-
-      await fields.updateName('nameChanged');
-      // We haven't changed the type nor the script so there should not be any updating indicator
-      expect(exists('isUpdatingIndicator')).toBe(false);
     });
 
     describe('read from _source', () => {
@@ -444,12 +340,12 @@ describe('Field editor Preview panel', () => {
         const {
           actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
         } = testBed;
+        await waitForUpdates(); // fetch documents
 
         await toggleFormRow('value');
-        await waitForUpdates(); // fetch documents
         await fields.updateName('description'); // Field name is a field in _source
         await fields.updateScript('echo("hello")');
-        await waitForUpdates(); // fetch preview
+        await waitForUpdates(); // Run validations
 
         // We render the value from the _execute API
         expect(getRenderedFieldsPreview()).toEqual([
@@ -464,6 +360,71 @@ describe('Field editor Preview panel', () => {
           { key: 'description', value: 'First doc - description' },
         ]);
       });
+    });
+  });
+
+  describe('updating indicator', () => {
+    beforeEach(async () => {
+      // Add some latency to be able to test the "updatingIndicator" state
+      setSearchResponseLatency(2000);
+      testBed = await setup();
+    });
+
+    test('should display an updating indicator while fetching the docs and the preview', async () => {
+      // We want to test if the loading indicator is in the DOM, for that we don't want the server to
+      // respond immediately. We'll manualy send the response.
+      server.respondImmediately = false;
+      server.autoRespond = false;
+
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+
+      const {
+        exists,
+        actions: { toggleFormRow, fields, waitForUpdates },
+      } = testBed;
+      await fields.updateName('myRuntimeField'); // Give a name to remove the empty prompt
+      expect(exists('isUpdatingIndicator')).toBe(true); // indicator while fetching the docs
+
+      await waitForUpdates(); // wait for docs to be fetched
+      expect(exists('isUpdatingIndicator')).toBe(false);
+
+      await toggleFormRow('value');
+      expect(exists('isUpdatingIndicator')).toBe(false);
+
+      await fields.updateScript('echo("hello")');
+      expect(exists('isUpdatingIndicator')).toBe(true); // indicator while getting preview
+
+      server.respond();
+      await waitForUpdates();
+      expect(exists('isUpdatingIndicator')).toBe(false);
+    });
+
+    test('should not display the updating indicator when neither the type nor the script has changed', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      // We want to test if the loading indicator is in the DOM, for that we need to manually
+      // send the response from the server
+      server.respondImmediately = false;
+      server.autoRespond = false;
+
+      const {
+        exists,
+        actions: { toggleFormRow, fields, waitForUpdates, waitForDocumentsAndPreviewUpdate },
+      } = testBed;
+      await waitForUpdates(); // wait for docs to be fetched
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript('echo("hello")');
+      expect(exists('isUpdatingIndicator')).toBe(true);
+
+      server.respond();
+      await waitForDocumentsAndPreviewUpdate();
+
+      expect(exists('isUpdatingIndicator')).toBe(false);
+
+      await fields.updateName('nameChanged');
+      // We haven't changed the type nor the script so there should not be any updating indicator
+      expect(exists('isUpdatingIndicator')).toBe(false);
     });
   });
 
@@ -512,32 +473,25 @@ describe('Field editor Preview panel', () => {
 
       const {
         exists,
-        find,
-        actions: {
-          toggleFormRow,
-          fields,
-          waitForUpdates,
-          waitForDocumentsAndPreviewUpdate,
-          getRenderedFieldsPreview,
-        },
+        actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
       } = testBed;
+
+      expect(exists('scriptErrorBadge')).toBe(false);
 
       await fields.updateName('myRuntimeField');
       await toggleFormRow('value');
       await fields.updateScript('bad()');
-      await waitForDocumentsAndPreviewUpdate();
+      await waitForUpdates(); // Run validations
 
-      expect(exists('fieldPreviewItem')).toBe(false);
-      expect(exists('indexPatternFieldList')).toBe(false);
-      expect(exists('previewError')).toBe(true);
-      expect(find('previewError.reason').text()).toBe(error.caused_by.reason);
+      expect(exists('scriptErrorBadge')).toBe(true);
+      expect(fields.getScriptError()).toBe(error.caused_by.reason);
 
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
       await fields.updateScript('echo("ok")');
       await waitForUpdates();
 
-      expect(exists('fieldPreviewItem')).toBe(true);
-      expect(find('indexPatternFieldList.listItem').length).toBeGreaterThan(0);
+      expect(exists('scriptErrorBadge')).toBe(false);
+      expect(fields.getScriptError()).toBe(null);
       expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'ok' }]);
     });
 
@@ -546,12 +500,12 @@ describe('Field editor Preview panel', () => {
         exists,
         find,
         form,
-        actions: { toggleFormRow, fields, waitForUpdates, waitForDocumentsAndPreviewUpdate },
+        component,
+        actions: { toggleFormRow, fields },
       } = testBed;
 
       await fields.updateName('myRuntimeField');
       await toggleFormRow('value');
-      await waitForDocumentsAndPreviewUpdate();
 
       // We will return no document from the search
       setSearchResponse([]);
@@ -559,11 +513,33 @@ describe('Field editor Preview panel', () => {
       await act(async () => {
         form.setInputValue('documentIdField', 'wrongID');
       });
-      await waitForUpdates();
+      component.update();
 
-      expect(exists('previewError')).toBe(true);
-      expect(find('previewError').text()).toContain('Document ID not found');
+      expect(exists('fetchDocError')).toBe(true);
+      expect(find('fetchDocError').text()).toContain('Document ID not found');
       expect(exists('isUpdatingIndicator')).toBe(false);
+    });
+
+    test('should clear the error when disabling "Set value"', async () => {
+      const error = createPreviewError({ reason: 'Houston we got a problem' });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: [], error, status: 400 });
+
+      const {
+        exists,
+        actions: { toggleFormRow, fields, waitForUpdates },
+      } = testBed;
+
+      await toggleFormRow('value');
+      await fields.updateScript('bad()');
+      await waitForUpdates(); // Run validations
+
+      expect(exists('scriptErrorBadge')).toBe(true);
+      expect(fields.getScriptError()).toBe(error.caused_by.reason);
+
+      await toggleFormRow('value', 'off');
+
+      expect(exists('scriptErrorBadge')).toBe(false);
+      expect(fields.getScriptError()).toBe(null);
     });
   });
 
@@ -580,19 +556,10 @@ describe('Field editor Preview panel', () => {
 
     test('should update the field list when the document changes', async () => {
       const {
-        actions: {
-          toggleFormRow,
-          fields,
-          getRenderedIndexPatternFields,
-          goToNextDocument,
-          goToPreviousDocument,
-          waitForUpdates,
-        },
+        actions: { fields, getRenderedIndexPatternFields, goToNextDocument, goToPreviousDocument },
       } = testBed;
 
-      await toggleFormRow('value');
-      await fields.updateName('myRuntimeField');
-      await waitForUpdates();
+      await fields.updateName('myRuntimeField'); // Give a name to remove empty prompt
 
       expect(getRenderedIndexPatternFields()[0]).toEqual({
         key: 'title',
@@ -635,26 +602,17 @@ describe('Field editor Preview panel', () => {
     test('should update the field preview value when the document changes', async () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['valueDoc1'] });
       const {
-        actions: {
-          toggleFormRow,
-          fields,
-          waitForUpdates,
-          waitForDocumentsAndPreviewUpdate,
-          getRenderedFieldsPreview,
-          goToNextDocument,
-        },
+        actions: { toggleFormRow, fields, getRenderedFieldsPreview, goToNextDocument },
       } = testBed;
 
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello world")');
-      await waitForDocumentsAndPreviewUpdate();
 
       expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'valueDoc1' }]);
 
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['valueDoc2'] });
       await goToNextDocument();
-      await waitForUpdates();
 
       expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'valueDoc2' }]);
     });
@@ -664,20 +622,12 @@ describe('Field editor Preview panel', () => {
         component,
         form,
         exists,
-        actions: {
-          toggleFormRow,
-          fields,
-          getRenderedIndexPatternFields,
-          getRenderedFieldsPreview,
-          waitForUpdates,
-          waitForDocumentsAndPreviewUpdate,
-        },
+        actions: { toggleFormRow, fields, getRenderedIndexPatternFields, getRenderedFieldsPreview },
       } = testBed;
 
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello world")');
-      await waitForDocumentsAndPreviewUpdate();
 
       // First make sure that we have the original cluster data is loaded
       // and the preview value rendered.
@@ -696,10 +646,6 @@ describe('Field editor Preview panel', () => {
         form.setInputValue('documentIdField', '123456');
       });
       component.update();
-      // We immediately remove the index pattern fields
-      expect(getRenderedIndexPatternFields()).toEqual([]);
-
-      await waitForDocumentsAndPreviewUpdate();
 
       expect(getRenderedIndexPatternFields()).toEqual([
         {
@@ -715,8 +661,6 @@ describe('Field editor Preview panel', () => {
           value: 'loaded doc - description',
         },
       ]);
-
-      await waitForUpdates(); // Then wait for the preview HTTP request
 
       // The preview should have updated
       expect(getRenderedFieldsPreview()).toEqual([
@@ -734,18 +678,10 @@ describe('Field editor Preview panel', () => {
         form,
         component,
         find,
-        actions: {
-          toggleFormRow,
-          fields,
-          getRenderedFieldsPreview,
-          getRenderedIndexPatternFields,
-          waitForUpdates,
-          waitForDocumentsAndPreviewUpdate,
-        },
+        actions: { toggleFormRow, fields, getRenderedFieldsPreview, waitForUpdates },
       } = testBed;
 
       await toggleFormRow('value');
-      await waitForUpdates(); // fetch documents
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello world")');
       await waitForUpdates(); // fetch preview
@@ -757,7 +693,7 @@ describe('Field editor Preview panel', () => {
       await act(async () => {
         form.setInputValue('documentIdField', '123456');
       });
-      await waitForDocumentsAndPreviewUpdate();
+      component.update();
 
       // Load back the cluster data
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['clusterDataDocPreview'] });
@@ -767,10 +703,6 @@ describe('Field editor Preview panel', () => {
         find('loadDocsFromClusterButton').simulate('click');
       });
       component.update();
-      // We immediately remove the index pattern fields
-      expect(getRenderedIndexPatternFields()).toEqual([]);
-
-      await waitForDocumentsAndPreviewUpdate();
 
       // The preview should be updated with the cluster data preview
       expect(getRenderedFieldsPreview()).toEqual([
@@ -778,22 +710,16 @@ describe('Field editor Preview panel', () => {
       ]);
     });
 
-    test('should not lose the state of single document vs cluster data after displaying the empty prompt', async () => {
+    test('should not lose the state of single document vs cluster data after toggling on/off the empty prompt', async () => {
       const {
         form,
         component,
         exists,
-        actions: {
-          toggleFormRow,
-          fields,
-          getRenderedIndexPatternFields,
-          waitForDocumentsAndPreviewUpdate,
-        },
+        actions: { toggleFormRow, fields, getRenderedIndexPatternFields },
       } = testBed;
 
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
-      await waitForDocumentsAndPreviewUpdate();
 
       // Initial state where we have the cluster data loaded and the doc navigation
       expect(exists('documentsNav')).toBe(true);
@@ -805,7 +731,6 @@ describe('Field editor Preview panel', () => {
         form.setInputValue('documentIdField', '123456');
       });
       component.update();
-      await waitForDocumentsAndPreviewUpdate();
 
       expect(exists('documentsNav')).toBe(false);
       expect(exists('loadDocsFromClusterButton')).toBe(true);
@@ -832,24 +757,20 @@ describe('Field editor Preview panel', () => {
         form,
         component,
         find,
-        actions: { toggleFormRow, fields, waitForUpdates },
+        actions: { fields },
       } = testBed;
 
       const expectedParamsToFetchClusterData = {
-        params: { index: 'testIndexPattern', body: { size: 50 } },
+        params: { index: indexPatternNameForTest, body: { size: 50 } },
       };
 
       // Initial state
       let searchMeta = getSearchCallMeta();
-      const initialCount = searchMeta.totalCalls;
 
-      // Open the preview panel. This will trigger document fetchint
-      await fields.updateName('myRuntimeField');
-      await toggleFormRow('value');
-      await waitForUpdates();
+      await fields.updateName('myRuntimeField'); // hide the empty prompt
 
       searchMeta = getSearchCallMeta();
-      expect(searchMeta.totalCalls).toBe(initialCount + 1);
+      const initialCount = searchMeta.totalCalls;
       expect(searchMeta.lastCallParams).toEqual(expectedParamsToFetchClusterData);
 
       // Load single doc
@@ -859,10 +780,9 @@ describe('Field editor Preview panel', () => {
         form.setInputValue('documentIdField', nextId);
       });
       component.update();
-      await waitForUpdates();
 
       searchMeta = getSearchCallMeta();
-      expect(searchMeta.totalCalls).toBe(initialCount + 2);
+      expect(searchMeta.totalCalls).toBe(initialCount + 1);
       expect(searchMeta.lastCallParams).toEqual({
         params: {
           body: {
@@ -873,7 +793,7 @@ describe('Field editor Preview panel', () => {
             },
             size: 1,
           },
-          index: 'testIndexPattern',
+          index: indexPatternNameForTest,
         },
       });
 
@@ -883,8 +803,30 @@ describe('Field editor Preview panel', () => {
         find('loadDocsFromClusterButton').simulate('click');
       });
       searchMeta = getSearchCallMeta();
-      expect(searchMeta.totalCalls).toBe(initialCount + 3);
+      expect(searchMeta.totalCalls).toBe(initialCount + 2);
       expect(searchMeta.lastCallParams).toEqual(expectedParamsToFetchClusterData);
+    });
+  });
+
+  describe('When no documents could be fetched from cluster', () => {
+    beforeEach(() => {
+      setSearchResponse([]);
+    });
+
+    test('should not display the updating indicator and have a callout to indicate that preview is not available', async () => {
+      setSearchResponseLatency(2000);
+      testBed = await setup();
+
+      const {
+        exists,
+        actions: { fields, waitForUpdates },
+      } = testBed;
+      await fields.updateName('myRuntimeField'); // Give a name to remove the empty prompt
+      expect(exists('isUpdatingIndicator')).toBe(true); // indicator while fetching the docs
+
+      await waitForUpdates(); // wait for docs to be fetched
+      expect(exists('isUpdatingIndicator')).toBe(false);
+      expect(exists('previewNotAvailableCallout')).toBe(true);
     });
   });
 });

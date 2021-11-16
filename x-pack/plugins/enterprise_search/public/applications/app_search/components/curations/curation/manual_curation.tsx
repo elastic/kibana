@@ -10,14 +10,15 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
 import { AppSearchPageTemplate } from '../../layout';
-import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
+import { MANAGE_CURATION_TITLE } from '../constants';
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { PROMOTED_DOCUMENTS_TITLE, HIDDEN_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
+import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultLogic, AddResultFlyout } from './results';
@@ -25,9 +26,26 @@ import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 export const ManualCuration: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
-  const { resetCuration } = useActions(CurationLogic({ curationId }));
-  const { dataLoading, queries } = useValues(CurationLogic({ curationId }));
+  const logic = CurationLogic({ curationId });
+  const { onSelectPageTab } = useActions(logic);
+  const { queries, selectedPageTab, curation } = useValues(logic);
+
   const { isFlyoutOpen } = useValues(AddResultLogic);
+
+  const pageTabs = [
+    {
+      label: PROMOTED_DOCUMENTS_TITLE,
+      append: <EuiBadge>{curation.promoted.length}</EuiBadge>,
+      isSelected: selectedPageTab === 'promoted',
+      onClick: () => onSelectPageTab('promoted'),
+    },
+    {
+      label: HIDDEN_DOCUMENTS_TITLE,
+      append: <EuiBadge>{curation.hidden.length}</EuiBadge>,
+      isSelected: selectedPageTab === 'hidden',
+      onClick: () => onSelectPageTab('hidden'),
+    },
+  ];
 
   return (
     <AppSearchPageTemplate
@@ -35,34 +53,23 @@ export const ManualCuration: React.FC = () => {
       pageHeader={{
         pageTitle: MANAGE_CURATION_TITLE,
         rightSideItems: [
-          <EuiButton
-            color="danger"
-            onClick={() => {
-              if (window.confirm(RESTORE_CONFIRMATION)) resetCuration();
-            }}
-          >
-            {RESTORE_DEFAULTS_BUTTON_LABEL}
-          </EuiButton>,
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <DeleteCurationButton />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ManageQueriesModal />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ],
+        tabs: pageTabs,
       }}
-      isLoading={dataLoading}
     >
-      <SuggestedDocumentsCallout />
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="xl" responsive={false}>
-        <EuiFlexItem>
-          <ActiveQuerySelect />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ManageQueriesModal />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xl" />
-
-      <PromotedDocuments />
-      <EuiSpacer />
+      <ActiveQuerySelect />
+      {selectedPageTab === 'promoted' && <SuggestedDocumentsCallout />}
+      {selectedPageTab === 'promoted' && <PromotedDocuments />}
+      {selectedPageTab === 'hidden' && <HiddenDocuments />}
       <OrganicDocuments />
-      <EuiSpacer />
-      <HiddenDocuments />
 
       {isFlyoutOpen && <AddResultFlyout />}
     </AppSearchPageTemplate>

@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { Overwrite, Unionize } from 'utility-types';
+import { Unionize } from 'utility-types';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { getVizColorForIndex } from '../../../common/viz_colors';
 import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import { getMetricsProjection } from '../../projections/metrics';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { Setup } from '../helpers/setup_request';
-import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { ChartBase } from './types';
+import {
+  environmentQuery,
+  serviceNodeNameQuery,
+} from '../../../common/utils/environment_query';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -24,31 +32,20 @@ type MetricsAggregationMap = Unionize<{
 
 type MetricAggs = Record<string, MetricsAggregationMap>;
 
-export type GenericMetricsRequest = Overwrite<
-  APMEventESSearchRequest,
-  {
-    body: {
-      aggs: {
-        timeseriesData: {
-          date_histogram: AggregationOptionsByType['date_histogram'];
-          aggs: MetricAggs;
-        };
-      } & MetricAggs;
-    };
-  }
->;
+export type GenericMetricsRequest = APMEventESSearchRequest & {
+  body: {
+    aggs: {
+      timeseriesData: {
+        date_histogram: AggregationOptionsByType['date_histogram'];
+        aggs: MetricAggs;
+      };
+    } & MetricAggs;
+  };
+};
 
-interface Filter {
-  exists?: {
-    field: string;
-  };
-  term?: {
-    [key: string]: string;
-  };
-  terms?: {
-    [key: string]: string[];
-  };
-}
+export type GenericMetricsChart = PromiseReturnType<
+  typeof fetchAndTransformMetrics
+>;
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment,
@@ -72,26 +69,27 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   end: number;
   chartBase: ChartBase;
   aggs: T;
-  additionalFilters?: Filter[];
+  additionalFilters?: QueryDslQueryContainer[];
   operationName: string;
 }) {
   const { apmEventClient, config } = setup;
 
-  const projection = getMetricsProjection({
-    environment,
-    kuery,
-    serviceName,
-    serviceNodeName,
-    start,
-    end,
-  });
-
-  const params: GenericMetricsRequest = mergeProjection(projection, {
+  const params: GenericMetricsRequest = {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [...projection.body.query.bool.filter, ...additionalFilters],
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...serviceNodeNameQuery(serviceNodeName),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...additionalFilters,
+          ],
         },
       },
       aggs: {
@@ -99,16 +97,50 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
           date_histogram: getMetricsDateHistogramParams({
             start,
             end,
-            metricsInterval: config['xpack.apm.metricsInterval'],
+            metricsInterval: config.metricsInterval,
           }),
           aggs,
         },
         ...aggs,
       },
     },
-  });
+  };
 
-  const response = await apmEventClient.search(operationName, params);
+  const { hits, aggregations } = await apmEventClient.search(
+    operationName,
+    params
+  );
+  const timeseriesData = aggregations?.timeseriesData;
 
-  return transformDataToMetricsChart(response, chartBase);
+  return {
+    title: chartBase.title,
+    key: chartBase.key,
+    yUnit: chartBase.yUnit,
+    series:
+      hits.total.value === 0
+        ? []
+        : Object.keys(chartBase.series).map((seriesKey, i) => {
+            // @ts-ignore
+            const overallValue = aggregations?.[seriesKey]?.value as number;
+
+            return {
+              title: chartBase.series[seriesKey].title,
+              key: seriesKey,
+              type: chartBase.type,
+              color:
+                chartBase.series[seriesKey].color ||
+                getVizColorForIndex(i, theme),
+              overallValue,
+              data:
+                timeseriesData?.buckets.map((bucket) => {
+                  const { value } = bucket[seriesKey];
+                  const y = value === null || isNaN(value) ? null : value;
+                  return {
+                    x: bucket.key,
+                    y,
+                  };
+                }) || [],
+            };
+          }),
+  };
 }

@@ -9,16 +9,16 @@ import { PluginInitializerContext, CoreStart, AppMountParameters } from 'kibana/
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { MonitoringConfig } from '../server';
+export type { MonitoringConfig } from '../server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   element: HTMLElement;
   core: CoreStart;
   isCloud: boolean;

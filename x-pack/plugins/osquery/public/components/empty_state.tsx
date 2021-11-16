@@ -24,13 +24,15 @@ const OsqueryAppEmptyStateComponent = () => {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
 
-  const integrationHref = useMemo(() => {
-    return getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
-      path: pagePathGetters.integration_details_overview({
-        pkgkey: OSQUERY_INTEGRATION_NAME,
-      })[1],
-    });
-  }, [getUrlForApp]);
+  const integrationHref = useMemo(
+    () =>
+      getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
+        path: pagePathGetters.integration_details_overview({
+          pkgkey: OSQUERY_INTEGRATION_NAME,
+        })[1],
+      }),
+    [getUrlForApp]
+  );
 
   const integrationClick = useCallback(
     (event) => {

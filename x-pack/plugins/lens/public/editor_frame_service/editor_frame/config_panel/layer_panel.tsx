@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiText,
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -125,11 +126,7 @@ export function LayerPanel(
     dateRange,
   };
 
-  const {
-    groups,
-    supportStaticValue,
-    supportFieldFormat = true,
-  } = useMemo(
+  const { groups } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -389,7 +386,7 @@ export function LayerPanel(
 
           {groups.map((group, groupIndex) => {
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
-
+            const isOptional = !group.required;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"
@@ -413,6 +410,15 @@ export function LayerPanel(
                       </>
                     )}
                   </>
+                }
+                labelAppend={
+                  isOptional ? (
+                    <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
+                      {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
+                        defaultMessage: 'Optional',
+                      })}
+                    </EuiText>
+                  ) : null
                 }
                 labelType="legend"
                 key={group.groupId}
@@ -477,6 +483,13 @@ export function LayerPanel(
                                   );
                                   removeButtonRef(id);
                                 }}
+                                invalid={
+                                  !layerDatasource.isValidColumn(
+                                    layerDatasourceState,
+                                    layerId,
+                                    columnId
+                                  )
+                                }
                               >
                                 <NativeRenderer
                                   render={layerDatasource.renderDimensionTrigger}
@@ -511,7 +524,7 @@ export function LayerPanel(
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
-                          isNew: !supportStaticValue,
+                          isNew: !group.supportStaticValue,
                         });
                       }}
                       onDrop={onDrop}
@@ -568,8 +581,9 @@ export function LayerPanel(
                   toggleFullscreen,
                   isFullscreen,
                   setState: updateDataLayerState,
-                  supportStaticValue: Boolean(supportStaticValue),
-                  supportFieldFormat: Boolean(supportFieldFormat),
+                  supportStaticValue: Boolean(activeGroup.supportStaticValue),
+                  paramEditorCustomProps: activeGroup.paramEditorCustomProps,
+                  supportFieldFormat: activeGroup.supportFieldFormat !== false,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 }}
               />

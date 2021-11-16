@@ -18,12 +18,16 @@ import { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
+import { CASES_FEATURE_ID } from '../../../../../common/constants';
+import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
+jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
+
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
     [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
@@ -75,6 +79,7 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
+    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -84,9 +89,10 @@ describe('useSecuritySolutionNavigation', () => {
             `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
           capabilities: {
             siem: {
-              crud_alerts: true,
-              read_alerts: true,
+              show: true,
+              crud: true,
             },
+            [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
           },
         },
         chrome: {
@@ -110,10 +116,10 @@ describe('useSecuritySolutionNavigation', () => {
             "id": "main",
             "items": Array [
               Object {
-                "data-href": "securitySolution/overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "data-href": "securitySolutionUI/overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "data-test-subj": "navigation-overview",
                 "disabled": false,
-                "href": "securitySolution/overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "href": "securitySolutionUI/overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "overview",
                 "isSelected": false,
                 "name": "Overview",
@@ -126,30 +132,30 @@ describe('useSecuritySolutionNavigation', () => {
             "id": "detect",
             "items": Array [
               Object {
-                "data-href": "securitySolution/alerts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "data-href": "securitySolutionUI/alerts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "data-test-subj": "navigation-alerts",
                 "disabled": false,
-                "href": "securitySolution/alerts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "href": "securitySolutionUI/alerts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "alerts",
                 "isSelected": false,
                 "name": "Alerts",
                 "onClick": [Function],
               },
               Object {
-                "data-href": "securitySolution/rules?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "data-href": "securitySolutionUI/rules?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "data-test-subj": "navigation-rules",
                 "disabled": false,
-                "href": "securitySolution/rules?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "href": "securitySolutionUI/rules?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "rules",
                 "isSelected": false,
                 "name": "Rules",
                 "onClick": [Function],
               },
               Object {
-                "data-href": "securitySolution/exceptions?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "data-href": "securitySolutionUI/exceptions?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "data-test-subj": "navigation-exceptions",
                 "disabled": false,
-                "href": "securitySolution/exceptions?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "href": "securitySolutionUI/exceptions?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "exceptions",
                 "isSelected": false,
                 "name": "Exceptions",
@@ -162,20 +168,20 @@ describe('useSecuritySolutionNavigation', () => {
             "id": "explore",
             "items": Array [
               Object {
-                "data-href": "securitySolution/hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "data-href": "securitySolutionUI/hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "data-test-subj": "navigation-hosts",
                 "disabled": false,
-                "href": "securitySolution/hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "href": "securitySolutionUI/hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "hosts",
                 "isSelected": true,
                 "name": "Hosts",
                 "onClick": [Function],
               },
               Object {
-                "data-href": "securitySolution/network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "data-href": "securitySolutionUI/network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "data-test-subj": "navigation-network",
                 "disabled": false,
-                "href": "securitySolution/network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "href": "securitySolutionUI/network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "network",
                 "isSelected": false,
                 "name": "Network",
@@ -188,10 +194,10 @@ describe('useSecuritySolutionNavigation', () => {
             "id": "investigate",
             "items": Array [
               Object {
-                "data-href": "securitySolution/timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "data-href": "securitySolutionUI/timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "data-test-subj": "navigation-timelines",
                 "disabled": false,
-                "href": "securitySolution/timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+                "href": "securitySolutionUI/timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
                 "id": "timelines",
                 "isSelected": false,
                 "name": "Timelines",
@@ -204,43 +210,43 @@ describe('useSecuritySolutionNavigation', () => {
             "id": "manage",
             "items": Array [
               Object {
-                "data-href": "securitySolution/endpoints",
+                "data-href": "securitySolutionUI/endpoints",
                 "data-test-subj": "navigation-endpoints",
                 "disabled": false,
-                "href": "securitySolution/endpoints",
+                "href": "securitySolutionUI/endpoints",
                 "id": "endpoints",
                 "isSelected": false,
                 "name": "Endpoints",
                 "onClick": [Function],
               },
               Object {
-                "data-href": "securitySolution/trusted_apps",
+                "data-href": "securitySolutionUI/trusted_apps",
                 "data-test-subj": "navigation-trusted_apps",
                 "disabled": false,
-                "href": "securitySolution/trusted_apps",
+                "href": "securitySolutionUI/trusted_apps",
                 "id": "trusted_apps",
                 "isSelected": false,
                 "name": "Trusted applications",
                 "onClick": [Function],
               },
               Object {
-                "data-href": "securitySolution/event_filters",
+                "data-href": "securitySolutionUI/event_filters",
                 "data-test-subj": "navigation-event_filters",
                 "disabled": false,
-                "href": "securitySolution/event_filters",
+                "href": "securitySolutionUI/event_filters",
                 "id": "event_filters",
                 "isSelected": false,
                 "name": "Event filters",
                 "onClick": [Function],
               },
               Object {
-                "data-href": "securitySolution/host_isolation_exceptions",
+                "data-href": "securitySolutionUI/host_isolation_exceptions",
                 "data-test-subj": "navigation-host_isolation_exceptions",
                 "disabled": false,
-                "href": "securitySolution/host_isolation_exceptions",
+                "href": "securitySolutionUI/host_isolation_exceptions",
                 "id": "host_isolation_exceptions",
                 "isSelected": false,
-                "name": "Host Isolation Exceptions",
+                "name": "Host isolation exceptions",
                 "onClick": [Function],
               },
             ],
@@ -260,8 +266,22 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    // @ts-ignore possibly undefined, but if undefined we want this test to fail
+    // possibly undefined, but if undefined we want this test to fail
+    // @ts-expect-error TS2532
     expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
+  });
+
+  it('should omit host isolation exceptions if hook reports false', () => {
+    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValueOnce(false);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
+    expect(
+      result.current?.items
+        .find((item) => item.id === 'manage')
+        ?.items?.find((item) => item.id === 'host_isolation_exceptions')
+    ).toBeUndefined();
   });
 
   describe('Permission gated routes', () => {
@@ -282,10 +302,10 @@ describe('useSecuritySolutionNavigation', () => {
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
           Object {
-            "data-href": "securitySolution/case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "data-href": "securitySolutionUI/case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
             "data-test-subj": "navigation-case",
             "disabled": false,
-            "href": "securitySolution/case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "href": "securitySolutionUI/case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
             "id": "case",
             "isSelected": false,
             "name": "Cases",

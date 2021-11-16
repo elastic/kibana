@@ -15,13 +15,15 @@ import '../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../../test_helpers';
+
 import { CurationLogic } from './';
 
 describe('CurationLogic', () => {
   const { mount } = new LogicMounter(CurationLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const MOCK_CURATION_RESPONSE = {
     id: 'cur-123456789',
@@ -56,6 +58,7 @@ describe('CurationLogic', () => {
     hiddenIds: [],
     hiddenDocumentsLoading: false,
     isAutomated: false,
+    selectedPageTab: 'promoted',
   };
 
   beforeEach(() => {
@@ -248,20 +251,19 @@ describe('CurationLogic', () => {
       });
     });
 
-    describe('resetCuration', () => {
-      it('should clear promotedIds & hiddenIds & set dataLoading to true', () => {
-        mount({ promotedIds: ['hello'], hiddenIds: ['world'] });
+    describe('onSelectPageTab', () => {
+      it('should set the selected page tab and clears flash messages', () => {
+        mount({
+          selectedPageTab: 'promoted',
+        });
 
-        CurationLogic.actions.resetCuration();
+        CurationLogic.actions.onSelectPageTab('hidden');
 
         expect(CurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          dataLoading: true,
-          promotedIds: [],
-          promotedDocumentsLoading: true,
-          hiddenIds: [],
-          hiddenDocumentsLoading: true,
+          selectedPageTab: 'hidden',
         });
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
   });
@@ -295,7 +297,7 @@ describe('CurationLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -309,14 +311,30 @@ describe('CurationLogic', () => {
         expect(CurationLogic.actions.loadCuration).toHaveBeenCalled();
       });
 
-      it('flashes any error messages', async () => {
-        http.put.mockReturnValueOnce(Promise.reject('error'));
-        mount({ activeQuery: 'some query' });
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationLogic.actions.convertToManual();
+      });
+    });
+
+    describe('deleteCuration', () => {
+      it('should make an API call and navigate to the curations page', async () => {
+        http.delete.mockReturnValueOnce(Promise.resolve());
+        mount({}, { curationId: 'cur-123456789' });
+        jest.spyOn(CurationLogic.actions, 'onCurationLoad');
+
+        CurationLogic.actions.deleteCuration();
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(http.delete).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/curations/cur-123456789'
+        );
+        expect(flashSuccessToast).toHaveBeenCalled();
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
+      });
+
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
+        mount({}, { curationId: 'cur-404' });
+        CurationLogic.actions.deleteCuration();
       });
     });
 
@@ -385,6 +403,7 @@ describe('CurationLogic', () => {
         expect(http.put).toHaveBeenCalledWith(
           '/internal/app_search/engines/some-engine/curations/cur-123456789',
           {
+            query: { skip_record_analytics: 'true' },
             body: '{"queries":["a","b","c"],"query":"b","promoted":["d","e","f"],"hidden":["g"]}', // Uses state currently in CurationLogic
           }
         );

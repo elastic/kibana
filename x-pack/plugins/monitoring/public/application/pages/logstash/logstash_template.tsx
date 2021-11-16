@@ -55,21 +55,23 @@ export const LogstashTemplate: React.FC<LogstashTemplateProps> = ({
         label: i18n.translate('xpack.monitoring.logstashNavigation.instance.overviewLinkText', {
           defaultMessage: 'Overview',
         }),
-        route: `/logstash/node/${instance.nodeSummary?.uuid}`, // IDK if this is right
+        route: `/logstash/node/${instance.nodeSummary?.uuid}`,
       });
       tabs.push({
         id: 'pipeline',
         label: i18n.translate('xpack.monitoring.logstashNavigation.instance.pipelinesLinkText', {
           defaultMessage: 'Pipelines',
         }),
-        route: `/logstash/node/${instance.nodeSummary?.uuid}/pipelines`, // IDK if this is right
+        route: `/logstash/node/${instance.nodeSummary?.uuid}/pipelines`,
+        testSubj: 'logstashNodeDetailPipelinesLink',
       });
       tabs.push({
         id: 'advanced',
         label: i18n.translate('xpack.monitoring.logstashNavigation.instance.advancedLinkText', {
           defaultMessage: 'Advanced',
         }),
-        route: `/logstash/node/${instance.nodeSummary?.uuid}/advanced`, // IDK if this is right
+        route: `/logstash/node/${instance.nodeSummary?.uuid}/advanced`,
+        testSubj: 'logstashNodeDetailAdvancedLink',
       });
     }
   }

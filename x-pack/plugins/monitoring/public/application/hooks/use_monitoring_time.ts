@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState, useContext } from 'react';
+import { useCallback, useState, useContext, useEffect } from 'react';
 import createContainer from 'constate';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../../legacy_shims';
-import { GlobalStateContext } from '../../application/global_state_context';
+import { GlobalStateContext } from '../contexts/global_state_context';
 
 interface TimeOptions {
   from: string;
@@ -52,6 +52,18 @@ export const useMonitoringTime = () => {
     },
     [currentTimerange, setTimeRange, state]
   );
+
+  useEffect(() => {
+    const sub = Legacy.shims.timefilter.getTimeUpdate$().subscribe(function onTimeUpdate() {
+      const updatedTime = Legacy.shims.timefilter.getTime();
+      setTimeRange({ ...currentTimerange, ...updatedTime });
+      state.time = { ...updatedTime };
+      state.save?.();
+    });
+
+    return () => sub.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     currentTimerange,

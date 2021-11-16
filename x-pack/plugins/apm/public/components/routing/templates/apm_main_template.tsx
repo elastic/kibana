@@ -42,14 +42,13 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks } = services;
+  const { http, docLinks, observability } = services;
   const basePath = http?.basePath.get();
 
-  const ObservabilityPageTemplate =
-    services.observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
 
   const { data } = useFetcher((callApmApi) => {
-    return callApmApi({ endpoint: 'GET /api/apm/has_data' });
+    return callApmApi({ endpoint: 'GET /internal/apm/has_data' });
   }, []);
 
   const noDataConfig = getNoDataConfig({

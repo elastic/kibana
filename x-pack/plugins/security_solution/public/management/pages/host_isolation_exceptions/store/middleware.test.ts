@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import {
+  CreateExceptionListItemSchema,
+  UpdateEndpointListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { applyMiddleware, createStore, Store } from 'redux';
-import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { AppAction } from '../../../../common/store/actions';
 import {
   createSpyMiddleware,
@@ -19,16 +21,21 @@ import {
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../state';
-import { getHostIsolationExceptionItems, deleteHostIsolationExceptionItems } from '../service';
+import {
+  createHostIsolationExceptionItem,
+  getOneHostIsolationExceptionItem,
+  updateOneHostIsolationExceptionItem,
+} from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
+import { createEmptyHostIsolationException } from '../utils';
 import { initialHostIsolationExceptionsPageState } from './builders';
 import { createHostIsolationExceptionsPageMiddleware } from './middleware';
 import { hostIsolationExceptionsPageReducer } from './reducer';
-import { getListFetchError } from './selector';
 
 jest.mock('../service');
-const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
-const deleteHostIsolationExceptionItemsMock = deleteHostIsolationExceptionItems as jest.Mock;
+const createHostIsolationExceptionItemMock = createHostIsolationExceptionItem as jest.Mock;
+const getOneHostIsolationExceptionItemMock = getOneHostIsolationExceptionItem as jest.Mock;
+const updateOneHostIsolationExceptionItemMock = updateOneHostIsolationExceptionItem as jest.Mock;
 
 const fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
 
@@ -67,146 +74,164 @@ describe('Host isolation exceptions middleware', () => {
     });
   });
 
-  describe('when on the List page', () => {
-    const changeUrl = (searchParams: string = '') => {
-      store.dispatch({
-        type: 'userChangedUrl',
-        payload: {
-          pathname: HOST_ISOLATION_EXCEPTIONS_PATH,
-          search: searchParams,
-          hash: '',
-          key: 'miniMe',
-        },
-      });
-    };
-
+  describe('When adding an item to host isolation exceptions', () => {
+    let entry: CreateExceptionListItemSchema;
     beforeEach(() => {
-      getHostIsolationExceptionItemsMock.mockClear();
-      getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+      createHostIsolationExceptionItemMock.mockReset();
+      entry = {
+        ...createEmptyHostIsolationException(),
+        name: 'test name',
+        description: 'description',
+        entries: [
+          {
+            field: 'destination.ip',
+            operator: 'included',
+            type: 'match',
+            value: '10.0.0.1',
+          },
+        ],
+      };
     });
 
-    it.each([
-      [undefined, undefined],
-      [3, 50],
-    ])(
-      'should trigger api call to retrieve host isolation exceptions params page_index[%s] page_size[%s]',
-      async (pageIndex, perPage) => {
-        changeUrl((pageIndex && perPage && `?page_index=${pageIndex}&page_size=${perPage}`) || '');
-        await spyMiddleware.waitForAction('hostIsolationExceptionsPageDataChanged', {
-          validate({ payload }) {
-            return isLoadedResourceState(payload);
-          },
-        });
+    it('should dispatch a form loading state when an entry is submited', async () => {
+      const waiter = spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
+        validate({ payload }) {
+          return isLoadingResourceState(payload);
+        },
+      });
+      store.dispatch({
+        type: 'hostIsolationExceptionsCreateEntry',
+        payload: entry,
+      });
+      await waiter;
+    });
 
-        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            page: (pageIndex ?? 0) + 1,
-            perPage: perPage ?? 10,
-            filter: undefined,
-          })
-        );
-      }
-    );
-
-    it('should clear up previous page and apply a filter configuration when a filter is used', async () => {
-      changeUrl('?filter=testMe');
-      await spyMiddleware.waitForAction('hostIsolationExceptionsPageDataChanged', {
+    it('should dispatch a form success state when an entry is confirmed by the API', async () => {
+      const waiter = spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
         validate({ payload }) {
           return isLoadedResourceState(payload);
         },
       });
-      expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          page: 1,
-          perPage: 10,
-          filter:
-            '(exception-list-agnostic.attributes.name:(*testMe*) OR exception-list-agnostic.attributes.description:(*testMe*) OR exception-list-agnostic.attributes.entries.value:(*testMe*))',
-        })
-      );
+      store.dispatch({
+        type: 'hostIsolationExceptionsCreateEntry',
+        payload: entry,
+      });
+      await waiter;
+      expect(createHostIsolationExceptionItemMock).toHaveBeenCalledWith({
+        http: fakeCoreStart.http,
+        exception: entry,
+      });
     });
 
-    it('should dispatch a Failure if an API error was encountered', async () => {
-      getHostIsolationExceptionItemsMock.mockRejectedValue({
-        body: { message: 'error message', statusCode: 500, error: 'Internal Server Error' },
+    it('should dispatch a form failure state when an entry is rejected by the API', async () => {
+      createHostIsolationExceptionItemMock.mockRejectedValue({
+        body: { message: 'error message', statusCode: 500, error: 'Not today' },
       });
-
-      changeUrl();
-      await spyMiddleware.waitForAction('hostIsolationExceptionsPageDataChanged', {
+      const waiter = spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
         validate({ payload }) {
           return isFailedResourceState(payload);
         },
       });
-
-      expect(getListFetchError(store.getState())).toEqual({
-        message: 'error message',
-        statusCode: 500,
-        error: 'Internal Server Error',
+      store.dispatch({
+        type: 'hostIsolationExceptionsCreateEntry',
+        payload: entry,
       });
+      await waiter;
     });
   });
 
-  describe('When deleting an item from host isolation exceptions', () => {
+  describe('When updating an item from host isolation exceptions', () => {
+    const fakeId = 'dc5d1d00-2766-11ec-981f-7f84cfc8764f';
+    let fakeException: UpdateEndpointListItemSchema;
     beforeEach(() => {
-      deleteHostIsolationExceptionItemsMock.mockClear();
-      deleteHostIsolationExceptionItemsMock.mockReturnValue(undefined);
-      getHostIsolationExceptionItemsMock.mockClear();
-      getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
-      store.dispatch({
-        type: 'hostIsolationExceptionsMarkToDelete',
-        payload: {
-          id: '1',
-        },
+      fakeException = {
+        ...createEmptyHostIsolationException(),
+        name: 'name edit me',
+        description: 'initial description',
+        id: fakeId,
+        item_id: fakeId,
+        entries: [
+          {
+            field: 'destination.ip',
+            operator: 'included',
+            type: 'match',
+            value: '10.0.0.5',
+          },
+        ],
+      };
+      getOneHostIsolationExceptionItemMock.mockReset();
+      getOneHostIsolationExceptionItemMock.mockImplementation(async () => {
+        return fakeException;
       });
     });
 
-    it('should call the delete exception API when a delete is submitted and advertise a loading status', async () => {
+    it('should load data from an entry when an exception is marked to edit', async () => {
+      const waiter = spyMiddleware.waitForAction('hostIsolationExceptionsFormEntryChanged');
+      store.dispatch({
+        type: 'hostIsolationExceptionsMarkToEdit',
+        payload: {
+          id: fakeId,
+        },
+      });
+      await waiter;
+      expect(getOneHostIsolationExceptionItemMock).toHaveBeenCalledWith(fakeCoreStart.http, fakeId);
+    });
+
+    it('should call the update API when an item edit is submitted', async () => {
       const waiter = Promise.all([
-        // delete loading action
-        spyMiddleware.waitForAction('hostIsolationExceptionsDeleteStatusChanged', {
-          validate({ payload }) {
+        // loading status
+        spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
+          validate: ({ payload }) => {
             return isLoadingResourceState(payload);
           },
         }),
-        // delete finished action
-        spyMiddleware.waitForAction('hostIsolationExceptionsDeleteStatusChanged', {
+        // loaded status
+        spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
           validate({ payload }) {
             return isLoadedResourceState(payload);
           },
         }),
       ]);
       store.dispatch({
-        type: 'hostIsolationExceptionsSubmitDelete',
+        type: 'hostIsolationExceptionsSubmitEdit',
+        payload: fakeException,
+      });
+      expect(updateOneHostIsolationExceptionItemMock).toHaveBeenCalledWith(fakeCoreStart.http, {
+        name: 'name edit me',
+        description: 'initial description',
+        id: fakeId,
+        item_id: fakeId,
+        entries: [
+          {
+            field: 'destination.ip',
+            operator: 'included',
+            type: 'match',
+            value: '10.0.0.5',
+          },
+        ],
+        namespace_type: 'agnostic',
+        os_types: ['windows', 'linux', 'macos'],
+        tags: ['policy:all'],
+        type: 'simple',
+        comments: [],
       });
       await waiter;
-      expect(deleteHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith(
-        fakeCoreStart.http,
-        '1'
-      );
     });
 
-    it('should dispatch a failure if the API returns an error', async () => {
-      deleteHostIsolationExceptionItemsMock.mockRejectedValue({
-        body: { message: 'error message', statusCode: 500, error: 'Internal Server Error' },
+    it('should dispatch a form failure state when an entry is rejected by the API', async () => {
+      updateOneHostIsolationExceptionItemMock.mockRejectedValue({
+        body: { message: 'error message', statusCode: 500, error: 'Not today' },
       });
-      store.dispatch({
-        type: 'hostIsolationExceptionsSubmitDelete',
-      });
-      await spyMiddleware.waitForAction('hostIsolationExceptionsDeleteStatusChanged', {
+      const waiter = spyMiddleware.waitForAction('hostIsolationExceptionsFormStateChanged', {
         validate({ payload }) {
           return isFailedResourceState(payload);
         },
       });
-    });
-
-    it('should reload the host isolation exception lists after delete', async () => {
       store.dispatch({
-        type: 'hostIsolationExceptionsSubmitDelete',
+        type: 'hostIsolationExceptionsSubmitEdit',
+        payload: fakeException,
       });
-      await spyMiddleware.waitForAction('hostIsolationExceptionsPageDataChanged', {
-        validate({ payload }) {
-          return isLoadingResourceState(payload);
-        },
-      });
+      await waiter;
     });
   });
 });

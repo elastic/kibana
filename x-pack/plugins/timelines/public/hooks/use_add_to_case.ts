@@ -8,7 +8,7 @@ import { get, isEmpty } from 'lodash/fp';
 import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
@@ -81,6 +81,7 @@ export const useAddToCase = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
 }: AddToCaseActionProps): UseAddToCase => {
   const eventId = event?.ecs._id ?? '';
@@ -120,13 +121,13 @@ export const useAddToCase = ({
   const isAlert = useMemo(() => {
     if (event !== undefined) {
       const data = [...event.data];
-      return data.some(({ field }) => field === 'kibana.alert.uuid');
+      return data.some(({ field }) => field === 'kibana.alert.rule.uuid');
     } else {
       return false;
     }
   }, [event]);
   const isSecurityAlert = useMemo(() => {
-    return !isEmpty(event?.ecs.signal?.rule?.id);
+    return !isEmpty(event?.ecs.signal?.rule?.id ?? event?.ecs.kibana?.alert?.rule?.uuid);
   }, [event]);
   const isEventSupported = isSecurityAlert || isAlert;
   const userCanCrud = casePermissions?.crud ?? false;
@@ -167,13 +168,13 @@ export const useAddToCase = ({
               id: ruleId,
               name: ruleName,
             },
-            owner: appId,
+            owner,
           },
           updateCase,
         });
       }
     },
-    [eventId, eventIndex, appId, dispatch, event]
+    [eventId, eventIndex, owner, dispatch, event]
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
@@ -187,7 +188,7 @@ export const useAddToCase = ({
     async (ev) => {
       ev.preventDefault();
       return navigateToApp(appId, {
-        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
+        deepLinkId: appId === 'securitySolutionUI' ? 'case' : 'cases',
         path: getCreateCaseUrl(urlSearch),
       });
     },

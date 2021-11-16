@@ -65,7 +65,7 @@ import {
   updateRange,
   updateSort,
   upsertColumn,
-  updateIndexNames,
+  updateDataView,
   updateTimeline,
   updateTitleAndDescription,
   updateAutoSaveMsg,
@@ -109,7 +109,7 @@ const timelineActionsType = [
   updateProviders.type,
   updateTitleAndDescription.type,
 
-  updateIndexNames.type,
+  updateDataView.type,
   removeColumn.type,
   updateColumns.type,
   updateSort.type,
@@ -235,7 +235,7 @@ export const createTimelineEpic =
               mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
                 const error = result as TimelineErrorResponse;
                 if (error.status_code != null && error.status_code === 405) {
-                  kibana.notifications!.toasts.addDanger({
+                  kibana.notifications.toasts.addDanger({
                     title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
                     text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
                   });
@@ -326,6 +326,7 @@ export const createTimelineEpic =
 const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
+  dataViewId: null,
   description: null,
   eqlOptions: null,
   eventType: null,

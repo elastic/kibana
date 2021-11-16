@@ -1,9 +1,9 @@
-# Grouping target to call all underlying packages build
-# targets so we can build them all at once
+# It will build all declared code packages
 filegroup(
-  name = "build",
+  name = "build_pkg_code",
   srcs = [
-     "//packages/elastic-datemath:build",
+      "//packages/elastic-apm-synthtrace:build",
+      "//packages/elastic-datemath:build",
       "//packages/elastic-eslint-config-kibana:build",
       "//packages/elastic-safer-lodash-set:build",
       "//packages/kbn-ace:build",
@@ -35,6 +35,7 @@ filegroup(
       "//packages/kbn-optimizer:build",
       "//packages/kbn-plugin-generator:build",
       "//packages/kbn-plugin-helpers:build",
+      "//packages/kbn-react-field:build",
       "//packages/kbn-rule-data-utils:build",
       "//packages/kbn-securitysolution-autocomplete:build",
       "//packages/kbn-securitysolution-list-constants:build",
@@ -45,6 +46,7 @@ filegroup(
       "//packages/kbn-securitysolution-list-api:build",
       "//packages/kbn-securitysolution-list-hooks:build",
       "//packages/kbn-securitysolution-list-utils:build",
+      "//packages/kbn-securitysolution-rules:build",
       "//packages/kbn-securitysolution-utils:build",
       "//packages/kbn-securitysolution-es-utils:build",
       "//packages/kbn-securitysolution-t-grid:build",
@@ -65,5 +67,26 @@ filegroup(
       "//packages/kbn-ui-shared-deps-src:build",
       "//packages/kbn-utility-types:build",
       "//packages/kbn-utils:build",
+  ],
+)
+
+# It will build all declared package types
+filegroup(
+  name = "build_pkg_types",
+  srcs = [
+      "//packages/elastic-datemath:build_types",
+  ],
+)
+
+
+
+# Grouping target to call all underlying packages build
+# targets so we can build them all at once
+# It will auto build all declared code packages and types packages
+filegroup(
+  name = "build",
+  srcs = [
+      ":build_pkg_code",
+      ":build_pkg_types"
   ],
 )

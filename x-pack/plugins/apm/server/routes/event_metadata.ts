@@ -6,14 +6,14 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
 import { getEventMetadata } from '../lib/event_metadata/get_event_metadata';
 import { processorEventRt } from '../../common/processor_event';
 import { setupRequest } from '../lib/helpers/setup_request';
 
 const eventMetadataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/event_metadata/{processorEvent}/{id}',
+  endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
   options: { tags: ['access:apm'] },
   params: t.type({
     path: t.type({

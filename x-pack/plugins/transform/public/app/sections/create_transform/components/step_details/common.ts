@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
+import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
 
 export type EsIndexName = string;
 export type IndexPatternTitle = string;
@@ -27,6 +27,7 @@ export interface StepDetailsExposedState {
   transformSettingsDocsPerSecond?: number;
   valid: boolean;
   indexPatternTimeField?: string | undefined;
+  _meta?: Record<string, unknown>;
 }
 
 const defaultContinuousModeDelay = '60s';
@@ -55,7 +56,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
 
 export function applyTransformConfigToDetailsState(
   state: StepDetailsExposedState,
-  transformConfig?: TransformPivotConfig
+  transformConfig?: TransformConfigUnion
 ): StepDetailsExposedState {
   // apply the transform configuration to wizard DETAILS state
   if (transformConfig !== undefined) {
@@ -93,6 +94,10 @@ export function applyTransformConfigToDetailsState(
       if (typeof transformConfig.settings?.docs_per_second === 'number') {
         state.transformSettingsDocsPerSecond = transformConfig.settings.docs_per_second;
       }
+    }
+
+    if (transformConfig._meta) {
+      state._meta = transformConfig._meta;
     }
   }
   return state;

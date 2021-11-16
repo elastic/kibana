@@ -60,9 +60,10 @@ function DefaultEditor({
       return;
     }
 
-    embeddableHandler.render(visRef.current);
-    setTimeout(() => {
-      eventEmitter.emit('embeddableRendered');
+    embeddableHandler.render(visRef.current).then(() => {
+      setTimeout(async () => {
+        eventEmitter.emit('embeddableRendered');
+      });
     });
 
     return () => embeddableHandler.destroy();

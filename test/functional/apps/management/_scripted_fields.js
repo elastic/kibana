@@ -367,8 +367,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/113745
-    describe.skip('creating and using Painless date scripted fields', function describeIndexTests() {
+    describe('creating and using Painless date scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painDate';
 
       it('should create scripted field', async function () {
@@ -384,7 +383,7 @@ export default function ({ getService, getPageObjects }) {
           'date',
           { format: 'date', datePattern: 'YYYY-MM-DD HH:00' },
           '1',
-          "doc['utc_time'].value.getMillis() + (1000) * 60 * 60"
+          "doc['utc_time'].value.toEpochMilli() + (1000) * 60 * 60"
         );
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
