@@ -62,7 +62,7 @@ describe('DiscoverNoResults', () => {
     describe('timeFieldName', () => {
       test('renders time range feedback', () => {
         const result = mountAndFindSubjects({
-          timeFieldName: 'awesome_time_field',
+          isTimeBased: true,
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
@@ -94,7 +94,7 @@ describe('DiscoverNoResults', () => {
       test('renders error message', () => {
         const error = new Error('Fatal error');
         const result = mountAndFindSubjects({
-          timeFieldName: 'awesome_time_field',
+          isTimeBased: true,
           error,
         });
         expect(result).toMatchInlineSnapshot(`
