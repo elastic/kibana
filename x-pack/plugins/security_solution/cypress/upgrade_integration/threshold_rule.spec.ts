@@ -111,7 +111,7 @@ describe('After an upgrade, the threshold rule', () => {
     cy.get(HOST_NAME).should('have.text', alert.hostName);
   });
 
-  it('Displays the Overview alert details at the alert flyout', () => {
+  it('Displays the Overview alert details in the alert flyout', () => {
     expandFirstAlert();
 
     cy.get(OVERVIEW_STATUS).should('have.text', 'open');
