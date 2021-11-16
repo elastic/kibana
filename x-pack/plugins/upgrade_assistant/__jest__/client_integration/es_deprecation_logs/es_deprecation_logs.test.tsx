@@ -11,7 +11,7 @@ import {
   setupESDeprecationLogsPage,
 } from './es_deprecation_logs.helpers';
 
-describe.skip('ES deprecation logs', () => {
+describe('ES deprecation logs', () => {
   let testBed: EsDeprecationLogsTestBed;
   const { server } = setupEnvironment();
 
@@ -24,15 +24,8 @@ describe.skip('ES deprecation logs', () => {
     server.restore();
   });
 
-  describe('Documentation links', () => {
-    test('Has a whatsNew link and it references target version', () => {
-      const { exists, find } = testBed;
-
-      expect(exists('whatsNewLink')).toBe(true);
-      expect(find('whatsNewLink').text()).toContain('8');
-    });
-
-    test('Has a link for upgrade assistant in page header', () => {
+  describe('Documentation link', () => {
+    test('Has a link for migration info api docs in page header', () => {
       const { exists } = testBed;
 
       expect(exists('documentationLink')).toBe(true);
