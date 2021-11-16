@@ -21,6 +21,7 @@ import {
   updateOneHostIsolationExceptionItem,
   getOneHostIsolationExceptionItem,
 } from '../../service';
+import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
 
 jest.mock('../../service.ts');
 jest.mock('../../../../../common/hooks/use_license');
@@ -38,7 +39,8 @@ describe('When on the host isolation exceptions flyout form', () => {
   beforeEach(async () => {
     onCancel = jest.fn();
     mockedContext = createAppRootMockRenderer();
-    mockedContext.history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
+    mockedContext.history.push(getHostIsolationExceptionsListPath({ show: 'create' }));
+
     createHostIsolationExceptionItemMock.mockReset();
     updateOneHostIsolationExceptionItemMock.mockReset();
     getOneHostIsolationExceptionItemMock.mockReset();
@@ -153,7 +155,7 @@ describe('When on the host isolation exceptions flyout form', () => {
   describe('When editing an existing exception', () => {
     const fakeId = uuid.v4();
     beforeEach(() => {
-      mockedContext.history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit&id=${fakeId}`);
+      mockedContext.history.push(getHostIsolationExceptionsListPath({ show: 'edit', id: fakeId }));
       render = () => {
         return mockedContext.render(
           <HostIsolationExceptionsFormFlyout id={fakeId} onCancel={onCancel} />
