@@ -6,7 +6,6 @@
  */
 import { EuiLink } from '@elastic/eui';
 import React, { useContext, useCallback, useEffect } from 'react';
-import React from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -96,7 +95,7 @@ export const getRenderCellValue = ({
       case TIMESTAMP:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
-        return asDuration(Number(value));
+        return <span>{asDuration(Number(value))}</span>;
       case ALERT_SEVERITY:
         return <SeverityBadge severityLevel={value ?? undefined} />;
       case ALERT_REASON:
@@ -117,7 +116,7 @@ export const getRenderCellValue = ({
           </EuiLink>
         );
       default:
-        return <>{value}</>;
+        return <span>{value}</span>;
     }
   };
 };

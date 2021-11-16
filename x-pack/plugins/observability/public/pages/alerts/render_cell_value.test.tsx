@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
-import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import React from 'react';
+// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+import { ALERT_STATUS } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { CellValueElementProps } from '../../../../timelines/common';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import * as PluginHook from '../../hooks/use_plugin_context';
@@ -29,18 +28,18 @@ describe('getRenderCellValue', () => {
       } as any)
   );
 
-  const renderCellValue = getRenderCellValue({
+  const CellValue = getRenderCellValue({
     setFlyoutAlert: jest.fn(),
   });
 
   describe('when column is alert status', () => {
     it('should return an active indicator when alert status is active', async () => {
       const cell = render(
-        renderCellValue({
-          ...requiredProperties,
-          columnId: ALERT_STATUS,
-          data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_ACTIVE }),
-        })
+        <CellValue
+          {...requiredProperties}
+          columnId={ALERT_STATUS}
+          data={makeAlertsTableRow({ alertStatus: ALERT_STATUS_ACTIVE })}
+        />
       );
 
       expect(cell.getByText('Active')).toBeInTheDocument();
@@ -48,11 +47,11 @@ describe('getRenderCellValue', () => {
 
     it('should return a recovered indicator when alert status is recovered', async () => {
       const cell = render(
-        renderCellValue({
-          ...requiredProperties,
-          columnId: ALERT_STATUS,
-          data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_RECOVERED }),
-        })
+        <CellValue
+          {...requiredProperties}
+          columnId={ALERT_STATUS}
+          data={makeAlertsTableRow({ alertStatus: ALERT_STATUS_RECOVERED })}
+        />
       );
 
       expect(cell.getByText('Recovered')).toBeInTheDocument();
