@@ -60,14 +60,15 @@ const cellActionLink = [
     header?: ColumnHeaderOptions;
     timelineId: string;
     pageSize: number;
-  }) =>
-    getLink(header?.id, header?.type, header?.linkField)
+  }) => {
+    return getLink(header?.id, header?.type, header?.linkField)
       ? ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
           const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
           const ecs = pageRowIndex < ecsData.length ? ecsData[pageRowIndex] : null;
-          const linkValues = header && getOr([], header.linkField ?? '', ecs);
+          const link = getLink(columnId, header?.type, header?.linkField);
+          const linkField = header?.linkField ? header?.linkField : link?.linkField;
+          const linkValues = header && getOr([], linkField ?? '', ecs);
           const eventId = header && get('_id' ?? '', ecs);
-
           if (pageRowIndex >= data.length) {
             // data grid expects each cell action always return an element, it crashes if returns null
             return <></>;
@@ -78,9 +79,7 @@ const cellActionLink = [
             fieldName: columnId,
           });
 
-          const link = getLink(columnId, header?.type, header?.linkField);
           const value = parseValue(head(values));
-
           return link && eventId && values && !isEmpty(value) ? (
             <FormattedFieldValue
               Component={Component}
@@ -102,7 +101,8 @@ const cellActionLink = [
             <></>
           );
         }
-      : EmptyComponent,
+      : EmptyComponent;
+  },
 ];
 
 export const cellActions: TGridCellAction[] = [
