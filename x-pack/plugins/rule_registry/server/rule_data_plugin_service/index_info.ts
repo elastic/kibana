@@ -28,7 +28,7 @@ export class IndexInfo {
     this.indexOptions = indexOptions;
     this.kibanaVersion = kibanaVersion;
     this.baseName = additionalPrefix
-      ? joinWith<string>('')(
+      ? joinWith('')(
           additionalPrefix,
           joinWithDash(INDEX_PREFIX, `${registrationContext}.${dataset}`)
         )

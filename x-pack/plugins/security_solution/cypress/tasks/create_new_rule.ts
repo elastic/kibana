@@ -33,7 +33,6 @@ import {
   DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
   EQL_QUERY_INPUT,
-  EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
   FALSE_POSITIVES_INPUT,
@@ -92,6 +91,7 @@ import {
   EMAIL_CONNECTOR_USER_INPUT,
   EMAIL_CONNECTOR_PASSWORD_INPUT,
   EMAIL_CONNECTOR_SERVICE_SELECTOR,
+  PREVIEW_HISTOGRAM,
 } from '../screens/create_new_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 import { TOAST_ERROR } from '../screens/shared';
@@ -325,12 +325,12 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
     .find(QUERY_PREVIEW_BUTTON)
     .should('not.be.disabled')
     .click({ force: true });
-  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
+  cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
       if (text !== 'Hits') {
         cy.get(RULES_CREATION_PREVIEW).find(QUERY_PREVIEW_BUTTON).click({ force: true });
-        cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+        cy.get(PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
