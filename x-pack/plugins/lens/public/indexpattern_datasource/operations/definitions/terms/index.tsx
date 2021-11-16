@@ -44,7 +44,7 @@ const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLa
 function ofName(name?: string, count: number = 0) {
   if (count) {
     return i18n.translate('xpack.lens.indexPattern.multipleTermsOf', {
-      defaultMessage: 'Top values of {name} + {count} other',
+      defaultMessage: 'Top values of {name} + {count} {count, plural, one {other} other {others}}',
       values: {
         name: name ?? missingFieldLabel,
         count,
