@@ -160,7 +160,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       ),
       content: (
         <>
-          <EuiSpacer size={'m'} />
+          <EuiSpacer size={'s'} />
           <EuiFlexGrid columns={2} gutterSize={'m'}>
             <EuiFlexItem>
               <EuiPanel>
@@ -216,7 +216,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             ),
             content: (
               <>
-                <EuiSpacer size={'m'} />
+                <EuiSpacer size={'s'} />
                 <EuiFlexGrid columns={2} gutterSize={'m'}>
                   <EuiFlexItem>
                     <EuiPanel>
@@ -276,27 +276,26 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             ),
             content: (
               <>
-                <EuiSpacer size={'m'} />
-                {!!modelItems?.length ? (
-                  <>
-                    <EuiPanel>
-                      <EuiTitle size={'xs'}>
-                        <h5>
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
-                            defaultMessage="Deployment stats"
-                          />
-                        </h5>
-                      </EuiTitle>
-                      <EuiSpacer size={'m'} />
-                      <AllocatedModels models={modelItems} hideColumns={['model_id']} />
-                    </EuiPanel>
+                <EuiSpacer size={'s'} />
 
-                    <EuiSpacer size={'m'} />
-                  </>
-                ) : null}
-                <EuiFlexGrid columns={2}>
-                  {stats.inference_stats && (
+                <EuiFlexGrid columns={2} gutterSize={'m'}>
+                  {!!modelItems?.length ? (
+                    <EuiFlexItem grow={2}>
+                      <EuiPanel>
+                        <EuiTitle size={'xs'}>
+                          <h5>
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
+                              defaultMessage="Deployment stats"
+                            />
+                          </h5>
+                        </EuiTitle>
+                        <EuiSpacer size={'m'} />
+                        <AllocatedModels models={modelItems} hideColumns={['model_id']} />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  ) : null}
+                  {stats.inference_stats ? (
                     <EuiFlexItem>
                       <EuiPanel>
                         <EuiTitle size={'xs'}>
@@ -315,7 +314,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         />
                       </EuiPanel>
                     </EuiFlexItem>
-                  )}
+                  ) : null}
                 </EuiFlexGrid>
               </>
             ),
@@ -337,7 +336,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             ),
             content: (
               <>
-                <EuiSpacer size={'m'} />
+                <EuiSpacer size={'s'} />
                 <ModelPipelines pipelines={pipelines!} ingestStats={stats.ingest} />
               </>
             ),
