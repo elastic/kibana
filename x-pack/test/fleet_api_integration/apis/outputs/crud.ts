@@ -170,6 +170,9 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('DELETE /outputs/{outputId}', () => {
       let outputId: string;
+      let defaultOutputIdToDelete: string;
+      let defaultMonitoringOutputId: string;
+
       before(async () => {
         const { body: postResponse } = await supertest
           .post(`/api/fleet/outputs`)
@@ -181,15 +184,50 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         outputId = postResponse.item.id;
+
+        const { body: defaultOutputPostResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default Output to delete test',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default: true,
+          })
+          .expect(200);
+        defaultOutputIdToDelete = defaultOutputPostResponse.item.id;
+        const { body: defaultMonitoringOutputPostResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default Output to delete test',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+          })
+          .expect(200);
+        defaultMonitoringOutputId = defaultMonitoringOutputPostResponse.item.id;
+      });
+
+      it('should return a 400 when deleting a default output ', async function () {
+        await supertest
+          .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return a 400 when deleting a default output ', async function () {
+        await supertest
+          .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
       });
 
       it('should return a 404 when deleting a non existing output ', async function () {
-        const { body: deleteResponse } = await supertest
+        await supertest
           .delete(`/api/fleet/outputs/idonotexists`)
           .set('kbn-xsrf', 'xxxx')
           .expect(404);
-
-        expect(deleteResponse.id).to.eql(outputId);
       });
 
       it('should allow to delete an output ', async function () {
