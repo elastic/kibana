@@ -1,0 +1,1 @@
+A mock `system` packages for testing functionality around Fleet's `default packages` concept. Because we rely on the package name in our hard coded lists, we use `system` for this test package's name.

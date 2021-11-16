@@ -1,0 +1,15 @@
+format_version: 1.0.0
+name: system
+title: System
+description: Mock system package
+version: 0.2.0
+categories: []
+release: beta
+type: integration
+license: basic
+
+requirement:
+  elasticsearch:
+    versions: '>99.99.99'
+  kibana:
+    versions: '>99.99.99'
