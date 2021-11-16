@@ -32,10 +32,7 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -97,7 +94,6 @@ interface OwnProps {
   filterStatus?: AlertStatus;
   id: string;
   indexNames: string[];
-  initialSelectedEventIds?: Record<string, TimelineNonEcsData[]>;
   isEventViewer?: boolean;
   itemsPerPageOptions: number[];
   leadingControlColumns?: ControlColumnProps[];
@@ -319,7 +315,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     hasAlertsCrudPermissions,
     id,
     indexNames,
-    initialSelectedEventIds,
     isEventViewer = false,
     isLoading,
     isSelectAllChecked,
@@ -343,7 +338,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
-    const [initialized, setInitialized] = useState(false);
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
@@ -394,16 +388,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           : clearSelected({ id }),
       [setSelected, id, data, queryFields, hasAlertsCrud, hasAlertsCrudPermissions, clearSelected]
     );
-
-    useEffect(() => {
-      if (!initialized && initialSelectedEventIds) {
-        // Wait for component to fully intialize before dispatching the select action
-        requestAnimationFrame(() =>
-          onRowSelected({ eventIds: Object.keys(initialSelectedEventIds), isSelected: true })
-        );
-      }
-      setInitialized(true);
-    }, [initialSelectedEventIds, initialized, setInitialized, onRowSelected]);
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
@@ -801,7 +785,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
     });
-
     return (
       <>
         <StatefulEventContext.Provider value={activeStatefulEventContext}>

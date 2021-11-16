@@ -29,19 +29,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    it('remembers selected alerts', async () => {
-      await observability.alerts.common.clickCheckboxByNumber(3);
-      await observability.alerts.common.clickCheckboxByNumber(4);
-      await observability.alerts.common.clickCheckboxByNumber(5);
-      await observability.alerts.common.clickCheckboxByNumber(3);
-
-      await observability.alerts.common.navigateToTimeWithData();
-
-      expect(await observability.alerts.common.isCheckboxByNumberChecked(3)).to.be(false);
-      expect(await observability.alerts.common.isCheckboxByNumberChecked(4)).to.be(true);
-      expect(await observability.alerts.common.isCheckboxByNumberChecked(5)).to.be(true);
-    });
-
     it('remembers column changes', async () => {
       const durationColumnButton = await testSubjects.find(
         'dataGridHeaderCellActionButton-kibana.alert.duration.us'

@@ -35,7 +35,7 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { combineQueries, getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
-import type { State, TGridModel } from '../../../store/t_grid';
+import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { LastUpdatedAt } from '../..';
@@ -104,7 +104,6 @@ export interface TGridStandaloneProps {
   }) => boolean;
   height?: number;
   indexNames: string[];
-  initialSelectedEventIds?: TGridModel['selectedEventIds'];
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
@@ -139,7 +138,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filterStatus,
   hasAlertsCrudPermissions,
   indexNames,
-  initialSelectedEventIds,
   itemsPerPageOptions,
   onRuleChange,
   query,
@@ -408,7 +406,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       unit={unit}
                       filterStatus={filterStatus}
                       trailingControlColumns={trailingControlColumns}
-                      initialSelectedEventIds={initialSelectedEventIds}
                     />
                   </ScrollableFlexItem>
                 </FullWidthFlexGroup>

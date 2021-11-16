@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Store } from 'redux';
+import { Store, Unsubscribe } from 'redux';
 import { throttle } from 'lodash';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -30,6 +30,7 @@ import { getHoverActions } from './components/hover_actions';
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;
   private _storage = new Storage(localStorage);
+  private _storeUnsubscribe: Unsubscribe | undefined;
 
   public setup(core: CoreSetup) {}
 
@@ -46,8 +47,10 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
             this._store = undefined;
           } else {
             if (props.onTGridStateChange) {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              this._store.subscribe(throttle(() => props.onTGridStateChange!(getState()), 500));
+              this._storeUnsubscribe = this._store.subscribe(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                throttle(() => props.onTGridStateChange!(getState()), 500)
+              );
             }
           }
         }
@@ -124,5 +127,9 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
     this._store = store;
   }
 
-  public stop() {}
+  public stop() {
+    if (this._storeUnsubscribe) {
+      this._storeUnsubscribe();
+    }
+  }
 }

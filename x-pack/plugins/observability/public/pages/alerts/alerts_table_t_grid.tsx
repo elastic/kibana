@@ -333,14 +333,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
     JSON.parse(localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY) ?? 'null')
   );
-  const [initialSelectedEventIds, setInitialSelectedEventIds] = useState<
-    TGridModel['selectedEventIds'] | undefined
-  >(undefined);
-  useEffect(() => {
-    if (!initialSelectedEventIds && tGridState?.selectedEventIds) {
-      setInitialSelectedEventIds(tGridState.selectedEventIds);
-    }
-  }, [tGridState, initialSelectedEventIds, setInitialSelectedEventIds]);
 
   const casePermissions = useGetUserCasesPermissions();
 
@@ -433,7 +425,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filters: [],
       hasAlertsCrudPermissions,
       indexNames,
-      initialSelectedEventIds,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
@@ -473,7 +464,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     leadingControlColumns,
     deletedEventIds,
     onTGridStateChange,
-    initialSelectedEventIds,
     tGridState,
   ]);
 
