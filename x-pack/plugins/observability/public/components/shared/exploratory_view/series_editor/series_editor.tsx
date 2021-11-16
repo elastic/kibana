@@ -117,7 +117,7 @@ export const SeriesEditor = React.memo(function () {
     <Wrapper>
       <SectionHeaderBackground />
       <StickyFlexGroup gutterSize="none">
-        <ReportTypeFormFlexItem grow={false}>
+        <EuiFlexItem grow={false}>
           <EuiFormRow
             css={{ alignItems: 'center' }}
             aria-label={REPORT_TYPE_ARIA_LABEL}
@@ -126,7 +126,7 @@ export const SeriesEditor = React.memo(function () {
           >
             <ReportTypesSelect prepend={REPORT_TYPE_LABEL} />
           </EuiFormRow>
-        </ReportTypeFormFlexItem>
+        </EuiFlexItem>
 
         <EuiFlexItem>
           <ViewActions onApply={() => setItemIdToExpandedRowMap({})} />
@@ -206,16 +206,6 @@ const StickyFlexGroup = euiStyled(EuiFlexGroup)`
 
 const EditorRowsWrapper = euiStyled.div`
   margin: ${({ theme }) => theme.eui.paddingSizes.m} 0;
-`;
-
-const ReportTypeFormFlexItem = euiStyled(EuiFlexItem)`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.m};
-  &&& {
-    .euiFormLabel {
-      font-size: ${({ theme }) => theme.eui.euiFontSize};
-      font-weight: ${({ theme }) => theme.eui.euiFontWeightMedium};
-    }
-  }
 `;
 
 export const LOADING_VIEW = i18n.translate(
