@@ -76,6 +76,7 @@ export const streamScreenshots = async (
       throw new Error(`Failure in getScreenshots! Screenshot data is void`);
     }
 
+    // FIXME: figure out how to send multiple parts
     stream.write(data);
 
     screenshots.push({
