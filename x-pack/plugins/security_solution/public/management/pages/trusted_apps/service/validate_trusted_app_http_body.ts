@@ -5,38 +5,52 @@
  * 2.0.
  */
 
-import {
-  NewTrustedApp,
-  OperatingSystem,
-  UpdateTrustedApp,
-} from '../../../../../common/endpoint/types';
+import type { HttpStart } from 'kibana/public';
+import { NewTrustedApp, UpdateTrustedApp } from '../../../../../common/endpoint/types';
 import { HttpRequestValidationError } from './errors';
-
-const VALID_OS_LIST: readonly OperatingSystem[] = Object.freeze([
-  OperatingSystem.LINUX,
-  OperatingSystem.MAC,
-  OperatingSystem.WINDOWS,
-]);
+import { sendGetAgentPolicyList } from '../../policy/store/services/ingest';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 
 /**
  * Validates that the Trusted App is valid for sending to the API for a create (`POST`)
  *
  * @throws
  */
-export const validateTrustedAppHttpPostBody = async (trustedApp: NewTrustedApp): Promise<true> => {
+export const validateTrustedAppHttpPostBody = async (
+  http: HttpStart,
+  trustedApp: NewTrustedApp
+): Promise<true> => {
   const failedValidations: string[] = [];
 
-  if (!VALID_OS_LIST.includes(trustedApp.os)) {
-    failedValidations.push(`Unknown OS [${trustedApp.os}]`);
+  // Validate that the Policy IDs are still valid
+  if (trustedApp.effectScope.type === 'policy' && trustedApp.effectScope.policies.length) {
+    const policyIds = trustedApp.effectScope.policies;
+
+    // We can't search against the Package Policy API by ID because there is no way to do that.
+    // So, as a work-around, we use the Agent Policy API and check for those Agent Policies that
+    // have these package policies in it. For endpoint, these are 1-to-1.
+    const agentPoliciesFound = await sendGetAgentPolicyList(http, {
+      query: {
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIds.join(' or ')})`,
+      },
+    });
+
+    if (agentPoliciesFound.items.length !== policyIds.length) {
+      failedValidations.push(
+        `Invalid policy id(s) [${policyIds
+          .filter(
+            (policyId) =>
+              !agentPoliciesFound.items.find(({ package_policies: packagePolicies }) =>
+                (packagePolicies as string[]).includes(policyId)
+              )
+          )
+          .join(', ')}]`
+      );
+    }
   }
 
-  // FIXME: implement additional validations once discussion around adding List plugin validation is addressed (#2205)
-
   if (failedValidations.length) {
-    throw new HttpRequestValidationError<string[]>(
-      'Invalid trusted application',
-      failedValidations
-    );
+    throw new HttpRequestValidationError(failedValidations);
   }
 
   return true;
@@ -48,13 +62,10 @@ export const validateTrustedAppHttpPostBody = async (trustedApp: NewTrustedApp):
  * @throws
  */
 export const validateTrustedAppHttpPutBody = async (
+  http: HttpStart,
   trustedApp: UpdateTrustedApp
 ): Promise<true> => {
-  await validateTrustedAppHttpPostBody(trustedApp);
-
-  if (!trustedApp.version) {
-    throw new HttpRequestValidationError('missing "version" property');
-  }
+  await validateTrustedAppHttpPostBody(http, trustedApp);
 
   return true;
 };

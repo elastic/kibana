@@ -7,4 +7,13 @@
 
 import { EndpointError } from '../../../../../common/endpoint/errors';
 
-export class HttpRequestValidationError<M> extends EndpointError<M> {}
+export class HttpRequestValidationError extends EndpointError<string[]> {
+  public readonly body: { message: string };
+  constructor(validationFailures: string[]) {
+    super('Invalid trusted application', validationFailures);
+    // Attempts to mirror an HTTP API error body
+    this.body = {
+      message: validationFailures.join(', ') ?? 'unknown',
+    };
+  }
+}

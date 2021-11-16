@@ -137,7 +137,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async createTrustedApp(request: PostTrustedAppCreateRequest) {
-    await validateTrustedAppHttpPostBody(request);
+    await validateTrustedAppHttpPostBody(this.http, request);
 
     const createdExceptionItem = await this.http.post<ExceptionListItemSchema>(
       EXCEPTION_LIST_ITEM_URL,
@@ -157,7 +157,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   ) {
     const [currentExceptionListItem] = await Promise.all([
       await this.getExceptionListItem(params.id),
-      await validateTrustedAppHttpPutBody(updatedTrustedApp),
+      await validateTrustedAppHttpPutBody(this.http, updatedTrustedApp),
     ]);
 
     const updatedExceptionListItem = await this.http.put<ExceptionListItemSchema>(
