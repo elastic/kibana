@@ -37,7 +37,6 @@ export class ScreenshotObservableHandler {
 
   constructor(
     private readonly driver: HeadlessChromiumDriver,
-    private stream: Writable,
     opts: ScreenshotObservableOpts,
     private timeouts: PhaseTimeouts
   ) {
@@ -140,7 +139,7 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  public getScreenshots() {
+  public getScreenshots(stream: Writable) {
     return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotResults> => {
@@ -149,7 +148,7 @@ export class ScreenshotObservableHandler {
           const elements =
             data.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
-          await getScreenshots(this.driver, this.stream, elements, this.logger);
+          await getScreenshots(this.driver, stream, elements, this.logger);
           const { timeRange, error: setupError } = data;
 
           return {

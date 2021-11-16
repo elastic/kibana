@@ -57,7 +57,6 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
-  data: Buffer;
   title: string | null;
   description: string | null;
 }

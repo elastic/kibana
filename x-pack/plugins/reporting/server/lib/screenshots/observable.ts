@@ -57,12 +57,7 @@ export function getScreenshots$(
       apmCreatePage?.end();
       exit$.subscribe({ error: () => apmTrans?.end() });
 
-      const screen = new ScreenshotObservableHandler(
-        driver,
-        stream,
-        opts,
-        getTimeouts(captureConfig)
-      );
+      const screen = new ScreenshotObservableHandler(driver, opts, getTimeouts(captureConfig));
 
       return Rx.from(opts.urlsOrUrlLocatorTuples).pipe(
         concatMap((urlOrUrlLocatorTuple, index) =>
@@ -74,7 +69,7 @@ export function getScreenshots$(
               return Rx.of({ ...defaultSetupResult, error: err }); // allow failover screenshot capture
             }),
             takeUntil(exit$),
-            screen.getScreenshots()
+            screen.getScreenshots(stream)
           )
         ),
         take(opts.urlsOrUrlLocatorTuples.length),

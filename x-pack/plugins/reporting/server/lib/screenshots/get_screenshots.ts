@@ -30,8 +30,9 @@ export const getScreenshots = async (
       throw new Error(`Failure in getScreenshots! Screenshot data is void`);
     }
 
+    stream.write(data);
+
     screenshots.push({
-      data,
       title: item.attributes.title,
       description: item.attributes.description,
     });

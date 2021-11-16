@@ -28,7 +28,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams & { selectors?: Partial<LayoutSelectorDictionary> },
     stream: Writable
-  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
+  ): Rx.Observable<{ warnings: string[] }> {
     const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
     const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
     if (!layoutParams || !layoutParams.dimensions) {
@@ -52,7 +52,6 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
         apmBuffer = apmTrans?.startSpan('get_buffer', 'output') ?? null;
       }),
       map((results: ScreenshotResults[]) => ({
-        buffer: results[0].screenshots[0].data,
         warnings: results.reduce((found, current) => {
           if (current.error) {
             found.push(current.error.message);
@@ -63,10 +62,6 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
           return found;
         }, [] as string[]),
       })),
-      tap(({ buffer }) => {
-        logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
-        apmTrans?.setLabel('byte_length', buffer.byteLength, false);
-      }),
       finalize(() => {
         apmBuffer?.end();
         apmTrans?.end();
