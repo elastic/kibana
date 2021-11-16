@@ -9,11 +9,6 @@ import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-
 import { Action } from 'redux';
 import { HostIsolationExceptionsPageState } from '../types';
 
-export type HostIsolationExceptionsPageDataChanged =
-  Action<'hostIsolationExceptionsPageDataChanged'> & {
-    payload: HostIsolationExceptionsPageState['entries'];
-  };
-
 export type HostIsolationExceptionsFormStateChanged =
   Action<'hostIsolationExceptionsFormStateChanged'> & {
     payload: HostIsolationExceptionsPageState['form']['status'];
@@ -28,8 +23,6 @@ export type HostIsolationExceptionsCreateEntry = Action<'hostIsolationExceptions
   payload: HostIsolationExceptionsPageState['form']['entry'];
 };
 
-export type HostIsolationExceptionsRefreshList = Action<'hostIsolationExceptionsRefreshList'>;
-
 export type HostIsolationExceptionsMarkToEdit = Action<'hostIsolationExceptionsMarkToEdit'> & {
   payload: {
     id: string;
@@ -41,10 +34,8 @@ export type HostIsolationExceptionsSubmitEdit = Action<'hostIsolationExceptionsS
 };
 
 export type HostIsolationExceptionsPageAction =
-  | HostIsolationExceptionsPageDataChanged
   | HostIsolationExceptionsCreateEntry
   | HostIsolationExceptionsFormStateChanged
-  | HostIsolationExceptionsRefreshList
   | HostIsolationExceptionsFormEntryChanged
   | HostIsolationExceptionsMarkToEdit
   | HostIsolationExceptionsSubmitEdit;

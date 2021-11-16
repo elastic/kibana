@@ -105,8 +105,6 @@ interface AdditionalControlColumnProps {
   // Override these type definitions to support either a generic custom component or the one used in security_solution today.
   headerCellRender: HeaderCellRender;
   rowCellRender: RowCellRender;
-  // If not provided, calculated dynamically
-  width?: number;
 }
 
 export type ControlColumnProps = Omit<
