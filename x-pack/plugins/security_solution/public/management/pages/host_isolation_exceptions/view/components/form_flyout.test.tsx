@@ -12,7 +12,6 @@ import {
 } from '../../../../../common/mock/endpoint';
 import userEvent from '@testing-library/user-event';
 import { HostIsolationExceptionsFormFlyout } from './form_flyout';
-import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
 import uuid from 'uuid';
 import { createEmptyHostIsolationException } from '../../utils';
 import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
