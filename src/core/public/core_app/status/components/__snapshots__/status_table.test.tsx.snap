@@ -26,9 +26,11 @@ exports[`StatusTable renders when statuses is provided 1`] = `
         "align": "right",
         "isExpander": true,
         "name": <EuiScreenReaderOnly>
-          <span>
-            Expand row
-          </span>
+          <FormattedMessage
+            defaultMessage="Expand row"
+            id="core.statusPage.statusTable.columns.expandRowHeader"
+            values={Object {}}
+          />
         </EuiScreenReaderOnly>,
         "render": [Function],
         "width": "40px",
