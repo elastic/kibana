@@ -13,8 +13,11 @@ import { installIndexPatterns } from '../kibana/index_pattern/install';
 
 import type { InstallResult } from '../../../types';
 
+import { AUTO_UPDATE_PACKAGES, DEFAULT_PACKAGES } from '../../../constants';
+
 import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
+import { removeInstallation } from './remove';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -42,6 +45,7 @@ export async function bulkInstallPackages({
   const bulkInstallResults = await Promise.allSettled(
     packagesResults.map(async (result, index) => {
       const packageName = getNameFromPackagesToInstall(packagesToInstall, index);
+
       if (result.status === 'fulfilled') {
         const pkgKeyProps = result.value;
         const installedPackageResult = await isPackageVersionOrLaterInstalled({
@@ -49,6 +53,7 @@ export async function bulkInstallPackages({
           pkgName: pkgKeyProps.name,
           pkgVersion: pkgKeyProps.version,
         });
+
         if (installedPackageResult) {
           const {
             name,
@@ -56,15 +61,39 @@ export async function bulkInstallPackages({
             installed_es: installedEs,
             installed_kibana: installedKibana,
           } = installedPackageResult.package;
-          return {
-            name,
-            version,
-            result: {
-              assets: [...installedEs, ...installedKibana],
-              status: 'already_installed',
-              installType: installedPackageResult.installType,
-            } as InstallResult,
-          };
+
+          const isManagedPackage = [...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES].some(
+            (pkg) => pkg.name === name
+          );
+
+          const shouldOverwriteManagedPackageVersion =
+            isManagedPackage && version !== pkgKeyProps.version;
+
+          if (!shouldOverwriteManagedPackageVersion) {
+            // If the version provided and the installed version match, then simply respond w/ a no-op
+            return {
+              name,
+              version,
+              result: {
+                assets: [...installedEs, ...installedKibana],
+                status: 'already_installed',
+                installType: installedPackageResult.installType,
+              } as InstallResult,
+            };
+          } else {
+            // If the version provided and the installed version do not match, we need to override the existing installation
+            // for managed packages. e.g. if a version of `system` is installed that's out of sync w/ the registry or version
+            // specified by preconfiguration, we need to replace it
+            logger.debug(
+              `Found out-of-sync version "${version}" of managed package "${name}". Removing and replacing with provided version "${pkgKeyProps.version}"".`
+            );
+
+            await removeInstallation({
+              savedObjectsClient,
+              esClient,
+              pkgkey: Registry.pkgToPkgKey(pkgKeyProps),
+            });
+          }
         }
         const installResult = await installPackage({
           savedObjectsClient,

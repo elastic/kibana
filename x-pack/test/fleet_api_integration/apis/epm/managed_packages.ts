@@ -15,8 +15,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const oldPackageKey = 'system-0.1.0';
-  const newPackageKey = 'system-0.2.0';
+  const oldPackageKey = 'apm-0.1.0';
+  const newPackageKey = 'apm-0.2.0';
 
   const installPackage = async (pkgkey: string) => {
     await supertest
