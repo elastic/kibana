@@ -66,6 +66,7 @@ export interface Screenshot {
   data?: Buffer;
   title: string | null;
   description: string | null;
+  byteLength: number;
 }
 
 export interface BufferedScreenshot extends Screenshot {

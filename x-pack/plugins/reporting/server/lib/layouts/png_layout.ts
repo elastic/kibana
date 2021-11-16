@@ -6,9 +6,8 @@
  */
 
 import path from 'path';
-import { CustomPageSize } from 'pdfmake/interfaces';
 import { LAYOUT_TYPES } from '../../../common/constants';
-import { PageSizeParams, Size } from '../../../common/types';
+import { Size } from '../../../common/types';
 import { getDefaultLayoutSelectors, LayoutInstance, LayoutSelectorDictionary } from './';
 import { Layout } from './layout';
 
@@ -16,7 +15,7 @@ import { Layout } from './layout';
 // FIXME: should be based on config
 const ZOOM: number = 2;
 
-export class PreserveLayout extends Layout implements LayoutInstance {
+export class PngLayout extends Layout implements LayoutInstance {
   public readonly selectors: LayoutSelectorDictionary;
   public readonly groupCount = 1;
   public readonly height: number;
@@ -25,7 +24,7 @@ export class PreserveLayout extends Layout implements LayoutInstance {
   private readonly scaledWidth: number;
 
   constructor(size: Size, selectors?: Partial<LayoutSelectorDictionary>) {
-    super(LAYOUT_TYPES.PRESERVE_LAYOUT);
+    super(LAYOUT_TYPES.PNG);
     this.height = size.height;
     this.width = size.width;
     this.scaledHeight = size.height * ZOOM;
@@ -38,7 +37,7 @@ export class PreserveLayout extends Layout implements LayoutInstance {
   }
 
   public getCssOverridesPath() {
-    return path.join(__dirname, 'preserve_layout.css');
+    return path.join(__dirname, 'preserve_layout.css'); // NOTE: copy pasted from preserve_layout
   }
 
   public getBrowserViewport() {
@@ -64,23 +63,6 @@ export class PreserveLayout extends Layout implements LayoutInstance {
     return {
       height: this.height,
       width: this.width,
-    };
-  }
-
-  public getPdfPageOrientation() {
-    return undefined;
-  }
-
-  public getPdfPageSize(pageSizeParams: PageSizeParams): CustomPageSize {
-    return {
-      height:
-        this.height +
-        pageSizeParams.pageMarginTop +
-        pageSizeParams.pageMarginBottom +
-        pageSizeParams.tableBorderWidth * 2 +
-        pageSizeParams.headingHeight +
-        pageSizeParams.subheadingHeight,
-      width: this.width + pageSizeParams.pageMarginWidth * 2 + pageSizeParams.tableBorderWidth * 2,
     };
   }
 }

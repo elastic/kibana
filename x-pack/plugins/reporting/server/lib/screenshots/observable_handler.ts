@@ -9,11 +9,21 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { Writable } from 'stream';
+import { startTrace } from '..';
 import { numberToDuration } from '../../../common/schema_utils';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { getChromiumDisconnectedError } from '../../browsers/chromium';
-import { PageSetupResults, PhaseInstance, PhaseTimeouts, ScreenshotObservableOpts } from './';
+import {
+  BufferedScreenshot,
+  BufferedScreenshotResults,
+  PageSetupResults,
+  PhaseInstance,
+  PhaseTimeouts,
+  Screenshot,
+  ScreenshotObservableOpts,
+  ScreenshotResults,
+} from './';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
@@ -133,24 +143,71 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  public getScreenshots(stream: Writable | null) {
+  public getScreenshots() {
     return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
-        mergeMap(async (data: PageSetupResults) => {
+        mergeMap(async (page: PageSetupResults): Promise<BufferedScreenshotResults> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
 
           const elements =
-            data.elementsPositionAndAttributes ??
+            page.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
 
-          await getScreenshots(this.driver, stream, elements, this.logger);
-          const { timeRange, error: setupError } = data;
+          const screenshots = (await getScreenshots(
+            this.driver,
+            elements,
+            this.logger
+          )) as BufferedScreenshot[];
+          const { timeRange, error: setupError } = page;
 
           return {
-            byteLength: 9999,
+            timeRange,
+            screenshots,
+            error: setupError,
+            byteLength: screenshots.reduce((total, { byteLength }) => total + byteLength, 0),
+            elementsPositionAndAttributes: elements,
+          };
+        })
+      );
+  }
+
+  public streamScreenshots(stream: Writable) {
+    return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
+      withRenderComplete.pipe(
+        mergeMap(async (page: PageSetupResults): Promise<ScreenshotResults> => {
+          this.checkPageIsOpen(); // fail the report job if the browser has closed
+
+          const { timeRange, error: setupError } = page;
+          const [element] =
+            page.elementsPositionAndAttributes ??
+            getDefaultElementPosition(this.layout.getViewport(1));
+
+          const endTrace = startTrace('get_screenshots', 'read');
+
+          // spit the screenshots into the stream
+          const data = await this.driver.screenshot(element.position);
+          stream.write(data);
+
+          if (!data?.byteLength) {
+            throw new Error(`Failure in getScreenshots! Screenshot data is void`);
+          }
+
+          const screenshots: Screenshot[] = [
+            {
+              title: element.attributes.title,
+              description: element.attributes.description,
+              byteLength: data.byteLength,
+            },
+          ];
+
+          endTrace();
+
+          return {
+            screenshots,
             timeRange,
             error: setupError,
-            elementsPositionAndAttributes: elements,
+            byteLength: 1999,
+            elementsPositionAndAttributes: [element],
           };
         })
       );

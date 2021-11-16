@@ -23,7 +23,9 @@ export type { LayoutParams, PageSizeParams, PdfImageSize, Size } from '../../../
 export { CanvasLayout } from './canvas_layout';
 export { createLayout } from './create_layout';
 export type { Layout } from './layout';
+export type { PdfLayout } from './pdf_layout';
 export { PreserveLayout } from './preserve_layout';
+export { PngLayout } from './png_layout';
 export { PrintLayout } from './print_layout';
 
 export const LayoutTypes = {

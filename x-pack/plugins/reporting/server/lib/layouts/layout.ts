@@ -6,7 +6,7 @@
  */
 
 import type { CustomPageSize, PredefinedPageSize } from 'pdfmake/interfaces';
-import type { PageSizeParams, PdfImageSize, Size } from '../../../common/types';
+import type { PageSizeParams, Size } from '../../../common/types';
 
 export interface ViewZoomWidthHeight {
   zoom: number;
@@ -25,10 +25,6 @@ export abstract class Layout {
   constructor(id: string) {
     this.id = id;
   }
-
-  public abstract getPdfImageSize(): PdfImageSize;
-
-  public abstract getPdfPageOrientation(): 'portrait' | 'landscape' | undefined;
 
   public abstract getPdfPageSize(
     pageSizeParams: PageSizeParams

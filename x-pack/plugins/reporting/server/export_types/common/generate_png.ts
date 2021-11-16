@@ -12,7 +12,7 @@ import { Writable } from 'stream';
 import { ReportingCore } from '../../';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger } from '../../lib';
-import { LayoutParams, LayoutSelectorDictionary, PreserveLayout } from '../../lib/layouts';
+import { LayoutParams, LayoutSelectorDictionary, PngLayout } from '../../lib/layouts';
 import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
 
@@ -27,14 +27,14 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams & { selectors?: Partial<LayoutSelectorDictionary> },
-    stream: Writable | null
+    stream: Writable
   ): Rx.Observable<{ warnings: string[] }> {
     const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
     const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
-    const layout = new PreserveLayout(layoutParams.dimensions, layoutParams.selectors);
+    const layout = new PngLayout(layoutParams.dimensions, layoutParams.selectors);
 
     if (apmLayout) apmLayout.end();
 
