@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getFixLogsStep } from './fix_logs_step';
+export { FixDeprecationLogs } from './fix_deprecation_logs';
