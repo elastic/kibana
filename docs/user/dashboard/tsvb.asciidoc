@@ -31,8 +31,7 @@ When you use only {data-sources}, you are able to:
 
 * Improve performance
 
-IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`. Creating *TSVB* visualizations with an {es} index string will be removed in a future release.
-Creating visualizations with only {data-sources} is the default.
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a fytyre release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.
 
 . On the dashboard, click *All types*, then select *TSVB*.
 
@@ -81,8 +80,7 @@ To configure the value of each series, select the function, then configure the f
   with the overall sum function, which outputs a single Y value per unique series.
 +
 *Math*::
-  The math context is able to do simple and advanced calculations per series.
-  This function must always be the last metric in the series.
+  For each series, apply simple and advanced calculations. Only use *Math* for the last function in a series.
 
 . To display each group separately, select one of the following options from the *Group by* dropdown:
 
