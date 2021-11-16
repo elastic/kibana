@@ -28,6 +28,7 @@ import {
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
 import { InfraPluginSetup, InfraRequestHandlerContext } from '../../infra/server';
+import { PluginSetupContract as AlertingPluginSetup } from '../../alerting/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
@@ -80,6 +81,7 @@ export interface RouteDependencies {
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
+  alerting?: AlertingPluginSetup;
   logger: Logger;
 }
 

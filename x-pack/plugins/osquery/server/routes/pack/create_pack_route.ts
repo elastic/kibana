@@ -43,7 +43,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   schema.recordOf(
                     schema.string(),
                     schema.object({
-                      field: schema.string(),
+                      field: schema.maybe(schema.string()),
+                      value: schema.maybe(
+                        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+                      ),
                     })
                   )
                 ),
@@ -68,8 +71,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const conflictingEntries = await savedObjectsClient.find({
         type: packSavedObjectType,
-        search: name,
-        searchFields: ['name'],
+        filter: `${packSavedObjectType}.attributes.name: "${name}"`,
       });
 
       if (conflictingEntries.saved_objects.length) {

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
 import * as t from 'io-ts';
 import { decodeRequestParams } from './decode_request_params';
 
@@ -69,7 +69,7 @@ describe('decodeRequestParams', () => {
     };
 
     expect(decode).toThrowErrorMatchingInlineSnapshot(`
-      "Excess keys are not allowed: 
+      "Excess keys are not allowed:
       path.extraKey"
     `);
   });

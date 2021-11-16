@@ -7,17 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
-import type {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
-} from '@kbn/rule-data-utils';
 import {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils/technical_field_names';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -48,12 +42,7 @@ import { RegisterRuleDependencies } from './register_apm_alerts';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import { getDocumentTypeFilterForTransactions } from '../helpers/transactions';
 import { asPercent } from '../../../../observability/common/utils/formatters';
-
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
-  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
-  ALERT_EVALUATION_VALUE_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
+import { termQuery } from '../../../../observability/server';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -142,18 +131,8 @@ export function registerTransactionErrorRateAlertType({
                       ],
                     },
                   },
-                  ...(alertParams.serviceName
-                    ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                    : []),
-                  ...(alertParams.transactionType
-                    ? [
-                        {
-                          term: {
-                            [TRANSACTION_TYPE]: alertParams.transactionType,
-                          },
-                        },
-                      ]
-                    : []),
+                  ...termQuery(SERVICE_NAME, alertParams.serviceName),
+                  ...termQuery(TRANSACTION_TYPE, alertParams.transactionType),
                   ...environmentQuery(alertParams.environment),
                 ],
               },

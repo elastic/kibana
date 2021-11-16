@@ -13,7 +13,8 @@ const MAX_SIZE = 1000;
 export const getConfig = (
   visParams: PieVisParams,
   chartTheme: RecursivePartial<Theme>,
-  dimensions?: PieContainerDimensions
+  dimensions?: PieContainerDimensions,
+  rescaleFactor: number = 1
 ): RecursivePartial<PartitionConfig> => {
   // On small multiples we want the labels to only appear inside
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
@@ -32,7 +33,9 @@ export const getConfig = (
   const usingOuterSizeRatio =
     dimensions && !isSplitChart
       ? {
-          outerSizeRatio: MAX_SIZE / Math.min(dimensions?.width, dimensions?.height),
+          outerSizeRatio:
+            // Cap the ratio to 1 and then rescale
+            rescaleFactor * Math.min(MAX_SIZE / Math.min(dimensions?.width, dimensions?.height), 1),
         }
       : null;
   const config: RecursivePartial<PartitionConfig> = {
