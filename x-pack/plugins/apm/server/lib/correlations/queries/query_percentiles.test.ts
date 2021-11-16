@@ -65,7 +65,7 @@ describe('query_percentiles', () => {
           track_total_hits: true,
         },
         index: params.index,
-        ignore_throttled: !params.includeFrozen,
+        ignore_throttled: params.includeFrozen ? false : undefined,
         ignore_unavailable: true,
       });
     });
