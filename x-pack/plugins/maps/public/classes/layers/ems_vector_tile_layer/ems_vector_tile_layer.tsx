@@ -7,7 +7,7 @@
 
 import type { Map as MbMap, Layer as MbLayer, Style as MbStyle } from '@kbn/mapbox-gl';
 import _ from 'lodash';
-import { RasterTileLayer } from '../raster_tile_layer/raster_tile_layer';
+import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
@@ -19,6 +19,7 @@ import {
 } from '../../../connected_components/mb_map/utils';
 import { DataRequestContext } from '../../../actions';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
+import { TileStyle } from '../../styles/tile/tile_style';
 
 interface SourceRequestMeta {
   tileLayerId: string;
@@ -46,8 +47,7 @@ interface SourceRequestData {
   };
 }
 
-// TODO extend from AbstractLayer instead of RasterTileLayer
-export class EmsVectorTileLayer extends RasterTileLayer {
+export class EmsVectorTileLayer extends AbstractLayer {
   static createDescriptor(options: Partial<LayerDescriptor>) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
@@ -55,6 +55,8 @@ export class EmsVectorTileLayer extends RasterTileLayer {
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
   }
+
+  private readonly _style: TileStyle;
 
   constructor({
     source,
@@ -64,10 +66,23 @@ export class EmsVectorTileLayer extends RasterTileLayer {
     layerDescriptor: LayerDescriptor;
   }) {
     super({ source, layerDescriptor });
+    this._style = new TileStyle();
   }
 
   getSource(): EMSTMSSource {
     return super.getSource() as EMSTMSSource;
+  }
+
+  getStyleForEditing() {
+    return this._style;
+  }
+
+  getStyle() {
+    return this._style;
+  }
+
+  getCurrentStyle() {
+    return this._style;
   }
 
   _canSkipSync({
@@ -356,5 +371,13 @@ export class EmsVectorTileLayer extends RasterTileLayer {
 
   async getLicensedFeatures() {
     return this._source.getLicensedFeatures();
+  }
+
+  getLayerTypeIconName() {
+    return 'grid';
+  }
+
+  isBasemap(order: number) {
+    return order === 0;
   }
 }
