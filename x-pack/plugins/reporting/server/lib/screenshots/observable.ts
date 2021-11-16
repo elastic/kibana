@@ -13,15 +13,16 @@ import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import {
+  BufferScreenshotResults,
   ElementPosition,
   ElementsPositionAndAttribute,
   PageSetupResults,
   ScreenshotObservableOpts,
-  ScreenshotResults,
+  StreamScreenshotResults,
 } from './';
 import { ScreenshotObservableHandler } from './observable_handler';
 
-export type { ElementPosition, ElementsPositionAndAttribute, ScreenshotResults };
+export type { ElementPosition, ElementsPositionAndAttribute, StreamScreenshotResults };
 
 const getTimeouts = (captureConfig: CaptureConfig) => ({
   openUrl: {
@@ -42,12 +43,11 @@ const getTimeouts = (captureConfig: CaptureConfig) => ({
   loadDelay: durationToNumber(captureConfig.loadDelay),
 });
 
-export function getScreenshots$(
+export function getScreenshotsToBuffer$(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory,
-  stream: Writable,
   opts: ScreenshotObservableOpts
-): Rx.Observable<ScreenshotResults[]> {
+): Rx.Observable<BufferScreenshotResults[]> {
   const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
   const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
   const { browserTimezone, logger } = opts;
@@ -69,7 +69,45 @@ export function getScreenshots$(
               return Rx.of({ ...defaultSetupResult, error: err }); // allow failover screenshot capture
             }),
             takeUntil(exit$),
-            screen.getScreenshots(stream)
+            screen.getScreenshotsToBuffer()
+          )
+        ),
+        take(opts.urlsOrUrlLocatorTuples.length),
+        toArray()
+      );
+    }),
+    first()
+  );
+}
+
+export function getScreenshotsToStream$(
+  captureConfig: CaptureConfig,
+  browserDriverFactory: HeadlessChromiumDriverFactory,
+  stream: Writable,
+  opts: ScreenshotObservableOpts
+): Rx.Observable<StreamScreenshotResults[]> {
+  const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
+  const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
+  const { browserTimezone, logger } = opts;
+
+  return browserDriverFactory.createPage({ browserTimezone }, logger).pipe(
+    mergeMap(({ driver, exit$ }) => {
+      apmCreatePage?.end();
+      exit$.subscribe({ error: () => apmTrans?.end() });
+
+      const screen = new ScreenshotObservableHandler(driver, opts, getTimeouts(captureConfig));
+
+      return Rx.from(opts.urlsOrUrlLocatorTuples).pipe(
+        concatMap((urlOrUrlLocatorTuple, index) =>
+          screen.setupPage(index, urlOrUrlLocatorTuple, apmTrans).pipe(
+            catchError((err) => {
+              screen.checkPageIsOpen(); // this fails the job if the browser has closed
+
+              logger.error(err);
+              return Rx.of({ ...defaultSetupResult, error: err }); // allow failover screenshot capture
+            }),
+            takeUntil(exit$),
+            screen.getScreenshotsToStream(stream)
           )
         ),
         take(opts.urlsOrUrlLocatorTuples.length),

@@ -12,7 +12,7 @@ import { ElementsPositionAndAttribute, Screenshot } from './';
 
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
-  stream: Writable,
+  stream: Writable | null,
   elementsPositionAndAttributes: ElementsPositionAndAttribute[],
   logger: LevelLogger
 ): Promise<Screenshot[]> => {
@@ -30,9 +30,15 @@ export const getScreenshots = async (
       throw new Error(`Failure in getScreenshots! Screenshot data is void`);
     }
 
-    stream.write(data);
+    let screenshotData: Buffer | undefined;
+    if (stream) {
+      stream.write(data);
+    } else {
+      screenshotData = data;
+    }
 
     screenshots.push({
+      data: screenshotData,
       title: item.attributes.title,
       description: item.attributes.description,
     });

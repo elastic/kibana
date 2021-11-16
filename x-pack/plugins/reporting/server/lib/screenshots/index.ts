@@ -10,7 +10,7 @@ import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { ConditionalHeaders } from '../../export_types/common';
 import { LayoutInstance } from '../layouts';
 
-export { getScreenshots$ } from './observable';
+export { getScreenshotsToBuffer$, getScreenshotsToStream$ } from './observable';
 
 export interface PhaseInstance {
   timeoutValue: number;
@@ -57,6 +57,7 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
+  data: Buffer | undefined;
   title: string | null;
   description: string | null;
 }
@@ -67,8 +68,12 @@ export interface PageSetupResults {
   error?: Error;
 }
 
-export interface ScreenshotResults {
+/*
+ * Results of a screenshot job when the screenshot is streamed into storage
+ */
+export interface StreamScreenshotResults {
   timeRange: string | null;
+  byteLength: number;
   error?: Error;
 
   /**
@@ -78,4 +83,12 @@ export interface ScreenshotResults {
    */
   renderErrors?: string[];
   elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
+}
+
+/*
+ * Results of a screenshot job when the screenshot buffer needs to be returned
+ * to the caller (PDF)
+ */
+export interface BufferScreenshotResults extends StreamScreenshotResults {
+  screenshots: Screenshot[];
 }

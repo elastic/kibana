@@ -11,12 +11,12 @@ import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
+import { getScreenshotsToBuffer$, BufferScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 import { PdfMaker } from '../../common/pdf';
 import { getTracker } from './tracker';
 
-const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
+const getTimeRange = (urlScreenshots: BufferScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
@@ -48,14 +48,14 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.endLayout();
 
     tracker.startScreenshots();
-    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
+    const screenshots$ = getScreenshotsToBuffer$(captureConfig, browserDriverFactory, {
       logger,
       urlsOrUrlLocatorTuples: urls,
       conditionalHeaders,
       layout,
       browserTimezone,
     }).pipe(
-      mergeMap(async (results: ScreenshotResults[]) => {
+      mergeMap(async (results: BufferScreenshotResults[]) => {
         tracker.endScreenshots();
 
         tracker.startSetup();

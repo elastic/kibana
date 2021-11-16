@@ -12,14 +12,14 @@ import { ReportingCore } from '../../../';
 import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
+import { getScreenshotsToBuffer$, BufferScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 import { PdfMaker } from '../../common/pdf';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import type { TaskPayloadPDFV2 } from '../types';
 import { getTracker } from './tracker';
 
-const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
+const getTimeRange = (urlScreenshots: BufferScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
@@ -60,14 +60,14 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
       getFullRedirectAppUrl(reporting.getConfig(), job.spaceId, job.forceNow)
     );
 
-    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
+    const screenshots$ = getScreenshotsToBuffer$(captureConfig, browserDriverFactory, {
       logger,
       urlsOrUrlLocatorTuples: zip(urls, locatorParams) as UrlOrUrlLocatorTuple[],
       conditionalHeaders,
       layout,
       browserTimezone,
     }).pipe(
-      mergeMap(async (results: ScreenshotResults[]) => {
+      mergeMap(async (results: BufferScreenshotResults[]) => {
         tracker.endScreenshots();
 
         tracker.startSetup();
@@ -81,7 +81,8 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
 
         results.forEach((r) => {
           r.screenshots.forEach((screenshot) => {
-            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.data.byteLength}`); // prettier-ignore
+            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.data.byteLength}`);
+
             tracker.startAddImage();
             tracker.endAddImage();
             pdfOutput.addImage(screenshot.data, {

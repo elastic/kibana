@@ -13,7 +13,7 @@ import { ReportingCore } from '../../';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger } from '../../lib';
 import { LayoutParams, LayoutSelectorDictionary, PreserveLayout } from '../../lib/layouts';
-import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
+import { getScreenshotsToStream$, StreamScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
@@ -40,7 +40,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
     let apmBuffer: typeof apm.currentSpan;
-    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, stream, {
+    const screenshots$ = getScreenshotsToStream$(captureConfig, browserDriverFactory, stream, {
       logger,
       urlsOrUrlLocatorTuples: [urlOrUrlLocatorTuple],
       conditionalHeaders,
@@ -51,7 +51,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
         apmScreenshots?.end();
         apmBuffer = apmTrans?.startSpan('get_buffer', 'output') ?? null;
       }),
-      map((results: ScreenshotResults[]) => ({
+      map((results: StreamScreenshotResults[]) => ({
         warnings: results.reduce((found, current) => {
           if (current.error) {
             found.push(current.error.message);
@@ -61,7 +61,12 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
           }
           return found;
         }, [] as string[]),
+        byteLength: results.reduce((found, { byteLength }) => found + byteLength, 0),
       })),
+      tap(({ byteLength }) => {
+        logger.debug(`PNG buffer byte length: ${byteLength}`);
+        apmTrans?.setLabel('byte_length', byteLength, false);
+      }),
       finalize(() => {
         apmBuffer?.end();
         apmTrans?.end();

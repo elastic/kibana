@@ -7,19 +7,13 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { Writable } from 'stream';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
+import { Writable } from 'stream';
 import { numberToDuration } from '../../../common/schema_utils';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { getChromiumDisconnectedError } from '../../browsers/chromium';
-import {
-  PageSetupResults,
-  PhaseInstance,
-  PhaseTimeouts,
-  ScreenshotObservableOpts,
-  ScreenshotResults,
-} from './';
+import { PageSetupResults, PhaseInstance, PhaseTimeouts, ScreenshotObservableOpts } from './';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
@@ -139,19 +133,44 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  public getScreenshots(stream: Writable) {
+  public getScreenshotsToBuffer() {
     return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
-        mergeMap(async (data: PageSetupResults): Promise<ScreenshotResults> => {
+        mergeMap(async (data: PageSetupResults) => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
 
           const elements =
             data.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
+          const screenshots = await getScreenshots(this.driver, null, elements, this.logger);
+          const { timeRange, error: setupError } = data;
+
+          return {
+            timeRange,
+            screenshots,
+            error: setupError,
+            elementsPositionAndAttributes: elements,
+            byteLength: 424242,
+          };
+        })
+      );
+  }
+
+  public getScreenshotsToStream(stream: Writable) {
+    return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
+      withRenderComplete.pipe(
+        mergeMap(async (data: PageSetupResults) => {
+          this.checkPageIsOpen(); // fail the report job if the browser has closed
+
+          const elements =
+            data.elementsPositionAndAttributes ??
+            getDefaultElementPosition(this.layout.getViewport(1));
+
           await getScreenshots(this.driver, stream, elements, this.logger);
           const { timeRange, error: setupError } = data;
 
           return {
+            byteLength: 9999,
             timeRange,
             error: setupError,
             elementsPositionAndAttributes: elements,
