@@ -103,7 +103,7 @@ describe('After an upgrade, the threshold rule', () => {
     });
   });
 
-  it('Displays the alert details at the tgrid', () => {
+  it('Displays the alert details in the TGrid', () => {
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
