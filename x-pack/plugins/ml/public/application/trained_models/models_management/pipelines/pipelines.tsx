@@ -34,7 +34,9 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
 
   return (
     <>
-      {Object.entries(pipelines).map(([pipelineName, pipelineDefinition]) => {
+      {Object.entries(pipelines).map(([pipelineName, pipelineDefinition], i) => {
+        // Expand first 3 pipelines by default
+        const initialIsOpen = i <= 2;
         return (
           <>
             <EuiAccordion
@@ -66,6 +68,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                 </EuiButtonEmpty>
               }
               paddingSize="l"
+              initialIsOpen={initialIsOpen}
             >
               <EuiFlexGrid columns={2}>
                 {ingestStats?.pipelines ? (
