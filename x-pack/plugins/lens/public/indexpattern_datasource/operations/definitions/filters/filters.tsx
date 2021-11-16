@@ -182,6 +182,7 @@ export const FilterList = ({
     if (isOpenByCreation) {
       setActiveFilterId(localFilters[localFilters.length - 1].id);
     }
+    setIsOpenByCreation(false);
   }, [isOpenByCreation, localFilters]);
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
@@ -251,7 +252,7 @@ export const FilterList = ({
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
                 isOpen={filter.id === activeFilterId}
-                triggerClose={() => setActiveFilterId('')}
+                triggerClose={() => changeActiveFilter('')}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {

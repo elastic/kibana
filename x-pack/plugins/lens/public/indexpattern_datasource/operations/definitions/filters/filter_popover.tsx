@@ -30,13 +30,7 @@ export const FilterPopover = ({
   isOpen: boolean;
   triggerClose: () => void;
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>();
-
-  // set popover open on start to work around EUI bug
-  useEffect(() => {
-    setIsPopoverOpen(isOpen);
-  }, [isOpen]);
 
   const setFilterLabel = (label: string) => setFilter({ ...filter, label });
   const setFilterQuery = (input: Query) => setFilter({ ...filter, input });
@@ -56,7 +50,7 @@ export const FilterPopover = ({
       data-test-subj="indexPattern-filters-existingFilterContainer"
       anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
-      isOpen={isPopoverOpen}
+      isOpen={isOpen}
       ownFocus
       closePopover={() => triggerClose()}
       button={<Button />}
