@@ -20,14 +20,19 @@ describe('columns', () => {
     it('returns a datatable with included columns and without excluded columns', () => {
       const arbitraryRowIndex = 7;
       const result = fn(testTable, {
-        include: 'name, price, quantity, foo, bar',
+        include: 'name, title_id, price, quantity, foo, bar',
         exclude: 'price, quantity, fizz, buzz',
       });
 
       expect(result.columns[0]).toHaveProperty('name', 'name');
+      expect(result.columns[1]).toHaveProperty('id', 'title_id');
       expect(result.rows[arbitraryRowIndex]).toHaveProperty(
         'name',
         testTable.rows[arbitraryRowIndex].name
+      );
+      expect(result.rows[arbitraryRowIndex]).toHaveProperty(
+        'title_id',
+        testTable.rows[arbitraryRowIndex].title_id
       );
       expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('price');
       expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('quantity');
@@ -46,8 +51,8 @@ describe('columns', () => {
 
       expect(
         fn(testTable, {
-          include: 'price, quantity, in_stock',
-          exclude: 'price, quantity, in_stock',
+          include: 'price, quantity, in_stock, title_id',
+          exclude: 'price, quantity, in_stock, title_id',
         })
       ).toEqual(emptyTable);
     });
@@ -56,15 +61,17 @@ describe('columns', () => {
       it('returns a datatable with included columns only', () => {
         const arbitraryRowIndex = 3;
         const result = fn(testTable, {
-          include: 'name, time, in_stock',
+          include: 'name, time, in_stock, title_id',
         });
 
-        expect(result.columns).toHaveLength(3);
-        expect(Object.keys(result.rows[0])).toHaveLength(3);
+        expect(result.columns).toHaveLength(4);
+        expect(Object.keys(result.rows[0])).toHaveLength(4);
 
         expect(result.columns[0]).toHaveProperty('name', 'name');
         expect(result.columns[1]).toHaveProperty('name', 'time');
         expect(result.columns[2]).toHaveProperty('name', 'in_stock');
+        expect(result.columns[3]).toHaveProperty('id', 'title_id');
+
         expect(result.rows[arbitraryRowIndex]).toHaveProperty(
           'name',
           testTable.rows[arbitraryRowIndex].name
@@ -76,6 +83,10 @@ describe('columns', () => {
         expect(result.rows[arbitraryRowIndex]).toHaveProperty(
           'in_stock',
           testTable.rows[arbitraryRowIndex].in_stock
+        );
+        expect(result.rows[arbitraryRowIndex]).toHaveProperty(
+          'title_id',
+          testTable.rows[arbitraryRowIndex].title_id
         );
       });
 
@@ -102,14 +113,15 @@ describe('columns', () => {
     describe('exclude', () => {
       it('returns a datatable without excluded columns', () => {
         const arbitraryRowIndex = 5;
-        const result = fn(testTable, { exclude: 'price, quantity, foo, bar' });
+        const result = fn(testTable, { exclude: 'price, quantity, foo, bar, title_id' });
 
-        expect(result.columns.length).toEqual(testTable.columns.length - 2);
-        expect(Object.keys(result.rows[0])).toHaveLength(testTable.columns.length - 2);
+        expect(result.columns.length).toEqual(testTable.columns.length - 3);
+        expect(Object.keys(result.rows[0])).toHaveLength(testTable.columns.length - 3);
         expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('price');
         expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('quantity');
         expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('foo');
         expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('bar');
+        expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('title_id');
       });
 
       it('ignores invalid columns', () => {
