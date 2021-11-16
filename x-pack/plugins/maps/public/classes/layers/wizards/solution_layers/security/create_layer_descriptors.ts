@@ -12,7 +12,7 @@ import {
   LayerDescriptor,
   SizeDynamicOptions,
   VectorStylePropertiesDescriptor,
-} from '../../../../../common/descriptor_types';
+} from '../../../../../../common/descriptor_types';
 import {
   AGG_TYPE,
   COUNT_PROP_NAME,
@@ -21,14 +21,14 @@ import {
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
-} from '../../../../../common/constants';
-import { GeoJsonVectorLayer } from '../../vector_layer';
-import { VectorStyle } from '../../../styles/vector/vector_style';
+} from '../../../../../../common/constants';
+import { GeoJsonVectorLayer } from '../../../vector_layer';
+import { VectorStyle } from '../../../../styles/vector/vector_style';
 // @ts-ignore
-import { ESSearchSource } from '../../../sources/es_search_source';
+import { ESSearchSource } from '../../../../sources/es_search_source';
 // @ts-ignore
-import { ESPewPewSource } from '../../../sources/es_pew_pew_source';
-import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
+import { ESPewPewSource } from '../../../../sources/es_pew_pew_source';
+import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';
 import { APM_INDEX_PATTERN_TITLE } from '../observability';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
