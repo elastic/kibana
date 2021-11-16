@@ -177,8 +177,10 @@ function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, sta
   );
 }
 
-export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
-  const { state, setState, frame } = props;
+export const XyToolbar = memo(function XyToolbar(
+  props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
+) {
+  const { state, setState, frame, useLegacyTimeAxis } = props;
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(state?.layers, shouldRotate, frame.activeData);
@@ -326,6 +328,28 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       });
     },
     [setState, state]
+  );
+
+  const filteredBarLayers = state?.layers.filter((layer) => layer.seriesType.includes('bar'));
+  const chartHasMoreThanOneBarSeries =
+    filteredBarLayers.length > 1 ||
+    filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessor);
+
+  const isTimeHistogramModeEnabled = state?.layers.some(
+    ({ xAccessor, layerId, seriesType, splitAccessor }) => {
+      if (!xAccessor) {
+        return false;
+      }
+      const xAccessorOp = props.frame.datasourceLayers[layerId].getOperationForColumnId(xAccessor);
+      return (
+        getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
+        xAccessorOp?.isBucketed &&
+        (seriesType.includes('stacked') || !splitAccessor) &&
+        (seriesType.includes('stacked') ||
+          !seriesType.includes('bar') ||
+          !chartHasMoreThanOneBarSeries)
+      );
+    }
   );
 
   return (
@@ -488,6 +512,9 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             setEndzoneVisibility={onChangeEndzoneVisiblity}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
+            useMultilayerTimeAxis={
+              isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
+            }
           />
           <TooltipWrapper
             tooltipContent={
