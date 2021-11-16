@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiText,
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -398,7 +399,7 @@ export function LayerPanel(
                     requiredMinDimensionCount: group.requiredMinDimensionCount,
                   },
                 });
-
+            const isOptional = !group.required;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"
@@ -422,6 +423,15 @@ export function LayerPanel(
                       </>
                     )}
                   </>
+                }
+                labelAppend={
+                  isOptional ? (
+                    <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
+                      {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
+                        defaultMessage: 'Optional',
+                      })}
+                    </EuiText>
+                  ) : null
                 }
                 labelType="legend"
                 key={group.groupId}
