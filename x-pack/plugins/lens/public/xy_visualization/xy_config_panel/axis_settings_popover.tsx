@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
-import { ToolbarPopover, useDebouncedValue } from '../../shared_components';
+import { ToolbarPopover, useDebouncedValue, TooltipWrapper } from '../../shared_components';
 import { isHorizontalChart } from '../state_helpers';
 import { EuiIconAxisBottom } from '../../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../../assets/axis_left';
@@ -104,6 +104,11 @@ export interface AxisSettingsPopoverProps {
   hasBarOrAreaOnAxis: boolean;
   hasPercentageAxis: boolean;
   dataBounds?: { min: number; max: number };
+
+  /**
+   * Toggle the visibility of legacy axis settings when using the new multilayer time axis
+   */
+  useMultilayerTimeAxis?: boolean;
 }
 
 const popoverConfig = (
@@ -210,6 +215,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   hasBarOrAreaOnAxis,
   hasPercentageAxis,
   dataBounds,
+  useMultilayerTimeAxis,
 }) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
@@ -314,30 +320,41 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         checked={areTickLabelsVisible}
       />
       <EuiSpacer size="s" />
-      <EuiFormRow
-        display="rowCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
-          defaultMessage: 'Orientation',
+      <TooltipWrapper
+        tooltipContent={i18n.translate('xpack.lens.xyChart.axisOrientationMultilayer.disabled', {
+          defaultMessage: 'These options can be configured only with non-time-based axes',
         })}
+        condition={Boolean(useMultilayerTimeAxis)}
+        display="block"
       >
-        <EuiButtonGroup
-          isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+        <EuiFormRow
+          display="rowCompressed"
+          fullWidth
+          isDisabled={useMultilayerTimeAxis}
+          label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
             defaultMessage: 'Orientation',
           })}
-          data-test-subj="lnsXY_axisOrientation_groups"
-          name="axisOrientation"
-          isDisabled={!areTickLabelsVisible}
-          buttonSize="compressed"
-          options={axisOrientationOptions}
-          idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}
-          onChange={(optionId) => {
-            const newOrientation = axisOrientationOptions.find(({ id }) => id === optionId)!.value;
-            setOrientation(axis, newOrientation);
-          }}
-        />
-      </EuiFormRow>
+        >
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+              defaultMessage: 'Orientation',
+            })}
+            data-test-subj="lnsXY_axisOrientation_groups"
+            name="axisOrientation"
+            isDisabled={!areTickLabelsVisible || Boolean(useMultilayerTimeAxis)}
+            buttonSize="compressed"
+            options={axisOrientationOptions}
+            idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}
+            onChange={(optionId) => {
+              const newOrientation = axisOrientationOptions.find(
+                ({ id }) => id === optionId
+              )!.value;
+              setOrientation(axis, newOrientation);
+            }}
+          />
+        </EuiFormRow>
+      </TooltipWrapper>
       {setEndzoneVisibility && (
         <>
           <EuiSpacer size="m" />
