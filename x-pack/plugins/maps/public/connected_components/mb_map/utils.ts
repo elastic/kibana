@@ -10,7 +10,7 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { RGBAImage } from './image_utils';
 import { isGlDrawLayer } from './sort_layers';
 import { ILayer } from '../../classes/layers/layer';
-import { EmsSpriteSheet } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
+import { EmsSpriteSheet } from '../../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 
 export function removeOrphanedSourcesAndLayers(
   mbMap: MbMap,
