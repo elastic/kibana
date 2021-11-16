@@ -140,7 +140,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               ]),
               name: nodeName,
             } as AllocatedModel['node'],
-            model_id: 'qq',
           };
         });
 
