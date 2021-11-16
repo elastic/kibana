@@ -6,12 +6,34 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { keys } from '@elastic/eui/lib/services';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
+
+jest.mock('../../../public/application/lib/ace.js', () => {
+  const createAceEditor = () => {
+    return {
+      getValue: () => {
+        return `{
+          "index.routing.allocation.include._tier_preference": "non_existent_tier"
+        }`;
+      },
+      getSession: () => {
+        return {
+          on: () => null,
+          getValue: () => null,
+        };
+      },
+      destroy: () => null,
+    };
+  };
+
+  return {
+    createAceEditor,
+  };
+});
 
 /**
  * The below import is required to avoid a console error warn from the "brace" package
@@ -234,19 +256,23 @@ describe('<IndexManagementHome />', () => {
       const error = {
         statusCode: 400,
         error: 'Bad Request',
-        message: 'invalid tier names found',
+        message: 'invalid tier names found in ...',
+        attributes: {
+          error: {
+            root_cause: [
+              {
+                type: 'illegal_argument_exception',
+                reason: 'invalid tier names found in ...',
+              },
+            ],
+            type: 'illegal_argument_exception',
+            reason: 'invalid tier names found in ...',
+          },
+        },
       };
       httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
 
       await actions.selectIndexDetailsTab('edit_settings');
-
-      find('.ace_text-input').simulate('change', {
-        target: {
-          value: `{
-          "index.routing.allocation.include._tier_preference": "non_existent_tier"
-        }`,
-        },
-      });
 
       await act(async () => {
         find('updateEditIndexSettingsButton').simulate('click');
