@@ -18,11 +18,13 @@ export interface FilterValueFnArgs {
 }
 
 export interface HoverActionComponentProps {
+  className?: string;
   defaultFocusedButtonRef?: EuiButtonIconPropsForButton['buttonRef'];
   field: string;
   keyboardEvent?: React.KeyboardEvent;
   ownFocus: boolean;
   onClick?: () => void;
+  size?: 'xs' | 's' | 'm';
   showTooltip?: boolean;
   value?: string[] | string | null;
 }

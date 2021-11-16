@@ -108,6 +108,7 @@ export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedAp
     updated_at: trustedApplication.updated_at,
     entries: trustedApplication.entries,
     os_types: [trustedApplication.os],
+    scope: trustedApplication.effectScope,
   } as ExceptionListItem;
 };
 
@@ -160,7 +161,7 @@ export const ruleExceptionListItemToTelemetryEvent = (
 export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
   return listData.map((item) => {
     const template: ListTemplate = {
-      '@timestamp': new Date().getTime(),
+      '@timestamp': moment().toISOString(),
     };
 
     // cast exception list type to a TelemetryEvent for allowlist filtering

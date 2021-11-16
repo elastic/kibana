@@ -113,6 +113,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
 
   public setup(core: CoreSetup): UsageCollectionSetup {
     const config = this.initializerContext.config.get<ConfigType>();
+    const kibanaIndex = core.savedObjects.getKibanaIndex();
 
     const collectorSet = new CollectorSet({
       logger: this.logger.get('usage-collection', 'collector-set'),
@@ -128,7 +129,6 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     const { createUsageCounter, getUsageCounterByType } = this.usageCountersService.setup(core);
 
     const uiCountersUsageCounter = createUsageCounter('uiCounter');
-    const globalConfig = this.initializerContext.config.legacy.get();
     const router = core.http.createRouter();
     setupRoutes({
       router,
@@ -137,7 +137,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       collectorSet,
       config: {
         allowAnonymous: core.status.isStatusPageAnonymous(),
-        kibanaIndex: globalConfig.kibana.index,
+        kibanaIndex,
         kibanaVersion: this.initializerContext.env.packageInfo.version,
         server: core.http.getServerInfo(),
         uuid: this.initializerContext.env.instanceUuid,

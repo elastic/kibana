@@ -22,7 +22,7 @@ export const onRedirectNoIndexPattern =
   ) =>
   () => {
     const canManageIndexPatterns = capabilities.management.kibana.indexPatterns;
-    const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
+    const redirectTarget = canManageIndexPatterns ? '/management/kibana/dataViews' : '/home';
     let timeoutId: NodeJS.Timeout | undefined;
 
     if (timeoutId) {

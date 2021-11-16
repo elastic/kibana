@@ -154,6 +154,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: mac.events,
         malware: mac.malware,
         behavior_protection: mac.behavior_protection,
+        memory_protection: mac.memory_protection,
         popup: mac.popup,
       },
       linux: {
@@ -161,6 +162,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: linux.events,
         malware: linux.malware,
         behavior_protection: linux.behavior_protection,
+        memory_protection: linux.memory_protection,
         popup: linux.popup,
       },
     };
@@ -220,7 +222,7 @@ export const totalLinuxEvents = (state: PolicyDetailsState): number => {
   return 0;
 };
 
-/** Returns the number of selected liinux eventing configurations */
+/** Returns the number of selected linux eventing configurations */
 export const selectedLinuxEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {

@@ -2622,7 +2622,7 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/index_pattern.ts"
+                "path": "x-pack/plugins/apm/server/routes/data_view.ts"
               },
               {
                 "plugin": "infra",
@@ -2638,7 +2638,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/plugin.ts"
+                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -3185,7 +3189,7 @@
             "section": "def-server.SavedObjectsRepository",
             "text": "SavedObjectsRepository"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
@@ -3384,7 +3388,7 @@
             },
             {
               "plugin": "apm",
-              "path": "x-pack/plugins/apm/server/routes/index_pattern.ts"
+              "path": "x-pack/plugins/apm/server/routes/data_view.ts"
             },
             {
               "plugin": "infra",
@@ -3404,7 +3408,11 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/plugin.ts"
+              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
             },
             {
               "plugin": "securitySolution",

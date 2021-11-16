@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Action } from 'redux';
 import { HostIsolationExceptionsPageState } from '../types';
-
-export type HostIsolationExceptionsPageDataChanged =
-  Action<'hostIsolationExceptionsPageDataChanged'> & {
-    payload: HostIsolationExceptionsPageState['entries'];
-  };
 
 export type HostIsolationExceptionsFormStateChanged =
   Action<'hostIsolationExceptionsFormStateChanged'> & {
@@ -28,20 +23,19 @@ export type HostIsolationExceptionsCreateEntry = Action<'hostIsolationExceptions
   payload: HostIsolationExceptionsPageState['form']['entry'];
 };
 
-export type HostIsolationExceptionsDeleteItem = Action<'hostIsolationExceptionsMarkToDelete'> & {
-  payload?: ExceptionListItemSchema;
+export type HostIsolationExceptionsMarkToEdit = Action<'hostIsolationExceptionsMarkToEdit'> & {
+  payload: {
+    id: string;
+  };
 };
 
-export type HostIsolationExceptionsSubmitDelete = Action<'hostIsolationExceptionsSubmitDelete'>;
+export type HostIsolationExceptionsSubmitEdit = Action<'hostIsolationExceptionsSubmitEdit'> & {
+  payload: UpdateExceptionListItemSchema;
+};
 
-export type HostIsolationExceptionsDeleteStatusChanged =
-  Action<'hostIsolationExceptionsDeleteStatusChanged'> & {
-    payload: HostIsolationExceptionsPageState['deletion']['status'];
-  };
 export type HostIsolationExceptionsPageAction =
-  | HostIsolationExceptionsPageDataChanged
   | HostIsolationExceptionsCreateEntry
   | HostIsolationExceptionsFormStateChanged
-  | HostIsolationExceptionsDeleteItem
-  | HostIsolationExceptionsSubmitDelete
-  | HostIsolationExceptionsDeleteStatusChanged;
+  | HostIsolationExceptionsFormEntryChanged
+  | HostIsolationExceptionsMarkToEdit
+  | HostIsolationExceptionsSubmitEdit;

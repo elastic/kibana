@@ -16,20 +16,33 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { omit } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { Dispatch } from 'redux';
+import { useQueryClient } from 'react-query';
 import { Loader } from '../../../../../common/components/loader';
 import { useToasts } from '../../../../../common/lib/kibana';
+import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
 import {
-  isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
 } from '../../../../state/async_resource_state';
+import {
+  getCreateErrorMessage,
+  getCreationSuccessMessage,
+  getLoadErrorMessage,
+  getUpdateErrorMessage,
+  getUpdateSuccessMessage,
+} from './translations';
 import { HostIsolationExceptionsPageAction } from '../../store/action';
+import { getCurrentLocation, getExceptionToEdit, getFormStatusFailure } from '../../store/selector';
 import { createEmptyHostIsolationException } from '../../utils';
 import {
   useHostIsolationExceptionsNavigateCallback,
@@ -40,21 +53,23 @@ import { HostIsolationExceptionsForm } from './form';
 export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const toasts = useToasts();
-
+  const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const creationInProgress = useHostIsolationExceptionsSelector((state) =>
     isLoadingResourceState(state.form.status)
   );
   const creationSuccessful = useHostIsolationExceptionsSelector((state) =>
     isLoadedResourceState(state.form.status)
   );
-  const creationFailure = useHostIsolationExceptionsSelector((state) =>
-    isFailedResourceState(state.form.status)
-  );
-
+  const creationFailure = useHostIsolationExceptionsSelector(getFormStatusFailure);
+  const exceptionToEdit = useHostIsolationExceptionsSelector(getExceptionToEdit);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+  const queryClient = useQueryClient();
+  const history = useHistory();
 
   const [formHasError, setFormHasError] = useState(true);
-  const [exception, setException] = useState<CreateExceptionListItemSchema | undefined>(undefined);
+  const [exception, setException] = useState<
+    CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
+  >(undefined);
 
   const onCancel = useCallback(
     () =>
@@ -65,12 +80,31 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     [navigateCallback]
   );
 
+  // load data to edit or create
   useEffect(() => {
-    setException(createEmptyHostIsolationException());
-  }, []);
+    if (location.show === 'create' && exception === undefined) {
+      setException(createEmptyHostIsolationException());
+    } else if (location.show === 'edit') {
+      // prevent flyout to show edit without an id
+      if (!location.id) {
+        onCancel();
+        return;
+      }
+      // load the exception to edit
+      if (!exceptionToEdit || location.id !== exceptionToEdit.id) {
+        dispatch({
+          type: 'hostIsolationExceptionsMarkToEdit',
+          payload: { id: location.id },
+        });
+      } else if (exception === undefined) {
+        setException(exceptionToEdit);
+      }
+    }
+  }, [dispatch, exception, exceptionToEdit, location.id, location.show, onCancel]);
 
+  // handle creation and edit success
   useEffect(() => {
-    if (creationSuccessful) {
+    if (creationSuccessful && exception?.name) {
       onCancel();
       dispatch({
         type: 'hostIsolationExceptionsFormStateChanged',
@@ -78,30 +112,54 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
           type: 'UninitialisedResourceState',
         },
       });
-      toasts.addSuccess(
-        i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
-          {
-            defaultMessage: '"{name}" has been added to the host isolation exceptions list.',
-            values: { name: exception?.name },
-          }
-        )
-      );
+      if (exception?.item_id) {
+        toasts.addSuccess(getUpdateSuccessMessage(exception.name));
+      } else {
+        toasts.addSuccess(getCreationSuccessMessage(exception.name));
+      }
+      queryClient.invalidateQueries('hostIsolationExceptions');
     }
-  }, [creationSuccessful, onCancel, dispatch, toasts, exception?.name]);
+  }, [
+    creationSuccessful,
+    dispatch,
+    exception?.item_id,
+    exception?.name,
+    onCancel,
+    queryClient,
+    toasts,
+  ]);
 
+  // handle load item to edit error
+  useEffect(() => {
+    if (creationFailure && location.show === 'edit' && !exception?.item_id) {
+      toasts.addWarning(getLoadErrorMessage(creationFailure));
+      history.replace(getHostIsolationExceptionsListPath(omit(location, ['show', 'id'])));
+      dispatch({
+        type: 'hostIsolationExceptionsFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
+    }
+  }, [creationFailure, dispatch, exception?.item_id, history, location, toasts]);
+
+  // handle edit or creation error
   useEffect(() => {
     if (creationFailure) {
-      toasts.addDanger(
-        i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.form.creationFailureToastTitle',
-          {
-            defaultMessage: 'There was an error creating the exception',
-          }
-        )
-      );
+      // failed to load the entry
+      if (exception?.item_id) {
+        toasts.addDanger(getUpdateErrorMessage(creationFailure));
+      } else {
+        toasts.addDanger(getCreateErrorMessage(creationFailure));
+      }
+      dispatch({
+        type: 'hostIsolationExceptionsFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
     }
-  }, [dispatch, toasts, creationFailure]);
+  }, [creationFailure, dispatch, exception?.item_id, toasts]);
 
   const handleOnCancel = useCallback(() => {
     if (creationInProgress) return;
@@ -109,10 +167,17 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
   }, [creationInProgress, onCancel]);
 
   const handleOnSubmit = useCallback(() => {
-    dispatch({
-      type: 'hostIsolationExceptionsCreateEntry',
-      payload: exception,
-    });
+    if (exception?.item_id) {
+      dispatch({
+        type: 'hostIsolationExceptionsSubmitEdit',
+        payload: exception,
+      });
+    } else {
+      dispatch({
+        type: 'hostIsolationExceptionsCreateEntry',
+        payload: exception,
+      });
+    }
   }, [dispatch, exception]);
 
   const confirmButtonMemo = useMemo(
@@ -124,13 +189,20 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         onClick={handleOnSubmit}
         isLoading={creationInProgress}
       >
-        <FormattedMessage
-          id="xpack.securitySolution.hostIsolationExceptions.flyout.actions.create"
-          defaultMessage="Add Host Isolation Exception"
-        />
+        {exception?.item_id ? (
+          <FormattedMessage
+            id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
+            defaultMessage="Edit host isolation exception"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.securitySolution.hostIsolationExceptions.flyout.createButton"
+            defaultMessage="Add host isolation exception"
+          />
+        )}
       </EuiButton>
     ),
-    [formHasError, creationInProgress, handleOnSubmit]
+    [formHasError, creationInProgress, handleOnSubmit, exception?.item_id]
   );
 
   return exception ? (
@@ -141,12 +213,21 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
-            <FormattedMessage
-              id="xpack.securitySolution.hostIsolationExceptions.flyout.title"
-              defaultMessage="Add Host Isolation Exception"
-            />
-          </h2>
+          {exception?.item_id ? (
+            <h2>
+              <FormattedMessage
+                id="xpack.securitySolution.hostIsolationExceptions.flyout.editTitle"
+                defaultMessage="Edit host isolation exception"
+              />
+            </h2>
+          ) : (
+            <h2>
+              <FormattedMessage
+                id="xpack.securitySolution.hostIsolationExceptions.flyout.title"
+                defaultMessage="Add host isolation exception"
+              />
+            </h2>
+          )}
         </EuiTitle>
       </EuiFlyoutHeader>
 

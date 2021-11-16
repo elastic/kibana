@@ -78,8 +78,12 @@ export class Node extends React.PureComponent<Props, State> {
             <SquareInner color={color}>
               {valueMode ? (
                 <ValueInner aria-label={nodeAriaLabel}>
-                  <Label color={color}>{node.name}</Label>
-                  <Value color={color}>{value}</Value>
+                  <Label data-test-subj="nodeName" color={color}>
+                    {node.name}
+                  </Label>
+                  <Value data-test-subj="nodeValue" color={color}>
+                    {value}
+                  </Value>
                 </ValueInner>
               ) : (
                 ellipsisMode && (
@@ -124,11 +128,7 @@ export class Node extends React.PureComponent<Props, State> {
 
         {isAlertFlyoutVisible && (
           <AlertFlyout
-            filter={
-              options.fields
-                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-                : ''
-            }
+            filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}
             options={options}
             nodeType={nodeType}
             setVisible={this.setAlertFlyoutVisible}

@@ -90,7 +90,7 @@ export async function runTests(options: RunTestsParams) {
   log.write('--- determining which ftr configs to run');
   const configPathsWithTests: string[] = [];
   for (const configPath of options.configs) {
-    log.info('testing', configPath);
+    log.info('testing', relative(REPO_ROOT, configPath));
     await log.indent(4, async () => {
       if (await hasTests({ configPath, options: { ...options, log } })) {
         configPathsWithTests.push(configPath);
@@ -98,9 +98,10 @@ export async function runTests(options: RunTestsParams) {
     });
   }
 
-  for (const configPath of configPathsWithTests) {
+  for (const [i, configPath] of configPathsWithTests.entries()) {
     await log.indent(0, async () => {
-      log.write(`--- Running ${relative(REPO_ROOT, configPath)}`);
+      const progress = `${i + 1}/${configPathsWithTests.length}`;
+      log.write(`--- [${progress}] Running ${relative(REPO_ROOT, configPath)}`);
 
       await withProcRunner(log, async (procs) => {
         const config = await readConfigFile(log, configPath);
@@ -168,7 +169,7 @@ export async function startServers({ ...options }: StartServerOptions) {
         ...opts,
         extraKbnOpts: [
           ...options.extraKbnOpts,
-          ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
+          ...(options.installDir ? [] : ['--dev', '--no-dev-config', '--no-dev-credentials']),
         ],
       },
     });

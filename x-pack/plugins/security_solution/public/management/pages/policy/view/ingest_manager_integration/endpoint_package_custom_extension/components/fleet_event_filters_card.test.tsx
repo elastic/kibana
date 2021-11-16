@@ -66,10 +66,10 @@ describe('Fleet event filters card', () => {
         <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
       </I18nProvider>
     );
-    // @ts-ignore
+    // @ts-expect-error TS2739
     const component = reactTestingLibrary.render(<FleetEventFiltersCard />, { wrapper: Wrapper });
     try {
-      // @ts-ignore
+      // @ts-expect-error TS2769
       await reactTestingLibrary.act(() => promise);
     } catch (err) {
       return component;

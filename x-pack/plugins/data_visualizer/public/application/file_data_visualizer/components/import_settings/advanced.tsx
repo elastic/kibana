@@ -21,6 +21,7 @@ import {
 import { CombinedField, CombinedFieldsForm } from '../../../common/components/combined_fields';
 import { JsonEditor, EDITOR_MODE } from '../json_editor';
 import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { CreateDataViewToolTip } from './create_data_view_tooltip';
 const EDITOR_HEIGHT = '300px';
 
 interface Props {
@@ -42,6 +43,7 @@ interface Props {
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
   results: FindFileStructureResponse;
+  canCreateDataView: boolean;
 }
 
 export const AdvancedSettings: FC<Props> = ({
@@ -63,6 +65,7 @@ export const AdvancedSettings: FC<Props> = ({
   combinedFields,
   onCombinedFieldsChange,
   results,
+  canCreateDataView,
 }) => {
   return (
     <React.Fragment>
@@ -98,26 +101,28 @@ export const AdvancedSettings: FC<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiCheckbox
-        id="createIndexPattern"
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.createIndexPatternLabel"
-            defaultMessage="Create index pattern"
-          />
-        }
-        checked={createIndexPattern === true}
-        disabled={initialized === true}
-        onChange={onCreateIndexPatternChange}
-      />
+      <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
+        <EuiCheckbox
+          id="createIndexPattern"
+          label={
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.advancedImportSettings.createDataViewLabel"
+              defaultMessage="Create data view"
+            />
+          }
+          checked={createIndexPattern === true}
+          disabled={initialized === true || canCreateDataView === false}
+          onChange={onCreateIndexPatternChange}
+        />
+      </CreateDataViewToolTip>
 
       <EuiSpacer size="s" />
 
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.indexPatternNameLabel"
-            defaultMessage="Index pattern name"
+            id="xpack.dataVisualizer.file.advancedImportSettings.dataViewNameLabel"
+            defaultMessage="Data view name"
           />
         }
         isInvalid={indexPatternNameError !== ''}

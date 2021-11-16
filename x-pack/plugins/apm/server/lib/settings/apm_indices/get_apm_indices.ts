@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
-
 import { SavedObjectsClient } from 'src/core/server';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
@@ -18,11 +16,9 @@ import { APMRouteHandlerResources } from '../../../routes/typings';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { ApmIndicesConfig } from '../../../../../observability/common/typings';
 
-export { ApmIndicesConfig };
+export type { ApmIndicesConfig };
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
-
-export type ApmIndicesName = keyof ApmIndicesConfig;
 
 async function getApmIndicesSavedObject(
   savedObjectsClient: ISavedObjectsClient
@@ -38,14 +34,12 @@ async function getApmIndicesSavedObject(
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.sourcemapIndices': config['apm_oss.sourcemapIndices'],
-    'apm_oss.errorIndices': config['apm_oss.errorIndices'],
-    'apm_oss.onboardingIndices': config['apm_oss.onboardingIndices'],
-    'apm_oss.spanIndices': config['apm_oss.spanIndices'],
-    'apm_oss.transactionIndices': config['apm_oss.transactionIndices'],
-    'apm_oss.metricsIndices': config['apm_oss.metricsIndices'],
-    /* eslint-enable @typescript-eslint/naming-convention */
+    sourcemap: config.indices.sourcemap,
+    error: config.indices.error,
+    onboarding: config.indices.onboarding,
+    span: config.indices.span,
+    transaction: config.indices.transaction,
+    metric: config.indices.metric,
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
     apmCustomLinkIndex: '.apm-custom-link',
@@ -64,20 +58,11 @@ export async function getApmIndices({
       savedObjectsClient
     );
     const apmIndicesConfig = getApmIndicesConfig(config);
-    return merge({}, apmIndicesConfig, apmIndicesSavedObject);
+    return { ...apmIndicesConfig, ...apmIndicesSavedObject };
   } catch (error) {
     return getApmIndicesConfig(config);
   }
 }
-
-const APM_UI_INDICES: ApmIndicesName[] = [
-  'apm_oss.sourcemapIndices',
-  'apm_oss.errorIndices',
-  'apm_oss.onboardingIndices',
-  'apm_oss.spanIndices',
-  'apm_oss.transactionIndices',
-  'apm_oss.metricsIndices',
-];
 
 export async function getApmIndexSettings({
   context,
@@ -88,7 +73,7 @@ export async function getApmIndexSettings({
     apmIndicesSavedObject = await getApmIndicesSavedObject(
       context.core.savedObjects.client
     );
-  } catch (error) {
+  } catch (error: any) {
     if (error.output && error.output.statusCode === 404) {
       apmIndicesSavedObject = {};
     } else {
@@ -97,7 +82,11 @@ export async function getApmIndexSettings({
   }
   const apmIndicesConfig = getApmIndicesConfig(config);
 
-  return APM_UI_INDICES.map((configurationName) => ({
+  const apmIndices = Object.keys(config.indices) as Array<
+    keyof typeof config.indices
+  >;
+
+  return apmIndices.map((configurationName) => ({
     configurationName,
     defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
     savedValue: apmIndicesSavedObject[configurationName], // value saved via Saved Objects service

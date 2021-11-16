@@ -8,7 +8,6 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
-import { BehaviorSubject } from 'rxjs';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -50,15 +49,17 @@ import {
   AlertInstanceContext,
   WithoutReservedActionGroups,
 } from '../../common';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedAlertType, UntypedNormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
+import {
+  createAlertEventLogRecordObject,
+  Event,
+} from '../lib/create_alert_event_log_record_object';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
-
-type Event = Exclude<IEvent, undefined>;
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
@@ -81,6 +82,7 @@ export class TaskRunner<
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
+  private ruleName: string | null;
   private alertType: NormalizedAlertType<
     Params,
     ExtractedParams,
@@ -91,7 +93,7 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private cancelled$: BehaviorSubject<boolean>;
+  private cancelled: boolean;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -109,9 +111,10 @@ export class TaskRunner<
     this.context = context;
     this.logger = context.logger;
     this.alertType = alertType;
+    this.ruleName = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
-    this.cancelled$ = new BehaviorSubject<boolean>(false);
+    this.cancelled = false;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -227,7 +230,7 @@ export class TaskRunner<
 
   private shouldLogAndScheduleActionsForAlerts() {
     // if execution hasn't been cancelled, return true
-    if (!this.cancelled$.getValue()) {
+    if (!this.cancelled) {
       return true;
     }
 
@@ -531,6 +534,8 @@ export class TaskRunner<
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
+    this.ruleName = alert.name;
+
     try {
       this.ruleTypeRegistry.ensureRuleTypeEnabled(alert.alertTypeId);
     } catch (err) {
@@ -563,37 +568,26 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
     const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
-    const event: IEvent = {
-      // explicitly set execute timestamp so it will be before other events
-      // generated here (new-instance, schedule-action, etc)
-      '@timestamp': runDateString,
-      event: {
-        action: EVENT_LOG_ACTIONS.execute,
-        kind: 'alert',
-        category: [this.alertType.producer],
+
+    const event = createAlertEventLogRecordObject({
+      timestamp: runDateString,
+      ruleId: alertId,
+      ruleType: this.alertType as UntypedNormalizedAlertType,
+      action: EVENT_LOG_ACTIONS.execute,
+      namespace,
+      task: {
+        scheduled: this.taskInstance.runAt.toISOString(),
+        scheduleDelay: Millis2Nanos * scheduleDelay,
       },
-      kibana: {
-        saved_objects: [
-          {
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: 'alert',
-            id: alertId,
-            type_id: this.alertType.id,
-            namespace,
-          },
-        ],
-        task: {
-          scheduled: this.taskInstance.runAt.toISOString(),
-          schedule_delay: Millis2Nanos * scheduleDelay,
+      savedObjects: [
+        {
+          id: alertId,
+          type: 'alert',
+          typeId: this.alertType.id,
+          relation: SAVED_OBJECT_REL_PRIMARY,
         },
-      },
-      rule: {
-        id: alertId,
-        license: this.alertType.minimumLicenseRequired,
-        category: this.alertType.id,
-        ruleset: this.alertType.producer,
-      },
-    };
+      ],
+    });
 
     eventLogger.startTiming(event);
 
@@ -651,7 +645,12 @@ export class TaskRunner<
 
     eventLogger.logEvent(event);
 
-    if (!this.cancelled$.getValue()) {
+    if (!this.cancelled) {
+      this.logger.debug(
+        `Updating rule task for ${this.alertType.id} rule with id ${alertId} - ${JSON.stringify(
+          executionStatus
+        )}`
+      );
       await this.updateRuleExecutionStatus(alertId, namespace, executionStatus);
     }
 
@@ -690,13 +689,21 @@ export class TaskRunner<
   }
 
   async cancel(): Promise<void> {
-    this.cancelled$.next(true);
+    if (this.cancelled) {
+      return;
+    }
+
+    this.cancelled = true;
 
     // Write event log entry
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
+
+    this.logger.debug(
+      `Cancelling rule type ${this.alertType.id} with id ${alertId} - execution exceeded rule type timeout of ${this.alertType.ruleTaskTimeout}`
+    );
 
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {
@@ -706,7 +713,11 @@ export class TaskRunner<
         kind: 'alert',
         category: [this.alertType.producer],
       },
-      message: `rule execution cancelled due to timeout: "${this.alertType.id}${alertId}"`,
+      message: `rule: ${this.alertType.id}:${alertId}: '${
+        this.ruleName ?? ''
+      }' execution cancelled due to timeout - exceeded rule type timeout of ${
+        this.alertType.ruleTaskTimeout
+      }`,
       kibana: {
         saved_objects: [
           {
@@ -723,6 +734,7 @@ export class TaskRunner<
         license: this.alertType.minimumLicenseRequired,
         category: this.alertType.id,
         ruleset: this.alertType.producer,
+        ...(this.ruleName ? { name: this.ruleName } : {}),
       },
     };
     eventLogger.logEvent(event);
@@ -733,9 +745,12 @@ export class TaskRunner<
       status: 'error',
       error: {
         reason: AlertExecutionStatusErrorReasons.Timeout,
-        message: `rule execution cancelled due to timeout: "${this.alertType.id}${alertId}"`,
+        message: `${this.alertType.id}:${alertId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.alertType.ruleTaskTimeout}`,
       },
     };
+    this.logger.debug(
+      `Updating rule task for ${this.alertType.id} rule with id ${alertId} - execution error due to timeout`
+    );
     await this.updateRuleExecutionStatus(alertId, namespace, executionStatus);
   }
 }

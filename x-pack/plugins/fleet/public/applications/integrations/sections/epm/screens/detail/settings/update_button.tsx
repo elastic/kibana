@@ -114,18 +114,20 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
   }
 
-  const agentCount = useMemo(
-    () =>
-      agentPolicyData?.items.reduce((acc, item) => {
-        const existingPolicies = isStringArray(item?.package_policies)
-          ? (item?.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
-          : (item?.package_policies as PackagePolicy[]).filter((p) =>
+  const agentCount = useMemo(() => {
+    if (!agentPolicyData?.items) return 0;
+
+    return agentPolicyData.items.reduce((acc, item) => {
+      const existingPolicies = item?.package_policies
+        ? isStringArray(item.package_policies)
+          ? (item.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
+          : (item.package_policies as PackagePolicy[]).filter((p) =>
               packagePolicyIds.includes(p.id)
-            );
-        return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
-      }, 0),
-    [agentPolicyData, packagePolicyIds]
-  );
+            )
+        : [];
+      return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
+    }, 0);
+  }, [agentPolicyData, packagePolicyIds]);
 
   const conflictCount = useMemo(
     () => dryRunData?.filter((item) => item.hasErrors).length,
@@ -152,6 +154,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       return;
     }
 
+    setIsUpdateModalVisible(false);
     setIsUpgradingPackagePolicies(true);
 
     await installPackage({ name, version, title });
@@ -164,7 +167,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     );
 
     setIsUpgradingPackagePolicies(false);
-    setIsUpdateModalVisible(false);
 
     notifications.toasts.addSuccess({
       title: toMountPoint(
@@ -283,15 +285,15 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType={'refresh'}
-            isLoading={isInstalling}
+            isLoading={isInstalling || isUpgradingPackagePolicies}
             onClick={
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
+            data-test-subj="updatePackageBtn"
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
-              defaultMessage="Update to latest version"
+              defaultMessage="Upgrade to latest version"
             />
           </EuiButton>
         </EuiFlexItem>

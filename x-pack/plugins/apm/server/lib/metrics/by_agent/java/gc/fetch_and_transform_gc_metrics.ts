@@ -6,7 +6,7 @@
  */
 
 import { sum, round } from 'lodash';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { Setup } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
@@ -85,7 +85,7 @@ export async function fetchAndTransformGcMetrics({
               date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                metricsInterval: config['xpack.apm.metricsInterval'],
+                metricsInterval: config.metricsInterval,
               }),
               aggs: {
                 // get the max value
@@ -123,7 +123,6 @@ export async function fetchAndTransformGcMetrics({
   if (!aggregations) {
     return {
       ...chartBase,
-      noHits: true,
       series: [],
     };
   }
@@ -170,7 +169,6 @@ export async function fetchAndTransformGcMetrics({
 
   return {
     ...chartBase,
-    noHits: response.hits.total.value === 0,
     series,
   };
 }

@@ -11,18 +11,28 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../components';
-import type { IntegrationCategoryCount } from '../../../../../../../../../../src/plugins/custom_integrations/common';
-import { INTEGRATION_CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
-interface ALL_CATEGORY {
-  id: '';
+export interface CategoryFacet {
   count: number;
+  id: string;
+  title: string;
 }
 
-export type CategoryFacet = IntegrationCategoryCount | ALL_CATEGORY;
+export const ALL_CATEGORY = {
+  id: '',
+  title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
+    defaultMessage: 'All categories',
+  }),
+};
+
+export const INSTALLED_CATEGORY = {
+  id: '',
+  title: i18n.translate('xpack.fleet.epmList.allPackagesInstalledFilterLinkText', {
+    defaultMessage: 'All installed',
+  }),
+};
 
 export interface Props {
-  showCounts: boolean;
   isLoading?: boolean;
   categories: CategoryFacet[];
   selectedCategory: string;
@@ -30,7 +40,6 @@ export interface Props {
 }
 
 export function CategoryFacets({
-  showCounts,
   isLoading,
   categories,
   selectedCategory,
@@ -42,28 +51,15 @@ export function CategoryFacets({
         <Loading />
       ) : (
         categories.map((category) => {
-          let title;
-
-          if (category.id === 'updates_available') {
-            title = i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
-              defaultMessage: 'Updates available',
-            });
-          } else if (category.id === '') {
-            title = i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
-              defaultMessage: 'All',
-            });
-          } else {
-            title = INTEGRATION_CATEGORY_DISPLAY[category.id];
-          }
           return (
             <EuiFacetButton
               isSelected={category.id === selectedCategory}
               key={category.id}
               id={category.id}
-              quantity={showCounts ? category.count : undefined}
+              quantity={category.count}
               onClick={() => onCategoryChange(category)}
             >
-              {title}
+              {category.title}
             </EuiFacetButton>
           );
         })

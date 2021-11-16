@@ -47,6 +47,7 @@ describe('ConfigureCases', () => {
       iconClass: 'logoSecurity',
     });
   });
+
   beforeEach(() => {
     useActionTypesMock.mockImplementation(() => useActionTypesResponse);
   });
@@ -451,149 +452,149 @@ describe('ConfigureCases', () => {
       ).toBe('Update My Connector 2');
     });
   });
-});
 
-describe('closure options', () => {
-  let wrapper: ReactWrapper;
-  let persistCaseConfigure: jest.Mock;
+  describe('closure options', () => {
+    let wrapper: ReactWrapper;
+    let persistCaseConfigure: jest.Mock;
 
-  beforeEach(() => {
-    persistCaseConfigure = jest.fn();
-    useCaseConfigureMock.mockImplementation(() => ({
-      ...useCaseConfigureResponse,
-      mapping: null,
-      closureType: 'close-by-user',
-      connector: {
-        id: 'servicenow-1',
-        name: 'My connector',
-        type: ConnectorTypes.serviceNowITSM,
-        fields: null,
-      },
-      currentConfiguration: {
-        connector: {
-          id: 'My connector',
-          name: 'My connector',
-          type: ConnectorTypes.jira,
-          fields: null,
-        },
+    beforeEach(() => {
+      persistCaseConfigure = jest.fn();
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        mapping: null,
         closureType: 'close-by-user',
-      },
-      persistCaseConfigure,
-    }));
-    useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-    useGetUrlSearchMock.mockImplementation(() => searchURL);
-
-    wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
-      wrappingComponent: TestProviders,
-    });
-  });
-
-  test('it submits the configuration correctly when changing closure type', () => {
-    wrapper.find('input[id="close-by-pushing"]').simulate('change');
-    wrapper.update();
-
-    expect(persistCaseConfigure).toHaveBeenCalled();
-    expect(persistCaseConfigure).toHaveBeenCalledWith({
-      connector: {
-        id: 'servicenow-1',
-        name: 'My connector',
-        type: ConnectorTypes.serviceNowITSM,
-        fields: null,
-      },
-      closureType: 'close-by-pushing',
-    });
-  });
-});
-
-describe('user interactions', () => {
-  beforeEach(() => {
-    useCaseConfigureMock.mockImplementation(() => ({
-      ...useCaseConfigureResponse,
-      mapping: null,
-      closureType: 'close-by-user',
-      connector: {
-        id: 'resilient-2',
-        name: 'unchanged',
-        type: ConnectorTypes.resilient,
-        fields: null,
-      },
-      currentConfiguration: {
         connector: {
-          id: 'resilient-2',
-          name: 'unchanged',
+          id: 'servicenow-1',
+          name: 'My connector',
           type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
+        currentConfiguration: {
+          connector: {
+            id: 'My connector',
+            name: 'My connector',
+            type: ConnectorTypes.jira,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+        },
+        persistCaseConfigure,
+      }));
+      useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+      useGetUrlSearchMock.mockImplementation(() => searchURL);
+
+      wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
+    });
+
+    test('it submits the configuration correctly when changing closure type', () => {
+      wrapper.find('input[id="close-by-pushing"]').simulate('change');
+      wrapper.update();
+
+      expect(persistCaseConfigure).toHaveBeenCalled();
+      expect(persistCaseConfigure).toHaveBeenCalledWith({
+        connector: {
+          id: 'servicenow-1',
+          name: 'My connector',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: null,
+        },
+        closureType: 'close-by-pushing',
+      });
+    });
+  });
+
+  describe('user interactions', () => {
+    beforeEach(() => {
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        mapping: null,
         closureType: 'close-by-user',
-      },
-    }));
-    useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-    useGetUrlSearchMock.mockImplementation(() => searchURL);
-  });
-
-  test('it show the add flyout when pressing the add connector button', async () => {
-    const wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
-      wrappingComponent: TestProviders,
+        connector: {
+          id: 'resilient-2',
+          name: 'unchanged',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
+        currentConfiguration: {
+          connector: {
+            id: 'resilient-2',
+            name: 'unchanged',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+        },
+      }));
+      useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+      useGetUrlSearchMock.mockImplementation(() => searchURL);
     });
 
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').simulate('click');
+    test('it show the add flyout when pressing the add connector button', async () => {
+      const wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
 
-    await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find('ConnectorAddFlyout').exists()).toBe(true);
-      expect(wrapper.find('ConnectorAddFlyout').prop('actionTypes')).toEqual([
-        expect.objectContaining({
-          id: '.servicenow',
-        }),
-        expect.objectContaining({
-          id: '.jira',
-        }),
-        expect.objectContaining({
-          id: '.resilient',
-        }),
-        expect.objectContaining({
-          id: '.servicenow-sir',
-        }),
-      ]);
-    });
-  });
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').simulate('click');
 
-  test('it show the edit flyout when pressing the update connector button', async () => {
-    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
-      id: '.resilient',
-      validateConnector: () => {
-        return Promise.resolve({});
-      },
-      validateParams: () => {
-        const validationResult = { errors: {} };
-        return Promise.resolve(validationResult);
-      },
-      actionConnectorFields: null,
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('ConnectorAddFlyout').exists()).toBe(true);
+        expect(wrapper.find('ConnectorAddFlyout').prop('actionTypes')).toEqual([
+          expect.objectContaining({
+            id: '.servicenow',
+          }),
+          expect.objectContaining({
+            id: '.jira',
+          }),
+          expect.objectContaining({
+            id: '.resilient',
+          }),
+          expect.objectContaining({
+            id: '.servicenow-sir',
+          }),
+        ]);
+      });
     });
 
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest
-      .fn()
-      .mockReturnValue(actionType);
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.has = jest
-      .fn()
-      .mockReturnValue(true);
+    test('it show the edit flyout when pressing the update connector button', async () => {
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.resilient',
+        validateConnector: () => {
+          return Promise.resolve({});
+        },
+        validateParams: () => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
 
-    const wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
-      wrappingComponent: TestProviders,
+      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest
+        .fn()
+        .mockReturnValue(actionType);
+      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.has = jest
+        .fn()
+        .mockReturnValue(true);
+
+      const wrapper = mount(<ConfigureCases userCanCrud owner={[SECURITY_SOLUTION_OWNER]} />, {
+        wrappingComponent: TestProviders,
+      });
+      wrapper
+        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+        .simulate('click');
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('ConnectorEditFlyout').exists()).toBe(true);
+        expect(wrapper.find('ConnectorEditFlyout').prop('initialConnector')).toEqual(connectors[1]);
+      });
+
+      expect(
+        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+      ).toBeFalsy();
     });
-    wrapper
-      .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
-      .simulate('click');
-
-    await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find('ConnectorEditFlyout').exists()).toBe(true);
-      expect(wrapper.find('ConnectorEditFlyout').prop('initialConnector')).toEqual(connectors[1]);
-    });
-
-    expect(
-      wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-    ).toBeFalsy();
   });
 });

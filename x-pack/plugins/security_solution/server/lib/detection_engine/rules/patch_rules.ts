@@ -37,6 +37,7 @@ class PatchError extends Error {
 
 export const patchRules = async ({
   rulesClient,
+  savedObjectsClient,
   author,
   buildingBlockType,
   ruleStatusClient,
@@ -191,14 +192,14 @@ export const patchRules = async ({
 
   const newRule = {
     tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
-    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
-    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
     },
-    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
     params: removeUndefined(nextParams),
+    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
+    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
+    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
   };
 
   const [validated, errors] = validate(newRule, internalRuleUpdate);

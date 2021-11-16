@@ -407,16 +407,24 @@ export function DashboardTopNav({
       const timeRange = timefilter.getTime();
       ShowShareModal({
         share,
+        timeRange,
         kibanaVersion,
         anchorElement,
         dashboardCapabilities,
+        dashboardSessionStorage,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
-        timeRange,
       });
     },
-    [dashboardAppState, dashboardCapabilities, share, kibanaVersion, timefilter]
+    [
+      share,
+      timefilter,
+      kibanaVersion,
+      dashboardAppState,
+      dashboardCapabilities,
+      dashboardSessionStorage,
+    ]
   );
 
   const dashboardTopNavActions = useMemo(() => {
@@ -543,7 +551,6 @@ export function DashboardTopNav({
           createType: title,
           onClick: createNewVisType(visType as VisTypeAlias),
           'data-test-subj': `dashboardQuickButton${name}`,
-          isDarkModeEnabled: IS_DARK_THEME,
         };
       } else {
         const { name, icon, title, titleInWizard } = visType as BaseVisType;
@@ -553,7 +560,6 @@ export function DashboardTopNav({
           createType: titleInWizard || title,
           onClick: createNewVisType(visType as BaseVisType),
           'data-test-subj': `dashboardQuickButton${name}`,
-          isDarkModeEnabled: IS_DARK_THEME,
         };
       }
     }

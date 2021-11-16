@@ -50,7 +50,8 @@ export const actionStatusRequestHandler = function (
     const response = await getPendingActionCounts(
       esClient,
       endpointContext.service.getEndpointMetadataService(),
-      agentIDs
+      agentIDs,
+      endpointContext.experimentalFeatures.pendingActionResponsesWithAck
     );
 
     return res.ok({

@@ -133,7 +133,7 @@ describe('Custom detection rules creation', () => {
     });
   });
 
-  it('Creates and activates a new rule', function () {
+  it.skip('Creates and activates a new rule', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -351,10 +351,10 @@ describe('Custom detection rules deletion and edition', () => {
       goToRuleDetails();
 
       cy.wait('@fetchRuleDetails').then(({ response }) => {
-        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response?.statusCode).should('eql', 200);
 
-        cy.wrap(response!.body.max_signals).should('eql', getExistingRule().maxSignals);
-        cy.wrap(response!.body.enabled).should('eql', false);
+        cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
+        cy.wrap(response?.body.enabled).should('eql', false);
       });
     });
 
@@ -414,9 +414,9 @@ describe('Custom detection rules deletion and edition', () => {
       saveEditedRule();
 
       cy.wait('@getRule').then(({ response }) => {
-        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response?.statusCode).should('eql', 200);
         // ensure that editing rule does not modify max_signals
-        cy.wrap(response!.body.max_signals).should('eql', getExistingRule().maxSignals);
+        cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
       });
 
       cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);

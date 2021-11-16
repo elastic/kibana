@@ -18,7 +18,7 @@ import {
   displaySuccessToast,
   useStateToaster,
 } from '../../../common/components/toasters';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -28,6 +28,7 @@ import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18nCommon from '../../../common/translations';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
@@ -100,12 +101,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     indexPattern: indexPatterns,
     loading: indexPatternsLoading,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.detections);
+  } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+  const ACTION_BUTTON_COUNT = 4;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -142,14 +144,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading!({ id: timelineId, eventIds, isLoading });
+      setEventsLoading({ id: timelineId, eventIds, isLoading });
     },
     [setEventsLoading, timelineId]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted!({ id: timelineId, eventIds, isDeleted });
+      setEventsDeleted({ id: timelineId, eventIds, isDeleted });
     },
     [setEventsDeleted, timelineId]
   );
@@ -216,7 +218,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
-    clearSelected!({ id: timelineId });
+    clearSelected({ id: timelineId });
     dispatch(
       timelineActions.setTGridSelectAll({
         id: timelineId,
@@ -369,27 +371,30 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     );
   }, [dispatch, defaultTimelineModel, filterManager, tGridEnabled, timelineId]);
 
+  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+
   if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
     return null;
   }
 
   return (
     <StatefulEventsViewer
-      pageFilters={defaultFiltersMemo}
+      additionalFilters={additionalFiltersComponent}
+      currentFilter={filterGroup}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
-      entityType="events"
       end={to}
-      currentFilter={filterGroup}
+      entityType="events"
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
       id={timelineId}
+      leadingControlColumns={leadingControlColumns}
       onRuleChange={onRuleChange}
+      pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
-      additionalFilters={additionalFiltersComponent}
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
     />
   );
 };

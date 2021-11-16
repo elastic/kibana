@@ -78,7 +78,8 @@ describe('Transform: useIndexData()', () => {
   });
 });
 
-describe('Transform: <DataGrid /> with useIndexData()', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/109943
+describe.skip('Transform: <DataGrid /> with useIndexData()', () => {
   test('Minimal initialization, no cross cluster search warning.', async () => {
     // Arrange
     const indexPattern = {

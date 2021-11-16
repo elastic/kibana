@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -17,15 +16,15 @@ import { ListClient } from '../../../../../../lists/server';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { AlertAttributes, RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, SavedQueryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 
 export const queryExecutor = async ({
-  rule,
+  completeRule,
   tuple,
   listClient,
   exceptionItems,
@@ -39,7 +38,7 @@ export const queryExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
+  completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -53,7 +52,8 @@ export const queryExecutor = async ({
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }) => {
-  const ruleParams = rule.attributes.params;
+  const ruleParams = completeRule.ruleParams;
+
   const inputIndex = await getInputIndex({
     experimentalFeatures,
     services,
@@ -76,11 +76,11 @@ export const queryExecutor = async ({
     tuple,
     listClient,
     exceptionsList: exceptionItems,
-    ruleSO: rule,
+    completeRule,
     services,
     logger,
     eventsTelemetry,
-    id: rule.id,
+    id: completeRule.alertId,
     inputIndexPattern: inputIndex,
     signalsIndex: ruleParams.outputIndex,
     filter: esFilter,

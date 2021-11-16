@@ -104,7 +104,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         });
         return url;
       },
-      shortUrls: {
+      shortUrls: () => ({
         get: () => ({
           create: async () => {
             throw new Error('Not implemented');
@@ -119,7 +119,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
             throw new Error('Not implemented.');
           },
         }),
-      },
+      }),
     });
 
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());

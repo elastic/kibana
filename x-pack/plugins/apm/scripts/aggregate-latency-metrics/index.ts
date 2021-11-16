@@ -40,7 +40,7 @@ import { ESClient, getEsClient } from '../shared/get_es_client';
 // - from: start of the date range that should be processed. Should be a valid ISO timestamp.
 // - to: end of the date range that should be processed. Should be a valid ISO timestamp.
 // - source: from which transaction documents should be read. Should be location of ES (basic auth
-// is supported) plus the index name (or an index pattern). Example:
+// is supported) plus the index name (or an data view). Example:
 // https://foo:bar@apm.elstc.co:9999/apm-8.0.0-transaction
 // - dest: to which metric documents should be written. If this is not set, no metric documents
 // will be created.Should be location of ES (basic auth is supported) plus the index name.
@@ -135,11 +135,9 @@ export async function aggregateLatencyMetrics() {
     destOptions = parseIndexUrl(dest);
     destClient = getEsClient({ node: destOptions.node });
 
-    const mappings = (
-      await sourceClient.indices.getMapping({
-        index: sourceOptions.index,
-      })
-    ).body;
+    const mappings = await sourceClient.indices.getMapping({
+      index: sourceOptions.index,
+    });
 
     const lastMapping = mappings[Object.keys(mappings)[0]];
 

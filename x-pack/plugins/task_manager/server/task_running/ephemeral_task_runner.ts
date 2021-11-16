@@ -115,10 +115,18 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   }
 
   /**
-   * Gets the unique uuid of this task instance.
+   * Gets the exeuction id of this task instance.
    */
-  public get taskUuid() {
-    return `${this.id}-${this.uuid}`;
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**

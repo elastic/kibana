@@ -8,20 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import { compact } from 'lodash';
 import { ESSearchResponse } from 'src/core/types/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import type {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
-} from '@kbn/rule-data-utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
-  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_SEVERITY,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';
@@ -46,13 +39,7 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
-
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
-  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
-  ALERT_EVALUATION_VALUE_NON_TYPED;
-const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
+import { termQuery } from '../../../../observability/server';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -157,24 +144,11 @@ export function registerTransactionDurationAnomalyAlertType({
                       },
                     },
                   },
-                  ...(alertParams.serviceName
-                    ? [
-                        {
-                          term: {
-                            partition_field_value: alertParams.serviceName,
-                          },
-                        },
-                      ]
-                    : []),
-                  ...(alertParams.transactionType
-                    ? [
-                        {
-                          term: {
-                            by_field_value: alertParams.transactionType,
-                          },
-                        },
-                      ]
-                    : []),
+                  ...termQuery(
+                    'partition_field_value',
+                    alertParams.serviceName
+                  ),
+                  ...termQuery('by_field_value', alertParams.transactionType),
                 ] as QueryDslQueryContainer[],
               },
             },

@@ -122,7 +122,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
       searchSource: getSearchSource(true),
       columns,
-      title: savedSearch.title,
+      title: savedSearch.title || '',
       objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
     });
 
@@ -144,7 +144,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
         this.isDownloading = false;
 
         const download = `${savedSearch.title}.csv`;
-        const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([rawResponse as BlobPart], { type: 'text/csv;charset=utf-8;' });
 
         // Hack for IE11 Support
         if (window.navigator.msSaveOrOpenBlob) {

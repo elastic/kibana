@@ -6,6 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import uuid from 'uuid';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -54,6 +55,14 @@ export const getExceptionProviderMock = (): ExceptionListItemSchema => {
         },
       ],
       tags: ['policy:all'],
+      comments: [
+        {
+          id: uuid.v4(),
+          comment: 'test',
+          created_at: new Date().toISOString(),
+          created_by: 'Justa',
+        },
+      ],
     })
   );
 };

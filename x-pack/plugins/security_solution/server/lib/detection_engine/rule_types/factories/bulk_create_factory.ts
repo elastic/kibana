@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
-
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty } from 'lodash';
 
@@ -16,7 +14,6 @@ import { BuildRuleMessage } from '../../signals/rule_messages';
 import { errorAggregator, makeFloatString } from '../../signals/utils';
 import { RefreshTypes } from '../../types';
 import { PersistenceAlertService } from '../../../../../../rule_registry/server';
-import { AlertInstanceContext } from '../../../../../../alerting/common';
 
 export interface GenericBulkCreateResponse<T> {
   success: boolean;
@@ -27,13 +24,15 @@ export interface GenericBulkCreateResponse<T> {
 }
 
 export const bulkCreateFactory =
-  <TContext extends AlertInstanceContext>(
+  (
     logger: Logger,
-    alertWithPersistence: PersistenceAlertService<TContext>,
+    alertWithPersistence: PersistenceAlertService,
     buildRuleMessage: BuildRuleMessage,
     refreshForBulkCreate: RefreshTypes
   ) =>
-  async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
+  async <T extends Record<string, unknown>>(
+    wrappedDocs: Array<BaseHit<T>>
+  ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {
         errors: [],
@@ -49,7 +48,8 @@ export const bulkCreateFactory =
     const response = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         id: doc._id,
-        fields: doc.fields ?? doc._source ?? {},
+        // `fields` should have already been merged into `doc._source`
+        fields: doc._source,
       })),
       refreshForBulkCreate
     );
@@ -62,63 +62,64 @@ export const bulkCreateFactory =
       )
     );
 
-    if (response) {
-      logger.debug(
-        buildRuleMessage(`took property says bulk took: ${response.body.took} milliseconds`)
+    if (response == null) {
+      return {
+        errors: [
+          'alertWithPersistence returned undefined response. Alerts as Data write flag may be disabled.',
+        ],
+        success: false,
+        bulkCreateDuration: makeFloatString(end - start),
+        createdItemsCount: 0,
+        createdItems: [],
+      };
+    }
+
+    logger.debug(
+      buildRuleMessage(`took property says bulk took: ${response.body.took} milliseconds`)
+    );
+
+    const createdItems = wrappedDocs
+      .map((doc, index) => {
+        const responseIndex = response.body.items[index].index;
+        return {
+          _id: responseIndex?._id ?? '',
+          _index: responseIndex?._index ?? '',
+          ...doc._source,
+        };
+      })
+      .filter((_, index) => response.body.items[index].index?.status === 201);
+    const createdItemsCount = createdItems.length;
+
+    const duplicateSignalsCount = countBy(response.body.items, 'create.status')['409'];
+    const errorCountByMessage = errorAggregator(response.body, [409]);
+
+    logger.debug(buildRuleMessage(`bulk created ${createdItemsCount} signals`));
+
+    if (duplicateSignalsCount > 0) {
+      logger.debug(buildRuleMessage(`ignored ${duplicateSignalsCount} duplicate signals`));
+    }
+
+    if (!isEmpty(errorCountByMessage)) {
+      logger.error(
+        buildRuleMessage(
+          `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
+        )
       );
 
-      const createdItems = wrappedDocs
-        .map((doc, index) => {
-          const responseIndex = response.body.items[index].index;
-          return {
-            _id: responseIndex?._id ?? '',
-            _index: responseIndex?._index ?? '',
-            [ALERT_INSTANCE_ID]: responseIndex?._id ?? '',
-            ...doc._source,
-          };
-        })
-        .filter((_, index) => response.body.items[index].index?.status === 201);
-
-      const createdItemsCount = createdItems.length;
-      const duplicateSignalsCount = countBy(response.body.items, 'create.status')['409'];
-      const errorCountByMessage = errorAggregator(response.body, [409]);
-
-      logger.debug(buildRuleMessage(`bulk created ${createdItemsCount} signals`));
-
-      if (duplicateSignalsCount > 0) {
-        logger.debug(buildRuleMessage(`ignored ${duplicateSignalsCount} duplicate signals`));
-      }
-
-      if (!isEmpty(errorCountByMessage)) {
-        logger.error(
-          buildRuleMessage(
-            `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
-          )
-        );
-
-        return {
-          errors: Object.keys(errorCountByMessage),
-          success: false,
-          bulkCreateDuration: makeFloatString(end - start),
-          createdItemsCount: createdItems.length,
-          createdItems,
-        };
-      } else {
-        return {
-          errors: [],
-          success: true,
-          bulkCreateDuration: makeFloatString(end - start),
-          createdItemsCount: createdItems.length,
-          createdItems,
-        };
-      }
+      return {
+        errors: Object.keys(errorCountByMessage),
+        success: false,
+        bulkCreateDuration: makeFloatString(end - start),
+        createdItemsCount: createdItems.length,
+        createdItems,
+      };
     } else {
       return {
         errors: [],
         success: true,
         bulkCreateDuration: makeFloatString(end - start),
-        createdItemsCount: 0,
-        createdItems: [],
+        createdItemsCount: createdItems.length,
+        createdItems,
       };
     }
   };

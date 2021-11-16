@@ -19,7 +19,9 @@ import {
   DashboardContainerInput,
   DashboardBuildContext,
 } from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
+import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
+import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
+import { ControlGroupInput } from '../../../../presentation_util/public';
 
 interface SavedObjectToDashboardStateProps {
   version: string;
@@ -73,6 +75,9 @@ export const savedObjectToDashboardState = ({
     usageCollection
   );
 
+  rawState.controlGroupInput = deserializeControlGroupFromDashboardSavedObject(
+    savedDashboard
+  ) as ControlGroupInput;
   return { ...rawState, panels: convertSavedPanelsToPanelMap(rawState.panels) };
 };
 
@@ -91,8 +96,17 @@ export const stateToDashboardContainerInput = ({
   const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
 
-  const { expandedPanelId, fullScreenMode, description, options, viewMode, panels, query, title } =
-    dashboardState;
+  const {
+    controlGroupInput,
+    expandedPanelId,
+    fullScreenMode,
+    description,
+    options,
+    viewMode,
+    panels,
+    query,
+    title,
+  } = dashboardState;
 
   return {
     refreshConfig: timefilter.getRefreshInterval(),
@@ -102,6 +116,7 @@ export const stateToDashboardContainerInput = ({
     dashboardCapabilities,
     isEmbeddedExternally,
     ...(options || {}),
+    controlGroupInput,
     searchSessionId,
     expandedPanelId,
     description,

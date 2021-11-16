@@ -22,7 +22,7 @@ import {
 import { ContainerType } from '../../../common/service_metadata';
 import { rangeQuery } from '../../../../observability/server';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 import { should } from './get_service_metadata_icons';
 
@@ -81,9 +81,7 @@ export async function getServiceMetadataDetails({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],

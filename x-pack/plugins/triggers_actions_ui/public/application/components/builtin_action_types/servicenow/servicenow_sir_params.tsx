@@ -13,7 +13,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
@@ -21,8 +24,8 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
-import { ServiceNowSIRActionParams, Fields, Choice } from './types';
-import { choicesToEuiOptions } from './helpers';
+import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
+import { choicesToEuiOptions, isDeprecatedConnector, DEFAULT_CORRELATION_ID } from './helpers';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -35,6 +38,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const {
+    docLinks,
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -115,7 +119,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: DEFAULT_CORRELATION_ID },
           comments: [],
         },
         index
@@ -132,7 +136,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: DEFAULT_CORRELATION_ID },
           comments: [],
         },
         index
@@ -144,7 +148,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   return (
     <>
       <EuiTitle size="s">
-        <h3>{i18n.INCIDENT}</h3>
+        <h3>{i18n.SECURITY_INCIDENT}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -162,48 +166,8 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'short_description'}
-          inputTargetValue={incident?.short_description ?? undefined}
+          inputTargetValue={incident?.short_description}
           errors={errors['subActionParams.incident.short_description'] as string[]}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.SOURCE_IP_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'source_ip'}
-          inputTargetValue={incident?.source_ip ?? undefined}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.DEST_IP_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'dest_ip'}
-          inputTargetValue={incident?.dest_ip ?? undefined}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_URL_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'malware_url'}
-          inputTargetValue={incident?.malware_url ?? undefined}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_HASH_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'malware_hash'}
-          inputTargetValue={incident?.malware_hash ?? undefined}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -261,6 +225,46 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {!isDeprecatedConnector(actionConnector as unknown as ServiceNowActionConnector) && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={i18n.CORRELATION_ID}
+                helpText={
+                  <EuiLink href={docLinks.links.alerting.serviceNowSIRAction} target="_blank">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIRAction.correlationIDHelpLabel"
+                      defaultMessage="Identifier for updating incidents"
+                    />
+                  </EuiLink>
+                }
+              >
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'correlation_id'}
+                  inputTargetValue={incident?.correlation_id ?? undefined}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.CORRELATION_DISPLAY}>
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'correlation_display'}
+                  inputTargetValue={incident?.correlation_display ?? undefined}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}
@@ -277,6 +281,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
       />
+      <EuiSpacer size="m" />
     </>
   );
 };

@@ -7,7 +7,7 @@
  */
 
 import { Server } from 'http';
-import { rmdir, mkdtemp, readFile, writeFile } from 'fs/promises';
+import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
 import { omit } from 'lodash';
 import { join } from 'path';
@@ -1419,7 +1419,7 @@ describe('setup contract', () => {
 
     afterAll(async () => {
       if (tempDir) {
-        await rmdir(tempDir, { recursive: true });
+        await rm(tempDir, { recursive: true });
       }
     });
 

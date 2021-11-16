@@ -48,6 +48,7 @@ export const initServerWithKibana = (
     },
     alerting: [
       'xpack.uptime.alerts.tls',
+      'xpack.uptime.alerts.tlsCertificate',
       'xpack.uptime.alerts.monitorStatus',
       'xpack.uptime.alerts.durationAnomaly',
     ],
@@ -64,6 +65,7 @@ export const initServerWithKibana = (
           rule: {
             all: [
               'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.tlsCertificate',
               'xpack.uptime.alerts.monitorStatus',
               'xpack.uptime.alerts.durationAnomaly',
             ],
@@ -71,6 +73,7 @@ export const initServerWithKibana = (
           alert: {
             all: [
               'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.tlsCertificate',
               'xpack.uptime.alerts.monitorStatus',
               'xpack.uptime.alerts.durationAnomaly',
             ],
@@ -93,6 +96,7 @@ export const initServerWithKibana = (
           rule: {
             read: [
               'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.tlsCertificate',
               'xpack.uptime.alerts.monitorStatus',
               'xpack.uptime.alerts.durationAnomaly',
             ],
@@ -100,6 +104,7 @@ export const initServerWithKibana = (
           alert: {
             read: [
               'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.tlsCertificate',
               'xpack.uptime.alerts.monitorStatus',
               'xpack.uptime.alerts.durationAnomaly',
             ],

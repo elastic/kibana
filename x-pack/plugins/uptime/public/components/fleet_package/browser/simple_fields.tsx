@@ -24,15 +24,33 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
     setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
   };
   const onChangeSourceField = useCallback(
-    ({ zipUrl, folder, username, password, inlineScript, params }) => {
+    ({
+      zipUrl,
+      folder,
+      username,
+      password,
+      inlineScript,
+      params,
+      proxyUrl,
+      isGeneratedScript,
+      fileName,
+    }) => {
       setFields((prevFields) => ({
         ...prevFields,
         [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
+        [ConfigKeys.SOURCE_ZIP_PROXY_URL]: proxyUrl,
         [ConfigKeys.SOURCE_ZIP_FOLDER]: folder,
         [ConfigKeys.SOURCE_ZIP_USERNAME]: username,
         [ConfigKeys.SOURCE_ZIP_PASSWORD]: password,
         [ConfigKeys.SOURCE_INLINE]: inlineScript,
         [ConfigKeys.PARAMS]: params,
+        [ConfigKeys.METADATA]: {
+          ...prevFields[ConfigKeys.METADATA],
+          script_source: {
+            is_generated_script: isGeneratedScript,
+            file_name: fileName,
+          },
+        },
       }));
     },
     [setFields]
@@ -80,11 +98,15 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
           defaultConfig={useMemo(
             () => ({
               zipUrl: defaultValues[ConfigKeys.SOURCE_ZIP_URL],
+              proxyUrl: defaultValues[ConfigKeys.SOURCE_ZIP_PROXY_URL],
               folder: defaultValues[ConfigKeys.SOURCE_ZIP_FOLDER],
               username: defaultValues[ConfigKeys.SOURCE_ZIP_USERNAME],
               password: defaultValues[ConfigKeys.SOURCE_ZIP_PASSWORD],
               inlineScript: defaultValues[ConfigKeys.SOURCE_INLINE],
               params: defaultValues[ConfigKeys.PARAMS],
+              isGeneratedScript:
+                defaultValues[ConfigKeys.METADATA].script_source?.is_generated_script,
+              fileName: defaultValues[ConfigKeys.METADATA].script_source?.file_name,
             }),
             [defaultValues]
           )}

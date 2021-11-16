@@ -18,16 +18,10 @@ import {
 import { MonitorListComponent, noItemsMessage } from './monitor_list';
 import * as redux from 'react-redux';
 import moment from 'moment';
-import { IHttpFetchError } from '../../../../../../../src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '../../../../../../../src/core/public';
 import { mockMoment } from '../../../lib/helper/test_helpers';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { NO_DATA_MESSAGE } from './translations';
-
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
 
 const testFooPings: Ping[] = [
   makePing({
@@ -191,7 +185,7 @@ describe('MonitorList component', () => {
       <MonitorListComponent
         monitorList={{
           list: getMonitorList(),
-          error: new Error('foo message') as IHttpFetchError,
+          error: new Error('foo message') as IHttpFetchError<ResponseErrorBody>,
           loading: false,
         }}
         pageSize={10}

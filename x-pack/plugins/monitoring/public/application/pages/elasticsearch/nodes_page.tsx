@@ -13,7 +13,7 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ElasticsearchNodes } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
@@ -33,6 +33,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
+  const [isLoading, setIsLoading] = React.useState(false);
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } =
     useTable('elasticsearch.nodes');
@@ -64,7 +65,8 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
     if (services.http?.fetch && clusterUuid) {
-      const response = await services.http?.fetch(url, {
+      setIsLoading(true);
+      const response = await services.http?.fetch<{ totalNodeCount: number }>(url, {
         method: 'POST',
         body: JSON.stringify({
           ccs,
@@ -76,6 +78,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
         }),
       });
 
+      setIsLoading(false);
       setData(response);
       updateTotalItemCount(response.totalNodeCount);
       const alertsResponse = await fetchAlerts({
@@ -125,6 +128,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
                 setupMode={setupMode}
                 nodes={data.nodes}
                 alerts={alerts}
+                isLoading={isLoading}
                 showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
                 {...getPaginationTableProps()}
               />

@@ -194,10 +194,10 @@ export class ExpressionLoader {
 
 export type IExpressionLoader = (
   element: HTMLElement,
-  expression: string | ExpressionAstExpression,
-  params: IExpressionLoaderParams
-) => ExpressionLoader;
+  expression?: string | ExpressionAstExpression,
+  params?: IExpressionLoaderParams
+) => Promise<ExpressionLoader>;
 
-export const loader: IExpressionLoader = (element, expression, params) => {
+export const loader: IExpressionLoader = async (element, expression?, params?) => {
   return new ExpressionLoader(element, expression, params);
 };

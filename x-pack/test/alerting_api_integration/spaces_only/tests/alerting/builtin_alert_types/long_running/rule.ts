@@ -64,7 +64,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(status).to.eql(200);
       expect(rule.execution_status.status).to.eql('error');
       expect(rule.execution_status.error.message).to.eql(
-        `rule execution cancelled due to timeout: "test.patternLongRunning.cancelAlertsOnRuleTimeout${ruleId}"`
+        `test.patternLongRunning.cancelAlertsOnRuleTimeout:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`
       );
       expect(rule.execution_status.error.reason).to.eql('timeout');
     });
@@ -89,7 +89,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             ['execute', { gte: 4 }],
             ['execute-timeout', { gte: 1 }],
             ['new-instance', { equal: 1 }],
-            ['active-instance', { equal: 2 }],
+            ['active-instance', { gte: 2 }],
           ]),
         });
       });

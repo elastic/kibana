@@ -19,7 +19,7 @@ export async function getHasData({ setup }: { setup: Setup }) {
           ProcessorEvent.metric,
         ],
       },
-      terminateAfter: 1,
+      terminate_after: 1,
       body: {
         size: 0,
       },

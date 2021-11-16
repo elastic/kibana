@@ -14,7 +14,6 @@
 import apm from 'elastic-apm-node';
 import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
 import {
   Logger,
@@ -70,10 +69,11 @@ export interface TaskRunner {
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
-  taskUuid: string;
+  taskExecutionId: string;
   stage: string;
   isEphemeral?: boolean;
   toString: () => string;
+  isSameTask: (executionId: string) => boolean;
 }
 
 export enum TaskRunningStage {
@@ -188,10 +188,18 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   /**
-   * Gets the unique uuid of this task instance.
+   * Gets the execution id of this task instance.
    */
-  public get taskUuid() {
-    return `${this.id}-${this.uuid}`;
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**
@@ -324,7 +332,6 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    performance.mark('markTaskAsRunning_start');
 
     const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
 
@@ -383,12 +390,10 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (apmTrans) apmTrans.end('success');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
       return true;
     } catch (error) {
       if (apmTrans) apmTrans.end('failure');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -626,15 +631,6 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
 
 function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
   return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
-}
-
-function performanceStopMarkingTaskAsRunning() {
-  performance.mark('markTaskAsRunning_stop');
-  performance.measure(
-    'taskRunner.markTaskAsRunning',
-    'markTaskAsRunning_start',
-    'markTaskAsRunning_stop'
-  );
 }
 
 // A type that extracts the Instance type out of TaskRunningStage

@@ -23,6 +23,7 @@ import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
+import { INSTALLED_CATEGORY } from './category_facets';
 
 const AnnouncementLink = () => {
   const { docLinks } = useStartServices();
@@ -54,10 +55,6 @@ const Callout = () => (
     </p>
   </EuiCallOut>
 );
-
-const title = i18n.translate('xpack.fleet.epmList.installedTitle', {
-  defaultMessage: 'Installed integrations',
-});
 
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
@@ -114,12 +111,15 @@ export const InstalledPackages: React.FC = memo(() => {
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
-        id: '',
+        ...INSTALLED_CATEGORY,
         count: allInstalledPackages.length,
       },
       {
         id: 'updates_available',
         count: updatablePackages.length,
+        title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
+          defaultMessage: 'Updates available',
+        }),
       },
     ],
     [allInstalledPackages.length, updatablePackages.length]
@@ -135,7 +135,6 @@ export const InstalledPackages: React.FC = memo(() => {
 
   const controls = (
     <CategoryFacets
-      showCounts={true}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategoryFacet) => setSelectedCategory(id)}
@@ -150,7 +149,7 @@ export const InstalledPackages: React.FC = memo(() => {
 
   return (
     <PackageListGrid
-      {...{ isLoading, title, controls, setSelectedCategory, callout }}
+      {...{ isLoading, controls, setSelectedCategory, callout }}
       onSearchChange={setSearchTerm}
       initialSearch={searchParam}
       list={cards}

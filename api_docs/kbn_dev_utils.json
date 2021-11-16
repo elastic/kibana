@@ -26,7 +26,9 @@
             "type": "Function",
             "tags": [],
             "label": "fromEnv",
-            "description": [],
+            "description": [
+              "\nCreate a CiStatsReporter by inspecting the ENV for the necessary config"
+            ],
             "signature": [
               "(log: ",
               {
@@ -92,7 +94,13 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Config",
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.Config",
+                    "text": "Config"
+                  },
                   " | undefined"
                 ],
                 "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
@@ -128,7 +136,9 @@
             "type": "Function",
             "tags": [],
             "label": "isEnabled",
-            "description": [],
+            "description": [
+              "\nDetermine if CI_STATS is explicitly disabled by the environment. To determine\nif the CiStatsReporter has enough information in the environment to send metrics\nfor builds use #hasBuildConfig()."
+            ],
             "signature": [
               "() => boolean"
             ],
@@ -143,7 +153,9 @@
             "type": "Function",
             "tags": [],
             "label": "hasBuildConfig",
-            "description": [],
+            "description": [
+              "\nDetermines if the CiStatsReporter is disabled by the environment, or properly\nconfigured and able to send stats"
+            ],
             "signature": [
               "() => boolean"
             ],
@@ -216,7 +228,15 @@
                 "section": "def-server.CiStatsMetric",
                 "text": "CiStatsMetric"
               },
-              "[]) => Promise<true | undefined>"
+              "[], options?: ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.MetricsOptions",
+                "text": "MetricsOptions"
+              },
+              " | undefined) => Promise<true | undefined>"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false,
@@ -241,6 +261,27 @@
                 "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.CiStatsReporter.metrics.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.MetricsOptions",
+                    "text": "MetricsOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -644,8 +685,46 @@
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
                 "deprecated": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.ToolingLog.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.ToolingLogOptions",
+                    "text": "ToolingLogOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.ToolingLog.getIndent",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndent",
+            "description": [
+              "\nGet the current indentation level of the ToolingLog"
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -654,9 +733,11 @@
             "type": "Function",
             "tags": [],
             "label": "indent",
-            "description": [],
+            "description": [
+              "\nIndent the output of the ToolingLog by some character (4 is a good choice usually).\n\nIf provided, the `block` function will be executed and once it's promise is resolved\nor rejected the indentation will be reset to its original state.\n"
+            ],
             "signature": [
-              "(delta?: number) => number"
+              "<T>(delta?: number, block?: (() => Promise<T>) | undefined) => Promise<T> | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
             "deprecated": false,
@@ -667,13 +748,31 @@
                 "type": "number",
                 "tags": [],
                 "label": "delta",
-                "description": [],
+                "description": [
+                  "the number of spaces to increase/decrease the indentation"
+                ],
                 "signature": [
                   "number"
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.ToolingLog.indent.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "block",
+                "description": [
+                  "a function to run and reset any indentation changes after"
+                ],
+                "signature": [
+                  "(() => Promise<T>) | undefined"
+                ],
+                "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -897,7 +996,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "Writer",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.Writer",
+                "text": "Writer"
+              },
               "[]"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
@@ -914,7 +1019,13 @@
             "description": [],
             "signature": [
               "(writers: ",
-              "Writer",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.Writer",
+                "text": "Writer"
+              },
               "[]) => void"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
@@ -928,7 +1039,13 @@
                 "label": "writers",
                 "description": [],
                 "signature": [
-                  "Writer",
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.Writer",
+                    "text": "Writer"
+                  },
                   "[]"
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
@@ -949,12 +1066,59 @@
               "() => ",
               "Observable",
               "<",
-              "Message",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.Message",
+                "text": "Message"
+              },
               ">"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
             "deprecated": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.ToolingLog.withType",
+            "type": "Function",
+            "tags": [],
+            "label": "withType",
+            "description": [
+              "\nCreate a new ToolingLog which sets a different \"type\", allowing messages to be filtered out by \"source\""
+            ],
+            "signature": [
+              "(type: string) => ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.ToolingLog.withType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -1021,7 +1185,53 @@
                 "label": "level",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\""
+                  "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
+                ],
+                "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_collecting_writer.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.ToolingLogCollectingWriter.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [
+              "\nCalled by ToolingLog, extends messages with the source if message includes one."
+            ],
+            "signature": [
+              "(msg: ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.Message",
+                "text": "Message"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_collecting_writer.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.ToolingLogCollectingWriter.write.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.Message",
+                    "text": "Message"
+                  }
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_collecting_writer.ts",
                 "deprecated": false,
@@ -1049,7 +1259,13 @@
             "text": "ToolingLogTextWriter"
           },
           " implements ",
-          "Writer"
+          {
+            "pluginId": "@kbn/dev-utils",
+            "scope": "server",
+            "docId": "kibKbnDevUtilsPluginApi",
+            "section": "def-server.Writer",
+            "text": "Writer"
+          }
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
         "deprecated": false,
@@ -1062,7 +1278,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "{ name: \"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\"; flags: { warning: boolean; error: boolean; info: boolean; success: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+              "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
             "deprecated": false
@@ -1125,7 +1341,13 @@
             "description": [],
             "signature": [
               "(msg: ",
-              "Message",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.Message",
+                "text": "Message"
+              },
               ") => boolean"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
@@ -1139,7 +1361,13 @@
                 "label": "msg",
                 "description": [],
                 "signature": [
-                  "Message"
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.Message",
+                    "text": "Message"
+                  }
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
                 "deprecated": false,
@@ -1157,7 +1385,13 @@
             "description": [],
             "signature": [
               "(writeTo: { write(msg: string): void; }, prefix: string, msg: ",
-              "Message",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.Message",
+                "text": "Message"
+              },
               ") => void"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
@@ -1199,7 +1433,13 @@
                 "label": "msg",
                 "description": [],
                 "signature": [
-                  "Message"
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.Message",
+                    "text": "Message"
+                  }
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
                 "deprecated": false,
@@ -2455,7 +2695,7 @@
         "label": "parseLogLevel",
         "description": [],
         "signature": [
-          "(name: \"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\") => { name: \"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\"; flags: { warning: boolean; error: boolean; info: boolean; success: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+          "(name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\") => { name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
         "deprecated": false,
@@ -2468,7 +2708,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\""
+              "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
             "deprecated": false,
@@ -2486,7 +2726,7 @@
         "label": "pickLevelFromFlags",
         "description": [],
         "signature": [
-          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; }) => \"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\""
+          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; }) => \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
         "deprecated": false,
@@ -2523,7 +2763,7 @@
                 "label": "default",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
+                  "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
                 "deprecated": false
@@ -2947,6 +3187,34 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CiStatsMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "CiStatsMetadata",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsMetadata.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\nArbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric\nobjects stored in the ci-stats service"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.CiStatsMetric",
         "type": "Interface",
         "tags": [],
@@ -2961,7 +3229,9 @@
             "type": "string",
             "tags": [],
             "label": "group",
-            "description": [],
+            "description": [
+              "Top-level categorization for the metric, e.g. \"page load bundle size\""
+            ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
           },
@@ -2971,7 +3241,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "Specific sub-set of the \"group\", e.g. \"dashboard\""
+            ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
           },
@@ -2981,7 +3253,9 @@
             "type": "number",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "integer value recorded as the value of this metric"
+            ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
           },
@@ -2991,7 +3265,9 @@
             "type": "number",
             "tags": [],
             "label": "limit",
-            "description": [],
+            "description": [
+              "optional limit which will generate an error on PRs when the metric exceeds the limit"
+            ],
             "signature": [
               "number | undefined"
             ],
@@ -3004,9 +3280,33 @@
             "type": "string",
             "tags": [],
             "label": "limitConfigPath",
-            "description": [],
+            "description": [
+              "\npath, relative to the repo, where the config file contianing limits\nis kept. Linked from PR comments instructing contributors how to fix\ntheir PRs."
+            ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsMetric.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "Arbitrary key-value pairs which can be used for additional filtering/reporting"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
@@ -3030,7 +3330,9 @@
             "type": "string",
             "tags": [],
             "label": "group",
-            "description": [],
+            "description": [
+              "Top-level categorization for the timing, e.g. \"scripts/foo\", process type, etc."
+            ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
           },
@@ -3040,7 +3342,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "Specific timing (witin the \"group\" being tracked) e.g. \"total\""
+            ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
           },
@@ -3050,7 +3354,9 @@
             "type": "number",
             "tags": [],
             "label": "ms",
-            "description": [],
+            "description": [
+              "time in milliseconds which should be recorded"
+            ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
           },
@@ -3060,42 +3366,18 @@
             "type": "Object",
             "tags": [],
             "label": "meta",
-            "description": [],
+            "description": [
+              "hash of key-value pairs which will be stored with the timing for additional filtering and reporting"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/dev-utils",
                 "scope": "server",
                 "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.CiStatsTimingMetadata",
-                "text": "CiStatsTimingMetadata"
+                "section": "def-server.CiStatsMetadata",
+                "text": "CiStatsMetadata"
               },
               " | undefined"
-            ],
-            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.CiStatsTimingMetadata",
-        "type": "Interface",
-        "tags": [],
-        "label": "CiStatsTimingMetadata",
-        "description": [],
-        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.CiStatsTimingMetadata.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
@@ -3221,6 +3503,45 @@
               " | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/run/run_with_commands.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.Config",
+        "type": "Interface",
+        "tags": [],
+        "label": "Config",
+        "description": [
+          "\nInformation about how CiStatsReporter should talk to the ci-stats service. Normally\nit is read from a JSON environment variable using the `parseConfig()` function\nexported by this module."
+        ],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.Config.apiToken",
+            "type": "string",
+            "tags": [],
+            "label": "apiToken",
+            "description": [
+              "ApiToken necessary for writing build data to ci-stats service"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.Config.buildId",
+            "type": "string",
+            "tags": [],
+            "label": "buildId",
+            "description": [
+              "\nuuid which should be obtained by first creating a build with the\nci-stats service and then passing it to all subsequent steps"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_config.ts",
             "deprecated": false
           }
         ],
@@ -3480,54 +3801,105 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.ReqOptions",
+        "id": "def-server.Message",
         "type": "Interface",
         "tags": [],
-        "label": "ReqOptions",
+        "label": "Message",
+        "description": [
+          "\nThe object shape passed to ToolingLog writers each time the log is used."
+        ],
+        "path": "packages/kbn-dev-utils/src/tooling_log/message.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.Message.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "level/type of message"
+            ],
+            "signature": [
+              "\"write\" | \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\""
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/message.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.Message.indent",
+            "type": "number",
+            "tags": [],
+            "label": "indent",
+            "description": [
+              "indentation intended when message written to a text log"
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/message.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.Message.source",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "type of logger this message came from"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/message.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.Message.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [
+              "args passed to the logging method"
+            ],
+            "signature": [
+              "any[]"
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/message.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.MetricsOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricsOptions",
         "description": [],
         "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.ReqOptions.auth",
-            "type": "boolean",
+            "id": "def-server.MetricsOptions.defaultMeta",
+            "type": "Object",
             "tags": [],
-            "label": "auth",
-            "description": [],
-            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.ReqOptions.path",
-            "type": "string",
-            "tags": [],
-            "label": "path",
-            "description": [],
-            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.ReqOptions.body",
-            "type": "Any",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "any"
+            "label": "defaultMeta",
+            "description": [
+              "Default metadata to add to each metric"
             ],
-            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.ReqOptions.bodyDesc",
-            "type": "string",
-            "tags": [],
-            "label": "bodyDesc",
-            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              },
+              " | undefined"
+            ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
           }
@@ -3625,7 +3997,13 @@
             "description": [],
             "signature": [
               "(task: ",
-              "CleanupTask",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.CleanupTask",
+                "text": "CleanupTask"
+              },
               ") => void"
             ],
             "path": "packages/kbn-dev-utils/src/run/run.ts",
@@ -3639,7 +4017,13 @@
                 "label": "task",
                 "description": [],
                 "signature": [
-                  "CleanupTask"
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.CleanupTask",
+                    "text": "CleanupTask"
+                  }
                 ],
                 "path": "packages/kbn-dev-utils/src/run/run.ts",
                 "deprecated": false,
@@ -3695,7 +4079,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/run/run.ts",
             "deprecated": false
@@ -3751,7 +4135,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/run/run_with_commands.ts",
             "deprecated": false
@@ -3916,6 +4300,56 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.ToolingLogOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolingLogOptions",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.ToolingLogOptions.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\ntype name for this logger, will be assigned to the \"source\"\nproperties of messages produced by this logger"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.ToolingLogOptions.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [
+              "\nparent ToolingLog. When a ToolingLog has a parent they will both\nshare indent and writers state. Changing the indent width or\nwriters on either log will update the other too."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.ToolingLogTextWriterConfig",
         "type": "Interface",
         "tags": [],
@@ -3930,9 +4364,26 @@
             "type": "CompoundType",
             "tags": [],
             "label": "level",
-            "description": [],
+            "description": [
+              "\nLog level, messages below this level will be ignored"
+            ],
             "signature": [
-              "\"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\""
+              "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.ToolingLogTextWriterConfig.ignoreSources",
+            "type": "Array",
+            "tags": [],
+            "label": "ignoreSources",
+            "description": [
+              "\nList of message sources/ToolingLog types which will be ignored. Create\na logger with `ToolingLog#withType()` to create messages with a specific\nsource. Ignored messages will be dropped without writing."
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
             "deprecated": false
@@ -3943,12 +4394,77 @@
             "type": "Object",
             "tags": [],
             "label": "writeTo",
-            "description": [],
+            "description": [
+              "\nTarget which will receive formatted message lines, a common value for `writeTo`\nis process.stdout"
+            ],
             "signature": [
               "{ write(s: string): void; }"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.Writer",
+        "type": "Interface",
+        "tags": [],
+        "label": "Writer",
+        "description": [
+          "\nAn object which received ToolingLog `Messages` and sends them to\nsome interface for collecting logs like stdio, or a file"
+        ],
+        "path": "packages/kbn-dev-utils/src/tooling_log/writer.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.Writer.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [
+              "\nCalled with every log message, should return true if the message\nwas written and false if it was ignored."
+            ],
+            "signature": [
+              "(msg: ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.Message",
+                "text": "Message"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/kbn-dev-utils/src/tooling_log/writer.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.Writer.write.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "msg",
+                "description": [
+                  "The log message to write"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.Message",
+                    "text": "Message"
+                  }
+                ],
+                "path": "packages/kbn-dev-utils/src/tooling_log/writer.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3965,6 +4481,24 @@
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CleanupTask",
+        "type": "Type",
+        "tags": [],
+        "label": "CleanupTask",
+        "description": [
+          "\nA function which will be called when the CLI is torn-down which should\nquickly cleanup whatever it needs."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-dev-utils/src/run/cleanup.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -4150,7 +4684,7 @@
         "label": "LogLevel",
         "description": [],
         "signature": [
-          "\"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\""
+          "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
         "deprecated": false,
@@ -4164,7 +4698,7 @@
         "label": "ParsedLogLevel",
         "description": [],
         "signature": [
-          "{ name: \"warning\" | \"error\" | \"info\" | \"success\" | \"debug\" | \"silent\" | \"verbose\"; flags: { warning: boolean; error: boolean; info: boolean; success: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+          "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
         "deprecated": false,

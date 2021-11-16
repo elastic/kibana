@@ -28,8 +28,8 @@ import {
   AlertAction,
   AlertAggregations,
   AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
+  AlertSummary,
+  AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
@@ -43,26 +43,25 @@ import {
 type Alert = SanitizedAlert<AlertTypeParams>;
 type ResolvedRule = ResolvedSanitizedRule<AlertTypeParams>;
 
-export {
+export type {
   Alert,
   AlertAction,
   AlertAggregations,
   AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
+  AlertSummary,
+  AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
   ResolvedRule,
 };
+export type { ActionType, AsApiContract };
 export {
-  ActionType,
   AlertHistoryEsIndexConnectorId,
   AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
-  AsApiContract,
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
@@ -73,6 +72,14 @@ export type ActionTypeRegistryContract<
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
+export type ActionConnectorFieldsCallbacks = {
+  beforeActionConnectorSave?: () => Promise<void>;
+  afterActionConnectorSave?: (connector: ActionConnector) => Promise<void>;
+} | null;
+export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
+  React.SetStateAction<ActionConnectorFieldsCallbacks>
+>;
+
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
   editActionConfig: (property: string, value: unknown) => void;
@@ -80,6 +87,8 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
+  setCallbacks: ActionConnectorFieldsSetCallbacks;
+  isEdit: boolean;
 }
 
 export enum AlertFlyoutCloseReason {

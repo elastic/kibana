@@ -16,6 +16,7 @@ import {
   getFindResultWithSingleHit,
   nonRuleFindResult,
   getEmptySavedObjectsResponse,
+  getRuleExecutionStatusSucceeded,
   resolveAlertMock,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
@@ -37,7 +38,9 @@ describe.each([
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
-    clients.ruleExecutionLogClient.find.mockResolvedValue([]);
+    clients.ruleExecutionLogClient.getCurrentStatus.mockResolvedValue(
+      getRuleExecutionStatusSucceeded()
+    );
 
     clients.rulesClient.resolve.mockResolvedValue({
       ...resolveAlertMock(isRuleRegistryEnabled, {
@@ -86,7 +89,7 @@ describe.each([
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

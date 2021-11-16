@@ -9,10 +9,7 @@ import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
 import { ApmIndicesConfig } from '../common/typings';
 
-const sampleAPMIndices = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'apm_oss.transactionIndices': 'apm-*',
-} as ApmIndicesConfig;
+const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
 const params = {
   absoluteTime: {
@@ -23,7 +20,8 @@ const params = {
     start: 'now-15m',
     end: 'now',
   },
-  bucketSize: '10s',
+  intervalString: '10s',
+  bucketSize: 10,
 };
 
 describe('registerDataHandler', () => {

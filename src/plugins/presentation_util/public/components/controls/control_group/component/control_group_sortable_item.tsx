@@ -12,10 +12,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
 
-import { ControlWidth } from '../../types';
-import { ControlGroupContainer } from '../control_group_container';
-import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { ControlFrame, ControlFrameProps } from '../../control_frame/control_frame_component';
+import { ControlGroupInput } from '../types';
+import { ControlFrame, ControlFrameProps } from './control_frame_component';
+import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
 
 interface DragInfo {
   isOver?: boolean;
@@ -26,18 +25,19 @@ interface DragInfo {
 
 export type SortableControlProps = ControlFrameProps & {
   dragInfo: DragInfo;
-  width: ControlWidth;
+  isEditable: boolean;
 };
 
 /**
  * A sortable wrapper around the generic control frame.
  */
 export const SortableControl = (frameProps: SortableControlProps) => {
-  const { embeddableId } = frameProps;
+  const { embeddableId, isEditable } = frameProps;
   const { over, listeners, isSorting, transform, transition, attributes, isDragging, setNodeRef } =
     useSortable({
       id: embeddableId,
       animateLayoutChanges: () => true,
+      disabled: !isEditable,
     });
 
   frameProps.dragInfo = { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging };
@@ -60,90 +60,70 @@ export const SortableControl = (frameProps: SortableControlProps) => {
 const SortableControlInner = forwardRef<
   HTMLButtonElement,
   SortableControlProps & { style: HTMLAttributes<HTMLButtonElement>['style'] }
->(
-  (
-    {
-      embeddableId,
-      controlStyle,
-      container,
-      dragInfo,
-      onRemove,
-      onEdit,
-      style,
-      width,
-      ...dragHandleProps
-    },
-    dragHandleRef
-  ) => {
-    const { isOver, isDragging, draggingIndex, index } = dragInfo;
+>(({ embeddableId, dragInfo, style, isEditable, ...dragHandleProps }, dragHandleRef) => {
+  const { isOver, isDragging, draggingIndex, index } = dragInfo;
+  const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
+  const { panels } = useEmbeddableSelector((state) => state);
 
-    const dragHandle = (
-      <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame--dragHandle">
-        <EuiIcon type="grabHorizontal" />
-      </button>
-    );
+  const width = panels[embeddableId].width;
 
-    return (
-      <EuiFlexItem
-        grow={width === 'auto'}
-        className={classNames('controlFrame--wrapper', {
-          'controlFrame--wrapper-isDragging': isDragging,
-          'controlFrame--wrapper-small': width === 'small',
-          'controlFrame--wrapper-medium': width === 'medium',
-          'controlFrame--wrapper-large': width === 'large',
-          'controlFrame--wrapper-insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-          'controlFrame--wrapper-insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
-        })}
-        style={style}
-      >
-        <ControlFrame
-          enableActions={draggingIndex === -1}
-          controlStyle={controlStyle}
-          embeddableId={embeddableId}
-          customPrepend={dragHandle}
-          container={container}
-          onRemove={onRemove}
-          onEdit={onEdit}
-        />
-      </EuiFlexItem>
-    );
-  }
-);
+  const dragHandle = (
+    <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame__dragHandle">
+      <EuiIcon type="grabHorizontal" />
+    </button>
+  );
+
+  return (
+    <EuiFlexItem
+      grow={width === 'auto'}
+      className={classNames('controlFrameWrapper', {
+        'controlFrameWrapper-isDragging': isDragging,
+        'controlFrameWrapper--small': width === 'small',
+        'controlFrameWrapper--medium': width === 'medium',
+        'controlFrameWrapper--large': width === 'large',
+        'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
+        'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+      })}
+      style={style}
+    >
+      <ControlFrame
+        enableActions={isEditable && draggingIndex === -1}
+        embeddableId={embeddableId}
+        customPrepend={isEditable ? dragHandle : undefined}
+      />
+    </EuiFlexItem>
+  );
+});
 
 /**
  * A simplified clone version of the control which is dragged. This version only shows
  * the title, because individual controls can be any size, and dragging a wide item
  * can be quite cumbersome.
  */
-export const ControlClone = ({
-  embeddableId,
-  container,
-  width,
-}: {
-  embeddableId: string;
-  container: ControlGroupContainer;
-  width: ControlWidth;
-}) => {
-  const embeddable = useChildEmbeddable({ embeddableId, container });
-  const layout = container.getInput().controlStyle;
+export const ControlClone = ({ draggingId }: { draggingId: string }) => {
+  const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
+  const { panels, controlStyle } = useEmbeddableSelector((state) => state);
+
+  const width = panels[draggingId].width;
+  const title = panels[draggingId].explicitInput.title;
   return (
     <EuiFlexItem
-      className={classNames('controlFrame--cloneWrapper', {
-        'controlFrame--cloneWrapper-small': width === 'small',
-        'controlFrame--cloneWrapper-medium': width === 'medium',
-        'controlFrame--cloneWrapper-large': width === 'large',
-        'controlFrame--cloneWrapper-twoLine': layout === 'twoLine',
+      className={classNames('controlFrameCloneWrapper', {
+        'controlFrameCloneWrapper--small': width === 'small',
+        'controlFrameCloneWrapper--medium': width === 'medium',
+        'controlFrameCloneWrapper--large': width === 'large',
+        'controlFrameCloneWrapper--twoLine': controlStyle === 'twoLine',
       })}
     >
-      {layout === 'twoLine' ? (
-        <EuiFormLabel>{embeddable?.getInput().title}</EuiFormLabel>
-      ) : undefined}
-      <EuiFlexGroup gutterSize="none" className={'controlFrame--draggable'}>
+      {controlStyle === 'twoLine' ? <EuiFormLabel>{title}</EuiFormLabel> : undefined}
+      <EuiFlexGroup responsive={false} gutterSize="none" className={'controlFrame__draggable'}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="grabHorizontal" className="controlFrame--dragHandle" />
+          <EuiIcon type="grabHorizontal" className="controlFrame__dragHandle" />
         </EuiFlexItem>
-        {container.getInput().controlStyle === 'oneLine' ? (
-          <EuiFlexItem>{embeddable?.getInput().title}</EuiFlexItem>
+        {controlStyle === 'oneLine' ? (
+          <EuiFlexItem>
+            <label className="controlFrameCloneWrapper__label">{title}</label>
+          </EuiFlexItem>
         ) : undefined}
       </EuiFlexGroup>
     </EuiFlexItem>

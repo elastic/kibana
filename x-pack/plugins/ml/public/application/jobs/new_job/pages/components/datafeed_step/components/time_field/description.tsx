@@ -20,7 +20,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.timeField.description"
-          defaultMessage="The default time field for the index pattern is automatically selected, but can be overridden."
+          defaultMessage="The default time field for the data view is automatically selected, but can be overridden."
         />
       }
     >

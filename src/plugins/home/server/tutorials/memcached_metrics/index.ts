@@ -23,17 +23,17 @@ export function memcachedMetricsSpecProvider(context: TutorialContext): Tutorial
   return {
     id: 'memcachedMetrics',
     name: i18n.translate('home.tutorials.memcachedMetrics.nameTitle', {
-      defaultMessage: 'Memcached metrics',
+      defaultMessage: 'Memcached Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.memcachedMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Memcached server.',
+      defaultMessage: 'Collect metrics from Memcached servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.memcachedMetrics.longDescription', {
       defaultMessage:
-        'The `memcached` Metricbeat module fetches internal metrics from Memcached. \
+        'The `memcached` Metricbeat module fetches metrics from Memcached. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-memcached.html',

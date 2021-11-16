@@ -152,9 +152,9 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyIndexPattern*`,
             icon: 'indexPatternApp',
-            editUrl: '#/management/kibana/indexPatterns/patterns/1',
+            editUrl: '#/management/kibana/dataViews/dataView/1',
             inAppUrl: {
-              path: '/management/kibana/indexPatterns/patterns/1',
+              path: '/management/kibana/dataViews/dataView/1',
               uiCapabilitiesPath: 'management.kibana.indexPatterns',
             },
           },

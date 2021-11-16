@@ -52,11 +52,10 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 
         toastNotifications.addDanger(
           i18n.translate(
-            'xpack.transform.deleteTransform.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
+            'xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage',
             {
-              defaultMessage:
-                'An error occurred checking if index pattern {indexPattern} exists: {error}',
-              values: { indexPattern: indexName, error },
+              defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+              values: { dataView: indexName, error },
             }
           )
         );
@@ -171,10 +170,9 @@ export const useDeleteTransforms = () => {
           if (status.destIndexPatternDeleted?.success) {
             toastNotifications.addSuccess(
               i18n.translate(
-                'xpack.transform.deleteTransform.deleteAnalyticsWithIndexPatternSuccessMessage',
+                'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewSuccessMessage',
                 {
-                  defaultMessage:
-                    'Request to delete index pattern {destinationIndex} acknowledged.',
+                  defaultMessage: 'Request to delete data view {destinationIndex} acknowledged.',
                   values: { destinationIndex },
                 }
               )
@@ -220,9 +218,9 @@ export const useDeleteTransforms = () => {
           const error = status.destIndexPatternDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate(
-              'xpack.transform.deleteTransform.deleteAnalyticsWithIndexPatternErrorMessage',
+              'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage',
               {
-                defaultMessage: 'An error occurred deleting index pattern {destinationIndex}',
+                defaultMessage: 'An error occurred deleting data view {destinationIndex}',
                 values: { destinationIndex },
               }
             ),
@@ -257,9 +255,9 @@ export const useDeleteTransforms = () => {
       }
       if (successCount.destIndexPatternDeleted > 0) {
         toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.transformList.bulkDeleteDestIndexPatternSuccessMessage', {
+          i18n.translate('xpack.transform.transformList.bulkDeleteDestDataViewSuccessMessage', {
             defaultMessage:
-              'Successfully deleted {count} destination index {count, plural, one {pattern} other {patterns}}.',
+              'Successfully deleted {count} destination data {count, plural, one {view} other {views}}.',
             values: { count: successCount.destIndexPatternDeleted },
           })
         );

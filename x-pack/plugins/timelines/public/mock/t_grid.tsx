@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
-import { mockBrowserFields, mockDocValueFields } from './browser_fields';
+import { mockBrowserFields, mockDocValueFields, mockRuntimeMappings } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
 import { mockTimelineData } from './mock_timeline_data';
 import { ColumnHeaderOptions, TimelineId } from '../../common';
@@ -114,6 +114,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   },
   renderCellValue: () => null,
   rowRenderers: [],
+  runtimeMappings: mockRuntimeMappings,
   setQuery: () => null,
   sort: [
     {

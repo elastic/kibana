@@ -40,5 +40,6 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     doesAnyTrustedAppExists: createUninitialisedResourceState(),
     assignedList: createUninitialisedResourceState(),
     policies: createUninitialisedResourceState(),
+    removeList: createUninitialisedResourceState(),
   },
 });

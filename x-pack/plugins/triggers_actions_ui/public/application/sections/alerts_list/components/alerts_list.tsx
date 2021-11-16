@@ -8,7 +8,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import { capitalize, padStart, sortBy } from 'lodash';
+import { capitalize, sortBy } from 'lodash';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
@@ -72,7 +72,6 @@ import {
   ALERTS_FEATURE_ID,
   AlertExecutionStatusErrorReasons,
   formatDuration,
-  parseDuration,
 } from '../../../../../../alerting/common';
 import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -82,6 +81,10 @@ import { CenterJustifiedSpinner } from '../../../components/center_justified_spi
 import { ManageLicenseModal } from './manage_license_modal';
 import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
 import { RuleEnabledSwitch } from './rule_enabled_switch';
+import {
+  formatMillisForDisplay,
+  shouldShowDurationWarning,
+} from '../../../lib/execution_duration_utils';
 
 const ENTER_KEY = 13;
 
@@ -108,6 +111,8 @@ export const AlertsList: React.FunctionComponent = () => {
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const [noData, setNoData] = useState<boolean>(true);
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -217,7 +222,8 @@ export const AlertsList: React.FunctionComponent = () => {
   }, []);
 
   async function loadAlertsData() {
-    const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
+    const hasAnyAuthorizedAlertType =
+      alertTypesState.isInitialized && alertTypesState.data.size > 0;
     if (hasAnyAuthorizedAlertType) {
       setAlertsState({ ...alertsState, isLoading: true });
       try {
@@ -240,6 +246,15 @@ export const AlertsList: React.FunctionComponent = () => {
         if (!alertsResponse.data?.length && page.index > 0) {
           setPage({ ...page, index: 0 });
         }
+
+        const isFilterApplied = !(
+          isEmpty(searchText) &&
+          isEmpty(typesFilter) &&
+          isEmpty(actionTypesFilter) &&
+          isEmpty(alertStatusesFilter)
+        );
+
+        setNoData(alertsResponse.data.length === 0 && !isFilterApplied);
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
@@ -251,6 +266,7 @@ export const AlertsList: React.FunctionComponent = () => {
         });
         setAlertsState({ ...alertsState, isLoading: false });
       }
+      setInitialLoad(false);
     }
   }
 
@@ -435,6 +451,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 color="hollow"
                 iconType="tag"
                 iconSide="left"
+                tabIndex={-1}
                 onClick={() => setTagPopoverOpenIndex(item.index)}
                 onClickAriaLabel="Tags"
                 iconOnClick={() => setTagPopoverOpenIndex(item.index)}
@@ -523,25 +540,14 @@ export const AlertsList: React.FunctionComponent = () => {
       truncateText: false,
       'data-test-subj': 'alertsTableCell-duration',
       render: (value: number, item: AlertTableItem) => {
-        const ruleTypeTimeout: string | undefined = alertTypesState.data.get(
-          item.alertTypeId
-        )?.ruleTaskTimeout;
-        const ruleTypeTimeoutMillis: number | undefined = ruleTypeTimeout
-          ? parseDuration(ruleTypeTimeout)
-          : undefined;
-        const showDurationWarning: boolean = ruleTypeTimeoutMillis
-          ? value > ruleTypeTimeoutMillis
-          : false;
-        const duration = moment.duration(value);
-        const durationString = [duration.hours(), duration.minutes(), duration.seconds()]
-          .map((v: number) => padStart(`${v}`, 2, '0'))
-          .join(':');
+        const showDurationWarning = shouldShowDurationWarning(
+          alertTypesState.data.get(item.alertTypeId),
+          value
+        );
 
-        // add millis
-        const millisString = padStart(`${duration.milliseconds()}`, 3, '0');
         return (
           <>
-            {`${durationString}.${millisString}`}
+            {`${formatMillisForDisplay(value)}`}
             {showDurationWarning && (
               <EuiIconTip
                 data-test-subj="ruleDurationWarning"
@@ -579,47 +585,50 @@ export const AlertsList: React.FunctionComponent = () => {
       name: '',
       width: '10%',
       render(item: AlertTableItem) {
-        return item.isEditable && isRuleTypeEditableInContext(item.alertTypeId) ? (
+        return (
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
             <EuiFlexItem grow={false} className="alertSidebarItem">
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false} data-test-subj="alertSidebarEditAction">
-                  <EuiButtonIcon
-                    color={'primary'}
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip',
-                      { defaultMessage: 'Edit' }
-                    )}
-                    className="alertSidebarItem__action"
-                    data-test-subj="editActionHoverButton"
-                    onClick={() => onRuleEdit(item)}
-                    iconType={'pencil'}
-                    aria-label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
-                      { defaultMessage: 'Edit' }
-                    )}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} data-test-subj="alertSidebarDeleteAction">
-                  <EuiButtonIcon
-                    color={'danger'}
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip',
-                      { defaultMessage: 'Delete' }
-                    )}
-                    className="alertSidebarItem__action"
-                    data-test-subj="deleteActionHoverButton"
-                    onClick={() => setAlertsToDelete([item.id])}
-                    iconType={'trash'}
-                    aria-label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
-                      { defaultMessage: 'Delete' }
-                    )}
-                  />
-                </EuiFlexItem>
+                {item.isEditable && isRuleTypeEditableInContext(item.alertTypeId) ? (
+                  <EuiFlexItem grow={false} data-test-subj="alertSidebarEditAction">
+                    <EuiButtonIcon
+                      color={'primary'}
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip',
+                        { defaultMessage: 'Edit' }
+                      )}
+                      className="alertSidebarItem__action"
+                      data-test-subj="editActionHoverButton"
+                      onClick={() => onRuleEdit(item)}
+                      iconType={'pencil'}
+                      aria-label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
+                        { defaultMessage: 'Edit' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                ) : null}
+                {item.isEditable ? (
+                  <EuiFlexItem grow={false} data-test-subj="alertSidebarDeleteAction">
+                    <EuiButtonIcon
+                      color={'danger'}
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip',
+                        { defaultMessage: 'Delete' }
+                      )}
+                      className="alertSidebarItem__action"
+                      data-test-subj="deleteActionHoverButton"
+                      onClick={() => setAlertsToDelete([item.id])}
+                      iconType={'trash'}
+                      aria-label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
+                        { defaultMessage: 'Delete' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
               <CollapsedItemActions
                 key={item.id}
@@ -630,7 +639,7 @@ export const AlertsList: React.FunctionComponent = () => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        ) : null;
+        );
       },
     },
   ];
@@ -950,18 +959,22 @@ export const AlertsList: React.FunctionComponent = () => {
     </>
   );
 
-  const loadedItems = convertAlertsToTableItems(
-    alertsState.data,
-    alertTypesState.data,
-    canExecuteActions
-  );
+  // if initial load, show spinner
+  const getRulesList = () => {
+    if (noData && !alertsState.isLoading && !alertTypesState.isLoading) {
+      return authorizedToCreateAnyAlerts ? (
+        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
+      ) : (
+        noPermissionPrompt
+      );
+    }
 
-  const isFilterApplied = !(
-    isEmpty(searchText) &&
-    isEmpty(typesFilter) &&
-    isEmpty(actionTypesFilter) &&
-    isEmpty(alertStatusesFilter)
-  );
+    if (initialLoad) {
+      return <CenterJustifiedSpinner />;
+    }
+
+    return table;
+  };
 
   return (
     <section data-test-subj="alertsList">
@@ -992,15 +1005,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       />
       <EuiSpacer size="xs" />
-      {loadedItems.length || isFilterApplied ? (
-        table
-      ) : alertTypesState.isLoading || alertsState.isLoading ? (
-        <CenterJustifiedSpinner />
-      ) : authorizedToCreateAnyAlerts ? (
-        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
-      ) : (
-        noPermissionPrompt
-      )}
+      {getRulesList()}
       {alertFlyoutVisible && (
         <AlertAdd
           consumer={ALERTS_FEATURE_ID}

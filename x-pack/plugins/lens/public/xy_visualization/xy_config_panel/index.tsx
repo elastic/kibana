@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './xy_config_panel.scss';
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
@@ -24,7 +23,7 @@ import type {
   FramePublicAPI,
 } from '../../types';
 import { State, visualizationTypes, XYState } from '../types';
-import type { FormatFactory } from '../../../common';
+import { FormatFactory, layerTypes } from '../../../common';
 import {
   SeriesType,
   YAxisMode,
@@ -39,7 +38,7 @@ import { getAxesConfiguration, GroupsConfiguration } from '../axes_configuration
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
-import { ThresholdPanel } from './threshold_panel';
+import { ReferenceLinePanel } from './reference_line_panel';
 import { PalettePicker, TooltipWrapper } from '../../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -564,8 +563,8 @@ export function DimensionEditor(
     );
   }
 
-  if (layer.layerType === 'threshold') {
-    return <ThresholdPanel {...props} isHorizontal={isHorizontal} />;
+  if (layer.layerType === layerTypes.REFERENCELINE) {
+    return <ReferenceLinePanel {...props} isHorizontal={isHorizontal} />;
   }
 
   return (
