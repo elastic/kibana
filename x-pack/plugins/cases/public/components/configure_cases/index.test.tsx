@@ -49,13 +49,11 @@ describe('ConfigureCases', () => {
       iconClass: 'logoSecurity',
     });
 
-    useKibanaMock().services.triggersActionsUi.getAddConnectorFlyout = getAddConnectorFlyoutMock.mockReturnValue(
-      <div data-test-subj="add-connector-flyout" />
-    );
+    useKibanaMock().services.triggersActionsUi.getAddConnectorFlyout =
+      getAddConnectorFlyoutMock.mockReturnValue(<div data-test-subj="add-connector-flyout" />);
 
-    useKibanaMock().services.triggersActionsUi.getEditConnectorFlyout = getEditConnectorFlyoutMock.mockReturnValue(
-      <div data-test-subj="edit-connector-flyout" />
-    );
+    useKibanaMock().services.triggersActionsUi.getEditConnectorFlyout =
+      getEditConnectorFlyoutMock.mockReturnValue(<div data-test-subj="edit-connector-flyout" />);
   });
   beforeEach(() => {
     useActionTypesMock.mockImplementation(() => useActionTypesResponse);
