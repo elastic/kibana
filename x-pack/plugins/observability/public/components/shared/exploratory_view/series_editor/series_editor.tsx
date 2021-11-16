@@ -118,8 +118,12 @@ export const SeriesEditor = React.memo(function () {
       <div>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label={REPORT_TYPE_LABEL} display="columnCompressed">
-              <ReportTypesSelect />
+            <EuiFormRow
+              aria-label={REPORT_TYPE_ARIA_LABEL}
+              id="report-type-label"
+              isDisabled={true}
+            >
+              <ReportTypesSelect prepend={REPORT_TYPE_LABEL} />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -203,5 +207,12 @@ export const REPORT_TYPE_LABEL = i18n.translate(
   'xpack.observability.expView.seriesBuilder.reportType',
   {
     defaultMessage: 'Report type',
+  }
+);
+
+export const REPORT_TYPE_ARIA_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.reportType.aria',
+  {
+    defaultMessage: 'This select allows you to choose the type of report you wish to create',
   }
 );
