@@ -190,7 +190,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
           max: 1,
           min: 1,
         },
-        VECTOR: {
+        GEOJSON_VECTOR: {
           avg: 1.2,
           max: 2,
           min: 1,
