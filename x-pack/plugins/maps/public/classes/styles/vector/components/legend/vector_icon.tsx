@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
 import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
@@ -14,6 +14,7 @@ import { SymbolIcon } from './symbol_icon';
 import { IconStaticOptions } from '../../../../../../common/descriptor_types';
 
 interface Props {
+  borderStyle?: CSSProperties;
   fillColor?: string;
   isPointsOnly: boolean;
   isLinesOnly: boolean;
@@ -21,12 +22,20 @@ interface Props {
   icon?: IconStaticOptions;
 }
 
-export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, icon }: Props) {
+export function VectorIcon({
+  borderStyle = {},
+  fillColor,
+  isPointsOnly,
+  isLinesOnly,
+  strokeColor,
+  icon,
+}: Props) {
   const { value: symbolId, svg } = icon || {};
   if (isLinesOnly) {
     const style = {
       stroke: strokeColor,
       strokeWidth: '4px',
+      ...borderStyle,
     };
     return <LineIcon style={style} />;
   }
@@ -35,6 +44,7 @@ export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, 
     stroke: strokeColor,
     strokeWidth: '1px',
     fill: fillColor,
+    ...borderStyle,
   };
 
   if (!isPointsOnly) {
@@ -52,6 +62,7 @@ export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, 
       fill={fillColor}
       svg={svg}
       stroke={strokeColor}
+      style={borderStyle}
     />
   );
 }

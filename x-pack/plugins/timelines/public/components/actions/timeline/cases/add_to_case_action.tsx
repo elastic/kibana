@@ -25,6 +25,7 @@ export interface AddToCaseActionProps {
     read: boolean;
   } | null;
   appId: string;
+  owner: string;
   onClose?: Function;
   disableAlerts?: boolean;
 }
@@ -35,6 +36,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
   disableAlerts,
 }) => {
@@ -50,7 +52,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     createCaseUrl,
     isAllCaseModalOpen,
     isCreateCaseFlyoutOpen,
-  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, onClose });
+  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, owner, onClose });
 
   const getAllCasesSelectorModalProps = useMemo(() => {
     const { ruleId, ruleName } = normalizedEventFields(event);
@@ -62,7 +64,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           id: ruleId,
           name: ruleName,
         },
-        owner: appId,
+        owner,
       },
       createCaseNavigation: {
         href: createCaseUrl,
@@ -75,7 +77,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       onRowClick: onCaseClicked,
       updateCase: onCaseSuccess,
       userCanCrud: casePermissions?.crud ?? false,
-      owner: [appId],
+      owner: [owner],
       onClose: () =>
         dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: false })),
     };
@@ -87,8 +89,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     goToCreateCase,
     eventId,
     eventIndex,
-    appId,
     dispatch,
+    owner,
     useInsertTimeline,
     event,
   ]);
@@ -105,7 +107,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           onCloseFlyout={closeCaseFlyoutOpen}
           onSuccess={onCaseSuccess}
           useInsertTimeline={useInsertTimeline}
-          appId={appId}
+          owner={owner}
           disableAlerts={disableAlerts}
         />
       )}

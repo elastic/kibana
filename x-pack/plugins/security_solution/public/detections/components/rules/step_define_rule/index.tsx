@@ -10,7 +10,6 @@ import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'reac
 import styled from 'styled-components';
 import { isEqual } from 'lodash';
 
-import { IndexPattern } from 'src/plugins/data/public';
 import {
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
@@ -324,10 +323,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ threatMapping }) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={indexPatterns as IndexPattern}
+        indexPatterns={indexPatterns}
         threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
-        threatIndexPatterns={threatIndexPatterns as IndexPattern}
+        threatIndexPatterns={threatIndexPatterns}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
         threatMapping={threatMapping}
         onValidityChange={setIsThreatQueryBarValid}

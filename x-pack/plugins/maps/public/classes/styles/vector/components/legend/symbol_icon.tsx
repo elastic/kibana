@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { Component, CSSProperties } from 'react';
 // @ts-expect-error
 import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
 
@@ -14,6 +14,7 @@ interface Props {
   svg?: string;
   fill?: string;
   stroke?: string;
+  style: CSSProperties;
 }
 
 interface State {
