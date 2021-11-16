@@ -246,7 +246,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
               fullWidth
               onChange={onChangeSuper}
               options={dataViewSelectOptions}
-              placeholder={i18n.PICK_INDEX_PATTERNS}
+              placeholder={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
               valueOfSelected={dataViewId}
             />
           </StyledFormRow>
