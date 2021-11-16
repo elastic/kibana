@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-import agent from 'elastic-apm-node';
+import agent, { AgentConfigOptions } from 'elastic-apm-node';
 import { getConfiguration } from '@kbn/apm-config-loader';
+
+function shouldInstrumentClient(config?: AgentConfigOptions): boolean {
+  return Boolean(
+    config?.active === true && config.contextPropagationOnly !== true && config.disableSend !== true
+  );
+}
 
 export const getApmConfig = (requestPath: string) => {
   const baseConfig = getConfiguration('kibana-frontend');
-  if (!baseConfig?.active) {
+  if (!shouldInstrumentClient(baseConfig)) {
     return null;
   }
 

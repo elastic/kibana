@@ -34,6 +34,22 @@ describe('getApmConfig', () => {
     expect(getApmConfig('/path')).toBeNull();
   });
 
+  it('returns null if apm is enabled with contextPropagationOnly: true', () => {
+    getConfigurationMock.mockReturnValue({
+      active: true,
+      contextPropagationOnly: true,
+    });
+    expect(getApmConfig('/path')).toBeDefined();
+  });
+
+  it('returns null if apm is enabled with disableSend: true', () => {
+    getConfigurationMock.mockReturnValue({
+      active: true,
+      disableSend: true,
+    });
+    expect(getApmConfig('/path')).toBeDefined();
+  });
+
   it('calls `getConfig` with the correct parameters', () => {
     getApmConfig('/path');
 
