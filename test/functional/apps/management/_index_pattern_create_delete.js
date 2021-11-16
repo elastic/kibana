@@ -9,6 +9,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const log = getService('log');
@@ -18,16 +19,11 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default index', function describeIndexTests() {
-    before(function () {
-      // Delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings
-        .replace({})
-        .then(function () {
-          return PageObjects.settings.navigateTo();
-        })
-        .then(function () {
-          return PageObjects.settings.clickKibanaIndexPatterns();
-        });
+    before(async function () {
+      await esArchiver.emptyKibanaIndex();
+      await kibanaServer.uiSettings.replace({});
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
     describe('can open and close editor', function () {
@@ -39,17 +35,16 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/107831
-    describe.skip('validation', function () {
+    describe('validation', function () {
       it('can display errors', async function () {
         await PageObjects.settings.clickAddNewIndexPatternButton();
-        await PageObjects.settings.setIndexPatternField('log*');
+        await PageObjects.settings.setIndexPatternField('log-fake*');
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         await find.byClassName('euiFormErrorText');
       });
 
       it('can resolve errors and submit', async function () {
-        await PageObjects.settings.selectTimeFieldOption('@timestamp');
+        await PageObjects.settings.setIndexPatternField('log*');
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         await PageObjects.settings.removeIndexPattern();
       });
