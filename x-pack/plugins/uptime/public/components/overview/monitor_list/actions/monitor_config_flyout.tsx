@@ -140,7 +140,7 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, monitor, isEditFlow = 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={saveMonitor} fill isLoading={isSaving}>
-              {monitor ? 'Update' : 'Save'}
+              {monitor?.id ? 'Update' : 'Save'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
