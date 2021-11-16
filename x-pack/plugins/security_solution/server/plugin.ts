@@ -131,13 +131,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    const { pluginContext, config, logger, appClientFactory } = this;
+    const { appClientFactory, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
-
-    appClientFactory.setup({
-      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
-      config,
-    });
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
@@ -307,6 +302,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     core.getStartServices().then(([_, depsStart]) => {
+      appClientFactory.setup({
+        getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
+        config,
+      });
+
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext
@@ -349,7 +349,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, appClientFactory } = this;
+    const { config, logger } = this;
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
@@ -417,7 +417,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.fleet?.agentPolicyService!,
         logger
       ),
-      appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config,
