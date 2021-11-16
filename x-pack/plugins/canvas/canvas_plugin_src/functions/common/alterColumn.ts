@@ -52,10 +52,9 @@ export function alterColumn(): ExpressionFunctionDefinition<
         return input;
       }
 
-      let column = input.columns.find((col) => col.id === args.column);
-      if (!column) {
-        column = input.columns.find((col) => col.name === args.column);
-      }
+      const column =
+        input.columns.find((col) => col.id === args.column) ??
+        input.columns.find((col) => col.name === args.column);
 
       if (!column) {
         throw errors.columnNotFound(args.column);
