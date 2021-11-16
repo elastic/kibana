@@ -31,7 +31,7 @@ import {
   createMockReportingCore,
 } from '../../test_helpers';
 import * as contexts from './constants';
-import { getScreenshotsToBuffer$ } from './';
+import { getScreenshots$ } from './';
 
 /*
  * Mocks
@@ -57,7 +57,7 @@ let core: ReportingCore;
 /*
  * Tests
  */
-describe('Screenshot Observable Pipeline', () => {
+describe('Screenshot Observable Pipeline: buffered screenshots', () => {
   let mockBrowserDriverFactory: any;
 
   beforeEach(async () => {
@@ -66,7 +66,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await getScreenshotsToBuffer$(captureConfig, mockBrowserDriverFactory, {
+    const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, null, {
       logger,
       urlsOrUrlLocatorTuples: ['/welcome/home/start/index.htm'],
       conditionalHeaders: {} as ConditionalHeaders,
@@ -137,7 +137,7 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     // test
-    const result = await getScreenshotsToBuffer$(captureConfig, mockBrowserDriverFactory, {
+    const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, null, {
       logger,
       urlsOrUrlLocatorTuples: [
         '/welcome/home/start/index2.htm',
@@ -279,7 +279,7 @@ describe('Screenshot Observable Pipeline', () => {
 
       // test
       const getScreenshot = async () => {
-        return await getScreenshotsToBuffer$(captureConfig, mockBrowserDriverFactory, {
+        return await getScreenshots$(captureConfig, mockBrowserDriverFactory, null, {
           logger,
           urlsOrUrlLocatorTuples: [
             '/welcome/home/start/index2.htm',
@@ -401,7 +401,7 @@ describe('Screenshot Observable Pipeline', () => {
 
       // test
       const getScreenshot = async () => {
-        return await getScreenshotsToBuffer$(captureConfig, mockBrowserDriverFactory, {
+        return await getScreenshots$(captureConfig, mockBrowserDriverFactory, null, {
           logger,
           urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
           conditionalHeaders: {} as ConditionalHeaders,
@@ -431,7 +431,7 @@ describe('Screenshot Observable Pipeline', () => {
       });
       mockLayout.getViewport = () => null;
 
-      const screenshots = await getScreenshotsToBuffer$(captureConfig, mockBrowserDriverFactory, {
+      const screenshots = await getScreenshots$(captureConfig, mockBrowserDriverFactory, null, {
         logger,
         urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
         conditionalHeaders: {} as ConditionalHeaders,

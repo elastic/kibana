@@ -63,7 +63,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      return generatePngObservable(logger, hashUrl, 'America/Los_Angeles', headers, layout)
+      return generatePngObservable(logger, hashUrl, 'America/Los_Angeles', headers, layout, null)
         .pipe()
         .toPromise()
         .then((screenshot) => {

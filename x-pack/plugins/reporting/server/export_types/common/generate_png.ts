@@ -13,7 +13,7 @@ import { ReportingCore } from '../../';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger } from '../../lib';
 import { LayoutParams, LayoutSelectorDictionary, PreserveLayout } from '../../lib/layouts';
-import { getScreenshotsToStream$, StreamScreenshotResults } from '../../lib/screenshots';
+import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
@@ -27,7 +27,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams & { selectors?: Partial<LayoutSelectorDictionary> },
-    stream: Writable
+    stream: Writable | null
   ): Rx.Observable<{ warnings: string[] }> {
     const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
     const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
@@ -40,7 +40,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
     let apmBuffer: typeof apm.currentSpan;
-    const screenshots$ = getScreenshotsToStream$(captureConfig, browserDriverFactory, stream, {
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, stream, {
       logger,
       urlsOrUrlLocatorTuples: [urlOrUrlLocatorTuple],
       conditionalHeaders,
@@ -51,7 +51,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
         apmScreenshots?.end();
         apmBuffer = apmTrans?.startSpan('get_buffer', 'output') ?? null;
       }),
-      map((results: StreamScreenshotResults[]) => ({
+      map((results: ScreenshotResults[]) => ({
         warnings: results.reduce((found, current) => {
           if (current.error) {
             found.push(current.error.message);

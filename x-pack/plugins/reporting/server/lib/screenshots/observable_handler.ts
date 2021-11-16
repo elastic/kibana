@@ -133,30 +133,7 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  public getScreenshotsToBuffer() {
-    return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
-      withRenderComplete.pipe(
-        mergeMap(async (data: PageSetupResults) => {
-          this.checkPageIsOpen(); // fail the report job if the browser has closed
-
-          const elements =
-            data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1));
-          const screenshots = await getScreenshots(this.driver, null, elements, this.logger);
-          const { timeRange, error: setupError } = data;
-
-          return {
-            timeRange,
-            screenshots,
-            error: setupError,
-            elementsPositionAndAttributes: elements,
-            byteLength: 424242,
-          };
-        })
-      );
-  }
-
-  public getScreenshotsToStream(stream: Writable) {
+  public getScreenshots(stream: Writable | null) {
     return (withRenderComplete: Rx.Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults) => {

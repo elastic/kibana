@@ -12,14 +12,14 @@ import { ReportingCore } from '../../../';
 import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { getScreenshotsToBuffer$, BufferScreenshotResults } from '../../../lib/screenshots';
+import { BufferedScreenshotResults, getScreenshots$ } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 import { PdfMaker } from '../../common/pdf';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import type { TaskPayloadPDFV2 } from '../types';
 import { getTracker } from './tracker';
 
-const getTimeRange = (urlScreenshots: BufferScreenshotResults[]) => {
+const getTimeRange = (urlScreenshots: BufferedScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
@@ -60,32 +60,39 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
       getFullRedirectAppUrl(reporting.getConfig(), job.spaceId, job.forceNow)
     );
 
-    const screenshots$ = getScreenshotsToBuffer$(captureConfig, browserDriverFactory, {
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, null, {
       logger,
       urlsOrUrlLocatorTuples: zip(urls, locatorParams) as UrlOrUrlLocatorTuple[],
       conditionalHeaders,
       layout,
       browserTimezone,
     }).pipe(
-      mergeMap(async (results: BufferScreenshotResults[]) => {
-        tracker.endScreenshots();
+      mergeMap(async (results) => {
+        const bufferedResults = results as BufferedScreenshotResults[];
 
+        tracker.endScreenshots();
         tracker.startSetup();
+
         const pdfOutput = new PdfMaker(layout, logo);
         if (title) {
-          const timeRange = getTimeRange(results);
+          const timeRange = getTimeRange(bufferedResults);
           title += timeRange ? ` - ${timeRange}` : '';
           pdfOutput.setTitle(title);
         }
         tracker.endSetup();
 
-        results.forEach((r) => {
-          r.screenshots.forEach((screenshot) => {
-            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.data.byteLength}`);
+        bufferedResults.forEach((r) => {
+          const screenshots = r.screenshots;
+          if (!screenshots) {
+            return;
+          }
+          screenshots.forEach((screenshot) => {
+            const { data } = screenshot;
+            logger.debug(`Adding image to PDF. Image base64 size: ${data.byteLength}`);
 
             tracker.startAddImage();
             tracker.endAddImage();
-            pdfOutput.addImage(screenshot.data, {
+            pdfOutput.addImage(data, {
               title: screenshot.title ?? undefined,
               description: screenshot.description ?? undefined,
             });

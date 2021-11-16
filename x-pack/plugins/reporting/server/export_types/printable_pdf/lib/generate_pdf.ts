@@ -11,12 +11,12 @@ import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { getScreenshotsToBuffer$, BufferScreenshotResults } from '../../../lib/screenshots';
+import { getScreenshots$, BufferedScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 import { PdfMaker } from '../../common/pdf';
 import { getTracker } from './tracker';
 
-const getTimeRange = (urlScreenshots: BufferScreenshotResults[]) => {
+const getTimeRange = (urlScreenshots: BufferedScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
@@ -48,31 +48,34 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.endLayout();
 
     tracker.startScreenshots();
-    const screenshots$ = getScreenshotsToBuffer$(captureConfig, browserDriverFactory, {
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, null, {
       logger,
       urlsOrUrlLocatorTuples: urls,
       conditionalHeaders,
       layout,
       browserTimezone,
     }).pipe(
-      mergeMap(async (results: BufferScreenshotResults[]) => {
-        tracker.endScreenshots();
+      mergeMap(async (results) => {
+        const bufferedResults = results as BufferedScreenshotResults[];
 
+        tracker.endScreenshots();
         tracker.startSetup();
+
         const pdfOutput = new PdfMaker(layout, logo);
         if (title) {
-          const timeRange = getTimeRange(results);
+          const timeRange = getTimeRange(bufferedResults);
           title += timeRange ? ` - ${timeRange}` : '';
           pdfOutput.setTitle(title);
         }
         tracker.endSetup();
 
-        results.forEach((r) => {
+        bufferedResults.forEach((r) => {
           r.screenshots.forEach((screenshot) => {
-            logger.debug(`Adding image to PDF. Image size: ${screenshot.data.byteLength}`); // prettier-ignore
+            const { data } = screenshot;
+            logger.debug(`Adding image to PDF. Image size: ${data!.byteLength}`);
             tracker.startAddImage();
             tracker.endAddImage();
-            pdfOutput.addImage(screenshot.data, {
+            pdfOutput.addImage(data!, {
               title: screenshot.title ?? undefined,
               description: screenshot.description ?? undefined,
             });
