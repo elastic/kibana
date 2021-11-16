@@ -175,8 +175,8 @@ describe('LayerPanel', () => {
 
       const group = instance.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
       expect(group).toHaveLength(1);
-      const optionalLabel = instance.find('.[data-test-subj="lnsGroup_optional"]');
-      expect(optionalLabel).toHaveLength(1);
+      const optionalLabel = instance.find('[data-test-subj="lnsGroup_optional"]').first();
+      expect(optionalLabel.text()).toEqual('Optional');
     });
 
     it('should render the group with a way to add a new column', async () => {
