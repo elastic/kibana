@@ -152,7 +152,7 @@ describe('Sourcerer', () => {
       isNotSourcererOption(`${DEFAULT_ALERTS_INDEX}-default`);
     });
 
-    describe.only('Modified badge', () => {
+    describe('Modified badge', () => {
       it('Selecting new data view does not add a modified badge', () => {
         openTimelineUsingToggle();
         cy.get(SOURCERER.badgeModified).should(`not.exist`);
