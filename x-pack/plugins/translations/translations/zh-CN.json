@@ -4325,7 +4325,6 @@
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName": "标题",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName": "类型",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle": "删除已保存对象",
-    "savedObjectsManagement.objectsTable.export.dangerNotification": "无法生成导出",
     "savedObjectsManagement.objectsTable.export.successNotification": "您的文件正在后台下载",
     "savedObjectsManagement.objectsTable.export.successWithExcludedObjectsNotification": "您的文件正在后台下载。一些对象已从导出中排除。有关已排除对象列表，请查看导出文件的最后一行。",
     "savedObjectsManagement.objectsTable.export.successWithMissingRefsNotification": "您的文件正在后台下载。找不到某些相关对象。有关缺失对象列表，请查看导出文件的最后一行。",
