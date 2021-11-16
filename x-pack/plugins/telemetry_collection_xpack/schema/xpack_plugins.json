@@ -144,6 +144,32 @@
         "throttle_time": {
           "properties": {
             "min": {
+              "type": "keyword"
+            },
+            "avg": {
+              "type": "keyword"
+            },
+            "max": {
+              "type": "keyword"
+            }
+          }
+        },
+        "schedule_time": {
+          "properties": {
+            "min": {
+              "type": "keyword"
+            },
+            "avg": {
+              "type": "keyword"
+            },
+            "max": {
+              "type": "keyword"
+            }
+          }
+        },
+        "throttle_time_number_s": {
+          "properties": {
+            "min": {
               "type": "long"
             },
             "avg": {
@@ -154,7 +180,7 @@
             }
           }
         },
-        "schedule_time": {
+        "schedule_time_number_s": {
           "properties": {
             "min": {
               "type": "long"

@@ -15,7 +15,6 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { SavedObjectsClient } from '../../../../src/core/server';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
@@ -26,7 +25,6 @@ import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import { registerSearchStrategies } from './lib/search_strategies';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
@@ -195,25 +193,6 @@ export class APMPlugin
       ruleDataClient,
       config: currentConfig,
       logger: this.logger,
-    });
-
-    // search strategies for async partial search results
-    core.getStartServices().then(([coreStart]) => {
-      (async () => {
-        const savedObjectsClient = new SavedObjectsClient(
-          coreStart.savedObjects.createInternalRepository()
-        );
-
-        const includeFrozen = await coreStart.uiSettings
-          .asScopedToClient(savedObjectsClient)
-          .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-
-        registerSearchStrategies(
-          plugins.data.search.registerSearchStrategy,
-          boundGetApmIndices,
-          includeFrozen
-        );
-      })();
     });
 
     core.deprecations.registerDeprecations({
