@@ -18,8 +18,8 @@ export const orderedLevels: ServiceStatusLevel[] = [
 
 export const groupByLevel = (statuses: FormattedStatus[]) => {
   return statuses.reduce((map, status) => {
-    const existings = map.get(status.state.id) ?? [];
-    map.set(status.state.id, [...existings, status]);
+    const existing = map.get(status.state.id) ?? [];
+    map.set(status.state.id, [...existing, status]);
     return map;
   }, new Map<ServiceStatusLevel, FormattedStatus[]>());
 };
