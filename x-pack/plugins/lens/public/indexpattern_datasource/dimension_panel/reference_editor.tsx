@@ -315,7 +315,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               fieldIsInvalid={showFieldInvalid || showFieldMissingInvalid}
               currentIndexPattern={currentIndexPattern}
               existingFields={existingFields}
-              operationSupportMatrix={operationSupportMatrix}
+              operationByField={operationSupportMatrix.operationByField}
               selectedOperationType={
                 // Allows operation to be selected before creating a valid column
                 column ? column.operationType : incompleteOperation
