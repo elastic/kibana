@@ -41,12 +41,12 @@ describe('getChannel', () => {
 
   it('returns correct snapshot channel name', () => {
     const channelName = getChannel('snapshot');
-    expect(channelName).toMatchInlineSnapshot(`"kibana-snapshot"`);
+    expect(channelName).toMatchInlineSnapshot(`"xpack"`);
   });
 
   it('returns correct optInStatus channel name', () => {
     const channelName = getChannel('optInStatus');
-    expect(channelName).toMatchInlineSnapshot(`"kibana-opt_in_status"`);
+    expect(channelName).toMatchInlineSnapshot(`"opt_in_status"`);
   });
 });
 
@@ -68,14 +68,12 @@ describe('getTelemetryChannelEndpoint', () => {
   describe('snapshot channel', () => {
     it('returns correct prod endpoint', () => {
       const endpoint = getTelemetryChannelEndpoint({ env: 'prod', channelName: 'snapshot' });
-      expect(endpoint).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/v3/send/kibana-snapshot"`
-      );
+      expect(endpoint).toMatchInlineSnapshot(`"https://telemetry.elastic.co/xpack/v2/send"`);
     });
     it('returns correct staging endpoint', () => {
       const endpoint = getTelemetryChannelEndpoint({ env: 'staging', channelName: 'snapshot' });
       expect(endpoint).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/v3/send/kibana-snapshot"`
+        `"https://telemetry-staging.elastic.co/xpack/v2/send"`
       );
     });
   });
@@ -84,13 +82,13 @@ describe('getTelemetryChannelEndpoint', () => {
     it('returns correct prod endpoint', () => {
       const endpoint = getTelemetryChannelEndpoint({ env: 'prod', channelName: 'optInStatus' });
       expect(endpoint).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/v3/send/kibana-opt_in_status"`
+        `"https://telemetry.elastic.co/opt_in_status/v2/send"`
       );
     });
     it('returns correct staging endpoint', () => {
       const endpoint = getTelemetryChannelEndpoint({ env: 'staging', channelName: 'optInStatus' });
       expect(endpoint).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/v3/send/kibana-opt_in_status"`
+        `"https://telemetry-staging.elastic.co/opt_in_status/v2/send"`
       );
     });
   });
