@@ -29,7 +29,6 @@ export async function requestOAuthJWTToken(
   clientSecret?: string,
   scope?: string
 ): Promise<OAuthJWTTokenResponse> {
-  const oauthTokenUrl = `${tokenUrl}/oauth_token.do`;
   const axiosInstance = axios.create();
 
   const res = await request({
@@ -45,7 +44,7 @@ export async function requestOAuthJWTToken(
     }),
     method: 'post',
     axios: axiosInstance,
-    url: oauthTokenUrl,
+    url: tokenUrl,
     logger,
     configurationUtilities,
   });

@@ -8,90 +8,35 @@
 jest.mock('axios', () => ({
   create: jest.fn(),
 }));
-import axios from 'axios';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import jwt from 'jsonwebtoken';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 import { actionsConfigMock } from '../../actions_config.mock';
+import { createJWTAssertion } from './create_jwt_assertion';
 
-const createAxiosInstanceMock = axios.create as jest.Mock;
-const axiosInstanceMock = jest.fn();
-
+const jwtSign = jwt.sign as jest.Mock;
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-describe('requestOAuthClientCredentialsToken', () => {
-  beforeEach(() => {
-    createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
-  });
-
-  test('making a token request with the required options', async () => {
-    const configurationUtilities = actionsConfigMock.create();
-    axiosInstanceMock.mockReturnValueOnce({
-      status: 200,
+describe('createJWTAssertion', () => {
+  test('creating a JWT token from provided claims with default values', () => {
+    jwtSign.mockReturnValueOnce({
+      status: 400,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
+        error: 'invalid_scope',
+        error_description:
+          "AADSTS70011: The provided value for the input parameter 'scope' is not valid.",
       },
     });
-    await requestOAuthClientCredentialsToken(
-      'https://test',
-      mockLogger,
-      {
-        scope: 'test',
-        clientId: '123456',
-        clientSecret: 'secrert123',
-      },
-      configurationUtilities
-    );
 
-    expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "https://test",
-        Object {
-          "data": "client_id=123456&client_secret=secrert123&grant_type=client_credentials&scope=test",
-          "headers": Object {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          },
-          "httpAgent": undefined,
-          "httpsAgent": Agent {
-            "_events": Object {
-              "free": [Function],
-              "newListener": [Function],
-            },
-            "_eventsCount": 2,
-            "_maxListeners": undefined,
-            "_sessionCache": Object {
-              "list": Array [],
-              "map": Object {},
-            },
-            "defaultPort": 443,
-            "freeSockets": Object {},
-            "keepAlive": false,
-            "keepAliveMsecs": 1000,
-            "maxCachedSessions": 100,
-            "maxFreeSockets": 256,
-            "maxSockets": Infinity,
-            "maxTotalSockets": Infinity,
-            "options": Object {
-              "path": null,
-              "rejectUnauthorized": true,
-            },
-            "protocol": "https:",
-            "requests": Object {},
-            "scheduling": "lifo",
-            "sockets": Object {},
-            "totalSocketCount": 0,
-            Symbol(kCapture): false,
-          },
-          "maxContentLength": 1000000,
-          "method": "post",
-          "proxy": false,
-          "timeout": 360000,
-          "validateStatus": [Function],
-        },
-      ]
-    `);
+    const assertion = createJWTAssertion(mockLogger, 'test', '123456', {
+      audience: '1',
+      issuer: 'someappid',
+      subject: 'test@gmail.com',
+    });
+
+    expect(assertion).toMatchInlineSnapshot('');
   });
 
   test('throw the exception and log the proper error if token was not get successfuly', async () => {

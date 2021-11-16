@@ -8,20 +8,25 @@
 import jwt, { Algorithm } from 'jsonwebtoken';
 import { Logger } from '../../../../../../src/core/server';
 
-export async function createJWTAssertion(
+export interface JWTClaims {
+  audience: string;
+  subject: string;
+  issuer: string;
+  expireInMilisecons?: number;
+  keyId?: string;
+}
+
+export function createJWTAssertion(
   logger: Logger,
-  audience: string,
-  subject: string,
-  issuer: string,
   privateKey: string,
   privateKeyPassword: string,
-  expireInMilisecons?: number,
-  keyId?: string,
+  reservedClaims: JWTClaims,
   customClaims?: Record<string, string>
 ): Promise<string> {
+  const { subject, audience, issuer, expireInMilisecons, keyId } = reservedClaims;
   const iat = Math.floor(Date.now() / 1000);
 
-  const headerObj = { algorithm: 'RS256' as Algorithm, keyid: keyId };
+  const headerObj = { algorithm: 'RS256' as Algorithm, ...(keyId ? { keyid: keyId } : {}) };
 
   const payloadObj = {
     sub: subject, // subject claim identifies the principal that is the subject of the JWT
