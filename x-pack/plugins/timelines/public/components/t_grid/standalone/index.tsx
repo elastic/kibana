@@ -93,6 +93,7 @@ export interface TGridStandaloneProps {
   deletedEventIds: Readonly<string[]>;
   end: string;
   entityType?: EntityType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   expanded?: any;
   loadingText: React.ReactNode;
   filters: Filter[];
@@ -111,10 +112,12 @@ export interface TGridStandaloneProps {
   query: Query;
   onTotalItemsChange?: (totalItems: number) => void;
   onRuleChange?: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parseAlert?: (item: TimelineItem) => any;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setExpanded?: (expanded: any) => void;
   selectedAlertIndex?: number;
   setRefetch: (ref: () => void) => void;
