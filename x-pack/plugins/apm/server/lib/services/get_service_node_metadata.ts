@@ -11,8 +11,16 @@ import {
   CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { getServiceNodesProjection } from '../../projections/service_nodes';
+import {
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+} from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  environmentQuery,
+  serviceNodeNameQuery,
+} from '../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export async function getServiceNodeMetadata({
@@ -32,39 +40,48 @@ export async function getServiceNodeMetadata({
 }) {
   const { apmEventClient } = setup;
 
-  const query = mergeProjection(
-    getServiceNodesProjection({
-      kuery,
-      serviceName,
-      serviceNodeName,
-      environment: ENVIRONMENT_ALL.value,
-      start,
-      end,
-    }),
-    {
-      body: {
-        size: 0,
-        aggs: {
-          host: {
-            terms: {
-              field: HOST_NAME,
-              size: 1,
-            },
+  const params = {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(ENVIRONMENT_ALL.value),
+            ...kqlQuery(kuery),
+            ...serviceNodeNameQuery(serviceNodeName),
+          ],
+        },
+      },
+      aggs: {
+        nodes: {
+          terms: {
+            field: SERVICE_NODE_NAME,
           },
-          containerId: {
-            terms: {
-              field: CONTAINER_ID,
-              size: 1,
-            },
+        },
+        host: {
+          terms: {
+            field: HOST_NAME,
+            size: 1,
+          },
+        },
+        containerId: {
+          terms: {
+            field: CONTAINER_ID,
+            size: 1,
           },
         },
       },
-    }
-  );
+    },
+  };
 
   const response = await apmEventClient.search(
     'get_service_node_metadata',
-    query
+    params
   );
 
   return {

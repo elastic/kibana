@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-// compile typescript on the fly
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/optimizer').registerNodeAutoTranspilation();
 
-require('./upload-telemetry-data/index.ts');
+const {
+  aggregateLatencyMetrics,
+} = require('./aggregate_latency_metrics/index.ts');
+
+aggregateLatencyMetrics().catch((err) => {
+  if (err.meta && err.meta.body) {
+    // error from elasticsearch client
+    console.error(err.meta.body);
+  } else {
+    console.error(err);
+  }
+  process.exit(1);
+});
