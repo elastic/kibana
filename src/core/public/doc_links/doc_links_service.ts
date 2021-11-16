@@ -428,7 +428,7 @@ export class DocLinksService {
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
         },
         snapshotRestore: {
-          guide: `${KIBANA_DOCS}snapshot-repositories.html`,
+          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
