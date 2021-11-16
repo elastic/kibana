@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiText,
   HorizontalAlignment,
+  LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
@@ -91,12 +92,13 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
       width: '25px',
-      align: RIGHT_ALIGNMENT as HorizontalAlignment,
+      align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',
       name: '',
       render: (v: string) => <strong>{v}</strong>,
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
   ];
 
