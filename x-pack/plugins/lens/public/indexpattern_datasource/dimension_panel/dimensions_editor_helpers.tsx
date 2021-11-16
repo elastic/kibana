@@ -161,7 +161,12 @@ export const DimensionEditorTabs = ({ tabs }: { tabs: DimensionEditorTab[] }) =>
     >
       {tabs.map(({ id, enabled, state, onClick, label }) => {
         return enabled ? (
-          <EuiTab isSelected={state} data-test-subj={`lens-dimensionTabs-${id}`} onClick={onClick}>
+          <EuiTab
+            isSelected={state}
+            data-test-subj={`lens-dimensionTabs-${id}`}
+            onClick={onClick}
+            key={id}
+          >
             {label}
           </EuiTab>
         ) : null;

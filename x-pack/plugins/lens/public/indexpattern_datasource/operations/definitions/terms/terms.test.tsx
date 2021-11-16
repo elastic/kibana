@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import 'jest-canvas-mock';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
