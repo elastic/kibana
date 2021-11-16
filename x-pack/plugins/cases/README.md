@@ -133,15 +133,12 @@ UI component:
 
 Arguments:
 
-| Property              | Description                                                                                                                             |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| appId                 | `string;` application id used to register the plugin                                                                                    |
-| userCanCrud           | `boolean;` user permissions to crud                                                                                                     |
-| owner                 | `string[];` owner ids of the cases                                                                                                      |
-| allCasesNavigation    | `CasesNavigation` route configuration for configure cases page                                                                          |
-| caseDetailsNavigation | `CasesNavigation<CaseDetailsHrefSchema, 'configurable'>` route configuration to generate the case details url for the case details page |
-| createCaseNavigation  | `CasesNavigation` route configuration for create case page                                                                              |
-| maxCasesToShow        | `number;` number of cases to show in widget                                                                                             |
+| Property       | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| appId          | `string;` application id used to register the plugin |
+| userCanCrud    | `boolean;` user permissions to crud                  |
+| owner          | `string[];` owner ids of the cases                   |
+| maxCasesToShow | `number;` number of cases to show in widget          |
 
 UI component:
 ![Recent Cases Component][recent-cases-img]
