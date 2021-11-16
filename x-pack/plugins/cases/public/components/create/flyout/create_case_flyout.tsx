@@ -70,6 +70,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
       <StyledFlyout
         onClose={onClose}
         data-test-subj="create-case-flyout"
+        // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
         maskProps={{ className: maskOverlayClassName }}
       >
         <EuiFlyoutHeader hasBorder>
