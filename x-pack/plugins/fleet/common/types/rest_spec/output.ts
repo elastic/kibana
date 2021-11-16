@@ -11,6 +11,10 @@ export interface GetOneOutputResponse {
   item: Output;
 }
 
+export interface DeleteOutputResponse {
+  id: string;
+}
+
 export interface GetOneOutputRequest {
   params: {
     outputId: string;

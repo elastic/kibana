@@ -8,8 +8,17 @@
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
-import type { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
+import type {
+  DeleteOutputRequestSchema,
+  GetOneOutputRequestSchema,
+  PostOutputRequestSchema,
+  PutOutputRequestSchema,
+} from '../../types';
+import type {
+  DeleteOutputResponse,
+  GetOneOutputResponse,
+  GetOutputsResponse,
+} from '../../../common';
 import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -78,3 +87,45 @@ export const putOuputHandler: RequestHandler<
     return defaultIngestErrorHandler({ error, response });
   }
 };
+
+export const postOuputHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostOutputRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const { id, ...data } = request.body;
+    const output = await outputService.create(soClient, data, { id });
+
+    const body: GetOneOutputResponse = {
+      item: output,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const deleteOutputHandler: RequestHandler<TypeOf<typeof DeleteOutputRequestSchema.params>> =
+  async (context, request, response) => {
+    const soClient = context.core.savedObjects.client;
+    try {
+      await outputService.delete(soClient, request.params.outputId);
+
+      const body: DeleteOutputResponse = {
+        id: request.params.outputId,
+      };
+
+      return response.ok({ body });
+    } catch (error) {
+      if (error.isBoom && error.output.statusCode === 404) {
+        return response.notFound({
+          body: { message: `Output ${request.params.outputId} not found` },
+        });
+      }
+
+      return defaultIngestErrorHandler({ error, response });
+    }
+  };

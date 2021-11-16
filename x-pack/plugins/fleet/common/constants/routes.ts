@@ -65,6 +65,8 @@ export const OUTPUT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/outputs`,
   INFO_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+  DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+  CREATE_PATTERN: `${API_ROOT}/outputs`,
 };
 
 // Settings API routes
