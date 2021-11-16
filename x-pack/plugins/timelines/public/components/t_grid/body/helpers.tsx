@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
+} from '@kbn/rule-data-utils/technical_field_names';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
