@@ -81,7 +81,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         }),
         value: true,
         description: i18n.translate('xpack.rollupJobs.rollupDataViewsDescription', {
-          defaultMessage: `Enable the creation of data views which capture rollup indices,
+          defaultMessage: `Enable the creation of data views that capture rollup indices,
               which in turn enable visualizations based on rollup data.`,
         }),
         category: ['rollups'],
