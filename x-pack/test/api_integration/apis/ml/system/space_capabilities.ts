@@ -226,7 +226,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: false,
           canCreateAnnotation: false,
           canDeleteAnnotation: false,
-          canViewMlNodes: true,
+          canViewMlNodes: false,
         });
       });
     });
