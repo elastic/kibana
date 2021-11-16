@@ -104,6 +104,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
 
   const hasDupeName = checkDupeName(name, selectedVar && selectedVar.name, variables);
   const hasEmptyValue = value.toString().trim() === '';
+  const hasEmptyName = !name;
 
   const typeOptions = [
     {
@@ -200,12 +201,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
             />
           </EuiFormRow>
           <EuiFormRow label={strings.getValueFieldLabel()} display="rowCompressed">
-            <VarValueField
-              type={type}
-              value={value}
-              isInvalid={hasEmptyValue}
-              onChange={(v) => setValue(v)}
-            />
+            <VarValueField type={type} value={value} onChange={(v) => setValue(v)} />
           </EuiFormRow>
 
           <EuiSpacer size="m" />
@@ -223,7 +219,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
                     type,
                   })
                 }
-                disabled={hasDupeName || hasEmptyValue || !name}
+                disabled={hasDupeName || hasEmptyValue || hasEmptyName}
                 iconType="save"
               >
                 {strings.getSaveButtonLabel()}

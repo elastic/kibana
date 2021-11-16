@@ -31,10 +31,9 @@ interface Props {
   type: CanvasVariable['type'];
   value: CanvasVariable['value'];
   onChange: (v: CanvasVariable['value']) => void;
-  isInvalid?: boolean;
 }
 
-export const VarValueField: FC<Props> = ({ type, value, onChange, isInvalid }) => {
+export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
   const idPrefix = htmlIdGenerator()();
 
   const options = [
@@ -59,13 +58,7 @@ export const VarValueField: FC<Props> = ({ type, value, onChange, isInvalid }) =
 
   if (type === 'number') {
     return (
-      <EuiFieldNumber
-        compressed
-        name="value"
-        value={value as number}
-        isInvalid={isInvalid}
-        onChange={onNumberChange}
-      />
+      <EuiFieldNumber compressed name="value" value={value as number} onChange={onNumberChange} />
     );
   }
 
@@ -91,7 +84,6 @@ export const VarValueField: FC<Props> = ({ type, value, onChange, isInvalid }) =
       compressed
       name="value"
       value={String(value)}
-      isInvalid={isInvalid}
       onChange={(e) => onChange(e.target.value)}
     />
   );
