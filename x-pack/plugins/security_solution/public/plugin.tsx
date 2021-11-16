@@ -64,16 +64,20 @@ import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { SecurityDataView } from './common/containers/sourcerer/api';
+import { pluginServiceRegistry } from './common/services';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
   private config: SecuritySolutionUiConfigType;
+  private initContext: PluginInitializerContext;
+
   readonly experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.initContext = initializerContext;
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -144,7 +148,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
-        const { renderApp } = await this.lazyApplicationDependencies();
+        const { renderApp, pluginServices } = await this.lazyApplicationDependencies();
+        const appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+
+        pluginServices.setRegistry(
+          pluginServiceRegistry.start({
+            coreStart,
+            startPlugins,
+            appUpdater,
+            initContext: this.initContext,
+          })
+        );
+
         return renderApp({
           ...params,
           services: await startServices,
@@ -154,6 +169,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             subPlugins,
             coreStart.application.capabilities
           ),
+          pluginServices,
         });
       },
     });
@@ -314,13 +330,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins: StartPlugins
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.subPlugins();
+
+    console.log('---plugin.tsx', plugins);
     return {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
       cases: subPlugins.cases.start(),
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
-      hosts: subPlugins.hosts.start(storage),
+      hosts: subPlugins.hosts.start(storage, plugins),
       network: subPlugins.network.start(storage),
       ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),

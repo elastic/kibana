@@ -67,6 +67,7 @@ import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 import { createSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
+import { getMatrixHistogramTemplates } from '../lib/matrix_histogram_templates/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -155,4 +156,7 @@ export const initRoutes = (
 
   // Sourcerer API to generate default pattern
   createSourcererDataViewRoute(router, getStartServices);
+
+  // Matrix Histogram Templates API
+  getMatrixHistogramTemplates(router);
 };

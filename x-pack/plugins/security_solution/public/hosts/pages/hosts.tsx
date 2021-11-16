@@ -54,6 +54,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
+import { WorkpadTemplates } from '../../common/components/matrix_histogram/templates';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -64,7 +65,7 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-const HostsComponent = () => {
+const HostsComponent = ({ plugins }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -200,6 +201,8 @@ const HostsComponent = () => {
 
               <EuiSpacer />
             </Display>
+
+            <WorkpadTemplates plugins={plugins} />
 
             <HostsTabs
               deleteQuery={deleteQuery}

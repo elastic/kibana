@@ -18,6 +18,7 @@ import {
   exceptionsArtifactType,
   manifestType,
 } from './endpoint/lib/artifacts/saved_object_mappings';
+import { matrixHistogramTemplateType } from './saved_objects/matrix_histogram_templates';
 
 const types = [
   noteType,
@@ -29,6 +30,7 @@ const types = [
   exceptionsArtifactType,
   manifestType,
   signalsMigrationType,
+  matrixHistogramTemplateType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

@@ -41,7 +41,7 @@ export const useLensDraftComment = () => {
         ?.getStateTransfer()
         .getIncomingEmbeddablePackage(currentAppId);
       const storageDraftComment = storage.get(DRAFT_COMMENT_STORAGE_ID);
-
+      console.log('storageDraftComment', storageDraftComment);
       setHasIncomingLensState(!!incomingEmbeddablePackage);
 
       if (storageDraftComment) {

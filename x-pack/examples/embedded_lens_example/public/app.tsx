@@ -78,7 +78,7 @@ function getLensAttributes(
     tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
     valueLabels: 'hide',
   };
-
+  console.log('color', color);
   return {
     visualizationType: 'lnsXY',
     title: 'Prefilled from example app',
@@ -124,7 +124,8 @@ export const App = (props: {
     from: 'now-5d',
     to: 'now',
   });
-
+  console.log('time', time);
+  console.log('defaultIndexPattern', props.defaultIndexPattern);
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -255,7 +256,6 @@ export const App = (props: {
                   onTableRowClick={(_data) => {
                     // call back event for on table row click event
                   }}
-                  viewMode={ViewMode.VIEW}
                 />
                 {isSaveModalVisible && (
                   <LensSaveModalComponent

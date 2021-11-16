@@ -11,6 +11,7 @@
  */
 
 import { renderApp } from './app';
+import { pluginServices, pluginServiceRegistry } from './common/services';
 
 import { createStore, createInitialState } from './common/store';
-export { renderApp, createStore, createInitialState };
+export { pluginServices, pluginServiceRegistry, renderApp, createStore, createInitialState };

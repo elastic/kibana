@@ -22,9 +22,12 @@ export const renderApp = ({
   store,
   usageCollection,
   subPluginRoutes,
+  pluginServices,
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+  const ServicesContextProvider = pluginServices.getContextProvider();
+
   render(
     <SecurityApp
       history={history}
@@ -34,14 +37,16 @@ export const renderApp = ({
       store={store}
     >
       <ApplicationUsageTrackingProvider>
-        <Switch>
-          {subPluginRoutes.map((route, index) => {
-            return <Route key={`route-${index}`} {...route} />;
-          })}
-          <Route>
-            <NotFoundPage />
-          </Route>
-        </Switch>
+        <ServicesContextProvider>
+          <Switch>
+            {subPluginRoutes.map((route, index) => {
+              return <Route key={`route-${index}`} {...route} />;
+            })}
+            <Route>
+              <NotFoundPage />
+            </Route>
+          </Switch>
+        </ServicesContextProvider>
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element

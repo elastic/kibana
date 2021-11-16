@@ -87,6 +87,7 @@ import type {
   PluginInitializerContext,
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
+import { initializeTemplates } from './templates';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -340,12 +341,13 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger } = this;
-
-    const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const client = core.savedObjects.createInternalRepository();
+    const savedObjectsClient = new SavedObjectsClient(client);
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     let manifestManager: ManifestManager | undefined;
 
     this.licensing$ = plugins.licensing.license$;
+    initializeTemplates(client);
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

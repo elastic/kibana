@@ -20,6 +20,7 @@
     "inspector",
     "licensing",
     "maps",
+    "presentationUtil",
     "ruleRegistry",
     "taskManager",
     "timelines",

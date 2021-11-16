@@ -32,7 +32,7 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.events}|` +
   `${HostsTableType.alerts})`;
 
-export const HostsContainer = React.memo(() => {
+export const HostsContainer = React.memo(({ plugins }) => {
   return (
     <Switch>
       <Route
@@ -48,7 +48,7 @@ export const HostsContainer = React.memo(() => {
         <MlHostConditionalContainer />
       </Route>
       <Route path={getHostsTabPath()}>
-        <Hosts />
+        <Hosts plugins={plugins} />
       </Route>
       <Route
         path={getHostDetailsTabPath()}

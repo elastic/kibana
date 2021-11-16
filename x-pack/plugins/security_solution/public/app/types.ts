@@ -19,7 +19,7 @@ import { RouteProps } from 'react-router-dom';
 import { AppMountParameters } from '../../../../../src/core/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { StartServices } from '../types';
-
+import { PluginServices } from '../../../../../src/plugins/presentation_util/public';
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
@@ -28,6 +28,7 @@ export interface RenderAppProps extends AppMountParameters {
   store: Store<State, Action>;
   subPluginRoutes: RouteProps[];
   usageCollection?: UsageCollectionSetup;
+  pluginServices: PluginServices<CanvasPluginServices>;
 }
 
 import { State, SubPluginsInitReducer } from '../common/store';
