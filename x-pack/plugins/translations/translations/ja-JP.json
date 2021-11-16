@@ -4279,7 +4279,6 @@
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName": "タイトル",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName": "型",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle": "保存されたオブジェクトの削除",
-    "savedObjectsManagement.objectsTable.export.dangerNotification": "エクスポートを生成できません",
     "savedObjectsManagement.objectsTable.export.successNotification": "ファイルはバックグラウンドでダウンロード中です",
     "savedObjectsManagement.objectsTable.export.successWithExcludedObjectsNotification": "ファイルはバックグラウンドでダウンロード中です。一部のオブジェクトはエクスポートから除外されました。除外されたオブジェクトの一覧は、エクスポートされたファイルの最後の行をご覧ください。",
     "savedObjectsManagement.objectsTable.export.successWithMissingRefsNotification": "ファイルはバックグラウンドでダウンロード中です。一部の関連オブジェクトが見つかりませんでした。足りないオブジェクトの一覧は、エクスポートされたファイルの最後の行をご覧ください。",
