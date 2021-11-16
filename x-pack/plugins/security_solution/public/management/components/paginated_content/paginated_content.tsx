@@ -34,6 +34,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
@@ -166,14 +167,16 @@ export const PaginatedContent = memo(
       (pageSize) => {
         if (pagination?.pageIndex) {
           const pageIndex = Math.floor(
-            ((pagination?.pageIndex ?? 0) * (pagination?.pageSize ?? 10)) / pageSize
+            ((pagination?.pageIndex ?? MANAGEMENT_DEFAULT_PAGE) *
+              (pagination?.pageSize ?? MANAGEMENT_DEFAULT_PAGE_SIZE)) /
+              pageSize
           );
           onChange({
             pageSize,
-            pageIndex: isNaN(pageIndex) ? 0 : pageIndex,
+            pageIndex: isNaN(pageIndex) ? MANAGEMENT_DEFAULT_PAGE : pageIndex,
           });
         } else {
-          onChange({ pageSize, pageIndex: 0 });
+          onChange({ pageSize, pageIndex: MANAGEMENT_DEFAULT_PAGE });
         }
       },
       [onChange, pagination]
@@ -181,7 +184,7 @@ export const PaginatedContent = memo(
 
     const handlePageChange: EuiTablePaginationProps['onChangePage'] = useCallback(
       (pageIndex) => {
-        onChange({ pageIndex, pageSize: pagination?.pageSize || 10 });
+        onChange({ pageIndex, pageSize: pagination?.pageSize || MANAGEMENT_DEFAULT_PAGE_SIZE });
       },
       [onChange, pagination?.pageSize]
     );
