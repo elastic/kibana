@@ -13,6 +13,7 @@ import {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
 import { HttpStart } from 'kibana/public';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST } from './constants';
@@ -68,16 +69,14 @@ export async function getHostIsolationExceptionItems({
   return entries;
 }
 
-export async function createHostIsolationExceptionItem({
-  http,
-  exception,
-}: {
-  http: HttpStart;
-  exception: CreateExceptionListItemSchema;
-}): Promise<ExceptionListItemSchema> {
+export async function createHostIsolationExceptionItem(
+  http: HttpStart,
+  exception: CreateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> {
   await ensureHostIsolationExceptionsListExists(http);
+  const entry = transformNewItemOutput(exception);
   return http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-    body: JSON.stringify(exception),
+    body: JSON.stringify(entry),
   });
 }
 
@@ -109,8 +108,25 @@ export async function updateOneHostIsolationExceptionItem(
   exception: UpdateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> {
   await ensureHostIsolationExceptionsListExists(http);
+  const entry = transformOutput(exception);
+
+  // Clean unnecessary fields for update action
+  const fieldsToRemove: Array<keyof ExceptionListItemSchema> = [
+    'created_at',
+    'created_by',
+    'created_at',
+    'created_by',
+    'list_id',
+    'tie_breaker_id',
+    'updated_at',
+    'updated_by',
+  ];
+
+  fieldsToRemove.forEach((field) => {
+    delete entry[field as keyof UpdateExceptionListItemSchema];
+  });
   return http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-    body: JSON.stringify(exception),
+    body: JSON.stringify(entry),
   });
 }
 export async function getHostIsolationExceptionSummary(
