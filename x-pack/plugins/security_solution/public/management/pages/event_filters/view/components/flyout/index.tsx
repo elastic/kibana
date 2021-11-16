@@ -154,6 +154,11 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update"
               defaultMessage="Update event filter"
             />
+          ) : data ? (
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update.withData"
+              defaultMessage="Update endpoint event filter"
+            />
           ) : (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.create"
@@ -162,7 +167,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           )}
         </EuiButton>
       ),
-      [formHasError, creationInProgress, id, dispatch]
+      [formHasError, creationInProgress, id, data, dispatch]
     );
 
     return (
@@ -178,7 +183,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
               ) : data ? (
                 <FormattedMessage
                   id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title.create.withData"
-                  defaultMessage="Add Endpoint event filter"
+                  defaultMessage="Add endpoint event filter"
                 />
               ) : (
                 <FormattedMessage
