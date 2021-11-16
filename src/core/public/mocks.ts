@@ -169,5 +169,5 @@ export const coreMock = {
   createStart: createCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
   createStorage: createStorageMock,
-  createAppMountParamters: createAppMountParametersMock,
+  createAppMountParameters: createAppMountParametersMock,
 };

@@ -43,8 +43,13 @@ import {
   SavedSearchURLConflictCallout,
   useSavedSearchAliasMatchRedirect,
 } from '../../../../services/saved_searches';
-import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
+import { FieldStatisticsTable } from '../../../components/field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import {
+  DOCUMENTS_VIEW_CLICK,
+  FIELD_STATISTICS_VIEW_CLICK,
+} from '../../../components/field_stats_table/constants';
+import { DataViewType } from '../../../../../../data_views/common';
 
 /**
  * Local storage key for sidebar persistence state
@@ -54,7 +59,7 @@ export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
-const DataVisualizerGridMemoized = React.memo(DiscoverDataVisualizerGrid);
+const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
 export function DiscoverLayout({
   indexPattern,
@@ -95,8 +100,16 @@ export function DiscoverLayout({
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
       stateContainer.setAppState({ viewMode: mode });
+
+      if (trackUiMetric) {
+        if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
+          trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
+        } else {
+          trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
+        }
+      }
     },
-    [stateContainer]
+    [trackUiMetric, stateContainer]
   );
 
   const fetchCounter = useRef<number>(0);
@@ -110,8 +123,12 @@ export function DiscoverLayout({
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
-  const timeField = useMemo(() => {
-    return indexPattern.type !== 'rollup' ? indexPattern.timeFieldName : undefined;
+  // We treat rollup v1 data views as non time based in Discover, since we query them
+  // in a non time based way using the regular _search API, since the internal
+  // representation of those documents does not have the time field that _field_caps
+  // reports us.
+  const isTimeBased = useMemo(() => {
+    return indexPattern.type !== DataViewType.ROLLUP && indexPattern.isTimeBased();
   }, [indexPattern]);
 
   const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
@@ -264,7 +281,7 @@ export function DiscoverLayout({
             >
               {resultState === 'none' && (
                 <DiscoverNoResults
-                  timeFieldName={timeField}
+                  isTimeBased={isTimeBased}
                   data={data}
                   error={dataState.error}
                   hasQuery={!!state.query?.query}
@@ -295,7 +312,7 @@ export function DiscoverLayout({
                       savedSearchDataTotalHits$={totalHits$}
                       services={services}
                       stateContainer={stateContainer}
-                      timefield={timeField}
+                      isTimeBased={isTimeBased}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                     />
@@ -315,7 +332,7 @@ export function DiscoverLayout({
                       stateContainer={stateContainer}
                     />
                   ) : (
-                    <DataVisualizerGridMemoized
+                    <FieldStatisticsTableMemoized
                       savedSearch={savedSearch}
                       services={services}
                       indexPattern={indexPattern}
@@ -324,6 +341,8 @@ export function DiscoverLayout({
                       columns={columns}
                       stateContainer={stateContainer}
                       onAddFilter={onAddFilter}
+                      trackUiMetric={trackUiMetric}
+                      savedSearchRefetch$={savedSearchRefetch$}
                     />
                   )}
                 </EuiFlexGroup>

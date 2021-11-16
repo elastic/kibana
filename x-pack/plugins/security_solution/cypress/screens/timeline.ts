@@ -20,8 +20,8 @@ export const ATTACH_TIMELINE_TO_EXISTING_CASE_ICON =
 
 export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
-export const CASE = (id: string) => {
-  return `[data-test-subj="cases-table-row-${id}"]`;
+export const SELECT_CASE = (id: string) => {
+  return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
 export const CELL = '[data-test-subj="statefulCell"]';
@@ -149,6 +149,8 @@ export const TIMELINE_ADD_FIELD_BUTTON = '[data-test-subj="addField"]';
 
 export const TIMELINE_DATA_PROVIDER_FIELD = '[data-test-subj="field"]';
 
+export const TIMELINE_DATA_PROVIDER_FIELD_INPUT = '[data-test-subj="comboBoxSearchInput"]';
+
 export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
 
 export const TIMELINE_DATA_PROVIDER_VALUE = `[data-test-subj="value"]`;
@@ -244,6 +246,12 @@ export const TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON = `${TIMELINE_ROW_RENDERE
 export const TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX = `${TIMELINE_ROW_RENDERERS_MODAL} .euiCheckbox__input`;
 
 export const TIMELINE_ROW_RENDERERS_SEARCHBOX = `${TIMELINE_ROW_RENDERERS_MODAL} input[type="search"]`;
+
+export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE = `${TIMELINE_ROW_RENDERERS_MODAL} [data-test-subj="render-content-suricata.eve.alert.signature"]`;
+
+export const TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP = `[data-test-subj="externalLinkTooltip"]`;
+
+export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP = `[data-test-subj="suricata.eve.alert.signature-tooltip"]`;
 
 export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-renderers-gear"]';
 
