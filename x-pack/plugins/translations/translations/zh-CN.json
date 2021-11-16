@@ -4123,8 +4123,6 @@
     "inspector.requests.statisticsTabLabel": "统计信息",
     "inspector.title": "检查器",
     "inspector.view": "视图：{viewName}",
-    "kibana_legacy.notify.toaster.errorStatusMessage": "错误 {errStatus} {errStatusText}：{errMessage}",
-    "kibana_legacy.notify.toaster.unavailableServerErrorMessage": "HTTP 请求无法连接。请检查 Kibana 服务器是否正在运行以及您的浏览器是否具有有效的连接，或请联系您的系统管理员。",
     "kibana_utils.history.savedObjectIsMissingNotificationMessage": "已保存对象缺失",
     "kibana_utils.stateManagement.stateHash.unableToRestoreUrlErrorMessage": "无法完全还原 URL，请确保使用共享功能。",
     "kibana_utils.stateManagement.stateHash.unableToStoreHistoryInSessionErrorMessage": "Kibana 无法将历史记录项存储在您的会话中，因为其已满，另外，似乎没有任何可安全删除的项目。\n\n通常，这可以通过移到全新的选项卡来解决，但这种情况可能是由更大的问题造成。如果您定期看到这个消息，请在 {gitHubIssuesUrl} 报告问题。",

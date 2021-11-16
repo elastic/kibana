@@ -10,7 +10,7 @@ import { includes } from 'lodash';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Legacy } from '../legacy_shims';
-import { formatMsg } from '../../../../../src/plugins/kibana_legacy/public';
+import { formatMsg } from '../lib/notify';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 export function formatMonitoringError(err: any) {

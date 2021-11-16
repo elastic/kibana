@@ -1,9 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -36,14 +35,14 @@ export function formatMsg(err: Record<string, any> | string, source: string = ''
     // is an Angular $http "error object"
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
-      message += i18n.translate('kibana_legacy.notify.toaster.unavailableServerErrorMessage', {
+      message += i18n.translate('xpack.canvas.notify.toaster.unavailableServerErrorMessage', {
         defaultMessage:
           'An HTTP request has failed to connect. ' +
           'Please check if the Kibana server is running and that your browser has a working connection, ' +
           'or contact your system administrator.',
       });
     } else {
-      message += i18n.translate('kibana_legacy.notify.toaster.errorStatusMessage', {
+      message += i18n.translate('xpack.canvas.notify.toaster.errorStatusMessage', {
         defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',
         values: {
           errStatus: err.status,

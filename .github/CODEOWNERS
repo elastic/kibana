@@ -25,7 +25,6 @@
 /src/plugins/advanced_settings/ @elastic/kibana-vis-editors
 /src/plugins/charts/ @elastic/kibana-vis-editors
 /src/plugins/management/ @elastic/kibana-vis-editors
-/src/plugins/kibana_legacy/ @elastic/kibana-vis-editors
 /src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/table/ @elastic/kibana-vis-editors
