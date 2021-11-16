@@ -23,7 +23,6 @@ import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public'
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
@@ -165,7 +164,6 @@ export interface DiscoverSetupPlugins {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
-  kibanaLegacy: KibanaLegacySetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
@@ -182,7 +180,6 @@ export interface DiscoverStartPlugins {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   savedObjects: SavedObjectsStart;
