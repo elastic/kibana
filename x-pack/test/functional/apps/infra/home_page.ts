@@ -105,7 +105,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clearSearchTerm();
       });
 
-      it('change color palette', async () => {
+      // Tracked in https://github.com/elastic/kibana/issues/118481
+      it.skip('change color palette', async () => {
         await pageObjects.infraHome.openLegendControls();
         await pageObjects.infraHome.changePalette('temperature');
         await pageObjects.infraHome.applyLegendControls();
