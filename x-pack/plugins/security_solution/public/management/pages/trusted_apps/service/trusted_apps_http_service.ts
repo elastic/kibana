@@ -31,7 +31,6 @@ import {
   TRUSTED_APPS_GET_API,
   TRUSTED_APPS_LIST_API,
   TRUSTED_APPS_SUMMARY_API,
-  TRUSTED_APPS_UPDATE_API,
 } from '../../../../../common/endpoint/constants';
 import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 import { isGlobalEffectScope } from '../state/type_guards';
@@ -40,7 +39,11 @@ import {
   validateTrustedAppHttpPostBody,
   validateTrustedAppHttpPutBody,
 } from './validate_trusted_app_http_body';
-import { exceptionListItemToTrustedApp, newTrustedAppToCreateExceptionListItem } from './mappers';
+import {
+  exceptionListItemToTrustedApp,
+  newTrustedAppToCreateExceptionListItem,
+  updatedTrustedAppToUpdateExceptionListItem,
+} from './mappers';
 
 export interface TrustedAppsService {
   getTrustedApp(params: GetOneTrustedAppRequestParams): Promise<GetOneTrustedAppResponse>;
@@ -81,6 +84,15 @@ const P_MAP_OPTIONS = Object.freeze<pMap.Options>({
 export class TrustedAppsHttpService implements TrustedAppsService {
   constructor(private http: HttpStart) {}
 
+  private async getExceptionListItem(itemId: string): Promise<ExceptionListItemSchema> {
+    return this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      query: {
+        item_id: itemId,
+        namespace_type: 'agnostic',
+      },
+    });
+  }
+
   async getTrustedApp(params: GetOneTrustedAppRequestParams) {
     return this.http.get<GetOneTrustedAppResponse>(
       resolvePathVariables(TRUSTED_APPS_GET_API, params)
@@ -116,12 +128,23 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     params: PutTrustedAppsRequestParams,
     updatedTrustedApp: PutTrustedAppUpdateRequest
   ) {
-    await validateTrustedAppHttpPutBody(updatedTrustedApp);
+    const [currentExceptionListItem] = await Promise.all([
+      await this.getExceptionListItem(params.id),
+      await validateTrustedAppHttpPutBody(updatedTrustedApp),
+    ]);
 
-    return this.http.put<PutTrustedAppUpdateResponse>(
-      resolvePathVariables(TRUSTED_APPS_UPDATE_API, params),
-      { body: JSON.stringify(updatedTrustedApp) }
+    const updatedExceptionListItem = await this.http.put<ExceptionListItemSchema>(
+      EXCEPTION_LIST_ITEM_URL,
+      {
+        body: JSON.stringify(
+          updatedTrustedAppToUpdateExceptionListItem(currentExceptionListItem, updatedTrustedApp)
+        ),
+      }
     );
+
+    return {
+      data: exceptionListItemToTrustedApp(updatedExceptionListItem),
+    };
   }
 
   async getTrustedAppsSummary(request: GetTrustedAppsSummaryRequest) {
