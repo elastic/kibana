@@ -54,7 +54,6 @@ import { getRenderCellValue } from './render_cell_value';
 import { observabilityFeatureId } from '../../../common';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -67,7 +66,6 @@ interface AlertsTableTGridProps {
   kuery: string;
   workflowStatus: AlertWorkflowStatus;
   setRefetch: (ref: () => void) => void;
-  addToQuery: (value: string) => void;
 }
 
 interface ObservabilityActionsProps extends ActionProps {
@@ -314,7 +312,7 @@ function ObservabilityActions({
 }
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
+  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch } = props;
   const prevWorkflowStatus = usePrevious(workflowStatus);
   const {
     timelines,
@@ -381,7 +379,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       type,
       columns,
       deletedEventIds,
-      defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
       hasAlertsCrudPermissions,
@@ -413,7 +410,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    addToQuery,
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
