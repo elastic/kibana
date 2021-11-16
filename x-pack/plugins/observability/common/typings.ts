@@ -25,3 +25,13 @@ export interface ApmIndicesConfig {
   apmAgentConfigurationIndex: string;
   apmCustomLinkIndex: string;
 }
+export enum AlertStatus {
+  All = 'all',
+  Active = 'active',
+  Recovered = 'recovered',
+}
+export interface AlertStatusFilter {
+  status: AlertStatus;
+  query: string;
+  label: string;
+}
