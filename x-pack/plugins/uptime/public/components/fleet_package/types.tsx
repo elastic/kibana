@@ -101,6 +101,7 @@ export enum ConfigKeys {
   SCHEDULE = 'schedule',
   SCREENSHOTS = 'screenshots',
   SOURCE_INLINE = 'source.inline.script',
+  SCRIPT_ACTIONS = 'source.inline.scriptActions',
   SOURCE_ZIP_URL = 'source.zip_url.url',
   SOURCE_ZIP_USERNAME = 'source.zip_url.username',
   SOURCE_ZIP_PASSWORD = 'source.zip_url.password',

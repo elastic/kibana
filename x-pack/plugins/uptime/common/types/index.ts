@@ -43,4 +43,5 @@ export type MonitorSavedObject = SimpleSavedObject<{
       script: string;
     };
   };
+  'source.inline.scriptActions': [];
 }>;

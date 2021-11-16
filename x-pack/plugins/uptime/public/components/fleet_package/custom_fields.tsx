@@ -52,7 +52,7 @@ const dataStreamToString = [
   },
 ];
 
-export const CustomFields = memo<Props>(({ validate, dataStreams = [], children }) => {
+export const CustomFields = memo<Props>(({ monitor, validate, dataStreams = [], children }) => {
   const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
     usePolicyConfigContext();
 
@@ -73,7 +73,7 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
       case DataStream.TCP:
         return <TCPSimpleFields validate={validate} />;
       case DataStream.BROWSER:
-        return <BrowserSimpleFields validate={validate} />;
+        return <BrowserSimpleFields validate={validate} monitor={monitor} />;
       default:
         return null;
     }

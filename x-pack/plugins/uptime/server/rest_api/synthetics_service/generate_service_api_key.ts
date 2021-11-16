@@ -42,7 +42,7 @@ export const generateAPIKey = async ({
           cluster: ['monitor', 'read_ilm', 'read_pipeline'],
           index: [
             {
-              names: ['synthetics-*'],
+              names: ['synthetics-*', 'heartbeat-*'],
               privileges: ['view_index_metadata', 'create_doc'],
             },
           ],

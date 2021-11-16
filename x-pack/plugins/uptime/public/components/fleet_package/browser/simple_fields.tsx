@@ -13,12 +13,14 @@ import { useBrowserSimpleFieldsContext } from '../contexts';
 import { ScheduleField } from '../schedule_field';
 import { SourceField } from './source_field';
 import { CommonFields } from '../common/common_fields';
+import { MonitorSavedObject } from '../../../../common/types';
 
 interface Props {
   validate: Validation;
+  monitor: MonitorSavedObject;
 }
 
-export const BrowserSimpleFields = memo<Props>(({ validate }) => {
+export const BrowserSimpleFields = memo<Props>(({ validate, monitor }) => {
   const { fields, setFields, defaultValues } = useBrowserSimpleFieldsContext();
   const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
     setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
@@ -34,6 +36,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
       proxyUrl,
       isGeneratedScript,
       fileName,
+      scriptActions,
     }) => {
       setFields((prevFields) => ({
         ...prevFields,
@@ -43,6 +46,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
         [ConfigKeys.SOURCE_ZIP_USERNAME]: username,
         [ConfigKeys.SOURCE_ZIP_PASSWORD]: password,
         [ConfigKeys.SOURCE_INLINE]: inlineScript,
+        [ConfigKeys.SCRIPT_ACTIONS]: scriptActions,
         [ConfigKeys.PARAMS]: params,
         [ConfigKeys.METADATA]: {
           ...prevFields[ConfigKeys.METADATA],
@@ -103,7 +107,12 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
               folder: defaultValues[ConfigKeys.SOURCE_ZIP_FOLDER],
               username: defaultValues[ConfigKeys.SOURCE_ZIP_USERNAME],
               password: defaultValues[ConfigKeys.SOURCE_ZIP_PASSWORD],
-              inlineScript: defaultValues[ConfigKeys.SOURCE_INLINE],
+              inlineScript:
+                monitor?.attributes.source?.inline.script ||
+                defaultValues[ConfigKeys.SOURCE_INLINE],
+              scriptActions:
+                monitor?.attributes['source.inline.scriptActions'] ||
+                defaultValues[ConfigKeys.SCRIPT_ACTIONS],
               params: defaultValues[ConfigKeys.PARAMS],
               isGeneratedScript:
                 defaultValues[ConfigKeys.METADATA].script_source?.is_generated_script,

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiModalHeaderTitle,
   EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { apiService } from '../../../../state/api/utils';
 import { API_URLS } from '../../../../../common/constants';
@@ -25,8 +25,8 @@ import { MonitorSavedObject } from '../../../../../common/types';
 import { TestRunResult } from './TestRunResult';
 import { MonitorConfigFlyoutBody } from './monitor_config_flyout_body';
 
-import { PolicyConfig } from '../../../fleet_package/types';
-import { usePolicyConfigContext, defaultConfig } from '../../../fleet_package/contexts';
+import { DataStream, PolicyConfig } from '../../../fleet_package/types';
+import { defaultConfig, usePolicyConfigContext } from '../../../fleet_package/contexts';
 
 import { usePolicy } from '../../../fleet_package/hooks/use_policy';
 import { validate } from '../../../fleet_package/validation';
@@ -40,19 +40,30 @@ interface Props {
   isEditFlow?: boolean;
   setIsFlyoutVisible: (val: boolean) => void;
 }
+const getBrowserMonitor = (monitor: MonitorSavedObject, policy: PolicyConfig) => {
+  if (!monitor) {
+    return policy;
+  }
+  policy[DataStream.BROWSER]['source.inline.script'] = monitor.attributes.source?.inline.script;
+  policy[DataStream.BROWSER]['source.inline.scriptActions'] =
+    monitor.attributes['source.inline.scriptActions'];
 
-export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: Props) => {
+  return policy;
+};
+
+export const MonitorConfigFlyout = ({ setIsFlyoutVisible, monitor, isEditFlow = false }: Props) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isTestRunning, setTestRunning] = useState(false);
   const [testMonitor, setTestMonitor] = useState<MonitorSavedObject>();
   const { monitorType } = usePolicyConfigContext();
-  const [name, setName] = useState('');
+  const [name, setName] = useState(monitor?.attributes.name ?? '');
   const policyConfig: PolicyConfig = usePolicy(name);
   const [locations, setLocations] = useState<string[]>([]);
   const { updatedMonitor, isValid } = useUpdateMonitor({
     monitorType,
     validate,
-    config: { ...policyConfig[monitorType], name },
+    // config: { ...policyConfig[monitorType], name },
+    config: { ...getBrowserMonitor(monitor, policyConfig)[monitorType], name },
     defaultConfig: defaultConfig[monitorType],
   });
 
@@ -108,6 +119,7 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: 
           setLocations={setLocations}
           setName={setName}
           name={name}
+          monitor={monitor}
         />
         <EuiHorizontalRule margin="xs" style={{ height: 2 }} />
       </EuiFlyoutBody>
@@ -128,7 +140,7 @@ export const MonitorConfigFlyout = ({ setIsFlyoutVisible, isEditFlow = false }: 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={saveMonitor} fill isLoading={isSaving}>
-              Save
+              {monitor ? 'Update' : 'Save'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

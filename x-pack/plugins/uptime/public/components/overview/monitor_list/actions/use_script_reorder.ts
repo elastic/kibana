@@ -15,25 +15,19 @@ export const useScriptReorder = ({ stopPolling }: Props) => {
   const [refresh, setRefresh] = useState(Date.now());
 
   useEffect(() => {
-    let tickTick;
-    if (!stopPolling) {
-      tickTick = setInterval(() => {
-        setRefresh(Date.now());
-      }, 10 * 1000);
-    } else {
-      if (tickTick) clearInterval(tickTick);
-    }
+    const tickTick = setInterval(() => {
+      setRefresh(Date.now());
+    }, 5 * 1000);
 
     return () => {
       if (tickTick) clearInterval(tickTick);
     };
-  }, [stopPolling]);
+  }, []);
 
   const { data } = useFetcher(async () => {
     const res = await fetch('http://localhost:8230/');
-    return res.text();
+    return res.json();
   }, [refresh]);
-  console.log(data);
 
-  return data;
+  return data?.code;
 };

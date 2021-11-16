@@ -27,6 +27,7 @@ export const MonitorConfigFlyoutBody = ({
   setLocations,
   setName,
   name,
+  monitor,
 }: Props) => {
   const { monitorType } = usePolicyConfigContext();
   const { locations: serviceLocations } = useServiceLocations();
@@ -50,6 +51,7 @@ export const MonitorConfigFlyoutBody = ({
       <CustomFields
         validate={validate[monitorType]}
         dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER]}
+        monitor={monitor}
       >
         <EuiFormRow label="Monitor name" fullWidth={true}>
           <EuiFieldText

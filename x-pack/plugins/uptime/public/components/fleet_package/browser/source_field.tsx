@@ -18,12 +18,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextArea,
+  EuiText,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ZipUrlTLSFields } from './zip_url_tls_fields';
 import { MonacoEditorLangId } from '../types';
+import { useScriptReorder } from '../../overview/monitor_list/actions/use_script_reorder';
+import { useFetcher } from '../../../../../observability/public';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
@@ -38,6 +43,7 @@ interface SourceConfig {
   username: string;
   password: string;
   inlineScript: string;
+  scriptActions: string;
   params: string;
   isGeneratedScript?: boolean;
   fileName?: string;
@@ -74,9 +80,36 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
   const [sourceType, setSourceType] = useState<SourceType>(getDefaultTab(defaultConfig));
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
 
+  const [refresh, setRefresh] = useState(Date.now());
+
+  useEffect(() => {
+    const tickTick = setInterval(() => {
+      setRefresh(Date.now());
+    }, 5 * 1000);
+
+    return () => {
+      if (tickTick) clearInterval(tickTick);
+    };
+  }, []);
+
+  const { data } = useFetcher(async () => {
+    const res = await fetch('http://localhost:8230/');
+    return res.json();
+  }, [refresh]);
+
   useEffect(() => {
     onChange(config);
   }, [config, onChange]);
+
+  useEffect(() => {
+    if (data?.code) {
+      setConfig((prevConfig) => ({
+        ...prevConfig,
+        inlineScript: data.code,
+        scriptActions: data?.actions,
+      }));
+    }
+  }, [data]);
 
   const zipUrlLabel = (
     <FormattedMessage
@@ -253,6 +286,18 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
         <EuiFormRow
+          labelAppend={
+            <EuiText size="xs">
+              <EuiIcon type="playFilled" />
+              <EuiLink
+                href={`ElasticSyntheticsRecorder://data=${window.btoa(
+                  JSON.stringify(config.scriptActions || defaultConfig?.scriptActions)
+                )}`}
+              >
+                Open Script recorder
+              </EuiLink>
+            </EuiText>
+          }
           fullWidth={true}
           isInvalid={!config.inlineScript}
           error={
@@ -280,16 +325,6 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             onChange={(code) => setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }))}
             value={config.inlineScript}
           />
-          {/* <EuiTextArea*/}
-          {/*  fullWidth={true}*/}
-          {/*  value={*/}
-          {/*    config.inlineScript ||*/}
-          {/*    "step(\"load homepage\", async () => { await page.goto('https://www.elastic.co', { waitUntil: 'networkidle', timeout: 120000 }); });"*/}
-          {/*  }*/}
-          {/*  onChange={(evt) =>*/}
-          {/*    setConfig((prevConfig) => ({ ...prevConfig, inlineScript: evt.target.value }))*/}
-          {/*  }*/}
-          {/* />*/}
         </EuiFormRow>
       ),
     },
