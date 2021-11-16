@@ -7,17 +7,27 @@
  */
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Fields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import fc from 'fast-check';
 import { of } from 'rxjs';
+
+import { IndexPattern } from 'src/plugins/data/public';
+import { createStubDataView } from '../../../../data_views/common/mocks';
+import { IAggConfigs } from '../aggs';
+import { Query } from '../..';
+import { IndexPatternsContract } from '../..';
 import type { SearchSourceDependencies } from './search_source';
 import { SearchSource } from './search_source';
 import {
+  EsQuerySearchAfter,
   EsQuerySortValue,
+  SearchFieldValue,
   SearchSourceFields,
   SortDirection,
   SortDirectionFormat,
   SortDirectionNumeric,
 } from './types';
+import { createSearchSource } from './create_search_source';
 
 fc.configureGlobal({
   numRuns: 1000,
@@ -25,7 +35,7 @@ fc.configureGlobal({
 
 const option = <T>(arb: fc.Arbitrary<T>) => fc.option(arb, { nil: undefined });
 
-function arbitraryQuery() {
+function arbitraryQuery(): fc.Arbitrary<Query> {
   return fc.record({ query: fc.oneof(fc.string(), fc.object()), language: fc.string() });
 }
 
@@ -54,6 +64,25 @@ function arbitraryFilter(): fc.Arbitrary<Filter> {
     }),
     query: option(fc.object()),
   });
+}
+
+function arbitraryDataView(): fc.Arbitrary<IndexPattern> {
+  return fc.record({
+    id: fc.string({ minLength: 1 }),
+    title: fc.string(),
+    fieldFormatMap: fc.object(),
+    allowNoIndex: fc.boolean(),
+  }) as unknown as fc.Arbitrary<IndexPattern>;
+}
+
+function arbitraryAggConfigs(): fc.Arbitrary<IAggConfigs> {
+  return fc.record({
+    id: fc.string(),
+    enabled: fc.boolean(),
+    params: fc.anything(),
+    brandNew: option(fc.boolean()),
+    indexPattern: arbitraryDataView(),
+  }) as unknown as fc.Arbitrary<IAggConfigs>;
 }
 
 const sortDirectionsData: Array<fc.Arbitrary<SortDirection>> = [
@@ -90,7 +119,63 @@ function arbitraryDirectionFormat(): fc.Arbitrary<SortDirectionFormat> {
   });
 }
 
+function arbitraryFields(): fc.Arbitrary<Fields> {
+  return fc.oneof(fc.string(), fc.array(fc.string()));
+}
+
+const arbitrarySearchField = fc.memo((n) => {
+  return fc.object({ values: [arbitrarySearchFieldValue(n)] });
+});
+
+const arbitrarySearchFieldValue: fc.Memo<SearchFieldValue> = fc.memo((n) =>
+  n > 1
+    ? (fc.object({ values: [arbitrarySearchField()] }) as fc.Arbitrary<SearchFieldValue>)
+    : fc.string()
+);
+
+function artbitraryEsQuerySearchAfter(): fc.Arbitrary<EsQuerySearchAfter> {
+  return fc.array(fc.oneof(fc.string(), fc.nat()), {
+    maxLength: 2,
+  }) as fc.Arbitrary<EsQuerySearchAfter>;
+}
+
+const arbitrarySearchSourceFields: fc.Memo<SearchSourceFields> = fc.memo((n) => {
+  return fc.record<SearchSourceFields>({
+    type: option(fc.string()),
+    query: option(arbitraryQuery()),
+    filter: option(
+      fc.oneof(
+        fc.array(arbitraryFilter()),
+        arbitraryFilter(),
+        fc.func(fc.oneof(arbitraryFilter(), fc.array(arbitraryFilter())))
+      )
+    ),
+    sort: option(fc.oneof(arbitraryQuerySortValue(), fc.array(arbitraryQuerySortValue()))),
+    highlight: option(fc.anything()),
+    highlightAll: option(fc.boolean()),
+    trackTotalHits: option(fc.oneof(fc.boolean(), fc.nat())),
+    aggs: option(fc.oneof(fc.object(), fc.func(fc.object()), arbitraryAggConfigs())),
+    from: option(fc.nat()),
+    size: option(fc.nat()),
+    source: option(fc.oneof(fc.boolean(), arbitraryFields())),
+    version: option(fc.boolean()),
+    fields: option(fc.array(arbitrarySearchFieldValue(2))),
+    fieldsFromSource: option(arbitraryFields()),
+    index: option(arbitraryDataView()),
+    searchAfter: option(artbitraryEsQuerySearchAfter()),
+    timeout: option(fc.string()),
+    terminate_after: option(fc.nat()),
+    parent: n > 1 ? arbitrarySearchSourceFields(n) : fc.constant(undefined),
+  });
+});
+
 describe('Search source properties', () => {
+  /**
+   * NOTES
+   *
+   * * It is kind of weird that {@link SearchSourceFields} accepts non-serializable values
+   *   considering that the intention of the source fields is to be passed over the wire...
+   */
   const getConfigMock = jest
     .fn()
     .mockImplementation((param) => param === 'metaFields' && ['_type', '_source', '_id'])
@@ -111,73 +196,50 @@ describe('Search source properties', () => {
     onResponse: (req, res) => res,
   };
 
-  it('should serialize, deserialize and then serialize to the same source fields with some exceptions', () => {
-    fc.assert(
-      fc.property(
-        option(fc.string()), // type
-        option(arbitraryQuery()), // query
-        option(
-          fc.oneof(
-            fc.array(arbitraryFilter()),
-            arbitraryFilter(),
-            fc.func(fc.oneof(arbitraryFilter(), fc.array(arbitraryFilter())))
-          )
-        ), // filter: ;
-        option(fc.oneof(arbitraryQuerySortValue(), fc.array(arbitraryQuerySortValue()))), // sort
-        option(fc.anything()), // highlight
-        option(fc.boolean()), // highlightAll
-        option(fc.oneof(fc.boolean(), fc.nat())), // trackTotalHits
-        option(fc.oneof(fc.object(), fc.func(fc.object()))), // aggs
-        option(fc.nat()), // from
-        option(fc.nat()), // size
-        option(fc.oneof(fc.boolean(), fc.string(), fc.array(fc.string()))), // source
-        option(fc.boolean()), // version
-        (
-          type,
-          query,
-          filter,
-          sort,
-          highlight,
-          highlightAll,
-          trackTotalHits,
-          aggs,
-          from,
-          size,
-          source,
-          version
-        ) => {
-          const searchSourceFields: SearchSourceFields = {
-            type,
-            query,
-            filter,
-            sort,
-            highlight,
-            highlightAll,
-            trackTotalHits,
-            aggs,
-            from,
-            size,
-            source,
-            version,
-          };
+  const stripSize = (fields: SearchSourceFields): SearchSourceFields => {
+    let current: SearchSourceFields = { ...fields };
+    while (true) {
+      delete current.size;
+      if (!current.parent) break;
+      else {
+        current.parent = { ...current.parent };
+        current = current.parent;
+      }
+    }
+    return current;
+  };
 
-          const {
-            size: omit, // we exclude size from the serialization (why?)
-            ...searchSourceFieldsSubset
-          } = searchSourceFields;
+  const prepResult = (searchSourceFields: SearchSourceFields) => {
+    const { filter } = searchSourceFields;
 
-          const filterFinal = typeof filter === 'function' ? filter() : filter;
+    // We exclude size from serialized result (why?)
+    const searchSourceFieldsWithNoSize = stripSize(searchSourceFields);
 
+    const filterFinal = typeof filter === 'function' ? filter() : filter;
+
+    return {
+      ...searchSourceFieldsWithNoSize,
+      // Always return an array of the filter if there were 1 or more
+      filter: filterFinal ? (Array.isArray(filterFinal) ? filterFinal : [filterFinal]) : undefined,
+    };
+  };
+
+  it('should recursively serialize, deserialize to the same source fields with some exceptions', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        arbitrarySearchSourceFields(1 /* max number of parent search sources */),
+        async (searchSourceFields) => {
           const searchSource = new SearchSource(searchSourceFields, searchSourceDependencies);
-          expect({
-            ...searchSourceFieldsSubset,
-            // Always return an array of the filter if there were 1 or more
-            filter: filterFinal
-              ? Array.isArray(filterFinal)
-                ? filterFinal
-                : [filterFinal]
-              : undefined,
-          }).toEqual(searchSource.getSerializedFields(true));
+          const indexPatterns = {
+            get: jest.fn().mockResolvedValue(searchSourceFields.index),
+          } as unknown as IndexPatternsContract;
+
+          const create = createSearchSource(indexPatterns, searchSourceDependencies);
+          const serializedFields = searchSource.getSerializedFields(true);
+
+          expect((await create(serializedFields)).getFields()).toEqual(
+            prepResult(searchSourceFields)
+          );
         }
       )
     );
