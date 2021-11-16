@@ -257,11 +257,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
 
     const titleText = useMemo(
-      () => (
-        <span className="eui-textBreakNormal">
-          {onlyField == null ? title : i18n.TOP(onlyField)}
-        </span>
-      ),
+      () => (onlyField == null ? title : i18n.TOP(onlyField)),
       [onlyField, title]
     );
 

@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineNonEcsData } from '../../../../../common';
-import { APP_UI_ID } from '../../../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { useInsertTimeline } from '../../../../cases/components/use_insert_timeline';
 import { Ecs } from '../../../../../common/ecs';
 
@@ -40,6 +40,7 @@ export const useAddToCaseActions = ({
             useInsertTimeline: insertTimelineHook,
             casePermissions,
             appId: APP_UI_ID,
+            owner: APP_ID,
             onClose: afterCaseSelection,
           }
         : null,

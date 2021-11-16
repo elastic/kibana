@@ -986,7 +986,7 @@ export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert =>
 };
 
 export const isRACAlert = (event: unknown): event is RACAlert => {
-  return (event as RACAlert)?.[ALERT_UUID] != null;
+  return get(event, ALERT_UUID) != null;
 };
 
 export const racFieldMappings: Record<string, string> = {

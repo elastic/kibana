@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
-import type { SynthtraceEsClient } from '../../common/synthtrace_es_client';
+import { service, SynthtraceEsClient, timerange } from '@elastic/apm-synthtrace';
 
 export const config = {
   appleTransaction: {

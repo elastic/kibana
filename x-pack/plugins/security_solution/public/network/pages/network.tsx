@@ -49,7 +49,7 @@ import {
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 /**
@@ -109,7 +109,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current

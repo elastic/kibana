@@ -157,6 +157,7 @@ export type {
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,
+  ResponseErrorBody,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
 } from './http';

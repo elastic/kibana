@@ -40,16 +40,11 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   web: 'Web',
 
   // Kibana added
-  communication: 'Communication',
-  customer_support: 'Customer Support',
-  document_storage: 'Document Storage',
-  enterprise_management: 'Enterprise Management',
-  knowledge_platform: 'Knowledge Platform',
+  communications: 'Communications',
+  file_storage: 'File storage',
   language_client: 'Language client',
-  project_management: 'Project Management',
-  software_development: 'Software Development',
   upload_file: 'Upload a file',
-  website_search: 'Website Search',
+  website_search: 'Website search',
 };
 
 /**

@@ -1369,6 +1369,17 @@ export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: strin
   return referencedIds;
 }
 
+export function hasTermsWithManyBuckets(layer: IndexPatternLayer): boolean {
+  return layer.columnOrder.some((columnId) => {
+    const column = layer.columns[columnId];
+    if (column) {
+      return (
+        column.isBucketed && column.params && 'size' in column.params && column.params.size > 5
+      );
+    }
+  });
+}
+
 export function isOperationAllowedAsReference({
   operationType,
   validation,

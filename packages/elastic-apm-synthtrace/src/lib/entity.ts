@@ -15,6 +15,14 @@ export type ApplicationMetricFields = Partial<{
   'system.process.cpu.total.norm.pct': number;
 }>;
 
+export type UserAgentFields = Partial<{
+  'user_agent.original': string;
+  'user_agent.os.name': string;
+  'user_agent.name': string;
+  'user_agent.device.name': string;
+  'user_agent.version': number;
+}>;
+
 export interface Exception {
   message: string;
 }
@@ -32,6 +40,7 @@ export type Fields = Partial<{
   'error.grouping_name': string;
   'error.grouping_key': string;
   'host.name': string;
+  'kubernetes.pod.uid': string;
   'metricset.name': string;
   'observer.version': string;
   'observer.version_major': number;

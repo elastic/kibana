@@ -21,6 +21,7 @@ import { EndpointDocGenerator } from '../../../../../../../common/endpoint/gener
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../../../fleet/common';
 
 jest.mock('../../../../trusted_apps/service');
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
@@ -43,7 +44,7 @@ describe('Policy trusted apps layout', () => {
       const [path] = args;
       if (typeof path === 'string') {
         // GET datasouce
-        if (path === '/api/fleet/package_policies/1234') {
+        if (path === `${PACKAGE_POLICY_API_ROOT}/1234`) {
           return Promise.resolve({
             item: generator.generatePolicyPackagePolicy(),
             success: true,
@@ -51,7 +52,7 @@ describe('Policy trusted apps layout', () => {
         }
 
         // GET Agent status for agent policy
-        if (path === '/api/fleet/agent-status') {
+        if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
           return Promise.resolve({
             results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
             success: true,

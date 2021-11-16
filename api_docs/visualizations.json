@@ -1811,7 +1811,7 @@
             "label": "sharingSavedObjectProps",
             "description": [],
             "signature": [
-              "{ outcome?: \"conflict\" | \"exactMatch\" | \"aliasMatch\" | undefined; aliasTargetId?: string | undefined; errorJSON?: string | undefined; } | undefined"
+              "{ outcome?: \"conflict\" | \"aliasMatch\" | \"exactMatch\" | undefined; aliasTargetId?: string | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
@@ -4013,7 +4013,7 @@
             "text": "EmbeddableInput"
           }
         ],
-        "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+        "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
         "deprecated": false,
         "children": [
           {
@@ -4026,7 +4026,7 @@
             "signature": [
               "{ colors?: { [key: string]: string; } | undefined; } | undefined"
             ],
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false
           },
           {
@@ -4054,7 +4054,7 @@
               },
               "> | undefined"
             ],
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false
           },
           {
@@ -4067,7 +4067,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false
           },
           {
@@ -4087,7 +4087,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false
           },
           {
@@ -4107,7 +4107,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false
           },
           {
@@ -4127,7 +4127,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false
           }
         ],
@@ -4634,43 +4634,7 @@
         "label": "VisualizeEmbeddableFactoryContract",
         "description": [],
         "signature": [
-          "{ inject: (_state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          ", references: ",
-          "SavedObjectReference",
-          "[]) => ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          "; extract: (_state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          ") => { state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          "; references: ",
-          "SavedObjectReference",
-          "[]; }; readonly type: \"visualization\"; create: (input: ",
+          "{ readonly type: \"visualization\"; create: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -4782,7 +4746,43 @@
             "section": "def-public.SavedObjectMetaData",
             "text": "SavedObjectMetaData"
           },
-          "<VisualizationAttributes>; getCurrentAppId: () => Promise<string | undefined>; checkTitle: (props: ",
+          "<VisualizationAttributes>; extract: (_state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          ") => { state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          "; references: ",
+          "SavedObjectReference",
+          "[]; }; inject: (_state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          ", references: ",
+          "SavedObjectReference",
+          "[]) => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          "; getCurrentAppId: () => Promise<string | undefined>; checkTitle: (props: ",
           {
             "pluginId": "savedObjects",
             "scope": "public",
@@ -4965,28 +4965,6 @@
       "path": "src/plugins/visualizations/public/plugin.ts",
       "deprecated": false,
       "children": [
-        {
-          "parentPluginId": "visualizations",
-          "id": "def-public.VisualizationsStart.savedVisualizationsLoader",
-          "type": "CompoundType",
-          "tags": [],
-          "label": "savedVisualizationsLoader",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "savedObjects",
-              "scope": "public",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-public.SavedObjectLoader",
-              "text": "SavedObjectLoader"
-            },
-            " & { findListItems: (search: string, sizeOrOptions?: number | ",
-            "FindListItemsOptions",
-            " | undefined) => any; }"
-          ],
-          "path": "src/plugins/visualizations/public/plugin.ts",
-          "deprecated": false
-        },
         {
           "parentPluginId": "visualizations",
           "id": "def-public.VisualizationsStart.createVis",

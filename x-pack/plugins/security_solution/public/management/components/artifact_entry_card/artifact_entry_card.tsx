@@ -64,7 +64,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
 
     return (
       <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
-        <CardSectionPanel>
+        <CardSectionPanel className="top-section">
           <CardHeader
             name={artifact.name}
             createdDate={artifact.created_at}
@@ -80,22 +80,26 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
             data-test-subj={getTestId('subHeader')}
           />
 
-          <EuiSpacer size="l" />
-
           {!hideDescription && (
-            <DescriptionField data-test-subj={getTestId('description')}>
-              {artifact.description}
-            </DescriptionField>
+            <>
+              <EuiSpacer size="l" />
+              <DescriptionField data-test-subj={getTestId('description')}>
+                {artifact.description}
+              </DescriptionField>
+            </>
           )}
 
           {!hideComments ? (
-            <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
+            <>
+              <EuiSpacer size="l" />
+              <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
+            </>
           ) : null}
         </CardSectionPanel>
 
         <EuiHorizontalRule margin="none" />
 
-        <CardSectionPanel>
+        <CardSectionPanel className="bottom-section">
           <CriteriaConditions
             os={artifact.os as CriteriaConditionsProps['os']}
             entries={artifact.entries}

@@ -47,6 +47,14 @@ test('should render a Welcome screen with no telemetry disclaimer', () => {
   expect(component).toMatchSnapshot();
 });
 
+test('should render a Welcome screen without the opt in/out link when user cannot change optIn status', () => {
+  const telemetry = telemetryPluginMock.createStartContract();
+  telemetry.telemetryService.getCanChangeOptInStatus = jest.fn().mockReturnValue(false);
+  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
+
+  expect(component).toMatchSnapshot();
+});
+
 test('fires opt-in seen when mounted', () => {
   const telemetry = telemetryPluginMock.createStartContract();
   const mockSetOptedInNoticeSeen = jest.fn();

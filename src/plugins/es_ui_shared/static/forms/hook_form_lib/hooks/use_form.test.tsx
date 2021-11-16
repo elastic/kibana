@@ -572,4 +572,63 @@ describe('useForm() hook', () => {
       expect(isValid).toBe(false);
     });
   });
+
+  describe('form.getErrors()', () => {
+    test('should return the errors in the form', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="field1"
+              config={{
+                validations: [
+                  {
+                    validator: emptyField('Field1 can not be empty'),
+                  },
+                ],
+              }}
+            />
+
+            <UseField
+              path="field2"
+              data-test-subj="field2"
+              config={{
+                validations: [
+                  {
+                    validator: ({ value }) => {
+                      if (value === 'bad') {
+                        return {
+                          message: 'Field2 is invalid',
+                        };
+                      }
+                    },
+                  },
+                ],
+              }}
+            />
+          </Form>
+        );
+      };
+
+      const {
+        form: { setInputValue },
+      } = registerTestBed(TestComp)() as TestBed;
+
+      let errors: string[] = formHook!.getErrors();
+      expect(errors).toEqual([]);
+
+      await act(async () => {
+        await formHook!.submit();
+      });
+      errors = formHook!.getErrors();
+      expect(errors).toEqual(['Field1 can not be empty']);
+
+      await setInputValue('field2', 'bad');
+      errors = formHook!.getErrors();
+      expect(errors).toEqual(['Field1 can not be empty', 'Field2 is invalid']);
+    });
+  });
 });
