@@ -67,7 +67,7 @@ export type HeatmapGridConfigResult = HeatmapGridConfig & {
 
 export interface HeatmapArguments {
   percentageMode?: boolean;
-  useDistinctBands?: boolean;
+  lastRangeIsRightOpen?: boolean;
   showTooltip?: boolean;
   highlightInHover?: boolean;
   palette?: PaletteOutput<CustomPaletteState>;

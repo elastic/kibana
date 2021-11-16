@@ -42,7 +42,7 @@ export const heatmapRenderer = (): ExpressionRenderDefinition<HeatmapExpressionP
 
     const timeZone = getTimeZone(getUISettings());
     render(
-      <div className="heatmap-container" data-test-subj="heatmapContainer">
+      <div className="heatmap-container" data-test-subj="heatmapChart">
         <MemoizedChart
           {...config}
           onClickValue={onClickValue}

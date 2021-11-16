@@ -64,7 +64,7 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
   const expressionArgs = {
     showTooltip: vis.params.addTooltip,
     highlightInHover: vis.params.enableHover,
-    useDistinctBands: vis.params.useDistinctBands ?? true,
+    lastRangeIsRightOpen: vis.params.lastRangeIsRightOpen ?? false,
     percentageMode: vis.params.percentageMode,
     legend: prepareLegend(vis.params),
     gridConfig: prepareGrid(vis.params),

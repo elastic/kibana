@@ -12,6 +12,9 @@ Object {
     "highlightInHover": Array [
       false,
     ],
+    "lastRangeIsRightOpen": Array [
+      false,
+    ],
     "legend": Array [
       Object {
         "toAst": [Function],
@@ -26,9 +29,6 @@ Object {
       false,
     ],
     "showTooltip": Array [
-      true,
-    ],
-    "useDistinctBands": Array [
       true,
     ],
     "valueAccessor": Array [

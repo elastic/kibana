@@ -270,15 +270,18 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
     minMaxByColumnId[valueAccessor!]
   );
 
+  // adds a very small number to the max value to make sure the max value will be included
   const endValue =
     paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max + 0.00000001;
   const overwriteColors = uiState?.get('vis.colors', {}) ?? {};
 
   const bands = ranges.map((start, index, array) => {
-    // with the default continuity:above the last range is right-open
+    // by default the last range is right-open
     let end = index === array.length - 1 ? Infinity : array[index + 1];
-    if (args.useDistinctBands) {
-      end = array[index + 1] ?? endValue;
+    // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
+    if (args.lastRangeIsRightOpen === false) {
+      const lastBand = max === start ? Infinity : endValue;
+      end = index === array.length - 1 ? lastBand : array[index + 1];
     }
     const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
     const overwriteColor = overwriteColors[overwriteArrayIdx];

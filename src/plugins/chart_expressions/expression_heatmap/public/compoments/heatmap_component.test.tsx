@@ -150,7 +150,7 @@ describe('PieComponent', function () {
   it('computes the bands correctly for distinct bounds', async () => {
     const newProps = {
       ...wrapperProps,
-      args: { ...wrapperProps.args, useDistinctBands: true },
+      args: { ...wrapperProps.args, lastRangeIsRightOpen: false },
     } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
     await act(async () => {

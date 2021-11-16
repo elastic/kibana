@@ -81,6 +81,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       }),
       default: true,
     },
+    // not supported yet
     highlightInHover: {
       types: ['boolean'],
       help: i18n.translate('expressionHeatmap.function.args.highlightInHoverHelpText', {
@@ -88,17 +89,17 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
           'When this is enabled, it highlights the ranges of the same color on legend hover',
       }),
     },
-    useDistinctBands: {
+    lastRangeIsRightOpen: {
       types: ['boolean'],
-      help: i18n.translate('expressionHeatmap.function.args.useDistinctBandsHelpText', {
-        defaultMessage: 'If is set to false, the end value of the bands will be infinite',
+      help: i18n.translate('expressionHeatmap.function.args.lastRangeIsRightOpen', {
+        defaultMessage: 'If is set to true, the last range value will be right open',
       }),
-      default: false,
+      default: true,
     },
     xAccessor: {
       types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionHeatmap.function.args.xAccessorHelpText', {
-        defaultMessage: 'The id of the x axis column as string or the number of the table index',
+        defaultMessage: 'The id of the x axis column or the corresponding dimension',
       }),
     },
     yAccessor: {
@@ -115,6 +116,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
         defaultMessage: 'The id of the value column or the corresponding dimension',
       }),
     },
+    // not supported yet, small multiples accessor
     splitRowAccessor: {
       types: ['string', 'vis_dimension'],
 
@@ -122,6 +124,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
         defaultMessage: 'The id of the split row or the corresponding dimension',
       }),
     },
+    // not supported yet, small multiples accessor
     splitColumnAccessor: {
       types: ['string', 'vis_dimension'],
 
