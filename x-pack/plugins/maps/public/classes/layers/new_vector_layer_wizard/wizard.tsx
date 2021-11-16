@@ -10,7 +10,7 @@ import { EuiPanel, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createNewIndexAndPattern } from './create_new_index_pattern';
 import { RenderWizardArguments } from '../layer_wizard_registry';
-import { VectorLayer } from '../vector_layer';
+import { GeoJsonVectorLayer } from '../vector_layer';
 import { ESSearchSource } from '../../sources/es_search_source';
 import { ADD_LAYER_STEP_ID } from '../../../connected_components/add_layer_panel/view';
 import { getFileUpload, getIndexNameFormComponent } from '../../../kibana_services';
@@ -127,7 +127,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       geoField: 'coordinates',
       filterByMapBounds: false,
     });
-    const layerDescriptor = VectorLayer.createDescriptor(
+    const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
       { sourceDescriptor },
       this.props.mapColors
     );

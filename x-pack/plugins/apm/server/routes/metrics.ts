@@ -8,8 +8,8 @@
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const metricsChartsRoute = createApmServerRoute({
@@ -37,7 +37,8 @@ const metricsChartsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { agentName, environment, kuery, serviceNodeName, start, end } =
       params.query;
-    return await getMetricsChartDataByAgent({
+
+    const charts = await getMetricsChartDataByAgent({
       environment,
       kuery,
       setup,
@@ -47,6 +48,8 @@ const metricsChartsRoute = createApmServerRoute({
       start,
       end,
     });
+
+    return { charts };
   },
 });
 

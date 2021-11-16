@@ -13,45 +13,39 @@ import { Datatable } from '../../../../expressions/common/expression_types/specs
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(metricVisFunction());
-  const context = {
+  const context: Datatable = {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count' }],
-  } as unknown as Datatable;
-  const args = {
+    columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+  };
+  const args: MetricArguments = {
     percentageMode: false,
-    useRanges: false,
-    colorSchema: 'Green to Red',
-    metricColorMode: 'None',
-    colorsRange: [
-      {
-        from: 0,
-        to: 10000,
+    colorMode: 'None',
+    palette: {
+      type: 'palette',
+      name: '',
+      params: {
+        colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+        stops: [0, 10000],
+        gradient: false,
+        rangeMin: 0,
+        rangeMax: 150,
+        range: 'number',
       },
-    ],
-    labels: {
-      show: true,
     },
-    invertColors: false,
-    style: {
-      bgFill: '#000',
-      bgColor: false,
-      labelColor: false,
-      subText: '',
-      fontSize: 60,
-    },
-    font: { spec: { fontSize: 60 } },
-    metrics: [
+    showLabels: true,
+    font: { spec: { fontSize: '60px' }, type: 'style', css: '' },
+    metric: [
       {
+        type: 'vis_dimension',
         accessor: 0,
         format: {
           id: 'number',
+          params: {},
         },
-        params: {},
-        aggType: 'count',
       },
     ],
-  } as unknown as MetricArguments;
+  };
 
   it('returns an object with the correct structure', () => {
     const actual = fn(context, args, undefined);
