@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-jest.mock('axios', () => ({
-  create: jest.fn(),
+jest.mock('jwt', () => ({
+  sign: jest.fn(),
 }));
 // eslint-disable-next-line import/no-extraneous-dependencies
 import jwt from 'jsonwebtoken';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
-import { actionsConfigMock } from '../../actions_config.mock';
 import { createJWTAssertion } from './create_jwt_assertion';
 
 const jwtSign = jwt.sign as jest.Mock;
@@ -21,14 +19,7 @@ const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('createJWTAssertion', () => {
   test('creating a JWT token from provided claims with default values', () => {
-    jwtSign.mockReturnValueOnce({
-      status: 400,
-      data: {
-        error: 'invalid_scope',
-        error_description:
-          "AADSTS70011: The provided value for the input parameter 'scope' is not valid.",
-      },
-    });
+    jwtSign.mockReturnValueOnce('123456qwertyjwttoken');
 
     const assertion = createJWTAssertion(mockLogger, 'test', '123456', {
       audience: '1',
@@ -40,27 +31,17 @@ describe('createJWTAssertion', () => {
   });
 
   test('throw the exception and log the proper error if token was not get successfuly', async () => {
-    const configurationUtilities = actionsConfigMock.create();
-    axiosInstanceMock.mockReturnValueOnce({
-      status: 400,
-      data: {
-        error: 'invalid_scope',
-        error_description:
-          "AADSTS70011: The provided value for the input parameter 'scope' is not valid.",
-      },
+    jwtSign.mockReturnValueOnce({
+      name: 'JsonWebTokenError',
+      message: 'jwt wrong header',
     });
 
     await expect(
-      requestOAuthClientCredentialsToken(
-        'https://test',
-        mockLogger,
-        {
-          scope: 'test',
-          clientId: '123456',
-          clientSecret: 'secrert123',
-        },
-        configurationUtilities
-      )
+      createJWTAssertion(mockLogger, 'test', '123456', {
+        audience: '1',
+        issuer: 'someappid',
+        subject: 'test@gmail.com',
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"{\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}"'
     );
