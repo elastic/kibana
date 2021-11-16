@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { EndpointError } from '../../../../../../common/endpoint/errors';
+import { EndpointError } from '../../../../../common/endpoint/errors';
 
 export class HttpRequestValidationError<M> extends EndpointError<M> {}

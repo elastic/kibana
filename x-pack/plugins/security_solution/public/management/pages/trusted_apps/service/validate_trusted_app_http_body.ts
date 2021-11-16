@@ -9,7 +9,7 @@ import {
   NewTrustedApp,
   OperatingSystem,
   UpdateTrustedApp,
-} from '../../../../../../common/endpoint/types';
+} from '../../../../../common/endpoint/types';
 import { HttpRequestValidationError } from './errors';
 
 const VALID_OS_LIST: readonly OperatingSystem[] = Object.freeze([

@@ -7,6 +7,8 @@
 
 import pMap from 'p-map';
 import { HttpStart } from 'kibana/public';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   DeleteTrustedAppsRequestParams,
   GetOneTrustedAppRequestParams,
@@ -25,7 +27,6 @@ import {
 } from '../../../../../common/endpoint/types';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import {
-  TRUSTED_APPS_CREATE_API,
   TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_GET_API,
   TRUSTED_APPS_LIST_API,
@@ -38,7 +39,8 @@ import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trust
 import {
   validateTrustedAppHttpPostBody,
   validateTrustedAppHttpPutBody,
-} from './validators/validate_trusted_app_http_body';
+} from './validate_trusted_app_http_body';
+import { exceptionListItemToTrustedApp, newTrustedAppToCreateExceptionListItem } from './mappers';
 
 export interface TrustedAppsService {
   getTrustedApp(params: GetOneTrustedAppRequestParams): Promise<GetOneTrustedAppResponse>;
@@ -98,9 +100,16 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   async createTrustedApp(request: PostTrustedAppCreateRequest) {
     await validateTrustedAppHttpPostBody(request);
 
-    return this.http.post<PostTrustedAppCreateResponse>(TRUSTED_APPS_CREATE_API, {
-      body: JSON.stringify(request),
-    });
+    const createdExceptionItem = await this.http.post<ExceptionListItemSchema>(
+      EXCEPTION_LIST_ITEM_URL,
+      {
+        body: JSON.stringify(newTrustedAppToCreateExceptionListItem(request)),
+      }
+    );
+
+    return {
+      data: exceptionListItemToTrustedApp(createdExceptionItem),
+    };
   }
 
   async updateTrustedApp(
