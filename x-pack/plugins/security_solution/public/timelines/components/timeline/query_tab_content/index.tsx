@@ -38,7 +38,6 @@ import {
   ControlColumnProps,
   KueryFilterQueryKind,
   RowRenderer,
-  TimelineEventsType,
   TimelineId,
   TimelineTabs,
   ToggleDetailPanel,
@@ -47,7 +46,6 @@ import { requiredFieldsForActions } from '../../../../detections/components/aler
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';

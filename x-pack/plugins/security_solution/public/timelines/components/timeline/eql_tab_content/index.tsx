@@ -33,7 +33,6 @@ import { TimelineRefetch } from '../refetch_timeline';
 import {
   ControlColumnProps,
   RowRenderer,
-  TimelineEventsType,
   TimelineId,
   TimelineTabs,
   ToggleDetailPanel,
@@ -43,7 +42,6 @@ import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -374,21 +372,13 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const {
-      activeTab,
-      columns,
-      eqlOptions,
-      eventType,
-      expandedDetail,
-      itemsPerPage,
-      itemsPerPageOptions,
-    } = timeline;
+    const { activeTab, columns, eqlOptions, expandedDetail, itemsPerPage, itemsPerPageOptions } =
+      timeline;
 
     return {
       activeTab,
       columns,
       eqlOptions,
-      eventType: eventType ?? 'raw',
       end: input.timerange.to,
       expandedDetail,
       timelineId,
