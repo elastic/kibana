@@ -1,0 +1,21 @@
+==== Start {es} and generate an enrollment token for {kib}
+++++
+<titleabbrev>Generate an enrollment token</titleabbrev>
+++++
+
+When you start {es} for the first time, the following security configuration
+occurs automatically:
+
+* {ref}/configuring-stack-security.html#stack-security-certificates[Certificates and keys] for TLS are
+generated for the transport and HTTP layers.
+* The TLS configuration settings are written to `elasticsearch.yml`.
+* A password is generated for the `elastic` user.
+* An enrollment token is generated for {kib}.
+
+You can then start {kib} and enter the enrollment token, which is valid for 30
+minutes. This token automatically applies the security settings from your {es} 
+cluster, authenticates to {es} with the built-in `kibana` service account, and
+writes the security configuration to `kibana.yml`.
+
+To generate a new enrollment token for {kib}, run the
+{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.

@@ -115,6 +115,9 @@ sudo rpm --install kibana-{version}-x86_64.rpm
 
 endif::[]
 
+[[rpm-enroll]]
+include::start-es-and-enroll.asciidoc[]
+
 [[rpm-running-systemd]]
 include::systemd.asciidoc[]
 

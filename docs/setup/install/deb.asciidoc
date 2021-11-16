@@ -122,6 +122,9 @@ sudo dpkg -i kibana-{version}-amd64.deb
 
 endif::[]
 
+[[deb-enroll]]
+include::start-es-and-enroll.asciidoc[]
+
 [[deb-running-systemd]]
 include::systemd.asciidoc[]
 
