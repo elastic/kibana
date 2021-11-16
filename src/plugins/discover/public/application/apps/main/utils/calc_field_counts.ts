@@ -13,11 +13,8 @@ import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
  * This function is recording stats of the available fields, for usage in sidebar and sharing
  * Note that this values aren't displayed, but used for internal calculations
  */
-export function calcFieldCounts(
-  counts = {} as Record<string, number>,
-  rows?: ElasticSearchHit[],
-  indexPattern?: IndexPattern
-) {
+export function calcFieldCounts(rows?: ElasticSearchHit[], indexPattern?: IndexPattern) {
+  const counts = {} as Record<string, number>;
   if (!rows || !indexPattern) {
     return {};
   }

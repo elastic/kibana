@@ -51,7 +51,6 @@ function getCompProps(): DiscoverSidebarProps {
   }
   return {
     columns: ['extension'],
-    fieldCounts,
     documents: hits,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),

@@ -9,14 +9,18 @@
 import { difference } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
+import { ElasticSearchHit } from '../../../../../doc_views/doc_views_types';
+import { calcFieldCounts } from '../../../utils/calc_field_counts';
+import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 export function getIndexPatternFieldList(
-  indexPattern?: IndexPattern,
-  fieldCounts?: Record<string, number>
+  indexPattern: IndexPattern,
+  rows: ElasticSearchHit[],
+  fieldFilterState: FieldFilterState
 ) {
-  if (!indexPattern || !fieldCounts) return [];
-
-  const fieldNamesInDocs = Object.keys(fieldCounts);
+  if (!indexPattern) return [];
+  const fieldCounts = calcFieldCounts(rows, indexPattern);
+  const fieldNamesInDocs = Object.keys(calcFieldCounts(rows, indexPattern));
   const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
   const unknownFields: IndexPatternField[] = [];
 
@@ -36,5 +40,7 @@ export function getIndexPatternFieldList(
     }
   });
 
-  return [...indexPattern.fields.getAll(), ...unknownFields];
+  return [...indexPattern.fields.getAll(), ...unknownFields].filter((field) =>
+    isFieldFiltered(field, fieldFilterState, fieldCounts)
+  );
 }

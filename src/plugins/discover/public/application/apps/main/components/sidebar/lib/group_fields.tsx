@@ -23,7 +23,6 @@ export function groupFields(
   fields: IndexPatternField[] | null,
   columns: string[],
   popularLimit: number,
-  fieldCounts: Record<string, number> | undefined,
   fieldFilterState: FieldFilterState,
   useNewFieldsApi: boolean
 ): GroupedFields {
@@ -33,7 +32,7 @@ export function groupFields(
     popular: [],
     unpopular: [],
   };
-  if (!Array.isArray(fields) || !Array.isArray(columns) || typeof fieldCounts !== 'object') {
+  if (!Array.isArray(fields) || !Array.isArray(columns)) {
     return result;
   }
 
@@ -52,9 +51,6 @@ export function groupFields(
   const fieldsSorted = fields.sort(compareFn);
 
   for (const field of fieldsSorted) {
-    if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
-      continue;
-    }
     const subTypeMulti = getFieldSubtypeMulti(field?.spec);
     const isSubfield = useNewFieldsApi && subTypeMulti;
     if (columns.includes(field.name)) {
@@ -82,7 +78,7 @@ export function groupFields(
     } as IndexPatternField;
     if (
       !result.selected.find((field) => field.name === column) &&
-      isFieldFiltered(tmpField, fieldFilterState, fieldCounts)
+      isFieldFiltered(tmpField, fieldFilterState)
     ) {
       result.selected.push(tmpField);
     }

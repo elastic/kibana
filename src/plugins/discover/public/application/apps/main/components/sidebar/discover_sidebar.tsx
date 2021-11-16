@@ -71,10 +71,6 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   editField: (fieldName?: string) => void;
 
   /**
-   * a statistics of the distribution of fields in the given hits
-   */
-  fieldCounts?: Record<string, number>;
-  /**
    * hits fetched from ES, displayed in the doc table
    */
   documents?: ElasticSearchHit[];
@@ -87,7 +83,6 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
 export function DiscoverSidebarComponent({
   alwaysShowActionButtons = false,
   columns,
-  fieldCounts,
   fieldFilter,
   documents,
   indexPatternList,
@@ -120,10 +115,10 @@ export function DiscoverSidebarComponent({
 
   useEffect(() => {
     if (documents) {
-      const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+      const newFields = getIndexPatternFieldList(selectedIndexPattern, documents, fieldFilter);
       setFields(newFields);
     }
-  }, [selectedIndexPattern, fieldCounts, documents]);
+  }, [selectedIndexPattern, documents, fieldFilter]);
 
   const scrollDimensions = useResizeObserver(scrollContainer);
 
@@ -151,8 +146,8 @@ export function DiscoverSidebarComponent({
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
-    [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
+    () => groupFields(fields, columns, popularLimit, fieldFilter, useNewFieldsApi),
+    [fields, columns, popularLimit, fieldFilter, useNewFieldsApi]
   );
 
   const paginate = useCallback(() => {

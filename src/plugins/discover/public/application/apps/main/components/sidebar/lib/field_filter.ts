@@ -49,7 +49,7 @@ export function setFieldFilterProp(
 export function isFieldFiltered(
   field: IndexPatternField,
   filterState: FieldFilterState,
-  fieldCounts: Record<string, number>
+  fieldCounts?: Record<string, number>
 ): boolean {
   const matchFilter = filterState.type === 'any' || field.type === filterState.type;
   const isAggregatable =
@@ -61,7 +61,7 @@ export function isFieldFiltered(
     field.type === '_source' ||
     field.type === 'unknown_selected' ||
     field.scripted ||
-    fieldCounts[field.name] > 0;
+    (fieldCounts ? fieldCounts[field.name] > 0 : true);
   const needle = filterState.name ? filterState.name.toLowerCase() : '';
   const haystack = `${field.name}${field.displayName || ''}`.toLowerCase();
   const matchName = !filterState.name || haystack.indexOf(needle) !== -1;

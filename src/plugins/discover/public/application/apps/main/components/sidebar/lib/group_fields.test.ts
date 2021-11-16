@@ -43,13 +43,6 @@ const fields = [
   },
 ];
 
-const fieldCounts = {
-  category: 1,
-  currency: 1,
-  customer_birth_date: 1,
-  unknown_field: 1,
-};
-
 describe('group_fields', function () {
   it('should group fields in selected, popular, unpopular group', function () {
     const fieldFilterState = getDefaultFieldFilter();
@@ -58,7 +51,6 @@ describe('group_fields', function () {
       fields as IndexPatternField[],
       ['currency'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );
@@ -171,7 +163,7 @@ describe('group_fields', function () {
 
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(fieldsToGroup, ['currency'], 5, fieldCounts, fieldFilterState, true);
+    const actual = groupFields(fieldsToGroup, ['currency'], 5, fieldFilterState, true);
 
     expect(actual.popular).toEqual([category]);
     expect(actual.selected).toEqual([currency]);
@@ -185,7 +177,6 @@ describe('group_fields', function () {
       fields as IndexPatternField[],
       ['customer_birth_date', 'currency', 'unknown'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );
@@ -199,7 +190,6 @@ describe('group_fields', function () {
       fields as IndexPatternField[],
       ['currency', 'customer_birth_date', 'unknown'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );
@@ -215,9 +205,8 @@ describe('group_fields', function () {
 
     const actual1 = groupFields(
       fields as IndexPatternField[],
-      ['customer_birth_date', 'currency', 'unknown'],
+      ['currency', 'unknown'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );
@@ -242,7 +231,6 @@ describe('group_fields', function () {
       fieldsWithUnmappedField as IndexPatternField[],
       ['customer_birth_date', 'currency'],
       5,
-      fieldCounts,
       fieldFilterState,
       true
     );
@@ -267,7 +255,6 @@ describe('group_fields', function () {
       fieldsWithUnmappedField as IndexPatternField[],
       ['customer_birth_date', 'currency'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );

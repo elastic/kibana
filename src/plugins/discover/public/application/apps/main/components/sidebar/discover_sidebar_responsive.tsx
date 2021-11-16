@@ -36,7 +36,6 @@ import { DiscoverServices } from '../../../../../build_services';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../services/use_saved_search';
-import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../view_mode_toggle';
 
 export interface DiscoverSidebarResponsiveProps {
@@ -80,7 +79,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
+  selectedIndexPattern: IndexPattern;
   /**
    * Discover plugin services;
    */
@@ -122,41 +121,16 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onChangeIndexPattern } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  /**
-   * needed for merging new with old field counts, high likely legacy, but kept this behavior
-   * because not 100% sure in this case
-   */
-  const fieldCounts = useRef<Record<string, number> | null>(null);
-  if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(
-      {},
-      props.documents$.getValue().result,
-      selectedIndexPattern
-    );
-  }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
   useEffect(() => {
     const subscription = props.documents$.subscribe((next) => {
       if (next.fetchStatus !== documentState.fetchStatus) {
-        if (next.result) {
-          fieldCounts.current = calcFieldCounts(
-            next.result.length && fieldCounts.current ? fieldCounts.current : {},
-            next.result,
-            selectedIndexPattern!
-          );
-        }
         setDocumentState({ ...documentState, ...next });
       }
     });
     return () => subscription.unsubscribe();
   }, [props.documents$, selectedIndexPattern, documentState, setDocumentState]);
-
-  useEffect(() => {
-    // when index pattern changes fieldCounts needs to be cleaned up to prevent displaying
-    // fields of the previous index pattern
-    fieldCounts.current = {};
-  }, [selectedIndexPattern]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -228,7 +202,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             {...props}
             documents={documentState.result}
             fieldFilter={fieldFilter}
-            fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
             editField={editField}
           />
@@ -314,7 +287,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 <DiscoverSidebar
                   {...props}
                   documents={documentState.result}
-                  fieldCounts={fieldCounts.current}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
                   alwaysShowActionButtons={true}
