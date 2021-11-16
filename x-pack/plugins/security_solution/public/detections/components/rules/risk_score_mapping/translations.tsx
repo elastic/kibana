@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
 
 export const RISK_SCORE = i18n.translate(
   'xpack.securitySolution.alerts.riskScoreMapping.riskScoreTitle',
@@ -25,7 +24,7 @@ export const DEFAULT_RISK_SCORE = i18n.translate(
 export const RISK_SCORE_FIELD = i18n.translate(
   'xpack.securitySolution.alerts.riskScoreMapping.riskScoreFieldTitle',
   {
-    defaultMessage: ALERT_RULE_RISK_SCORE,
+    defaultMessage: 'kibana.alert.rule.risk_score',
   }
 );
 
