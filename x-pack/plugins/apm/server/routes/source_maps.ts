@@ -16,8 +16,8 @@ import {
   getCleanedBundleFilePath,
 } from '../lib/fleet/source_maps';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { stringFromBufferRt } from '../utils/string_from_buffer_rt';
 
 export const sourceMapRt = t.intersection([

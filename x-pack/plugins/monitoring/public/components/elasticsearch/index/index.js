@@ -31,7 +31,6 @@ export const Index = ({
   ...props
 }) => {
   const metricsToShow = [
-    metrics.index_mem,
     metrics.index_size,
     metrics.index_search_request_rate,
     metrics.index_request_rate,
