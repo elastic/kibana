@@ -24,6 +24,8 @@ import {
   EuiTextArea,
   EuiComboBox,
   EuiHorizontalRule,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -33,6 +35,7 @@ import { API_URLS } from '../../../../../common/constants';
 import { UptimeRefreshContext } from '../../../../contexts';
 import { MonitorSavedObject } from '../../../../../common/types';
 import { TestRunResult } from './TestRunResult';
+import { useScriptReorder } from './use_script_reorder';
 export const uptimeMonitorType = 'uptime-monitor';
 
 interface Props {
@@ -124,6 +127,12 @@ export const AddMonitorModal = ({ setIsModalVisible, monitor }: Props) => {
   const { refreshApp } = useContext(UptimeRefreshContext);
 
   const modalFormId = 'testForm';
+
+  const scriptCode = useScriptReorder({ stopPolling: false });
+
+  useEffect(() => {
+    setInlineScript(scriptCode);
+  }, [scriptCode]);
 
   const {
     services: { savedObjects },
@@ -236,7 +245,16 @@ export const AddMonitorModal = ({ setIsModalVisible, monitor }: Props) => {
           />
         </EuiFormRow>
       ) : (
-        <EuiFormRow label="Inline script" fullWidth={true}>
+        <EuiFormRow
+          label="Inline script"
+          fullWidth={true}
+          labelAppend={
+            <EuiText size="xs">
+              <EuiIcon type="playFilled" />
+              <EuiLink href="ElasticSyntheticsRecorder://abc=1">Open Script recorder</EuiLink>
+            </EuiText>
+          }
+        >
           <EuiTextArea
             fullWidth={true}
             placeholder="Placeholder text"
@@ -295,7 +313,6 @@ export const AddMonitorModal = ({ setIsModalVisible, monitor }: Props) => {
           <h1>{monitor ? 'Edit monitor' : 'Add monitor'}</h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-
       <EuiModalBody>{formSample}</EuiModalBody>
 
       <EuiModalFooter>

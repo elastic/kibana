@@ -17,7 +17,7 @@ const FlexGroupContainer = styled(EuiFlexGroup)`
 `;
 
 export const MonitorListHeader: React.FC = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(true);
   const showModal = () => setIsModalVisible(true);
 
   return (
