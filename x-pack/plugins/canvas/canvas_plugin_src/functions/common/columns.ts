@@ -24,14 +24,12 @@ const splitColumnsByFields = (
   saveOther: boolean = false
 ) =>
   cols.reduce<{ matched: DatatableColumn[]; other: DatatableColumn[] }>(
-    (splitedColumns, col) => {
+    (splitColumns, col) => {
       if (fields.includes(col.id) || fields.includes(col.name)) {
-        return { ...splitedColumns, matched: [...splitedColumns.matched, col] };
+        return { ...splitColumns, matched: [...splitColumns.matched, col] };
       }
 
-      return saveOther
-        ? { ...splitedColumns, other: [...splitedColumns.other, col] }
-        : splitedColumns;
+      return saveOther ? { ...splitColumns, other: [...splitColumns.other, col] } : splitColumns;
     },
     { matched: [], other: [] }
   );
