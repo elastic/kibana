@@ -71,7 +71,6 @@ describe('epicLocalStorage', () => {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      eventType: 'all',
       expandedDetail: {},
       filters: [],
       isLive: false,
@@ -89,7 +88,6 @@ describe('epicLocalStorage', () => {
       sort,
       timelineId: 'foo',
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
       show: true,
     };

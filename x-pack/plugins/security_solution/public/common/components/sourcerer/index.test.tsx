@@ -643,7 +643,7 @@ describe('timeline sourcerer', () => {
       .simulate('click');
   });
 
-  it('renders "alerts only" checkbox', () => {
+  it('renders "alerts only" checkbox, unchecked', () => {
     wrapper
       .find(
         `[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-alert-only-checkbox"]`
@@ -653,6 +653,9 @@ describe('timeline sourcerer', () => {
     expect(wrapper.find(`[data-test-subj="sourcerer-alert-only-checkbox"]`).first().text()).toEqual(
       'Show only detection alerts'
     );
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-alert-only-checkbox"] input`).first().prop('checked')
+    ).toEqual(false);
   });
 
   it('data view selector is enabled', () => {
@@ -690,6 +693,35 @@ describe('timeline sourcerer', () => {
 
   it('render save button', () => {
     expect(wrapper.find(`[data-test-subj="sourcerer-save"]`).exists()).toBeTruthy();
+  });
+
+  it('Checks box when only alerts index is selected in timeline', () => {
+    const state2 = {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            loading: false,
+            selectedDataViewId: id,
+            selectedPatterns: [`${mockGlobalState.sourcerer.signalIndexName}`],
+          },
+        },
+      },
+    };
+
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-alert-only-checkbox"] input`).first().prop('checked')
+    ).toEqual(true);
   });
 });
 

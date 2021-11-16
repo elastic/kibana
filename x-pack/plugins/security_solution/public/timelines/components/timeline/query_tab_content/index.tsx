@@ -38,7 +38,6 @@ import {
   ControlColumnProps,
   KueryFilterQueryKind,
   RowRenderer,
-  TimelineEventsType,
   TimelineId,
   TimelineTabs,
   ToggleDetailPanel,
@@ -47,7 +46,6 @@ import { requiredFieldsForActions } from '../../../../detections/components/aler
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -164,7 +162,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   end,
-  eventType,
   expandedDetail,
   filters,
   timelineId,
@@ -183,7 +180,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
-  updateEventTypeAndIndexesName,
 }) => {
   const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
@@ -368,7 +364,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <TimelineDatePickerLock />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <Sourcerer scope={SourcererScopeName.timeline} />
+                {activeTab === TimelineTabs.query && (
+                  <Sourcerer scope={SourcererScopeName.timeline} />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
@@ -461,7 +459,6 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       dataProviders,
-      eventType,
       expandedDetail,
       filters,
       itemsPerPage,
@@ -487,7 +484,6 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       dataProviders,
-      eventType: eventType ?? 'raw',
       end: input.timerange.to,
       expandedDetail,
       filters: timelineFilter,
@@ -511,27 +507,6 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (
-    newEventType: TimelineEventsType,
-    newIndexNames: string[],
-    newDataViewId: string
-  ) => {
-    dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(
-      timelineActions.updateDataView({
-        dataViewId: newDataViewId,
-        id: timelineId,
-        indexNames: newIndexNames,
-      })
-    );
-    dispatch(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.timeline,
-        selectedPatterns: newIndexNames,
-        selectedDataViewId: newDataViewId,
-      })
-    );
-  },
   onEventClosed: (args: ToggleDetailPanel) => {
     dispatch(timelineActions.toggleDetailPanel(args));
   },
@@ -548,7 +523,6 @@ const QueryTabContent = connector(
       compareQueryProps(prevProps, nextProps) &&
       prevProps.activeTab === nextProps.activeTab &&
       isTimerangeSame(prevProps, nextProps) &&
-      prevProps.eventType === nextProps.eventType &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
@@ -557,7 +531,6 @@ const QueryTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
-      prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
