@@ -106,7 +106,12 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async deleteTrustedApp(request: DeleteTrustedAppsRequestParams): Promise<void> {
-    return this.http.delete<void>(resolvePathVariables(TRUSTED_APPS_DELETE_API, request));
+    await this.http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      query: {
+        item_id: request.id,
+        namespace_type: 'agnostic',
+      },
+    });
   }
 
   async createTrustedApp(request: PostTrustedAppCreateRequest) {
