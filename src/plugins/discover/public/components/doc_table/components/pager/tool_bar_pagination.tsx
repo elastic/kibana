@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 
 interface ToolBarPaginationProps {
   pageSize: number;
@@ -30,7 +30,7 @@ interface ToolBarPaginationProps {
 
 const TOOL_BAR_PAGINATION_STYLES = {
   marginLeft: 'auto',
-  marginRight: themeLight.euiSizeL,
+  marginRight: euiLightVars.euiSizeL,
 };
 
 export const ToolBarPagination = ({
