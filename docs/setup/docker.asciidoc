@@ -97,7 +97,7 @@ services:
 
 By default, {kib] auto-generates a keystore file for secure settings at startup. To persist your {kibana-ref}/secure-settings.html[secure settings], use the `kibana-keystore` utility to bind-mount the parent directory of the keystore to the container. For example:
 
-[source,sh]
+["source","sh",subs="attributes"]
 ----
 docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore create
 docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore add test_keystore_setting
