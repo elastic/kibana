@@ -81,7 +81,7 @@ describe('After an upgrade, the threshold rule', () => {
   });
 
   it('Displays the rule details', () => {
-    cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+    cy.get(RULE_NAME_HEADER).should('contain', rule.name);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
