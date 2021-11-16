@@ -16,11 +16,6 @@ import { MAJOR_VERSION } from '../../../../../../../common/constants';
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
 const kibanaVersion = new SemVer(MAJOR_VERSION);
-const mockKibanaVersionInfo = {
-  currentMajor: kibanaVersion.major,
-  prevMajor: kibanaVersion.major - 1,
-  nextMajor: kibanaVersion.major + 1,
-};
 
 jest.mock('../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual(
@@ -30,8 +25,11 @@ jest.mock('../../../../../app_context', () => {
   return {
     useAppContext: () => {
       return {
-        docLinks: docLinksServiceMock.createStartContract(),
-        kibanaVersionInfo: mockKibanaVersionInfo,
+        services: {
+          core: {
+            docLinks: docLinksServiceMock.createStartContract(),
+          },
+        },
       };
     },
   };
@@ -39,10 +37,9 @@ jest.mock('../../../../../app_context', () => {
 
 describe('WarningsFlyoutStep', () => {
   const defaultProps = {
-    advanceNextStep: jest.fn(),
     warnings: [] as ReindexWarning[],
-    closeFlyout: jest.fn(),
-    renderGlobalCallouts: jest.fn(),
+    hideWarningsStep: jest.fn(),
+    continueReindex: jest.fn(),
   };
 
   it('renders', () => {
@@ -76,7 +73,7 @@ describe('WarningsFlyoutStep', () => {
       const button = wrapper.find('EuiButton');
 
       button.simulate('click');
-      expect(defaultPropsWithWarnings.advanceNextStep).not.toHaveBeenCalled();
+      expect(defaultPropsWithWarnings.continueReindex).not.toHaveBeenCalled();
 
       // first warning (customTypeName)
       wrapper.find(`input#${idForWarning(0)}`).simulate('change');
@@ -84,7 +81,7 @@ describe('WarningsFlyoutStep', () => {
       wrapper.find(`input#${idForWarning(1)}`).simulate('change');
       button.simulate('click');
 
-      expect(defaultPropsWithWarnings.advanceNextStep).toHaveBeenCalled();
+      expect(defaultPropsWithWarnings.continueReindex).toHaveBeenCalled();
     });
   }
 });

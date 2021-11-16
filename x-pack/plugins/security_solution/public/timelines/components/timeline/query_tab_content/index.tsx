@@ -46,7 +46,6 @@ import {
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { PickEventType } from '../search_or_filter/pick_events';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -59,8 +58,10 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
-import { defaultControlColumn } from '../body/control_columns';
+import { HeaderActions } from '../body/actions/header_actions';
+import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { Sourcerer } from '../../../../common/components/sourcerer';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -156,6 +157,8 @@ const EMPTY_EVENTS: TimelineItem[] = [];
 
 export type Props = OwnProps & PropsFromRedux;
 
+const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
   columns,
@@ -194,6 +197,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
+  const ACTION_BUTTON_COUNT = 5;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
@@ -314,8 +318,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return (combinedQueries && combinedQueries.kqlError != null) || false;
   }, [combinedQueries]);
 
-  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
-  const trailingControlColumns: ControlColumnProps[] = [];
+  const leadingControlColumns = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      })),
+    []
+  );
 
   return (
     <>
@@ -358,10 +368,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <TimelineDatePickerLock />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <PickEventType
-                  eventType={eventType}
-                  onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
-                />
+                <Sourcerer scope={SourcererScopeName.timeline} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">

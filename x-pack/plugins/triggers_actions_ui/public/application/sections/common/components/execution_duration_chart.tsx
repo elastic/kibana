@@ -16,7 +16,7 @@ import {
   EuiIconTip,
   EuiTitle,
 } from '@elastic/eui';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as lightEuiTheme } from '@kbn/ui-shared-deps-src/theme';
 import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import { assign, fill } from 'lodash';
 import { formatMillisForDisplay } from '../../../lib/execution_duration_utils';
