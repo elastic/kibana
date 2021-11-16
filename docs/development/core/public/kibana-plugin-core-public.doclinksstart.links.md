@@ -163,7 +163,6 @@ readonly links: {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
-            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
