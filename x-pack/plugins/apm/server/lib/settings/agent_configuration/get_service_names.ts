@@ -7,14 +7,9 @@
 
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../helpers/setup_request';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
 import { getProcessorEventForTransactions } from '../../helpers/transactions';
-
-export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
-  typeof getServiceNames
->;
 
 export async function getServiceNames({
   setup,
