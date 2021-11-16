@@ -50,7 +50,7 @@ describe('hooks', () => {
       const { result } = renderHook(() => useCasesNavigation(CasesDeepLinkId.cases), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      const [_, navigateToCases] = result.current;
+      const [, navigateToCases] = result.current;
 
       act(() => {
         navigateToCases();
