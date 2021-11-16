@@ -9,7 +9,7 @@ const path = require('path');
 
 const kibanaRoot = path.resolve(__dirname, '../../../../..');
 const tsconfigTpl = path.resolve(__dirname, './tsconfig.json');
-const tsconfigTplTest = path.resolve(__dirname, './test-tsconfig.json');
+const tsconfigTplTest = path.resolve(__dirname, './test_tsconfig.json');
 
 const filesToIgnore = [
   path.resolve(kibanaRoot, 'tsconfig.json'),

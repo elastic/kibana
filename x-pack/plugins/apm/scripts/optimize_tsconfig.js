@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const { optimizeTsConfig } = require('./optimize-tsconfig/optimize');
+const { optimizeTsConfig } = require('./optimize_tsconfig/optimize');
 
 optimizeTsConfig().catch((err) => {
   console.error(err);

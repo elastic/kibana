@@ -11,7 +11,7 @@ import { argv } from 'yargs';
 import Url from 'url';
 import cypress from 'cypress';
 import { FtrProviderContext } from './ftr_provider_context';
-import { createApmUsersAndRoles } from '../scripts/create-apm-users-and-roles/create_apm_users_and_roles';
+import { createApmUsersAndRoles } from '../scripts/create_apm_users_and_roles/create_apm_users_and_roles';
 import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 
 export async function cypressStart(
