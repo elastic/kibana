@@ -266,7 +266,11 @@ export function createTestEsCluster<
 
     async stop() {
       await this.getClient()
-        .search<{ message: string; 'elasticsearch.http.request.x_opaque_id': string }>(
+        .search<{
+          'log.level': string;
+          message: string;
+          'elasticsearch.http.request.x_opaque_id': string;
+        }>(
           { index: '.logs-deprecation.elasticsearch-default', ignore_unavailable: true, size: 100 },
           { ignore: [404] }
         )
@@ -276,11 +280,11 @@ export function createTestEsCluster<
               (d) => d._source!['elasticsearch.http.request.x_opaque_id'] !== 'kbn-test-client'
             )
             .map((d) => {
-              return d._source!.message;
+              return `ES DEPRECATION ${d._source!['log.level']} ${d._source!.message}`;
             });
 
           if (deps.length > 0) {
-            log.error(`Found ${deps.length} deprecation warnings.`);
+            log.error(`Found ${deps.length} deprecation logs:`);
           }
           deps.forEach((m) => {
             log.error(m);
