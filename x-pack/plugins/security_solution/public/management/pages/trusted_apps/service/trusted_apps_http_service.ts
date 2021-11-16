@@ -98,9 +98,11 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async getTrustedApp(params: GetOneTrustedAppRequestParams) {
-    return this.http.get<GetOneTrustedAppResponse>(
-      resolvePathVariables(TRUSTED_APPS_GET_API, params)
-    );
+    const exceptionItem = await this.getExceptionListItem(params.id);
+
+    return {
+      data: exceptionListItemToTrustedApp(exceptionItem),
+    };
   }
 
   async getTrustedAppsList({
