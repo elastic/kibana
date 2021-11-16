@@ -55,6 +55,7 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [data, setData] = useState<any[]>([]);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+  const [isDetailMounted, setIsDetailMounted] = useState<boolean>(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
   const styles = useStyles();
 
@@ -155,8 +156,8 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
   };
 
   const toggleDetailPanel = () => {
-    console.log('jack', data)
-    setIsDetailOpen(!isDetailOpen);
+    setIsDetailMounted(!isDetailMounted);
+    if (!isDetailOpen) setIsDetailOpen(true);
   };
 
   const renderInsertButtons = () => {
@@ -189,7 +190,7 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
   return (
     <EuiPage>
       <EuiPageContent>
-        <EuiPageHeader 
+        <EuiPageHeader
           pageTitle="Process Tree"
           iconType="logoKibana"
           description={
@@ -214,18 +215,25 @@ export const SessionView = ({ sessionId }: SessionViewDeps) => {
             </EuiFlexGroup>
             <EuiSplitPanel.Outer direction="row" color="transparent" borderRadius="none" css={styles.outerPanel}>
               <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
-              <div css={processTreeCSS}>
-                <ProcessTree
-                  sessionId={sessionId}
-                  forward={data}
-                  searchQuery={searchQuery}
-                  selectedProcess={selectedProcess}
-                  onProcessSelected={onProcessSelected}
-                />
-              </div>
+                <div css={processTreeCSS}>
+                  <ProcessTree
+                    sessionId={sessionId}
+                    forward={data}
+                    searchQuery={searchQuery}
+                    selectedProcess={selectedProcess}
+                    onProcessSelected={onProcessSelected}
+                  />
+                </div>
               </EuiSplitPanel.Inner>
               {isDetailOpen && (
-                <EuiSplitPanel.Inner paddingSize="s" css={styles.detailPanel}>
+                <EuiSplitPanel.Inner
+                  paddingSize="s"
+                  color="plain"
+                  css={isDetailMounted ? styles.detailPanelIn : styles.detailPanelOut}
+                  onAnimationEnd={() => {
+                    if (!isDetailMounted) setIsDetailOpen(false);
+                  }}
+                >
                   {selectedProcess && (
                     <>
                       <EuiTitle size="xs"><span>Command Detail</span></EuiTitle>

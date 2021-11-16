@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import { Comp } from './Comp';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -21,7 +22,7 @@ export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
       id: 'helloWorld',
       title: 'Hello World',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<div data-test-subj="helloWorldDiv">Hello World!</div>, element);
+        ReactDOM.render(<div data-test-subj="helloWorldDiv"><Comp /></div>, element);
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });

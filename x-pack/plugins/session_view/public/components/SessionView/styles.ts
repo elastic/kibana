@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { keyframes, CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -14,25 +15,62 @@ export const useStyles = () => {
   const cached = useMemo(() => {
     const padding = euiTheme.size.s;
 
-    const outerPanel = `
-      font-family: ${euiTheme.font.familyCode};
-      position: relative;
-    `;
+    const outerPanel: CSSObject = {
+      fontFamily: euiTheme.font.familyCode,
+      position: 'relative',
+      overflowX: 'hidden',
+    };
 
-    const treePanel = `
-      padding: ${padding} 0 0 ${padding};
-    `;
+    const treePanel: CSSObject = {
+      paddingTop: padding,
+      paddingLeft: padding,
+    };
 
-    const detailPanel = `
-      max-width: 424px;
-      height: 300px;
-      overflow-y: auto;
-    `;
+    const slideIn = keyframes({
+      to: {
+        right: '0',
+      }
+    });
+    
+    const slideOut = keyframes({
+      from: {
+        right: '0',
+      },
+      to: {
+        right: '-100%',
+      }
+    });
+    
+    const detailPanel: CSSObject = {
+      width: '424px',
+      height: '300px',
+      overflowY: 'auto',
+      position: 'absolute',
+      top: '8px',
+      right: '-100%',
+    };
+
+    const detailPanelIn: Array<string | CSSObject> = [
+      slideIn.styles,
+      {
+        ...detailPanel,
+        animation: `${slideIn.name} 200ms ease forwards`,
+      },
+    ];
+    
+    const detailPanelOut: Array<string | CSSObject> = [
+      slideOut.styles,
+      {
+        ...detailPanel,
+        animation: `${slideOut.name} 150ms ease`,
+      },
+    ];
 
     return {
       outerPanel,
       treePanel,
-      detailPanel,
+      detailPanelIn,
+      detailPanelOut,
     };
   }, [euiTheme]);
 
