@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaConfig } from './read-kibana-config';
+import { KibanaConfig } from './read_kibana_config';
 
 export const getHttpAuth = (config: KibanaConfig) => {
   const httpAuth =
