@@ -90,7 +90,6 @@ if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
   if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
     source .buildkite/scripts/common/env.sh
     source .buildkite/scripts/common/setup_node.sh
-    source .buildkite/scripts/common/setup_bazel.sh
   fi
 fi
 
