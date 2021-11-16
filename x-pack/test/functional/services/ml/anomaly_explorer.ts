@@ -119,6 +119,7 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
       await this.assertDashboardSearchInputValue(filter);
+      await this.waitForDashboardsToLoad();
     },
 
     async assertDashboardSearchInputValue(expectedSearchValue: string) {
