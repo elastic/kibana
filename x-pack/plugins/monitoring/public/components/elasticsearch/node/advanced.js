@@ -27,8 +27,6 @@ export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
     metrics.node_gc_time,
     metrics.node_jvm_mem,
     metrics.node_cpu_utilization,
-    metrics.node_index_1,
-    metrics.node_index_2,
     metrics.node_index_3,
     metrics.node_index_4,
     metrics.node_index_time,

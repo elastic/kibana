@@ -87,13 +87,8 @@ describe('getMetrics and getSeries', () => {
     const req = getMockReq(nonDerivMetricsBuckets);
     const metricSet = [
       {
-        name: 'index_1',
-        keys: [
-          'index_mem_overall_1',
-          'index_mem_stored_fields',
-          'index_mem_doc_values',
-          'index_mem_norms',
-        ],
+        name: 'index_3',
+        keys: ['index_mem_fixed_bit_set', 'index_mem_versions'],
       },
     ];
     const result = await getMetrics(req, indexPattern, metricSet);
