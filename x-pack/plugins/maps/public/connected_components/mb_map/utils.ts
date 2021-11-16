@@ -12,7 +12,11 @@ import { isGlDrawLayer } from './sort_layers';
 import { ILayer } from '../../classes/layers/layer';
 import { EmsSpriteSheet } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
 
-export function removeOrphanedSourcesAndLayers(mbMap: MbMap, layerList: ILayer[], spatialFilterLayer: ILayer) {
+export function removeOrphanedSourcesAndLayers(
+  mbMap: MbMap,
+  layerList: ILayer[],
+  spatialFilterLayer: ILayer
+) {
   const mbStyle = mbMap.getStyle();
   if (!mbStyle.layers) {
     return;
@@ -30,10 +34,10 @@ export function removeOrphanedSourcesAndLayers(mbMap: MbMap, layerList: ILayer[]
       return;
     }
 
-    const layer = layerList.find((layer) => {
+    const targetLayer = layerList.find((layer) => {
       return layer.ownsMbLayerId(mbLayer.id);
     });
-    if (!layer) {
+    if (!targetLayer) {
       mbLayerIdsToRemove.push(mbLayer.id);
     }
   });
@@ -47,10 +51,10 @@ export function removeOrphanedSourcesAndLayers(mbMap: MbMap, layerList: ILayer[]
         return;
       }
 
-      const layer = layerList.find((layer) => {
+      const targetLayer = layerList.find((layer) => {
         return layer.ownsMbSourceId(mbSourceId);
       });
-      if (!layer) {
+      if (!targetLayer) {
         mbSourcesToRemove.push(mbSourceId);
       }
     }
@@ -96,7 +100,11 @@ export async function loadSpriteSheetImageData(imgUrl: string): Promise<ImageDat
   });
 }
 
-export function addSpriteSheetToMapFromImageData(json: EmsSpriteSheet, imgData: ImageData, mbMap: MbMap) {
+export function addSpriteSheetToMapFromImageData(
+  json: EmsSpriteSheet,
+  imgData: ImageData,
+  mbMap: MbMap
+) {
   for (const imageId in json) {
     if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
       continue;
