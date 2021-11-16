@@ -3898,7 +3898,6 @@
     "indexPatternManagement.editIndexPattern.fields.table.isAggregatableAria": "は集約可能です",
     "indexPatternManagement.editIndexPattern.fields.table.isExcludedAria": "は除外されています",
     "indexPatternManagement.editIndexPattern.fields.table.isSearchableAria": "は検索可能です",
-    "indexPatternManagement.editIndexPattern.fields.table.multiTypeAria": "複数タイプのフィールド",
     "indexPatternManagement.editIndexPattern.fields.table.nameHeader": "名前",
     "indexPatternManagement.editIndexPattern.fields.table.primaryTimeAriaLabel": "プライマリ時間フィールド",
     "indexPatternManagement.editIndexPattern.fields.table.primaryTimeTooltip": "このフィールドはイベントの発生時刻を表します。",

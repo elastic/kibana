@@ -3934,7 +3934,6 @@
     "indexPatternManagement.editIndexPattern.fields.table.isAggregatableAria": "可聚合",
     "indexPatternManagement.editIndexPattern.fields.table.isExcludedAria": "已排除",
     "indexPatternManagement.editIndexPattern.fields.table.isSearchableAria": "可搜索",
-    "indexPatternManagement.editIndexPattern.fields.table.multiTypeAria": "多类型字段",
     "indexPatternManagement.editIndexPattern.fields.table.nameHeader": "名称",
     "indexPatternManagement.editIndexPattern.fields.table.primaryTimeAriaLabel": "主要时间字段",
     "indexPatternManagement.editIndexPattern.fields.table.primaryTimeTooltip": "此字段表示事件发生的时间。",
