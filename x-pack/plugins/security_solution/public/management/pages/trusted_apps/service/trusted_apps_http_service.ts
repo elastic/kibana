@@ -10,9 +10,11 @@ import { HttpStart } from 'kibana/public';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import {
   ExceptionListItemSchema,
+  ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -22,7 +24,6 @@ import {
   GetTrustedAppsListRequest,
   GetTrustedAppsListResponse,
   GetTrustedAppsSummaryRequest,
-  GetTrustedAppsSummaryResponse,
   MaybeImmutable,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
@@ -31,11 +32,6 @@ import {
   PutTrustedAppUpdateResponse,
   TrustedApp,
 } from '../../../../../common/endpoint/types';
-import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
-import {
-  TRUSTED_APPS_GET_API,
-  TRUSTED_APPS_SUMMARY_API,
-} from '../../../../../common/endpoint/constants';
 import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 import { isGlobalEffectScope } from '../state/type_guards';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
@@ -178,9 +174,12 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     };
   }
 
-  async getTrustedAppsSummary(request: GetTrustedAppsSummaryRequest) {
-    return this.http.get<GetTrustedAppsSummaryResponse>(TRUSTED_APPS_SUMMARY_API, {
-      query: request,
+  async getTrustedAppsSummary(_: GetTrustedAppsSummaryRequest) {
+    return this.http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
+      query: {
+        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        namespace_type: 'agnostic',
+      },
     });
   }
 
