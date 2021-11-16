@@ -6101,6 +6101,10 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
 
+"@types/elastic__datemath@link:bazel-bin/packages/elastic-datemath/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/elasticsearch@^5.0.33":
   version "5.0.33"
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.33.tgz#b0fd37dc674f498223b6d68c313bdfd71f4d812b"

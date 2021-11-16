@@ -512,6 +512,7 @@
     "@types/delete-empty": "^2.0.0",
     "@types/ejs": "^3.0.6",
     "@types/elasticsearch": "^5.0.33",
+    "@types/elastic__datemath": "link:bazel-bin/packages/elastic-datemath/npm_module_types",
     "@types/enzyme": "^3.10.8",
     "@types/eslint": "^7.28.0",
     "@types/extract-zip": "^1.6.2",
