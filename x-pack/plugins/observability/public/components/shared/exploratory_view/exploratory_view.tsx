@@ -102,11 +102,7 @@ export function ExploratoryView({
             chartTimeRange={chartTimeRangeContext}
           />
           <LensWrapper ref={wrapperRef} height={height}>
-            <EuiResizableContainer
-              style={{ height: '100%' }}
-              direction="vertical"
-              onToggleCollapsed={onCollapse}
-            >
+            <ResizableContainer direction="vertical" onToggleCollapsed={onCollapse}>
               {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
                 collapseFn.current = (id, direction) => togglePanel?.(id, { direction });
 
@@ -134,6 +130,7 @@ export function ExploratoryView({
                       mode={'main'}
                       id="seriesPanel"
                       color="subdued"
+                      className="paddingTopSmall"
                     >
                       <ChartToggle
                         isCollapsed={hiddenPanel === 'chartPanel'}
@@ -148,7 +145,7 @@ export function ExploratoryView({
                   </>
                 );
               }}
-            </EuiResizableContainer>
+            </ResizableContainer>
             {hiddenPanel === 'seriesPanel' && (
               <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
                 {PREVIEW_LABEL}
@@ -172,6 +169,14 @@ const LensWrapper = styled.div<{ height: string }>`
     height: 100%;
   }
 `;
+
+const ResizableContainer = styled(EuiResizableContainer)`
+  height: 100%;
+  &&& .paddingTopSmall {
+    padding-top: 8px;
+  }
+`;
+
 const Wrapper = styled(EuiPanel)`
   max-width: 1800px;
   min-width: 800px;

@@ -115,6 +115,7 @@ export const SeriesEditor = React.memo(function () {
 
   return (
     <Wrapper>
+      <SectionHeaderBackground />
       <StickyFlexGroup gutterSize="none">
         <ReportTypeFormFlexItem grow={false}>
           <EuiFormRow
@@ -185,13 +186,22 @@ const Wrapper = euiStyled.div`
   }
 `;
 
+const SectionHeaderBackground = euiStyled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 56px;
+  background-color: ${({ theme }) => theme.eui.euiPageBackgroundColor};
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  z-index: 90;
+`;
+
 const StickyFlexGroup = euiStyled(EuiFlexGroup)`
   position: sticky;
-  top: -${({ theme }) => theme.eui.paddingSizes.m};
-  background-color: ${({ theme }) => theme.eui.euiPageBackgroundColor};
+  top: 0;
   z-index: 100;
-  padding: ${({ theme }) => theme.eui.paddingSizes.s} 0;
-  border-bottom: 2px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  padding: 0;
 `;
 
 const EditorRowsWrapper = euiStyled.div`
