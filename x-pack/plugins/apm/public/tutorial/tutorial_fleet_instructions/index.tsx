@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
-import { EuiCard } from '@elastic/eui';
-import { EuiImage } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiCard,
+  EuiImage,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
@@ -90,18 +94,32 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
               }
             )}
             footer={
-              <EuiButton
-                iconType="analyzeEvent"
-                color="secondary"
-                href={`${basePath}/app/integrations#/detail/apm-0.4.0/overview`}
-              >
-                {i18n.translate(
-                  'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
-                  {
-                    defaultMessage: 'APM integration',
-                  }
-                )}
-              </EuiButton>
+              <>
+                <EuiButton
+                  iconType="analyzeEvent"
+                  color="secondary"
+                  href={`${basePath}/app/integrations#/detail/apm-0.4.0/overview`}
+                >
+                  {i18n.translate(
+                    'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
+                    {
+                      defaultMessage: 'APM integration',
+                    }
+                  )}
+                </EuiButton>
+                <EuiSpacer size="m" />
+                <EuiText size="s">
+                  <p>
+                    {i18n.translate(
+                      'xpack.apm.tutorial.apmServer.fleet.apmIntegration.description',
+                      {
+                        defaultMessage:
+                          'Fleet allows you to centrally manage Elastic Agents running the APM integration. The default option is to install a Fleet Server on a dedicated host. For setups without a dedicated host, we recommend following the instructions to install the standalone APM Server for your operating system by selecting the respective tab above.',
+                      }
+                    )}
+                  </p>
+                </EuiText>
+              </>
             }
           />
         </EuiFlexItem>
