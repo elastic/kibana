@@ -233,7 +233,7 @@ describe('<CustomFields />', () => {
     ).toBeInTheDocument();
 
     // expect tls options to be available for browser
-    expect(queryByLabelText('Zip Proxy URL')).toBeInTheDocument();
+    expect(queryByLabelText('Proxy Zip URL')).toBeInTheDocument();
     expect(queryByLabelText('Enable TLS configuration for Zip URL')).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
@@ -316,7 +316,7 @@ describe('<CustomFields />', () => {
       expect(getByText('HTTP')).toBeInTheDocument();
       expect(getByText('TCP')).toBeInTheDocument();
       expect(getByText('ICMP')).toBeInTheDocument();
-      expect(queryByText('Browser')).not.toBeInTheDocument();
+      expect(queryByText('Browser (Beta)')).not.toBeInTheDocument();
     });
   });
 });

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ALERT_REASON, ALERT_RULE_PARAMS, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  ALERT_RULE_PARAMS,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils/technical_field_names';
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';

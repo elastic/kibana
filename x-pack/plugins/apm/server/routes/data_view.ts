@@ -6,10 +6,10 @@
  */
 
 import { createStaticDataView } from '../lib/data_view/create_static_data_view';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getDynamicDataView } from '../lib/data_view/get_dynamic_data_view';
-import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
 
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
