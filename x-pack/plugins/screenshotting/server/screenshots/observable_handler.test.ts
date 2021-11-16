@@ -10,26 +10,24 @@ import { map } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import type { ConditionalHeaders } from '../browsers';
 import { createMockBrowserDriver } from '../browsers/mock';
-import { createMockLayoutInstance } from '../layouts/mock';
-import { ScreenshotObservableOpts } from './';
-import { ScreenshotObservableHandler } from './observable_handler';
+import { createMockLayout } from '../layouts/mock';
+import { ScreenshotObservableHandler, ScreenshotObservableOptions } from './observable_handler';
 
 describe('ScreenshotObservableHandler', () => {
   let browser: ReturnType<typeof createMockBrowserDriver>;
-  let layout: ReturnType<typeof createMockLayoutInstance>;
+  let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
-  let options: ScreenshotObservableOpts;
+  let options: ScreenshotObservableOptions;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
-    layout = createMockLayoutInstance();
+    layout = createMockLayout();
     logger = { error: jest.fn() } as unknown as jest.Mocked<Logger>;
     options = {
       conditionalHeaders: {
         headers: { testHeader: 'testHeadValue' },
         conditions: {} as unknown as ConditionalHeaders['conditions'],
       },
-      layout,
       timeouts: {
         loadDelay: 5000,
         openUrl: 30000,
@@ -44,7 +42,7 @@ describe('ScreenshotObservableHandler', () => {
 
   describe('waitUntil', () => {
     it('catches TimeoutError and references the timeout config in a custom message', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, logger, options);
+      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = interval(1000).pipe(screenshots.waitUntil(200, 'Test Config'));
 
       const testPipeline = () => test$.toPromise();
@@ -54,7 +52,7 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('catches other Errors and explains where they were thrown', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, logger, options);
+      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = throwError(new Error(`Test Error to Throw`)).pipe(
         screenshots.waitUntil(200, 'Test Config')
       );
@@ -66,7 +64,7 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('is a pass-through if there is no Error', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, logger, options);
+      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = of('nice to see you').pipe(screenshots.waitUntil(20, 'xxxxxxxxxxx'));
 
       await expect(test$.toPromise()).resolves.toBe(`nice to see you`);
@@ -76,7 +74,7 @@ describe('ScreenshotObservableHandler', () => {
   describe('checkPageIsOpen', () => {
     it('throws a decorated Error when page is not open', async () => {
       browser.isPageOpen.mockReturnValue(false);
-      const screenshots = new ScreenshotObservableHandler(browser, logger, options);
+      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = of(234455).pipe(
         map((input) => {
           screenshots.checkPageIsOpen();
@@ -90,7 +88,7 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('is a pass-through when the page is open', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, logger, options);
+      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = of(234455).pipe(
         map((input) => {
           screenshots.checkPageIsOpen();

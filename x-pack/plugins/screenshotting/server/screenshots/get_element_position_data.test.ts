@@ -7,17 +7,17 @@
 
 import type { Logger } from 'src/core/server';
 import { createMockBrowserDriver } from '../browsers/mock';
-import { createMockLayoutInstance } from '../layouts/mock';
+import { createMockLayout } from '../layouts/mock';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 
 describe('getElementPositionAndAttributes', () => {
   const logger = {} as jest.Mocked<Logger>;
   let browser: ReturnType<typeof createMockBrowserDriver>;
-  let layout: ReturnType<typeof createMockLayoutInstance>;
+  let layout: ReturnType<typeof createMockLayout>;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
-    layout = createMockLayoutInstance();
+    layout = createMockLayout();
 
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
 

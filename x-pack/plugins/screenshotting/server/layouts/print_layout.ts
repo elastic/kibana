@@ -6,22 +6,25 @@
  */
 
 import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
-import type { LayoutConfig, LayoutInstance, LayoutSelectorDictionary } from '.';
-import { LayoutTypes } from '.';
+import type { LayoutParams, LayoutSelectorDictionary } from '../../common/layout';
+import type { Layout } from '.';
+import { DEFAULT_SELECTORS, LayoutTypes } from '.';
 import { DEFAULT_VIEWPORT } from '../browsers';
-import { getDefaultLayoutSelectors } from '.';
-import { Layout } from './layout';
+import { BaseLayout } from './base_layout';
 
-export class PrintLayout extends Layout implements LayoutInstance {
+export class PrintLayout extends BaseLayout implements Layout {
   public readonly selectors: LayoutSelectorDictionary = {
-    ...getDefaultLayoutSelectors(),
+    ...DEFAULT_SELECTORS,
     screenshot: '[data-shared-item]', // override '[data-shared-items-container]'
   };
   public readonly groupCount = 2;
   private readonly viewport = DEFAULT_VIEWPORT;
+  private zoom: number;
 
-  constructor(private readonly config: LayoutConfig) {
+  constructor({ zoom = 1 }: Pick<LayoutParams, 'zoom'>) {
     super(LayoutTypes.PRINT);
+
+    this.zoom = zoom;
   }
 
   public getCssOverridesPath() {
@@ -33,12 +36,12 @@ export class PrintLayout extends Layout implements LayoutInstance {
   }
 
   public getBrowserZoom() {
-    return this.config.zoom;
+    return this.zoom;
   }
 
   public getViewport(itemsCount: number) {
     return {
-      zoom: this.config.zoom,
+      zoom: this.zoom,
       width: this.viewport.width,
       height: this.viewport.height * itemsCount,
     };

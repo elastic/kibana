@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getDefaultLayoutSelectors, LayoutTypes } from '.';
-import type { LayoutInstance, LayoutSelectorDictionary, PageSizeParams, Size } from '.';
-import { Layout } from './layout';
+import type { LayoutSelectorDictionary, Size } from '../../common/layout';
+import { DEFAULT_SELECTORS, LayoutTypes } from '.';
+import type { Layout } from '.';
+import { BaseLayout } from './base_layout';
 
 // FIXME - should use zoom from capture config
 const ZOOM: number = 2;
@@ -18,8 +19,8 @@ const ZOOM: number = 2;
  * The single image that was captured should be the only structural part of the
  * PDF document definition
  */
-export class CanvasLayout extends Layout implements LayoutInstance {
-  public readonly selectors: LayoutSelectorDictionary = getDefaultLayoutSelectors();
+export class CanvasLayout extends BaseLayout implements Layout {
+  public readonly selectors: LayoutSelectorDictionary = { ...DEFAULT_SELECTORS };
   public readonly groupCount = 1;
   public readonly height: number;
   public readonly width: number;
@@ -72,7 +73,7 @@ export class CanvasLayout extends Layout implements LayoutInstance {
     };
   }
 
-  public getPdfPageSize(pageSizeParams: PageSizeParams): Size {
+  public getPdfPageSize(): Size {
     return {
       height: this.height,
       width: this.width,

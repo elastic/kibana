@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
-import { LayoutInstance } from '../layouts';
+import { Layout } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
   browser: HeadlessChromiumDriver,
   logger: Logger,
   loadDelay: number,
-  layout: LayoutInstance
+  layout: Layout
 ) => {
   const span = apm.startSpan('wait_for_render', 'wait');
 

@@ -9,14 +9,36 @@ import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
-import { LayoutInstance } from '../layouts';
-import type { AttributesMap, ElementsPositionAndAttribute } from '.';
+import { Layout } from '../layouts';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
+
+export interface AttributesMap {
+  [key: string]: string | null;
+}
+
+export interface ElementPosition {
+  boundingClientRect: {
+    // modern browsers support x/y, but older ones don't
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+  scroll: {
+    x: number;
+    y: number;
+  };
+}
+
+export interface ElementsPositionAndAttribute {
+  position: ElementPosition;
+  attributes: AttributesMap;
+}
 
 export const getElementPositionAndAttributes = async (
   browser: HeadlessChromiumDriver,
   logger: Logger,
-  layout: LayoutInstance
+  layout: Layout
 ): Promise<ElementsPositionAndAttribute[] | null> => {
   const span = apm.startSpan('get_element_position_data', 'read');
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container

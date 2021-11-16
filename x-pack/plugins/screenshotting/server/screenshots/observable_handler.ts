@@ -9,23 +9,56 @@ import apm from 'elastic-apm-node';
 import { defer, forkJoin, throwError, Observable } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
-import type { HeadlessChromiumDriver } from '../browsers';
+import type { Layout as ScreenshotModeLayout } from 'src/plugins/screenshot_mode/common';
+import type { ConditionalHeaders, HeadlessChromiumDriver } from '../browsers';
 import { getChromiumDisconnectedError } from '../browsers';
-import type {
-  PageSetupResults,
-  ScreenshotObservableOptions,
-  ScreenshotResults,
-  UrlOrUrlWithContext,
-} from '.';
+import type { Layout } from '../layouts';
+import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
 import { getScreenshots } from './get_screenshots';
+import type { Screenshot } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
+import type { UrlOrUrlWithContext } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
+
+export interface PhaseTimeouts {
+  openUrl: number;
+  waitForElements: number;
+  renderComplete: number;
+  loadDelay: number;
+}
+
+export interface ScreenshotObservableOptions {
+  browserTimezone?: string;
+  conditionalHeaders: ConditionalHeaders;
+  timeouts: PhaseTimeouts;
+  urls: UrlOrUrlWithContext[];
+}
+
+export interface ScreenshotObservableResult {
+  timeRange: string | null;
+  screenshots: Screenshot[];
+  error?: Error;
+
+  /**
+   * Individual visualizations might encounter errors at runtime. If there are any they are added to this
+   * field. Any text captured here is intended to be shown to the user for debugging purposes, reporting
+   * does no further sanitization on these strings.
+   */
+  renderErrors?: string[];
+  elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
+}
+
+interface PageSetupResults {
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
+  timeRange: string | null;
+  error?: Error;
+}
 
 const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
 const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
@@ -59,6 +92,7 @@ export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
     private readonly logger: Logger,
+    private readonly layout: Layout,
     private options: ScreenshotObservableOptions
   ) {}
 
@@ -89,7 +123,7 @@ export class ScreenshotObservableHandler {
         index,
         url,
         this.options.conditionalHeaders,
-        this.options.layout.id
+        this.layout.id as ScreenshotModeLayout
       )
     ).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
   }
@@ -98,16 +132,14 @@ export class ScreenshotObservableHandler {
     const driver = this.driver;
     const waitTimeout = this.options.timeouts.waitForElements;
 
-    return defer(() =>
-      getNumberOfItems(driver, this.logger, waitTimeout, this.options.layout)
-    ).pipe(
+    return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
       mergeMap((itemsCount) => {
         // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
-        const viewport = this.options.layout.getViewport(itemsCount) || getDefaultViewPort();
+        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
 
         return forkJoin([
           driver.setViewport(viewport, this.logger),
-          waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.options.layout),
+          waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout),
         ]);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
@@ -116,7 +148,7 @@ export class ScreenshotObservableHandler {
 
   private completeRender(apmTrans: apm.Transaction | null) {
     const driver = this.driver;
-    const layout = this.options.layout;
+    const layout = this.layout;
     const logger = this.logger;
 
     return defer(async () => {
@@ -152,12 +184,12 @@ export class ScreenshotObservableHandler {
   public getScreenshots() {
     return (withRenderComplete: Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
-        mergeMap(async (data: PageSetupResults): Promise<ScreenshotResults> => {
+        mergeMap(async (data: PageSetupResults): Promise<ScreenshotObservableResult> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
 
           const elements =
             data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.options.layout.getViewport(1));
+            getDefaultElementPosition(this.layout.getViewport(1));
           const screenshots = await getScreenshots(this.driver, this.logger, elements);
           const { timeRange, error: setupError } = data;
 

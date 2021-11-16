@@ -9,7 +9,13 @@ import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
-import type { ElementsPositionAndAttribute, Screenshot } from './';
+import type { ElementsPositionAndAttribute } from './get_element_position_data';
+
+export interface Screenshot {
+  data: Buffer;
+  title: string | null;
+  description: string | null;
+}
 
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,

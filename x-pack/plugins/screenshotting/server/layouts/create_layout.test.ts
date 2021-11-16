@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { createLayout, LayoutConfig, LayoutParams, PreserveLayout } from '.';
+import type { LayoutParams } from '../../common/layout';
 import { CanvasLayout } from './canvas_layout';
+import { PreserveLayout } from './preserve_layout';
+import { createLayout } from './create_layout';
 
 describe('Create Layout', () => {
-  let config: LayoutConfig;
-  beforeEach(() => {
-    config = { zoom: 1 };
-  });
-
   it('creates preserve layout instance', () => {
     const { id, height, width } = new PreserveLayout({ width: 16, height: 16 });
     const preserveParams: LayoutParams = { id, dimensions: { height, width } };
-    const layout = createLayout(config, preserveParams);
+    const layout = createLayout(preserveParams);
     expect(layout).toMatchInlineSnapshot(`
       PreserveLayout {
         "groupCount": 1,
@@ -42,16 +39,14 @@ describe('Create Layout', () => {
   });
 
   it('creates the print layout', () => {
-    const print = createLayout(config);
+    const print = createLayout({ zoom: 1 });
     const printParams: LayoutParams = {
       id: print.id,
+      zoom: 1,
     };
-    const layout = createLayout(config, printParams);
+    const layout = createLayout(printParams);
     expect(layout).toMatchInlineSnapshot(`
       PrintLayout {
-        "config": Object {
-          "zoom": 1,
-        },
         "groupCount": 2,
         "hasFooter": true,
         "hasHeader": true,
@@ -69,6 +64,7 @@ describe('Create Layout', () => {
           "height": 1200,
           "width": 1950,
         },
+        "zoom": 1,
       }
     `);
   });
@@ -76,7 +72,7 @@ describe('Create Layout', () => {
   it('creates the canvas layout', () => {
     const { id, height, width } = new CanvasLayout({ width: 18, height: 18 });
     const canvasParams: LayoutParams = { id, dimensions: { height, width } };
-    const layout = createLayout(config, canvasParams);
+    const layout = createLayout(canvasParams);
     expect(layout).toMatchInlineSnapshot(`
       CanvasLayout {
         "groupCount": 1,

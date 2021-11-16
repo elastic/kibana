@@ -8,11 +8,11 @@
 import { of, throwError, NEVER } from 'rxjs';
 import type { Logger } from 'src/core/server';
 import { createMockBrowserDriver } from '../browsers/mock';
-import { createMockLayoutInstance } from '../layouts/mock';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
+import * as Layouts from '../layouts/create_layout';
+import { createMockLayout } from '../layouts/mock';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
-import { getScreenshots$ } from '.';
-import type { ScreenshotObservableOpts } from '.';
+import { getScreenshots, ScreenshotOptions } from './observable';
 
 /*
  * Tests
@@ -20,26 +20,25 @@ import type { ScreenshotObservableOpts } from '.';
 describe('Screenshot Observable Pipeline', () => {
   let driver: ReturnType<typeof createMockBrowserDriver>;
   let driverFactory: jest.Mocked<HeadlessChromiumDriverFactory>;
-  let layout: ReturnType<typeof createMockLayoutInstance>;
+  let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
-  let options: ScreenshotObservableOpts;
+  let options: ScreenshotOptions;
 
   beforeEach(async () => {
     driver = createMockBrowserDriver();
     driverFactory = {
       createPage: jest.fn(() => of({ driver, exit$: NEVER })),
     } as unknown as typeof driverFactory;
-    layout = createMockLayoutInstance();
+    layout = createMockLayout();
     logger = {
       debug: jest.fn(),
       error: jest.fn(),
       info: jest.fn(),
     } as unknown as jest.Mocked<Logger>;
-
     options = {
-      layout,
       browserTimezone: 'UTC',
       conditionalHeaders: {},
+      layout: {},
       timeouts: {
         loadDelay: 2000,
         openUrl: 120000,
@@ -49,326 +48,53 @@ describe('Screenshot Observable Pipeline', () => {
       urls: ['/welcome/home/start/index.htm'],
     } as unknown as typeof options;
 
+    jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
+
     driver.isPageOpen.mockReturnValue(true);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await getScreenshots$(driverFactory, logger, options).toPromise();
+    const result = await getScreenshots(driverFactory, logger, options).toPromise();
 
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "elementsPositionAndAttributes": Array [
-            Object {
-              "attributes": Object {
-                "description": "Default ",
-                "title": "Default Mock Title",
-              },
-              "position": Object {
-                "boundingClientRect": Object {
-                  "height": 600,
-                  "left": 0,
-                  "top": 0,
-                  "width": 800,
-                },
-                "scroll": Object {
-                  "x": 0,
-                  "y": 0,
-                },
-              },
-            },
-          ],
-          "error": undefined,
-          "screenshots": Array [
-            Object {
-              "data": Object {
-                "data": Array [
-                  115,
-                  99,
-                  114,
-                  101,
-                  101,
-                  110,
-                  115,
-                  104,
-                  111,
-                  116,
-                ],
-                "type": "Buffer",
-              },
-              "description": "Default ",
-              "title": "Default Mock Title",
-            },
-          ],
-          "timeRange": "Default GetTimeRange Result",
+      Object {
+        "layout": PreserveLayout {
+          "groupCount": 1,
+          "hasFooter": true,
+          "hasHeader": true,
+          "height": 100,
+          "id": "preserve_layout",
+          "scaledHeight": 200,
+          "scaledWidth": 200,
+          "selectors": Object {
+            "itemsCountAttribute": "itemsSelector",
+            "renderComplete": "renderedSelector",
+            "renderError": "[dataRenderErrorSelector]",
+            "renderErrorAttribute": "dataRenderErrorSelector",
+            "screenshot": "screenshotSelector",
+            "timefilterDurationAttribute": "timefilterDurationSelector",
+          },
+          "useReportingBranding": true,
+          "width": 100,
         },
-      ]
-    `);
-  });
-
-  it('pipelines multiple urls into', async () => {
-    driver.screenshot.mockResolvedValue(Buffer.from('some screenshots'));
-
-    await expect(
-      getScreenshots$(driverFactory, logger, {
-        ...options,
-        urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
-      }).toPromise()
-    ).resolves.toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "elementsPositionAndAttributes": Array [
-            Object {
-              "attributes": Object {
-                "description": "Default ",
-                "title": "Default Mock Title",
-              },
-              "position": Object {
-                "boundingClientRect": Object {
-                  "height": 600,
-                  "left": 0,
-                  "top": 0,
-                  "width": 800,
-                },
-                "scroll": Object {
-                  "x": 0,
-                  "y": 0,
-                },
-              },
-            },
-          ],
-          "error": undefined,
-          "screenshots": Array [
-            Object {
-              "data": Object {
-                "data": Array [
-                  115,
-                  111,
-                  109,
-                  101,
-                  32,
-                  115,
-                  99,
-                  114,
-                  101,
-                  101,
-                  110,
-                  115,
-                  104,
-                  111,
-                  116,
-                  115,
-                ],
-                "type": "Buffer",
-              },
-              "description": "Default ",
-              "title": "Default Mock Title",
-            },
-          ],
-          "timeRange": "Default GetTimeRange Result",
-        },
-        Object {
-          "elementsPositionAndAttributes": Array [
-            Object {
-              "attributes": Object {
-                "description": "Default ",
-                "title": "Default Mock Title",
-              },
-              "position": Object {
-                "boundingClientRect": Object {
-                  "height": 600,
-                  "left": 0,
-                  "top": 0,
-                  "width": 800,
-                },
-                "scroll": Object {
-                  "x": 0,
-                  "y": 0,
-                },
-              },
-            },
-          ],
-          "error": undefined,
-          "screenshots": Array [
-            Object {
-              "data": Object {
-                "data": Array [
-                  115,
-                  111,
-                  109,
-                  101,
-                  32,
-                  115,
-                  99,
-                  114,
-                  101,
-                  101,
-                  110,
-                  115,
-                  104,
-                  111,
-                  116,
-                  115,
-                ],
-                "type": "Buffer",
-              },
-              "description": "Default ",
-              "title": "Default Mock Title",
-            },
-          ],
-          "timeRange": "Default GetTimeRange Result",
-        },
-      ]
-    `);
-
-    expect(driver.open).toHaveBeenCalledTimes(2);
-    expect(driver.open).nthCalledWith(
-      1,
-      expect.anything(),
-      expect.objectContaining({ waitForSelector: '.kbnAppWrapper' }),
-      expect.anything()
-    );
-    expect(driver.open).nthCalledWith(
-      2,
-      expect.anything(),
-      expect.objectContaining({ waitForSelector: '[data-shared-page="2"]' }),
-      expect.anything()
-    );
-  });
-
-  describe('error handling', () => {
-    it('recovers if waitForSelector fails', async () => {
-      driver.waitForSelector.mockImplementation((selectorArg: string) => {
-        throw new Error('Mock error!');
-      });
-      await expect(
-        getScreenshots$(driverFactory, logger, {
-          ...options,
-          urls: [
-            '/welcome/home/start/index2.htm',
-            '/welcome/home/start/index.php3?page=./home.php3',
-          ],
-        }).toPromise()
-      ).resolves.toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "elementsPositionAndAttributes": Array [
-                    Object {
-                      "attributes": Object {},
-                      "position": Object {
-                        "boundingClientRect": Object {
-                          "height": 100,
-                          "left": 0,
-                          "top": 0,
-                          "width": 100,
-                        },
-                        "scroll": Object {
-                          "x": 0,
-                          "y": 0,
-                        },
-                      },
-                    },
-                  ],
-                  "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
-                  "screenshots": Array [
-                    Object {
-                      "data": Object {
-                        "data": Array [
-                          115,
-                          99,
-                          114,
-                          101,
-                          101,
-                          110,
-                          115,
-                          104,
-                          111,
-                          116,
-                        ],
-                        "type": "Buffer",
-                      },
-                      "description": undefined,
-                      "title": undefined,
-                    },
-                  ],
-                  "timeRange": null,
-                },
-                Object {
-                  "elementsPositionAndAttributes": Array [
-                    Object {
-                      "attributes": Object {},
-                      "position": Object {
-                        "boundingClientRect": Object {
-                          "height": 100,
-                          "left": 0,
-                          "top": 0,
-                          "width": 100,
-                        },
-                        "scroll": Object {
-                          "x": 0,
-                          "y": 0,
-                        },
-                      },
-                    },
-                  ],
-                  "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
-                  "screenshots": Array [
-                    Object {
-                      "data": Object {
-                        "data": Array [
-                          115,
-                          99,
-                          114,
-                          101,
-                          101,
-                          110,
-                          115,
-                          104,
-                          111,
-                          116,
-                        ],
-                        "type": "Buffer",
-                      },
-                      "description": undefined,
-                      "title": undefined,
-                    },
-                  ],
-                  "timeRange": null,
-                },
-              ]
-            `);
-    });
-
-    it('observes page exit', async () => {
-      driverFactory.createPage.mockReturnValue(
-        of({ driver, exit$: throwError('Instant timeout has fired!') })
-      );
-
-      await expect(
-        getScreenshots$(driverFactory, logger, options).toPromise()
-      ).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
-    });
-
-    it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {
-      driver.evaluate.mockImplementation(async (_, { context }) =>
-        context === CONTEXT_ELEMENTATTRIBUTES ? null : undefined
-      );
-
-      layout.getViewport = () => null;
-
-      await expect(getScreenshots$(driverFactory, logger, options).toPromise()).resolves
-        .toMatchInlineSnapshot(`
-        Array [
+        "results": Array [
           Object {
             "elementsPositionAndAttributes": Array [
               Object {
-                "attributes": Object {},
+                "attributes": Object {
+                  "description": "Default ",
+                  "title": "Default Mock Title",
+                },
                 "position": Object {
                   "boundingClientRect": Object {
-                    "height": 1200,
+                    "height": 600,
                     "left": 0,
                     "top": 0,
-                    "width": 1800,
+                    "width": 800,
                   },
                   "scroll": Object {
                     "x": 0,
@@ -395,14 +121,378 @@ describe('Screenshot Observable Pipeline', () => {
                   ],
                   "type": "Buffer",
                 },
-                "description": undefined,
-                "title": undefined,
+                "description": "Default ",
+                "title": "Default Mock Title",
               },
             ],
-            "timeRange": undefined,
+            "timeRange": "Default GetTimeRange Result",
           },
-        ]
-      `);
+        ],
+      }
+    `);
+  });
+
+  it('pipelines multiple urls into', async () => {
+    driver.screenshot.mockResolvedValue(Buffer.from('some screenshots'));
+
+    await expect(
+      getScreenshots(driverFactory, logger, {
+        ...options,
+        urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
+      }).toPromise()
+    ).resolves.toMatchInlineSnapshot(`
+            Object {
+              "layout": PreserveLayout {
+                "groupCount": 1,
+                "hasFooter": true,
+                "hasHeader": true,
+                "height": 100,
+                "id": "preserve_layout",
+                "scaledHeight": 200,
+                "scaledWidth": 200,
+                "selectors": Object {
+                  "itemsCountAttribute": "itemsSelector",
+                  "renderComplete": "renderedSelector",
+                  "renderError": "[dataRenderErrorSelector]",
+                  "renderErrorAttribute": "dataRenderErrorSelector",
+                  "screenshot": "screenshotSelector",
+                  "timefilterDurationAttribute": "timefilterDurationSelector",
+                },
+                "useReportingBranding": true,
+                "width": 100,
+              },
+              "results": Array [
+                Object {
+                  "elementsPositionAndAttributes": Array [
+                    Object {
+                      "attributes": Object {
+                        "description": "Default ",
+                        "title": "Default Mock Title",
+                      },
+                      "position": Object {
+                        "boundingClientRect": Object {
+                          "height": 600,
+                          "left": 0,
+                          "top": 0,
+                          "width": 800,
+                        },
+                        "scroll": Object {
+                          "x": 0,
+                          "y": 0,
+                        },
+                      },
+                    },
+                  ],
+                  "error": undefined,
+                  "screenshots": Array [
+                    Object {
+                      "data": Object {
+                        "data": Array [
+                          115,
+                          111,
+                          109,
+                          101,
+                          32,
+                          115,
+                          99,
+                          114,
+                          101,
+                          101,
+                          110,
+                          115,
+                          104,
+                          111,
+                          116,
+                          115,
+                        ],
+                        "type": "Buffer",
+                      },
+                      "description": "Default ",
+                      "title": "Default Mock Title",
+                    },
+                  ],
+                  "timeRange": "Default GetTimeRange Result",
+                },
+                Object {
+                  "elementsPositionAndAttributes": Array [
+                    Object {
+                      "attributes": Object {
+                        "description": "Default ",
+                        "title": "Default Mock Title",
+                      },
+                      "position": Object {
+                        "boundingClientRect": Object {
+                          "height": 600,
+                          "left": 0,
+                          "top": 0,
+                          "width": 800,
+                        },
+                        "scroll": Object {
+                          "x": 0,
+                          "y": 0,
+                        },
+                      },
+                    },
+                  ],
+                  "error": undefined,
+                  "screenshots": Array [
+                    Object {
+                      "data": Object {
+                        "data": Array [
+                          115,
+                          111,
+                          109,
+                          101,
+                          32,
+                          115,
+                          99,
+                          114,
+                          101,
+                          101,
+                          110,
+                          115,
+                          104,
+                          111,
+                          116,
+                          115,
+                        ],
+                        "type": "Buffer",
+                      },
+                      "description": "Default ",
+                      "title": "Default Mock Title",
+                    },
+                  ],
+                  "timeRange": "Default GetTimeRange Result",
+                },
+              ],
+            }
+          `);
+
+    expect(driver.open).toHaveBeenCalledTimes(2);
+    expect(driver.open).nthCalledWith(
+      1,
+      expect.anything(),
+      expect.objectContaining({ waitForSelector: '.kbnAppWrapper' }),
+      expect.anything()
+    );
+    expect(driver.open).nthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ waitForSelector: '[data-shared-page="2"]' }),
+      expect.anything()
+    );
+  });
+
+  describe('error handling', () => {
+    it('recovers if waitForSelector fails', async () => {
+      driver.waitForSelector.mockImplementation((selectorArg: string) => {
+        throw new Error('Mock error!');
+      });
+      await expect(
+        getScreenshots(driverFactory, logger, {
+          ...options,
+          urls: [
+            '/welcome/home/start/index2.htm',
+            '/welcome/home/start/index.php3?page=./home.php3',
+          ],
+        }).toPromise()
+      ).resolves.toMatchInlineSnapshot(`
+              Object {
+                "layout": PreserveLayout {
+                  "groupCount": 1,
+                  "hasFooter": true,
+                  "hasHeader": true,
+                  "height": 100,
+                  "id": "preserve_layout",
+                  "scaledHeight": 200,
+                  "scaledWidth": 200,
+                  "selectors": Object {
+                    "itemsCountAttribute": "itemsSelector",
+                    "renderComplete": "renderedSelector",
+                    "renderError": "[dataRenderErrorSelector]",
+                    "renderErrorAttribute": "dataRenderErrorSelector",
+                    "screenshot": "screenshotSelector",
+                    "timefilterDurationAttribute": "timefilterDurationSelector",
+                  },
+                  "useReportingBranding": true,
+                  "width": 100,
+                },
+                "results": Array [
+                  Object {
+                    "elementsPositionAndAttributes": Array [
+                      Object {
+                        "attributes": Object {},
+                        "position": Object {
+                          "boundingClientRect": Object {
+                            "height": 100,
+                            "left": 0,
+                            "top": 0,
+                            "width": 100,
+                          },
+                          "scroll": Object {
+                            "x": 0,
+                            "y": 0,
+                          },
+                        },
+                      },
+                    ],
+                    "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
+                    "screenshots": Array [
+                      Object {
+                        "data": Object {
+                          "data": Array [
+                            115,
+                            99,
+                            114,
+                            101,
+                            101,
+                            110,
+                            115,
+                            104,
+                            111,
+                            116,
+                          ],
+                          "type": "Buffer",
+                        },
+                        "description": undefined,
+                        "title": undefined,
+                      },
+                    ],
+                    "timeRange": null,
+                  },
+                  Object {
+                    "elementsPositionAndAttributes": Array [
+                      Object {
+                        "attributes": Object {},
+                        "position": Object {
+                          "boundingClientRect": Object {
+                            "height": 100,
+                            "left": 0,
+                            "top": 0,
+                            "width": 100,
+                          },
+                          "scroll": Object {
+                            "x": 0,
+                            "y": 0,
+                          },
+                        },
+                      },
+                    ],
+                    "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
+                    "screenshots": Array [
+                      Object {
+                        "data": Object {
+                          "data": Array [
+                            115,
+                            99,
+                            114,
+                            101,
+                            101,
+                            110,
+                            115,
+                            104,
+                            111,
+                            116,
+                          ],
+                          "type": "Buffer",
+                        },
+                        "description": undefined,
+                        "title": undefined,
+                      },
+                    ],
+                    "timeRange": null,
+                  },
+                ],
+              }
+            `);
+    });
+
+    it('observes page exit', async () => {
+      driverFactory.createPage.mockReturnValue(
+        of({ driver, exit$: throwError('Instant timeout has fired!') })
+      );
+
+      await expect(
+        getScreenshots(driverFactory, logger, options).toPromise()
+      ).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
+    });
+
+    it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {
+      driver.evaluate.mockImplementation(async (_, { context }) =>
+        context === CONTEXT_ELEMENTATTRIBUTES ? null : undefined
+      );
+
+      layout.getViewport = () => null;
+
+      await expect(getScreenshots(driverFactory, logger, options).toPromise()).resolves
+        .toMatchInlineSnapshot(`
+              Object {
+                "layout": PreserveLayout {
+                  "getViewport": [Function],
+                  "groupCount": 1,
+                  "hasFooter": true,
+                  "hasHeader": true,
+                  "height": 100,
+                  "id": "preserve_layout",
+                  "scaledHeight": 200,
+                  "scaledWidth": 200,
+                  "selectors": Object {
+                    "itemsCountAttribute": "itemsSelector",
+                    "renderComplete": "renderedSelector",
+                    "renderError": "[dataRenderErrorSelector]",
+                    "renderErrorAttribute": "dataRenderErrorSelector",
+                    "screenshot": "screenshotSelector",
+                    "timefilterDurationAttribute": "timefilterDurationSelector",
+                  },
+                  "useReportingBranding": true,
+                  "width": 100,
+                },
+                "results": Array [
+                  Object {
+                    "elementsPositionAndAttributes": Array [
+                      Object {
+                        "attributes": Object {},
+                        "position": Object {
+                          "boundingClientRect": Object {
+                            "height": 1200,
+                            "left": 0,
+                            "top": 0,
+                            "width": 1800,
+                          },
+                          "scroll": Object {
+                            "x": 0,
+                            "y": 0,
+                          },
+                        },
+                      },
+                    ],
+                    "error": undefined,
+                    "screenshots": Array [
+                      Object {
+                        "data": Object {
+                          "data": Array [
+                            115,
+                            99,
+                            114,
+                            101,
+                            101,
+                            110,
+                            115,
+                            104,
+                            111,
+                            116,
+                          ],
+                          "type": "Buffer",
+                        },
+                        "description": undefined,
+                        "title": undefined,
+                      },
+                    ],
+                    "timeRange": undefined,
+                  },
+                ],
+              }
+            `);
     });
   });
 });

@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { createLayout, LayoutTypes, LayoutInstance } from '.';
+import { createLayout, LayoutTypes, Layout } from '.';
 
-export function createMockLayoutInstance(): LayoutInstance {
-  const layout = createLayout(
-    { zoom: 1 },
-    {
-      id: LayoutTypes.PRESERVE_LAYOUT,
-      dimensions: { height: 100, width: 100 },
-    }
-  ) as LayoutInstance;
+export function createMockLayout(): Layout {
+  const layout = createLayout({
+    id: LayoutTypes.PRESERVE_LAYOUT,
+    dimensions: { height: 100, width: 100 },
+    zoom: 1,
+  }) as Layout;
 
   layout.selectors = {
     renderComplete: 'renderedSelector',

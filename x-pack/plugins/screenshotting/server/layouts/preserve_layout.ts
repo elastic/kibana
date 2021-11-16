@@ -6,14 +6,16 @@
  */
 import path from 'path';
 import type { CustomPageSize } from 'pdfmake/interfaces';
-import { getDefaultLayoutSelectors, LayoutTypes } from '.';
-import type { LayoutInstance, LayoutSelectorDictionary, PageSizeParams, Size } from '.';
-import { Layout } from './layout';
+import type { LayoutSelectorDictionary, Size } from '../../common/layout';
+import { DEFAULT_SELECTORS, LayoutTypes } from '.';
+import type { Layout } from '.';
+import { BaseLayout } from './base_layout';
+import type { PageSizeParams } from './base_layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
 
-export class PreserveLayout extends Layout implements LayoutInstance {
+export class PreserveLayout extends BaseLayout implements Layout {
   public readonly selectors: LayoutSelectorDictionary;
   public readonly groupCount = 1;
   public readonly height: number;
@@ -28,10 +30,7 @@ export class PreserveLayout extends Layout implements LayoutInstance {
     this.scaledHeight = size.height * ZOOM;
     this.scaledWidth = size.width * ZOOM;
 
-    this.selectors = {
-      ...getDefaultLayoutSelectors(),
-      ...selectors,
-    };
+    this.selectors = { ...DEFAULT_SELECTORS, ...selectors };
   }
 
   public getCssOverridesPath() {

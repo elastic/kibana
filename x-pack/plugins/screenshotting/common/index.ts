@@ -6,3 +6,4 @@
  */
 
 export type { Context } from './context';
+export type { LayoutParams } from './layout';

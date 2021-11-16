@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
-import { LayoutInstance } from '../layouts';
+import { Layout } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
 interface CompletedItemsCountParameters {
@@ -41,7 +41,7 @@ export const waitForVisualizations = async (
   logger: Logger,
   timeout: number,
   toEqual: number,
-  layout: LayoutInstance
+  layout: Layout
 ): Promise<void> => {
   const span = apm.startSpan('wait_for_visualizations', 'wait');
   const { renderComplete: renderCompleteSelector } = layout.selectors;

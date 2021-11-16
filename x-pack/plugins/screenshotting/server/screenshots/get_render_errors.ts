@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
-import type { LayoutInstance } from '../layouts';
+import type { Layout } from '../layouts';
 import { CONTEXT_GETRENDERERRORS } from './constants';
 
 export const getRenderErrors = async (
   browser: HeadlessChromiumDriver,
   logger: Logger,
-  layout: LayoutInstance
+  layout: Layout
 ): Promise<undefined | string[]> => {
   const span = apm.startSpan('get_render_errors', 'read');
   logger.debug('reading render errors');

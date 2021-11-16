@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
-import { LayoutInstance } from '../layouts';
+import { Layout } from '../layouts';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
 
 export const getNumberOfItems = async (
   browser: HeadlessChromiumDriver,
   logger: Logger,
   timeout: number,
-  layout: LayoutInstance
+  layout: Layout
 ): Promise<number> => {
   const span = apm.startSpan('get_number_of_items', 'read');
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;

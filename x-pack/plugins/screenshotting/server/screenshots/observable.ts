@@ -7,13 +7,34 @@
 
 import apm from 'elastic-apm-node';
 import { from, of, Observable } from 'rxjs';
-import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
+import {
+  catchError,
+  concatMap,
+  first,
+  map,
+  mergeMap,
+  take,
+  takeUntil,
+  toArray,
+} from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
+import { LayoutParams } from '../../common';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
-import type { PageSetupResults, ScreenshotObservableOptions, ScreenshotResults } from '.';
+import { createLayout } from '../layouts';
+import type { Layout } from '../layouts';
 import { ScreenshotObservableHandler } from './observable_handler';
+import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable_handler';
 
-const defaultSetupResult: PageSetupResults = {
+export interface ScreenshotOptions extends ScreenshotObservableOptions {
+  layout: LayoutParams;
+}
+
+export interface ScreenshotResult {
+  layout: Layout;
+  results: ScreenshotObservableResult[];
+}
+
+const DEFAULT_SETUP_RESULT = {
   elementsPositionAndAttributes: null,
   timeRange: null,
 };
@@ -21,9 +42,14 @@ const defaultSetupResult: PageSetupResults = {
 export function getScreenshots$(
   browserDriverFactory: HeadlessChromiumDriverFactory,
   logger: Logger,
-  options: ScreenshotObservableOptions
-): Observable<ScreenshotResults[]> {
+  options: ScreenshotOptions
+): Observable<ScreenshotResult> {
   const apmTrans = apm.startTransaction('screenshot-pipeline', 'reporting');
+  const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
+  const layout = createLayout(options.layout);
+  logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
+  apmCreateLayout?.end();
+
   const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
   const {
     browserTimezone,
@@ -35,23 +61,24 @@ export function getScreenshots$(
       apmCreatePage?.end();
       exit$.subscribe({ error: () => apmTrans?.end() });
 
-      const screen = new ScreenshotObservableHandler(driver, logger, options);
+      const screen = new ScreenshotObservableHandler(driver, logger, layout, options);
 
       return from(options.urls).pipe(
         concatMap((url, index) =>
           screen.setupPage(index, url, apmTrans).pipe(
-            catchError((err) => {
+            catchError((error) => {
               screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
-              logger.error(err);
-              return of({ ...defaultSetupResult, error: err }); // allow failover screenshot capture
+              logger.error(error);
+              return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
             }),
             takeUntil(exit$),
             screen.getScreenshots()
           )
         ),
         take(options.urls.length),
-        toArray()
+        toArray(),
+        map((results) => ({ layout, results }))
       );
     }),
     first()

@@ -13,7 +13,10 @@ import { Context } from '../../common';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { ConditionalHeaders } from '../browsers';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
-import type { UrlOrUrlWithContext } from '.';
+
+type Url = string;
+type UrlWithContext = [url: Url, context: Context];
+export type UrlOrUrlWithContext = Url | UrlWithContext;
 
 export const openUrl = async (
   browser: HeadlessChromiumDriver,

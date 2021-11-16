@@ -7,17 +7,17 @@
 
 import type { Logger } from 'src/core/server';
 import { createMockBrowserDriver } from '../browsers/mock';
-import { createMockLayoutInstance } from '../layouts/mock';
+import { createMockLayout } from '../layouts/mock';
 import { getTimeRange } from './get_time_range';
 
 describe('getTimeRange', () => {
   let browser: ReturnType<typeof createMockBrowserDriver>;
-  let layout: ReturnType<typeof createMockLayoutInstance>;
+  let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
-    layout = createMockLayoutInstance();
+    layout = createMockLayout();
     logger = { debug: jest.fn(), info: jest.fn() } as unknown as jest.Mocked<Logger>;
 
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
