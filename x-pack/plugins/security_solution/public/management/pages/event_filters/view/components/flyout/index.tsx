@@ -20,6 +20,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextColor,
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
 import { EventFiltersForm } from '../form';
@@ -141,7 +142,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         <EuiButton
           data-test-subj="add-exception-confirm-button"
           fill
-          disabled={formHasError || creationInProgress}
+          disabled={formHasError || creationInProgress || (!!data && !enrichedData)}
           onClick={() =>
             id
               ? dispatch({ type: 'eventFiltersUpdateStart' })
@@ -157,7 +158,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           ) : data ? (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update.withData"
-              defaultMessage="Update endpoint event filter"
+              defaultMessage="Add endpoint event filter"
             />
           ) : (
             <FormattedMessage
@@ -167,7 +168,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           )}
         </EuiButton>
       ),
-      [formHasError, creationInProgress, id, data, dispatch]
+      [formHasError, creationInProgress, data, enrichedData, id, dispatch]
     );
 
     return (
@@ -193,10 +194,18 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
               )}
             </h2>
           </EuiTitle>
+          {data ? (
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create.withData"
+                defaultMessage="Endpoint security"
+              />
+            </EuiTextColor>
+          ) : null}
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EventFiltersForm allowSelectOs />
+          <EventFiltersForm allowSelectOs={!data} />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
