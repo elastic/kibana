@@ -39,13 +39,12 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     it('Should render all steps', async () => {
       testSubjects.exists('backupStep-incomplete');
       testSubjects.exists('fixIssuesStep-incomplete');
-      testSubjects.exists('fixLogsStep-incomplete');
       testSubjects.exists('upgradeStep');
     });
 
-    describe('fixLogsStep', () => {
+    describe('ES deprecation logs', () => {
       before(async () => {
-        await PageObjects.upgradeAssistant.navigateToPage();
+        await PageObjects.upgradeAssistant.navigateToFixDeprecationLogs();
         // Access to system indices will be deprecated and should generate a deprecation log
         await es.indices.get({ index: '.kibana' });
         // Only click deprecation logging toggle if its not already enabled
@@ -59,7 +58,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
       });
 
       beforeEach(async () => {
-        await PageObjects.upgradeAssistant.navigateToPage();
+        await PageObjects.upgradeAssistant.navigateToFixDeprecationLogs();
       });
 
       it('Shows warnings callout if there are deprecations', async () => {

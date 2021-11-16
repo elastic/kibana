@@ -52,8 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/115859
-  describe.skip('Upgrade Assistant', () => {
+  describe('Upgrade Assistant', () => {
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
 
@@ -84,6 +83,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
           return testSubjects.exists('overview');
         });
+      });
+
+      it('has no accessibility issues', async () => {
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('ES deprecations logs page', () => {
+      beforeEach(async () => {
+        await PageObjects.upgradeAssistant.navigateToFixDeprecationLogs();
       });
 
       it('with logs collection disabled', async () => {
@@ -132,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
-      it('Default deprecation flyout', async () => {
+      it.skip('Default deprecation flyout', async () => {
         await PageObjects.upgradeAssistant.clickEsDeprecation(
           'default' // A default deprecation was added in the before() hook so should be guaranteed
         );
