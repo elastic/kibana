@@ -10,7 +10,21 @@ import { getRequestBase } from './get_request_base';
 
 describe('correlations', () => {
   describe('getRequestBase', () => {
-    it('returns the request base parameters', () => {
+    it('defaults to not setting `ignore_throttled`', () => {
+      const requestBase = getRequestBase({
+        index: 'apm-*',
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
+        start: 1577836800000,
+        end: 1609459200000,
+      });
+      expect(requestBase).toEqual({
+        index: 'apm-*',
+        ignore_unavailable: true,
+      });
+    });
+
+    it('adds `ignore_throttled=false` when `includeFrozen=true`', () => {
       const requestBase = getRequestBase({
         index: 'apm-*',
         includeFrozen: true,
