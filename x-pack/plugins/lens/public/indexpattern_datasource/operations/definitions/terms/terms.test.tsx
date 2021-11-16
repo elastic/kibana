@@ -22,8 +22,9 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
-import { IndexPattern, IndexPatternLayer } from '../../../types';
+import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
+import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -45,6 +46,7 @@ const defaultProps = {
 describe('terms', () => {
   let layer: IndexPatternLayer;
   const InlineOptions = termsOperation.paramEditor!;
+  const InlineFieldInput = termsOperation.renderFieldInput!;
 
   beforeEach(() => {
     layer = {
@@ -686,6 +688,195 @@ describe('terms', () => {
     });
   });
 
+  describe('getDefaultLabel', () => {
+    it('should return the default label for single value', () => {
+      expect(
+        termsOperation.getDefaultLabel(
+          {
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'alphabetical', fallback: true },
+              size: 3,
+              orderDirection: 'asc',
+            },
+            sourceField: 'source',
+          } as TermsIndexPatternColumn,
+          createMockedIndexPattern(),
+          {}
+        )
+      ).toBe('Top values of source');
+    });
+
+    it('should return main value with single counter for two fields', () => {
+      expect(
+        termsOperation.getDefaultLabel(
+          {
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'alphabetical', fallback: true },
+              size: 3,
+              orderDirection: 'asc',
+              secondaryFields: ['bytes'],
+            },
+            sourceField: 'source',
+          } as TermsIndexPatternColumn,
+          createMockedIndexPattern(),
+          {}
+        )
+      ).toBe('Top values of source + 1 other');
+    });
+
+    it('should return main value with counter value for multiple values', () => {
+      expect(
+        termsOperation.getDefaultLabel(
+          {
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'alphabetical', fallback: true },
+              size: 3,
+              orderDirection: 'asc',
+              secondaryFields: ['bytes', 'memory'],
+            },
+            sourceField: 'source',
+          } as TermsIndexPatternColumn,
+          createMockedIndexPattern(),
+          {}
+        )
+      ).toBe('Top values of source + 2 others');
+    });
+  });
+
+  describe('field input', () => {
+    const defaultFieldInputProps = {
+      indexPattern: defaultProps.indexPattern,
+      currentFieldIsInvalid: false,
+      incompleteField: null,
+      incompleteOperation: undefined,
+      incompleteParams: {},
+      dimensionGroups: [],
+      groupId: 'any',
+      operationDefinitionMap: defaultProps.operationDefinitionMap,
+    };
+
+    function getExistingFields() {
+      const fields: Record<string, boolean> = {};
+      for (const field of defaultProps.indexPattern.fields) {
+        fields[field.name] = true;
+      }
+      return {
+        [layer.indexPatternId]: fields,
+      };
+    }
+
+    function getDefaultOperationSupportMatrix(
+      columnId: string,
+      existingFields: Record<string, Record<string, boolean>>
+    ) {
+      return getOperationSupportMatrix({
+        state: {
+          layers: { layer1: layer },
+          indexPatterns: {
+            [defaultProps.indexPattern.id]: defaultProps.indexPattern,
+          },
+          existingFields,
+        } as unknown as IndexPatternPrivateState,
+        layerId: 'layer1',
+        filterOperations: () => true,
+        columnId,
+      });
+    }
+
+    it('should render the default field input for no field', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const instance = shallow(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+        />
+      );
+
+      // Fallback field input has no add button
+      expect(instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()).toBeFalsy();
+      // check the error message too
+      expect(instance.find('[data-test-subj="indexPattern-field-selection-row"]').text()).toBe(
+        'To use this function, select a field'
+      );
+    });
+
+    it('should show an error message when field is invalid', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      layer.columns.col1 = {
+        label: 'Top value of unsupported',
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'unsupported',
+      };
+      const instance = shallow(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+        />
+      );
+      expect(instance.find('[data-test-subj="indexPattern-field-selection-row"]').text()).toBe(
+        'Field unsupported is of the wrong type'
+      );
+    });
+    it.todo('should render the default field input for incomplete column');
+
+    it.todo('should render the an add button for single layer, but no other hints');
+
+    it.todo('should render the multi terms specific UI');
+
+    it.todo('should return to single value UI when removing second item of two');
+
+    it.todo(
+      'should disable remove button and reorder drag when single value and one temporary new field'
+    );
+
+    it.todo('should enable fields reordering via drag and drop');
+
+    it.todo('should accept scripted fields for single value');
+
+    it.todo('should not filter scripted fields when in single value');
+
+    it.todo('should mark scripted fields for multiple values');
+
+    it.todo('should filter scripted fields when in multi terms mode');
+
+    it.todo('should filter already used fields when displaying fields list');
+  });
+
   describe('param editor', () => {
     it('should render current other bucket value', () => {
       const updateLayerSpy = jest.fn();
@@ -1040,6 +1231,38 @@ describe('terms', () => {
       };
       expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
         'Field notExisting was not found',
+      ]);
+    });
+
+    it('return no error for scripted field when in single mode', () => {
+      layer = {
+        ...layer,
+        columns: {
+          col1: {
+            ...layer.columns.col1,
+            sourceField: 'scripted',
+          } as TermsIndexPatternColumn,
+        },
+      };
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toBeUndefined();
+    });
+
+    it('return error for scripted field when in multi terms mode', () => {
+      layer = {
+        ...layer,
+        columns: {
+          col1: {
+            ...layer.columns.col1,
+            sourceField: 'scripted',
+            params: {
+              ...layer.columns.col1.params,
+              secondaryFields: ['bytes'],
+            },
+          } as TermsIndexPatternColumn,
+        },
+      };
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+        'Scripted fields are not supported when using multiple fields, found scripted',
       ]);
     });
 

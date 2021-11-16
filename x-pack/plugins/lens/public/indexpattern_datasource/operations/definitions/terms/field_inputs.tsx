@@ -98,13 +98,14 @@ export function FieldInputs({
           onChoose={onFieldSelectChange}
         />
         <NewBucketButton
+          data-test-subj={`indexPattern-terms-add-field`}
           onClick={() => {
             handleInputChange([
               ...localValues,
               { id: generateId(), value: undefined, isNew: true },
             ]);
           }}
-          label={i18n.translate('xpack.lens.indexPattern.terms.addaFilter', {
+          label={i18n.translate('xpack.lens.indexPattern.terms.addField', {
             defaultMessage: 'Add field',
           })}
         />
@@ -205,7 +206,7 @@ export function FieldInputs({
                         onClick={() => {
                           handleInputChange(localValues.filter((_, i) => i !== index));
                         }}
-                        data-test-subj={`indexPattern-terms-removeStop-${index}`}
+                        data-test-subj={`indexPattern-terms-removeField-${index}`}
                         isDisabled={disableActions && !isNew}
                       />
                     </TooltipWrapper>
