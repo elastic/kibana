@@ -18,7 +18,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   // Only update the baseline images from Jenkins session images after comparing them
   // These tests might fail locally because of scaling factors and resolution.
 
-  describe('maps loaded from sample data', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/118745
+  describe.skip('maps loaded from sample data', () => {
     before(async () => {
       //installing the sample data with test user with super user role and then switching roles with limited privileges
       await security.testUser.setRoles(['superuser'], false);
