@@ -62,7 +62,7 @@ beta:[] {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled check
 [[security-rules]]
 === Security rules
 
-{security-guide}/prebuilt-rules.html[Security rules] detect suspicious source events with pre-built or custom rules and create alerts when a rule’s conditions are met.
+Security rules detect suspicious source events with pre-built or custom rules and create alerts when a rule’s conditions are met. For more information, refer to {security-guide}/prebuilt-rules.html[Security rules].
 
 include::rule-types/index-threshold.asciidoc[]
 include::rule-types/es-query.asciidoc[]

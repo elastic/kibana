@@ -24,7 +24,7 @@ This section describes all of these elements and how they operate together.
 [float]
 === Rules
 
-A rule specifies a background task that runs on the {kib} server to check for specific conditions. {kib} provides two types of rules: stack rules that are built into {kib} and domain rules that are registered by Kibana apps. Refer to <<rule-types,Rule types>> for more information.
+A rule specifies a background task that runs on the {kib} server to check for specific conditions. {kib} provides two types of rules: stack rules that are built into {kib} and the rules that are registered by Kibana apps. Refer to <<rule-types,Rule types>> for more information.
 
 A rule consists of three main parts: 
 
@@ -53,7 +53,7 @@ to control the details of the conditions to detect.
 
 For example, an <<rule-type-index-threshold, index threshold rule type>> lets you specify the index to query, an aggregation field, and a time window, but the details of the underlying {es} query are hidden.
 
-See <<stack-rules>>, <<observability-rules>>, <<security-rules>>, <<ml-rules>> for the types of rules provided by {kib} and how they express their conditions.
+See <<rule-types>> for the rules provided by {kib} and how they express their conditions.
 
 [float]
 [[alerting-concepts-scheduling]]
