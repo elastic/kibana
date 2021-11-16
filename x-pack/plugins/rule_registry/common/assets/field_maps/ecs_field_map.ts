@@ -716,12 +716,12 @@ export const ecsFieldMap = {
     required: false,
   },
   'error.message': {
-    type: 'match_only_text',
+    type: 'text',
     array: false,
     required: false,
   },
   'error.stack_trace': {
-    type: 'wildcard',
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1581,7 +1581,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'http.request.body.content': {
-    type: 'wildcard',
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1616,7 +1616,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'http.response.body.content': {
-    type: 'wildcard',
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1711,7 +1711,7 @@ export const ecsFieldMap = {
     required: false,
   },
   message: {
-    type: 'match_only_text',
+    type: 'text',
     array: false,
     required: false,
   },
@@ -2176,7 +2176,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.command_line': {
-    type: 'wildcard',
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2431,7 +2431,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.parent.command_line': {
-    type: 'wildcard',
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2796,7 +2796,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'registry.data.strings': {
-    type: 'wildcard',
+    type: 'keyword',
     array: true,
     required: false,
   },
@@ -5526,12 +5526,12 @@ export const ecsFieldMap = {
     required: false,
   },
   'url.full': {
-    type: 'wildcard',
+    type: 'keyword',
     array: false,
     required: false,
   },
   'url.original': {
-    type: 'wildcard',
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -5541,7 +5541,7 @@ export const ecsFieldMap = {
     required: false,
   },
   'url.path': {
-    type: 'wildcard',
+    type: 'keyword',
     array: false,
     required: false,
   },
