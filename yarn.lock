@@ -2073,6 +2073,13 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@babel/runtime@^7.16.0":
+  version "7.16.3"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.16.3.tgz#b86f0db02a04187a3c17caa77de69840165d42d5"
+  integrity sha512-WBwekcqacdY2e9AF/Q7WLFUWmdJGJTkbjqTjoMDgXkVZ3ZRUvOPsLb5KdwISoQVsbP+DQzVZW4Zhci0DvpbNTQ==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 "@babel/template@^7.10.4", "@babel/template@^7.12.13", "@babel/template@^7.12.7", "@babel/template@^7.3.3", "@babel/template@^7.4.4":
   version "7.12.13"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.12.13.tgz#530265be8a2589dbb37523844c5bcb55947fb327"
@@ -6689,10 +6696,10 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node-forge@^0.10.5":
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.10.5.tgz#f79925c88202817a7ec0958c3a9d3a915d362b4f"
-  integrity sha512-P+Q+MPSDr0RgIzv5h0gJuJDCm1e4RaSu/EMJZTUS4ZzboWH2uX/T7TiqAAcEFTHzCKtgMRqCgTVTX9SD72fMTQ==
+"@types/node-forge@^0.10.10":
+  version "0.10.10"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.10.10.tgz#07ffccf0f7f3ebb97de67446555912803be50e7b"
+  integrity sha512-iixn5bedlE9fm/5mN7fPpXraXlxCVrnNWHZekys8c5fknridLVWGnNRqlaWpenwaijIuB3bNI0lEOm+JD6hZUA==
   dependencies:
     "@types/node" "*"
 
@@ -9598,19 +9605,18 @@ broadcast-channel@^3.4.1:
     rimraf "3.0.2"
     unload "2.2.0"
 
-broadcast-channel@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-4.2.0.tgz#9ca93a23a31036266c2c9b0f8f55bd21594b8f82"
-  integrity sha512-XX9yNnIy/v2T+HR5EKIH7ziM2mYTefsrzZ2lkCmFZxwCDG7Ns7HLIooUXA114sCeFRJ4MEXEgdMapxfPDh9Xkg==
+broadcast-channel@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-4.5.0.tgz#d4717c493e219908fcb7f2f9078fe0baf95b77c1"
+  integrity sha512-jp+VPlQ1HyR0CM3uIYUrdpXupBvhTMFRkjR6mEmt5W4HaGDPFEzrO2Jqvi2PZ6zCC4zwLeco7CC5EUJPrVH8Tw==
   dependencies:
-    "@babel/runtime" "^7.7.2"
+    "@babel/runtime" "^7.16.0"
     detect-node "^2.1.0"
-    js-sha3 "0.8.0"
     microseconds "0.2.0"
     nano-time "1.0.0"
     oblivious-set "1.0.0"
     rimraf "3.0.2"
-    unload "2.2.0"
+    unload "2.3.1"
 
 brorand@^1.0.1, brorand@^1.1.0:
   version "1.1.0"
@@ -12761,15 +12767,15 @@ detect-newline@^3.0.0:
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
   integrity sha512-TLz+x/vEXm/Y7P7wn1EJFNLxYpUD4TgMosxY6fAVJUnJMbupHBOncxyWUG9OpTaH9EBD7uFI5LfEgmMOc54DsA==
 
+detect-node@2.1.0, detect-node@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
+  integrity sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==
+
 detect-node@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.0.4.tgz#014ee8f8f669c5c58023da64b8179c083a28c46c"
   integrity sha512-ZIzRpLJrOj7jjP2miAtgqIfmzbxa4ZOr5jJc601zklsfEx9oTzmmj2nVpIPRpNlRTIh8lc1kyViIY7BWSGNmKw==
-
-detect-node@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
-  integrity sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==
 
 detect-port-alt@1.1.6:
   version "1.1.6"
@@ -28957,6 +28963,14 @@ unload@2.2.0:
   dependencies:
     "@babel/runtime" "^7.6.2"
     detect-node "^2.0.4"
+
+unload@2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/unload/-/unload-2.3.1.tgz#9d16862d372a5ce5cb630ad1309c2fd6e35dacfe"
+  integrity sha512-MUZEiDqvAN9AIDRbbBnVYVvfcR6DrjCqeU2YQMmliFZl9uaBUjTkhuDQkBiyAy8ad5bx1TXVbqZ3gg7namsWjA==
+  dependencies:
+    "@babel/runtime" "^7.6.2"
+    detect-node "2.1.0"
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"
