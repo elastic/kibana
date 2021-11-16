@@ -6,26 +6,18 @@
  */
 import { EuiLink } from '@elastic/eui';
 import React, { useContext, useCallback, useEffect } from 'react';
-/**
- * We need to produce types and code transpilation at different folders during the build of the package.
- * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
- * This way plugins can do targeted imports to reduce the final code bundle
- */
-import type {
-  ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
-  ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
-} from '@kbn/rule-data-utils';
+import React from 'react';
 import {
-  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
-  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
+  ALERT_DURATION,
+  ALERT_SEVERITY,
+  ALERT_STATUS,
+  ALERT_REASON,
   TIMESTAMP,
-  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+} from '@kbn/rule-data-utils/alerts_as_data_status';
 import {
   euiLightVars as themeLight,
   euiDarkVars as themeDark,
@@ -39,11 +31,6 @@ import { SeverityBadge } from './severity_badge';
 import { TopAlert } from '.';
 import { parseAlert } from './parse_alert';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-
-const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
-const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 export const getMappedNonEcsValue = ({
   data,
