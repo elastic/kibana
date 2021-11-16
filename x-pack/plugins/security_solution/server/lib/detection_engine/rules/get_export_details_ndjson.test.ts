@@ -20,6 +20,7 @@ describe('getExportDetailsNdjson', () => {
     const details = getExportDetailsNdjson([rule]);
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
+      exported_count: 1,
       exported_rules_count: 1,
       missing_rules: [],
       missing_rules_count: 0,
@@ -31,6 +32,7 @@ describe('getExportDetailsNdjson', () => {
     const details = getExportDetailsNdjson([], [missingRule]);
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
+      exported_count: 0,
       exported_rules_count: 0,
       missing_rules: [{ rule_id: 'rule-1' }],
       missing_rules_count: 1,
@@ -49,6 +51,7 @@ describe('getExportDetailsNdjson', () => {
     const details = getExportDetailsNdjson([rule1, rule2], [missingRule1, missingRule2]);
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
+      exported_count: 2,
       exported_rules_count: 2,
       missing_rules: [missingRule1, missingRule2],
       missing_rules_count: 2,

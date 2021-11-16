@@ -46,6 +46,11 @@ export const buildActionResultsQuery = ({
                 },
               },
               aggs: {
+                rows_count: {
+                  sum: {
+                    field: 'action_response.osquery.count',
+                  },
+                },
                 responses: {
                   terms: {
                     script: {

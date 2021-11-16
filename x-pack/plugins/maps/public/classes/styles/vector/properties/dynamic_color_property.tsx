@@ -101,7 +101,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   supportsFieldMeta() {
-    if (!this.isComplete() || !this._field || !this._field.supportsFieldMeta()) {
+    if (!this.isComplete() || !this._field || !this._field.supportsFieldMetaFromEs()) {
       return false;
     }
 

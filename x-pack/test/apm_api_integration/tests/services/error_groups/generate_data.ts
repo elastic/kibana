@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { service, timerange } from '@elastic/apm-synthtrace';
-import type { SynthtraceEsClient } from '../../../common/synthtrace_es_client';
+import type { SynthtraceEsClient } from '@elastic/apm-synthtrace';
 
 export const config = {
   PROD_LIST_RATE: 75,

@@ -36,7 +36,7 @@ const MOCK_VALUES = {
   ],
   // EngineLogic
   engine: {
-    search_relevance_suggestions_active: true,
+    adaptive_relevance_suggestions_active: true,
   },
 };
 
@@ -71,14 +71,14 @@ describe('CurationsOverview', () => {
   });
 
   it('renders a suggestions table when suggestions are active', () => {
-    setMockValues(set('engine.search_relevance_suggestions_active', true, MOCK_VALUES));
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', true, MOCK_VALUES));
     const wrapper = shallow(<CurationsOverview />);
 
     expect(wrapper.find(SuggestionsTable).exists()).toBe(true);
   });
 
   it('doesn\t render a suggestions table when suggestions are not active', () => {
-    setMockValues(set('engine.search_relevance_suggestions_active', false, MOCK_VALUES));
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, MOCK_VALUES));
     const wrapper = shallow(<CurationsOverview />);
 
     expect(wrapper.find(SuggestionsTable).exists()).toBe(false);

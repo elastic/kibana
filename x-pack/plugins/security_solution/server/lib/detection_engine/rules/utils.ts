@@ -333,6 +333,10 @@ export const legacyMigrate = async ({
     }),
     savedObjectsClient.find({
       type: legacyRuleActionsSavedObjectType,
+      hasReference: {
+        type: 'alert',
+        id: rule.id,
+      },
     }),
   ]);
 
@@ -346,8 +350,10 @@ export const legacyMigrate = async ({
           )
         : null,
     ]);
+
+    const { id, ...restOfRule } = rule;
     const migratedRule = {
-      ...rule,
+      ...restOfRule,
       actions: siemNotification.data[0].actions,
       throttle: siemNotification.data[0].schedule.interval,
       notifyWhen: transformToNotifyWhen(siemNotification.data[0].throttle),
@@ -356,7 +362,7 @@ export const legacyMigrate = async ({
       id: rule.id,
       data: migratedRule,
     });
-    return migratedRule;
+    return { id: rule.id, ...migratedRule };
   }
   return rule;
 };

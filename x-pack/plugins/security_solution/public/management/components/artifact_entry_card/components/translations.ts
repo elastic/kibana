@@ -54,6 +54,13 @@ export const CONDITION_OPERATOR_TYPE_MATCH = i18n.translate(
   }
 );
 
+export const CONDITION_OPERATOR_TYPE_NOT_MATCH = i18n.translate(
+  'xpack.securitySolution.artifactCard.conditions.matchOperator.not',
+  {
+    defaultMessage: 'IS NOT',
+  }
+);
+
 export const CONDITION_OPERATOR_TYPE_WILDCARD = i18n.translate(
   'xpack.securitySolution.artifactCard.conditions.wildcardOperator',
   {
@@ -71,7 +78,14 @@ export const CONDITION_OPERATOR_TYPE_NESTED = i18n.translate(
 export const CONDITION_OPERATOR_TYPE_MATCH_ANY = i18n.translate(
   'xpack.securitySolution.artifactCard.conditions.matchAnyOperator',
   {
-    defaultMessage: 'is any',
+    defaultMessage: 'is one of',
+  }
+);
+
+export const CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY = i18n.translate(
+  'xpack.securitySolution.artifactCard.conditions.matchAnyOperator.not',
+  {
+    defaultMessage: 'is not one of',
   }
 );
 
@@ -134,3 +148,10 @@ export const HIDE_COMMENTS_LABEL = (count: number = 0) =>
     defaultMessage: 'Hide comments ({count})',
     values: { count },
   });
+
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.artifactMinifiedCard.descriptionLabel',
+  {
+    defaultMessage: 'Description',
+  }
+);

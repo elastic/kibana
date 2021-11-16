@@ -75,6 +75,10 @@ export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
   defaultMessage: 'Delete',
 });
 
+export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
+  defaultMessage: 'Select',
+});
+
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
   defaultMessage: ' requires update',
 });

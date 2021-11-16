@@ -9,7 +9,7 @@ import { omit, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLte from 'semver/functions/lte';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest, LogMeta } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
@@ -42,7 +42,6 @@ import type {
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  HostedAgentPolicyRestrictionRelatedError,
   IngestManagerError,
   ingestErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
@@ -68,6 +67,8 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
+import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
+import { sendTelemetryEvents } from './upgrade_sender';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -84,17 +85,6 @@ export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
   'read_cross_cluster',
 ]);
 
-interface PackagePolicyUpgradeLogMeta extends LogMeta {
-  package_policy_upgrade: {
-    package_name: string;
-    current_version: string;
-    new_version: string;
-    status: 'success' | 'failure';
-    error?: any[];
-    dryRun?: boolean;
-  };
-}
-
 class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
@@ -108,24 +98,14 @@ class PackagePolicyService {
       skipEnsureInstalled?: boolean;
     }
   ): Promise<PackagePolicy> {
-    // Check that its agent policy does not have a package policy with the same name
-    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
-    if (!parentAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-    if (parentAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot add integrations to hosted agent policy ${parentAgentPolicy.id}`
-      );
-    }
-    if (
-      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-        (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
-      )
-    ) {
-      throw new IngestManagerError(
-        'There is already a package with the same name on this agent policy'
-      );
+    const existingPoliciesWithName = await this.list(soClient, {
+      perPage: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+    });
+
+    // Check that the name does not exist already
+    if (existingPoliciesWithName.items.length > 0) {
+      throw new IngestManagerError('There is already a package with the same name');
     }
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
@@ -329,12 +309,12 @@ class PackagePolicyService {
     });
 
     return {
-      items: packagePolicies.saved_objects.map((packagePolicySO) => ({
+      items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
         id: packagePolicySO.id,
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
       })),
-      total: packagePolicies.total,
+      total: packagePolicies?.total,
       page,
       perPage,
     };
@@ -369,7 +349,8 @@ class PackagePolicyService {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser },
+    currentVersion?: string
   ): Promise<PackagePolicy> {
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
@@ -377,19 +358,15 @@ class PackagePolicyService {
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
+    // Check that the name does not exist already but exclude the current package policy
+    const existingPoliciesWithName = await this.list(soClient, {
+      perPage: 1,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+    });
+    const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
-    // Check that its agent policy does not have a package policy with the same name
-    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
-    if (!parentAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-    if (
-      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-        (siblingPackagePolicy) =>
-          siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
-      )
-    ) {
-      throw new Error('There is already a package with the same name on this agent policy');
+    if (filtered.length > 0) {
+      throw new IngestManagerError('There is already a package with the same name');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -404,6 +381,7 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
+
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
       inputs = await this._compilePackagePolicyInputs(
         registryPkgInfo,
@@ -444,22 +422,23 @@ class PackagePolicyService {
         currentVersion: packagePolicy.package.version,
       });
 
-      const upgradeMeta: PackagePolicyUpgradeLogMeta = {
-        package_policy_upgrade: {
-          package_name: packagePolicy.package.name,
-          new_version: packagePolicy.package.version,
-          current_version: 'unknown',
+      if (packagePolicy.package.version !== currentVersion) {
+        const upgradeTelemetry: PackageUpdateEvent = {
+          packageName: packagePolicy.package.name,
+          currentVersion: currentVersion || 'unknown',
+          newVersion: packagePolicy.package.version,
           status: 'success',
           dryRun: false,
-        },
-      };
-
-      appContextService
-        .getLogger()
-        .info<PackagePolicyUpgradeLogMeta>(
-          `Package policy successfully upgraded ${JSON.stringify(upgradeMeta)}`,
-          upgradeMeta
+          eventType: 'package-policy-upgrade' as UpdateEventType,
+        };
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          upgradeTelemetry
         );
+        appContextService.getLogger().info(`Package policy upgraded successfully`);
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      }
     }
 
     return newPolicy;
@@ -628,20 +607,20 @@ class PackagePolicyService {
         );
         updatePackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
-        await this.update(soClient, esClient, id, updatePackagePolicy, options);
+        await this.update(
+          soClient,
+          esClient,
+          id,
+          updatePackagePolicy,
+          options,
+          packagePolicy.package.version
+        );
         result.push({
           id,
           name: packagePolicy.name,
           success: true,
         });
       } catch (error) {
-        // We only want to specifically handle validation errors for the new package policy. If a more severe or
-        // general error is thrown elsewhere during the upgrade process, we want to surface that directly in
-        // order to preserve any status code mappings, etc that might be included w/ the particular error type
-        if (!(error instanceof PackagePolicyValidationError)) {
-          throw error;
-        }
-
         result.push({
           id,
           success: false,
@@ -690,24 +669,28 @@ class PackagePolicyService {
       const hasErrors = 'errors' in updatedPackagePolicy;
 
       if (packagePolicy.package.version !== packageInfo.version) {
-        const upgradeMeta: PackagePolicyUpgradeLogMeta = {
-          package_policy_upgrade: {
-            package_name: packageInfo.name,
-            current_version: packagePolicy.package.version,
-            new_version: packageInfo.version,
-            status: hasErrors ? 'failure' : 'success',
-            error: hasErrors ? updatedPackagePolicy.errors : undefined,
-            dryRun: true,
-          },
+        const upgradeTelemetry: PackageUpdateEvent = {
+          packageName: packageInfo.name,
+          currentVersion: packagePolicy.package.version,
+          newVersion: packageInfo.version,
+          status: hasErrors ? 'failure' : 'success',
+          error: hasErrors ? updatedPackagePolicy.errors : undefined,
+          dryRun: true,
+          eventType: 'package-policy-upgrade' as UpdateEventType,
         };
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          upgradeTelemetry
+        );
         appContextService
           .getLogger()
-          .info<PackagePolicyUpgradeLogMeta>(
+          .info(
             `Package policy upgrade dry run ${
               hasErrors ? 'resulted in errors' : 'ran successfully'
-            } ${JSON.stringify(upgradeMeta)}`,
-            upgradeMeta
+            }`
           );
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
       }
 
       return {
@@ -716,10 +699,6 @@ class PackagePolicyService {
         hasErrors,
       };
     } catch (error) {
-      if (!(error instanceof PackagePolicyValidationError)) {
-        throw error;
-      }
-
       return {
         hasErrors: true,
         ...ingestErrorToResponseOptions(error),
@@ -739,7 +718,7 @@ class PackagePolicyService {
           pkgName: pkgInstall.name,
           pkgVersion: pkgInstall.version,
         }),
-        outputService.getDefaultOutputId(soClient),
+        outputService.getDefaultDataOutputId(soClient),
       ]);
       if (packageInfo) {
         if (!defaultOutputId) {
@@ -1111,7 +1090,9 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      const indexOfInput = inputs.indexOf(originalInput);
+      inputs[indexOfInput] = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      originalInput = inputs[indexOfInput];
     }
 
     if (override.streams) {
@@ -1130,10 +1111,24 @@ export function overridePackageInputs(
         }
 
         if (stream.vars) {
-          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
+          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          originalInput.streams[indexOfStream] = deepMergeVars(
+            originalStream,
+            stream as InputsOverride
+          );
+          originalStream = originalInput.streams[indexOfStream];
         }
       }
     }
+
+    // Filter all stream that have been removed from the input
+    originalInput.streams = originalInput.streams.filter((originalStream) => {
+      return (
+        override.streams?.some(
+          (s) => s.data_stream.dataset === originalStream.data_stream.dataset
+        ) ?? false
+      );
+    });
   }
 
   const resultingPackagePolicy: NewPackagePolicy = {
@@ -1199,4 +1194,31 @@ function deepMergeVars(original: any, override: any): any {
   }
 
   return result;
+}
+
+export async function incrementPackageName(
+  soClient: SavedObjectsClientContract,
+  packageName: string
+) {
+  // Fetch all packagePolicies having the package name
+  const packagePolicyData = await packagePolicyService.list(soClient, {
+    perPage: 1,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
+  });
+
+  // Retrieve highest number appended to package policy name and increment it by one
+  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+
+  const pkgPoliciesWithMatchingNames = packagePolicyData?.items
+    ? packagePolicyData.items
+        .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+        .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
+        .sort()
+    : [];
+
+  return `${packageName}-${
+    pkgPoliciesWithMatchingNames.length
+      ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+      : 1
+  }`;
 }

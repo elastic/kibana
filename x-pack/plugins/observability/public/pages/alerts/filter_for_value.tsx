@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const filterForValueButtonLabel = i18n.translate(
   'xpack.observability.hoverActions.filterForValueButtonLabel',
   {
-    defaultMessage: 'Filter for value',
+    defaultMessage: 'Filter in',
   }
 );
 
@@ -35,7 +35,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
         Component ? (
           <Component
             aria-label={filterForValueButtonLabel}
-            data-test-subj="filter-for-value"
+            data-test-subj="filterForValue"
             iconType="plusInCircle"
             onClick={onClick}
             title={filterForValueButtonLabel}
@@ -46,7 +46,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
           <EuiButtonIcon
             aria-label={filterForValueButtonLabel}
             className="timelines__hoverActionButton"
-            data-test-subj="filter-for-value"
+            data-test-subj="filterForValue"
             iconSize="s"
             iconType="plusInCircle"
             onClick={onClick}

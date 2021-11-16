@@ -7,6 +7,7 @@
 
 import { Action } from 'redux';
 import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
+import { DataViewBase } from '@kbn/es-query';
 import {
   HostResultList,
   HostInfo,
@@ -17,7 +18,6 @@ import {
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { EndpointState } from '../types';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';
@@ -96,7 +96,7 @@ export interface ServerReturnedEndpointExistValue {
 
 export interface ServerReturnedMetadataPatterns {
   type: 'serverReturnedMetadataPatterns';
-  payload: IIndexPattern[];
+  payload: DataViewBase[];
 }
 
 export interface ServerFailedToReturnMetadataPatterns {
