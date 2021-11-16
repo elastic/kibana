@@ -394,7 +394,7 @@ const makeMapStateToProps = () => {
   };
   return mapStateToProps;
 };
-const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   onEventClosed: (args: ToggleDetailPanel) => {
     dispatch(timelineActions.toggleDetailPanel(args));
   },
