@@ -8,8 +8,10 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
+import {
+  euiLightVars as themeLight,
+  euiDarkVars as themeDark,
+} from '@kbn/ui-shared-deps-src/theme';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 import { EsHitRecord } from '../../application/types';
