@@ -198,7 +198,11 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/nodes_overview',
       validate: {},
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: [
+          'access:ml:canViewMlNodes',
+          'access:ml:canGetDataFrameAnalytics',
+          'access:ml:canGetJobs',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
