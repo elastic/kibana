@@ -112,9 +112,6 @@ Choose the type of element you want to use, then use the preconfigured demo data
 By default, most of the elements you create use the demo data until you change the data source. The demo data includes a small data set that you can use to experiment with your element.
 
 . Click *Add element*, then select the element you want to use.
-+
-[role="screenshot"]
-image::images/canvas-element-select.gif[Canvas elements]
 
 . To connect the element to your data, select *Data*, then select one of the following data sources:
 
